@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model admin {
+  id_admin   Int       @id @default(autoincrement())
+  id_nguoi   Int       @unique
+  ma_admin   String    @unique @db.VarChar(50)
+  chuc_vu    String?   @db.VarChar(200)
+  trang_thai String?   @default("active") @db.VarChar(20)
+  ngay_tao   DateTime? @default(now()) @db.Timestamp(6)
+  ngay_xoa   DateTime? @db.Timestamp(6)
+  nguoi      nguoi     @relation(fields: [id_nguoi], references: [id_nguoi], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model dat_phong {
+  id_dat_phong  Int        @id @default(autoincrement())
+  id_phong      Int
+  ngay_dat      DateTime   @db.Date
+  tiet_bat_dau  Int        @db.SmallInt
+  tiet_ket_thuc Int        @db.SmallInt
+  muc_dich      String?    @db.VarChar(500)
+  nguoi_dat     Int
+  trang_thai    String?    @default("pending") @db.VarChar(20)
+  ngay_tao      DateTime?  @default(now()) @db.Timestamp(6)
+  ngay_xoa      DateTime?  @db.Timestamp(6)
+  phong         phong      @relation(fields: [id_phong], references: [id_phong], onDelete: NoAction, onUpdate: NoAction)
+  nguoi_dung    nguoi_dung @relation(fields: [nguoi_dat], references: [id_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model giang_vien {
+  id_giang_vien                        Int        @id @default(autoincrement())
+  id_nguoi                             Int        @unique
+  ma_giang_vien                        String     @unique @db.VarChar(50)
+  bang_cap                             String?    @db.VarChar(200)
+  chuyen_mon                           String?    @db.VarChar(500)
+  id_khoa                              Int
+  ngay_vao_lam                         DateTime?  @db.Date
+  trang_thai                           String?    @default("active") @db.VarChar(20)
+  ngay_tao                             DateTime?  @default(now()) @db.Timestamp(6)
+  ngay_xoa                             DateTime?  @db.Timestamp(6)
+  khoa_giang_vien_id_khoaTokhoa        khoa       @relation("giang_vien_id_khoaTokhoa", fields: [id_khoa], references: [id_khoa], onDelete: NoAction, onUpdate: NoAction)
+  nguoi                                nguoi      @relation(fields: [id_nguoi], references: [id_nguoi], onDelete: NoAction, onUpdate: NoAction)
+  khoa_khoa_id_truong_khoaTogiang_vien khoa[]     @relation("khoa_id_truong_khoaTogiang_vien")
+  khoa_hoc                             khoa_hoc[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model hoc_ky {
+  id_hoc_ky             Int        @id @default(autoincrement())
+  ten_hoc_ky            String     @db.VarChar(100)
+  id_nam_hoc            Int
+  loai_hoc_ky           String     @db.VarChar(20)
+  ngay_bat_dau          DateTime   @db.Date
+  ngay_ket_thuc         DateTime   @db.Date
+  ngay_bat_dau_dang_ky  DateTime   @db.Date
+  ngay_ket_thuc_dang_ky DateTime   @db.Date
+  ngay_xoa              DateTime?  @db.Timestamp(6)
+  nam_hoc               nam_hoc    @relation(fields: [id_nam_hoc], references: [id_nam_hoc], onDelete: NoAction, onUpdate: NoAction)
+  hoc_phi               hoc_phi[]
+  khoa_hoc              khoa_hoc[]
+  tuan                  tuan[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model hoc_phi {
+  id_hoc_phi   Int          @id @default(autoincrement())
+  id_sinh_vien Int
+  id_hoc_ky    Int
+  so_tien      Decimal      @db.Decimal(15, 2)
+  han_dong     DateTime     @db.Date
+  da_dong      Boolean?     @default(false)
+  ngay_tao     DateTime?    @default(now()) @db.Timestamp(6)
+  ngay_xoa     DateTime?    @db.Timestamp(6)
+  hoc_ky       hoc_ky       @relation(fields: [id_hoc_ky], references: [id_hoc_ky], onDelete: NoAction, onUpdate: NoAction)
+  sinh_vien    sinh_vien    @relation(fields: [id_sinh_vien], references: [id_sinh_vien], onDelete: NoAction, onUpdate: NoAction)
+  thanh_toan   thanh_toan[]
+
+  @@unique([id_sinh_vien, id_hoc_ky])
+}
+
+model khoa {
+  id_khoa                                    Int          @id @default(autoincrement())
+  ten_khoa                                   String       @db.VarChar(200)
+  ma_khoa                                    String       @unique @db.VarChar(50)
+  id_truong_khoa                             Int?
+  ngay_xoa                                   DateTime?    @db.Timestamp(6)
+  giang_vien_giang_vien_id_khoaTokhoa        giang_vien[] @relation("giang_vien_id_khoaTokhoa")
+  giang_vien_khoa_id_truong_khoaTogiang_vien giang_vien?  @relation("khoa_id_truong_khoaTogiang_vien", fields: [id_truong_khoa], references: [id_giang_vien], onDelete: NoAction, onUpdate: NoAction, map: "fk_truong_khoa")
+  mon_hoc                                    mon_hoc[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model khoa_hoc {
+  id_khoa_hoc         Int                  @id @default(autoincrement())
+  id_mon_hoc          Int
+  id_giang_vien       Int
+  id_lop              Int
+  id_hoc_ky           Int
+  so_sinh_vien_toi_da Int
+  trang_thai          String?              @default("active") @db.VarChar(20)
+  ngay_tao            DateTime?            @default(now()) @db.Timestamp(6)
+  ngay_xoa            DateTime?            @db.Timestamp(6)
+  giang_vien          giang_vien           @relation(fields: [id_giang_vien], references: [id_giang_vien], onDelete: NoAction, onUpdate: NoAction)
+  hoc_ky              hoc_ky               @relation(fields: [id_hoc_ky], references: [id_hoc_ky], onDelete: NoAction, onUpdate: NoAction)
+  lop                 lop                  @relation(fields: [id_lop], references: [id_lop], onDelete: NoAction, onUpdate: NoAction)
+  mon_hoc             mon_hoc              @relation(fields: [id_mon_hoc], references: [id_mon_hoc], onDelete: NoAction, onUpdate: NoAction)
+  lich_hoc            lich_hoc[]
+  sinh_vien_khoa_hoc  sinh_vien_khoa_hoc[]
+  tai_lieu            tai_lieu[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model lich_hoc {
+  id_lich_hoc   Int       @id @default(autoincrement())
+  id_khoa_hoc   Int
+  id_ngay       Int
+  tiet_bat_dau  Int       @db.SmallInt
+  tiet_ket_thuc Int       @db.SmallInt
+  id_phong      Int
+  ngay_xoa      DateTime? @db.Timestamp(6)
+  khoa_hoc      khoa_hoc  @relation(fields: [id_khoa_hoc], references: [id_khoa_hoc], onDelete: NoAction, onUpdate: NoAction)
+  ngay          ngay      @relation(fields: [id_ngay], references: [id_ngay], onDelete: NoAction, onUpdate: NoAction)
+  phong         phong     @relation(fields: [id_phong], references: [id_phong], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model lop {
+  id_lop                                   Int         @id @default(autoincrement())
+  ma_lop                                   String      @unique @db.VarChar(50)
+  ten_lop                                  String      @db.VarChar(200)
+  id_nam_hoc_bat_dau                       Int
+  id_nam_hoc_ket_thuc                      Int?
+  ngay_xoa                                 DateTime?   @db.Timestamp(6)
+  khoa_hoc                                 khoa_hoc[]
+  nam_hoc_lop_id_nam_hoc_bat_dauTonam_hoc  nam_hoc     @relation("lop_id_nam_hoc_bat_dauTonam_hoc", fields: [id_nam_hoc_bat_dau], references: [id_nam_hoc], onDelete: NoAction, onUpdate: NoAction)
+  nam_hoc_lop_id_nam_hoc_ket_thucTonam_hoc nam_hoc?    @relation("lop_id_nam_hoc_ket_thucTonam_hoc", fields: [id_nam_hoc_ket_thuc], references: [id_nam_hoc], onDelete: NoAction, onUpdate: NoAction)
+  sinh_vien                                sinh_vien[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model mon_hoc {
+  id_mon_hoc                                                          Int                  @id @default(autoincrement())
+  ten_mon_hoc                                                         String               @db.VarChar(200)
+  ma_mon_hoc                                                          String               @unique @db.VarChar(50)
+  so_tin_chi                                                          Int
+  gio_ly_thuyet                                                       Int?                 @default(0)
+  gio_thuc_hanh                                                       Int?                 @default(0)
+  id_khoa                                                             Int
+  ngay_xoa                                                            DateTime?            @db.Timestamp(6)
+  khoa_hoc                                                            khoa_hoc[]
+  khoa                                                                khoa                 @relation(fields: [id_khoa], references: [id_khoa], onDelete: NoAction, onUpdate: NoAction)
+  mon_hoc_tien_quyet_mon_hoc_tien_quyet_id_mon_hoc_can_truocTomon_hoc mon_hoc_tien_quyet[] @relation("mon_hoc_tien_quyet_id_mon_hoc_can_truocTomon_hoc")
+  mon_hoc_tien_quyet_mon_hoc_tien_quyet_id_mon_hocTomon_hoc           mon_hoc_tien_quyet[] @relation("mon_hoc_tien_quyet_id_mon_hocTomon_hoc")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model mon_hoc_tien_quyet {
+  id_tien_quyet                                            Int     @id @default(autoincrement())
+  id_mon_hoc                                               Int
+  id_mon_hoc_can_truoc                                     Int
+  diem_toi_thieu                                           Decimal @db.Decimal(4, 2)
+  mon_hoc_mon_hoc_tien_quyet_id_mon_hoc_can_truocTomon_hoc mon_hoc @relation("mon_hoc_tien_quyet_id_mon_hoc_can_truocTomon_hoc", fields: [id_mon_hoc_can_truoc], references: [id_mon_hoc], onDelete: NoAction, onUpdate: NoAction)
+  mon_hoc_mon_hoc_tien_quyet_id_mon_hocTomon_hoc           mon_hoc @relation("mon_hoc_tien_quyet_id_mon_hocTomon_hoc", fields: [id_mon_hoc], references: [id_mon_hoc], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_mon_hoc, id_mon_hoc_can_truoc])
+}
+
+model nam_hoc {
+  id_nam_hoc                           Int       @id @default(autoincrement())
+  ngay_bat_dau                         DateTime  @db.Date
+  ngay_ket_thuc                        DateTime  @db.Date
+  ngay_xoa                             DateTime? @db.Timestamp(6)
+  hoc_ky                               hoc_ky[]
+  lop_lop_id_nam_hoc_bat_dauTonam_hoc  lop[]     @relation("lop_id_nam_hoc_bat_dauTonam_hoc")
+  lop_lop_id_nam_hoc_ket_thucTonam_hoc lop[]     @relation("lop_id_nam_hoc_ket_thucTonam_hoc")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ngay {
+  id_ngay     Int        @id @default(autoincrement())
+  id_tuan     Int
+  thu_tu_ngay Int
+  ngay_thang  DateTime   @db.Date
+  ten_ngay    String     @db.VarChar(20)
+  lich_hoc    lich_hoc[]
+  tuan        tuan       @relation(fields: [id_tuan], references: [id_tuan], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_tuan, thu_tu_ngay])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model nguoi {
+  id_nguoi      Int         @id @default(autoincrement())
+  ho_ten        String      @db.VarChar(200)
+  ngay_sinh     DateTime?   @db.Date
+  gioi_tinh     String?     @db.VarChar(10)
+  email         String      @unique @db.VarChar(255)
+  so_dien_thoai String?     @db.VarChar(20)
+  dia_chi       String?     @db.VarChar(500)
+  anh_dai_dien  String?     @db.VarChar(500)
+  ngay_tao      DateTime?   @default(now()) @db.Timestamp(6)
+  ngay_cap_nhat DateTime?   @default(now()) @db.Timestamp(6)
+  ngay_xoa      DateTime?   @db.Timestamp(6)
+  admin         admin?
+  giang_vien    giang_vien?
+  nguoi_dung    nguoi_dung?
+  sinh_vien     sinh_vien?
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model nguoi_dung {
+  id_nguoi_dung                                 Int               @id @default(autoincrement())
+  id_nguoi                                      Int               @unique
+  ten_dang_nhap                                 String            @unique @db.VarChar(100)
+  mat_khau_hash                                 String            @db.VarChar(255)
+  mat_khau_salt                                 String            @db.VarChar(255)
+  email_da_xac_thuc                             Boolean?          @default(false)
+  ma_xac_thuc_email                             String?           @db.VarChar(255)
+  trang_thai                                    String            @default("active") @db.VarChar(20)
+  ngay_tao                                      DateTime?         @default(now()) @db.Timestamp(6)
+  ngay_cap_nhat                                 DateTime?         @default(now()) @db.Timestamp(6)
+  ngay_xoa                                      DateTime?         @db.Timestamp(6)
+  dat_phong                                     dat_phong[]
+  nguoi                                         nguoi             @relation(fields: [id_nguoi], references: [id_nguoi], onDelete: NoAction, onUpdate: NoAction)
+  phien_dang_nhap                               phien_dang_nhap[]
+  tai_lieu                                      tai_lieu[]
+  thong_bao_thong_bao_id_nguoi_guiTonguoi_dung  thong_bao[]       @relation("thong_bao_id_nguoi_guiTonguoi_dung")
+  thong_bao_thong_bao_id_nguoi_nhanTonguoi_dung thong_bao[]       @relation("thong_bao_id_nguoi_nhanTonguoi_dung")
+}
+
+model phien_dang_nhap {
+  id_phien              Int        @id @default(autoincrement())
+  id_nguoi_dung         Int
+  ma_phien              String     @unique @db.VarChar(255)
+  dia_chi_ip            String     @db.VarChar(45)
+  thong_tin_trinh_duyet String?    @db.VarChar(500)
+  la_thiet_bi_moi       Boolean?   @default(false)
+  ngay_tao              DateTime?  @default(now()) @db.Timestamp(6)
+  ngay_het_han          DateTime   @db.Timestamp(6)
+  hoat_dong_cuoi        DateTime?  @default(now()) @db.Timestamp(6)
+  nguoi_dung            nguoi_dung @relation(fields: [id_nguoi_dung], references: [id_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model phong {
+  id_phong   Int         @id @default(autoincrement())
+  ma_phong   String      @unique @db.VarChar(50)
+  ten_phong  String      @db.VarChar(200)
+  suc_chua   Int
+  loai       String      @db.VarChar(20)
+  id_toa_nha Int
+  ngay_xoa   DateTime?   @db.Timestamp(6)
+  dat_phong  dat_phong[]
+  lich_hoc   lich_hoc[]
+  toa_nha    toa_nha     @relation(fields: [id_toa_nha], references: [id_toa_nha], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model sinh_vien {
+  id_sinh_vien        Int                  @id @default(autoincrement())
+  id_nguoi            Int                  @unique
+  ma_sinh_vien        String               @unique @db.VarChar(50)
+  id_lop              Int?
+  so_tin_chi_tich_luy Int?                 @default(0)
+  trang_thai_hoc_tap  String?              @default("good_standing") @db.VarChar(20)
+  trang_thai          String?              @default("active") @db.VarChar(20)
+  ngay_tao            DateTime?            @default(now()) @db.Timestamp(6)
+  ngay_xoa            DateTime?            @db.Timestamp(6)
+  hoc_phi             hoc_phi[]
+  lop                 lop?                 @relation(fields: [id_lop], references: [id_lop], onDelete: NoAction, onUpdate: NoAction)
+  nguoi               nguoi                @relation(fields: [id_nguoi], references: [id_nguoi], onDelete: NoAction, onUpdate: NoAction)
+  sinh_vien_khoa_hoc  sinh_vien_khoa_hoc[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model sinh_vien_khoa_hoc {
+  id_dang_ky      Int       @id @default(autoincrement())
+  id_sinh_vien    Int
+  id_khoa_hoc     Int
+  ngay_dang_ky    DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Date
+  trang_thai      String?   @default("registered") @db.VarChar(20)
+  diem_chuyen_can Decimal?  @db.Decimal(4, 2)
+  diem_giua_ky    Decimal?  @db.Decimal(4, 2)
+  diem_cuoi_ky    Decimal?  @db.Decimal(4, 2)
+  ngay_xoa        DateTime? @db.Timestamp(6)
+  khoa_hoc        khoa_hoc  @relation(fields: [id_khoa_hoc], references: [id_khoa_hoc], onDelete: NoAction, onUpdate: NoAction)
+  sinh_vien       sinh_vien @relation(fields: [id_sinh_vien], references: [id_sinh_vien], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_sinh_vien, id_khoa_hoc])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tai_lieu {
+  id_tai_lieu     Int        @id @default(autoincrement())
+  id_khoa_hoc     Int
+  ten_file        String     @db.VarChar(500)
+  duong_dan_file  String     @db.VarChar(1000)
+  loai_file       String?    @db.VarChar(20)
+  kich_thuoc_file BigInt?
+  nguoi_upload    Int
+  mo_ta           String?    @db.VarChar(1000)
+  ngay_tao        DateTime?  @default(now()) @db.Timestamp(6)
+  ngay_xoa        DateTime?  @db.Timestamp(6)
+  khoa_hoc        khoa_hoc   @relation(fields: [id_khoa_hoc], references: [id_khoa_hoc], onDelete: NoAction, onUpdate: NoAction)
+  nguoi_dung      nguoi_dung @relation(fields: [nguoi_upload], references: [id_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model thanh_toan {
+  id_thanh_toan          Int       @id @default(autoincrement())
+  id_hoc_phi             Int
+  so_tien                Decimal   @db.Decimal(15, 2)
+  ngay_thanh_toan        DateTime  @db.Date
+  phuong_thuc_thanh_toan String    @db.VarChar(50)
+  so_bien_lai            String    @unique @db.VarChar(100)
+  trang_thai             String?   @default("completed") @db.VarChar(20)
+  ngay_tao               DateTime? @default(now()) @db.Timestamp(6)
+  hoc_phi                hoc_phi   @relation(fields: [id_hoc_phi], references: [id_hoc_phi], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model thong_bao {
+  id_thong_bao                                   Int        @id @default(autoincrement())
+  id_nguoi_gui                                   Int
+  id_nguoi_nhan                                  Int
+  loai_thong_bao                                 String?    @db.VarChar(50)
+  tieu_de                                        String     @db.VarChar(500)
+  noi_dung                                       String?
+  da_doc                                         Boolean?   @default(false)
+  ngay_tao                                       DateTime?  @default(now()) @db.Timestamp(6)
+  ngay_xoa                                       DateTime?  @db.Timestamp(6)
+  nguoi_dung_thong_bao_id_nguoi_guiTonguoi_dung  nguoi_dung @relation("thong_bao_id_nguoi_guiTonguoi_dung", fields: [id_nguoi_gui], references: [id_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+  nguoi_dung_thong_bao_id_nguoi_nhanTonguoi_dung nguoi_dung @relation("thong_bao_id_nguoi_nhanTonguoi_dung", fields: [id_nguoi_nhan], references: [id_nguoi_dung], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model toa_nha {
+  id_toa_nha  Int       @id @default(autoincrement())
+  ten_toa_nha String    @db.VarChar(200)
+  ma_toa_nha  String    @unique @db.VarChar(50)
+  dia_chi     String?   @db.VarChar(500)
+  ngay_xoa    DateTime? @db.Timestamp(6)
+  phong       phong[]
+}
+
+model tuan {
+  id_tuan       Int      @id @default(autoincrement())
+  id_hoc_ky     Int
+  thu_tu_tuan   Int
+  ngay_bat_dau  DateTime @db.Date
+  ngay_ket_thuc DateTime @db.Date
+  ngay          ngay[]
+  hoc_ky        hoc_ky   @relation(fields: [id_hoc_ky], references: [id_hoc_ky], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_hoc_ky, thu_tu_tuan])
+}
