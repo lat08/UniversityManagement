@@ -15,7 +15,7 @@ CREATE TABLE nguoi (
     id_nguoi SERIAL PRIMARY KEY,
     ho_ten VARCHAR(200) NOT NULL,
     ngay_sinh DATE,
-    gioi_tinh VARCHAR(10) CHECK (gioi_tinh IN ('Nam', 'Nữ', 'Khác')),
+    gioi_tinh VARCHAR(10) CHECK (gioi_tinh IN ('nam', 'nu')),
     email VARCHAR(255) NOT NULL UNIQUE,
     so_dien_thoai VARCHAR(20),
     dia_chi VARCHAR(500),
