@@ -84,7 +84,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
     {
       title: "HỆ THỐNG",
       items: [
-        { icon: Users, label: "Hồ sơ cá nhân", href: "/profile" },
+        { icon: Users, label: "Người dùng", href: "/student/profile" },
         { icon: Bell, label: "Thông báo", href: "/notifications" },
       ],
     },
