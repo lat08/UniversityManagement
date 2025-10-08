@@ -30,17 +30,26 @@ interface SidebarProps {
   onToggle: () => void
   isMobileOpen: boolean
   onMobileToggle: () => void
+  currentPath?: string
 }
 
-export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [openPopover, setOpenPopover] = useState<string | null>(null)
-  const [activePage, setActivePage] = useState("/")
+  const [activePage, setActivePage] = useState(currentPath || "/")
 
   const toggleSection = (section: string) => {
     if (isCollapsed) return
     setExpandedSection(expandedSection === section ? null : section)
   }
+
+  // Auto expand section when current path is active
+  useState(() => {
+    if (currentPath?.startsWith("/student/schedule")) {
+      setExpandedSection("1-2") // Index of "Thời khóa biểu" in menuSections
+      setActivePage(currentPath)
+    }
+  })
 
   const menuSections = [
     {
@@ -61,8 +70,8 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle }:
           href: "/schedule",
           expandable: true,
           subItems: [
-            { label: "TKB theo tuần", href: "/schedule/weekly" },
-            { label: "TKB theo học kỳ", href: "/schedule/semester" },
+            { label: "TKB theo tuần", href: "/student/schedule/weekly" },
+            { label: "TKB theo học kỳ", href: "/student/schedule/semester" },
           ],
         },
         { icon: FileCheck, label: "Lịch thi", href: "/exams" },
@@ -237,8 +246,12 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle }:
                               isActive && "bg-blue-50 text-blue-600 hover:bg-blue-100",
                             )}
                             onClick={() => {
+                              if (!item.expandable) {
+                                window.location.href = item.href
+                              } else {
+                                toggleSection(itemKey)
+                              }
                               setActivePage(item.href)
-                              item.expandable && toggleSection(itemKey)
                             }}
                           >
                             <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -254,16 +267,25 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle }:
                           </Button>
                           {item.expandable && item.subItems && expandedSection === itemKey && (
                             <div className="ml-8 mt-1 space-y-1">
-                              {item.subItems.map((subItem, subIndex) => (
-                                <Button
-                                  key={subIndex}
-                                  variant="ghost"
-                                  className="w-full justify-start text-sm text-gray-600 hover:bg-gray-100 cursor-pointer"
-                                  onClick={() => setActivePage(subItem.href)}
-                                >
-                                  {subItem.label}
-                                </Button>
-                              ))}
+                              {item.subItems.map((subItem, subIndex) => {
+                                const isSubActive = activePage === subItem.href
+                                return (
+                                  <Button
+                                    key={subIndex}
+                                    variant="ghost"
+                                    className={cn(
+                                      "w-full justify-start text-sm hover:bg-gray-100 cursor-pointer",
+                                      isSubActive ? "bg-blue-50 text-blue-600 font-semibold" : "text-gray-600"
+                                    )}
+                                    onClick={() => {
+                                      window.location.href = subItem.href
+                                      setActivePage(subItem.href)
+                                    }}
+                                  >
+                                    {subItem.label}
+                                  </Button>
+                                )
+                              })}
                             </div>
                           )}
                         </div>
