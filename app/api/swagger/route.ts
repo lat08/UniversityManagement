@@ -423,7 +423,7 @@ const swaggerDocument = {
       },
       StudentWithRelations: {
         allOf: [
-          { $ref: "#/components/schemas/Student" },
+          { $ref: "#/components/schemas/example" },
           {
             type: "object",
             properties: {
