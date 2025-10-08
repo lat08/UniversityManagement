@@ -46,9 +46,13 @@ export async function GET(request: NextRequest) {
     const semesterIdParam = searchParams.get('semesterId');
     const classIdParam = searchParams.get('classId');
 
+    // HTTP 400: Request sai, thiếu tham số.
     if (!semesterIdParam || !classIdParam) {
       return NextResponse.json(
-        { message: 'Missing required parameters: semesterId and classId' },
+        { 
+          code: 'BAD_REQUEST',
+          message: 'Vui lòng cung cấp đủ ID học kỳ (semesterId) và ID lớp (classId).' 
+        },
         { status: 400 }
       );
     }
@@ -56,8 +60,15 @@ export async function GET(request: NextRequest) {
     const semesterId = parseInt(semesterIdParam, 10);
     const classId = parseInt(classIdParam, 10);
 
+    // HTTP 422: Dữ liệu hợp lệ về cú pháp nhưng sai về logic.
     if (isNaN(semesterId) || isNaN(classId)) {
-      return NextResponse.json({ message: 'Invalid ID format. Must be a number.' }, { status: 400 });
+      return NextResponse.json(
+        { 
+          code: 'UNPROCESSABLE_ENTITY',
+          message: 'Định dạng ID không hợp lệ. ID phải là một con số.' 
+        }, 
+        { status: 422 }
+      );
     }
     
     console.log(`=== RUNNING: /api/semesters/class ===`);
@@ -65,7 +76,7 @@ export async function GET(request: NextRequest) {
     const courses = await prisma.khoa_hoc.findMany({
         where: {
           id_hoc_ky: semesterId,
-          id_lop: classId, // Lọc theo ID lớp cụ thể
+          id_lop: classId,
           ngay_xoa: null,
         },
         include: {
@@ -91,8 +102,13 @@ export async function GET(request: NextRequest) {
         },
       });
 
+    // HTTP 200: Thành công, nhưng không có dữ liệu trả về (theo yêu cầu của team).
     if (courses.length === 0) {
-        return NextResponse.json({ message: 'Không tìm thấy thời khóa biểu cho lớp trong học kỳ này.'}, { status: 404 });
+        return NextResponse.json({ 
+            code: 'EMPTY_DATA',
+            message: 'Không tìm thấy thời khóa biểu cho lớp trong học kỳ này.',
+            data: [] 
+        }, { status: 200 });
     }
 
     const allScheduleEntries: any[] = [];
@@ -131,10 +147,22 @@ export async function GET(request: NextRequest) {
         return a.tiet_bat_dau - b.tiet_bat_dau;
     });
 
-    return NextResponse.json(uniqueSchedules, { status: 200 });
+    // HTTP 200: Thành công, có dữ liệu trả về.
+    return NextResponse.json({
+        code: 'SUCCESS',
+        message: 'Lấy dữ liệu thành công.',
+        data: uniqueSchedules
+    }, { status: 200 });
 
   } catch (error) {
     console.error('[API_CLASS_LOOKUP_TIMETABLE_ERROR]', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    // HTTP 500: Lỗi máy chủ nội bộ.
+    return NextResponse.json(
+        { 
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Đã có lỗi xảy ra ở máy chủ.' 
+        }, 
+        { status: 500 }
+    );
   }
 }

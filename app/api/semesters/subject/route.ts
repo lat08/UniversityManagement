@@ -1,8 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-// Khởi tạo PrismaClient instance
-// Sử dụng global object để tái sử dụng instance trong môi trường development.
+// =============================================
+// KHỞI TẠO PRISMA CLIENT
+// =============================================
 let prisma: PrismaClient;
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient();
@@ -18,7 +19,7 @@ if (process.env.NODE_ENV === 'production') {
 // Lấy toàn bộ danh sách môn học cho dropdown.
 // =============================================
 export async function GET(request: NextRequest) {
-  console.log("=== RUNNING: /api/semesters/subject/route.ts ==="); 
+  console.log("=== RUNNING: /api/semesters/subjects/route.ts ==="); 
   try {
     // Truy vấn tất cả môn học chưa bị xóa
     const subjects = await prisma.mon_hoc.findMany({
@@ -30,6 +31,15 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // HTTP 200: Thành công, nhưng không có dữ liệu (theo yêu cầu của team).
+    if (subjects.length === 0) {
+        return NextResponse.json({
+            code: 'EMPTY_DATA',
+            message: 'Không tìm thấy môn học nào trong hệ thống.',
+            data: []
+        }, { status: 200 });
+    }
+
     // Định dạng lại dữ liệu trả về
     const formattedSubjects = subjects.map((subject) => {
       return {
@@ -40,13 +50,23 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Trả về danh sách môn học
-    return NextResponse.json(formattedSubjects);
+    // HTTP 200: Thành công, có dữ liệu trả về.
+    return NextResponse.json({
+        code: 'SUCCESS',
+        message: 'Lấy danh sách môn học thành công.',
+        data: formattedSubjects
+    }, { status: 200 });
+
   } catch (error) {
     // Xử lý lỗi
     console.error('[API Error /subjects]:', error);
+
+    // HTTP 500: Lỗi máy chủ nội bộ.
     return NextResponse.json(
-      { error: 'Lỗi máy chủ nội bộ khi lấy danh sách môn học.' },
+      { 
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Lỗi máy chủ nội bộ khi lấy danh sách môn học.' 
+      },
       { status: 500 }
     );
   }

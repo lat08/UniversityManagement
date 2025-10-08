@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 // API ROUTE HANDLER: GET /api/faculties
 // =============================================
 export async function GET(request: Request) {
-  console.log("=== RUNNING: /api/semesters/faculty/route.ts ==="); 
+  console.log("=== RUNNING: /api//semesters/faculty/route.ts ==="); 
   try {
     // Truy vấn tất cả các khoa từ database
     const faculties = await prisma.khoa.findMany({
@@ -30,6 +30,15 @@ export async function GET(request: Request) {
       },
     });
 
+    // HTTP 200: Thành công, nhưng không có dữ liệu (theo yêu cầu của team).
+    if (faculties.length === 0) {
+        return NextResponse.json({
+            code: 'EMPTY_DATA',
+            message: 'Không tìm thấy khoa nào trong hệ thống.',
+            data: []
+        }, { status: 200 });
+    }
+
     // Định dạng lại dữ liệu để phù hợp với hiển thị trên giao diện
     const formattedFaculties = faculties.map((faculty) => {
       return {
@@ -39,13 +48,23 @@ export async function GET(request: Request) {
       };
     });
 
-    // Trả về danh sách khoa đã được định dạng
-    return NextResponse.json(formattedFaculties);
+    // HTTP 200: Thành công, có dữ liệu trả về.
+    return NextResponse.json({
+        code: 'SUCCESS',
+        message: 'Lấy danh sách khoa thành công.',
+        data: formattedFaculties
+    }, { status: 200 });
+
   } catch (error) {
     // Xử lý lỗi nếu có sự cố xảy ra
     console.error('[API Error /faculties]:', error);
+
+    // HTTP 500: Lỗi máy chủ nội bộ.
     return NextResponse.json(
-      { error: 'Lỗi máy chủ nội bộ khi lấy danh sách khoa.' },
+      { 
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Lỗi máy chủ nội bộ khi lấy danh sách khoa.' 
+      },
       { status: 500 }
     );
   }

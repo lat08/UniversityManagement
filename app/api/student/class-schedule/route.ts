@@ -20,7 +20,6 @@ if (process.env.NODE_ENV === 'production') {
 // =============================================
 // CÁC HÀM HỖ TRỢ (HELPERS)
 // =============================================
-
 const formatLecturerName = (fullName: string | null | undefined): string => {
   if (!fullName) return 'Chưa có GV';
   const parts = fullName.split(' ').filter(Boolean);
@@ -47,28 +46,40 @@ const formatDate = (date: Date | null): string => {
 export async function GET(request: NextRequest) {
   try {
     // BƯỚC 1: XÁC THỰC VÀ LẤY ID SINH VIÊN
-    // Trong thực tế, bạn sẽ lấy thông tin này từ session hoặc JWT token
     // const session = await auth(); 
     // const studentId = session?.user?.studentId;
     const studentId = 1; // << GIẢ LẬP: ID sinh viên đang đăng nhập là 1
 
+    // HTTP 401: Chưa đăng nhập
     if (!studentId) {
-        return NextResponse.json({ message: 'Unauthorized: Student not logged in.' }, { status: 401 });
+        return NextResponse.json({ 
+            code: 'UNAUTHORIZED',
+            message: 'Không được phép. Vui lòng đăng nhập.' 
+        }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const semesterIdParam = searchParams.get('semesterId');
 
+    // HTTP 400: Thiếu tham số bắt buộc
     if (!semesterIdParam) {
       return NextResponse.json(
-        { message: 'Missing required parameter: semesterId' },
+        { 
+            code: 'BAD_REQUEST',
+            message: 'Vui lòng cung cấp ID học kỳ (semesterId).' 
+        },
         { status: 400 }
       );
     }
 
     const semesterId = parseInt(semesterIdParam, 10);
+
+    // HTTP 422: Sai định dạng dữ liệu
     if (isNaN(semesterId)) {
-      return NextResponse.json({ message: 'Invalid semesterId format.' }, { status: 400 });
+      return NextResponse.json({ 
+          code: 'UNPROCESSABLE_ENTITY',
+          message: 'Định dạng ID học kỳ không hợp lệ. ID phải là một con số.' 
+        }, { status: 422 });
     }
 
     // BƯỚC 2: TÌM LỚP CỦA SINH VIÊN
@@ -77,8 +88,12 @@ export async function GET(request: NextRequest) {
         select: { id_lop: true }
     });
 
+    // HTTP 404: Không tìm thấy tài nguyên
     if (!studentInfo || !studentInfo.id_lop) {
-        return NextResponse.json({ message: 'Student information or class not found.' }, { status: 404 });
+        return NextResponse.json({ 
+            code: 'NOT_FOUND',
+            message: 'Không tìm thấy thông tin lớp của sinh viên.' 
+        }, { status: 404 });
     }
     const classId = studentInfo.id_lop;
     
@@ -88,7 +103,7 @@ export async function GET(request: NextRequest) {
     const courses = await prisma.khoa_hoc.findMany({
         where: {
           id_hoc_ky: semesterId,
-          id_lop: classId, // Lọc theo ID lớp của sinh viên đã đăng nhập
+          id_lop: classId,
           ngay_xoa: null,
           mon_hoc: {
             ngay_xoa: null,
@@ -103,13 +118,13 @@ export async function GET(request: NextRequest) {
             include: {
               phong: true,
               ngay: {
-                  include: {
-                      tuan: {
-                          include: {
-                              hoc_ky: true
-                          }
-                      }
+                include: {
+                  tuan: {
+                    include: {
+                      hoc_ky: true
+                    }
                   }
+                }
               },
             },
             orderBy: { ngay: { ngay_thang: 'asc' } },
@@ -117,11 +132,16 @@ export async function GET(request: NextRequest) {
         },
       });
 
+    // HTTP 200: Thành công nhưng không có dữ liệu
     if (courses.length === 0) {
-        return NextResponse.json({ message: 'Không tìm thấy thời khóa biểu cho lớp của bạn trong học kỳ này.'}, { status: 404 });
+        return NextResponse.json({ 
+            code: 'EMPTY_DATA',
+            message: 'Không tìm thấy thời khóa biểu cho lớp của bạn trong học kỳ này.',
+            data: []
+        }, { status: 200 });
     }
 
-    // BƯỚC 4: XỬ LÝ VÀ ĐỊNH DẠNG DỮ LIỆU (Giữ nguyên)
+    // BƯỚC 4: XỬ LÝ VÀ ĐỊNH DẠNG DỮ LIỆU
     const allScheduleEntries: any[] = [];
     courses.forEach(course => {
         course.lich_hoc.forEach(schedule => {
@@ -148,19 +168,27 @@ export async function GET(request: NextRequest) {
           giang_vien: formatLecturerName(course.giang_vien.nguoi.ho_ten),
           thoi_gian_hoc: studyDuration,
         };
-    });
+      });
     
-    // Sắp xếp lại kết quả cuối cùng
     formattedTimetable.sort((a, b) => {
         if (a.ma_mh !== b.ma_mh) return a.ma_mh.localeCompare(b.ma_mh);
         if (a.thu !== b.thu) return a.thu - b.thu;
         return a.tiet_bat_dau - b.tiet_bat_dau;
     });
 
-    return NextResponse.json(formattedTimetable, { status: 200 });
+    // HTTP 200: Thành công và có dữ liệu
+    return NextResponse.json({
+        code: 'SUCCESS',
+        message: 'Lấy dữ liệu thành công.',
+        data: formattedTimetable
+    }, { status: 200 });
 
   } catch (error) {
     console.error('[API_CLASS_TIMETABLE_ERROR]', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    // HTTP 500: Lỗi máy chủ nội bộ
+    return NextResponse.json({ 
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Đã có lỗi xảy ra ở máy chủ.' 
+    }, { status: 500 });
   }
 }

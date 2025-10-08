@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
 
     if (!semesterIdParam || !subjectIdParam) {
       return NextResponse.json(
-        { message: 'Missing required parameters: semesterId and subjectId' },
+        { message: 'Vui lòng cung cấp đủ ID học kỳ (semesterId) và ID môn học (subjectId).' },
         { status: 400 }
       );
     }
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
     const subjectId = parseInt(subjectIdParam, 10);
 
     if (isNaN(semesterId) || isNaN(subjectId)) {
-      return NextResponse.json({ message: 'Invalid ID format. Must be a number.' }, { status: 400 });
+      return NextResponse.json({ message: 'Định dạng ID không hợp lệ. ID phải là một con số.' }, { status: 400 });
     }
     
     console.log(`=== RUNNING: /api/semesters/timetable/subjects/route.ts ===`);
@@ -157,6 +157,6 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('[API_SUBJECT_TIMETABLE_ERROR]', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ message: 'Đã có lỗi xảy ra ở máy chủ.' }, { status: 500 });
   }
 }

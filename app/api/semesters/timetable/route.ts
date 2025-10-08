@@ -1,10 +1,9 @@
-// app/api/semesters/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-// Khởi tạo PrismaClient instance
-// Sử dụng global object trong môi trường phát triển để tránh tạo quá nhiều instance.
-// Điều này giúp ngăn chặn các lỗi "too many connections" trong quá trình hot reload của Next.js.
+// =============================================
+// KHỞI TẠO PRISMA CLIENT
+// =============================================
 let prisma: PrismaClient;
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient();
@@ -19,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 // Hàm chính: GET /api/semesters
 // =============================================
 export async function GET(request: Request) {
-  console.log("=== ĐANG CHẠY: /api/semesters/timetable/route.ts ==="); // Thêm dòng này
+  console.log("=== RUNNING: /api/semesters/timetable/route.ts ==="); 
   try {
     // Truy vấn tất cả các học kỳ từ database
     const semesters = await prisma.hoc_ky.findMany({
@@ -28,7 +27,6 @@ export async function GET(request: Request) {
       },
       include: {
         // Bao gồm thông tin từ bảng 'nam_hoc' để có ngày bắt đầu/kết thúc năm học
-        // Điều này cần thiết để tạo chuỗi hiển thị "Năm học 2025 - 2026"
         nam_hoc: {
           select: {
             ngay_bat_dau: true,
@@ -37,47 +35,56 @@ export async function GET(request: Request) {
         },
       },
       orderBy: [
-        { nam_hoc: { ngay_bat_dau: 'desc' } }, // Sắp xếp chính theo ngày bắt đầu năm học giảm dần (năm học mới nhất lên đầu)
-        { ngay_bat_dau: 'desc' }, // Sau đó sắp xếp theo ngày bắt đầu học kỳ giảm dần (học kỳ mới nhất trong năm lên đầu)
+        { nam_hoc: { ngay_bat_dau: 'desc' } }, // Sắp xếp theo năm học mới nhất lên đầu
+        { ngay_bat_dau: 'desc' },             // Sắp xếp theo học kỳ mới nhất trong năm lên đầu
       ],
     });
 
-    // Định dạng lại dữ liệu để phù hợp với hiển thị trên combobox hoặc danh sách trên giao diện
+    // HTTP 200: Thành công, nhưng không có dữ liệu (theo yêu cầu của team).
+    if (semesters.length === 0) {
+        return NextResponse.json({
+            code: 'EMPTY_DATA',
+            message: 'Không tìm thấy học kỳ nào trong hệ thống.',
+            data: []
+        }, { status: 200 });
+    }
+
+    // Định dạng lại dữ liệu để phù hợp với hiển thị trên giao diện
     const formattedSemesters = semesters.map((semester) => {
-        // Lấy thông tin năm bắt đầu và kết thúc từ đối tượng 'nam_hoc' đã được include
-        const startYear = semester.nam_hoc.ngay_bat_dau.getFullYear();
-        const endYear = semester.nam_hoc.ngay_ket_thuc.getFullYear();
-        
-        // Tạo chuỗi hiển thị năm học: "2025" nếu cùng năm, hoặc "2025-2026" nếu khác năm
+        const startYear = new Date(semester.nam_hoc.ngay_bat_dau).getFullYear();
+        const endYear = new Date(semester.nam_hoc.ngay_ket_thuc).getFullYear();
         const academicYearDisplay = startYear === endYear ? startYear.toString() : `${startYear}-${endYear}`;
 
-        let semesterNameDisplay = semester.ten_hoc_ky;
-        // Tùy chỉnh định dạng tên học kỳ cho thân thiện hơn trên UI
-        // Ví dụ: "HK1" -> "Học kỳ 1", "HK2" -> "Học kỳ 2", "HKH" -> "Học kỳ hè", "HKP1" -> "Học kỳ phụ 1"
-        if (semesterNameDisplay.startsWith('HKP')) { // Học kỳ phụ
-            semesterNameDisplay = `Học kỳ phụ ${semesterNameDisplay.replace('HKP', '')}`;
-        } else if (semesterNameDisplay.startsWith('HKH')) { // Học kỳ hè
-            semesterNameDisplay = `Học kỳ hè ${semesterNameDisplay.replace('HKH', '')}`;
-        } else if (semesterNameDisplay.startsWith('HK')) { // Học kỳ chính (HK1, HK2, ...)
-            semesterNameDisplay = `Học kỳ ${semesterNameDisplay.replace('HK', '')}`;
-        }
+        // Giữ nguyên tên học kỳ từ DB, không cần thay đổi logic này vì nó đã khá tốt.
+        // Frontend có thể tùy chỉnh hiển thị nếu cần.
+        const semesterNameDisplay = semester.ten_hoc_ky;
 
       return {
-        id: semester.id_hoc_ky, // ID của học kỳ, dùng làm giá trị (value) khi người dùng chọn
+        id: semester.id_hoc_ky, 
         name: `${semesterNameDisplay} - Năm học ${academicYearDisplay}`, // Chuỗi hiển thị trên UI
-        start_date: semester.ngay_bat_dau.toISOString().split('T')[0], // Ngày bắt đầu học kỳ (YYYY-MM-DD)
-        end_date: semester.ngay_ket_thuc.toISOString().split('T')[0],   // Ngày kết thúc học kỳ (YYYY-MM-DD)
+        start_date: new Date(semester.ngay_bat_dau).toISOString().split('T')[0],
+        end_date: new Date(semester.ngay_ket_thuc).toISOString().split('T')[0],
       };
     });
 
-    // Trả về danh sách học kỳ đã được định dạng dưới dạng JSON
-    return NextResponse.json(formattedSemesters);
+    // HTTP 200: Thành công, có dữ liệu trả về.
+    return NextResponse.json({
+        code: 'SUCCESS',
+        message: 'Lấy danh sách học kỳ thành công.',
+        data: formattedSemesters
+    }, { status: 200 });
+
   } catch (error) {
-    // Xử lý lỗi nếu có bất kỳ sự cố nào xảy ra trong quá trình truy vấn hoặc định dạng
+    // Xử lý lỗi
     console.error('[API Error /semesters]:', error);
+
+    // HTTP 500: Lỗi máy chủ nội bộ.
     return NextResponse.json(
-      { error: 'Lỗi máy chủ nội bộ khi lấy danh sách học kỳ.' },
-      { status: 500 } // Trả về mã lỗi 500 (Internal Server Error)
+      { 
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Lỗi máy chủ nội bộ khi lấy danh sách học kỳ.' 
+      },
+      { status: 500 }
     );
   }
 }
