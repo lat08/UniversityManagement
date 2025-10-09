@@ -83,25 +83,26 @@ const swaggerDocument = {
 
     // API Dashboard Sinh Viên
     "/api/student/dashboard": {
-      post: {
+      get: {
         summary: "Lấy dữ liệu tổng quan dashboard sinh viên",
         description:
           "Trả về thông tin tổng hợp cho trang dashboard sinh viên gồm thống kê học tập, lịch học, lịch thi, kết quả học tập trong học kỳ hiện tại, thông báo và các lớp đang học.",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  id_sinh_vien: { type: "integer", example: 12 },
-                  id_hoc_ky: { type: "integer", example: 3 },
-                },
-                required: ["id_sinh_vien"],
-              },
-            },
+        parameters: [
+          {
+            name: "id_sinh_vien",
+            in: "query",
+            required: true,
+            schema: { type: "integer", example: 12 },
+            description: "ID của sinh viên cần lấy dữ liệu dashboard",
           },
-        },
+          {
+            name: "id_hoc_ky",
+            in: "query",
+            required: false,
+            schema: { type: "integer", example: 3 },
+            description: "ID học kỳ cần xem (nếu không có sẽ lấy học kỳ hiện tại)",
+          },
+        ],
         responses: {
           "200": {
             description: "Thông tin tổng quan dashboard sinh viên",

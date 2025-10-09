@@ -13,10 +13,12 @@ function getWeekRange(date = new Date())  {
   return { start, end };
 }
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try{
-    const body = await req.json();
-    const { id_sinh_vien, id_hoc_ky } = body;
+    const { searchParams } = new URL(req.url);
+    const id_sinh_vien = Number(searchParams.get("id_sinh_vien"));
+    const id_hoc_ky = Number(searchParams.get("id_hoc_ky"));
+
 
     if(!id_sinh_vien) {
       return NextResponse.json({ message: "Thiếu id_sinh_vien!" }, { status: 400 });
