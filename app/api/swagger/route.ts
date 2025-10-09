@@ -80,7 +80,49 @@ const swaggerDocument = {
         },
       },
     },
-  },
+  "/api/student/week-schedule": {
+      get: {
+        summary: "Lấy thời khóa biểu theo tuần của sinh viên",
+        description: "Truy xuất thời khóa biểu của một sinh viên trong một học kỳ, có thể chỉ định tuần cụ thể. Nếu không có 'id_tuan', sẽ mặc định lấy tuần đầu tiên của học kỳ.",
+        parameters: [
+          {
+            name: "id_sinh_vien",
+            in: "query",
+            required: true,
+            schema: { type: "integer" },
+            description: "ID của sinh viên",
+          },
+          {
+            name: "id_hoc_ky",
+            in: "query",
+            required: true,
+            schema: { type: "integer" },
+            description: "ID của học kỳ",
+          },
+          {
+            name: "id_tuan",
+            in: "query",
+            required: false,
+            schema: { type: "integer" },
+            description: "ID của tuần (tùy chọn)",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Danh sách thời khóa biểu thành công",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/LichHocResponse" },
+              },
+            },
+          },
+          "400": { description: "Thiếu tham số bắt buộc (id_sinh_vien hoặc id_hoc_ky)" },
+          "404": { description: "Không tìm thấy tuần trong học kỳ này" },
+          "500": { description: "Lỗi server" },
+        },
+      },
+    },
+  },
   components: {
     schemas: {
       Person: {
