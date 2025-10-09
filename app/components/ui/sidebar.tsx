@@ -55,7 +55,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
     {
       title: "TỔNG QUAN",
       items: [
-        { icon: Home, label: "Bảng điều khiển", href: "/" },
+        { icon: Home, label: "Bảng điều khiển", href: "/student/dashboard" },
         { icon: FileText, label: "Quy chế / Quy định", href: "/regulations" },
       ],
     },
@@ -85,7 +85,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       title: "HỆ THỐNG",
       items: [
         { icon: Users, label: "Hồ sơ cá nhân", href: "/profile" },
-        { icon: Bell, label: "Thông báo", href: "/notifications" },
+        { icon: Bell, label: "Thông báo", href: "/notification" },
       ],
     },
   ]
