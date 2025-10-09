@@ -80,6 +80,132 @@ const swaggerDocument = {
         },
       },
     },
+
+    // API Dashboard Sinh Viên
+    "/api/student/dashboard": {
+      post: {
+        summary: "Lấy dữ liệu tổng quan dashboard sinh viên",
+        description:
+          "Trả về thông tin tổng hợp cho trang dashboard sinh viên gồm thống kê học tập, lịch học, lịch thi, kết quả học tập trong học kỳ hiện tại, thông báo và các lớp đang học.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  id_sinh_vien: { type: "integer", example: 12 },
+                  id_hoc_ky: { type: "integer", example: 3 },
+                },
+                required: ["id_sinh_vien"],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Thông tin tổng quan dashboard sinh viên",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    sinhVien: { $ref: "#/components/schemas/StudentWithRelations" },
+                    thongKe: {
+                      type: "object",
+                      properties: {
+                        diem_tb_tich_luy: { type: "number", example: 7.8 },
+                        so_tin_chi_dat: { type: "integer", example: 45 },
+                        xep_loai: { type: "string", example: "Khá" },
+                      },
+                    },
+                    lichHocTrongTuan: { type: "integer", example: 5 },
+                    lichThiTrongTuan: { type: "integer", example: 1 },
+                    ketQuaHocTapChiTiet: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          maMonHoc: { type: "string", example: "CS101" },
+                          tenMonHoc: { type: "string", example: "Lập trình cơ bản" },
+                          soTinChi: { type: "integer", example: 3 },
+                          diemTongKet: { type: "number", example: 7.5 },
+                          datHP: { type: "string", example: "Đạt" },
+                        },
+                      },
+                    },
+                    thongBao: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          id_thong_bao: { type: "integer", example: 1 },
+                          tieu_de: { type: "string", example: "Thông báo thi cuối kỳ" },
+                          noi_dung: {
+                            type: "string",
+                            example: "Thi cuối kỳ sẽ diễn ra vào ngày 20/12.",
+                          },
+                          ngay_tao: {
+                            type: "string",
+                            format: "date-time",
+                            example: "2025-10-08T10:00:00Z",
+                          },
+                        },
+                      },
+                    },
+                    lopDangHoc: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          id_khoa_hoc: { type: "integer", example: 5 },
+                          ten_khoa_hoc: {
+                            type: "string",
+                            example: "Công nghệ phần mềm",
+                          },
+                          mon_hoc: {
+                            type: "object",
+                            properties: {
+                              ten_mon_hoc: {
+                                type: "string",
+                                example: "Phát triển Web",
+                              },
+                              ma_mon_hoc: { type: "string", example: "WEB301" },
+                              so_tin_chi: { type: "integer", example: 3 },
+                            },
+                          },
+                          giang_vien: {
+                            type: "object",
+                            properties: {
+                              id_giang_vien: { type: "integer", example: 4 },
+                              nguoi: {
+                                type: "object",
+                                properties: {
+                                  ho_ten: {
+                                    type: "string",
+                                    example: "Nguyễn Văn B",
+                                  },
+                                  email: {
+                                    type: "string",
+                                    example: "nguyenvanb@example.com",
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { description: "Thiếu id_sinh_vien" },
+          "500": { description: "Lỗi máy chủ" },
+        },
+      },
+    },
   },
   components: {
     schemas: {

@@ -316,3 +316,22 @@ CREATE TABLE thong_bao (
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ngay_xoa TIMESTAMP NULL
 );
+
+-- =============================================
+-- LỊCH THI
+-- =============================================
+
+CREATE TABLE lich_thi (
+    id_lich_thi SERIAL PRIMARY KEY,
+    id_khoa_hoc INT NOT NULL REFERENCES khoa_hoc(id_khoa_hoc),
+    id_phong INT NOT NULL REFERENCES phong(id_phong),
+    id_ngay INT NOT NULL REFERENCES ngay(id_ngay),
+    gio_bat_dau TIME NOT NULL,
+    gio_ket_thuc TIME NOT NULL,
+    hinh_thuc_thi VARCHAR(50) NOT NULL CHECK (hinh_thuc_thi IN ('trac_nghiem', 'tu_luan', 'thuc_hanh', 'van_dap')),
+    loai_ky_thi VARCHAR(20) DEFAULT 'cuoi_ky' CHECK (loai_ky_thi IN ('giuaky', 'cuoi_ky', 'bo_sung')),
+    ghi_chu VARCHAR(500),
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_xoa TIMESTAMP NULL,
+    CHECK (gio_ket_thuc > gio_bat_dau)
+);

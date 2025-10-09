@@ -114,6 +114,7 @@ model khoa_hoc {
   lop                 lop                  @relation(fields: [id_lop], references: [id_lop], onDelete: NoAction, onUpdate: NoAction)
   mon_hoc             mon_hoc              @relation(fields: [id_mon_hoc], references: [id_mon_hoc], onDelete: NoAction, onUpdate: NoAction)
   lich_hoc            lich_hoc[]
+  lich_thi            lich_thi[]
   sinh_vien_khoa_hoc  sinh_vien_khoa_hoc[]
   tai_lieu            tai_lieu[]
 }
@@ -126,6 +127,24 @@ model lich_hoc {
   tiet_bat_dau  Int       @db.SmallInt
   tiet_ket_thuc Int       @db.SmallInt
   id_phong      Int
+  ngay_xoa      DateTime? @db.Timestamp(6)
+  khoa_hoc      khoa_hoc  @relation(fields: [id_khoa_hoc], references: [id_khoa_hoc], onDelete: NoAction, onUpdate: NoAction)
+  ngay          ngay      @relation(fields: [id_ngay], references: [id_ngay], onDelete: NoAction, onUpdate: NoAction)
+  phong         phong     @relation(fields: [id_phong], references: [id_phong], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model lich_thi {
+  id_lich_thi   Int       @id @default(autoincrement())
+  id_khoa_hoc   Int
+  id_phong      Int
+  id_ngay       Int
+  gio_bat_dau   DateTime  @db.Time(6)
+  gio_ket_thuc  DateTime  @db.Time(6)
+  hinh_thuc_thi String    @db.VarChar(50)
+  loai_ky_thi   String?   @default("cuoi_ky") @db.VarChar(20)
+  ghi_chu       String?   @db.VarChar(500)
+  ngay_tao      DateTime? @default(now()) @db.Timestamp(6)
   ngay_xoa      DateTime? @db.Timestamp(6)
   khoa_hoc      khoa_hoc  @relation(fields: [id_khoa_hoc], references: [id_khoa_hoc], onDelete: NoAction, onUpdate: NoAction)
   ngay          ngay      @relation(fields: [id_ngay], references: [id_ngay], onDelete: NoAction, onUpdate: NoAction)
@@ -191,6 +210,7 @@ model ngay {
   ngay_thang  DateTime   @db.Date
   ten_ngay    String     @db.VarChar(20)
   lich_hoc    lich_hoc[]
+  lich_thi    lich_thi[]
   tuan        tuan       @relation(fields: [id_tuan], references: [id_tuan], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([id_tuan, thu_tu_ngay])
@@ -260,6 +280,7 @@ model phong {
   ngay_xoa   DateTime?   @db.Timestamp(6)
   dat_phong  dat_phong[]
   lich_hoc   lich_hoc[]
+  lich_thi   lich_thi[]
   toa_nha    toa_nha     @relation(fields: [id_toa_nha], references: [id_toa_nha], onDelete: NoAction, onUpdate: NoAction)
 }
 
