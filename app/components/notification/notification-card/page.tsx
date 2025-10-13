@@ -36,7 +36,7 @@ const notificationTypeConfig = {
   general: {
     label: "Thông tin chung",
     variant: "outline" as const,
-    className: "bg-gray-100 text-gray-700 hover:bg-gray-100",
+    className: "bg-teal-100 text-teal-700 hover:bg-teal-200",
   },
 }
 
@@ -52,7 +52,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h3 className="font-semibold text-base leading-tight mb-1">{notification.title}</h3>
+            <h3 className="font-semibold text-2xl leading-tight mb-1">{notification.title}</h3>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Clock className="h-3 w-3" />
               <span>{notification.timeAgo}</span>
@@ -63,6 +63,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
+        <hr></hr>
         <div>
           <span className="font-semibold">Nội dung:</span>{" "}
           <span className="text-muted-foreground">{notification.content}</span>
@@ -83,6 +84,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
             <span className="text-muted-foreground">{notification.location}</span>
           </div>
         )}
+        <hr></hr> 
         <div className="pt-2">
           <span className="font-semibold text-red-600">Lưu ý:</span>{" "}
           <span className="text-muted-foreground">{notification.note}</span>
