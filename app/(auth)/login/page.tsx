@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -146,12 +147,12 @@ export default function LoginPage() {
 
             {/* Quên mật khẩu */}
             <div className="flex justify-end">
-              <button
-                type="button"
+              <Link
+                href="/forgot-password"
                 className="font-poppins text-[14px] text-[#000000] hover:text-[#4E8EE1] transition-colors cursor-pointer hover:underline"
               >
                 Quên mật khẩu ?
-              </button>
+              </Link>
             </div>
 
             {/* Nút đăng nhập */}
@@ -167,3 +168,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+
