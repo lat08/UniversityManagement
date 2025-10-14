@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Sidebar } from "@/app/components/ui/sidebar"
 import { Header } from "@/app/components/header/header"
-import { NotificationsContent } from "@/app/components/notification/content/page"
+import { NotificationsContent } from "@/app/components/notification/page/content/page"
 import { cn } from "@/lib/utils/utils"
 
 export default function NotificationsPage() {
