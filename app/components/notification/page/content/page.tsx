@@ -46,10 +46,10 @@ export function NotificationsContent() {
               <button
                 key={filter.key}
                 onClick={() => setActiveFilter(filter.key)}
-                className={`border-blue-400 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors  ${
                   isActive
                     ? typeConfig.className.replace("hover:", "") + " font-semibold"
-                    : typeConfig.className
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-black-400"
                 }`}
               >
                 {filter.label}
