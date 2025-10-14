@@ -25,7 +25,7 @@ export const notificationTypeConfig = {
     key: "all" as NotificationType,
     label: "Tất cả",
     
-    className: "bg-gray-100 text-gray-700 hover:bg-gray-200 border-black-300",
+    className: "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-black-300",
   },
   exam: {
     key: "exam" as NotificationType,    
