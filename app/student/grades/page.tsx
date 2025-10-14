@@ -669,6 +669,7 @@ export default function ScoresPage() {
                         </tbody>
                       </table>
                     </div>
+
                     <div className="mt-0 p-6 bg-gray-50 border-t border-gray-200">
                       <h3 className="font-bold text-gray-900 mb-3 text-base">Trung bình học kỳ</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
