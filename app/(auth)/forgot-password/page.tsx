@@ -1,120 +1,89 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { sendPasswordResetOtpApi, type ForgotPasswordDto } from '@/lib/api/auth';
+import { useAuthFlow } from '@/lib/hooks/useAuthFlow';
+import { AuthLayout } from '@/app/components/auth/AuthLayout';
+import { AuthInput } from '@/app/components/auth/AuthInput';
+import { AuthButton } from '@/app/components/auth/AuthButton';
+import toast from 'react-hot-toast';
 import { TEXT } from './constants';
-import type { ForgotPasswordForm } from './types';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const { setEmail: setFlowEmail } = useAuthFlow();
+
+  const { mutate: sendOtp, isPending } = useMutation({
+    mutationFn: sendPasswordResetOtpApi,
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success(response.message || 'Mã OTP đã được gửi đến email của bạn!', {
+          duration: 4000,
+        });
+        // Lưu email vào Redux store và chuyển đến trang verify OTP
+        setFlowEmail(email);
+        router.push('/verify-otp');
+      } else {
+        toast.error('Gửi OTP thất bại. Vui lòng thử lại!');
+      }
+    },
+    onError: (error: any) => {
+      const serverMessage = error?.response?.data?.message || 
+                           error?.response?.data?.errors?.join(', ') ||
+                           error?.message || 
+                           'Gửi OTP thất bại. Vui lòng thử lại!';
+      toast.error(serverMessage, {
+        duration: 4000,
+      });
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Forgot password for:', email);
-    router.push('/verify-otp');
+    
+    if (!email) {
+      toast.error('Vui lòng nhập địa chỉ email!');
+      return;
+    }
+
+    const forgotPasswordData: ForgotPasswordDto = { email };
+    sendOtp(forgotPasswordData);
   };
 
   return (
-    <div className="min-h-screen bg-[#1d2a5b] relative overflow-hidden">
-      {/* Logo và tên trường - Góc trái trên */}
-      <div className="absolute top-8 left-8 flex items-center gap-3 z-10 animate-fadeInDown">
-        <div className="w-[45px] h-[45px] flex items-center justify-center">
-          <img
-            src="/logo-siu.webp"
-            alt="SIU Logo"
-            className="w-full h-full object-contain"
-          />
-        </div>
-        <div className="flex flex-col">
-          <h1 className="text-[#FFC700] font-inter font-semibold text-[16px] leading-tight">
-            TRƯỜNG ĐẠI HỌC TƯ THỤC QUỐC TẾ SÀI GÒN
-          </h1>
-          <p className="text-white font-inter font-light text-[12px]">
-            THE SAIGON INTERNATIONAL UNIVERSITY
-          </p>
-        </div>
-      </div>
+    <AuthLayout
+      title={TEXT.title}
+      illustration="/forgot_pass.png"
+      showBackButton={true}
+      backHref="/login"
+      backText="Quay lại đăng nhập"
+    >
+      <p className="font-poppins text-[14px] text-[#666666] mb-8">
+        {TEXT.description}
+      </p>
 
-      {/* Phần hình minh họa với bóng nền ellipse */}
-      <div className="absolute left-[12%] top-1/2 -translate-y-1/2 w-[650px] h-[650px] flex items-center justify-center">
-        <div className="absolute bottom-[80px] left-1/2 -translate-x-1/2">
-          <div 
-            className="w-[820px] h-[520px] rounded-[50%] opacity-70"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(78, 142, 225, 0.9) 0%, rgba(78, 142, 225, 0.7) 25%, rgba(78, 142, 225, 0.5) 45%, rgba(78, 142, 225, 0.2) 65%, rgba(78, 142, 225, 0) 80%)',
-              filter: 'blur(40px)',
-            }}
-          />
-        </div>
-        <img
-          src="/forgot_pass.png"
-          alt="Forgot Password Character"
-          className="relative z-10 w-full h-full object-contain animate-float"
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <AuthInput
+          label={TEXT.emailLabel}
+          type="email"
+          value={email}
+          onChange={setEmail}
+          placeholder={TEXT.emailPlaceholder}
+          required
         />
-      </div>
 
-      {/* Form quên mật khẩu - Bên phải */}
-      <div className="absolute right-[10%] top-1/2 -translate-y-1/2 animate-fadeInRight">
-        <div className="bg-white rounded-[32px] px-12 py-16 shadow-2xl w-[400px] hover:shadow-3xl transition-all duration-300">
-          {/* Nút quay lại */}
-          <div className="mb-6">
-            <Link 
-              href="/login"
-              className="inline-flex items-center gap-2 text-[#666666] hover:text-[#4E8EE1] transition-colors font-poppins text-[14px]"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                />
-              </svg>
-              Quay lại đăng nhập
-            </Link>
-          </div>
-
-          <h2 className="font-poppins font-bold text-[32px] text-[#000000] mb-2">{TEXT.title}</h2>
-          
-          <p className="font-poppins text-[14px] text-[#666666] mb-8">{TEXT.description}</p>
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div>
-              <label
-                htmlFor="email"
-                className="block font-poppins font-normal text-[14px] text-[#000000] mb-2"
-              >
-                {TEXT.emailLabel}
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={TEXT.emailPlaceholder}
-                className="w-full px-4 py-3 border-2 border-[#CCCCCC] rounded-[12px] font-poppins text-[14px] text-[#333333] placeholder:text-[#999999] focus:outline-none focus:border-[#4E8EE1] transition-colors bg-white"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#4E8EE1] text-white font-poppins font-medium text-[16px] py-3 rounded-[12px] hover:bg-[#3d7bc9] hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
-            >
-              {TEXT.submit}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+        <AuthButton
+          type="submit"
+          loading={isPending}
+          loadingText="Đang gửi..."
+        >
+          {TEXT.submit}
+        </AuthButton>
+      </form>
+    </AuthLayout>
   );
 }
 

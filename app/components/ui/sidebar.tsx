@@ -1,6 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAppDispatch } from "@/lib/store/hooks"
+import { logout } from "@/lib/store/features/authSlice"
+import { logoutApi } from "@/lib/api/auth"
+import toast from "react-hot-toast"
 import {
   ChevronLeft,
   ChevronRight,
@@ -37,6 +42,32 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [openPopover, setOpenPopover] = useState<string | null>(null)
   const [activePage, setActivePage] = useState(currentPath || "/")
+  
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  // Logout function - optimized for speed
+  const onLogout = async () => {
+    try {
+      // Logout immediately from Redux state
+      dispatch(logout())
+      
+      // Redirect immediately
+      router.push('/login')
+      
+      // Try to call logout API in background (don't wait for it)
+      try {
+        await logoutApi()
+      } catch (error) {
+        // Silently fail - user is already logged out locally
+        console.log('Background logout API call failed:', error)
+      }
+    } catch (error) {
+      // This shouldn't happen, but just in case
+      console.error('Logout error:', error)
+      router.push('/login')
+    }
+  }
 
   const toggleSection = (section: string) => {
     if (isCollapsed) return
@@ -317,7 +348,11 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
                   <div className="hidden lg:block">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-center px-2 text-red-600 hover:bg-red-50 cursor-pointer">
+                        <Button 
+                          variant="ghost" 
+                          className="w-full justify-center px-2 text-red-600 hover:bg-red-50 cursor-pointer"
+                          onClick={onLogout}
+                        >
                           <LogOut className="h-5 w-5 flex-shrink-0" />
                         </Button>
                       </TooltipTrigger>
@@ -335,7 +370,11 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
                   <HelpCircle className="h-5 w-5 flex-shrink-0" />
                   <span className="text-sm">Trợ giúp</span>
                 </Button>
-                <Button variant="ghost" className="w-full justify-start gap-3 text-red-600 hover:bg-red-50 cursor-pointer">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-3 text-red-600 hover:bg-red-50 cursor-pointer"
+                  onClick={onLogout}
+                >
                   <LogOut className="h-5 w-5 flex-shrink-0" />
                   <span className="text-sm">Đăng xuất</span>
                 </Button>

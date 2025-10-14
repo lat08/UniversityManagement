@@ -5,6 +5,7 @@ import { Sidebar } from "@/app/components/ui/sidebar"
 import { Header } from "@/app/components/header/header"
 import { cn } from "@/lib/utils/utils"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
+import RequireAuth from "@/app/components/auth/RequireAuth"
 
 // Dữ liệu mẫu cho thời khóa biểu
 interface CourseSchedule {
@@ -142,8 +143,9 @@ export default function WeeklySchedulePage() {
   }, [])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar
+    <RequireAuth>
+      <div className="flex h-screen overflow-hidden bg-gray-50">
+        <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isMobileOpen={isMobileSidebarOpen}
@@ -399,6 +401,7 @@ export default function WeeklySchedulePage() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+    </RequireAuth>
   )
 }
