@@ -1,48 +1,8 @@
 import { Badge } from "@/app/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/app/components/ui/card"
 import { Clock } from "lucide-react"
+import { notificationTypeConfig, NotificationCardProps} from "@/public/data/notifications"
 
-export type NotificationType = "exam" | "event" | "important" | "general"
-
-export interface NotificationData {
-  id: string
-  title: string
-  timeAgo: string
-  type: NotificationType
-  content: string
-  date: string
-  time?: string
-  location?: string
-  note: string
-  isRead?: boolean
-}
-
-const notificationTypeConfig = {
-  exam: {
-    label: "Kỳ thi",
-    variant: "default" as const,
-    className: "bg-blue-100 text-blue-700 hover:bg-blue-100",
-  },
-  event: {
-    label: "Sự kiện",
-    variant: "secondary" as const,
-    className: "bg-purple-100 text-purple-700 hover:bg-purple-100",
-  },
-  important: {
-    label: "Quan trọng",
-    variant: "destructive" as const,
-    className: "bg-red-100 text-red-700 hover:bg-red-100",
-  },
-  general: {
-    label: "Thông tin chung",
-    variant: "outline" as const,
-    className: "bg-teal-100 text-teal-700 hover:bg-teal-200",
-  },
-}
-
-interface NotificationCardProps {
-  notification: NotificationData
-}
 
 export function NotificationCard({ notification }: NotificationCardProps) {
   const typeConfig = notificationTypeConfig[notification.type]
