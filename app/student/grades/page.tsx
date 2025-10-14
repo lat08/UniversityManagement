@@ -5,6 +5,7 @@ import { Sidebar } from "@/app/components/ui/sidebar";
 import { Header } from "@/app/components/header/header";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
+import RequireAuth from "@/app/components/auth/RequireAuth";
 import { 
   Printer, 
   TrendingUp, 
@@ -17,6 +18,15 @@ import {
   X
 } from "lucide-react";
 import { useState } from "react";
+
+// Kiểu dữ liệu cho một môn học trong học kỳ
+type Course = {
+  code: string;
+  name: string;
+  credits: number;
+  score10: number | null;
+  status: string;
+};
 
 export default function ScoresPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -125,10 +135,10 @@ export default function ScoresPage() {
   ]; 
 
   // Tính toán thống kê cho từng học kỳ
-  const calculateSemesterStats = (courses: any[]) => {
+  const calculateSemesterStats = (courses: Course[]) => {
     const completedCourses = courses.filter(c => c.status === "Đạt");
     const totalCredits = completedCourses.reduce((sum, c) => sum + c.credits, 0);
-    const totalWeightedScore = completedCourses.reduce((sum, c) => sum + (c.score10 * c.credits), 0);
+    const totalWeightedScore = completedCourses.reduce((sum, c) => sum + (((c.score10 ?? 0) * c.credits)), 0);
     const semesterGPA10 = totalCredits > 0 ? totalWeightedScore / totalCredits : 0;
     const semesterGPA4 = calculateGPA(semesterGPA10);
     
@@ -426,8 +436,9 @@ export default function ScoresPage() {
     : semesterData.filter(s => s.id === selectedSemester);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar 
+    <RequireAuth>
+      <div className="min-h-screen bg-gray-50">
+        <Sidebar 
         isCollapsed={isSidebarCollapsed}
         onToggle={handleSidebarToggle}
         isMobileOpen={isMobileSidebarOpen}
@@ -714,6 +725,7 @@ export default function ScoresPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </RequireAuth>
   );
 };

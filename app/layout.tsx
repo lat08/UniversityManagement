@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import AppProviders from "./providers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,18 +22,16 @@ export const metadata: Metadata = {
   title: "SIU - Đăng nhập",
   description: "Hệ thống quản lý trường đại học",
 };
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body className={`font-sans ${inter.variable}`}>
-        <Suspense fallback={null}>
-          {children}
-          <Analytics />
-        </Suspense>
+      <body className="font-sans">
+        <AppProviders>
+          <Suspense fallback={null}>
+            {children}
+            <Analytics />
+          </Suspense>
+        </AppProviders>
       </body>
     </html>
   )

@@ -1,6 +1,5 @@
 export const OTP_LENGTH = 6;
-export const RESEND_SECONDS = 10;
-export const SUCCESS_CODE = '123456';
+export const RESEND_SECONDS = 30;
 
 export const TEXT = {
   title: 'Xác thực mã',
