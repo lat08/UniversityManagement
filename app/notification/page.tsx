@@ -1,18 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { Sidebar } from "@/app/components/ui/sidebar"
+import { Sidebar } from "@/app/components/ui/sidebar" 
 import { Header } from "@/app/components/header/header"
-import { NotificationsContent } from "@/app/components/notification/content/page"
+import NotificationsContent from "@/app/components/notification/content/page"
 import { cn } from "@/lib/utils/utils"
+import RequireAuth from "@/app/components/auth/RequireAuth"
 
 export default function NotificationsPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar
+    <RequireAuth>
+      <div className="flex h-screen overflow-hidden bg-gray-50">
+        <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isMobileOpen={isMobileSidebarOpen}
@@ -33,6 +35,7 @@ export default function NotificationsPage() {
           <NotificationsContent />
         </main>
       </div>
-    </div>
+      </div>
+    </RequireAuth>
   )
 }

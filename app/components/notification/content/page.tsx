@@ -55,7 +55,7 @@ const mockNotifications: NotificationData[] = [
 
 type FilterType = "all" | "important" | "exam" | "event" | "general"
 
-export function NotificationsContent() {
+export default function NotificationsContent() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all")
 
   const filterCounts = {

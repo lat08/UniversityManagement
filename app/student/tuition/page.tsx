@@ -6,6 +6,7 @@ import { Header } from "@/app/components/header/header";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription } from "@/app/components/ui/alert";
+import RequireAuth from "@/app/components/auth/RequireAuth";
 import { 
   CreditCard, 
   Download, 
@@ -80,9 +81,10 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Add Sidebar */}
-      <Sidebar
+    <RequireAuth>
+      <div className="min-h-screen bg-white">
+        {/* Add Sidebar */}
+        <Sidebar
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
         isMobileOpen={isMobileOpen}
@@ -243,6 +245,7 @@ export default function PaymentPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </RequireAuth>
   );
 }

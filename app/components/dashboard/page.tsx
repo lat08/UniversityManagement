@@ -13,7 +13,7 @@ const academicData = [
   { semester: "HK6", score: 8.3 },
 ]
 
-export function DashboardContent() {
+export default function DashboardContent() {
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Welcome Section */}
