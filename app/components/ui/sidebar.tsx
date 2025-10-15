@@ -116,7 +116,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       title: "HỆ THỐNG",
       items: [
         { icon: Users, label: "Hồ sơ cá nhân", href: "/profile" },
-        { icon: Bell, label: "Thông báo", href: "/notification" },
+        { icon: Bell, label: "Thông báo", href: "student/notification" },
       ],
     },
   ]
