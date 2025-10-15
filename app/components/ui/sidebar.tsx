@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import { useAppDispatch } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/features/authSlice"
 import { logoutApi } from "@/lib/api/auth"
@@ -41,10 +41,13 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [openPopover, setOpenPopover] = useState<string | null>(null)
-  const [activePage, setActivePage] = useState(currentPath || "/")
   
   const router = useRouter()
+  const pathname = usePathname()
   const dispatch = useAppDispatch()
+  
+  // Use pathname from Next.js instead of prop for reliability
+  const activePage = pathname || currentPath || "/"
 
   // Logout function - optimized for speed
   const onLogout = async () => {
@@ -74,13 +77,12 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
     setExpandedSection(expandedSection === section ? null : section)
   }
 
-  // Auto expand section when current path is active
-  useState(() => {
-    if (currentPath?.startsWith("/student/schedule")) {
+  // Auto expand section when current path is active - FIX: use useEffect
+  useEffect(() => {
+    if (activePage?.startsWith("/student/schedule")) {
       setExpandedSection("1-2") // Index of "Thời khóa biểu" in menuSections
-      setActivePage(currentPath)
     }
-  })
+  }, [activePage])
 
   const menuSections = [
     {
@@ -94,7 +96,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       title: "HỌC VỤ",
       items: [
         { icon: BookOpen, label: "Khóa học", href: "/courses" },
-        { icon: Building2, label: "Phòng chức năng", href: "/departments" },
+        { icon: Building2, label: "Phòng chức năng", href: "/student/departments" },
         {
           icon: Calendar,
           label: "Thời khóa biểu",
@@ -116,7 +118,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       title: "HỆ THỐNG",
       items: [
         { icon: Users, label: "Hồ sơ cá nhân", href: "/profile" },
-        { icon: Bell, label: "Thông báo", href: "/notification" },
+        { icon: Bell, label: "Thông báo", href: "student/notification" },
       ],
     },
   ]
@@ -232,7 +234,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
                                         key={subIndex}
                                         variant="ghost"
                                         className="w-full justify-start text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => setActivePage(subItem.href)}
+                                        onClick={() => router.push(subItem.href)}
                                       >
                                         {subItem.label}
                                       </Button>
@@ -254,7 +256,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
                                     "w-full justify-center px-2 text-gray-700 hover:bg-gray-100 cursor-pointer",
                                     isActive && "bg-blue-50 text-blue-600 hover:bg-blue-100",
                                   )}
-                                  onClick={() => setActivePage(item.href)}
+                                  onClick={() => router.push(item.href)}
                                 >
                                   <item.icon className="h-5 w-5 flex-shrink-0" />
                                 </Button>
@@ -278,11 +280,10 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
                             )}
                             onClick={() => {
                               if (!item.expandable) {
-                                window.location.href = item.href
+                                router.push(item.href)
                               } else {
                                 toggleSection(itemKey)
                               }
-                              setActivePage(item.href)
                             }}
                           >
                             <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -309,8 +310,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
                                       isSubActive ? "bg-blue-50 text-blue-600 font-semibold" : "text-gray-600"
                                     )}
                                     onClick={() => {
-                                      window.location.href = subItem.href
-                                      setActivePage(subItem.href)
+                                      router.push(subItem.href)
                                     }}
                                   >
                                     {subItem.label}

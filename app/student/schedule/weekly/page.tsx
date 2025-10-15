@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Sidebar } from "@/app/components/ui/sidebar"
-import { Header } from "@/app/components/header/header"
-import { cn } from "@/lib/utils/utils"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
-import RequireAuth from "@/app/components/auth/RequireAuth"
+import { cn } from "@/lib/utils/utils"
 
 // Dữ liệu mẫu cho thời khóa biểu
 interface CourseSchedule {
@@ -46,15 +43,12 @@ const sampleSchedule: CourseSchedule[] = [
 ]
 
 export default function WeeklySchedulePage() {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
   const [selectedWeek, setSelectedWeek] = useState("Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]")
   const [hoveredCourse, setHoveredCourse] = useState<string | null>(null)
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 })
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
   const [isWeekOpen, setIsWeekOpen] = useState(false)
-  const currentPath = "/student/schedule/weekly"
 
   const semesters = [
     "Học kỳ 1 - Năm học 2025-2026",
@@ -143,27 +137,7 @@ export default function WeeklySchedulePage() {
   }, [])
 
   return (
-    <RequireAuth>
-      <div className="flex h-screen overflow-hidden bg-gray-50">
-        <Sidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        isMobileOpen={isMobileSidebarOpen}
-        onMobileToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-        currentPath={currentPath}
-      />
-
-      <div
-        className={cn(
-          "flex flex-1 flex-col transition-all duration-300",
-          "ml-0 lg:ml-16",
-          !isSidebarCollapsed && "lg:ml-64",
-        )}
-      >
-        <Header onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
-
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="mx-auto max-w-[1600px] relative">
+    <div className="mx-auto max-w-[1600px] relative">
             {/* Header */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900">Thời khóa biểu theo tuần</h1>
@@ -397,11 +371,7 @@ export default function WeeklySchedulePage() {
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </main>
-      </div>
-      </div>
-    </RequireAuth>
+          )}
+    </div>
   )
 }
