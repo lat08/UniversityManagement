@@ -36,7 +36,7 @@ export default function StudentLayout({
         <div
           className={cn(
             "flex flex-1 flex-col transition-all duration-300",
-            "ml-0 lg:ml-16",
+            "ml-0 lg:ml-20",
             !isSidebarCollapsed && "lg:ml-64",
           )}
         >
