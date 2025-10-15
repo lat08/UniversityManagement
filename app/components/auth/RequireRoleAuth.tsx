@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import AuthErrorBoundary from './AuthErrorBoundary';
 
-type UserRole = 'student' | 'admin' | 'instructor';
+type UserRole = 'Student' | 'Instructor' | 'Admin';
 
-// Note: Database có thể lưu "Student", "Admin", "Instructor" (viết hoa)
-// Component sẽ normalize về lowercase để so sánh
+// Note: Database lưu "Student", "Instructor", "Admin" (viết hoa)
+// Component sẽ so sánh trực tiếp với case-sensitive
 
 interface RequireRoleAuthProps {
   children: React.ReactNode;
@@ -23,16 +23,15 @@ const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string = '/login') =
 
   // Memoize auth state để tránh re-render không cần thiết
   const authState = useMemo(() => {
-    // Normalize case để xử lý database có thể lưu "Student" hoặc "student"
-    const normalizedUserRole = user?.role?.toLowerCase() as UserRole;
-    const normalizedAllowedRoles = allowedRoles.map(role => role.toLowerCase());
+    // So sánh trực tiếp với case-sensitive vì database lưu chính xác "Student", "Instructor", "Admin"
+    const userRole = user?.role as UserRole;
     
     return {
       isAuthenticated,
       accessToken,
-      userRole: normalizedUserRole,
+      userRole,
       hasValidToken: isAuthenticated && accessToken,
-      isAuthorized: isAuthenticated && accessToken && normalizedAllowedRoles.includes(normalizedUserRole)
+      isAuthorized: isAuthenticated && accessToken && allowedRoles.includes(userRole)
     };
   }, [isAuthenticated, accessToken, user?.role, allowedRoles]);
 
