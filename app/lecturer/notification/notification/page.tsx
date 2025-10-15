@@ -5,14 +5,14 @@ import { Sidebar } from "@/app/components/ui/sidebar"
 import { Header } from "@/app/components/header/header"
 import { NotificationsContent } from "@/app/components/notification/page/content/page"
 import { cn } from "@/lib/utils/utils"
-import RequireAuth from "@/app/components/auth/RequireAuth"
+import RequireRoleAuth from "@/app/components/auth/RequireRoleAuth"
 
 export default function NotificationsPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   return (
-    <RequireAuth>
+    <RequireRoleAuth allowedRoles={['student', 'admin', 'instructor']}>
       <div className="flex h-screen overflow-hidden bg-gray-50">
         <Sidebar
         isCollapsed={isSidebarCollapsed}
@@ -36,6 +36,6 @@ export default function NotificationsPage() {
         </main>
       </div>
       </div>
-    </RequireAuth>
+    </RequireRoleAuth>
   )
 }

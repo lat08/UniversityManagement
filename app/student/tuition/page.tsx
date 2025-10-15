@@ -1,12 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Header } from "@/app/components/header/header";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription } from "@/app/components/ui/alert";
-import RequireAuth from "@/app/components/auth/RequireAuth";
 import { 
   CreditCard, 
   Download, 
@@ -18,15 +15,8 @@ import {
   Clock,
   ArrowUp
 } from "lucide-react";
-import { Sidebar } from "@/app/components/ui/sidebar";
 
 export default function PaymentPage() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-  const handleMobileMenuToggle = () => {
-    setIsMobileOpen(!isMobileOpen);
-  };
   const bankInfo = {
     bank: "Vietcombank - Chi nhánh TP.HCM",
     accountNumber: "1234567890",
@@ -81,21 +71,7 @@ export default function PaymentPage() {
   };
 
   return (
-    <RequireAuth>
-      <div className="min-h-screen bg-white">
-        {/* Add Sidebar */}
-        <Sidebar
-        isCollapsed={isCollapsed}
-        onToggle={() => setIsCollapsed(!isCollapsed)}
-        isMobileOpen={isMobileOpen}
-        onMobileToggle={handleMobileMenuToggle}
-        currentPath="/student/tuition"
-      />
-
-      {/* Adjust main content to work with sidebar */}
-      <div className={`${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'} transition-all duration-300`}>
-        <Header onMobileMenuToggle={handleMobileMenuToggle} />
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="space-y-6">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-black mb-2">Học phí</h1>
@@ -243,9 +219,6 @@ export default function PaymentPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
-      </div>
-    </RequireAuth>
+    </div>
   );
 }
