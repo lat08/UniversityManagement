@@ -1,8 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card"
-import { Button } from "@/app/components/ui/button";
-import { Badge } from "@/app/components/ui/badge";
+import { Button } from "@/app/components/ui/button"
+import { Badge } from "@/app/components/ui/badge"
 import { Printer, TrendingUp, BookOpen, Award, CheckCircle, XCircle, ChevronUp, List } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -442,12 +442,13 @@ export default function ScoresPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Điểm số</h1>
-        <p className="text-gray-600">Theo dõi kết quả học tập và tiến độ học tập</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Điểm số</h1>
+        <p className="text-sm text-gray-600">Theo dõi kết quả học tập và tiến độ học tập</p>
       </div>
 
       {/* Tổng quan điểm số */}
       <div className="mb-8">
+        {/* Section title typography */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <h2 className="text-xl font-bold text-gray-900">Tổng quan điểm số</h2>
           <div className="relative">
@@ -539,6 +540,7 @@ export default function ScoresPage() {
 
       {/* Bảng điểm chi tiết cho từng học kỳ */}
       <div className="space-y-6">
+        {/* Section title typography */}
         <h2 className="text-xl font-bold text-gray-900">Bảng điểm chi tiết</h2>
 
         {filteredSemesters.map((semester) => {
