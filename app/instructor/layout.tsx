@@ -24,7 +24,7 @@ export default function InstructorLayout({
   }
 
   return (
-    <RequireRoleAuth allowedRoles={['instructor']}>
+    <RequireRoleAuth allowedRoles={['Instructor']}>
       <div className="flex h-screen overflow-hidden bg-gray-50" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}

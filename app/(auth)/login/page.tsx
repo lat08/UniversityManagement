@@ -8,6 +8,7 @@ import { useAppDispatch } from '@/lib/store/hooks';
 import { loginSuccess } from '@/lib/store/features/authSlice';
 import { loginApi, type LoginDto } from '@/lib/api/auth';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { useRoleNavigation } from '@/lib/hooks/useRoleNavigation';
 import { AuthLayout } from '@/app/components/auth/AuthLayout';
 import { AuthInput } from '@/app/components/auth/AuthInput';
 import { AuthButton } from '@/app/components/auth/AuthButton';
@@ -19,6 +20,7 @@ export default function LoginPage() {
   
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { navigateToDashboard } = useRoleNavigation();
   
   // Debounce email input để tránh validation liên tục
   const debouncedEmail = useDebounce(email, 300);
@@ -45,8 +47,9 @@ export default function LoginPage() {
           duration: 3000,
         });
         
-        // Redirect tới dashboard student
-        router.replace('/student/dashboard');
+        // Điều hướng dựa trên role
+        const userRole = response.data.userInfo.roles[0];
+        navigateToDashboard(userRole);
       } else {
         toast.error('Đăng nhập thất bại. Vui lòng thử lại!');
       }

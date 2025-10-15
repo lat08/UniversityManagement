@@ -24,7 +24,7 @@ export default function StudentLayout({
   }
 
   return (
-    <RequireRoleAuth allowedRoles={['student',"admin"]}>
+    <RequireRoleAuth allowedRoles={['Student']}>
       <div className="flex h-screen overflow-hidden bg-gray-50" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}
