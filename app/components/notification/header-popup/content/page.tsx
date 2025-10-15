@@ -36,7 +36,7 @@ export function NotificationPopup() {
           ) : (
             <>
               <NotificationCard/>
-              <Link href="/notification">
+              <Link href="student/notification">
                 <Button
                   variant="outline"
                   className="w-full mt-4 text-blue-600 border-blue-600 hover:bg-blue-50 bg-transparent"
