@@ -562,16 +562,6 @@ export default function ScoresPage() {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div className="flex items-center gap-3">
                     <CardTitle className="text-lg font-bold text-gray-900">{semester.semester}</CardTitle>
-
-                    {hasAllScores && semClassification ? (
-                      <Badge className={`${getClassificationColor(semClassification)} text-sm font-semibold ml-2`}>
-                        {semClassification}
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-gray-100 text-gray-500 text-sm font-medium ml-2 hover:bg-gray-100">
-                        Chưa đủ điểm
-                      </Badge>
-                    )}
                   </div>
 
                   <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 w-full sm:w-auto">
