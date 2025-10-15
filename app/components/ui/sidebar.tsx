@@ -111,7 +111,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
         { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
         { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
         { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
-        { icon: GraduationCap, label: "Xét học bổng", href: "/scholarships" },
+        { icon: GraduationCap, label: "Xét học bổng", href: "/student/scholarships" },
       ],
     },
     {
