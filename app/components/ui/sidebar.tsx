@@ -41,6 +41,7 @@ interface SidebarProps {
 }
 
 type MenuItem = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any
   label: string
   href: string
@@ -105,7 +106,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
             { label: "TKB theo học kỳ", href: "/student/schedule/semester" },
           ],
         },
-        { icon: FileCheck, label: "Lịch thi", href: "/exams" },
+        { icon: FileCheck, label: "Lịch thi", href: "/student/exam-schedule" },
         { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
         { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
         { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
