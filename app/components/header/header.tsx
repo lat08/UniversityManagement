@@ -4,12 +4,29 @@ import { Menu } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
 import { Avatar, AvatarFallback } from "@/app/components/ui/avatar"
 import { NotificationPopup } from "@/app/components/notification/header-popup/content/page"
+import { useAppSelector } from "@/lib/store/hooks"
 
 interface HeaderProps {
   onMobileMenuToggle: () => void
 }
 
 export function Header({ onMobileMenuToggle }: HeaderProps) {
+  const { user } = useAppSelector((state) => state.auth)
+
+  const displayName = user?.name || user?.email || "Name"
+  const roleLabel = (() => {
+    const role = (user?.role || "").toLowerCase()
+    if (role.includes("instructor") || role.includes("teacher") || role === "giang_vien") return "Giảng viên"
+    if (role.includes("student") || role === "sinh_vien") return "Sinh viên"
+    return "Người dùng"
+  })()
+
+  const initials = (() => {
+    const src = displayName.trim()
+    const parts = src.split(" ").filter(Boolean)
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+    return src.slice(0, 2).toUpperCase()
+  })()
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 lg:px-6">
       <Button variant="ghost" size="icon" onClick={onMobileMenuToggle} className="lg:hidden">
@@ -23,11 +40,11 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
 
         <div className="flex items-center gap-2 lg:gap-3">
           <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
-            <AvatarFallback className="bg-gray-200 text-gray-600 text-xs lg:text-sm">N</AvatarFallback>
+            <AvatarFallback className="bg-gray-200 text-gray-600 text-xs lg:text-sm">{initials}</AvatarFallback>
           </Avatar>
           <div className="hidden sm:flex flex-col">
-            <span className="text-sm font-medium">Name</span>
-            <span className="text-xs text-gray-500">Sinh viên</span>
+            <span className="text-sm font-medium">{displayName}</span>
+            <span className="text-xs text-gray-500">{roleLabel}</span>
           </div>
         </div>
       </div>
