@@ -1,48 +1,63 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, FileText, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 
-// Dữ liệu mẫu cho thời khóa biểu
-interface CourseSchedule {
+// Dữ liệu mẫu cho thời khóa biểu instructor
+interface InstructorSchedule {
   id: string
   name: string
   code: string
   room: string
-  teacher: string
+  class: string // Lớp học
   dayOfWeek: number // 2-8 (Thứ 2 - Chủ nhật)
   startPeriod: number // 1-13
   periodsCount: number // Số tiết
   color: string // blue, red, green, etc.
+  documents?: string[] // Tài liệu đã gắn
 }
 
-const sampleSchedule: CourseSchedule[] = [
+const sampleSchedule: InstructorSchedule[] = [
   {
     id: "1",
     name: "QUẢN LÝ DỰ ÁN CÔNG NGHỆ THÔNG TIN (3)",
-    code: "TV114",
+    code: "CS3545",
     room: "D04-06",
-    teacher: "Trần Thanh Tuyền",
+    class: "SE1801",
     dayOfWeek: 4, // Thứ 4
     startPeriod: 1,
     periodsCount: 5,
     color: "blue",
+    documents: ["Bài giảng tuần 4.pdf", "Slide Chapter 3.pptx", "Đề cương môn học.docx"],
   },
   {
     id: "2",
-    name: "QUẢN LÝ DỰ ÁN CÔNG NGHỆ THÔNG TIN (3) (CS3545)",
-    code: "TV114",
+    name: "QUẢN LÝ DỰ ÁN CÔNG NGHỆ THÔNG TIN (3) (Thực hành)",
+    code: "CS3545",
     room: "D04501-Audi",
-    teacher: "Trần Thanh Tuyền",
+    class: "SE1802",
     dayOfWeek: 5, // Thứ 5
     startPeriod: 6,
     periodsCount: 4,
     color: "red",
+    documents: ["Lab 3 - Project Management.pdf", "Template báo cáo.docx"],
+  },
+  {
+    id: "3",
+    name: "LẬP TRÌNH WEB NÂNG CAO",
+    code: "CS4567",
+    room: "D03-12",
+    class: "SE1803",
+    dayOfWeek: 3, // Thứ 3
+    startPeriod: 8,
+    periodsCount: 3,
+    color: "green",
+    documents: ["React Advanced Concepts.pdf", "Assignment 2.pdf"],
   },
 ]
 
-export default function WeeklySchedulePage() {
+export default function InstructorWeeklySchedulePage() {
   const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
   const [selectedWeek, setSelectedWeek] = useState("Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]")
   const [hoveredCourse, setHoveredCourse] = useState<string | null>(null)
@@ -51,6 +66,10 @@ export default function WeeklySchedulePage() {
   const [isWeekOpen, setIsWeekOpen] = useState(false)
   const [isTooltipPinned, setIsTooltipPinned] = useState(false)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [isScheduleChangeModalOpen, setIsScheduleChangeModalOpen] = useState(false)
+  const [selectedCourseForChange, setSelectedCourseForChange] = useState<string | null>(null)
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("")
+  const [isTimeOpen, setIsTimeOpen] = useState(false)
 
   const semesters = [
     "Học kỳ 1 - Năm học 2025-2026",
@@ -163,6 +182,36 @@ export default function WeeklySchedulePage() {
     e.stopPropagation()
   }
 
+  const handleScheduleChangeRequest = (courseId: string) => {
+    setSelectedCourseForChange(courseId)
+    setIsScheduleChangeModalOpen(true)
+    setHoveredCourse(null) // Đóng tooltip
+    setIsTooltipPinned(false)
+  }
+
+  const handleCloseModal = () => {
+    setIsScheduleChangeModalOpen(false)
+    setSelectedCourseForChange(null)
+    setSelectedTimeSlot("")
+  }
+
+  const handleSubmitScheduleChange = () => {
+    // Logic xử lý gửi đề xuất đổi lịch
+    console.log("Gửi đề xuất đổi lịch:", {
+      courseId: selectedCourseForChange,
+      newTimeSlot: selectedTimeSlot
+    })
+    handleCloseModal()
+  }
+
+  // Dữ liệu demo cho dropdown thời gian
+  const availableTimeSlots = [
+    "Thứ 3, tiết 1 - tiết 5, phòng FLE123",
+    "Thứ 3, tiết 1 - tiết 5, phòng LEW123", 
+    "Thứ 4, tiết 1 - tiết 5, phòng LEW123",
+    "Thứ 6, tiết 1 - tiết 5, phòng DQA123"
+  ]
+
   // Close dropdowns and tooltip when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -172,6 +221,7 @@ export default function WeeklySchedulePage() {
       if (!target.closest('.dropdown-container')) {
         setIsSemesterOpen(false)
         setIsWeekOpen(false)
+        setIsTimeOpen(false)
       }
       
       // Close tooltip if clicking outside
@@ -202,9 +252,9 @@ export default function WeeklySchedulePage() {
     <div className="mx-auto max-w-[1600px] relative">
             {/* Header */}
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Thời khóa biểu theo tuần</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Thời khóa biểu giảng dạy theo tuần</h1>
               <p className="text-sm text-gray-600 mt-1">
-                Hiển thị thời khóa biểu theo từng tuần trong học kỳ
+                Hiển thị lịch giảng dạy theo từng tuần trong học kỳ
               </p>
             </div>
 
@@ -349,13 +399,13 @@ export default function WeeklySchedulePage() {
                                   </div>
                                   <div className="space-y-0.5 text-[11px] text-gray-900">
                                     <div>
-                                      <strong>Nhóm:</strong> {course.code}
+                                      <strong>Lớp:</strong> {course.class}
                                     </div>
                                     <div>
                                       <strong>Phòng:</strong> {course.room}
                                     </div>
                                     <div>
-                                      <strong>GV:</strong> {course.teacher}
+                                      <strong>Mã MH:</strong> {course.code}
                                     </div>
                                   </div>
                                 </div>
@@ -375,7 +425,7 @@ export default function WeeklySchedulePage() {
               </div>
             </div>
 
-            {/* Interactive Hover Tooltip */}
+            {/* Enhanced Hover Tooltip with Documents and Schedule Change Button */}
             {hoveredCourse && (
               <div
                 className="absolute z-50 course-tooltip"
@@ -400,22 +450,23 @@ export default function WeeklySchedulePage() {
                   />
                   
                   {/* Tooltip content */}
-                  <div className="bg-gray-900 text-white p-3 rounded-md shadow-2xl w-[280px] select-text">
+                  <div className="bg-gray-900 text-white p-4 rounded-md shadow-2xl w-[320px] select-text">
                     {sampleSchedule
                       .filter((c) => c.id === hoveredCourse)
                       .map((course) => {
                         const dayName = daysOfWeek.find((d) => d.value === course.dayOfWeek)?.label || ""
                         return (
-                          <div key={course.id} className="space-y-1.5">
-                            <div className="font-bold text-xs pb-1.5 border-b border-gray-700">
-                              Mã MH: CS3545{course.id === "1" ? "" : "4"}
+                          <div key={course.id} className="space-y-3">
+                            {/* Course Info */}
+                            <div className="font-bold text-xs pb-2 border-b border-gray-700">
+                              Mã MH: {course.code}
                             </div>
                             <div className="text-[11px] space-y-1 leading-relaxed">
                               <div>
-                                <span className="font-semibold">Môn:</span> QUẢN LÝ DỰ ÁN CÔNG NGHỆ THÔNG TIN (3)
+                                <span className="font-semibold">Môn:</span> {course.name}
                               </div>
                               <div>
-                                <span className="font-semibold">Nhóm:</span> TV114 - Tổ TH 01
+                                <span className="font-semibold">Lớp:</span> {course.class}
                               </div>
                               <div>
                                 <span className="font-semibold">Phòng:</span> {course.room}
@@ -424,11 +475,44 @@ export default function WeeklySchedulePage() {
                                 <span className="font-semibold">{dayName} - Tiết:</span> {course.startPeriod} - Số tiết: {course.periodsCount}
                               </div>
                               <div>
-                                <span className="font-semibold">GV:</span> Trần Thanh Tuyền
+                                <span className="font-semibold">Ngày:</span> {course.dayOfWeek === 5 ? "15/09/2025" : course.dayOfWeek === 4 ? "01/10/2025" : "30/09/2025"}
                               </div>
-                              <div>
-                                <span className="font-semibold">Ngày:</span> {course.dayOfWeek === 5 ? "15/09/2025" : "01/10/2025"}
+                            </div>
+
+                            {/* Documents Section */}
+                            {course.documents && course.documents.length > 0 && (
+                              <div className="pt-2 border-t border-gray-700">
+                                <div className="flex items-center gap-1 mb-2">
+                                  <FileText className="w-3 h-3" />
+                                  <span className="font-semibold text-xs">Tài liệu đã gắn:</span>
+                                </div>
+                                <div className="space-y-1">
+                                  {course.documents.map((doc, index) => (
+                                    <div key={index} className="text-[10px] text-blue-300 hover:text-blue-200 cursor-pointer flex items-center gap-1">
+                                      <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+                                      {doc}
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
+                            )}
+
+                            {/* Schedule Change Request Button */}
+                            <div className="pt-2 border-t border-gray-700">
+                              <button
+                                onClick={() => handleScheduleChangeRequest(course.id)}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white rounded text-xs font-medium transition-colors cursor-pointer"
+                                style={{ backgroundColor: '#4E8EE1' }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#3A7BC8'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#4E8EE1'
+                                }}
+                              >
+                                <Calendar className="w-3 h-3" />
+                                Đề xuất đổi lịch
+                              </button>
                             </div>
                           </div>
                         )
@@ -436,6 +520,99 @@ export default function WeeklySchedulePage() {
                   </div>
                 </div>
               </div>
+          )}
+
+          {/* Schedule Change Modal */}
+          {isScheduleChangeModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center z-[100] backdrop-blur-[2px]" style={{ backgroundColor: 'rgba(148, 163, 184, 0.25)' }}>
+              <div className="bg-white rounded-lg shadow-xl w-[500px] max-w-[90vw] max-h-[90vh] overflow-hidden">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Đề xuất đổi lịch dạy</h2>
+                  <button
+                    onClick={handleCloseModal}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6">
+                  <p className="text-sm text-gray-600 mb-6">
+                    Gửi yêu cầu thay đổi lịch dạy đến phòng đào tạo
+                  </p>
+
+                  {/* Phương án mong muốn */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phương án mong muốn
+                    </label>
+                    <div className="relative dropdown-container">
+                      <button 
+                        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
+                        onClick={() => setIsTimeOpen(!isTimeOpen)}
+                      >
+                        <span className="text-sm text-gray-900">
+                          {selectedTimeSlot || "Chọn thời gian mong muốn"}
+                        </span>
+                        <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+                      </button>
+                      {isTimeOpen && (
+                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {availableTimeSlots.map((slot, index) => (
+                            <button
+                              key={index}
+                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                              onClick={() => {
+                                setSelectedTimeSlot(slot)
+                                setIsTimeOpen(false)
+                              }}
+                            >
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Lý do (optional) */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Lý do đổi lịch (tùy chọn)
+                    </label>
+                    <textarea
+                      placeholder="Nhập lý do muốn đổi lịch..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50">
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={handleSubmitScheduleChange}
+                    disabled={!selectedTimeSlot}
+                    className="px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ 
+                      backgroundColor: selectedTimeSlot ? '#4E8EE1' : '#9CA3AF'
+                    }}
+                  >
+                    Gửi
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
     </div>
   )

@@ -6,7 +6,7 @@ import { Header } from "@/app/components/header/header";
 import RequireRoleAuth from "@/app/components/auth/RequireRoleAuth";
 import { cn } from "@/lib/utils/utils";
 
-export default function StudentLayout({
+export default function InstructorLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -24,14 +24,14 @@ export default function StudentLayout({
   }
 
   return (
-    <RequireRoleAuth allowedRoles={['student']}>
+    <RequireRoleAuth allowedRoles={['instructor']}>
       <div className="flex h-screen overflow-hidden bg-gray-50" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           isMobileOpen={isMobileSidebarOpen}
           onMobileToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-          variant="student"
+          variant="instructor"
         />
 
         <div
@@ -51,4 +51,3 @@ export default function StudentLayout({
     </RequireRoleAuth>
   );
 }
-

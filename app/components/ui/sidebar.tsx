@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useAppDispatch } from "@/lib/store/hooks"
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/features/authSlice"
 import { logoutApi } from "@/lib/api/auth"
-import toast from "react-hot-toast"
 import {
   ChevronLeft,
   ChevronRight,
@@ -30,7 +29,10 @@ import { Button } from "@/app/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/components/ui/tooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 
+type Variant = "student" | "instructor"
+
 interface SidebarProps {
+  variant?: Variant // nếu không truyền, tự suy ra từ Redux role
   isCollapsed: boolean
   onToggle: () => void
   isMobileOpen: boolean
@@ -38,53 +40,52 @@ interface SidebarProps {
   currentPath?: string
 }
 
-export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
-  const [expandedSection, setExpandedSection] = useState<string | null>(null)
-  const [openPopover, setOpenPopover] = useState<string | null>(null)
-  
-  const router = useRouter()
-  const pathname = usePathname()
-  const dispatch = useAppDispatch()
-  
-  // Use pathname from Next.js instead of prop for reliability
-  const activePage = pathname || currentPath || "/"
+type MenuItem = {
+  icon: any
+  label: string
+  href: string
+  expandable?: boolean
+  subItems?: { label: string; href: string }[]
+}
+type MenuSection = { title: string; items: MenuItem[] }
 
-  // Logout function - optimized for speed
-  const onLogout = async () => {
-    try {
-      // Logout immediately from Redux state
-      dispatch(logout())
-      
-      // Redirect immediately
-      router.push('/login')
-      
-      // Try to call logout API in background (don't wait for it)
-      try {
-        await logoutApi()
-      } catch (error) {
-        // Silently fail - user is already logged out locally
-        console.log('Background logout API call failed:', error)
-      }
-    } catch (error) {
-      // This shouldn't happen, but just in case
-      console.error('Logout error:', error)
-      router.push('/login')
-    }
+function getMenuSections(variant: Variant): MenuSection[] {
+  if (variant === "instructor") {
+    return [
+      {
+        title: "TỔNG QUAN",
+        items: [
+          { icon: Home, label: "Bảng điều khiển", href: "/instructor/dashboard" },
+          { icon: FileText, label: "Quy chế / Quy định", href: "/instructor/regulations" },
+        ],
+      },
+      {
+        title: "HỌC VỤ",
+        items: [
+          {
+            icon: Calendar, label: "Thời khóa biểu", href: "/instructor/schedule", expandable: true,
+            subItems: [
+              { label: "TKB theo tuần", href: "/instructor/schedule/weekly" },
+              { label: "TKB theo học kỳ", href: "/instructor/schedule/semester" },
+            ],
+          },
+          { icon: Building2, label: "Khoa học phụ trách", href: "/instructor/departments" },
+          { icon: BarChart3, label: "Bài giảng & Giáo trình", href: "/instructor/materials" },
+          { icon: FileCheck, label: "Đề thi", href: "/instructor/exams" },
+          { icon: Notebook, label: "Điểm số", href: "/instructor/grades" },
+        ],
+      },
+      {
+        title: "HỆ THỐNG",
+        items: [
+          { icon: Users, label: "Hồ sơ cá nhân", href: "/instructor/profile" },
+          { icon: Bell, label: "Thông báo", href: "/instructor/notification" },
+        ],
+      },
+    ]
   }
 
-  const toggleSection = (section: string) => {
-    if (isCollapsed) return
-    setExpandedSection(expandedSection === section ? null : section)
-  }
-
-  // Auto expand section when current path is active - FIX: use useEffect
-  useEffect(() => {
-    if (activePage?.startsWith("/student/schedule")) {
-      setExpandedSection("1-2") // Index of "Thời khóa biểu" in menuSections
-    }
-  }, [activePage])
-
-  const menuSections = [
+  return [
     {
       title: "TỔNG QUAN",
       items: [
@@ -98,10 +99,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
         { icon: BookOpen, label: "Khóa học", href: "/courses" },
         { icon: Building2, label: "Phòng chức năng", href: "/student/departments" },
         {
-          icon: Calendar,
-          label: "Thời khóa biểu",
-          href: "/schedule",
-          expandable: true,
+          icon: Calendar, label: "Thời khóa biểu", href: "/schedule", expandable: true,
           subItems: [
             { label: "TKB theo tuần", href: "/student/schedule/weekly" },
             { label: "TKB theo học kỳ", href: "/student/schedule/semester" },
@@ -122,6 +120,50 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       ],
     },
   ]
+}
+
+export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const dispatch = useAppDispatch()
+  const { user } = useAppSelector((s) => s.auth)
+
+  const resolvedVariant: Variant =
+    variant || ((user?.role || "").toLowerCase().includes("instructor") || (user?.role || "") === "giang_vien" ? "instructor" : "student")
+
+  const sections = getMenuSections(resolvedVariant)
+
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [openPopover, setOpenPopover] = useState<string | null>(null)
+
+  const activePage = pathname || currentPath || "/"
+
+  // Auto expand theo route
+  useEffect(() => {
+    if (resolvedVariant === "instructor" && activePage?.startsWith("/instructor/schedule")) {
+      setExpandedSection("1-0")
+    }
+    if (resolvedVariant === "student" && (activePage?.startsWith("/student/schedule") || activePage?.startsWith("/schedule"))) {
+      setExpandedSection("1-2")
+    }
+  }, [activePage, resolvedVariant])
+
+  const toggleSection = (section: string) => {
+    if (isCollapsed) return
+    setExpandedSection(expandedSection === section ? null : section)
+  }
+
+  const onLogout = async () => {
+    try {
+      dispatch(logout())
+      router.push('/login')
+      try {
+        await logoutApi()
+      } catch {}
+    } catch {
+      router.push('/login')
+    }
+  }
 
   return (
     <>
@@ -130,10 +172,8 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       <aside
         className={cn(
           "fixed left-0 top-0 z-50 h-screen bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
-          // Desktop behavior
           "lg:z-40",
           isCollapsed ? "lg:w-20" : "lg:w-64",
-          // Mobile behavior
           "w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
@@ -155,9 +195,9 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
             )}>
               <div className={cn(
                 "flex items-center justify-center transition-all duration-200",
-                "h-8 w-8", // Mobile size
-                "lg:h-10 lg:w-10", // Desktop normal size
-                isCollapsed && "lg:h-12 lg:w-12" // Desktop collapsed size
+                "h-8 w-8",
+                "lg:h-10 lg:w-10",
+                isCollapsed && "lg:h-12 lg:w-12"
               )}>
                 <img
                   src="/logo-siu.webp"
@@ -186,7 +226,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
           {/* Navigation */}
           <TooltipProvider delayDuration={300}>
             <nav className="flex-1 overflow-y-auto p-2">
-              {menuSections.map((section, sectionIndex) => (
+              {sections.map((section, sectionIndex) => (
                 <div key={sectionIndex} className="mb-4">
                   {sectionIndex > 0 && (
                     <hr className="my-3 border-gray-300" />
@@ -365,7 +405,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
               ) : null}
               
               {/* Mobile and desktop expanded view */}
-              <div className={cn(isCollapsed && "lg:hidden")}>
+              <div className={cn(isCollapsed && "lg:hidden")}> 
                 <Button variant="ghost" className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-100 cursor-pointer">
                   <HelpCircle className="h-5 w-5 flex-shrink-0" />
                   <span className="text-sm">Trợ giúp</span>
@@ -386,3 +426,5 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
     </>
   )
 }
+
+
