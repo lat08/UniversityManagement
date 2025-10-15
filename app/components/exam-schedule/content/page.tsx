@@ -24,7 +24,7 @@ export function ExamScheduleContent() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Lịch thi</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Lịch thi</h1>
         <p className="text-gray-500">Hiển thị đầy đủ lịch thi học kỳ theo kế hoạch đào tạo</p>
       </div>
 
