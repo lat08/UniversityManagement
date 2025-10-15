@@ -109,7 +109,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
         },
         { icon: FileCheck, label: "Lịch thi", href: "/exams" },
         { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
-        { icon: Notebook, label: "Tài liệu", href: "/documents" },
+        { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
         { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
         { icon: GraduationCap, label: "Xét học bổng", href: "/scholarships" },
       ],
@@ -118,7 +118,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, c
       title: "HỆ THỐNG",
       items: [
         { icon: Users, label: "Hồ sơ cá nhân", href: "/profile" },
-        { icon: Bell, label: "Thông báo", href: "student/notification" },
+        { icon: Bell, label: "Thông báo", href: "/student/notification" },
       ],
     },
   ]
