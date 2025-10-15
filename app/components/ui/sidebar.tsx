@@ -90,7 +90,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
       title: "TỔNG QUAN",
       items: [
         { icon: Home, label: "Bảng điều khiển", href: "/student/dashboard" },
-        { icon: FileText, label: "Quy chế / Quy định", href: "/regulations" },
+        { icon: FileText, label: "Quy chế / Quy định", href: "/student/regulations" },
       ],
     },
     {
