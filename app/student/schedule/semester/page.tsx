@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Sidebar } from "@/app/components/ui/sidebar"
-import { Header } from "@/app/components/header/header"
-import { cn } from "@/lib/utils/utils"
 import { ChevronDown } from "lucide-react"
-import RequireAuth from "@/app/components/auth/RequireAuth"
+import { cn } from "@/lib/utils/utils"
 
 // Dữ liệu mẫu cho thời khóa biểu theo học kỳ
 interface SemesterCourse {
@@ -208,13 +205,10 @@ const sampleCourses: SemesterCourse[] = [
 ]
 
 export default function SemesterSchedulePage() {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
   const [selectedView, setSelectedView] = useState("Thời khóa biểu cá nhân")
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
-  const currentPath = "/student/schedule/semester"
 
   const semesters = [
     "Học kỳ 1 - Năm học 2025-2026",
@@ -242,27 +236,7 @@ export default function SemesterSchedulePage() {
   }, [])
 
   return (
-    <RequireAuth>
-      <div className="flex h-screen overflow-hidden bg-gray-50">
-        <Sidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        isMobileOpen={isMobileSidebarOpen}
-        onMobileToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-        currentPath={currentPath}
-      />
-
-      <div
-        className={cn(
-          "flex flex-1 flex-col transition-all duration-300",
-          "ml-0 lg:ml-16",
-          !isSidebarCollapsed && "lg:ml-64",
-        )}
-      >
-        <Header onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
-
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="mx-auto max-w-[1600px]">
+    <div className="mx-auto max-w-[1600px]">
             {/* Header */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900">Thời khóa biểu theo học kỳ</h1>
@@ -431,11 +405,7 @@ export default function SemesterSchedulePage() {
                   </tbody>
                 </table>
               </div>
-            </div>
           </div>
-        </main>
-      </div>
-      </div>
-    </RequireAuth>
+    </div>
   )
 }

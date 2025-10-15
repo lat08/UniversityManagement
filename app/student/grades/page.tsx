@@ -1,11 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Sidebar } from "@/app/components/ui/sidebar";
-import { Header } from "@/app/components/header/header";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
-import RequireAuth from "@/app/components/auth/RequireAuth";
 import { 
   Printer, 
   TrendingUp, 
@@ -29,19 +26,9 @@ type Course = {
 };
 
 export default function ScoresPage() {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-
-  const handleMobileMenuToggle = () => {
-    setIsMobileSidebarOpen(!isMobileSidebarOpen);
-  };
-
-  const handleSidebarToggle = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
 
   // Hàm tính GPA từ điểm 10
   const calculateGPA = (score10: number): number => {
@@ -436,20 +423,7 @@ export default function ScoresPage() {
     : semesterData.filter(s => s.id === selectedSemester);
 
   return (
-    <RequireAuth>
-      <div className="min-h-screen bg-gray-50">
-        <Sidebar 
-        isCollapsed={isSidebarCollapsed}
-        onToggle={handleSidebarToggle}
-        isMobileOpen={isMobileSidebarOpen}
-        onMobileToggle={handleMobileMenuToggle}
-        currentPath="/grades"
-      />
-      
-      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
-        <Header onMobileMenuToggle={handleMobileMenuToggle} />
-        
-        <div className="max-w-7xl mx-auto p-4 lg:p-6 space-y-6">
+    <div className="space-y-6">
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Điểm số</h1>
@@ -656,8 +630,6 @@ export default function ScoresPage() {
               );
             })}
           </div>
-        </div>
-      </div>
 
       {/* Modal chi tiết điểm */}
       {showDetailModal && selectedCourse && courseDetails[selectedCourse] && (
@@ -725,7 +697,6 @@ export default function ScoresPage() {
           </div>
         </div>
       )}
-      </div>
-    </RequireAuth>
+    </div>
   );
-};
+}
