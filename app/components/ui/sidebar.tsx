@@ -97,7 +97,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
     {
       title: "HỌC VỤ",
       items: [
-        { icon: BookOpen, label: "Khóa học", href: "/courses" },
+        { icon: BookOpen, label: "Khóa học", href: "/student/course" },
         { icon: Building2, label: "Phòng chức năng", href: "/student/departments" },
         {
           icon: Calendar, label: "Thời khóa biểu", href: "/schedule", expandable: true,
