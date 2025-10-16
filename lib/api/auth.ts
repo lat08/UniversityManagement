@@ -10,7 +10,7 @@ export type UserInfo = {
   username: string;
   email: string;
   fullName: string;
-  roles: string[];
+  roleName: string;
   permissions: string[];
 };
 
