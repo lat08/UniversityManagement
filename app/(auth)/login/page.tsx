@@ -38,7 +38,7 @@ export default function LoginPage() {
             id: response.data.userInfo.userId,
             email: response.data.userInfo.email,
             name: response.data.userInfo.fullName || response.data.userInfo.username,
-            role: response.data.userInfo.roles[0] || 'user'
+            role: response.data.userInfo.roleName || 'user'
           }
         }));
         
@@ -48,7 +48,7 @@ export default function LoginPage() {
         });
         
         // Điều hướng dựa trên role
-        const userRole = response.data.userInfo.roles[0];
+        const userRole = response.data.userInfo.roleName;
         navigateToDashboard(userRole);
       } else {
         toast.error('Đăng nhập thất bại. Vui lòng thử lại!');
