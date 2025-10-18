@@ -11,8 +11,8 @@ export default function Loading() {
     const generatedStars = Array.from({ length: 90 }, () => ({
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
-      delay: Math.random() * 3,
-      duration: 1 + Math.random() * 2,
+      delay: Math.random() * 0.5,
+      duration: 0.5 + Math.random() * 0.5,
     }));
     setStars(generatedStars);
   }, []);
@@ -23,7 +23,7 @@ export default function Loading() {
       {stars.map((star, index) => (
         <div
           key={index}
-          className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+          className="absolute w-1 h-1 bg-white rounded-full animate-twinkle blur-[0.5px]"
           style={{
             top: star.top,
             left: star.left,
@@ -34,7 +34,7 @@ export default function Loading() {
       ))}
 
       {/* Main content container */}
-      <div className="flex items-center gap-12 z-10">
+      <div className="flex items-center gap-12 z-10 opacity-30">
         {/* Logo - Fade in + Scale */}
         <div className="animate-logoFadeIn">
           <Image
@@ -56,7 +56,7 @@ export default function Loading() {
           
           {/* Animated fill text */}
           <div className="absolute inset-0 overflow-hidden animate-textFill">
-            <div className="text-9xl font-black bg-gradient-to-r from-[#E5A033] via-[#DC3545] to-[#0099FF] bg-clip-text text-transparent drop-shadow-lg">
+            <div className="text-9xl font-black bg-gradient-to-r from-[#FDB913] via-[#DC3545] to-[#0099FF] bg-clip-text text-transparent drop-shadow-lg">
               SIU
             </div>
           </div>
@@ -100,15 +100,14 @@ export default function Loading() {
         }
 
         .animate-logoFadeIn {
-          animation: logoFadeIn 1.5s ease-out forwards;
+          animation: logoFadeIn 0.4s ease-out forwards;
         }
 
         .animate-textFill {
-          animation: textFill 2s ease-in-out 0.5s forwards;
+          animation: textFill 0.3s ease-out forwards;
           clip-path: inset(0 100% 0 0);
         }
       `}</style>
     </div>
   );
 }
-

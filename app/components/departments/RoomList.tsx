@@ -1,12 +1,11 @@
 'use client';
 
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { setSelectedRoom } from '@/lib/store/features/roomBookingSlice';
+import { useRoomBookingStore } from '@/lib/store/roomBookingStore';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
 import { Users, MapPin, Monitor, Check } from 'lucide-react';
-import type { Room } from '@/lib/store/features/roomBookingSlice';
+import type { Room } from '@/lib/store/roomBookingStore';
 
 interface RoomListProps {
   rooms: Room[];
@@ -14,11 +13,11 @@ interface RoomListProps {
 }
 
 export default function RoomList({ rooms, isLoading }: RoomListProps) {
-  const dispatch = useAppDispatch();
-  const { selectedRoom } = useAppSelector((state) => state.roomBooking);
+  const selectedRoom = useRoomBookingStore((state) => state.selectedRoom);
+  const setSelectedRoom = useRoomBookingStore((state) => state.setSelectedRoom);
 
   const handleRoomSelect = (room: Room) => {
-    dispatch(setSelectedRoom(room.id === selectedRoom?.id ? null : room));
+    setSelectedRoom(room.id === selectedRoom?.id ? null : room);
   };
 
   const getStatusColor = (status: Room['status']) => {

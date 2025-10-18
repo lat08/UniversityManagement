@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { setSelectedDate, setSelectedTimeSlot, clearSelection } from '@/lib/store/features/roomBookingSlice';
+import { useRoomBookingStore } from '@/lib/store/roomBookingStore';
 import { Button } from '../ui/button';
 import { Calendar, Clock, Users, Search } from 'lucide-react';
 import { vi } from 'date-fns/locale';
@@ -18,19 +17,22 @@ const timeSlots = [
 ];
 
 export default function BookingForm() {
-  const dispatch = useAppDispatch();
-  const { selectedDate, selectedTimeSlot, selectedRoom, isLoading } = useAppSelector(
-    (state) => state.roomBooking
-  );
+  const selectedDate = useRoomBookingStore((state) => state.selectedDate);
+  const selectedTimeSlot = useRoomBookingStore((state) => state.selectedTimeSlot);
+  const selectedRoom = useRoomBookingStore((state) => state.selectedRoom);
+  const isLoading = useRoomBookingStore((state) => state.isLoading);
+  const setSelectedDate = useRoomBookingStore((state) => state.setSelectedDate);
+  const setSelectedTimeSlot = useRoomBookingStore((state) => state.setSelectedTimeSlot);
+  
   const [studentCount, setStudentCount] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleDateSelect = (date: Date | undefined) => {
-    dispatch(setSelectedDate(date ? date.toISOString() : null));
+    setSelectedDate(date ? date.toISOString() : null);
   };
 
   const handleTimeSlotSelect = (timeSlotId: string) => {
-    dispatch(setSelectedTimeSlot(timeSlotId));
+    setSelectedTimeSlot(timeSlotId);
   };
 
   const handleFindRoom = () => {

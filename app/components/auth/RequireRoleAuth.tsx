@@ -1,6 +1,6 @@
 'use client';
 
-import { useAppSelector } from '@/lib/store/hooks';
+import { useAuthStore } from '@/lib/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import AuthErrorBoundary from './AuthErrorBoundary';
@@ -18,7 +18,7 @@ interface RequireRoleAuthProps {
 
 // Custom hook để tái sử dụng logic auth guard
 const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string = '/login') => {
-  const { isAuthenticated, accessToken, user } = useAppSelector(s => s.auth);
+  const { isAuthenticated, accessToken, user } = useAuthStore();
   const router = useRouter();
 
   // Memoize auth state để tránh re-render không cần thiết

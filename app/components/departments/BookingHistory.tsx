@@ -8,7 +8,7 @@ import { Calendar, Clock, Users, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import toast from 'react-hot-toast';
-import type { UserBooking } from '@/lib/store/features/roomBookingSlice';
+import type { UserBooking } from '@/lib/store/roomBookingStore';
 
 interface BookingHistoryProps {
   bookings: UserBooking[];

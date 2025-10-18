@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppSelector } from '@/lib/store/hooks';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function HomePage() {
   const router = useRouter();
-  const isAuthenticated = useAppSelector(s => s.auth.isAuthenticated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {
     // Kiểm tra token và redirect phù hợp

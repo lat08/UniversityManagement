@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { resetPasswordApi, type ResetPasswordDto } from '@/lib/api/auth';
 import { useAuthFlow } from '@/lib/hooks/useAuthFlow';
@@ -12,11 +14,33 @@ import { AuthButton } from '@/app/components/auth/AuthButton';
 import toast from 'react-hot-toast';
 import { TEXT } from './constants';
 
+const resetPasswordSchema = z.object({
+  password: z
+    .string()
+    .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
+    .max(100, 'Mật khẩu không được quá 100 ký tự'),
+  confirmPassword: z
+    .string()
+    .min(1, 'Vui lòng xác nhận mật khẩu'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Mật khẩu xác nhận không khớp',
+  path: ['confirmPassword'],
+});
+
+type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+
 function ResetPasswordContent() {
   const router = useRouter();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const { forgotPasswordFlow, clearFlow } = useAuthFlow();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: 'onChange',
+  });
 
   const { mutate: resetPassword, isPending } = useMutation({
     mutationFn: resetPasswordApi,
@@ -25,7 +49,6 @@ function ResetPasswordContent() {
         toast.success(response.message || 'Đặt lại mật khẩu thành công!', {
           duration: 4000,
         });
-        // Xóa forgot password flow và chuyển về trang login
         clearFlow();
         router.push('/login');
       } else {
@@ -43,29 +66,7 @@ function ResetPasswordContent() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!password) {
-      toast.error('Vui lòng nhập mật khẩu mới!');
-      return;
-    }
-
-    if (!confirmPassword) {
-      toast.error('Vui lòng xác nhận mật khẩu!');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp!');
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('Mật khẩu phải có ít nhất 6 ký tự!');
-      return;
-    }
-
+  const onSubmit = (data: ResetPasswordFormData) => {
     if (!forgotPasswordFlow.passwordResetToken) {
       toast.error('Thông tin không hợp lệ. Vui lòng thử lại từ đầu.');
       return;
@@ -73,7 +74,7 @@ function ResetPasswordContent() {
 
     const resetPasswordData: ResetPasswordDto = {
       passwordResetToken: forgotPasswordFlow.passwordResetToken,
-      newPassword: password,
+      newPassword: data.password,
     };
     
     resetPassword(resetPasswordData);
@@ -88,29 +89,28 @@ function ResetPasswordContent() {
       backText="Quay lại"
       formWidth="w-[420px]"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <AuthInput
           label={TEXT.newPasswordLabel}
           type="password"
-          value={password}
-          onChange={setPassword}
           placeholder={TEXT.placeholder}
           showPasswordToggle={true}
-          required
+          error={errors.password?.message}
+          {...register('password')}
         />
 
         <AuthInput
           label={TEXT.confirmPasswordLabel}
           type="password"
-          value={confirmPassword}
-          onChange={setConfirmPassword}
           placeholder={TEXT.placeholder}
           showPasswordToggle={true}
-          required
+          error={errors.confirmPassword?.message}
+          {...register('confirmPassword')}
         />
 
         <AuthButton
           type="submit"
+          disabled={!isValid || isPending}
           loading={isPending}
           loadingText="Đang xử lý..."
         >

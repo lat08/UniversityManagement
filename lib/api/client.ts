@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { store } from '../store';
-import { refreshTokenSuccess, logout } from '../store/features/authSlice';
+import { useAuthStore } from '../store/authStore';
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:5001/edu/api',
@@ -13,8 +12,7 @@ export const api = axios.create({
 
 // Request interceptor để thêm token
 api.interceptors.request.use((config) => {
-  const state = store.getState();
-  const token = state.auth.accessToken;
+  const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -71,8 +69,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const state = store.getState();
-        const refreshToken = state.auth.refreshToken;
+        const refreshToken = useAuthStore.getState().refreshToken;
         
         if (!refreshToken) {
           throw new Error('No refresh token available');
@@ -94,11 +91,11 @@ api.interceptors.response.use(
         const { accessToken, refreshToken: newRefreshToken, expiresAt } = response.data.data;
         
         // Cập nhật store với token mới
-        store.dispatch(refreshTokenSuccess({
+        useAuthStore.getState().refreshTokenSuccess({
           accessToken,
           refreshToken: newRefreshToken,
           expiresAt
-        }));
+        });
 
         // Cập nhật header cho request gốc
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -110,7 +107,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         
         // Nếu refresh thất bại, logout user
-        store.dispatch(logout());
+        useAuthStore.getState().logout();
         
         // Chỉ redirect về login nếu không phải đang ở trang login
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {

@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { sendPasswordResetOtpApi, type ForgotPasswordDto } from '@/lib/api/auth';
 import { useAuthFlow } from '@/lib/hooks/useAuthFlow';
@@ -11,20 +13,36 @@ import { AuthButton } from '@/app/components/auth/AuthButton';
 import toast from 'react-hot-toast';
 import { TEXT } from './constants';
 
+const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email không được để trống')
+    .email('Email không hợp lệ'),
+});
+
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
   const { setEmail: setFlowEmail } = useAuthFlow();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: 'onChange',
+  });
 
   const { mutate: sendOtp, isPending } = useMutation({
     mutationFn: sendPasswordResetOtpApi,
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       if (response.success) {
         toast.success(response.message || 'Mã OTP đã được gửi đến email của bạn!', {
           duration: 4000,
         });
-        // Lưu email vào Redux store và chuyển đến trang verify OTP
-        setFlowEmail(email);
+        setFlowEmail(variables.email);
         router.push('/verify-otp');
       } else {
         toast.error('Gửi OTP thất bại. Vui lòng thử lại!');
@@ -41,15 +59,8 @@ export default function ForgotPasswordPage() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email) {
-      toast.error('Vui lòng nhập địa chỉ email!');
-      return;
-    }
-
-    const forgotPasswordData: ForgotPasswordDto = { email };
+  const onSubmit = (data: ForgotPasswordFormData) => {
+    const forgotPasswordData: ForgotPasswordDto = { email: data.email };
     sendOtp(forgotPasswordData);
   };
 
@@ -65,18 +76,18 @@ export default function ForgotPasswordPage() {
         {TEXT.description}
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <AuthInput
           label={TEXT.emailLabel}
           type="email"
-          value={email}
-          onChange={setEmail}
           placeholder={TEXT.emailPlaceholder}
-          required
+          error={errors.email?.message}
+          {...register('email')}
         />
 
         <AuthButton
           type="submit"
+          disabled={!isValid || isPending}
           loading={isPending}
           loadingText="Đang gửi..."
         >

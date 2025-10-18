@@ -1,7 +1,5 @@
 'use client';
 
-import { Provider } from 'react-redux';
-import { store } from '@/lib/store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
@@ -20,35 +18,33 @@ export default function AppProviders({ children }: { children: React.ReactNode }
   }));
 
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={client}>
-        {children}
-        <Toaster 
-          position="top-right"
-          toastOptions={{
+    <QueryClientProvider client={client}>
+      {children}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4ade80',
+              secondary: '#fff',
+            },
+          },
+          error: {
             duration: 4000,
-            style: {
-              background: '#363636',
-              color: '#fff',
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
             },
-            success: {
-              duration: 3000,
-              iconTheme: {
-                primary: '#4ade80',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              duration: 4000,
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </Provider>
+          },
+        }}
+      />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
