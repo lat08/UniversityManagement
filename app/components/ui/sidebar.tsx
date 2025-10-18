@@ -91,7 +91,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
       title: "TỔNG QUAN",
       items: [
         { icon: Home, label: "Bảng điều khiển", href: "/student/dashboard" },
-        { icon: FileText, label: "Quy chế / Quy định", href: "/regulations" },
+        { icon: FileText, label: "Quy chế / Quy định", href: "/student/regulations" },
       ],
     },
     {
@@ -110,7 +110,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
         { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
         { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
         { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
-        { icon: GraduationCap, label: "Xét học bổng", href: "/scholarships" },
+        { icon: GraduationCap, label: "Xét học bổng", href: "/student/scholarships" },
       ],
     },
     {
