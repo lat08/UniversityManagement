@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,20 +26,25 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const { setEmail: setFlowEmail } = useAuthFlow();
+  const [isSendSuccess, setIsSendSuccess] = useState(false);
   
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
+    clearErrors,
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    mode: 'onChange',
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   });
 
   const { mutate: sendOtp, isPending } = useMutation({
     mutationFn: sendPasswordResetOtpApi,
     onSuccess: (response, variables) => {
       if (response.success) {
+        setIsSendSuccess(true);
+        
         toast.success(response.message || 'Mã OTP đã được gửi đến email của bạn!', {
           duration: 4000,
         });
@@ -48,7 +54,7 @@ export default function ForgotPasswordPage() {
         toast.error('Gửi OTP thất bại. Vui lòng thử lại!');
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string, errors?: string[] } } }) => {
       const serverMessage = error?.response?.data?.message || 
                            error?.response?.data?.errors?.join(', ') ||
                            error?.message || 
@@ -82,12 +88,14 @@ export default function ForgotPasswordPage() {
           type="email"
           placeholder={TEXT.emailPlaceholder}
           error={errors.email?.message}
-          {...register('email')}
+          {...register('email', {
+            onChange: () => clearErrors('email')
+          })}
         />
 
         <AuthButton
           type="submit"
-          disabled={!isValid || isPending}
+          disabled={isPending || isSendSuccess}
           loading={isPending}
           loadingText="Đang gửi..."
         >

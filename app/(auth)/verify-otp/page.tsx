@@ -16,6 +16,7 @@ import { useCountdown } from './libs/useCountdown';
 function OtpVerifyContent() {
   const router = useRouter();
   const [code, setCode] = useState('');
+  const [isVerifySuccess, setIsVerifySuccess] = useState(false);
   const { seconds, reset, finished } = useCountdown(RESEND_SECONDS);
   const { forgotPasswordFlow, setResetToken } = useAuthFlow();
 
@@ -31,7 +32,7 @@ function OtpVerifyContent() {
         toast.error('Gửi lại OTP thất bại. Vui lòng thử lại!');
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string, errors?: string[] } } }) => {
       const serverMessage = error?.response?.data?.message || 
                            error?.response?.data?.errors?.join(', ') ||
                            error?.message || 
@@ -44,6 +45,8 @@ function OtpVerifyContent() {
     mutationFn: verifyOtpApi,
     onSuccess: (response) => {
       if (response.success && response.data.passwordResetToken) {
+        setIsVerifySuccess(true);
+        
         toast.success('Xác thực OTP thành công!', {
           duration: 3000,
         });
@@ -54,7 +57,7 @@ function OtpVerifyContent() {
         toast.error('Xác thực OTP thất bại. Vui lòng thử lại!');
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string, errors?: string[] } } }) => {
       const serverMessage = error?.response?.data?.message || 
                            error?.response?.data?.errors?.join(', ') ||
                            error?.message || 
@@ -159,6 +162,7 @@ function OtpVerifyContent() {
 
         <AuthButton 
           type="submit"
+          disabled={isVerifying || isVerifySuccess}
           loading={isVerifying}
           loadingText="Đang xác thực..."
         >

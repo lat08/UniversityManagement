@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { loginApi } from '@/lib/api/auth';
 import { useRoleNavigation } from '@/lib/hooks/useRoleNavigation';
@@ -30,22 +30,26 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const loginSuccess = useAuthStore((state) => state.loginSuccess);
-  const router = useRouter();
   const { navigateToDashboard } = useRoleNavigation();
+  const [isLoginSuccess, setIsLoginSuccess] = useState(false);
   
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
+    clearErrors,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    mode: 'onChange', // Validate khi user nhập
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   });
 
   const { mutate: login, isPending } = useMutation({
     mutationFn: loginApi,
     onSuccess: (response) => {
       if (response.success) {
+        setIsLoginSuccess(true);
+        
         // Lưu token và user info vào Zustand store
         loginSuccess({ 
           accessToken: response.data.accessToken,
@@ -71,7 +75,7 @@ export default function LoginPage() {
         toast.error('Đăng nhập thất bại. Vui lòng thử lại!');
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string, errors?: string[] } } }) => {
       // Lấy thông báo lỗi từ server response
       const serverMessage = error?.response?.data?.message || 
                            error?.response?.data?.errors?.join(', ') ||
@@ -98,7 +102,9 @@ export default function LoginPage() {
           type="email"
           placeholder="example@email.com"
           error={errors.email?.message}
-          {...register('email')}
+          {...register('email', {
+            onChange: () => clearErrors('email')
+          })}
         />
 
         <AuthInput
@@ -107,7 +113,9 @@ export default function LoginPage() {
           placeholder="Mật khẩu (ít nhất 6 ký tự)"
           showPasswordToggle={true}
           error={errors.password?.message}
-          {...register('password')}
+          {...register('password', {
+            onChange: () => clearErrors('password')
+          })}
         />
 
         {/* Quên mật khẩu */}
@@ -122,7 +130,7 @@ export default function LoginPage() {
 
         <AuthButton
           type="submit"
-          disabled={!isValid || isPending}
+          disabled={isPending || isLoginSuccess}
           loading={isPending}
           loadingText="Đang đăng nhập..."
         >

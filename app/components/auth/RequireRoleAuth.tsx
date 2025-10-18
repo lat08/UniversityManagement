@@ -4,6 +4,7 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import AuthErrorBoundary from './AuthErrorBoundary';
+import AuthLoading from './AuthLoading';
 
 type UserRole = 'Student' | 'Instructor' | 'Admin';
 
@@ -68,13 +69,13 @@ export function RequireRoleAuth({
   }, []);
 
   if (!isMounted) {
-    return null;
+    return <AuthLoading />;
   }
 
-  // Nếu không có auth hoặc không đủ quyền, trả về null
+  // Nếu không có auth hoặc không đủ quyền, hiển thị loading
   // useEffect trong useAuthGuard sẽ tự động redirect
   if (!hasValidToken || !isAuthorized) {
-    return null;
+    return <AuthLoading />;
   }
 
   return (

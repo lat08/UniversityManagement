@@ -3,19 +3,21 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
+import { getDashboardRoute } from '@/lib/utils/navigation';
 
 export default function HomePage() {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
-    // Kiểm tra token và redirect phù hợp
-    if (isAuthenticated) {
-      router.replace('/student/dashboard');
+    if (isAuthenticated && user?.role) {
+      // Redirect dựa trên role thực tế
+      const dashboardRoute = getDashboardRoute(user.role);
+      router.replace(dashboardRoute);
     } else {
       router.replace('/login');
     }
-  }, [router, isAuthenticated]);
+  }, [router, isAuthenticated, user?.role]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

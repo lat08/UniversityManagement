@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,20 +33,25 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 function ResetPasswordContent() {
   const router = useRouter();
   const { forgotPasswordFlow, clearFlow } = useAuthFlow();
+  const [isResetSuccess, setIsResetSuccess] = useState(false);
   
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
+    clearErrors,
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
-    mode: 'onChange',
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   });
 
   const { mutate: resetPassword, isPending } = useMutation({
     mutationFn: resetPasswordApi,
     onSuccess: (response) => {
       if (response.success) {
+        setIsResetSuccess(true);
+        
         toast.success(response.message || 'Đặt lại mật khẩu thành công!', {
           duration: 4000,
         });
@@ -55,7 +61,7 @@ function ResetPasswordContent() {
         toast.error('Đặt lại mật khẩu thất bại. Vui lòng thử lại!');
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string, errors?: string[] } } }) => {
       const serverMessage = error?.response?.data?.message || 
                            error?.response?.data?.errors?.join(', ') ||
                            error?.message || 
@@ -96,7 +102,9 @@ function ResetPasswordContent() {
           placeholder={TEXT.placeholder}
           showPasswordToggle={true}
           error={errors.password?.message}
-          {...register('password')}
+          {...register('password', {
+            onChange: () => clearErrors('password')
+          })}
         />
 
         <AuthInput
@@ -105,12 +113,14 @@ function ResetPasswordContent() {
           placeholder={TEXT.placeholder}
           showPasswordToggle={true}
           error={errors.confirmPassword?.message}
-          {...register('confirmPassword')}
+          {...register('confirmPassword', {
+            onChange: () => clearErrors('confirmPassword')
+          })}
         />
 
         <AuthButton
           type="submit"
-          disabled={!isValid || isPending}
+          disabled={isPending || isResetSuccess}
           loading={isPending}
           loadingText="Đang xử lý..."
         >
