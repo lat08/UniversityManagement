@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { logout } from "@/lib/store/features/authSlice"
+import { useAuthStore } from "@/lib/store/authStore"
 import { logoutApi } from "@/lib/api/auth"
 import {
   ChevronLeft,
@@ -126,8 +125,8 @@ function getMenuSections(variant: Variant): MenuSection[] {
 export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const dispatch = useAppDispatch()
-  const { user } = useAppSelector((s) => s.auth)
+  const user = useAuthStore((state) => state.user)
+  const logout = useAuthStore((state) => state.logout)
 
   const resolvedVariant: Variant =
     variant || ((user?.role || "").toLowerCase().includes("instructor") || (user?.role || "") === "giang_vien" ? "instructor" : "student")
@@ -156,7 +155,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
   const onLogout = async () => {
     try {
-      dispatch(logout())
+      logout()
       router.push('/login')
       try {
         await logoutApi()

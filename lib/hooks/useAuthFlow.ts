@@ -1,29 +1,14 @@
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { 
-  setForgotPasswordEmail, 
-  setPasswordResetToken,
-  clearForgotPasswordFlow 
-} from '../store/features/authSlice';
+import { useAuthStore } from '../store/authStore';
 
 /**
  * Hook quản lý flow quên mật khẩu
  * Flow: forgot-password -> verify-otp -> reset-password
  */
 export const useAuthFlow = () => {
-  const dispatch = useAppDispatch();
-  const { forgotPasswordFlow } = useAppSelector(state => state.auth);
-  
-  const setEmail = (email: string) => {
-    dispatch(setForgotPasswordEmail(email));
-  };
-  
-  const setResetToken = (token: string) => {
-    dispatch(setPasswordResetToken(token));
-  };
-  
-  const clearFlow = () => {
-    dispatch(clearForgotPasswordFlow());
-  };
+  const forgotPasswordFlow = useAuthStore((state) => state.forgotPasswordFlow);
+  const setEmail = useAuthStore((state) => state.setForgotPasswordEmail);
+  const setResetToken = useAuthStore((state) => state.setPasswordResetToken);
+  const clearFlow = useAuthStore((state) => state.clearForgotPasswordFlow);
   
   return { 
     forgotPasswordFlow, 

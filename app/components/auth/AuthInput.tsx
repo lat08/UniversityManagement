@@ -1,36 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 
 type AuthInputProps = {
   label: string;
   type?: 'text' | 'email' | 'password';
-  value: string;
-  onChange: (value: string) => void;
   placeholder: string;
-  required?: boolean;
   showPasswordToggle?: boolean;
   className?: string;
-  maxLength?: number;
-  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
-  pattern?: string;
   inputClassName?: string;
-  title?: string;
-};
+  error?: string;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
 
-export const AuthInput: React.FC<AuthInputProps> = ({
+export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({
   label,
   type = 'text',
-  value,
-  onChange,
   placeholder,
-  required = false,
   showPasswordToggle = false,
   className = '',
-  maxLength,
-  inputMode,
-  pattern,
-  inputClassName,
-  title
-}) => {
+  inputClassName = '',
+  error,
+  ...rest
+}, ref) => {
   const [showPassword, setShowPassword] = useState(false);
   
   const inputType = showPasswordToggle ? (showPassword ? 'text' : 'password') : type;
@@ -42,16 +31,11 @@ export const AuthInput: React.FC<AuthInputProps> = ({
       </label>
       <div className="relative">
         <input
+          ref={ref}
           type={inputType}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full py-3 border-2 border-[#CCCCCC] rounded-[12px] font-poppins text-[14px] text-[#333333] placeholder:text-[#999999] focus:outline-none focus:border-[#4E8EE1] transition-colors bg-white ${showPasswordToggle ? 'pl-4 pr-12' : 'px-4'} ${inputClassName ?? ''}`}
-          required={required}
-          maxLength={maxLength}
-          inputMode={inputMode}
-          pattern={pattern}
-          title={title}
+          className={`w-full py-3 border-2 rounded-[12px] font-poppins text-[14px] text-[#333333] placeholder:text-[#999999] focus:outline-none transition-colors bg-white ${showPasswordToggle ? 'pl-4 pr-12' : 'px-4'} ${error ? 'border-red-500 focus:border-red-600' : 'border-[#CCCCCC] focus:border-[#4E8EE1]'} ${inputClassName}`}
+          {...rest}
         />
         {showPasswordToggle && (
           <button
@@ -98,7 +82,14 @@ export const AuthInput: React.FC<AuthInputProps> = ({
           </button>
         )}
       </div>
+      {error && (
+        <p className="mt-1 text-sm text-red-600 font-poppins">
+          {error}
+        </p>
+      )}
     </div>
   );
-};
+});
+
+AuthInput.displayName = 'AuthInput';
 

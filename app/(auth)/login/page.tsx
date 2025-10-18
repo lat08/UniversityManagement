@@ -1,36 +1,53 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch } from '@/lib/store/hooks';
-import { loginSuccess } from '@/lib/store/features/authSlice';
-import { loginApi, type LoginDto } from '@/lib/api/auth';
-import { useDebounce } from '@/lib/hooks/useDebounce';
+import { useAuthStore } from '@/lib/store/authStore';
+import { loginApi } from '@/lib/api/auth';
 import { useRoleNavigation } from '@/lib/hooks/useRoleNavigation';
 import { AuthLayout } from '@/app/components/auth/AuthLayout';
 import { AuthInput } from '@/app/components/auth/AuthInput';
 import { AuthButton } from '@/app/components/auth/AuthButton';
 import toast from 'react-hot-toast';
 
+// Zod schema cho login form
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email không được để trống')
+    .email('Email không hợp lệ'),
+  password: z
+    .string()
+    .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
+    .max(100, 'Mật khẩu không được quá 100 ký tự'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
-  const dispatch = useAppDispatch();
+  const loginSuccess = useAuthStore((state) => state.loginSuccess);
   const router = useRouter();
   const { navigateToDashboard } = useRoleNavigation();
   
-  // Debounce email input để tránh validation liên tục
-  const debouncedEmail = useDebounce(email, 300);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange', // Validate khi user nhập
+  });
 
   const { mutate: login, isPending } = useMutation({
     mutationFn: loginApi,
     onSuccess: (response) => {
       if (response.success) {
-        // Lưu token và user info vào Redux store
-        dispatch(loginSuccess({ 
+        // Lưu token và user info vào Zustand store
+        loginSuccess({ 
           accessToken: response.data.accessToken,
           refreshToken: response.data.refreshToken,
           expiresAt: response.data.expiresAt,
@@ -40,7 +57,7 @@ export default function LoginPage() {
             name: response.data.userInfo.fullName || response.data.userInfo.username,
             role: response.data.userInfo.roleName || 'user'
           }
-        }));
+        });
         
         // Hiển thị thông báo thành công
         toast.success(response.message || 'Đăng nhập thành công!', {
@@ -66,47 +83,31 @@ export default function LoginPage() {
     },
   });
 
-  // Memoize validation logic
-  const isFormValid = useMemo(() => {
-    return debouncedEmail.length > 0 && password.length > 0;
-  }, [debouncedEmail, password]);
-
-  // Memoize submit handler
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!isFormValid) {
-      toast.error('Vui lòng nhập đầy đủ thông tin!');
-      return;
-    }
-
-    const loginData: LoginDto = { email: debouncedEmail, password };
-    login(loginData);
-  }, [isFormValid, debouncedEmail, password, login]);
+  const onSubmit = (data: LoginFormData) => {
+    login(data);
+  };
 
   return (
     <AuthLayout
       title="Đăng nhập"
       illustration="/login-character.png"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <AuthInput
           label="Nhập địa chỉ Email"
           type="email"
-          value={email}
-          onChange={setEmail}
-          placeholder="Email"
-          required
+          placeholder="example@email.com"
+          error={errors.email?.message}
+          {...register('email')}
         />
 
         <AuthInput
           label="Nhập mật khẩu"
           type="password"
-          value={password}
-          onChange={setPassword}
-          placeholder="Mật khẩu"
+          placeholder="Mật khẩu (ít nhất 6 ký tự)"
           showPasswordToggle={true}
-          required
+          error={errors.password?.message}
+          {...register('password')}
         />
 
         {/* Quên mật khẩu */}
@@ -121,6 +122,7 @@ export default function LoginPage() {
 
         <AuthButton
           type="submit"
+          disabled={!isValid || isPending}
           loading={isPending}
           loadingText="Đang đăng nhập..."
         >

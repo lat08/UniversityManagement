@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppSelector } from '@/lib/store/hooks';
+import { useRoomBookingStore } from '@/lib/store/roomBookingStore';
 import { useCreateBooking } from '@/lib/hooks/useRoomBooking';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -25,9 +25,9 @@ const timeSlots = [
 ];
 
 export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
-  const { selectedRoom, selectedDate, selectedTimeSlot } = useAppSelector(
-    (state) => state.roomBooking
-  );
+  const selectedRoom = useRoomBookingStore((state) => state.selectedRoom);
+  const selectedDate = useRoomBookingStore((state) => state.selectedDate);
+  const selectedTimeSlot = useRoomBookingStore((state) => state.selectedTimeSlot);
   const createBookingMutation = useCreateBooking();
   
   const [studentCount, setStudentCount] = useState<number>(30);

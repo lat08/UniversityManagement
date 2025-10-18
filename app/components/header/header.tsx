@@ -4,14 +4,14 @@ import { Menu } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
 import { Avatar, AvatarFallback } from "@/app/components/ui/avatar"
 import { NotificationPopup } from "@/app/components/notification/header-popup/content/page"
-import { useAppSelector } from "@/lib/store/hooks"
+import { useAuthStore } from "@/lib/store/authStore"
 
 interface HeaderProps {
   onMobileMenuToggle: () => void
 }
 
 export function Header({ onMobileMenuToggle }: HeaderProps) {
-  const { user } = useAppSelector((state) => state.auth)
+  const user = useAuthStore((state) => state.user)
 
   const displayName = user?.name || user?.email || "Name"
   const roleLabel = (() => {

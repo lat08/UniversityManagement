@@ -143,7 +143,7 @@ function OtpVerifyContent() {
             label={TEXT.label}
             type="text"
             value={code}
-            onChange={(val) => setCode(val.replace(/\D/g, '').slice(0, OTP_LENGTH))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH))}
             placeholder={TEXT.placeholder}
             required
             maxLength={OTP_LENGTH}

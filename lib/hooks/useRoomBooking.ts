@@ -1,18 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAppDispatch } from '../store/hooks';
-import { 
-  setRooms, 
-  setBookingSlots, 
-  setUserBookings, 
-  addUserBooking,
-  updateUserBooking,
-  removeUserBooking,
-  setLoading,
-  setError,
-  type Room,
-  type BookingSlot,
-  type UserBooking
-} from '../store/features/roomBookingSlice';
+import { useRoomBookingStore, type Room, type BookingSlot, type UserBooking } from '../store/roomBookingStore';
 
 // Mock data - sẽ thay thế bằng API calls thực tế
 const mockRooms: Room[] = [
@@ -68,14 +55,14 @@ export const roomBookingKeys = {
 
 // Hooks
 export const useRooms = () => {
-  const dispatch = useAppDispatch();
+  const setRooms = useRoomBookingStore((state) => state.setRooms);
   
   return useQuery({
     queryKey: roomBookingKeys.rooms(),
     queryFn: async (): Promise<Room[]> => {
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 500));
-      dispatch(setRooms(mockRooms));
+      setRooms(mockRooms);
       return mockRooms;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -83,7 +70,7 @@ export const useRooms = () => {
 };
 
 export const useBookingSlots = (date?: string) => {
-  const dispatch = useAppDispatch();
+  const setBookingSlots = useRoomBookingStore((state) => state.setBookingSlots);
   
   return useQuery({
     queryKey: roomBookingKeys.bookingSlots(date),
@@ -112,7 +99,7 @@ export const useBookingSlots = (date?: string) => {
           status: 'available'
         }
       ];
-      dispatch(setBookingSlots(mockSlots));
+      setBookingSlots(mockSlots);
       return mockSlots;
     },
     enabled: !!date,
@@ -121,14 +108,14 @@ export const useBookingSlots = (date?: string) => {
 };
 
 export const useUserBookings = () => {
-  const dispatch = useAppDispatch();
+  const setUserBookings = useRoomBookingStore((state) => state.setUserBookings);
   
   return useQuery({
     queryKey: roomBookingKeys.userBookings(),
     queryFn: async (): Promise<UserBooking[]> => {
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 400));
-      dispatch(setUserBookings(mockUserBookings));
+      setUserBookings(mockUserBookings);
       return mockUserBookings;
     },
     staleTime: 3 * 60 * 1000, // 3 minutes
@@ -138,11 +125,13 @@ export const useUserBookings = () => {
 // Mutations
 export const useCreateBooking = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
+  const setLoading = useRoomBookingStore((state) => state.setLoading);
+  const setError = useRoomBookingStore((state) => state.setError);
+  const addUserBooking = useRoomBookingStore((state) => state.addUserBooking);
 
   return useMutation({
     mutationFn: async (bookingData: Omit<UserBooking, 'id' | 'status'>) => {
-      dispatch(setLoading(true));
+      setLoading(true);
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
@@ -152,42 +141,44 @@ export const useCreateBooking = () => {
         status: 'confirmed'
       };
       
-      dispatch(addUserBooking(newBooking));
+      addUserBooking(newBooking);
       return newBooking;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.userBookings() });
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.bookingSlots() });
-      dispatch(setLoading(false));
+      setLoading(false);
     },
     onError: (error) => {
-      dispatch(setError(error.message));
-      dispatch(setLoading(false));
+      setError(error.message);
+      setLoading(false);
     },
   });
 };
 
 export const useCancelBooking = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
+  const setLoading = useRoomBookingStore((state) => state.setLoading);
+  const setError = useRoomBookingStore((state) => state.setError);
+  const removeUserBooking = useRoomBookingStore((state) => state.removeUserBooking);
 
   return useMutation({
     mutationFn: async (bookingId: string) => {
-      dispatch(setLoading(true));
+      setLoading(true);
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      dispatch(removeUserBooking(bookingId));
+      removeUserBooking(bookingId);
       return bookingId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.userBookings() });
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.bookingSlots() });
-      dispatch(setLoading(false));
+      setLoading(false);
     },
     onError: (error) => {
-      dispatch(setError(error.message));
-      dispatch(setLoading(false));
+      setError(error.message);
+      setLoading(false);
     },
   });
 };
