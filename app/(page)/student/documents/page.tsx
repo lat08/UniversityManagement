@@ -1,123 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Download, Eye, ChevronDown } from 'lucide-react';
+import { Download, Eye, ChevronDown } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
-
-interface Document {
-  id: string;
-  name: string;
-  size: string;
-  date: string;
-  type: 'pdf' | 'zip' | 'pptx';
-}
-
-interface DocumentSection {
-  title: string;
-  subtitle: string;
-  fileCount: number;
-  documents: Document[];
-}
-
-const documentSections: DocumentSection[] = [
-  {
-    title: 'Lập trình Web',
-    subtitle: 'CS301 - TS. Nguyễn Văn Bangkok',
-    fileCount: 3,
-    documents: [
-      {
-        id: '1',
-        name: 'Bài giảng bài 1 - Giới thiệu HTML/CSS',
-        size: '2.5 MB',
-        date: '01/02/2025',
-        type: 'pdf'
-      },
-      {
-        id: '2',
-        name: 'Bài tập thực hành JavaScript',
-        size: '1.8 MB',
-        date: '05/02/2025',
-        type: 'pdf'
-      },
-      {
-        id: '3',
-        name: 'Source code demo React',
-        size: '5.2 MB',
-        date: '08/02/2025',
-        type: 'zip'
-      }
-    ]
-  },
-  {
-    title: 'Cơ sở dữ liệu',
-    subtitle: 'CS202 - PGS. Trần Thị Canada',
-    fileCount: 2,
-    documents: [
-      {
-        id: '4',
-        name: 'Chương 1 - Mô hình quan hệ',
-        size: '3.1 MB',
-        date: '02/02/2025',
-        type: 'pdf'
-      },
-      {
-        id: '5',
-        name: 'Bài tập SQL cơ bản',
-        size: '1.2 MB',
-        date: '06/02/2025',
-        type: 'pdf'
-      }
-    ]
-  },
-  {
-    title: 'Mạng máy tính',
-    subtitle: 'CS304 - Tiến sĩ Vũ Domain',
-    fileCount: 2,
-    documents: [
-      {
-        id: '6',
-        name: 'Bài giảng - Mô hình OSI',
-        size: '4.2 MB',
-        date: '03/02/2025',
-        type: 'pptx'
-      },
-      {
-        id: '7',
-        name: 'Lab 1 - Cấu hình Router',
-        size: '2.9 MB',
-        date: '07/02/2025',
-        type: 'pdf'
-      }
-    ]
-  }
-];
-
-const getFileIcon = (type: string) => {
-  return <FileText className="w-8 h-8" style={{ color: '#4E8EE1' }} />;
-};
-
-const getFileTypeTag = (type: string) => {
-  const tagColors = {
-    'pdf': 'bg-red-50 text-red-600 border border-red-200',
-    'zip': 'bg-green-50 text-green-600 border border-green-200', 
-    'pptx': 'bg-orange-50 text-orange-600 border border-orange-200',
-    'docx': 'bg-blue-50 text-blue-600 border border-blue-200'
-  };
-  
-  const typeLabels = {
-    'pdf': 'PDF',
-    'zip': 'ZIP',
-    'pptx': 'PPTX',
-    'docx': 'WORD'
-  };
-  
-  return (
-    <span className={`inline-flex items-center px-1 py-0.5 rounded text-[10px] font-medium border ${tagColors[type as keyof typeof tagColors] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-      {typeLabels[type as keyof typeof typeLabels] || type.toUpperCase()}
-    </span>
-  );
-};
+import { documentSections } from './lib/data/documentData';
+import { getFileIcon, getFileTypeTag } from './lib/utils/fileUtils';
+import { Document, DocumentSection as DocumentSectionType } from './lib/types/types';
 
 const DocumentCard = ({ document }: { document: Document }) => {
   const handleView = () => {
@@ -171,7 +60,7 @@ const DocumentCard = ({ document }: { document: Document }) => {
   );
 };
 
-const DocumentSection = ({ section }: { section: DocumentSection }) => {
+const DocumentSection = ({ section }: { section: DocumentSectionType }) => {
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
       <div className="flex items-center justify-between mb-6">
@@ -186,7 +75,7 @@ const DocumentSection = ({ section }: { section: DocumentSection }) => {
         </span>
       </div>
       <div className="space-y-4">
-        {section.documents.map((document) => (
+        {section.documents.map((document: Document) => (
           <DocumentCard key={document.id} document={document} />
         ))}
       </div>

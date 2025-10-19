@@ -8,10 +8,10 @@ import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/store/authStore';
 import { loginApi } from '@/lib/api/auth';
-import { useRoleNavigation } from '@/lib/hooks/useRoleNavigation';
-import { AuthLayout } from '@/app/components/auth/AuthLayout';
-import { AuthInput } from '@/app/components/auth/AuthInput';
-import { AuthButton } from '@/app/components/auth/AuthButton';
+import { useRoleNavigation } from '../lib/hooks/useRoleNavigation';
+import { AuthLayout } from '../components/AuthLayout';
+import { AuthInput } from '../components/AuthInput';
+import { AuthButton } from '../components/AuthButton';
 import toast from 'react-hot-toast';
 
 // Zod schema cho login form

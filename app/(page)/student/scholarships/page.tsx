@@ -3,39 +3,12 @@
 import type React from "react"
 import { useState, useRef } from "react"
 import { Upload, ChevronDown, X } from "lucide-react"
-
-interface FormData {
-  fullName: string
-  studentId: string
-  gender: string
-  dateOfBirth: string
-  email: string
-  major: string
-  idNumber: string
-  specialization: string
-  residence: string
-  academicYear: string
-  class: string
-}
-
-interface FormErrors {
-  [key: string]: boolean
-}
+import { FormData, FormErrors } from "./lib/types/types"
+import { validateField, validateForm } from "./lib/utils/validation"
+import { GENDER_OPTIONS, MAJOR_OPTIONS, ACADEMIC_YEAR_OPTIONS, CLASS_OPTIONS, INITIAL_FORM_DATA } from "./lib/constants/formOptions"
 
 export default function ScholarshipsPage() {
-  const [formData, setFormData] = useState<FormData>({
-    fullName: "",
-    studentId: "",
-    gender: "",
-    dateOfBirth: "",
-    email: "",
-    major: "",
-    idNumber: "",
-    specialization: "",
-    residence: "",
-    academicYear: "",
-    class: "",
-  })
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
 
   const [errors, setErrors] = useState<FormErrors>({})
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
@@ -50,71 +23,14 @@ export default function ScholarshipsPage() {
     }
   }
 
-  const validateField = (field: keyof FormData, value: string): boolean => {
-    switch (field) {
-      case "fullName":
-        // Should contain only letters, spaces, and Vietnamese characters
-        return value.trim().length >= 2 && /^[a-zA-ZÀ-ỹ\s]+$/.test(value)
-
-      case "studentId":
-        // Should be alphanumeric and at least 5 characters
-        return value.trim().length >= 5 && /^[a-zA-Z0-9]+$/.test(value)
-
-      case "gender":
-        return value === "Nam" || value === "Nữ"
-
-      case "dateOfBirth":
-        if (!value) return false
-        const date = new Date(value)
-        const today = new Date()
-        const minDate = new Date(today.getFullYear() - 100, 0, 1) // 100 years ago
-        const maxDate = new Date(today.getFullYear() - 15, today.getMonth(), today.getDate()) // At least 15 years old
-        return date >= minDate && date <= maxDate
-
-      case "email":
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-
-      case "major":
-        // Should contain meaningful text, not just random characters
-        return value.trim().length >= 3 && /^[a-zA-ZÀ-ỹ\s]+$/.test(value)
-
-      case "idNumber":
-        // CMND is 9 digits, CCCD is 12 digits
-        return /^\d{9}$/.test(value) || /^\d{12}$/.test(value)
-
-      case "specialization":
-        return value.trim().length >= 3 && /^[a-zA-ZÀ-ỹ\s]+$/.test(value)
-
-      case "residence":
-        return value.trim().length >= 5
-
-      case "academicYear":
-        // Should match format like "2023-2027"
-        return /^\d{4}-\d{4}$/.test(value)
-
-      case "class":
-        return value.trim().length >= 2
-
-      default:
-        return true
-    }
-  }
 
   const handleBlur = (field: keyof FormData) => {
     const isValid = validateField(field, formData[field])
     setErrors((prev) => ({ ...prev, [field]: !isValid }))
   }
 
-  const validateForm = () => {
-    const newErrors: FormErrors = {}
-
-    Object.keys(formData).forEach((key) => {
-      const field = key as keyof FormData
-      if (!validateField(field, formData[field])) {
-        newErrors[field] = true
-      }
-    })
-
+  const handleValidateForm = () => {
+    const newErrors = validateForm(formData)
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -131,26 +47,14 @@ export default function ScholarshipsPage() {
   }
 
   const handleSubmit = () => {
-    if (validateForm()) {
+    if (handleValidateForm()) {
       console.log("Form submitted:", formData, uploadedFiles)
       // Add your submission logic here
     }
   }
 
   const handleCancel = () => {
-    setFormData({
-      fullName: "",
-      studentId: "",
-      gender: "",
-      dateOfBirth: "",
-      email: "",
-      major: "",
-      idNumber: "",
-      specialization: "",
-      residence: "",
-      academicYear: "",
-      class: "",
-    })
+    setFormData(INITIAL_FORM_DATA)
     setUploadedFiles([])
     setErrors({})
   }
@@ -209,8 +113,11 @@ export default function ScholarshipsPage() {
                   } ${formData.gender ? "text-gray-900" : "text-gray-400"}`}
                 >
                   <option value="">Chọn giới tính</option>
-                  <option value="Nam">Nam</option>
-                  <option value="Nữ">Nữ</option>
+                  {GENDER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
@@ -247,16 +154,21 @@ export default function ScholarshipsPage() {
             <div>
               <label className="block text-sm font-normal text-gray-900 mb-2">Ngành</label>
               <div className="relative">
-                <input
-                  type="text"
+                <select
                   value={formData.major}
                   onChange={(e) => handleInputChange("major", e.target.value)}
                   onBlur={() => handleBlur("major")}
-                  className={`w-full px-3 py-2 pr-10 border rounded-md text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-3 py-2 border rounded-md text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.major ? "border-red-500" : "border-gray-300"
-                  }`}
-                  placeholder="Nhập ngành học"
-                />
+                  } ${formData.major ? "text-gray-900" : "text-gray-400"}`}
+                >
+                  <option value="">Chọn ngành học</option>
+                  {MAJOR_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
             </div>
@@ -309,16 +221,24 @@ export default function ScholarshipsPage() {
             </div>
             <div>
               <label className="block text-sm font-normal text-gray-900 mb-2">Niên khóa</label>
-              <input
-                type="text"
-                value={formData.academicYear}
-                onChange={(e) => handleInputChange("academicYear", e.target.value)}
-                onBlur={() => handleBlur("academicYear")}
-                className={`w-full px-3 py-2 border rounded-md text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.academicYear ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="Ví dụ: 2023-2027"
-              />
+              <div className="relative">
+                <select
+                  value={formData.academicYear}
+                  onChange={(e) => handleInputChange("academicYear", e.target.value)}
+                  onBlur={() => handleBlur("academicYear")}
+                  className={`w-full px-3 py-2 border rounded-md text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.academicYear ? "border-red-500" : "border-gray-300"
+                  } ${formData.academicYear ? "text-gray-900" : "text-gray-400"}`}
+                >
+                  <option value="">Chọn niên khóa</option>
+                  {ACADEMIC_YEAR_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 
@@ -326,16 +246,24 @@ export default function ScholarshipsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-normal text-gray-900 mb-2">Lớp</label>
-              <input
-                type="text"
-                value={formData.class}
-                onChange={(e) => handleInputChange("class", e.target.value)}
-                onBlur={() => handleBlur("class")}
-                className={`w-full px-3 py-2 border rounded-md text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.class ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="Nhập lớp"
-              />
+              <div className="relative">
+                <select
+                  value={formData.class}
+                  onChange={(e) => handleInputChange("class", e.target.value)}
+                  onBlur={() => handleBlur("class")}
+                  className={`w-full px-3 py-2 border rounded-md text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.class ? "border-red-500" : "border-gray-300"
+                  } ${formData.class ? "text-gray-900" : "text-gray-400"}`}
+                >
+                  <option value="">Chọn lớp</option>
+                  {CLASS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 

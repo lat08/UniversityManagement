@@ -7,12 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { sendPasswordResetOtpApi, type ForgotPasswordDto } from '@/lib/api/auth';
-import { useAuthFlow } from '@/lib/hooks/useAuthFlow';
-import { AuthLayout } from '@/app/components/auth/AuthLayout';
-import { AuthInput } from '@/app/components/auth/AuthInput';
-import { AuthButton } from '@/app/components/auth/AuthButton';
+import { useAuthFlow } from '../lib/hooks/useAuthFlow';
+import { AuthLayout } from '../components/AuthLayout';
+import { AuthInput } from '../components/AuthInput';
+import { AuthButton } from '../components/AuthButton';
 import toast from 'react-hot-toast';
-import { TEXT } from './constants';
+import { TEXT } from './lib/constants';
 
 const forgotPasswordSchema = z.object({
   email: z

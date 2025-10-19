@@ -1,11 +1,11 @@
 'use client';
 
-import { useRooms, useUserBookings } from '@/lib/hooks/useRoomBooking';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { useRooms, useUserBookings } from './lib/hooks/useRoomBooking';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
-import BookingForm from '../../components/departments/BookingForm';
-import RoomList from '../../components/departments/RoomList';
-import BookingHistory from '../../components/departments/BookingHistory';
+import BookingForm from './components/BookingForm';
+import RoomList from './components/RoomList';
+import BookingHistory from './components/BookingHistory';
 
 export default function RoomBookingPage() {
   const { data: rooms, isLoading: roomsLoading } = useRooms();

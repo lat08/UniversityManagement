@@ -1,202 +1,31 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
-
-// Dữ liệu mẫu cho thời khóa biểu
-interface CourseSchedule {
-  id: string
-  name: string
-  code: string
-  room: string
-  teacher: string
-  dayOfWeek: number // 2-8 (Thứ 2 - Chủ nhật)
-  startPeriod: number // 1-13
-  periodsCount: number // Số tiết
-  color: string // blue, red, green, etc.
-}
-
-const sampleSchedule: CourseSchedule[] = [
-  {
-    id: "1",
-    name: "QUẢN LÝ DỰ ÁN CÔNG NGHỆ THÔNG TIN (3)",
-    code: "TV114",
-    room: "D04-06",
-    teacher: "Trần Thanh Tuyền",
-    dayOfWeek: 4, // Thứ 4
-    startPeriod: 1,
-    periodsCount: 5,
-    color: "blue",
-  },
-  {
-    id: "2",
-    name: "QUẢN LÝ DỰ ÁN CÔNG NGHỆ THÔNG TIN (3) (CS3545)",
-    code: "TV114",
-    room: "D04501-Audi",
-    teacher: "Trần Thanh Tuyền",
-    dayOfWeek: 5, // Thứ 5
-    startPeriod: 6,
-    periodsCount: 4,
-    color: "red",
-  },
-]
+import { sampleSchedule } from "../lib/data/weeklyData"
+import { SEMESTERS, WEEKS, DAYS_OF_WEEK, PERIODS } from "../lib/constants/weeklyConstants"
+import { useWeeklySchedule } from "../lib/hooks/useWeeklySchedule"
 
 export default function WeeklySchedulePage() {
-  const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
-  const [selectedWeek, setSelectedWeek] = useState("Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]")
-  const [hoveredCourse, setHoveredCourse] = useState<string | null>(null)
-  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 })
-  const [isSemesterOpen, setIsSemesterOpen] = useState(false)
-  const [isWeekOpen, setIsWeekOpen] = useState(false)
-  const [isTooltipPinned, setIsTooltipPinned] = useState(false)
-  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
-
-  const semesters = [
-    "Học kỳ 1 - Năm học 2025-2026",
-    "Học kỳ 2 - Năm học 2024-2025",
-    "Học kỳ 3 - Năm học 2024-2025",
-  ]
-
-  const weeks = [
-    "Tuần 1 [từ ngày 1/9/2025 đến ngày 7/9/2025]",
-    "Tuần 2 [từ ngày 8/9/2025 đến ngày 14/9/2025]",
-    "Tuần 3 [từ ngày 15/9/2025 đến ngày 21/9/2025]",
-    "Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]",
-    "Tuần 5 [từ ngày 6/10/2025 đến ngày 12/10/2025]",
-  ]
-
-  const periods = Array.from({ length: 13 }, (_, i) => i + 1)
-  const daysOfWeek = [
-    { label: "Thứ hai", subLabel: "29/9", value: 2 },
-    { label: "Thứ ba", subLabel: "30/9", value: 3 },
-    { label: "Thứ tư", subLabel: "1/10", value: 4 },
-    { label: "Thứ năm", subLabel: "2/10", value: 5 },
-    { label: "Thứ sáu", subLabel: "3/10", value: 6 },
-    { label: "Thứ bảy", subLabel: "4/10", value: 7 },
-    { label: "Chủ nhật", subLabel: "5/10", value: 8 },
-  ]
-
-  const getColorClasses = (color: string, isHovered: boolean) => {
-    const colors: Record<string, { bg: string; hover: string; border: string }> = {
-      blue: {
-        bg: "bg-blue-200",
-        hover: "bg-blue-300",
-        border: "border-blue-400",
-      },
-      red: {
-        bg: "bg-red-200",
-        hover: "bg-red-300",
-        border: "border-red-400",
-      },
-      green: {
-        bg: "bg-green-200",
-        hover: "bg-green-300",
-        border: "border-green-400",
-      },
-      yellow: {
-        bg: "bg-yellow-200",
-        hover: "bg-yellow-300",
-        border: "border-yellow-400",
-      },
-    }
-
-    const colorClass = colors[color] || colors.blue
-    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-gray-900`
-  }
-
-  const handleMouseEnter = (courseId: string, event: React.MouseEvent) => {
-    // Clear any existing timeout
-    if (hideTimeout) {
-      clearTimeout(hideTimeout)
-      setHideTimeout(null)
-    }
-    
-    setHoveredCourse(courseId)
-    setIsTooltipPinned(false) // Reset pin state
-    
-    const element = event.currentTarget as HTMLElement
-    const rect = element.getBoundingClientRect()
-    const container = element.closest('.mx-auto')
-    const containerRect = container?.getBoundingClientRect()
-    
-    if (containerRect) {
-      setHoverPosition({
-        x: rect.right - containerRect.left + 10, // Position to the right of the cell, relative to container
-        y: rect.top - containerRect.top,
-      })
-    }
-  }
-
-  const handleMouseLeave = () => {
-    // Only hide if tooltip is not pinned
-    if (!isTooltipPinned) {
-      const timeout = setTimeout(() => {
-        setHoveredCourse(null)
-        setIsTooltipPinned(false)
-      }, 200)
-      setHideTimeout(timeout)
-    }
-  }
-
-  const handleTooltipMouseEnter = () => {
-    // Clear any hide timeout and pin the tooltip
-    if (hideTimeout) {
-      clearTimeout(hideTimeout)
-      setHideTimeout(null)
-    }
-    setIsTooltipPinned(true)
-  }
-
-  const handleTooltipMouseLeave = () => {
-    // Unpin and hide tooltip when leaving it
-    setIsTooltipPinned(false)
-    setHoveredCourse(null)
-    if (hideTimeout) {
-      clearTimeout(hideTimeout)
-      setHideTimeout(null)
-    }
-  }
-
-  const handleTooltipClick = (e: React.MouseEvent) => {
-    // Prevent event bubbling to avoid closing tooltip
-    e.stopPropagation()
-  }
-
-  // Close dropdowns and tooltip when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      
-      // Close dropdowns
-      if (!target.closest('.dropdown-container')) {
-        setIsSemesterOpen(false)
-        setIsWeekOpen(false)
-      }
-      
-      // Close tooltip if clicking outside
-      if (!target.closest('.course-tooltip') && !target.closest('.course-cell')) {
-        setHoveredCourse(null)
-        setIsTooltipPinned(false)
-        if (hideTimeout) {
-          clearTimeout(hideTimeout)
-          setHideTimeout(null)
-        }
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [hideTimeout])
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hideTimeout) {
-        clearTimeout(hideTimeout)
-      }
-    }
-  }, [hideTimeout])
+  const {
+    selectedSemester,
+    setSelectedSemester,
+    selectedWeek,
+    setSelectedWeek,
+    hoveredCourse,
+    hoverPosition,
+    isSemesterOpen,
+    setIsSemesterOpen,
+    isWeekOpen,
+    setIsWeekOpen,
+    isTooltipPinned,
+    getColorClasses,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleTooltipMouseEnter,
+    handleTooltipMouseLeave,
+    handleTooltipClick,
+  } = useWeeklySchedule()
 
   return (
     <div className="mx-auto max-w-[1600px] relative">
@@ -224,7 +53,7 @@ export default function WeeklySchedulePage() {
                 </button>
                 {isSemesterOpen && (
                   <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {semesters.map((semester, index) => (
+                    {SEMESTERS.map((semester, index) => (
                       <button
                         key={index}
                         className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
@@ -254,7 +83,7 @@ export default function WeeklySchedulePage() {
                 </button>
                 {isWeekOpen && (
                   <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {weeks.map((week, index) => (
+                    {WEEKS.map((week, index) => (
                       <button
                         key={index}
                         className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
@@ -293,7 +122,7 @@ export default function WeeklySchedulePage() {
                     </div>
 
                     {/* Days of week */}
-                    {daysOfWeek.map((day) => (
+                    {DAYS_OF_WEEK.map((day) => (
                       <div
                         key={day.value}
                         className="flex-1 min-w-[120px] text-white rounded-lg flex flex-col items-center justify-center h-[60px]"
@@ -314,7 +143,7 @@ export default function WeeklySchedulePage() {
 
                   {/* Schedule Grid */}
                   <div className="relative">
-                    {periods.map((period) => (
+                    {PERIODS.map((period) => (
                       <div key={period} className="flex gap-2 mb-2">
                         {/* Period Label */}
                         <div className="w-[90px] flex-shrink-0 text-white rounded-lg flex items-center justify-center font-semibold text-sm h-[52px]" style={{ backgroundColor: '#4E8EE1' }}>
@@ -322,7 +151,7 @@ export default function WeeklySchedulePage() {
                         </div>
 
                         {/* Day Cells */}
-                        {daysOfWeek.map((day) => {
+                        {DAYS_OF_WEEK.map((day) => {
                           const course = sampleSchedule.find(
                             (c) => c.dayOfWeek === day.value && c.startPeriod === period
                           )
@@ -404,7 +233,7 @@ export default function WeeklySchedulePage() {
                     {sampleSchedule
                       .filter((c) => c.id === hoveredCourse)
                       .map((course) => {
-                        const dayName = daysOfWeek.find((d) => d.value === course.dayOfWeek)?.label || ""
+                        const dayName = DAYS_OF_WEEK.find((d) => d.value === course.dayOfWeek)?.label || ""
                         return (
                           <div key={course.id} className="space-y-1.5">
                             <div className="font-bold text-xs pb-1.5 border-b border-gray-700">

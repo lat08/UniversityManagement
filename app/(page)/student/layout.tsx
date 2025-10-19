@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/app/components/ui/sidebar";
 import { Header } from "@/app/components/header/header";
-import RequireRoleAuth from "@/app/components/auth/RequireRoleAuth";
+import RequireRoleAuth from "@/app/(auth)/components/RequireRoleAuth";
 import { cn } from "@/lib/utils/utils";
 
 export default function StudentLayout({
