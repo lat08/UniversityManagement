@@ -1,4 +1,4 @@
-import { ExamScheduleContent } from "@/app/components/exam-schedule/content/page"
+import { ExamScheduleContent } from "./components/content/page"
 
 export default function ExamsPage() {
   return <ExamScheduleContent />

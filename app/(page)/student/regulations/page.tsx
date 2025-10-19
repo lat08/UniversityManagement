@@ -2,49 +2,8 @@
 
 import { useState } from "react"
 import { Download, ExternalLink, AlertTriangle, ChevronRight } from "lucide-react"
-
-type Regulation = {
-  id: string
-  title: string
-  description: string
-  fileName?: string
-  fileUrl?: string
-}
-
-const REGULATIONS: Regulation[] = [
-  {
-    id: "reg-1",
-    title: "Quy chế đào tạo trình độ đại học",
-    description:
-      "Quy chế này quy định về tổ chức và quản lý đào tạo trình độ đại học tại Đại học Quốc tế Sài Gòn, bao gồm các quy định về chương trình đào tạo, tổ chức giảng dạy, học tập, thi và đánh giá kết quả học tập, điều kiện tốt nghiệp.",
-    fileName: "QC_DaoTao_DaiHoc_2024.pdf",
-    fileUrl: "#",
-  },
-  {
-    id: "reg-2",
-    title: "Quy chế tuyển sinh và đào tạo trình độ thạc sĩ",
-    description:
-      "Quy định chi tiết về tuyển sinh và đào tạo sau đại học, hồ sơ, điều kiện và nhiệm vụ học tập cho học viên cao học.",
-    fileName: "QC_ThacSi_2024.pdf",
-    fileUrl: "#",
-  },
-  {
-    id: "reg-3",
-    title: "Quy định về học phí và chính sách miễn giảm",
-    description:
-      "Quy định mức thu học phí, các chính sách miễn, giảm học phí dành cho các đối tượng chính sách, sinh viên có hoàn cảnh đặc biệt.",
-    fileName: "QC_HocPhi_2024.pdf",
-    fileUrl: "#",
-  },
-  {
-    id: "reg-4",
-    title: "Quy định về sử dụng cơ sở vật chất",
-    description:
-      "Hướng dẫn sử dụng phòng học, thư viện, phòng thí nghiệm và trang thiết bị chung cho cán bộ và sinh viên.",
-    fileName: "QC_CSVC_2024.pdf",
-    fileUrl: "#",
-  },
-]
+import { REGULATIONS } from "./lib/data/regulationsData"
+import { CONTACT_INFO } from "./lib/constants/contactInfo"
 
 export default function RegulationsPage() {
   const [selectedIdx, setSelectedIdx] = useState(0)
@@ -157,14 +116,14 @@ export default function RegulationsPage() {
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div>
-                    <p className="font-semibold text-sm text-gray-900 mb-3">Phòng Đào tạo</p>
-                    <p className="text-sm text-gray-600 mb-1">Email: daotao@siu.edu.vn</p>
-                    <p className="text-sm text-gray-600">ĐT: (028) 3724 4270</p>
+                    <p className="font-semibold text-sm text-gray-900 mb-3">{CONTACT_INFO.academicAffairs.name}</p>
+                    <p className="text-sm text-gray-600 mb-1">Email: {CONTACT_INFO.academicAffairs.email}</p>
+                    <p className="text-sm text-gray-600">ĐT: {CONTACT_INFO.academicAffairs.phone}</p>
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-gray-900 mb-3">Phòng Công tác sinh viên</p>
-                    <p className="text-sm text-gray-600 mb-1">Email: ctsv@siu.edu.vn</p>
-                    <p className="text-sm text-gray-600">ĐT: (028) 3724 4271</p>
+                    <p className="font-semibold text-sm text-gray-900 mb-3">{CONTACT_INFO.studentAffairs.name}</p>
+                    <p className="text-sm text-gray-600 mb-1">Email: {CONTACT_INFO.studentAffairs.email}</p>
+                    <p className="text-sm text-gray-600">ĐT: {CONTACT_INFO.studentAffairs.phone}</p>
                   </div>
                 </div>
               </div>

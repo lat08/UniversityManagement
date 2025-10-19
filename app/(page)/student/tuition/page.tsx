@@ -15,60 +15,11 @@ import {
   Clock,
   ArrowUp
 } from "lucide-react";
+import { bankInfo, directPaymentInfo, tuitionData, paymentHistory } from "./lib/data/tuitionData";
+import { formatCurrency, formatDate, formatPaymentMethod, formatPaymentStatus } from "./lib/utils/formatters";
+import { PAYMENT_METHODS, PAYMENT_STATUS, TUITION_STATUS, PAYMENT_DEADLINE_WARNING } from "./lib/constants/paymentOptions";
 
 export default function PaymentPage() {
-  const bankInfo = {
-    bank: "Vietcombank - Chi nhánh TP.HCM",
-    accountNumber: "1234567890",
-    accountHolder: "Trường Đại học Quốc tế Sài Gòn",
-    content: "HOCPHI - [MSSV] - [HỌ TÊN]"
-  };
-
-  const directPaymentInfo = {
-    address: "Tầng 1, Tòa nhà A - Thứ 2 đến Thứ 6, 8:00 - 17:00"
-  };
-
-  const tuitionData = {
-    semester: "HK2 2024-2025",
-    originalFee: 15000000,
-    discount: -2000000,
-    payableFee: 13000000,
-    paid: 8000000,
-    outstanding: 5000000,
-    dueDate: "20/02/2025"
-  };
-
-  const paymentHistory = [
-    {
-      date: "15/01/2025",
-      content: "Đóng học phí HK2 2024-2025 (Đợt 1)",
-      amount: 8000000,
-      method: "Chuyển khoản",
-      status: "Đã thanh toán"
-    },
-    {
-      date: "10/09/2024",
-      content: "Đóng học phí HK1 2024-2025",
-      amount: 13000000,
-      method: "Tiền mặt",
-      status: "Đã thanh toán"
-    },
-    {
-      date: "15/02/2024",
-      content: "Đóng học phí HK2 2023-2024",
-      amount: 12500000,
-      method: "Chuyển khoản",
-      status: "Đã thanh toán"
-    }
-  ];
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
-  };
-
-  const formatDate = (dateString: string) => {
-    return dateString;
-  };
 
   return (
     <div className="space-y-6">
@@ -208,9 +159,9 @@ export default function PaymentPage() {
                         <td className="py-3 px-4 text-right font-medium text-black">
                           {formatCurrency(payment.amount)}
                         </td>
-                        <td className="py-3 px-4 text-black">{payment.method}</td>
+                        <td className="py-3 px-4 text-black">{formatPaymentMethod(payment.method)}</td>
                         <td className="py-3 px-4">
-                          <span className="text-green-600 font-medium">{payment.status}</span>
+                          <span className="text-green-600 font-medium">{formatPaymentStatus(payment.status)}</span>
                         </td>
                       </tr>
                     ))}

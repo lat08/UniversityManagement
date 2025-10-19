@@ -1,6 +1,6 @@
 "use client"
 
-import { CoursesContent } from "@/app/components/courses/content/page"
+import { CoursesContent } from "./components/content/page"
 
 export default function CoursesPage() {
   return <CoursesContent />
