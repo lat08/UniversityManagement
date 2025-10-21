@@ -1,6 +1,4 @@
-//data structure
-
-export type ExamStatus = "completed" | "upcoming" | "scheduled"
+import { ExamStatus } from "../type/examScheduleType"
 
 export interface ExamCardProps {
   courseName: string
