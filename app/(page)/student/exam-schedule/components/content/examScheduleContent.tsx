@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Calendar, CalendarX, CalendarCheck, Download } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
-import { ExamCard} from "../card/page"
+import { ExamCard} from "../card/examScheduleCard"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
 import { examsData } from "@/public/data/exam-schedule"
 
