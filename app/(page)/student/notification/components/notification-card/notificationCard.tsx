@@ -1,7 +1,7 @@
 import { Badge } from "@/app/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/app/components/ui/card"
 import { Clock } from "lucide-react"
-import { notificationTypeConfig, NotificationCardProps} from "@/public/data/notifications"
+import { notificationTypeConfig, NotificationCardProps} from "../../libs/constants/notificationConstants"
 
 
 export function NotificationCard({ notification }: NotificationCardProps) {

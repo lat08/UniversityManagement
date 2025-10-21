@@ -1,5 +1,5 @@
 
-import { mockNotifications } from "@/public/data/notifications"
+import { mockNotifications } from "@/app/(page)/student/notification/libs/constants/notificationConstants";
 
 export function NotificationCard() {
     return(
