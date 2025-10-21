@@ -3,8 +3,9 @@
 import { BellOff } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/app/components/ui/badge"
-import { NotificationCard } from "../notification-card/page"
-import { mockNotifications, notificationTypeConfig, NotificationType } from "@/public/data/notifications"
+import { NotificationCard } from "../notification-card/notificationCard"
+import { mockNotifications, notificationTypeConfig  } from "../../libs/constants/notificationConstants"
+import { NotificationType } from "../../libs/type/notificationType"
 
 export function NotificationsContent() {
   const [activeFilter, setActiveFilter] = useState<NotificationType>("all")
