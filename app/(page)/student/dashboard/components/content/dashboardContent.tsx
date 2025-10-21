@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/app/components/ui/chart"
-import { academicData } from "@/public/data/dashboard"
+import { academicData } from "@/app/(page)/student/dashboard/libs/constants/dashboardConstant"
 
 
 export default function DashboardContent() {
