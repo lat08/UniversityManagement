@@ -39,15 +39,10 @@ interface SidebarProps {
   currentPath?: string
 }
 
-type MenuItem = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: any
-  label: string
-  href: string
-  expandable?: boolean
-  subItems?: { label: string; href: string }[]
-}
-type MenuSection = { title: string; items: MenuItem[] }
+export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [openPopover, setOpenPopover] = useState<string | null>(null)
+  const [activePage, setActivePage] = useState(currentPath || "/")
 
 function getMenuSections(variant: Variant): MenuSection[] {
   if (variant === "instructor") {
@@ -85,7 +80,15 @@ function getMenuSections(variant: Variant): MenuSection[] {
     ]
   }
 
-  return [
+  // Auto expand section when current path is active
+  useState(() => {
+    if (currentPath?.startsWith("/student/schedule")) {
+      setExpandedSection("1-2") // Index of "Thời khóa biểu" in menuSections
+      setActivePage(currentPath)
+    }
+  })
+
+  const menuSections = [
     {
       title: "TỔNG QUAN",
       items: [
@@ -320,10 +323,11 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                             )}
                             onClick={() => {
                               if (!item.expandable) {
-                                router.push(item.href)
+                                window.location.href = item.href
                               } else {
                                 toggleSection(itemKey)
                               }
+                              setActivePage(item.href)
                             }}
                           >
                             <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -350,7 +354,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                       isSubActive ? "bg-blue-50 text-blue-600 font-semibold" : "text-gray-600"
                                     )}
                                     onClick={() => {
-                                      router.push(subItem.href)
+                                      window.location.href = subItem.href
+                                      setActivePage(subItem.href)
                                     }}
                                   >
                                     {subItem.label}
