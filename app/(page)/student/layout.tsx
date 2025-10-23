@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/app/components/ui/sidebar";
 import { Header } from "@/app/components/header/header";
-import RequireRoleAuth from "@/app/(auth)/components/RequireRoleAuth";
+// import RequireRoleAuth from "@/app/(auth)/components/RequireRoleAuth";
 import { cn } from "@/lib/utils/utils";
 
 export default function StudentLayout({
@@ -22,9 +22,9 @@ export default function StudentLayout({
   if (!isMounted) {
     return null;
   }
-
+  
   return (
-    <RequireRoleAuth allowedRoles={['Student']}>
+    // <RequireRoleAuth allowedRoles={['Student']}>
       <div className="flex h-screen overflow-hidden bg-gray-50" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}
@@ -48,7 +48,7 @@ export default function StudentLayout({
           </main>
         </div>
       </div>
-    </RequireRoleAuth>
+    // </RequireRoleAuth>
   );
 }
 

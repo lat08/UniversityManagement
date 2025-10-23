@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, Clock, MapPin, User } from "lucide-react"
+import { Calendar, Clock, MapPin, User, Trash2 } from "lucide-react"
 import { Card } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
 
@@ -35,43 +35,41 @@ export function CourseCard({
 }: CourseCardProps) {
   return (
     <Card className="p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div className="flex-1 space-y-3">
           {/* Course title and code */}
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-semibold text-base">{name}</h3>
-            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-blue-700" style={{backgroundColor: '#DBEDFF'}}>
               {code}
             </span>
-            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-500 text-white">
+            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white" style={{backgroundColor: '#0053AD'}}>
               {credits} tín chỉ
             </span>
           </div>
 
           {/* Course details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-gray-600">
+          <div className="space-y-2 text-sm text-gray-600" style={{marginLeft: '10px'}}>
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">GV {instructor}</span>
+              <span>GV {instructor}</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{room}</span>
+              <span>{room}</span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">
-                Từ {startDate} đến {endDate}
-              </span>
+              <span>Từ {startDate} đến {endDate}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{schedule}</span>
+              <span>{schedule}</span>
             </div>
             {studentCount && (
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{studentCount} sinh viên</span>
+                <span>{studentCount} sinh viên</span>
               </div>
             )}
           </div>
@@ -83,11 +81,19 @@ export function CourseCard({
           variant={actionType === "cancel" ? "destructive" : "default"}
           className={
             actionType === "cancel"
-              ? "bg-red-500 hover:bg-red-600 text-white shrink-0"
-              : "bg-blue-500 hover:bg-blue-600 text-white shrink-0"
+              ? "bg-red-500 hover:bg-red-600 text-white shrink-0 cursor-pointer"
+              : "text-white shrink-0 cursor-pointer"
           }
+          style={actionType === "register" ? {backgroundColor: '#0053AD'} : {}}
         >
-          {actionType === "cancel" ? "Hủy đăng ký" : "Đăng ký"}
+          {actionType === "cancel" ? (
+            <>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Hủy đăng ký
+            </>
+          ) : (
+            "Đăng ký"
+          )}
         </Button>
       </div>
     </Card>

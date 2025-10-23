@@ -48,11 +48,11 @@ export function AvailableCourses({ courses, onRegisterClick }: AvailableCoursesP
             placeholder="Tìm kiếm theo tên, mã môn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 cursor-text"
           />
         </div>
         <Select value={filterValue} onValueChange={setFilterValue}>
-          <SelectTrigger className="w-full sm:w-[320px]">
+          <SelectTrigger className="w-full sm:w-[320px] cursor-pointer">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -63,8 +63,8 @@ export function AvailableCourses({ courses, onRegisterClick }: AvailableCoursesP
       </div>
 
       {/* Semester card with nested course cards */}
-      <Card className="bg-blue-100 text-white pb-4">
-        <div className="bg-blue-500 text-white px-6 mb-4 py-4 rounded-xl">
+      <Card className="text-white pb-4" style={{backgroundColor: '#DBEDFF'}}>
+        <div className="text-white px-6 mb-4 py-4 rounded-xl" style={{backgroundColor: '#0053AD'}}>
           <h2 className="font-semibold text-lg mb-2">Học kỳ 1 - Năm học 2025 - 2026</h2>
           <div className="flex gap-8 text-sm mb-6">
             <span>Tổng số tín chỉ: {totalCredits} tín chỉ</span>
