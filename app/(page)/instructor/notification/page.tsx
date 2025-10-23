@@ -1,6 +1,6 @@
 "use client"
 
-import { NotificationsContent } from "@/app/components/notification/page/content/page"
+import { NotificationsContent } from "../notification/components/content/notificationContent"
 
 export default function InstructorNotificationsPage() {
   return (
