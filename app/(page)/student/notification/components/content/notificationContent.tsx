@@ -2,9 +2,8 @@
 
 import { BellOff } from "lucide-react"
 import { useState } from "react"
-import { Badge } from "@/app/components/ui/badge"
 import { NotificationCard } from "../notification-card/notificationCard"
-import { mockNotifications, notificationTypeConfig  } from "../../libs/constants/notificationConstants"
+import { mockNotifications } from "../../libs/constants/notificationConstants"
 import { NotificationType } from "../../libs/type/notificationType"
 
 export function NotificationsContent() {
@@ -33,38 +32,47 @@ export function NotificationsContent() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold mb-4">Thông báo</h1>
-
-        {/* Filter tabs */}
-        <div className="flex flex-wrap gap-2 ">
-          {filters.map((filter) => {
-            const typeConfig = notificationTypeConfig[filter.key as keyof typeof notificationTypeConfig]
+      {/* Filter tabs */}
+      <div className="overflow-hidden">
+        <div className="flex w-full border border-gray-300 rounded-lg bg-gray-100 relative">
+          {/* Active tab background slider */}
+          <div 
+            className="absolute top-0 bottom-0 bg-blue-600 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
+            style={{
+              width: `${100 / filters.length}%`,
+              left: `${filters.findIndex(f => f.key === activeFilter) * (100 / filters.length)}%`,
+              transform: 'translateX(0)'
+            }}
+          />
+          
+          {filters.map((filter, index) => {
             const isActive = activeFilter === filter.key
 
-            // các nút còn lại theo màu riêng
             return (
-              <button
-                key={filter.key}
-                onClick={() => setActiveFilter(filter.key)}
-                className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors  ${
-                  isActive
-                    ? typeConfig.className.replace("hover:", "") + " font-semibold"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-black-400"
-                }`}
-              >
-                {filter.label}
-                <Badge
-                  variant="secondary"
-                  className={`${
+              <div key={filter.key} className="flex-1 relative z-10">
+                <button
+                  onClick={() => setActiveFilter(filter.key)}
+                  className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 relative ${
                     isActive
-                      ? "bg-white text-current font-semibold"
-                      : "bg-white text-gray-700"
+                      ? "text-white"
+                      : "text-gray-600 hover:text-gray-800"
                   }`}
                 >
-                  {filterCounts[filter.key]}
-                </Badge>
-              </button>
+                  <span className="relative z-100">{filter.label}</span>
+                  <span className={`flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold transition-transform duration-300 ${
+                    isActive 
+                      ? "bg-white text-blue-600 scale-110" 
+                      : "bg-white text-gray-600 hover:scale-105"
+                  }`}>
+                    {filterCounts[filter.key]}
+                  </span>
+                </button>
+                
+                {/* Divider - chỉ hiển thị khi tab không được chọn và không phải tab cuối */}
+                {!isActive && index < filters.length - 1 && (
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-400 transition-opacity duration-300"></div>
+                )}
+              </div>
             )
           })}
         </div>

@@ -5,7 +5,7 @@ export interface NotificationData {
   id: string
   title: string
   timeAgo: string
-  type: NotificationType
+  type: Exclude<NotificationType, "all">
   content: string
   date: string
   time?: string

@@ -175,7 +175,7 @@ function CoursesContent() {
       <div className="flex gap-6 border-b">
         <button
           onClick={() => setActiveTab("registered")}
-          className={`pb-3 px-1 font-medium transition-colors relative ${
+          className={`pb-3 px-1 font-medium transition-colors relative cursor-pointer ${
             activeTab === "registered" ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
           }`}
         >
@@ -187,7 +187,7 @@ function CoursesContent() {
         </button>
         <button
           onClick={() => setActiveTab("available")}
-          className={`pb-3 px-1 font-medium transition-colors relative ${
+          className={`pb-3 px-1 font-medium transition-colors relative cursor-pointer ${
             activeTab === "available" ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
           }`}
         >
@@ -212,10 +212,10 @@ function CoursesContent() {
             <DialogDescription>Hành động này không thể hoàn tác.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="cursor-pointer">
               Hủy
             </Button>
-            <Button onClick={handleConfirmCancel}>Xác nhận</Button>
+            <Button onClick={handleConfirmCancel} className="cursor-pointer">Xác nhận</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
