@@ -1,4 +1,4 @@
-export interface WeeklyScheduleItem {
+export interface SemesterScheduleItem {
   subjectId?: string
   subjectCode: string
   subjectName: string
@@ -15,13 +15,6 @@ export interface WeeklyScheduleItem {
   scheduleStartDate: string
   scheduleEndDate: string
   note?: string
-  date: string
-}
-
-export interface Week {
-  weekNumber: number
-  startDate: string
-  endDate: string
 }
 
 export interface Semester {
@@ -39,9 +32,9 @@ export interface Subject {
   subjectName: string
 }
 
-export interface WeeklyScheduleResponse {
+export interface SemesterScheduleResponse {
   success: boolean
-  data: WeeklyScheduleItem[]
+  data: SemesterScheduleItem[]
   message?: string
 }
 
@@ -54,11 +47,5 @@ export interface SemestersResponse {
 export interface SubjectsResponse {
   success: boolean
   data: Subject[]
-  message?: string
-}
-
-export interface WeekResponse {
-  success: boolean
-  data: Week[]
   message?: string
 }
