@@ -13,24 +13,27 @@ export default function StatCard({ data }: StatCardProps) {
 
   return (
     <Card className={`${data.bgColor} border-none shadow-sm`}>
-      <CardContent className="p-4 lg:p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-xs lg:text-sm text-gray-600 mb-2">
-              {data.title}
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">
-                {data.value}
-              </span>
-              <span className="text-xs lg:text-sm text-gray-500">
-                {data.unit}
-              </span>
-            </div>
-          </div>
+      <CardContent className="p-6 relative">
+        {/* Icon ở góc phải trên */}
+        <div className="absolute top-4 right-4">
           <div className={`${data.iconColor} opacity-20`}>
-            <Icon className="w-10 h-10 lg:w-12 lg:h-12" />
+            <Icon className="w-10 h-10" />
           </div>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-sm text-gray-500 mb-4">
+          {data.title}
+        </h3>
+
+        {/* Value */}
+        <div className={`text-5xl font-bold ${data.textColor} mb-1`}>
+          {data.value}
+        </div>
+
+        {/* Unit */}
+        <div className="text-sm text-gray-600">
+          {data.unit}
         </div>
       </CardContent>
     </Card>

@@ -37,7 +37,7 @@ export default function LearningStatsCard() {
   return (
     <Card className="shadow-sm h-full">
       <CardHeader className="pb-4">
-        <CardTitle className="text-base font-bold text-gray-900 text-center">
+        <CardTitle className="text-base font-bold text-gray-900 text-left">
           Thống kê học tập
         </CardTitle>
         <div className="w-full h-px bg-gray-200 mt-2"></div>
@@ -64,13 +64,28 @@ export default function LearningStatsCard() {
           <div className="text-sm text-gray-700 text-center">
             Tín chỉ tích lũy
           </div>
-          <div className="flex justify-center">
-            <div className="relative w-32 h-32">
-              <Doughnut data={chartData} options={chartOptions} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-gray-900">
-                  {learningStats.credits}/{learningStats.totalCredits}
-                </span>
+          <div className="relative">
+            {/* Chart */}
+            <div className="flex justify-center">
+              <div className="relative w-32 h-32">
+                <Doughnut data={chartData} options={chartOptions} />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-900">
+                    {learningStats.credits}/{learningStats.totalCredits}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Legend - Small and positioned at top right */}
+            <div className="absolute top-0 right-0 space-y-1">
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 rounded-full bg-[#F87171]"></div>
+                <span className="text-xs text-gray-600">Đã hoàn thành</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 rounded-full bg-[#C4B5FD]"></div>
+                <span className="text-xs text-gray-600">Còn lại</span>
               </div>
             </div>
           </div>

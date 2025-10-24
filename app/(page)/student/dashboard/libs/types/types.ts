@@ -4,6 +4,7 @@ export interface StatCardData {
   unit: string;
   bgColor: string;
   iconColor: string;
+  textColor: string;
 }
 
 export interface SubjectGrade {

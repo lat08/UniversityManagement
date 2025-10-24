@@ -255,8 +255,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                       <Button
                                         variant="ghost"
                                         className={cn(
-                                          "w-full justify-center px-2 text-gray-700 hover:bg-gray-100 cursor-pointer",
-                                          isActive && "bg-blue-50 text-blue-600 hover:bg-blue-100",
+                                          "w-full justify-center px-2 text-gray-700 hover:bg-[#DBEDFF] cursor-pointer",
+                                          isActive && "bg-[#0053AD] text-white hover:bg-[#0053AD] hover:text-white",
                                         )}
                                       >
                                         <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -293,8 +293,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                 <Button
                                   variant="ghost"
                                   className={cn(
-                                    "w-full justify-center px-2 text-gray-700 hover:bg-gray-100 cursor-pointer",
-                                    isActive && "bg-blue-50 text-blue-600 hover:bg-blue-100",
+                                    "w-full justify-center px-2 text-gray-700 hover:bg-[#DBEDFF] cursor-pointer",
+                                    isActive && "bg-[#0053AD] text-white hover:bg-[#0053AD] hover:text-white",
                                   )}
                                   onClick={() => router.push(item.href)}
                                 >
@@ -315,8 +315,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                           <Button
                             variant="ghost"
                             className={cn(
-                              "w-full justify-start gap-3 text-gray-700 hover:bg-gray-100 cursor-pointer",
-                              isActive && "bg-blue-50 text-blue-600 hover:bg-blue-100",
+                              "w-full justify-start gap-3 text-gray-700 hover:bg-[#DBEDFF] cursor-pointer",
+                              isActive && "bg-[#0053AD] text-white hover:bg-[#0053AD] hover:text-white",
                             )}
                             onClick={() => {
                               if (!item.expandable) {
@@ -346,8 +346,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                     key={subIndex}
                                     variant="ghost"
                                     className={cn(
-                                      "w-full justify-start text-sm hover:bg-gray-100 cursor-pointer",
-                                      isSubActive ? "bg-blue-50 text-blue-600 font-semibold" : "text-gray-600"
+                                      "w-full justify-start text-sm hover:bg-[#DBEDFF] cursor-pointer",
+                                      isSubActive ? "bg-[#0053AD] text-white font-semibold hover:bg-[#0053AD] hover:text-white" : "text-gray-600"
                                     )}
                                     onClick={() => {
                                       router.push(subItem.href)

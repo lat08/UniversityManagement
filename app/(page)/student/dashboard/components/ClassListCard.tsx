@@ -12,9 +12,6 @@ export default function ClassListCard() {
           <CardTitle className="text-sm lg:text-base font-semibold">
             Lớp đang theo học
           </CardTitle>
-          <button className="text-gray-400 hover:text-gray-600 transition-colors">
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4 flex-1">

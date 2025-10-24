@@ -14,6 +14,7 @@ export const statCards: StatCardData[] = [
     unit: "Tiết",
     bgColor: "bg-blue-50",
     iconColor: "text-blue-500",
+    textColor: "text-blue-600",
   },
   {
     title: "Lịch thi trong tuần",
@@ -21,6 +22,7 @@ export const statCards: StatCardData[] = [
     unit: "Môn thi",
     bgColor: "bg-red-50",
     iconColor: "text-red-500",
+    textColor: "text-red-600",
   },
 ];
 
