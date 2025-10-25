@@ -121,7 +121,7 @@ export default function ThemeConfigurationPage() {
     const completeColors = { ...baseColors };
     if (currentTheme?.colors) {
       Object.keys(currentTheme.colors).forEach((key) => {
-        const value = (currentTheme.colors as any)[key];
+        const value = currentTheme.colors[key as keyof typeof currentTheme.colors];
         if (value !== null && value !== undefined && value !== '') {
           completeColors[key as keyof typeof completeColors] = value;
         }
