@@ -63,7 +63,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
         title: "HỌC VỤ",
         items: [
           {
-            icon: Calendar, label: "Thời khóa biểu", href: "/instructor/schedule", expandable: true,
+            icon: Calendar, label: "Kế hoạch giảng dạy", href: "/instructor/schedule", expandable: true,
             subItems: [
               { label: "TKB theo tuần", href: "/instructor/schedule/weekly" },
               { label: "TKB theo học kỳ", href: "/instructor/schedule/semester" },
@@ -99,13 +99,13 @@ function getMenuSections(variant: Variant): MenuSection[] {
         { icon: BookOpen, label: "Khóa học", href: "/student/course" },
         { icon: Building2, label: "Phòng chức năng", href: "/student/departments" },
         {
-          icon: Calendar, label: "Thời khóa biểu", href: "/schedule", expandable: true,
+          icon: Calendar, label: "Kế hoạch học tập", href: "/schedule", expandable: true,
           subItems: [
             { label: "TKB theo tuần", href: "/student/schedule/weekly" },
             { label: "TKB theo học kỳ", href: "/student/schedule/semester" },
+            { label: "Lịch thi", href: "/student/exam-schedule" },
           ],
         },
-        { icon: FileCheck, label: "Lịch thi", href: "/student/exam-schedule" },
         { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
         { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
         { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
@@ -338,23 +338,36 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                             )}
                           </Button>
                           {item.expandable && item.subItems && expandedSection === itemKey && (
-                            <div className="ml-8 mt-1 space-y-1">
+                            <div className="ml-6 mt-1 space-y-1 relative">
+                              {/* Vertical line connecting all sub-items */}
+                              <div className="absolute left-0 top-0 bottom-2 w-px bg-[var(--sidebar-border)]" />
+                              
                               {item.subItems.map((subItem, subIndex) => {
                                 const isSubActive = activePage === subItem.href
+                                const isLastItem = subIndex === item.subItems!.length - 1
                                 return (
-                                  <Button
-                                    key={subIndex}
-                                    variant="ghost"
-                                    className={cn(
-                                      "w-full justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer",
-                                      isSubActive ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] font-semibold hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]" : "text-[var(--sidebar-item-text)] opacity-80"
+                                  <div key={subIndex} className="relative">
+                                    {/* Horizontal line connecting to the sub-item */}
+                                    <div className="absolute left-0 top-1/2 w-4 h-px bg-[var(--sidebar-border)]" />
+                                    
+                                    <Button
+                                      variant="ghost"
+                                      className={cn(
+                                        "w-full justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer pl-6",
+                                        isSubActive ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] font-semibold hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]" : "text-[var(--sidebar-item-text)] opacity-80"
+                                      )}
+                                      onClick={() => {
+                                        router.push(subItem.href)
+                                      }}
+                                    >
+                                      {subItem.label}
+                                    </Button>
+                                    
+                                    {/* Stop vertical line at the last item */}
+                                    {isLastItem && (
+                                      <div className="absolute left-0 top-1/2 bottom-0 w-px bg-[var(--sidebar)]" />
                                     )}
-                                    onClick={() => {
-                                      router.push(subItem.href)
-                                    }}
-                                  >
-                                    {subItem.label}
-                                  </Button>
+                                  </div>
                                 )
                               })}
                             </div>

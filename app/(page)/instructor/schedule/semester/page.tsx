@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
  import { sampleInstructorCourses } from "../lib/data/semesterData"
 import { SEMESTERS } from "../lib/constants/scheduleConstants"
 
 
 export default function InstructorSemesterSchedulePage() {
+  usePageTitle('TKB theo học kỳ');
   const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
   const [selectedView, setSelectedView] = useState("Thời khóa biểu cá nhân")
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import StatCard from "../StatCard";
 import AcademicResultsChart from "../AcademicResultsChart";
 import LearningStatsCard from "../LearningStatsCard";
@@ -8,6 +9,7 @@ import ClassListCard from "../ClassListCard";
 import { statCards } from "../../libs/constants/dashboardConstant";
 
 export default function DashboardContent() {
+  usePageTitle('Bảng điều khiển');
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Welcome Section */}

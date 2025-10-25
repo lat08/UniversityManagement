@@ -12,6 +12,7 @@ import { useRoleNavigation } from '../lib/hooks/useRoleNavigation';
 import { AuthLayout } from '../components/AuthLayout';
 import { AuthInput } from '../components/AuthInput';
 import { AuthButton } from '../components/AuthButton';
+import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import toast from 'react-hot-toast';
 
 // Zod schema cho login form
@@ -29,6 +30,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  usePageTitle('Đăng nhập');
   const loginSuccess = useAuthStore((state) => state.loginSuccess);
   const { navigateToDashboard } = useRoleNavigation();
   const [isLoginSuccess, setIsLoginSuccess] = useState(false);

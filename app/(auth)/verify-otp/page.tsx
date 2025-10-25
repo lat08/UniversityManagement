@@ -9,11 +9,13 @@ import { RouteGuard } from '../components/RouteGuard';
 import { AuthLayout } from '../components/AuthLayout';
 import { AuthInput } from '../components/AuthInput';
 import { AuthButton } from '../components/AuthButton';
+import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import toast from 'react-hot-toast';
 import { OTP_LENGTH, RESEND_SECONDS, TEXT } from './lib/constants';
 import { useCountdown } from './lib/hooks/useCountdown';
 
 function OtpVerifyContent() {
+  usePageTitle('Xác thực OTP');
   const router = useRouter();
   const [code, setCode] = useState('');
   const [isVerifySuccess, setIsVerifySuccess] = useState(false);

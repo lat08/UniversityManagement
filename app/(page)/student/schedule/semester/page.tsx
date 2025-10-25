@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useSemesterSchedule } from "../lib/hooks/useSemesterSchedule"
 
 export default function SemesterSchedulePage() {
+  usePageTitle('TKB theo học kỳ');
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isSubjectOpen, setIsSubjectOpen] = useState(false)

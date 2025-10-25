@@ -12,6 +12,7 @@ import { RouteGuard } from '../components/RouteGuard';
 import { AuthLayout } from '../components/AuthLayout';
 import { AuthInput } from '../components/AuthInput';
 import { AuthButton } from '../components/AuthButton';
+import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import toast from 'react-hot-toast';
 import { TEXT } from './lib/constants';
 
@@ -31,6 +32,7 @@ const resetPasswordSchema = z.object({
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 function ResetPasswordContent() {
+  usePageTitle('Đặt lại mật khẩu');
   const router = useRouter();
   const { forgotPasswordFlow, clearFlow } = useAuthFlow();
   const [isResetSuccess, setIsResetSuccess] = useState(false);

@@ -19,8 +19,20 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "SIU - Đăng nhập",
-  description: "Hệ thống quản lý trường đại học",
+  title: {
+    template: "%s - SIU",
+    default: "SIU - Đại học Quốc tế Sài Gòn",
+  },
+  description: "Hệ thống quản lý trường Đại học Quốc tế Sài Gòn",
+  icons: {
+    icon: [
+      { url: '/logo-siu.webp' },
+      { url: '/logo-siu.webp', sizes: '32x32', type: 'image/webp' },
+      { url: '/logo-siu.webp', sizes: '16x16', type: 'image/webp' },
+    ],
+    shortcut: '/logo-siu.webp',
+    apple: '/logo-siu.webp',
+  },
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
