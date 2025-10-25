@@ -18,7 +18,7 @@ export const regulationsApi = {
       orderBy: orderBy.toString()
     })
 
-    const response = await api.get(`/v1/Regulation?${searchParams}`)
+    const response = await api.get(`/v1/regulations?${searchParams}`)
     return response.data
   }
 }

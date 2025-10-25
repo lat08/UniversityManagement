@@ -9,25 +9,25 @@ import {
 export const weeklyScheduleApi = {
   // Lấy thời khóa biểu theo tuần
   getWeeklySchedule: async (semesterId: string, weekNumber: number): Promise<WeeklyScheduleResponse> => {
-    const response = await api.get(`/v1/week-schedule/week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}`)
+    const response = await api.get(`/v1/schedules/weekly?semesterId=${semesterId}&weekNumber=${weekNumber}`)
     return response.data
   },
 
   // Lấy thời khóa biểu theo tuần và môn học
   getWeeklyScheduleBySubject: async (semesterId: string, weekNumber: number, subjectId: string): Promise<WeeklyScheduleResponse> => {
-    const response = await api.get(`/v1/week-schedule/subject-week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`)
+    const response = await api.get(`/v1/schedules/subject-week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`)
     return response.data
   },
 
   // Lấy danh sách học kỳ
   getSemesters: async (): Promise<SemestersResponse> => {
-    const response = await api.get('/v1/Common/semesters')
+    const response = await api.get('/v1/common/semesters')
     return response.data
   },
 
   // Lấy danh sách môn học
   getSubjects: async (): Promise<SubjectsResponse> => {
-    const response = await api.get('/v1/Common/subjects')
+    const response = await api.get('/v1/common/subjects')
     return response.data
   },
 

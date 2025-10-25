@@ -34,7 +34,7 @@ export const useTokenExpiry = (enabled = true) => {
       console.log('[Token Expiry] Token sắp hết hạn, gọi API test...');
       
       // Gọi một API đơn giản để trigger refresh
-      api.get('/v1/Auth/test-token')
+      api.get('/v1/auth/health')
         .then(() => console.log('[Token Expiry] API test thành công'))
         .catch(() => console.log('[Token Expiry] API test thất bại hoặc token đã refresh'));
     }
@@ -53,7 +53,7 @@ export const useTokenExpiry = (enabled = true) => {
           testApiCalledRef.current = true;
           console.log('[Token Expiry] Token hết hạn, gọi API test...');
           
-          api.get('/v1/Auth/test-token')
+          api.get('/v1/auth/health')
             .then(() => {
               console.log('[Token Expiry] API test thành công - token đã được refresh');
               testApiCalledRef.current = false; // Reset để có thể test lại
