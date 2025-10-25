@@ -1,46 +1,47 @@
-import { NotificationData, NotificationType } from "../type/notificationType"
+import { NotificationData, NotificationType, NotificationApiItem } from "../type/notificationType"
 
 export interface NotificationCardProps {
-  notification: NotificationData
+  notification: NotificationApiItem
+  onNotificationClick?: (id: string) => void
 }
 
 
-// config for notification types
+// config for notification types - Using CSS Variables for Theme Customization
 export const notificationTypeConfig = {
   all: {
     key: "all" as NotificationType,
     label: "Tất cả",
-    iconBg: "bg-[var(--info-light)]",
-    iconColor: "text-[var(--info)]",
-    iconBorder: "border-2 border-[var(--info)]",
-  },
-  exam: {
-    key: "exam" as NotificationType,    
-    label: "Kỳ thi",
-    iconBg: "bg-[var(--info-light)]",
-    iconColor: "text-[var(--info)]",
-    iconBorder: "border-2 border-[var(--info)]",
+    iconBg: "bg-[var(--notification-event-bg)]",
+    iconColor: "text-[var(--notification-event-icon)]",
+    iconBorder: "border-2 border-[var(--notification-event-border)]",
   },
   event: {
     key: "event" as NotificationType,
     label: "Sự kiện",
-    iconBg: "bg-[var(--chart-8)]",
-    iconColor: "text-[var(--chart-6)]",
-    iconBorder: "border-2 border-[var(--chart-6)]",
+    iconBg: "bg-[var(--notification-event-bg)]",
+    iconColor: "text-[var(--notification-event-icon)]",
+    iconBorder: "border-2 border-[var(--notification-event-border)]",
+  },
+  tuition: {
+    key: "tuition" as NotificationType,
+    label: "Học phí",
+    iconBg: "bg-[var(--notification-tuition-bg)]",
+    iconColor: "text-[var(--notification-tuition-icon)]",
+    iconBorder: "border-2 border-[var(--notification-tuition-border)]",
+  },
+  schedule: {
+    key: "schedule" as NotificationType,
+    label: "Lịch học",
+    iconBg: "bg-[var(--notification-schedule-bg)]",
+    iconColor: "text-[var(--notification-schedule-icon)]",
+    iconBorder: "border-2 border-[var(--notification-schedule-border)]",
   },
   important: {
     key: "important" as NotificationType,
     label: "Quan trọng",
-    iconBg: "bg-[var(--error-light)]",
-    iconColor: "text-[var(--error)]",
-    iconBorder: "border-2 border-[var(--error)]",
-  },
-  general: {
-    key: "general" as NotificationType,
-    label: "Thông tin chung",
-    iconBg: "bg-[var(--muted)]",
-    iconColor: "text-[var(--muted-foreground)]",
-    iconBorder: "border-2 border-[var(--border)]",
+    iconBg: "bg-[var(--notification-important-bg)]",
+    iconColor: "text-[var(--notification-important-icon)]",
+    iconBorder: "border-2 border-[var(--notification-important-border)]",
   },
 }
 

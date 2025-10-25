@@ -137,6 +137,32 @@ export function getCompleteThemeColors(isDarkMode: boolean = false): ThemeColors
     cardBg: colors.cardBg || '#ffffff',
     cardBorder: colors.cardBorder || '#e2e8f0',
     cardShadow: colors.cardShadow || '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+    
+    // Badge Colors (for Notification Page unread counts)
+    badgeBg: colors.badgeBg || '#ef4444',
+    badgeText: colors.badgeText || '#ffffff',
+    badgeActiveBg: colors.badgeActiveBg || '#ffffff',
+    badgeActiveText: colors.badgeActiveText || '#ef4444',
+    
+    // Notification Page Colors - Event Type
+    notificationEventBg: colors.notificationEventBg || '#fef3c7',
+    notificationEventIcon: colors.notificationEventIcon || '#d97706',
+    notificationEventBorder: colors.notificationEventBorder || '#d97706',
+    
+    // Notification Page Colors - Tuition Type
+    notificationTuitionBg: colors.notificationTuitionBg || '#fef3c7',
+    notificationTuitionIcon: colors.notificationTuitionIcon || '#f59e0b',
+    notificationTuitionBorder: colors.notificationTuitionBorder || '#f59e0b',
+    
+    // Notification Page Colors - Schedule Type
+    notificationScheduleBg: colors.notificationScheduleBg || '#dbeafe',
+    notificationScheduleIcon: colors.notificationScheduleIcon || '#3b82f6',
+    notificationScheduleBorder: colors.notificationScheduleBorder || '#3b82f6',
+    
+    // Notification Page Colors - Important Type
+    notificationImportantBg: colors.notificationImportantBg || '#fee2e2',
+    notificationImportantIcon: colors.notificationImportantIcon || '#ef4444',
+    notificationImportantBorder: colors.notificationImportantBorder || '#ef4444',
   };
   
   return completeColors;
