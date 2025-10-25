@@ -11,6 +11,7 @@ import { useAuthFlow } from '../lib/hooks/useAuthFlow';
 import { AuthLayout } from '../components/AuthLayout';
 import { AuthInput } from '../components/AuthInput';
 import { AuthButton } from '../components/AuthButton';
+import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import toast from 'react-hot-toast';
 import { TEXT } from './lib/constants';
 
@@ -24,6 +25,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
+  usePageTitle('Quên mật khẩu');
   const router = useRouter();
   const { setEmail: setFlowEmail } = useAuthFlow();
   const [isSendSuccess, setIsSendSuccess] = useState(false);

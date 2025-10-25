@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight, FileText, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { sampleSchedule } from "../lib/data/weeklyData"
 import { SEMESTERS, WEEKS, DAYS_OF_WEEK, PERIODS } from "../lib/constants/scheduleConstants"
 import { getColorClasses, getPeriodTime, getDayName } from "../lib/utils/scheduleUtils"
 
 
 export default function InstructorWeeklySchedulePage() {
+  usePageTitle('TKB theo tuần');
   const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
   const [selectedWeek, setSelectedWeek] = useState("Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]")
   const [hoveredCourse, setHoveredCourse] = useState<string | null>(null)

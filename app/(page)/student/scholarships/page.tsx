@@ -3,11 +3,13 @@
 import type React from "react"
 import { useState, useRef } from "react"
 import { Upload, ChevronDown, X } from "lucide-react"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { FormData, FormErrors } from "./lib/types/types"
 import { validateField, validateForm } from "./lib/utils/validation"
 import { GENDER_OPTIONS, MAJOR_OPTIONS, ACADEMIC_YEAR_OPTIONS, CLASS_OPTIONS, INITIAL_FORM_DATA } from "./lib/constants/formOptions"
 
 export default function ScholarshipsPage() {
+  usePageTitle('Xét học bổng');
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
 
   const [errors, setErrors] = useState<FormErrors>({})

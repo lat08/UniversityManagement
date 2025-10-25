@@ -5,11 +5,13 @@ import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
 import { Printer, TrendingUp, BookOpen, Award, CheckCircle, XCircle, ChevronUp, List } from "lucide-react"
 import { useState, useEffect } from "react"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { semesterData } from "./lib/data/semesterData"
 import { courseDetails } from "./lib/data/courseDetails"
 import { calculateGPA, getLetterGrade, getClassification, calculateSemesterStats, calculateCumulativeGPA } from "./lib/utils/gradeUtils"
 
 export default function ScoresPage() {
+  usePageTitle('Điểm số');
   const [selectedSemester, setSelectedSemester] = useState("all")
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)

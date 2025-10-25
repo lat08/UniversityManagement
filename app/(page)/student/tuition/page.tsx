@@ -1,5 +1,6 @@
 "use client";
 
+import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
@@ -20,6 +21,7 @@ import { formatCurrency, formatDate, formatPaymentMethod, formatPaymentStatus } 
 import { PAYMENT_METHODS, PAYMENT_STATUS, TUITION_STATUS, PAYMENT_DEADLINE_WARNING } from "./lib/constants/paymentOptions";
 
 export default function PaymentPage() {
+  usePageTitle('Học phí');
 
   return (
     <div className="space-y-6">

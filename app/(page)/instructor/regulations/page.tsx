@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { Download, ExternalLink, AlertTriangle, Loader2 } from "lucide-react"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useRegulations } from "./lib/hooks/useRegulations"
 import { CONTACT_INFO } from "./lib/constants/contactInfo"
 
 export default function InstructorRegulationsPage() {
+  usePageTitle('Quy chế / Quy định');
   const [selectedIdx, setSelectedIdx] = useState(0)
   const { regulations, loading, error, refetch } = useRegulations()
   

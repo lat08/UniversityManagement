@@ -3,10 +3,12 @@
 import { useState, useMemo, useEffect } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "../lib/constants/index"
 import { useScheduleData } from "../lib/hooks/useScheduleData"
 
 export default function WeeklySchedulePage() {
+  usePageTitle('TKB theo tuần');
   const [isViewTypeOpen, setIsViewTypeOpen] = useState(false)
   const [isSubjectOpen, setIsSubjectOpen] = useState(false)
   const [subjectSearchTerm, setSubjectSearchTerm] = useState("")

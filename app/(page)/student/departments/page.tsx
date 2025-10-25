@@ -1,5 +1,6 @@
 'use client';
 
+import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import { useRooms, useUserBookings } from './lib/hooks/useRoomBooking';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import RoomList from './components/RoomList';
 import BookingHistory from './components/BookingHistory';
 
 export default function RoomBookingPage() {
+  usePageTitle('Phòng chức năng');
   const { data: rooms, isLoading: roomsLoading } = useRooms();
   const { data: userBookings, isLoading: bookingsLoading } = useUserBookings();
 

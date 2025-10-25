@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Download, Eye, ChevronDown } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
+import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import { documentSections } from './lib/data/documentData';
 import { getFileIcon, getFileTypeTag } from './lib/utils/fileUtils';
 import { Document, DocumentSection as DocumentSectionType } from './lib/types/types';
@@ -84,6 +85,7 @@ const DocumentSection = ({ section }: { section: DocumentSectionType }) => {
 };
 
 export default function DocumentsPage() {
+  usePageTitle('Tài liệu');
   const [selectedSemester, setSelectedSemester] = useState('Tất cả học kỳ');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
