@@ -79,6 +79,27 @@ export interface ThemeColors {
   cardBg: string;
   cardBorder: string;
   cardShadow: string;
+  // Badge Colors (for Notification Page)
+  badgeBg: string;
+  badgeText: string;
+  badgeActiveBg: string;
+  badgeActiveText: string;
+  // Notification Page Colors - Event Type
+  notificationEventBg: string;
+  notificationEventIcon: string;
+  notificationEventBorder: string;
+  // Notification Page Colors - Tuition Type
+  notificationTuitionBg: string;
+  notificationTuitionIcon: string;
+  notificationTuitionBorder: string;
+  // Notification Page Colors - Schedule Type
+  notificationScheduleBg: string;
+  notificationScheduleIcon: string;
+  notificationScheduleBorder: string;
+  // Notification Page Colors - Important Type
+  notificationImportantBg: string;
+  notificationImportantIcon: string;
+  notificationImportantBorder: string;
 }
 
 export interface ThemeConfig {

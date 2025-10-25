@@ -69,6 +69,32 @@
   --chart-7: #f87171;
   --chart-8: #c4b5fd;
   
+  /* Badge Colors for Notification Counts */
+  --badge-bg: #ef4444;              /* Red background for unread badge (inactive tabs) */
+  --badge-text: #ffffff;            /* White text for unread badge (inactive tabs) */
+  --badge-active-bg: #ffffff;       /* White background for unread badge (active tab) */
+  --badge-active-text: #ef4444;     /* Red text for unread badge (active tab) */
+  
+  /* Notification Page Colors - Event Type */
+  --notification-event-bg: #fef3c7;
+  --notification-event-icon: #d97706;
+  --notification-event-border: #d97706;
+  
+  /* Notification Page Colors - Tuition Type */
+  --notification-tuition-bg: #fef3c7;
+  --notification-tuition-icon: #f59e0b;
+  --notification-tuition-border: #f59e0b;
+  
+  /* Notification Page Colors - Schedule Type */
+  --notification-schedule-bg: #dbeafe;
+  --notification-schedule-icon: #3b82f6;
+  --notification-schedule-border: #3b82f6;
+  
+  /* Notification Page Colors - Important Type */
+  --notification-important-bg: #fee2e2;
+  --notification-important-icon: #ef4444;
+  --notification-important-border: #ef4444;
+  
   /* Sidebar Colors */
   --sidebar: #f8fafc;
   --sidebar-foreground: #0f172a;
@@ -187,6 +213,32 @@
   --chart-6: #f472b6;
   --chart-7: #fb923c;
   --chart-8: #c4b5fd;
+  
+  /* Badge Colors for Notification Counts */
+  --badge-bg: #f87171;              /* Lighter red background for unread badge (inactive tabs) */
+  --badge-text: #ffffff;            /* White text for unread badge (inactive tabs) */
+  --badge-active-bg: #ffffff;       /* White background for unread badge (active tab) */
+  --badge-active-text: #f87171;     /* Lighter red text for unread badge (active tab) */
+  
+  /* Notification Page Colors - Event Type */
+  --notification-event-bg: #78350f;
+  --notification-event-icon: #fbbf24;
+  --notification-event-border: #fbbf24;
+  
+  /* Notification Page Colors - Tuition Type */
+  --notification-tuition-bg: #78350f;
+  --notification-tuition-icon: #fbbf24;
+  --notification-tuition-border: #fbbf24;
+  
+  /* Notification Page Colors - Schedule Type */
+  --notification-schedule-bg: #1e3a8a;
+  --notification-schedule-icon: #60a5fa;
+  --notification-schedule-border: #60a5fa;
+  
+  /* Notification Page Colors - Important Type */
+  --notification-important-bg: #7f1d1d;
+  --notification-important-icon: #f87171;
+  --notification-important-border: #f87171;
   
   /* Sidebar Colors */
   --sidebar: #1e293b;
@@ -656,4 +708,32 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Scrollbar Styling */
+/* For Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
