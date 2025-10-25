@@ -18,7 +18,7 @@ export default function ClassListCard() {
         {currentClasses.map((classInfo) => (
           <div
             key={classInfo.id}
-            className="p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all"
+            className="p-4 rounded-lg border border-[var(--border)] hover:border-[var(--primary)] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between mb-3">
               <h4 className="text-sm lg:text-base font-semibold text-gray-900 flex-1">

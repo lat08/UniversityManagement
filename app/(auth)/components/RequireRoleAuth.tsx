@@ -17,20 +17,25 @@ import { UserRole, RequireRoleAuthProps } from '../lib/types/types';
 const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string = '/login') => {
   const { isAuthenticated, accessToken, user } = useAuthStore();
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
   // Memoize auth state để tránh re-render không cần thiết
   const authState = useMemo(() => {
     // So sánh trực tiếp với case-sensitive vì database lưu chính xác "Student", "Instructor", "Admin"
     const userRole = user?.role as UserRole;
     
+    // Ensure we have all required data
+    const hasValidToken = !!(isAuthenticated && accessToken && user);
+    const isAuthorized = hasValidToken && userRole && allowedRoles.includes(userRole);
+    
     return {
       isAuthenticated,
       accessToken,
       userRole,
-      hasValidToken: isAuthenticated && accessToken,
-      isAuthorized: isAuthenticated && accessToken && allowedRoles.includes(userRole)
+      hasValidToken,
+      isAuthorized
     };
-  }, [isAuthenticated, accessToken, user?.role, allowedRoles]);
+  }, [isAuthenticated, accessToken, user, allowedRoles]);
 
   // Memoize redirect function
   const redirect = useCallback(() => {
@@ -39,6 +44,17 @@ const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string = '/login') =
 
   // Effect để handle redirect logic
   useEffect(() => {
+    // Give zustand time to rehydrate from localStorage
+    const timer = setTimeout(() => {
+      setIsChecking(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (isChecking) return;
+
     if (!authState.hasValidToken) {
       redirect();
       return;
@@ -47,9 +63,9 @@ const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string = '/login') =
     if (!authState.isAuthorized) {
       redirect();
     }
-  }, [authState.hasValidToken, authState.isAuthorized, redirect]);
+  }, [isChecking, authState.hasValidToken, authState.isAuthorized, redirect]);
 
-  return authState;
+  return { ...authState, isChecking };
 };
 
 export function RequireRoleAuth({ 
@@ -58,13 +74,14 @@ export function RequireRoleAuth({
   redirectTo = '/login' 
 }: RequireRoleAuthProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { isAuthorized, hasValidToken } = useAuthGuard(allowedRoles, redirectTo);
+  const { isAuthorized, hasValidToken, isChecking } = useAuthGuard(allowedRoles, redirectTo);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
+  // Show loading while checking or not mounted
+  if (!isMounted || isChecking) {
     return <AuthLoading />;
   }
 

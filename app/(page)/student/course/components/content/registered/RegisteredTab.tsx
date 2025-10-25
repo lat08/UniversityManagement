@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/app/components/ui/card"
-import { CourseCard } from "../../card/page"
+import { CourseCard } from "../../card/CourseCard"
 
 interface Course {
   id: string

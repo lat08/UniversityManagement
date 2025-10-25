@@ -25,7 +25,7 @@ export default function AcademicResultsChart() {
     datasets: [
       {
         data: subjectGrades.map((item) => item.grade),
-        backgroundColor: "#8B5CF6",
+        backgroundColor: "var(--chart-6)",
         borderRadius: 8,
         barThickness: 40,
       },
@@ -40,14 +40,14 @@ export default function AcademicResultsChart() {
         display: false,
       },
       tooltip: {
-        backgroundColor: "#1F2937",
+        backgroundColor: "var(--card-bg)",
         padding: 12,
-        titleColor: "#fff",
-        bodyColor: "#fff",
+        titleColor: "var(--card-foreground)",
+        bodyColor: "var(--card-foreground)",
         displayColors: false,
         callbacks: {
-          label: function (context: any) {
-            return `Điểm: ${context.parsed.y}`;
+          label: function (context: { parsed: { y: number | null } }) {
+            return `Điểm: ${context.parsed.y ?? 0}`;
           },
         },
       },
@@ -61,7 +61,7 @@ export default function AcademicResultsChart() {
           font: {
             size: 11,
           },
-          color: "#6B7280",
+          color: "var(--text-secondary)",
           maxRotation: 45,
           minRotation: 45,
         },
@@ -70,14 +70,14 @@ export default function AcademicResultsChart() {
         beginAtZero: true,
         max: 10,
         grid: {
-          color: "#E5E7EB",
+          color: "var(--border)",
         },
         ticks: {
           stepSize: 2,
           font: {
             size: 11,
           },
-          color: "#6B7280",
+          color: "var(--text-secondary)",
         },
       },
     },
@@ -93,7 +93,7 @@ export default function AcademicResultsChart() {
           <select
             value={selectedSemester}
             onChange={(e) => setSelectedSemester(e.target.value)}
-            className="text-xs lg:text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
+            className="text-xs lg:text-sm border border-[var(--input-border)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] w-full sm:w-auto"
           >
             {semesterOptions.map((option) => (
               <option key={option.value} value={option.value}>

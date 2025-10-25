@@ -40,10 +40,10 @@ export function CourseCard({
           {/* Course title and code */}
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-semibold text-base">{name}</h3>
-            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-blue-700" style={{backgroundColor: '#DBEDFF'}}>
+            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-[var(--primary)] bg-[var(--primary-light)]">
               {code}
             </span>
-            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white" style={{backgroundColor: '#0053AD'}}>
+            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-[var(--primary-foreground)] bg-[var(--primary)]">
               {credits} tín chỉ
             </span>
           </div>
@@ -81,10 +81,9 @@ export function CourseCard({
           variant={actionType === "cancel" ? "destructive" : "default"}
           className={
             actionType === "cancel"
-              ? "bg-red-500 hover:bg-red-600 text-white shrink-0 cursor-pointer"
-              : "text-white shrink-0 cursor-pointer"
+              ? "bg-[var(--error)] hover:bg-[var(--destructive-hover)] text-[var(--error-foreground)] shrink-0 cursor-pointer"
+              : "text-[var(--primary-foreground)] shrink-0 cursor-pointer bg-[var(--primary)] hover:bg-[var(--primary-hover)]"
           }
-          style={actionType === "register" ? {backgroundColor: '#0053AD'} : {}}
         >
           {actionType === "cancel" ? (
             <>

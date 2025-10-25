@@ -5,7 +5,7 @@ import { Search } from "lucide-react"
 import { Card } from "@/app/components/ui/card"
 import { Input } from "@/app/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
-import { CourseCard } from "../../card/page"
+import { CourseCard } from "../../card/CourseCard"
 
 interface Course {
   id: string
@@ -63,8 +63,8 @@ export function AvailableCourses({ courses, onRegisterClick }: AvailableCoursesP
       </div>
 
       {/* Semester card with nested course cards */}
-      <Card className="text-white pb-4" style={{backgroundColor: '#DBEDFF'}}>
-        <div className="text-white px-6 mb-4 py-4 rounded-xl" style={{backgroundColor: '#0053AD'}}>
+      <Card className="text-white pb-4 bg-[var(--primary-light)]">
+        <div className="text-white px-6 mb-4 py-4 rounded-xl bg-[var(--primary)]">
           <h2 className="font-semibold text-lg mb-2">Học kỳ 1 - Năm học 2025 - 2026</h2>
           <div className="flex gap-8 text-sm mb-6">
             <span>Tổng số tín chỉ: {totalCredits} tín chỉ</span>

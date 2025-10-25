@@ -25,7 +25,7 @@ export default function StudentLayout({
   
   return (
     <RequireRoleAuth allowedRoles={['Student']}>
-      <div className="flex h-screen overflow-hidden bg-gray-50" suppressHydrationWarning>
+      <div className="flex h-screen overflow-hidden bg-[var(--bg-secondary)]" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}

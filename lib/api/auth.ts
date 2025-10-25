@@ -27,7 +27,7 @@ export type LoginResponse = {
 };
 
 export const loginApi = async (dto: LoginDto): Promise<LoginResponse> => {
-  const { data } = await api.post('/v1/Auth/login', dto);
+  const { data } = await api.post('/v1/sessions', dto);
   return data;
 };
 
@@ -55,23 +55,23 @@ export type ApiResponse<T> = {
 
 // Forgot Password API Functions
 export const sendPasswordResetOtpApi = async (dto: ForgotPasswordDto): Promise<ApiResponse<boolean>> => {
-  const { data } = await api.post('/v1/Auth/forgot-password/send-otp', dto);
+  const { data } = await api.post('/v1/passwords/reset-requests', dto);
   return data;
 };
 
 // Verify OTP và lấy PasswordResetToken
 export const verifyOtpApi = async (dto: VerifyOtpDto): Promise<ApiResponse<{ passwordResetToken: string }>> => {
-  const { data } = await api.post('/v1/Auth/forgot-password/verify-otp', dto);
+  const { data } = await api.post('/v1/passwords/reset-verifications', dto);
   return data;
 };
 
 export const resetPasswordApi = async (dto: ResetPasswordDto): Promise<ApiResponse<boolean>> => {
-  const { data } = await api.post('/v1/Auth/forgot-password/reset', dto);
+  const { data } = await api.put('/v1/passwords', dto);
   return data;
 };
 
 // Logout API function
 export const logoutApi = async (): Promise<ApiResponse<boolean>> => {
-  const { data } = await api.post('/v1/Auth/logout', {});
+  const { data } = await api.delete('/v1/sessions');
   return data;
 };

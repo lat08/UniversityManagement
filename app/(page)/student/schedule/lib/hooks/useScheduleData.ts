@@ -135,10 +135,11 @@ export const useScheduleData = () => {
           setError(response.message || "Không có dữ liệu thời khóa biểu")
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { success?: boolean; message?: string } } };
       // Kiểm tra nếu là response từ server với success: false
-      if (error?.response?.data?.success === false) {
-        const response = error.response.data
+      if (err?.response?.data?.success === false) {
+        const response = err.response.data
         setScheduleData([])
         // Không hiển thị lỗi nếu chỉ là không có dữ liệu
         if (response.message && (
@@ -181,10 +182,11 @@ export const useScheduleData = () => {
           setError(response.message || "Không có dữ liệu thời khóa biểu")
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { success?: boolean; message?: string } } };
       // Kiểm tra nếu là response từ server với success: false
-      if (error?.response?.data?.success === false) {
-        const response = error.response.data
+      if (err?.response?.data?.success === false) {
+        const response = err.response.data
         setScheduleData([])
         // Không hiển thị lỗi nếu chỉ là không có dữ liệu
         if (response.message && (

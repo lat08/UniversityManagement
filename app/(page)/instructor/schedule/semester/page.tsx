@@ -105,7 +105,7 @@ export default function InstructorSemesterSchedulePage() {
               </div>
 
               {/* Print Button */}
-              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none cursor-pointer transition-colors whitespace-nowrap">
+              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
@@ -117,36 +117,36 @@ export default function InstructorSemesterSchedulePage() {
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 border border-gray-300">
-                  <thead style={{ backgroundColor: '#4E8EE1' }}>
+                  <thead className="bg-[var(--primary)]">
                     <tr>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Mã MH
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Tên môn học
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Nhóm tổ
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Số tín chỉ
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Lớp
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Thứ
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Tiết bắt đầu
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Số tiết
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-r border-white">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Phòng
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider">
                         Thời gian dạy
                       </th>
                     </tr>
@@ -156,8 +156,8 @@ export default function InstructorSemesterSchedulePage() {
                       <tr 
                         key={course.id}
                         className={cn(
-                          "hover:bg-blue-50 transition-colors border-b border-gray-200",
-                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                          "hover:bg-[var(--primary-light)] transition-colors border-b border-gray-200",
+                          index % 2 === 0 ? "bg-white" : "bg-[var(--bg-secondary)]"
                         )}
                       >
                         <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">

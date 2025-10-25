@@ -50,29 +50,29 @@ export default function InstructorWeeklySchedulePage() {
   const getColorClasses = (color: string, isHovered: boolean) => {
     const colors: Record<string, { bg: string; hover: string; border: string }> = {
       blue: {
-        bg: "bg-blue-200",
-        hover: "bg-blue-300",
-        border: "border-blue-400",
+        bg: "bg-[var(--chart-1)]",
+        hover: "bg-[var(--primary-hover)]",
+        border: "border-[var(--primary)]",
       },
       red: {
-        bg: "bg-red-200",
-        hover: "bg-red-300",
-        border: "border-red-400",
+        bg: "bg-[var(--chart-4)]",
+        hover: "bg-[var(--error)]",
+        border: "border-[var(--error)]",
       },
       green: {
-        bg: "bg-green-200",
-        hover: "bg-green-300",
-        border: "border-green-400",
+        bg: "bg-[var(--chart-2)]",
+        hover: "bg-[var(--success)]",
+        border: "border-[var(--success)]",
       },
       yellow: {
-        bg: "bg-yellow-200",
-        hover: "bg-yellow-300",
-        border: "border-yellow-400",
+        bg: "bg-[var(--chart-3)]",
+        hover: "bg-[var(--warning)]",
+        border: "border-[var(--warning)]",
       },
     }
 
     const colorClass = colors[color] || colors.blue
-    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-gray-900`
+    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--text-primary)]`
   }
 
   const handleMouseEnter = (courseId: string, event: React.MouseEvent) => {
@@ -272,7 +272,7 @@ export default function InstructorWeeklySchedulePage() {
               </div>
 
               {/* Print Button */}
-              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none cursor-pointer transition-colors whitespace-nowrap">
+              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
@@ -288,7 +288,7 @@ export default function InstructorWeeklySchedulePage() {
                   <div className="flex gap-2 mb-2">
                     {/* Top left corner button */}
                     <div className="w-[90px] flex-shrink-0">
-                      <button className="w-full h-[60px] text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer hover:opacity-90" style={{ backgroundColor: '#4E8EE1' }}>
+                      <button className="w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors cursor-pointer hover:opacity-90 bg-[var(--primary)]">
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                     </div>
@@ -297,8 +297,7 @@ export default function InstructorWeeklySchedulePage() {
                     {daysOfWeek.map((day) => (
                       <div
                         key={day.value}
-                        className="flex-1 min-w-[120px] text-white rounded-lg flex flex-col items-center justify-center h-[60px]"
-                        style={{ backgroundColor: '#4E8EE1' }}
+                        className="flex-1 min-w-[120px] text-[var(--primary-foreground)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--primary)]"
                       >
                         <div className="font-semibold text-sm">{day.label}</div>
                         <div className="text-xs mt-1">{day.subLabel}</div>
@@ -307,7 +306,7 @@ export default function InstructorWeeklySchedulePage() {
 
                     {/* Top right corner button */}
                     <div className="w-[90px] flex-shrink-0">
-                      <button className="w-full h-[60px] text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer hover:opacity-90" style={{ backgroundColor: '#4E8EE1' }}>
+                      <button className="w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors cursor-pointer hover:opacity-90 bg-[var(--primary)]">
                         <ChevronRight className="w-5 h-5" />
                       </button>
                     </div>
@@ -318,7 +317,7 @@ export default function InstructorWeeklySchedulePage() {
                     {periods.map((period) => (
                       <div key={period} className="flex gap-2 mb-2">
                         {/* Period Label */}
-                        <div className="w-[90px] flex-shrink-0 text-white rounded-lg flex items-center justify-center font-semibold text-sm h-[52px]" style={{ backgroundColor: '#4E8EE1' }}>
+                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
                           Tiết {period}
                         </div>
 
@@ -366,7 +365,7 @@ export default function InstructorWeeklySchedulePage() {
                         })}
 
                         {/* Time Column */}
-                        <div className="w-[90px] flex-shrink-0 text-white rounded-lg flex items-center justify-center text-[10px] leading-tight text-center px-1 h-[52px]" style={{ backgroundColor: '#4E8EE1' }}>
+                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center text-[10px] leading-tight text-center px-1 h-[52px] bg-[var(--primary)]">
                           7:15 - 8:05
                         </div>
                       </div>
@@ -452,14 +451,7 @@ export default function InstructorWeeklySchedulePage() {
                             <div className="pt-2 border-t border-gray-700">
                               <button
                                 onClick={() => handleScheduleChangeRequest(course.id)}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white rounded text-xs font-medium transition-colors cursor-pointer"
-                                style={{ backgroundColor: '#4E8EE1' }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#3A7BC8'
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = '#4E8EE1'
-                                }}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[var(--primary-foreground)] rounded text-xs font-medium transition-colors cursor-pointer bg-[var(--primary)] hover:bg-[var(--primary-hover)]"
                               >
                                 <Calendar className="w-3 h-3" />
                                 Đề xuất đổi lịch
@@ -475,7 +467,7 @@ export default function InstructorWeeklySchedulePage() {
 
           {/* Schedule Change Modal */}
           {isScheduleChangeModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center z-[100] backdrop-blur-[2px]" style={{ backgroundColor: 'rgba(148, 163, 184, 0.25)' }}>
+            <div className="fixed inset-0 flex items-center justify-center z-[100] backdrop-blur-[2px] bg-[var(--muted-foreground)]/25">
               <div className="bg-white rounded-lg shadow-xl w-[500px] max-w-[90vw] max-h-[90vh] overflow-hidden">
                 {/* Modal Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -554,10 +546,7 @@ export default function InstructorWeeklySchedulePage() {
                   <button
                     onClick={handleSubmitScheduleChange}
                     disabled={!selectedTimeSlot}
-                    className="px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ 
-                      backgroundColor: selectedTimeSlot ? '#4E8EE1' : '#9CA3AF'
-                    }}
+                    className="px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--button-primary)] hover:bg-[var(--button-primary-hover)] disabled:bg-[var(--muted)]"
                   >
                     Gửi
                   </button>

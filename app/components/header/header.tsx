@@ -3,7 +3,7 @@
 import { Menu } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
 import { Avatar, AvatarFallback } from "@/app/components/ui/avatar"
-import { NotificationPopup } from "@/app/components/notification/header-popup/content/page"
+import { NotificationPopup } from "@/app/components/notification/header-popup/content/NotificationContent"
 import { useAuthStore } from "@/lib/store/authStore"
 
 interface HeaderProps {
@@ -28,7 +28,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
     return src.slice(0, 2).toUpperCase()
   })()
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[var(--header-border)] bg-[var(--header)] px-4 lg:px-6">
       <Button variant="ghost" size="icon" onClick={onMobileMenuToggle} className="lg:hidden">
         <Menu className="h-5 w-5" />
       </Button>

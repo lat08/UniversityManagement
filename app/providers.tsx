@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster, useToasterStore, toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
+import { ThemeProvider } from './providers/ThemeProvider';
 
 const TOAST_LIMIT = 1;
 
@@ -34,8 +35,9 @@ export default function AppProviders({ children }: { children: React.ReactNode }
 
   return (
     <QueryClientProvider client={client}>
-      {children}
-      <ToastLimit />
+      <ThemeProvider>
+        {children}
+        <ToastLimit />
       <Toaster 
         position="bottom-right"
         reverseOrder={false}
@@ -93,6 +95,7 @@ export default function AppProviders({ children }: { children: React.ReactNode }
         }}
       />
       <ReactQueryDevtools initialIsOpen={false} />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

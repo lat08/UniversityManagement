@@ -171,7 +171,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
+          "fixed left-0 top-0 z-50 h-screen bg-[var(--sidebar)] border-r border-[var(--sidebar-border)] transition-all duration-300 ease-in-out",
           "lg:z-40",
           isCollapsed ? "lg:w-20" : "lg:w-64",
           "w-64",
@@ -181,7 +181,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className={cn(
-            "flex items-center border-b border-gray-300 h-16 relative",
+            "flex items-center border-b border-[var(--sidebar-border)] h-16 relative",
             isCollapsed ? "px-2 justify-center" : "px-4 lg:px-6",
             "lg:justify-between"
           )}>
@@ -209,17 +209,17 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                 "flex flex-col",
                 isCollapsed && "lg:hidden"
               )}>
-                <span className="text-[10px] lg:text-xs font-bold text-gray-600">ĐẠI HỌC</span>
-                <span className="text-xs lg:text-sm font-bold text-gray-900">QUỐC TẾ SÀI GÒN</span>
+                <span className="text-[10px] lg:text-xs font-bold text-[var(--sidebar-foreground)] opacity-70">ĐẠI HỌC</span>
+                <span className="text-xs lg:text-sm font-bold text-[var(--sidebar-foreground)]">QUỐC TẾ SÀI GÒN</span>
               </div>
             </div>
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={onToggle} 
-              className="h-6 w-6 hidden lg:flex cursor-pointer absolute -right-3 top-1/2 -translate-y-1/2 bg-white border border-gray-300 rounded-md shadow-sm hover:shadow-md z-50 p-0"
+              className="h-6 w-6 hidden lg:flex cursor-pointer absolute -right-3 top-1/2 -translate-y-1/2 bg-[var(--sidebar)] border border-[var(--sidebar-border)] rounded-md shadow-sm hover:shadow-md hover:bg-[var(--sidebar-hover)] z-50 p-0 transition-colors"
             >
-              {isCollapsed ? <ChevronRight className="h-3.5 w-3.5 text-gray-700" /> : <ChevronLeft className="h-3.5 w-3.5 text-gray-700" />}
+              {isCollapsed ? <ChevronRight className="h-3.5 w-3.5 text-[var(--sidebar-item-text)]" /> : <ChevronLeft className="h-3.5 w-3.5 text-[var(--sidebar-item-text)]" />}
             </Button>
           </div>
 
@@ -229,10 +229,10 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
               {sections.map((section, sectionIndex) => (
                 <div key={sectionIndex} className="mb-4">
                   {sectionIndex > 0 && (
-                    <hr className="my-3 border-gray-300" />
+                    <hr className="my-3 border-[var(--sidebar-border)]" />
                   )}
                   <h3 className={cn(
-                    "mb-2 px-3 text-xs font-semibold text-gray-400 uppercase",
+                    "mb-2 px-3 text-xs font-semibold text-[var(--sidebar-foreground)] opacity-50 uppercase",
                     isCollapsed && "lg:hidden"
                   )}>{section.title}</h3>
                   <div className="space-y-1">
@@ -255,8 +255,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                       <Button
                                         variant="ghost"
                                         className={cn(
-                                          "w-full justify-center px-2 text-gray-700 hover:bg-[#DBEDFF] cursor-pointer",
-                                          isActive && "bg-[#0053AD] text-white hover:bg-[#0053AD] hover:text-white",
+                                          "w-full justify-center px-2 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                                          isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]",
                                         )}
                                       >
                                         <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -293,8 +293,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                 <Button
                                   variant="ghost"
                                   className={cn(
-                                    "w-full justify-center px-2 text-gray-700 hover:bg-[#DBEDFF] cursor-pointer",
-                                    isActive && "bg-[#0053AD] text-white hover:bg-[#0053AD] hover:text-white",
+                                    "w-full justify-center px-2 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                                    isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]",
                                   )}
                                   onClick={() => router.push(item.href)}
                                 >
@@ -315,8 +315,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                           <Button
                             variant="ghost"
                             className={cn(
-                              "w-full justify-start gap-3 text-gray-700 hover:bg-[#DBEDFF] cursor-pointer",
-                              isActive && "bg-[#0053AD] text-white hover:bg-[#0053AD] hover:text-white",
+                              "w-full justify-start gap-3 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                              isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]",
                             )}
                             onClick={() => {
                               if (!item.expandable) {
@@ -346,8 +346,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                     key={subIndex}
                                     variant="ghost"
                                     className={cn(
-                                      "w-full justify-start text-sm hover:bg-[#DBEDFF] cursor-pointer",
-                                      isSubActive ? "bg-[#0053AD] text-white font-semibold hover:bg-[#0053AD] hover:text-white" : "text-gray-600"
+                                      "w-full justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                                      isSubActive ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] font-semibold hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]" : "text-[var(--sidebar-item-text)] opacity-80"
                                     )}
                                     onClick={() => {
                                       router.push(subItem.href)
@@ -370,13 +370,13 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
           {/* Footer */}
           <TooltipProvider delayDuration={300}>
-            <div className="border-t border-gray-200 p-2">
+            <div className="border-t border-[var(--sidebar-border)] p-2">
               {isCollapsed ? (
                 <>
                   <div className="hidden lg:block">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-center px-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                        <Button variant="ghost" className="w-full justify-center px-2 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer">
                           <HelpCircle className="h-5 w-5 flex-shrink-0" />
                         </Button>
                       </TooltipTrigger>
@@ -406,7 +406,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
               
               {/* Mobile and desktop expanded view */}
               <div className={cn(isCollapsed && "lg:hidden")}> 
-                <Button variant="ghost" className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                <Button variant="ghost" className="w-full justify-start gap-3 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer">
                   <HelpCircle className="h-5 w-5 flex-shrink-0" />
                   <span className="text-sm">Trợ giúp</span>
                 </Button>

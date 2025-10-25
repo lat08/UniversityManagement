@@ -23,11 +23,11 @@ api.interceptors.request.use((config) => {
 // Response interceptor để xử lý refresh token
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value: any) => void;
-  reject: (error: any) => void;
+  resolve: (value: unknown) => void;
+  reject: (error: unknown) => void;
 }> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
       reject(error);
@@ -49,9 +49,9 @@ api.interceptors.response.use(
                           error?.response?.headers?.['token-expired'] === 'true';
     
     // Loại trừ các endpoint đăng nhập khỏi interceptor
-    const isLoginEndpoint = originalRequest.url?.includes('/Auth/login') || 
-                           originalRequest.url?.includes('/Auth/forgot-password') ||
-                           originalRequest.url?.includes('/Auth/refresh-token');
+    const isLoginEndpoint = originalRequest.url?.includes('/sessions') || 
+                           originalRequest.url?.includes('/passwords/reset') ||
+                           originalRequest.url?.includes('/tokens');
     
     if (isTokenExpired && !originalRequest._retry && !isLoginEndpoint) {
       if (isRefreshing) {
@@ -77,7 +77,7 @@ api.interceptors.response.use(
 
         // Gọi API refresh token
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/edu/api'}/v1/Auth/refresh-token`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/edu/api'}/v1/tokens`,
           { refreshToken },
           {
             headers: {
