@@ -1,22 +1,22 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight, FileText, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
-import { sampleSchedule } from "../lib/data/weeklyData"
-import { SEMESTERS, WEEKS, DAYS_OF_WEEK, PERIODS } from "../lib/constants/scheduleConstants"
-import { getColorClasses, getPeriodTime, getDayName } from "../lib/utils/scheduleUtils"
+import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "../lib/constants/index"
+import { useInstructorWeeklySchedule } from "../lib/hooks/useInstructorWeeklySchedule"
 
 
 export default function InstructorWeeklySchedulePage() {
   usePageTitle('TKB theo tuần');
-  const [selectedSemester, setSelectedSemester] = useState("Học kỳ 1 - Năm học 2025-2026")
-  const [selectedWeek, setSelectedWeek] = useState("Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]")
-  const [hoveredCourse, setHoveredCourse] = useState<string | null>(null)
-  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 })
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
   const [isWeekOpen, setIsWeekOpen] = useState(false)
+  const [isViewTypeOpen, setIsViewTypeOpen] = useState(false)
+  const [isSubjectOpen, setIsSubjectOpen] = useState(false)
+  const [subjectSearchTerm, setSubjectSearchTerm] = useState("")
+  const [hoveredCourse, setHoveredCourse] = useState<string | null>(null)
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 })
   const [isTooltipPinned, setIsTooltipPinned] = useState(false)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isScheduleChangeModalOpen, setIsScheduleChangeModalOpen] = useState(false)
@@ -24,30 +24,28 @@ export default function InstructorWeeklySchedulePage() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("")
   const [isTimeOpen, setIsTimeOpen] = useState(false)
 
-  const semesters = [
-    "Học kỳ 1 - Năm học 2025-2026",
-    "Học kỳ 2 - Năm học 2024-2025",
-    "Học kỳ 3 - Năm học 2024-2025",
-  ]
+  const {
+    semesters,
+    selectedSemester,
+    weeks,
+    selectedWeek,
+    scheduleData,
+    subjects,
+    selectedSubject,
+    viewType,
+    isLoading,
+    error,
+    handleSemesterChange,
+    handleWeekChange,
+    handleViewTypeChange,
+    handleSubjectChange,
+  } = useInstructorWeeklySchedule()
 
-  const weeks = [
-    "Tuần 1 [từ ngày 1/9/2025 đến ngày 7/9/2025]",
-    "Tuần 2 [từ ngày 8/9/2025 đến ngày 14/9/2025]",
-    "Tuần 3 [từ ngày 15/9/2025 đến ngày 21/9/2025]",
-    "Tuần 4 [từ ngày 29/9/2025 đến ngày 5/10/2025]",
-    "Tuần 5 [từ ngày 6/10/2025 đến ngày 12/10/2025]",
-  ]
-
-  const periods = Array.from({ length: 13 }, (_, i) => i + 1)
-  const daysOfWeek = [
-    { label: "Thứ hai", subLabel: "29/9", value: 2 },
-    { label: "Thứ ba", subLabel: "30/9", value: 3 },
-    { label: "Thứ tư", subLabel: "1/10", value: 4 },
-    { label: "Thứ năm", subLabel: "2/10", value: 5 },
-    { label: "Thứ sáu", subLabel: "3/10", value: 6 },
-    { label: "Thứ bảy", subLabel: "4/10", value: 7 },
-    { label: "Chủ nhật", subLabel: "5/10", value: 8 },
-  ]
+  // Filter subjects based on search term
+  const filteredSubjects = subjects.filter(subject => 
+    subject.subjectName.toLowerCase().includes(subjectSearchTerm.toLowerCase()) ||
+    subject.subjectCode.toLowerCase().includes(subjectSearchTerm.toLowerCase())
+  )
 
   const getColorClasses = (color: string, isHovered: boolean) => {
     const colors: Record<string, { bg: string; hover: string; border: string }> = {
@@ -165,15 +163,110 @@ export default function InstructorWeeklySchedulePage() {
     "Thứ 6, tiết 1 - tiết 5, phòng DQA123"
   ]
 
+  // Navigation functions for week buttons
+  const handlePreviousWeek = () => {
+    if (!selectedWeek || weeks.length === 0) return;
+    
+    const currentIndex = weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber);
+    if (currentIndex > 0) {
+      handleWeekChange(weeks[currentIndex - 1].weekNumber);
+    }
+  };
+
+  const handleNextWeek = () => {
+    if (!selectedWeek || weeks.length === 0) return;
+    
+    const currentIndex = weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber);
+    if (currentIndex < weeks.length - 1) {
+      handleWeekChange(weeks[currentIndex + 1].weekNumber);
+    }
+  };
+
+  // Check if navigation buttons should be disabled
+  const canGoPrevious = selectedWeek && weeks.length > 0 && 
+    weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) > 0;
+  
+  const canGoNext = selectedWeek && weeks.length > 0 && 
+    weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) < weeks.length - 1;
+
+  // Format semester and week for display
+  const formatWeekDisplay = (week: { weekNumber: number; startDate: string; endDate: string } | null) => {
+    if (!week) return "Chọn tuần";
+    const start = new Date(week.startDate).toLocaleDateString('vi-VN');
+    const end = new Date(week.endDate).toLocaleDateString('vi-VN');
+    return `Tuần ${week.weekNumber} [từ ngày ${start} đến ngày ${end}]`;
+  };
+
+  // Calculate dates for the current week
+  const weekDates = useMemo(() => {
+    if (!selectedWeek) return [];
+    
+    const startDate = new Date(selectedWeek.startDate);
+    const dates = [];
+    
+    // Generate dates for Monday to Sunday (7 days)
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      dates.push(date);
+    }
+    
+    return dates;
+  }, [selectedWeek]);
+
+  // Transform API data to match component structure
+  const transformedSchedule = useMemo(() => {
+    return scheduleData.map((item) => {
+      // Map courseType to color: Lý thuyết = blue, Thực hành = red
+      const getColorByCourseType = (courseType?: string): string => {
+        if (!courseType) return 'blue';
+        const lowerType = courseType.toLowerCase();
+        if (lowerType.includes('lý thuyết') || lowerType.includes('ly thuyet')) {
+          return 'blue';
+        }
+        if (lowerType.includes('thực hành') || lowerType.includes('thuc hanh')) {
+          return 'red';
+        }
+        return 'blue'; // default
+      };
+      
+      return {
+        id: `${item.subjectCode}-${item.startPeriod}-${item.dayOfWeek}-${item.date}-${item.roomCode}`,
+        name: item.subjectName,
+        code: item.subjectCode,
+        room: item.roomName && item.roomCode 
+          ? `${item.roomName} (${item.roomCode})` 
+          : item.roomCode || '-',
+        class: item.classCode || '-',
+        dayOfWeek: item.dayOfWeek,
+        startPeriod: item.startPeriod,
+        periodsCount: item.numberOfPeriods,
+        color: getColorByCourseType(item.courseType),
+        courseType: item.courseType || '',
+        note: item.note,
+        date: item.date,
+      };
+    });
+  }, [scheduleData]);
+
   // Close dropdowns and tooltip when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       
-      // Close dropdowns
-      if (!target.closest('.dropdown-container')) {
+      // Check if clicking on any dropdown container
+      const semesterDropdown = target.closest('[data-dropdown="semester"]')
+      const weekDropdown = target.closest('[data-dropdown="week"]')
+      const viewDropdown = target.closest('[data-dropdown="view"]')
+      const subjectDropdown = target.closest('[data-dropdown="subject"]')
+      
+      // Close dropdowns if clicking outside all dropdowns
+      if (!semesterDropdown && !weekDropdown && !viewDropdown && !subjectDropdown) {
         setIsSemesterOpen(false)
         setIsWeekOpen(false)
+        setIsViewTypeOpen(false)
+        setIsSubjectOpen(false)
+        setSubjectSearchTerm("")
         setIsTimeOpen(false)
       }
       
@@ -211,32 +304,45 @@ export default function InstructorWeeklySchedulePage() {
               </p>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                {error}
+              </div>
+            )}
+
             {/* Filters */}
-            <div className="mb-6 flex gap-4 items-stretch w-full">
+            <div className="mb-4 flex gap-4 items-stretch w-full">
               {/* Semester Dropdown */}
-              <div className="relative flex-1 dropdown-container">
+              <div className="relative flex-1 dropdown-container" data-dropdown="semester">
                 <button 
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => {
                     setIsSemesterOpen(!isSemesterOpen)
                     setIsWeekOpen(false)
+                    setIsViewTypeOpen(false)
+                    setIsSubjectOpen(false)
+                    setSubjectSearchTerm("")
                   }}
+                  disabled={isLoading}
                 >
-                  <span className="text-sm text-gray-900">{selectedSemester}</span>
+                  <span className="text-sm text-gray-900">
+                    {selectedSemester?.semesterName || "Đang tải..."}
+                  </span>
                   <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
                 </button>
                 {isSemesterOpen && (
                   <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {semesters.map((semester, index) => (
+                    {semesters.map((semester) => (
                       <button
-                        key={index}
+                        key={semester.semesterId}
                         className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
                         onClick={() => {
-                          setSelectedSemester(semester)
+                          handleSemesterChange(semester.semesterId)
                           setIsSemesterOpen(false)
                         }}
                       >
-                        {semester}
+                        {semester.semesterName}
                       </button>
                     ))}
                   </div>
@@ -244,29 +350,35 @@ export default function InstructorWeeklySchedulePage() {
               </div>
 
               {/* Week Dropdown */}
-              <div className="relative flex-1 dropdown-container">
+              <div className="relative flex-1 dropdown-container" data-dropdown="week">
                 <button 
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => {
                     setIsWeekOpen(!isWeekOpen)
                     setIsSemesterOpen(false)
+                    setIsViewTypeOpen(false)
+                    setIsSubjectOpen(false)
+                    setSubjectSearchTerm("")
                   }}
+                  disabled={isLoading || weeks.length === 0}
                 >
-                  <span className="text-sm text-gray-900">{selectedWeek}</span>
+                  <span className="text-sm text-gray-900">
+                    {formatWeekDisplay(selectedWeek)}
+                  </span>
                   <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
                 </button>
                 {isWeekOpen && (
                   <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {weeks.map((week, index) => (
+                    {weeks.map((week) => (
                       <button
-                        key={index}
+                        key={week.weekNumber}
                         className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
                         onClick={() => {
-                          setSelectedWeek(week)
+                          handleWeekChange(week.weekNumber)
                           setIsWeekOpen(false)
                         }}
                       >
-                        {week}
+                        {formatWeekDisplay(week)}
                       </button>
                     ))}
                   </div>
@@ -274,12 +386,123 @@ export default function InstructorWeeklySchedulePage() {
               </div>
 
               {/* Print Button */}
-              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap">
+              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
                 <span className="text-sm font-medium">In</span>
               </button>
+            </div>
+
+            {/* View Type and Subject Filters */}
+            <div className="mb-6 flex gap-4 items-stretch w-full mt-2">
+              {/* View Type Dropdown */}
+              <div className="relative flex-1 dropdown-container" data-dropdown="view">
+                <button 
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    setIsViewTypeOpen(!isViewTypeOpen)
+                    setIsSemesterOpen(false)
+                    setIsWeekOpen(false)
+                    setIsSubjectOpen(false)
+                    setSubjectSearchTerm("")
+                  }}
+                  disabled={isLoading}
+                >
+                  <span className="text-sm text-gray-900">
+                    {viewType === 'week' ? 'Thời khóa biểu cá nhân' : 'Thời khóa biểu theo môn học'}
+                  </span>
+                  <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+                </button>
+                {isViewTypeOpen && (
+                  <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+                    <button
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+                      onClick={() => {
+                        handleViewTypeChange('week')
+                        setIsViewTypeOpen(false)
+                      }}
+                    >
+                      Thời khóa biểu cá nhân
+                    </button>
+                    <button
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                      onClick={() => {
+                        handleViewTypeChange('subject')
+                        setIsViewTypeOpen(false)
+                      }}
+                    >
+                      Thời khóa biểu theo môn học
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Subject Dropdown - Only show when viewType is 'subject' */}
+              {viewType === 'subject' ? (
+                <div className="relative flex-1 dropdown-container" data-dropdown="subject">
+                  <button 
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      setIsSubjectOpen(!isSubjectOpen)
+                      setIsSemesterOpen(false)
+                      setIsWeekOpen(false)
+                      setIsViewTypeOpen(false)
+                    }}
+                    disabled={isLoading || subjects.length === 0}
+                  >
+                    <span className="text-sm text-gray-900">
+                      {selectedSubject ? `${selectedSubject.subjectCode} - ${selectedSubject.subjectName}` : 'Chọn môn học'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+                  </button>
+                  {isSubjectOpen && (
+                    <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                      {/* Search input */}
+                      <div className="p-3 border-b border-gray-200">
+                        <input
+                          type="text"
+                          placeholder="Tìm kiếm môn học..."
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          value={subjectSearchTerm}
+                          onChange={(e) => setSubjectSearchTerm(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      
+                      {/* Subject list */}
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredSubjects.length > 0 ? (
+                          filteredSubjects.map((subject) => (
+                            <button
+                              key={subject.subjectId}
+                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
+                              onClick={() => {
+                                handleSubjectChange(subject.subjectId)
+                                setIsSubjectOpen(false)
+                                setSubjectSearchTerm("")
+                              }}
+                            >
+                              {subject.subjectCode} - {subject.subjectName}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                            Không tìm thấy môn học
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex-1"></div>
+              )}
+
+              {/* Spacer to match Print button width */}
+              <div className="w-[100px]"></div>
             </div>
 
             {/* Schedule Grid */}
@@ -288,27 +511,51 @@ export default function InstructorWeeklySchedulePage() {
                 <div className="inline-block min-w-full align-middle">
                   {/* Header Row */}
                   <div className="flex gap-2 mb-2">
-                    {/* Top left corner button */}
+                    {/* Top left corner button - Previous Week */}
                     <div className="w-[90px] flex-shrink-0">
-                      <button className="w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors cursor-pointer hover:opacity-90 bg-[var(--primary)]">
+                      <button 
+                        className={cn(
+                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
+                          canGoPrevious 
+                            ? "cursor-pointer hover:opacity-90" 
+                            : "cursor-not-allowed opacity-50"
+                        )}
+                        onClick={handlePreviousWeek}
+                        disabled={!canGoPrevious}
+                      >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                     </div>
 
                     {/* Days of week */}
-                    {daysOfWeek.map((day) => (
-                      <div
-                        key={day.value}
-                        className="flex-1 min-w-[120px] text-[var(--primary-foreground)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--primary)]"
-                      >
-                        <div className="font-semibold text-sm">{day.label}</div>
-                        <div className="text-xs mt-1">{day.subLabel}</div>
-                      </div>
-                    ))}
+                    {DAYS_OF_WEEK.map((day: { value: number; label: string; subLabel: string }, index: number) => {
+                      const dayDate = weekDates[index];
+                      const formattedDate = dayDate ? 
+                        `${dayDate.getDate().toString().padStart(2, '0')}/${(dayDate.getMonth() + 1).toString().padStart(2, '0')}` : '';
+                      
+                      return (
+                        <div
+                          key={day.value}
+                          className="flex-1 min-w-[120px] text-[var(--primary-foreground)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--primary)]"
+                        >
+                          <div className="font-semibold text-sm">{day.label}</div>
+                          <div className="text-xs mt-1">{formattedDate || day.subLabel}</div>
+                        </div>
+                      );
+                    })}
 
-                    {/* Top right corner button */}
+                    {/* Top right corner button - Next Week */}
                     <div className="w-[90px] flex-shrink-0">
-                      <button className="w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors cursor-pointer hover:opacity-90 bg-[var(--primary)]">
+                      <button 
+                        className={cn(
+                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
+                          canGoNext 
+                            ? "cursor-pointer hover:opacity-90" 
+                            : "cursor-not-allowed opacity-50"
+                        )}
+                        onClick={handleNextWeek}
+                        disabled={!canGoNext}
+                      >
                         <ChevronRight className="w-5 h-5" />
                       </button>
                     </div>
@@ -316,7 +563,7 @@ export default function InstructorWeeklySchedulePage() {
 
                   {/* Schedule Grid */}
                   <div className="relative">
-                    {periods.map((period) => (
+                    {PERIODS.map((period: number) => (
                       <div key={period} className="flex gap-2 mb-2">
                         {/* Period Label */}
                         <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
@@ -324,8 +571,8 @@ export default function InstructorWeeklySchedulePage() {
                         </div>
 
                         {/* Day Cells */}
-                        {daysOfWeek.map((day) => {
-                          const course = sampleSchedule.find(
+                        {DAYS_OF_WEEK.map((day: { value: number; label: string }) => {
+                          const course = transformedSchedule.find(
                             (c) => c.dayOfWeek === day.value && c.startPeriod === period
                           )
 
@@ -367,8 +614,8 @@ export default function InstructorWeeklySchedulePage() {
                         })}
 
                         {/* Time Column */}
-                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center text-[10px] leading-tight text-center px-1 h-[52px] bg-[var(--primary)]">
-                          7:15 - 8:05
+                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
+                          {PERIOD_TIMES.find((p: { period: number; time: string }) => p.period === period)?.time || ''}
                         </div>
                       </div>
                     ))}
@@ -403,10 +650,11 @@ export default function InstructorWeeklySchedulePage() {
                   
                   {/* Tooltip content */}
                   <div className="bg-gray-900 text-white p-4 rounded-md shadow-2xl w-[320px] select-text">
-                    {sampleSchedule
+                    {transformedSchedule
                       .filter((c) => c.id === hoveredCourse)
                       .map((course) => {
-                        const dayName = daysOfWeek.find((d) => d.value === course.dayOfWeek)?.label || ""
+                        const dayName = DAYS_OF_WEEK.find((d: { value: number; label: string }) => d.value === course.dayOfWeek)?.label || ""
+                        const courseDate = new Date(course.date).toLocaleDateString('vi-VN')
                         return (
                           <div key={course.id} className="space-y-3">
                             {/* Course Info */}
@@ -417,6 +665,11 @@ export default function InstructorWeeklySchedulePage() {
                               <div>
                                 <span className="font-semibold">Môn:</span> {course.name}
                               </div>
+                              {course.courseType && (
+                                <div>
+                                  <span className="font-semibold">Loại:</span> {course.courseType}
+                                </div>
+                              )}
                               <div>
                                 <span className="font-semibold">Lớp:</span> {course.class}
                               </div>
@@ -427,27 +680,14 @@ export default function InstructorWeeklySchedulePage() {
                                 <span className="font-semibold">{dayName} - Tiết:</span> {course.startPeriod} - Số tiết: {course.periodsCount}
                               </div>
                               <div>
-                                <span className="font-semibold">Ngày:</span> {course.dayOfWeek === 5 ? "15/09/2025" : course.dayOfWeek === 4 ? "01/10/2025" : "30/09/2025"}
+                                <span className="font-semibold">Ngày:</span> {courseDate}
                               </div>
+                              {course.note && (
+                                <div>
+                                  <span className="font-semibold">Ghi chú:</span> {course.note}
+                                </div>
+                              )}
                             </div>
-
-                            {/* Documents Section */}
-                            {course.documents && course.documents.length > 0 && (
-                              <div className="pt-2 border-t border-gray-700">
-                                <div className="flex items-center gap-1 mb-2">
-                                  <FileText className="w-3 h-3" />
-                                  <span className="font-semibold text-xs">Tài liệu đã gắn:</span>
-                                </div>
-                                <div className="space-y-1">
-                                  {course.documents.map((doc, index) => (
-                                    <div key={index} className="text-[10px] text-blue-300 hover:text-blue-200 cursor-pointer flex items-center gap-1">
-                                      <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
-                                      {doc}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
 
                             {/* Schedule Change Request Button */}
                             <div className="pt-2 border-t border-gray-700">
