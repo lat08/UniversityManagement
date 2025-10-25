@@ -27,5 +27,6 @@ export {
   getPageById,
   getAllColorKeys,
   getColorConfigByKey,
+  getCompleteThemeColors,
 } from './constants';
 
