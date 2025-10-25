@@ -6,7 +6,7 @@ import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { useTheme } from '@/app/providers/ThemeProvider';
 import { themeApi, type ThemeConfig, type CreateThemeRequest } from './lib';
-import { getAllPages, type PageThemeConfig } from './lib';
+import { getAllPages, getCompleteThemeColors, type PageThemeConfig } from './lib';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { PageThemeEditor } from './components/PageThemeEditor';
@@ -113,16 +113,35 @@ export default function ThemeConfigurationPage() {
       return;
     }
 
-    if (!currentTheme?.colors) {
-      toast.error('Không có dữ liệu màu sắc');
-      return;
+    // Generate complete theme colors with all required fields
+    const baseColors = getCompleteThemeColors(isDarkMode);
+    
+    // Merge: use currentTheme colors if exists, but ensure ALL required fields are present
+    // Fill missing fields from baseColors
+    const completeColors = { ...baseColors };
+    if (currentTheme?.colors) {
+      Object.keys(currentTheme.colors).forEach((key) => {
+        const value = currentTheme.colors[key as keyof typeof currentTheme.colors];
+        if (value !== null && value !== undefined && value !== '') {
+          completeColors[key as keyof typeof completeColors] = value;
+        }
+      });
     }
+
+    // Debug: check if sidebarHover exists
+    console.log('=== CREATE THEME DEBUG ===');
+    console.log('baseColors.sidebarHover:', baseColors.sidebarHover);
+    console.log('currentTheme.colors.sidebarHover:', currentTheme?.colors?.sidebarHover);
+    console.log('completeColors.sidebarHover:', completeColors.sidebarHover);
+    console.log('completeColors keys count:', Object.keys(completeColors).length);
+    console.log('Missing fields:', Object.keys(baseColors).filter(k => !(k in completeColors)));
+    console.log('=========================');
 
     createMutation.mutate({
       themeName: newThemeName,
       description: newThemeDescription,
       scopeType: 'global',
-      colors: currentTheme.colors,
+      colors: completeColors,
     });
   };
 
