@@ -51,7 +51,7 @@ export const calculateSemesterStats = (courses: Course[], semesterName: string):
   }
 }
 
-export const calculateCumulativeGPA = (semesterData: any[]) => {
+export const calculateCumulativeGPA = (semesterData: Array<{ courses: Course[] }>) => {
   const allCompletedCourses = semesterData.flatMap((sem) =>
     sem.courses.filter((c: Course) => c.status === "Đạt" && c.score10 !== null),
   ) as Course[]

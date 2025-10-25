@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/app/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 import { mockNotifications } from "@/app/(page)/student/notification/libs/constants/notificationConstants"
-import { NotificationCard } from "@/app/components/notification/header-popup/notification-card/page"
+import { NotificationCard } from "@/app/components/notification/header-popup/notification-card/NotificationCard"
 
 
 

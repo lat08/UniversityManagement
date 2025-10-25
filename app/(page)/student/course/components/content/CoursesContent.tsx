@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/components/ui/dialog"
-import { RegisteredCourses } from "./registered/page"
-import { AvailableCourses } from "./register/page"
+import { RegisteredCourses } from "./registered/RegisteredTab"
+import { AvailableCourses } from "./register/RegisterTab"
 import toast from "react-hot-toast" 
 
 interface Course {

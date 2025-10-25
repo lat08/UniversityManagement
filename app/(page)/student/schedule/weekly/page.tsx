@@ -20,29 +20,29 @@ export default function WeeklySchedulePage() {
   const getColorClasses = (color: string, isHovered: boolean) => {
     const colors: Record<string, { bg: string; hover: string; border: string }> = {
       blue: {
-        bg: "bg-blue-200",
-        hover: "bg-blue-300",
-        border: "border-blue-400",
+        bg: "bg-[var(--chart-1)]",
+        hover: "bg-[var(--primary-hover)]",
+        border: "border-[var(--primary)]",
       },
       red: {
-        bg: "bg-red-200",
-        hover: "bg-red-300",
-        border: "border-red-400",
+        bg: "bg-[var(--chart-4)]",
+        hover: "bg-[var(--error)]",
+        border: "border-[var(--error)]",
       },
       green: {
-        bg: "bg-green-200",
-        hover: "bg-green-300",
-        border: "border-green-400",
+        bg: "bg-[var(--chart-2)]",
+        hover: "bg-[var(--success)]",
+        border: "border-[var(--success)]",
       },
       yellow: {
-        bg: "bg-yellow-200",
-        hover: "bg-yellow-300",
-        border: "border-yellow-400",
+        bg: "bg-[var(--chart-3)]",
+        hover: "bg-[var(--warning)]",
+        border: "border-[var(--warning)]",
       },
     }
 
     const colorClass = colors[color] || colors.blue
-    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-gray-900`
+    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--text-primary)]`
   }
 
   const handleMouseEnter = (courseId: string, event: React.MouseEvent) => {
@@ -424,7 +424,7 @@ export default function WeeklySchedulePage() {
               </div>
 
               {/* Print Button */}
-              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -553,12 +553,11 @@ export default function WeeklySchedulePage() {
                     <div className="w-[90px] flex-shrink-0">
                       <button 
                         className={cn(
-                          "w-full h-[60px] text-white rounded-lg flex items-center justify-center transition-colors",
+                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
                           canGoPrevious 
                             ? "cursor-pointer hover:opacity-90" 
                             : "cursor-not-allowed opacity-50"
                         )}
-                        style={{ backgroundColor: '#4E8EE1' }}
                         onClick={handlePreviousWeek}
                         disabled={!canGoPrevious}
                       >
@@ -567,7 +566,7 @@ export default function WeeklySchedulePage() {
                     </div>
 
                     {/* Days of week */}
-                    {DAYS_OF_WEEK.map((day: any, index: number) => {
+                    {DAYS_OF_WEEK.map((day: { value: number; label: string; subLabel: string }, index: number) => {
                       const dayDate = weekDates[index];
                       const formattedDate = dayDate ? 
                         `${dayDate.getDate().toString().padStart(2, '0')}/${(dayDate.getMonth() + 1).toString().padStart(2, '0')}` : '';
@@ -575,8 +574,7 @@ export default function WeeklySchedulePage() {
                       return (
                         <div
                           key={day.value}
-                          className="flex-1 min-w-[120px] text-white rounded-lg flex flex-col items-center justify-center h-[60px]"
-                          style={{ backgroundColor: '#4E8EE1' }}
+                          className="flex-1 min-w-[120px] text-[var(--primary-foreground)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--primary)]"
                         >
                           <div className="font-semibold text-sm">{day.label}</div>
                           <div className="text-xs mt-1">{formattedDate || day.subLabel}</div>
@@ -588,12 +586,11 @@ export default function WeeklySchedulePage() {
                     <div className="w-[90px] flex-shrink-0">
                       <button 
                         className={cn(
-                          "w-full h-[60px] text-white rounded-lg flex items-center justify-center transition-colors",
+                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
                           canGoNext 
                             ? "cursor-pointer hover:opacity-90" 
                             : "cursor-not-allowed opacity-50"
                         )}
-                        style={{ backgroundColor: '#4E8EE1' }}
                         onClick={handleNextWeek}
                         disabled={!canGoNext}
                       >
@@ -607,12 +604,12 @@ export default function WeeklySchedulePage() {
                     {PERIODS.map((period: number) => (
                       <div key={period} className="flex gap-2 mb-2">
                         {/* Period Label */}
-                        <div className="w-[90px] flex-shrink-0 text-white rounded-lg flex items-center justify-center font-semibold text-sm h-[52px]" style={{ backgroundColor: '#4E8EE1' }}>
+                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
                           Tiết {period}
                         </div>
 
                         {/* Day Cells */}
-                        {DAYS_OF_WEEK.map((day: any) => {
+                        {DAYS_OF_WEEK.map((day: { value: number; label: string }) => {
                           const course = transformedSchedule.find(
                             (c) => c.dayOfWeek === day.value && c.startPeriod === period
                           )
@@ -655,8 +652,8 @@ export default function WeeklySchedulePage() {
                         })}
 
                         {/* Time Column */}
-                        <div className="w-[90px] flex-shrink-0 text-white rounded-lg flex items-center justify-center font-semibold text-sm h-[52px]" style={{ backgroundColor: '#4E8EE1' }}>
-                          {PERIOD_TIMES.find((p: any) => p.period === period)?.time || ''}
+                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
+                          {PERIOD_TIMES.find((p: { period: number; time: string }) => p.period === period)?.time || ''}
                         </div>
                       </div>
                     ))}
@@ -694,7 +691,7 @@ export default function WeeklySchedulePage() {
                     {transformedSchedule
                       .filter((c) => c.id === hoveredCourse)
                       .map((course) => {
-                        const dayName = DAYS_OF_WEEK.find((d: any) => d.value === course.dayOfWeek)?.label || ""
+                          const dayName = DAYS_OF_WEEK.find((d: { value: number; label: string }) => d.value === course.dayOfWeek)?.label || ""
                         const courseDate = new Date(course.date).toLocaleDateString('vi-VN')
                         return (
                           <div key={course.id} className="space-y-1.5">
@@ -753,7 +750,7 @@ export default function WeeklySchedulePage() {
                 
                 <div className="space-y-3">
                   {scheduleConflicts.map((conflict, index) => {
-                    const dayName = DAYS_OF_WEEK.find((d: any) => d.value === conflict.dayOfWeek)?.label || "";
+                    const dayName = DAYS_OF_WEEK.find((d: { value: number; label: string }) => d.value === conflict.dayOfWeek)?.label || "";
                     
                     // Calculate the overlapping period range
                     const startPeriods = conflict.courses.map(c => {

@@ -12,17 +12,17 @@ export const statCards: StatCardData[] = [
     title: "Lịch học trong tuần",
     value: 20,
     unit: "Tiết",
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-500",
-    textColor: "text-blue-600",
+    bgColor: "bg-[var(--info-light)]",
+    iconColor: "text-[var(--info)]",
+    textColor: "text-[var(--info)]",
   },
   {
     title: "Lịch thi trong tuần",
     value: 2,
     unit: "Môn thi",
-    bgColor: "bg-red-50",
-    iconColor: "text-red-500",
-    textColor: "text-red-600",
+    bgColor: "bg-[var(--error-light)]",
+    iconColor: "text-[var(--error)]",
+    textColor: "text-[var(--error)]",
   },
 ];
 

@@ -17,11 +17,11 @@ export default function EventCard() {
           upcomingEvents.map((event) => (
             <div
               key={event.id}
-              className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+              className="flex items-start gap-3 p-3 rounded-lg bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
             >
               <div className="flex-shrink-0 mt-1">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-gray-900 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-[var(--primary)] flex items-center justify-center">
+                  <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-[var(--primary-foreground)]" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
