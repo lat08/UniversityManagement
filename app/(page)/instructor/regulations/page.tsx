@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Download, ExternalLink, AlertTriangle, ChevronRight, Loader2 } from "lucide-react"
+import { Download, ExternalLink, AlertTriangle, Loader2 } from "lucide-react"
 import { useRegulations } from "./lib/hooks/useRegulations"
 import { CONTACT_INFO } from "./lib/constants/contactInfo"
 
-export default function RegulationsPage() {
+export default function InstructorRegulationsPage() {
   const [selectedIdx, setSelectedIdx] = useState(0)
   const { regulations, loading, error, refetch } = useRegulations()
   
@@ -46,7 +46,7 @@ export default function RegulationsPage() {
       <div className="space-y-4 lg:space-y-6">
         <header className="space-y-2">
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế Quy định</h1>
-          <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách của trường</p>
+          <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
         </header>
         
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 lg:p-6">
@@ -73,7 +73,7 @@ export default function RegulationsPage() {
       <div className="space-y-4 lg:space-y-6">
         <header className="space-y-2">
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế Quy định</h1>
-          <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách của trường</p>
+          <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
         </header>
         
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 lg:p-6 text-center">
@@ -87,7 +87,7 @@ export default function RegulationsPage() {
     <div className="space-y-4 lg:space-y-6">
       <header className="space-y-2">
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế Quy định</h1>
-        <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách của trường</p>
+        <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -170,8 +170,8 @@ export default function RegulationsPage() {
                 <div className="flex-1">
                   <p className="font-semibold text-xs lg:text-sm text-yellow-900 mb-1">Lưu ý quan trọng</p>
                   <p className="text-xs lg:text-sm text-yellow-800 leading-relaxed">
-                    Sinh viên có trách nhiệm đọc kỹ và tuân thủ các quy định trong quy chế này. Mọi thắc mắc xin liên
-                    hệ Phòng Đào tạo hoặc Phòng Công tác sinh viên để được hướng dẫn chi tiết.
+                    Giảng viên có trách nhiệm đọc kỹ và tuân thủ các quy định trong quy chế này. Mọi thắc mắc xin liên
+                    hệ Phòng Đào tạo hoặc Phòng Tổ chức - Nhân sự để được hướng dẫn chi tiết.
                   </p>
                 </div>
               </div>
@@ -191,9 +191,9 @@ export default function RegulationsPage() {
                   <p className="text-xs lg:text-sm text-gray-600">ĐT: {CONTACT_INFO.academicAffairs.phone}</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-xs lg:text-sm text-gray-900 mb-2 lg:mb-3">{CONTACT_INFO.studentAffairs.name}</p>
-                  <p className="text-xs lg:text-sm text-gray-600 mb-1">Email: {CONTACT_INFO.studentAffairs.email}</p>
-                  <p className="text-xs lg:text-sm text-gray-600">ĐT: {CONTACT_INFO.studentAffairs.phone}</p>
+                  <p className="font-semibold text-xs lg:text-sm text-gray-900 mb-2 lg:mb-3">{CONTACT_INFO.humanResources.name}</p>
+                  <p className="text-xs lg:text-sm text-gray-600 mb-1">Email: {CONTACT_INFO.humanResources.email}</p>
+                  <p className="text-xs lg:text-sm text-gray-600">ĐT: {CONTACT_INFO.humanResources.phone}</p>
                 </div>
               </div>
             </div>
@@ -203,3 +203,4 @@ export default function RegulationsPage() {
     </div>
   )
 }
+
