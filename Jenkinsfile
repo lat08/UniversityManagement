@@ -43,27 +43,41 @@ pipeline {
     stage('Build') {
       steps {
         sh '''#!/usr/bin/env bash
-          set -euxo pipefail
+            set -euxo pipefail
 
-          if [ -s "/var/lib/jenkins/.nvm/nvm.sh" ]; then
-            echo "--- Sourcing nvm ---"
-            . "/var/lib/jenkins/.nvm/nvm.sh"
-          else
-            echo "ERROR: nvm.sh not found at /var/lib/jenkins/.nvm/nvm.sh!" >&2
-            exit 1
-          fi
-          
-          echo "--- Node & npm ---"
-          node --version
-          npm --version
+            echo "--- Attempting to source nvm from profile files ---"
+            [ -s "$HOME/.profile" ] && . "$HOME/.profile"
+            [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+            [ -s "$HOME/.bash_profile" ] && . "$HOME/.bash_profile"
 
-          echo "--- npm install ---"
-          npm ci || npm install
+            if ! command -v nvm &> /dev/null; then
+              echo "--- nvm command still not found, trying explicit path (as fallback) ---"
+              NVM_DIR="/var/lib/jenkins/.nvm"
+              if [ -s "$NVM_DIR/nvm.sh" ]; then
+                echo "--- Sourcing nvm from fallback path $NVM_DIR/nvm.sh ---"
+                . "$NVM_DIR/nvm.sh"
+              else
+                echo "ERROR: nvm initialization script not found in profile files or at fallback path!" >&2
+                echo "Please verify nvm installation for the 'jenkins' user (e.g., check $HOME/.bashrc)." >&2
+                exit 1
+              fi
+            else
+               echo "--- nvm command found after sourcing profile files ---"
+            fi
 
-          echo "--- Building Next.js app with env ---"
-          export NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL"
-          echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
-          npm run build
+            echo "--- Node & npm ---"
+            # Explicitly use the default nvm version (good practice)
+            nvm use default
+            node --version
+            npm --version
+
+            echo "--- npm install ---"
+            npm ci || npm install
+
+            echo "--- Building Next.js app with env ---"
+            export NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL"
+            echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+            npm run build
         '''
       }
       post {
