@@ -13,7 +13,7 @@ pipeline {
     SERVICE      = 'um-frontend.service'
     BACKEND_PORT = '5000'
     NEXT_TELEMETRY_DISABLED = '1'
-    NEXT_PUBLIC_API_BASE_URL = 'http://34.142.130.206:5000/edu/api'
+    NEXT_PUBLIC_API_BASE_URL = 'https://api.acdm.site/edu/api'
   }
 
   stages {
