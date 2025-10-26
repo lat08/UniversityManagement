@@ -1,14 +1,10 @@
 pipeline {
-  agent { label 'lab-server' }
+  agent { label 'github-server' }
 
   options {
     skipStagesAfterUnstable()
     skipDefaultCheckout(true)
     timestamps()
-  }
-
-  tools {
-    nodejs 'NodeJS-18'
   }
 
   environment {
