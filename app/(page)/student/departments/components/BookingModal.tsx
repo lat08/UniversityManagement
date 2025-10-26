@@ -18,60 +18,192 @@ interface BookingModalProps {
   onClose: () => void;
 }
 
-const timeSlots = [
-  { id: 'morning', label: 'Buổi sáng', time: '08:00 - 12:00' },
-  { id: 'afternoon', label: 'Buổi chiều', time: '13:00 - 17:00' },
-  { id: 'evening', label: 'Buổi tối', time: '18:00 - 21:00' },
+// Khung giờ tiết học chuẩn
+const CLASS_PERIODS = [
+  { period: 1, startTime: '07:15', endTime: '08:05', label: 'Tiết 1' },
+  { period: 2, startTime: '08:10', endTime: '09:00', label: 'Tiết 2' },
+  { period: 3, startTime: '09:10', endTime: '10:00', label: 'Tiết 3' },
+  { period: 4, startTime: '10:05', endTime: '10:55', label: 'Tiết 4' },
+  { period: 5, startTime: '11:00', endTime: '11:50', label: 'Tiết 5' },
+  { period: 6, startTime: '13:30', endTime: '14:20', label: 'Tiết 6' },
+  { period: 7, startTime: '14:25', endTime: '15:15', label: 'Tiết 7' },
+  { period: 8, startTime: '15:20', endTime: '16:10', label: 'Tiết 8' },
+  { period: 9, startTime: '16:15', endTime: '17:05', label: 'Tiết 9' },
+  { period: 10, startTime: '17:10', endTime: '18:00', label: 'Tiết 10' },
+  { period: 11, startTime: '18:05', endTime: '18:55', label: 'Tiết 11' },
+  { period: 12, startTime: '19:00', endTime: '19:50', label: 'Tiết 12' },
+  { period: 13, startTime: '19:55', endTime: '20:45', label: 'Tiết 13' },
 ];
+
+// Tạo các options cho thời gian bắt đầu (lọc theo ngày được chọn)
+const generateTimeOptions = (selectedDate?: Date) => {
+  if (!selectedDate) return [];
+  
+  const now = new Date();
+  const isToday = 
+    selectedDate.getDate() === now.getDate() &&
+    selectedDate.getMonth() === now.getMonth() &&
+    selectedDate.getFullYear() === now.getFullYear();
+  
+  // Nếu là ngày hôm nay, chỉ hiển thị các tiết học sau thời điểm hiện tại
+  if (isToday) {
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    return CLASS_PERIODS
+      .filter(period => {
+        // Parse thời gian bắt đầu của tiết học
+        const [startHour, startMinute] = period.startTime.split(':').map(Number);
+        const periodStartInMinutes = startHour * 60 + startMinute;
+        
+        // Chỉ hiển thị các tiết có thời gian bắt đầu sau thời điểm hiện tại
+        return periodStartInMinutes > currentTimeInMinutes;
+      })
+      .map(period => ({
+        value: period.startTime,
+        label: `${period.label} (${period.startTime})`,
+        period: period.period
+      }));
+  }
+  
+  // Nếu là ngày trong tương lai, hiển thị tất cả các tiết
+  return CLASS_PERIODS.map(period => ({
+    value: period.startTime,
+    label: `${period.label} (${period.startTime})`,
+    period: period.period
+  }));
+};
+
+const generateEndTimeOptions = (startTime: string) => {
+  const startPeriod = CLASS_PERIODS.find(p => p.startTime === startTime);
+  if (!startPeriod) return [];
+  
+  return CLASS_PERIODS
+    .filter(p => p.period >= startPeriod.period)
+    .map(period => ({
+      value: period.endTime,
+      label: `${period.label} (${period.endTime})`,
+      period: period.period
+    }));
+};
 
 export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const selectedRoom = useRoomBookingStore((state) => state.selectedRoom);
-  const selectedDate = useRoomBookingStore((state) => state.selectedDate);
-  const selectedTimeSlot = useRoomBookingStore((state) => state.selectedTimeSlot);
   const createBookingMutation = useCreateBooking();
   
-  const [studentCount, setStudentCount] = useState<number>(30);
-  const [purpose, setPurpose] = useState<string>('Học nhóm môn Lập trình Hướng đối tượng');
+  const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+  const [purpose, setPurpose] = useState<string>('');
 
   const handleConfirmBooking = () => {
-    if (!selectedRoom || !selectedDate || !selectedTimeSlot) {
-      toast.error('Vui lòng chọn đầy đủ thông tin');
+    if (!selectedRoom || !bookingDate || !startTime || !endTime || !purpose.trim()) {
+      toast.error('Vui lòng điền đầy đủ thông tin');
       return;
     }
 
-    const selectedSlot = timeSlots.find(slot => slot.id === selectedTimeSlot);
-    if (!selectedSlot) return;
+    // Validate purpose length
+    if (purpose.length > 500) {
+      toast.error('Mục đích sử dụng không được vượt quá 500 ký tự');
+      return;
+    }
 
-    const [startTime, endTime] = selectedSlot.time.split(' - ');
+    // Validate date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(bookingDate);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      toast.error('Ngày đặt phòng không được trong quá khứ');
+      return;
+    }
+
+    // Validate time is not in the past if booking today
+    const now = new Date();
+    const isToday = 
+      bookingDate.getDate() === now.getDate() &&
+      bookingDate.getMonth() === now.getMonth() &&
+      bookingDate.getFullYear() === now.getFullYear();
+    
+    if (isToday) {
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const bookingStartTime = new Date(bookingDate);
+      bookingStartTime.setHours(startHour, startMinute, 0, 0);
+      
+      if (bookingStartTime <= now) {
+        toast.error('Không thể đặt phòng cho thời gian trong quá khứ');
+        return;
+      }
+    }
+
+    // Validate max 8 consecutive periods
+    const startPeriod = CLASS_PERIODS.find(p => p.startTime === startTime);
+    const endPeriod = CLASS_PERIODS.find(p => p.endTime === endTime);
+    
+    if (startPeriod && endPeriod) {
+      const periodCount = endPeriod.period - startPeriod.period + 1;
+      if (periodCount > 8) {
+        toast.error('Không được đặt quá 8 tiết liên tiếp');
+        return;
+      }
+
+      // Check if booking spans across lunch break (period 5 to 6)
+      if (startPeriod.period <= 5 && endPeriod.period >= 6 && periodCount > 1) {
+        toast.error('Không được đặt xuyên qua giờ nghỉ trưa (tiết 5 → tiết 6)');
+        return;
+      }
+    }
 
     createBookingMutation.mutate({
-      roomId: selectedRoom.id,
-      roomName: selectedRoom.name,
-      date: format(new Date(selectedDate), 'yyyy-MM-dd'),
+      roomId: selectedRoom.roomId,
+      bookingDate: format(bookingDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
       startTime,
       endTime,
-      studentCount,
+      purpose: purpose.trim(),
     }, {
       onSuccess: () => {
-        toast.success('Đăng ký phòng thành công!');
+        toast.success('Đăng ký phòng thành công! Trạng thái: Chờ xác nhận');
         onClose();
+        // Reset form
+        setBookingDate(undefined);
+        setStartTime('');
+        setEndTime('');
+        setPurpose('');
       },
-      onError: () => {
-        toast.error('Đăng ký phòng thất bại!');
+      onError: (error: Error) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const apiError = error as any;
+        const errorMessage = apiError?.response?.data?.message || error.message || 'Đăng ký phòng thất bại!';
+        toast.error(errorMessage);
       }
     });
+  };
+
+  const handleStartTimeChange = (value: string) => {
+    setStartTime(value);
+    // Reset end time when start time changes
+    setEndTime('');
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    setBookingDate(date);
+    // Reset time selections when date changes
+    setStartTime('');
+    setEndTime('');
   };
 
   if (!isOpen || !selectedRoom) return null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available':
-        return 'bg-[#4E8EE1] text-white';
-      case 'occupied':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'full':
-        return 'bg-[#DEE9FF] text-[#4E8EE1]';
+      case 'active':
+        return 'bg-green-600 text-white';
+      case 'inactive':
+        return 'bg-gray-500 text-white';
+      case 'maintenance':
+        return 'bg-yellow-600 text-white';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -79,12 +211,12 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'available':
-        return 'Có sẵn';
-      case 'occupied':
-        return 'Có sẵn';
-      case 'full':
-        return 'Đã đặt';
+      case 'active':
+        return 'Hoạt động';
+      case 'inactive':
+        return 'Ngừng hoạt động';
+      case 'maintenance':
+        return 'Bảo trì';
       default:
         return 'Không xác định';
     }
@@ -99,7 +231,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Đăng ký phòng chức năng</h2>
               <p className="text-sm text-gray-600 mt-1">
-                Điền thông tin để hoàn tất đăng ký phòng {selectedRoom.name}
+                Điền thông tin để hoàn tất đăng ký phòng {selectedRoom.roomName}
               </p>
             </div>
             <Button
@@ -119,7 +251,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2">{selectedRoom.name}</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">{selectedRoom.roomName}</h3>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
@@ -127,37 +259,43 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
-                      <span>{selectedRoom.location}</span>
+                      <span>{selectedRoom.building.buildingName}</span>
                     </div>
                   </div>
-                  {selectedRoom.equipment && selectedRoom.equipment.length > 0 && (
+                  {selectedRoom.amenities && selectedRoom.amenities.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {selectedRoom.equipment.map((item, index) => (
-                        <Badge key={index} variant="outline" className="text-xs bg-white text-black border-gray-300">
+                      {selectedRoom.amenities.slice(0, 5).map((amenity) => (
+                        <Badge key={amenity.amenityId} variant="outline" className="text-xs bg-white text-black border-gray-300">
                           <Monitor className="h-3 w-3 mr-1" />
-                          {item}
+                          {amenity.amenityName}
                         </Badge>
                       ))}
+                      {selectedRoom.amenities.length > 5 && (
+                        <Badge variant="outline" className="text-xs bg-white text-black border-gray-300">
+                          +{selectedRoom.amenities.length - 5} tiện ích khác
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>
-                <Badge className={getStatusColor(selectedRoom.status)}>
-                  {getStatusText(selectedRoom.status)}
+                <Badge className={getStatusColor(selectedRoom.roomStatus)}>
+                  {getStatusText(selectedRoom.roomStatus)}
                 </Badge>
               </div>
             </CardContent>
           </Card>
 
-          {/* Registration Date */}
+          {/* Booking Date */}
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Ngày đăng ký
+              Ngày sử dụng
             </h3>
             <div className="border rounded-lg p-3 max-w-fit mx-auto">
               <DayPicker
                 mode="single"
-                selected={selectedDate ? new Date(selectedDate) : undefined}
+                selected={bookingDate}
+                onSelect={handleDateChange}
                 disabled={{ before: new Date() }}
                 locale={vi}
                 className="mx-auto"
@@ -171,54 +309,74 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             </div>
           </div>
 
-          {/* Time Slot and Student Count - Same Row */}
+          {/* Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Time Slot */}
+            {/* Start Time */}
             <div>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Khung giờ
+                Thời gian bắt đầu
               </h3>
               <select
-                value={selectedTimeSlot || ''}
+                value={startTime}
+                onChange={(e) => handleStartTimeChange(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
-                disabled
+                disabled={!bookingDate}
               >
-                <option value="">Chọn khung giờ</option>
-                {timeSlots.map((slot) => (
-                  <option key={slot.id} value={slot.id}>
-                    {slot.label} - {slot.time}
+                <option value="">
+                  {!bookingDate 
+                    ? 'Vui lòng chọn ngày trước' 
+                    : generateTimeOptions(bookingDate).length === 0 
+                    ? 'Không có thời gian khả dụng cho hôm nay'
+                    : 'Chọn thời gian bắt đầu'}
+                </option>
+                {bookingDate && generateTimeOptions(bookingDate).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
+              {bookingDate && generateTimeOptions(bookingDate).length === 0 && (
+                <p className="text-sm text-amber-600 mt-2">
+                  ⚠️ Không còn khung giờ khả dụng cho hôm nay. Vui lòng chọn ngày khác.
+                </p>
+              )}
             </div>
 
-            {/* Student Count */}
+            {/* End Time */}
             <div>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Số lượng sinh viên sử dụng
+                <Clock className="h-4 w-4" />
+                Thời gian kết thúc
               </h3>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                value={studentCount}
-                onChange={(e) => setStudentCount(Number(e.target.value))}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1]"
-                placeholder="Nhập số lượng sinh viên sử dụng"
-              />
+              <select
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
+                disabled={!startTime}
+              >
+                <option value="">Chọn thời gian kết thúc</option>
+                {startTime && generateEndTimeOptions(startTime).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           {/* Purpose */}
           <div>
-            <h3 className="font-semibold mb-3">Mục đích sử dụng</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Mục đích sử dụng</h3>
+              <span className="text-sm text-gray-500">{purpose.length} / 500</span>
+            </div>
             <textarea
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
+              maxLength={500}
               className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] min-h-[100px] resize-none"
-              placeholder="Nhập mục đích sử dụng phòng"
+              placeholder="Nhập mục đích sử dụng phòng (tối đa 500 ký tự)"
               rows={3}
             />
           </div>
