@@ -737,3 +737,62 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  /* Hide elements that shouldn't be printed */
+  header,
+  nav,
+  .no-print,
+  button:not(.print-only),
+  [role="navigation"],
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  /* Ensure content fits on page */
+  .print-content {
+    page-break-inside: avoid;
+  }
+
+  /* Reset colors for print */
+  .bg-blue-50,
+  .bg-orange-50,
+  .bg-green-50,
+  .bg-blue-100 {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  /* Reset timeline colors */
+  .bg-green-500,
+  .bg-red-500,
+  .bg-yellow-500 {
+    background: #4b5563 !important;
+  }
+
+  /* Ensure proper spacing */
+  .space-y-4 > * + *,
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+
+  /* Remove shadows */
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  /* Keep borders visible */
+  .border,
+  .border-2 {
+    border-color: #d1d5db !important;
+  }
+}
