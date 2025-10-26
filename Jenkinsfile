@@ -93,10 +93,14 @@ pipeline {
           sudo chown -R jenkins:jenkins "$DEPLOY_DIR"
 
           echo "--- Installing production dependencies ---"
-          sudo -u jenkins bash -c "cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
+          NVM_NPM_PATH=$(sudo -u jenkins -i which npm)
+            if [ -z "$NVM_NPM_PATH" ]; then
+              echo "ERROR: Could not find npm path for jenkins user!" >&2
+              exit 1
+            fi
+            echo "Using npm path: $NVM_NPM_PATH"
 
-          echo "--- Creating systemd service file ---"
-          sudo tee /etc/systemd/system/$SERVICE > /dev/null <<EOF
+            sudo tee /etc/systemd/system/$SERVICE > /dev/null <<EOF
 [Unit]
 Description=UniversityManagement Frontend (Next.js)
 After=network.target
@@ -107,7 +111,7 @@ Environment=NODE_ENV=production
 Environment=PORT=$PORT
 User=jenkins
 Group=jenkins
-ExecStart=/usr/bin/npm start
+ExecStart=$NVM_NPM_PATH start
 Restart=always
 RestartSec=5
 SyslogIdentifier=um-frontend
