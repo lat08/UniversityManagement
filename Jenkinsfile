@@ -115,8 +115,11 @@ pipeline {
           sudo chown -R jenkins:jenkins "$DEPLOY_DIR"
 
           echo "--- Installing production dependencies ---"
-          sudo -u jenkins bash -c "cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
+          sudo -u jenkins bash -c "source ~/.bashrc && cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
+
+          echo "--- Creating systemd service file ---"
           NVM_NPM_PATH=$(sudo -u jenkins bash -c 'source ~/.bashrc && which npm')
+          
           if [ -z "$NVM_NPM_PATH" ]; then
             echo "ERROR: Could not find npm path for jenkins user!" >&2
             echo "Please double-check nvm installation and ~/.bashrc for the jenkins user." >&2
