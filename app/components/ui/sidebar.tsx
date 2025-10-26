@@ -143,7 +143,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
     if (resolvedVariant === "instructor" && activePage?.startsWith("/instructor/schedule")) {
       setExpandedSection("1-0")
     }
-    if (resolvedVariant === "student" && (activePage?.startsWith("/student/schedule") || activePage?.startsWith("/schedule"))) {
+    if (resolvedVariant === "student" && (activePage?.startsWith("/student/schedule") || activePage?.startsWith("/schedule") || activePage?.startsWith("/student/exam-schedule"))) {
       setExpandedSection("1-2")
     }
   }, [activePage, resolvedVariant])
