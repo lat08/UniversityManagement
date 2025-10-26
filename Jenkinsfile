@@ -45,6 +45,14 @@ pipeline {
         sh '''#!/usr/bin/env bash
           set -euxo pipefail
 
+          if [ -s "/var/lib/jenkins/.nvm/nvm.sh" ]; then
+            echo "--- Sourcing nvm ---"
+            . "/var/lib/jenkins/.nvm/nvm.sh"
+          else
+            echo "ERROR: nvm.sh not found at /var/lib/jenkins/.nvm/nvm.sh!" >&2
+            exit 1
+          fi
+          
           echo "--- Node & npm ---"
           node --version
           npm --version
