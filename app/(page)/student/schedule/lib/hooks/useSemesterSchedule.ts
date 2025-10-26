@@ -5,6 +5,7 @@ import {
   Semester, 
   Subject 
 } from "../types/semesterTypes"
+import toast from "react-hot-toast"
 
 export const useSemesterSchedule = () => {
   const [semesters, setSemesters] = useState<Semester[]>([])
@@ -213,6 +214,40 @@ export const useSemesterSchedule = () => {
     }
   }, [subjects])
 
+  // Handle export PDF
+  const handleExportPDF = useCallback(async () => {
+    if (!selectedSemester) {
+      toast.error('Vui lòng chọn học kỳ')
+      return
+    }
+    
+    // Kiểm tra xem có dữ liệu thời khóa biểu không
+    if (!scheduleData || scheduleData.length === 0) {
+      toast.error('Không có dữ liệu thời khóa biểu để xuất file PDF')
+      return
+    }
+    
+    try {
+      setIsLoading(true)
+      await semesterScheduleApi.exportPersonalSchedulePDF(selectedSemester.semesterId)
+      toast.success('Tải file PDF thành công!')
+    } catch (error: unknown) {
+      console.error('Error exporting PDF:', error)
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string }
+      
+      // Xử lý lỗi 406 - thường là không có dữ liệu
+      if (err?.response?.status === 406) {
+        toast.error('Không có dữ liệu thời khóa biểu để xuất file PDF')
+      } else {
+        const errorMessage = err?.response?.data?.message || err?.message || 'Lỗi khi xuất file PDF'
+        toast.error(errorMessage)
+      }
+      // Không set error state để tránh hiển thị lỗi trên web
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedSemester, scheduleData])
+
   return {
     semesters,
     selectedSemester,
@@ -225,5 +260,6 @@ export const useSemesterSchedule = () => {
     handleSemesterChange,
     handleViewTypeChange,
     handleSubjectChange,
+    handleExportPDF,
   }
 }
