@@ -97,7 +97,7 @@ pipeline {
           sudo chown -R jenkins:jenkins "$DEPLOY_DIR"
 
           echo "--- Installing production dependencies ---"
-          sudo -u jenkins -E bash -c "cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
+          sudo -u jenkins bash -c "cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
 
           echo "--- Creating systemd service file ---"
           sudo tee /etc/systemd/system/$SERVICE > /dev/null <<EOF
