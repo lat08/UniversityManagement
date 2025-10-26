@@ -1,13 +1,13 @@
 pipeline {
-  agent { label 'github-server' }
+  agent { label 'github-server' } 
 
-  options {
+  options { 
     skipStagesAfterUnstable()
     skipDefaultCheckout(true)
     timestamps()
   }
 
-  environment {
+  environment { 
     DEPLOY_DIR   = '/data/um/UniversityManagement/frontend'
     PORT         = '5001'
     SERVICE      = 'um-frontend.service'
@@ -18,16 +18,16 @@ pipeline {
 
   stages {
 
-    stage('Git safe.directory') {
+    stage('Git safe.directory') { 
       steps {
         sh '''#!/usr/bin/env bash
-          set -euxo pipefail
-          git config --global --add safe.directory "$WORKSPACE" || true
-        '''
+            set -euxo pipefail
+            git config --global --add safe.directory "$WORKSPACE" || true
+        ''' 
       }
     }
 
-    stage('Checkout') {
+    stage('Checkout') { 
       steps {
         checkout([
           $class: 'GitSCM',
@@ -36,7 +36,7 @@ pipeline {
             url: 'https://github.com/lat08/UniversityManagement.git',
             credentialsId: 'jenkins-github-user'
           ]]
-        ])
+        ]) 
       }
     }
 
@@ -66,7 +66,6 @@ pipeline {
             fi
 
             echo "--- Node & npm ---"
-            # Explicitly use the default nvm version (good practice)
             nvm use default
             node --version
             npm --version
@@ -78,56 +77,63 @@ pipeline {
             export NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL"
             echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
             npm run build
-        '''
+        ''' 
       }
       post {
         success {
           archiveArtifacts artifacts: '.next/**, public/**, package.json, package-lock.json, next.config.js', fingerprint: true
-        }
+        } 
       }
     }
 
     stage('Deploy') {
       steps {
         sh '''#!/usr/bin/env bash
-          set -euxo pipefail
+            set -euxo pipefail
 
-          echo "WORKSPACE: $WORKSPACE"
-          echo "DEPLOY_DIR: $DEPLOY_DIR"
+            echo "WORKSPACE: $WORKSPACE"
+            echo "DEPLOY_DIR: $DEPLOY_DIR"
 
-          if [[ -z "$DEPLOY_DIR" || "$DEPLOY_DIR" == "/" ]]; then
-            echo "Invalid DEPLOY_DIR: '$DEPLOY_DIR'" >&2
-            exit 1
-          fi
+            if [[ -z "$DEPLOY_DIR" || "$DEPLOY_DIR" == "/" ]]; then
+              echo "Invalid DEPLOY_DIR: '$DEPLOY_DIR'" >&2
+              exit 1
+            fi
 
-          sudo mkdir -p "$DEPLOY_DIR"
-          sudo rm -rf -- "$DEPLOY_DIR"/*
+            sudo mkdir -p "$DEPLOY_DIR"
+            sudo rm -rf -- "$DEPLOY_DIR"/*
 
-          echo "--- Copying build artifacts ---"
-          sudo cp -a "$WORKSPACE/.next" "$DEPLOY_DIR/"
-          sudo cp -a "$WORKSPACE/public" "$DEPLOY_DIR/" || true
-          sudo cp -a "$WORKSPACE/package.json" "$DEPLOY_DIR/"
-          sudo cp -a "$WORKSPACE/package-lock.json" "$DEPLOY_DIR/" || true
-          if [[ -f "$WORKSPACE/next.config.js" ]]; then
-            sudo cp -a "$WORKSPACE/next.config.js" "$DEPLOY_DIR/"
-          fi
+            echo "--- Copying build artifacts ---"
+            sudo cp -a "$WORKSPACE/.next" "$DEPLOY_DIR/"
+            sudo cp -a "$WORKSPACE/public" "$DEPLOY_DIR/" || true
+            sudo cp -a "$WORKSPACE/package.json" "$DEPLOY_DIR/"
+            sudo cp -a "$WORKSPACE/package-lock.json" "$DEPLOY_DIR/" || true
+            if [[ -f "$WORKSPACE/next.config.js" ]]; then
+              sudo cp -a "$WORKSPACE/next.config.js" "$DEPLOY_DIR/"
+            fi
 
-          sudo chown -R jenkins:jenkins "$DEPLOY_DIR"
+            sudo chown -R jenkins:jenkins "$DEPLOY_DIR"
 
-          echo "--- Installing production dependencies ---"
-          sudo -u jenkins bash -c "source ~/.bashrc && cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
+            echo "--- Installing production dependencies ---"
+            # Explicitly source .bashrc before running npm commands
+            sudo -u jenkins bash -c "source ~/.bashrc && cd '$DEPLOY_DIR' && (npm ci --omit=dev || npm install --production --omit=dev)"
 
-          echo "--- Creating systemd service file ---"
-          NVM_NPM_PATH=$(sudo -u jenkins bash -c 'source ~/.bashrc && which npm')
-          
-          if [ -z "$NVM_NPM_PATH" ]; then
-            echo "ERROR: Could not find npm path for jenkins user!" >&2
-            echo "Please double-check nvm installation and ~/.bashrc for the jenkins user." >&2
-            exit 1
-          fi
-          echo "Using npm path: $NVM_NPM_PATH"
+            echo "--- Creating systemd service file ---"
+            # Explicitly source .bashrc before running which npm
+            NVM_NPM_PATH=$(sudo -u jenkins bash -c 'source ~/.bashrc && which npm')
+            if [ -z "$NVM_NPM_PATH" ]; then
+              echo "ERROR: Could not find npm path for jenkins user!" >&2; exit 1
+            fi
+            echo "Using npm path: $NVM_NPM_PATH"
 
-          sudo tee /etc/systemd/system/$SERVICE > /dev/null <<EOF
+            # Get the Node binary directory
+            NODE_BIN_DIR=$(dirname "$NVM_NPM_PATH")
+            if [ -z "$NODE_BIN_DIR" ]; then
+              echo "ERROR: Could not determine Node bin directory!" >&2; exit 1
+            fi
+            echo "Using Node bin directory: $NODE_BIN_DIR"
+
+            # ----- ĐÃ BỔ SUNG Environment="PATH=..." VÀO ĐÂY -----
+            sudo tee /etc/systemd/system/$SERVICE > /dev/null <<EOF
 [Unit]
 Description=UniversityManagement Frontend (Next.js)
 After=network.target
@@ -136,8 +142,11 @@ After=network.target
 WorkingDirectory=$DEPLOY_DIR
 Environment=NODE_ENV=production
 Environment=PORT=$PORT
+# Add nvm's node directory to the service's PATH
+Environment="PATH=${NODE_BIN_DIR}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 User=jenkins
 Group=jenkins
+# Use the found nvm npm path
 ExecStart=$NVM_NPM_PATH start
 Restart=always
 RestartSec=5
@@ -146,34 +155,34 @@ SyslogIdentifier=um-frontend
 [Install]
 WantedBy=multi-user.target
 EOF
+            # ---------------------------------------------------
 
-          sudo systemctl daemon-reload
-          sudo systemctl enable "$SERVICE"
-          sudo systemctl restart "$SERVICE"
+            sudo systemctl daemon-reload
+            sudo systemctl enable "$SERVICE"
+            sudo systemctl restart "$SERVICE"
 
-          echo "==== SERVICE STATUS ===="
-          sudo systemctl --no-pager -l status "$SERVICE" || true
+            echo "==== SERVICE STATUS ===="
+            sudo systemctl --no-pager -l status "$SERVICE" || true
 
-          echo "==== WAITING PORT (max 30s) ===="
-          for i in {1..30}; do
-            if sudo ss -ltn | grep -q ":$PORT"; then
-              echo "Port $PORT is listening."
-              sudo ss -ltn | grep ":$PORT" || true
-              break
-            fi
-            if [[ "$i" -eq 30 ]]; then
-              echo "ERROR: Port $PORT not up after 30s!" >&2
-              sudo journalctl -u "$SERVICE" -n 100 --no-pager || true
-              exit 1
-            fi
-            sleep 1
-          done
+            echo "==== WAITING PORT (max 30s) ===="
+            for i in {1..30}; do
+              if sudo ss -ltn | grep -q ":$PORT"; then
+                echo "Port $PORT is listening."
+                sudo ss -ltn | grep ":$PORT" || true
+                break
+              fi
+              if [[ "$i" -eq 30 ]]; then
+                echo "ERROR: Port $PORT not up after 30s!" >&2
+                sudo journalctl -u "$SERVICE" -n 100 --no-pager || true
+                exit 1
+              fi
+              sleep 1
+            done
 
-          echo "==== LAST 80 LOGS ===="
-          sudo journalctl -u "$SERVICE" -n 80 --no-pager || true
+            echo "==== LAST 80 LOGS ===="
+            sudo journalctl -u "$SERVICE" -n 80 --no-pager || true
         '''
       }
     }
   }
 }
-
