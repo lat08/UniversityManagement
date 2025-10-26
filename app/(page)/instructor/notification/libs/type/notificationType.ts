@@ -23,7 +23,7 @@ interface BaseApiResponse<T> {
   resultMessage: string
 }
 
-export interface NotificationListResponse extends BaseApiResponse<{
+export type NotificationListResponse = BaseApiResponse<{
   data: NotificationApiItem[]
   totalCount: number
   page: number
@@ -31,18 +31,18 @@ export interface NotificationListResponse extends BaseApiResponse<{
   totalPages: number
   hasNextPage: boolean
   hasPreviousPage: boolean
-}> {}
+}>
 
-export interface NotificationDetailResponse extends BaseApiResponse<NotificationApiItem> {}
+export type NotificationDetailResponse = BaseApiResponse<NotificationApiItem>
 
-export interface UnreadCountResponse extends BaseApiResponse<{
+export type UnreadCountResponse = BaseApiResponse<{
   unreadCount: number
-}> {}
+}>
 
-export interface MarkAllAsReadResponse extends BaseApiResponse<{
+export type MarkAllAsReadResponse = BaseApiResponse<{
   message: string
   count: number
-}> {}
+}>
 
 export interface NotificationQueryParams {
   NotificationType?: "event" | "tuition" | "schedule" | "important"
