@@ -1,3 +1,5 @@
+// Path: components/content/register/RegisterTab.tsx
+
 "use client"
 
 import { useState } from "react"
@@ -6,37 +8,36 @@ import { Card } from "@/app/components/ui/card"
 import { Input } from "@/app/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
 import { CourseCard } from "../../card/CourseCard"
+import { AvailableCoursesProps } from "../../../lib/type/courseType"
+import { useAvailableCourses } from "../../../lib/hooks/useAvailableCourses"; // <-- Hook đã sửa
 
-interface Course {
-  id: string
-  name: string
-  code: string
-  credits: number
-  instructor: string
-  room: string
-  startDate: string
-  endDate: string
-  schedule: string
-  studentCount?: string
-}
 
-interface AvailableCoursesProps {
-  courses: Course[]
-  onRegisterClick: (courseId: string, courseName: string) => void
-}
 
-export function AvailableCourses({ courses, onRegisterClick }: AvailableCoursesProps) {
+export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
+  // Tự fetch data bên trong
+  const { courses, loading, error } = useAvailableCourses(); 
   const [searchQuery, setSearchQuery] = useState("")
   const [filterValue, setFilterValue] = useState("all")
 
+  // Xử lý Loading State
+  if (loading) {
+      return <div className="text-center py-8">Đang tải danh sách môn học...</div>
+  }
+  
+  // Xử lý Error State
+  if (error) {
+       return <div className="text-red-500 text-center py-8">{error}</div>
+  }
+  
+  // Dùng courses (đã đảm bảo là Array hoặc [] sau khi fetch)
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
-      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.code.toLowerCase().includes(searchQuery.toLowerCase())
+      course.subjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.subjectCode.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesSearch
   })
 
-  const totalCredits = courses.reduce((sum, course) => sum + course.credits, 0)
+  const totalCredits = filteredCourses.reduce((sum, course) => sum + course.credits, 0) // Dùng filteredCourses
 
   return (
     <div className="space-y-4">
@@ -51,6 +52,7 @@ export function AvailableCourses({ courses, onRegisterClick }: AvailableCoursesP
             className="pl-10 cursor-text"
           />
         </div>
+
         <Select value={filterValue} onValueChange={setFilterValue}>
           <SelectTrigger className="w-full sm:w-[320px] cursor-pointer">
             <SelectValue />
@@ -74,8 +76,15 @@ export function AvailableCourses({ courses, onRegisterClick }: AvailableCoursesP
 
         {/* Course cards nested inside semester card */}
         <div className="mx-6 space-y-4">
+          {filteredCourses.length === 0 && <p className="text-gray-600">Không tìm thấy môn học nào.</p>}
           {filteredCourses.map((course) => (
-            <CourseCard key={course.id} {...course} onAction={onRegisterClick} actionType="register" />
+            <CourseCard 
+                key={course.courseId} 
+                {...course} 
+                // Truyền onAction: gọi onRegisterClick với courseId
+                onAction={(courseId) => onRegisterClick(courseId)} 
+                actionType="register" // Mặc định là register
+            />
           ))}
         </div>
       </Card>
