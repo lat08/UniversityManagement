@@ -1,69 +1,54 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRoomBookingStore, type Room, type BookingSlot, type UserBooking } from '../stores/roomBookingStore';
-
-// Mock data - sẽ thay thế bằng API calls thực tế
-const mockRooms: Room[] = [
-  {
-    id: '1',
-    name: 'Phòng máy tính 1',
-    capacity: 40,
-    location: 'Tòa Lewis',
-    status: 'available',
-    equipment: ['Máy tính', 'Máy chiếu', 'Bảng trắng'],
-    description: 'Phòng máy tính hiện đại với 40 máy tính'
-  },
-  {
-    id: '2',
-    name: 'Phòng thí nghiệm',
-    capacity: 20,
-    location: 'Tòa Lewis',
-    status: 'available',
-    equipment: ['Thiết bị thí nghiệm', 'Máy chiếu', 'Bảng trắng'],
-    description: 'Phòng thí nghiệm với đầy đủ thiết bị'
-  },
-  {
-    id: '3',
-    name: 'Phòng họp lớn',
-    capacity: 100,
-    location: 'Tòa Lewis',
-    status: 'full',
-    equipment: ['Thiết bị âm thanh', 'Máy chiếu', 'Bảng trắng'],
-    description: 'Phòng họp lớn cho các sự kiện'
-  }
-];
-
-const mockUserBookings: UserBooking[] = [
-  {
-    id: '1',
-    roomId: '1',
-    roomName: 'Phòng học nhóm 1',
-    date: '2025-10-10',
-    startTime: '13:30',
-    endTime: '15:00',
-    status: 'confirmed',
-    studentCount: 10
-  }
-];
+import { api } from '@/lib/api/client';
+import { useRoomBookingStore, type BookingSlot } from '../stores/roomBookingStore';
+import type { RoomApiResponse, BookingApiResponse, BookingData, CreateBookingRequest } from '../types/room.types';
+import { createRoomBooking, cancelRoomBooking } from '../api/rooms.api';
 
 // Query keys
 export const roomBookingKeys = {
   all: ['roomBooking'] as const,
-  rooms: () => [...roomBookingKeys.all, 'rooms'] as const,
+  rooms: (page?: number, pageSize?: number) => [...roomBookingKeys.all, 'rooms', page, pageSize] as const,
   bookingSlots: (date?: string) => [...roomBookingKeys.all, 'bookingSlots', date] as const,
   userBookings: () => [...roomBookingKeys.all, 'userBookings'] as const,
 };
 
 // Hooks
-export const useRooms = () => {
+export const useRooms = (page: number = 1, pageSize: number = 10) => {
   const setRooms = useRoomBookingStore((state) => state.setRooms);
   
   return useQuery({
-    queryKey: roomBookingKeys.rooms(),
-    queryFn: async (): Promise<Room[]> => {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setRooms(mockRooms);
-      return mockRooms;
+    queryKey: roomBookingKeys.rooms(page, pageSize),
+    queryFn: async () => {
+      try {
+        const response = await api.get<RoomApiResponse>('/v1/function-rooms/rooms', {
+          params: {
+            pageNumber: page,
+            pageSize: pageSize,
+          },
+        });
+        
+        if (response.data.success && response.data.data.items) {
+          const rooms = response.data.data.items;
+          setRooms(rooms);
+          
+          // Map API response to pagination format
+          const apiData = response.data.data;
+          return {
+            rooms,
+            pagination: {
+              currentPage: apiData.pageNumber || page,
+              totalPages: apiData.totalPages || 1,
+              totalItems: apiData.totalCount || rooms.length,
+              pageSize: apiData.pageSize || pageSize,
+            },
+          };
+        }
+        
+        return { rooms: [], pagination: undefined };
+      } catch (error) {
+        console.error('Error fetching rooms:', error);
+        throw error;
+      }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -108,15 +93,24 @@ export const useBookingSlots = (date?: string) => {
 };
 
 export const useUserBookings = () => {
-  const setUserBookings = useRoomBookingStore((state) => state.setUserBookings);
-  
   return useQuery({
     queryKey: roomBookingKeys.userBookings(),
-    queryFn: async (): Promise<UserBooking[]> => {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 400));
-      setUserBookings(mockUserBookings);
-      return mockUserBookings;
+    queryFn: async (): Promise<BookingData[]> => {
+      try {
+        const response = await api.get<BookingApiResponse>('/v1/function-rooms/my-bookings');
+        
+        if (response.data.success && response.data.data) {
+          const bookings = response.data.data;
+          // Sort by created date, newest first
+          bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          return bookings;
+        }
+        
+        return [];
+      } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        throw error;
+      }
     },
     staleTime: 3 * 60 * 1000, // 3 minutes
   });
@@ -127,29 +121,26 @@ export const useCreateBooking = () => {
   const queryClient = useQueryClient();
   const setLoading = useRoomBookingStore((state) => state.setLoading);
   const setError = useRoomBookingStore((state) => state.setError);
-  const addUserBooking = useRoomBookingStore((state) => state.addUserBooking);
 
   return useMutation({
-    mutationFn: async (bookingData: Omit<UserBooking, 'id' | 'status'>) => {
+    mutationFn: async (bookingData: CreateBookingRequest) => {
       setLoading(true);
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newBooking: UserBooking = {
-        ...bookingData,
-        id: Date.now().toString(),
-        status: 'confirmed'
-      };
-      
-      addUserBooking(newBooking);
-      return newBooking;
+      try {
+        const response = await createRoomBooking(bookingData);
+        return response;
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const apiError = error as any;
+        const errorMessage = apiError?.response?.data?.message || 'Không thể tạo đăng ký phòng';
+        throw new Error(errorMessage);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.userBookings() });
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.bookingSlots() });
       setLoading(false);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       setError(error.message);
       setLoading(false);
     },
@@ -160,23 +151,26 @@ export const useCancelBooking = () => {
   const queryClient = useQueryClient();
   const setLoading = useRoomBookingStore((state) => state.setLoading);
   const setError = useRoomBookingStore((state) => state.setError);
-  const removeUserBooking = useRoomBookingStore((state) => state.removeUserBooking);
 
   return useMutation({
     mutationFn: async (bookingId: string) => {
       setLoading(true);
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      removeUserBooking(bookingId);
-      return bookingId;
+      try {
+        const response = await cancelRoomBooking(bookingId);
+        return response;
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const apiError = error as any;
+        const errorMessage = apiError?.response?.data?.message || 'Không thể hủy đăng ký';
+        throw new Error(errorMessage);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.userBookings() });
       queryClient.invalidateQueries({ queryKey: roomBookingKeys.bookingSlots() });
       setLoading(false);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       setError(error.message);
       setLoading(false);
     },

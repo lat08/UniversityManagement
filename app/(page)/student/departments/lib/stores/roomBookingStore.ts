@@ -1,13 +1,24 @@
 import { create } from 'zustand';
+import type { RoomType, RoomStatus } from '../types/room.types';
 
 export type Room = {
-	id: string;
-	name: string;
+	roomId: string;
+	roomCode: string;
+	roomName: string;
 	capacity: number;
-	location: string;
-	status: 'available' | 'occupied' | 'full';
-	equipment: string[];
-	description?: string;
+	roomType: RoomType;
+	roomStatus: RoomStatus;
+	imageUrl: string | null;
+	building: {
+		buildingId: string;
+		buildingName: string;
+		buildingCode: string;
+		address: string;
+	};
+	amenities: {
+		amenityId: string;
+		amenityName: string;
+	}[];
 };
 
 export type BookingSlot = {
@@ -32,6 +43,13 @@ export type UserBooking = {
 	studentCount: number;
 };
 
+export type RoomFilters = {
+	capacity: string;
+	buildingId: string;
+	roomType: string;
+	roomStatus: string;
+};
+
 export type RoomBookingState = {
 	rooms: Room[];
 	bookingSlots: BookingSlot[];
@@ -39,6 +57,7 @@ export type RoomBookingState = {
 	selectedDate: string | null;
 	selectedTimeSlot: string | null;
 	selectedRoom: Room | null;
+	filters: RoomFilters;
 	isLoading: boolean;
 	error: string | null;
 };
@@ -52,6 +71,7 @@ type RoomBookingActions = {
 	setSelectedDate: (date: string | null) => void;
 	setSelectedTimeSlot: (timeSlot: string | null) => void;
 	setSelectedRoom: (room: Room | null) => void;
+	setFilters: (filters: Partial<RoomFilters>) => void;
 	addUserBooking: (booking: UserBooking) => void;
 	updateUserBooking: (id: string, updates: Partial<UserBooking>) => void;
 	removeUserBooking: (id: string) => void;
@@ -65,6 +85,12 @@ const initialState: RoomBookingState = {
 	selectedDate: null,
 	selectedTimeSlot: null,
 	selectedRoom: null,
+	filters: {
+		capacity: '',
+		buildingId: '',
+		roomType: '',
+		roomStatus: '',
+	},
 	isLoading: false,
 	error: null,
 };
@@ -79,6 +105,10 @@ export const useRoomBookingStore = create<RoomBookingState & RoomBookingActions>
 	setSelectedDate: (selectedDate) => set({ selectedDate }),
 	setSelectedTimeSlot: (selectedTimeSlot) => set({ selectedTimeSlot }),
 	setSelectedRoom: (selectedRoom) => set({ selectedRoom }),
+	setFilters: (newFilters) =>
+		set((state) => ({
+			filters: { ...state.filters, ...newFilters },
+		})),
 	addUserBooking: (booking) =>
 		set((state) => ({
 			userBookings: [...state.userBookings, booking],
