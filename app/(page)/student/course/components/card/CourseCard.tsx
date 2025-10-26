@@ -1,47 +1,60 @@
+// Path: components/card/CourseCard.tsx
+
 "use client"
 
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import { Calendar, Clock, MapPin, User, Trash2 } from "lucide-react"
 import { Card } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
+import { CourseCardProps } from "../../lib/type/courseType" // <-- Dùng Props đã được sửa
 
-interface CourseCardProps {
-  id: string
-  name: string
-  code: string
-  credits: number
-  instructor: string
-  room: string
-  startDate: string
-  endDate: string
-  schedule: string
-  studentCount?: string
-  onAction: (courseId: string, courseName: string) => void
-  actionType: "register" | "cancel"
-}
 
 export function CourseCard({
-  id,
-  name,
-  code,
+  courseId,
+  subjectName,
+  subjectCode,
   credits,
-  instructor,
-  room,
+  instructorName,
   startDate,
   endDate,
-  schedule,
-  studentCount,
-  onAction,
-  actionType,
+  registrationStatus,
+  weeklySchedules,
+  onAction,          
+  actionType = 'register', 
 }: CourseCardProps) {
+  // Format dates from ISO string to dd/MM/yyyy
+  const formattedStartDate = format(new Date(startDate), 'dd/MM/yyyy', { locale: vi });
+  const formattedEndDate = format(new Date(endDate), 'dd/MM/yyyy', { locale: vi });
+
+  // Get first schedule (assuming array)
+  const schedule = Array.isArray(weeklySchedules) ? weeklySchedules[0] : null;
+  
+  let buttonText = "Đăng ký";
+  let buttonVariant: "default" | "destructive" = "default";
+
+  if (actionType === 'cancel') {
+    buttonText = "Hủy đăng ký";
+    buttonVariant = "destructive";
+  } else { 
+    buttonText = "Đăng ký";
+  }
+  
+  // Custom class cho màu nút theo design
+  const buttonClassName = actionType === 'cancel' 
+    ? "bg-[var(--error)] hover:bg-[var(--destructive-hover)] text-white"
+    : "bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white";
+  
+  
   return (
     <Card className="p-4 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 space-y-3">
           {/* Course title and code */}
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-base">{name}</h3>
+            <h3 className="font-semibold text-base">{subjectName}</h3>
             <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-[var(--primary)] bg-[var(--primary-light)]">
-              {code}
+              {subjectCode}
             </span>
             <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-[var(--primary-foreground)] bg-[var(--primary)]">
               {credits} tín chỉ
@@ -52,48 +65,45 @@ export function CourseCard({
           <div className="space-y-2 text-sm text-gray-600" style={{marginLeft: '10px'}}>
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 flex-shrink-0" />
-              <span>GV {instructor}</span>
+              <span>GV {instructorName}</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>{room}</span>
+              <span>{schedule?.roomName}</span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 flex-shrink-0" />
-              <span>Từ {startDate} đến {endDate}</span>
+              <span>Từ {formattedStartDate} đến {formattedEndDate}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 flex-shrink-0" />
-              <span>{schedule}</span>
+              <span>{schedule?.dayOfWeekName} {schedule?.timeRange}</span>
             </div>
-            {studentCount && (
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 flex-shrink-0" />
-                <span>{studentCount} sinh viên</span>
-              </div>
-            )}
+            
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 flex-shrink-0" />
+              <span>{registrationStatus}</span>
+            </div>
+            
           </div>
         </div>
 
         {/* Action button */}
         <Button
-          onClick={() => onAction(id, name)}
-          variant={actionType === "cancel" ? "destructive" : "default"}
-          className={
-            actionType === "cancel"
-              ? "bg-[var(--error)] hover:bg-[var(--destructive-hover)] text-[var(--error-foreground)] shrink-0 cursor-pointer"
-              : "text-[var(--primary-foreground)] shrink-0 cursor-pointer bg-[var(--primary)] hover:bg-[var(--primary-hover)]"
-          }
+          onClick={() => {
+              if (actionType === 'cancel') {
+                  onAction(courseId, subjectName); // Truyền ID và Tên môn cho Hủy
+              } else {
+                  onAction(courseId); // Chỉ truyền ID cho Đăng ký
+              }
+          }}
+          variant={buttonVariant}
+          className={buttonClassName}
         >
-          {actionType === "cancel" ? (
-            <>
-              <Trash2 className="h-4 w-4 mr-2" />
-              Hủy đăng ký
-            </>
-          ) : (
-            "Đăng ký"
-          )}
+          {actionType === 'cancel' && <Trash2 className="h-4 w-4 mr-2" />}
+          {buttonText}
         </Button>
+
       </div>
     </Card>
   )

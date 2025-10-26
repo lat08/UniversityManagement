@@ -1,3 +1,5 @@
+// Path: components/content/CoursesContent.tsx
+
 "use client"
 
 import { useState } from "react"
@@ -11,157 +13,78 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/components/ui/dialog"
+// Import các tab component
 import { RegisteredCourses } from "./registered/RegisteredTab"
 import { AvailableCourses } from "./register/RegisterTab"
-import toast from "react-hot-toast" 
+// Import thư viện thông báo và các logic kết nối
+import toast from "react-hot-toast"
+import { coursesApi } from "../../lib/api/coursesApi"; 
+import { useAvailableCourses } from "../../lib/hooks/useAvailableCourses"
+import { useRegisteredCourses } from "../../lib/hooks/useRegisteredCourses"
 
-interface Course {
-  id: string
-  name: string
-  code: string
-  credits: number
-  instructor: string
-  room: string
-  startDate: string
-  endDate: string
-  schedule: string
-  studentCount?: string
-}
+// LOẠI BỎ import mock data cũ (nếu có): import { registeredCoursesData,availableCoursesData } from "../../lib/constants/courseConstants"
 
-const registeredCoursesData: Course[] = [
-  {
-    id: "1",
-    name: "Quản lý dự án công nghệ thông tin",
-    code: "CTS53168",
-    credits: 3,
-    instructor: "Trần Thanh Tuyền",
-    room: "DOA114",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 4, tiết 1 - tiết 5",
-  },
-  {
-    id: "2",
-    name: "Lập trình hướng đối tượng",
-    code: "CTS56687",
-    credits: 3,
-    instructor: "Nguyễn Thúy An",
-    room: "FLE78",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 6, tiết 1 - tiết 5",
-  },
-  {
-    id: "3",
-    name: "Chủ nghĩa xã hội khoa học",
-    code: "CTS56787",
-    credits: 2,
-    instructor: "Phạm Văn Tuyến",
-    room: "FLE77B",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 7, tiết 1 - tiết 5",
-  },
-  {
-    id: "4",
-    name: "Điện toán đám mây",
-    code: "CTS56787",
-    credits: 3,
-    instructor: "Trần Công Hùng",
-    room: "FLE77B",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 3, tiết 1 - tiết 5",
-  },
-]
 
-const availableCoursesData: Course[] = [
-  {
-    id: "5",
-    name: "Dữ liệu lớn",
-    code: "CTS51454",
-    credits: 4,
-    instructor: "Huỳnh Đệ Thu",
-    room: "LEV345",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 3, tiết 6 - tiết 9",
-    studentCount: "42/45",
-  },
-  {
-    id: "6",
-    name: "Học máy",
-    code: "CTS64345",
-    credits: 3,
-    instructor: "Trương Hải Bằng",
-    room: "DOA77B",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 5, tiết 1 - tiết 5",
-    studentCount: "10/45",
-  },
-  {
-    id: "7",
-    name: "Xử lý ngôn ngữ tự nhiên",
-    code: "CTS56787",
-    credits: 3,
-    instructor: "Nguyễn Tuấn Đăng",
-    room: "LEW111",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 5, tiết 4 - tiết 9",
-    studentCount: "10/45",
-  },
-  {
-    id: "8",
-    name: "An toàn và bảo mật thông tin",
-    code: "CTS68787",
-    credits: 2,
-    instructor: "Trần Công Hùng",
-    room: "DOA77B",
-    startDate: "15/09/2025",
-    endDate: "27/10/2025",
-    schedule: "Thứ 2, tiết 1 - tiết 5",
-    studentCount: "10/45",
-  },
-]
 function CoursesContent() {
   const [activeTab, setActiveTab] = useState<"registered" | "available">("registered")
-  const [registeredCourses, setRegisteredCourses] = useState<Course[]>(registeredCoursesData)
-  const [availableCourses, setAvailableCourses] = useState<Course[]>(availableCoursesData)
+  
+  // 1. SỬ DỤNG HOOKS ĐỂ FETCH DỮ LIỆU THỰC TỪ BE
+  const { 
+      courses: availableCourses, 
+      loading: availableLoading, 
+      error: availableError, 
+      refetch: refetchAvailable 
+  } = useAvailableCourses();
+
+  const { 
+      courses: registeredCourses, 
+      loading: registeredLoading, 
+      error: registeredError, 
+      refetch: refetchRegistered 
+  } = useRegisteredCourses();
+
+  // 2. QUẢN LÝ DIALOG HỦY MÔN
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState<{ id: string; name: string } | null>(null)
 
+  // Hàm tiện ích để refresh cả 2 list sau khi có hành động
+  const refreshAllData = () => {
+      refetchAvailable();
+      refetchRegistered();
+  }
+
+  // Xử lý khi click vào nút Hủy (Mở Dialog)
   const handleCancelClick = (courseId: string, courseName: string) => {
     setSelectedCourse({ id: courseId, name: courseName })
     setDialogOpen(true)
   }
 
-  const handleConfirmCancel = () => {
-    if (selectedCourse) {
-      const course = registeredCourses.find((c) => c.id === selectedCourse.id)
-      if (course) {
-        setRegisteredCourses(registeredCourses.filter((c) => c.id !== selectedCourse.id))
-        setAvailableCourses([...availableCourses, course])
-
-        toast.success("Đã hủy môn học thành công!", {
-          duration: 4000,
-        })
-      }
+  // 3. XỬ LÝ HỦY (GỌI API UNENROLL)
+  const handleConfirmCancel = async () => {
+    if (!selectedCourse) return;
+    try {
+        await coursesApi.cancelRegistration(selectedCourse.id);
+        refreshAllData();
+        toast.success("Đã hủy môn học thành công!", { duration: 4000 });
+    } catch (error: any) {
+        console.error("Lỗi khi hủy môn học:", error);
+        const message = error?.response?.data?.message || "Hủy môn học thất bại. Vui lòng kiểm tra kết nối.";
+        toast.error(message);
     }
-    setDialogOpen(false)
-    setSelectedCourse(null)
+    setDialogOpen(false);
+    setSelectedCourse(null);
   }
 
-  const handleRegisterClick = (courseId: string, courseName: string) => {
-    const course = availableCourses.find((c) => c.id === courseId)
-    if (course) {
-      setAvailableCourses(availableCourses.filter((c) => c.id !== courseId))
-      setRegisteredCourses([...registeredCourses, course])
-
-      toast.success("Đăng ký môn học thành công!", {
-        duration: 4000,
-      })
+  // 4. XỬ LÝ ĐĂNG KÝ (GỌI API ENROLL)
+  const handleRegisterClick = async (courseId: string) => { 
+    try {
+        await coursesApi.registerCourse(courseId);
+        refreshAllData();
+        toast.success("Đăng ký môn học thành công!", { duration: 4000 });
+    } catch (error: any) {
+        console.error("Lỗi khi đăng ký môn học:", error);
+        const message = error?.response?.data?.message || "Đăng ký môn học thất bại. Vui lòng kiểm tra kết nối.";
+        toast.error(message);
     }
   }
 
@@ -172,6 +95,7 @@ function CoursesContent() {
         <p className="text-gray-600 mt-1">Đăng ký và quản lý các môn học</p>
       </div>
 
+      {/* Tab Selector */}
       <div className="flex gap-6 border-b">
         <button
           onClick={() => setActiveTab("registered")}
@@ -199,12 +123,28 @@ function CoursesContent() {
         </button>
       </div>
 
+      {/* Tab Content */}
       {activeTab === "registered" ? (
-        <RegisteredCourses courses={registeredCourses} onCancelClick={handleCancelClick} />
+        // Hiển thị Môn học đã đăng ký
+        registeredLoading ? (
+            <p className="text-center py-8">Đang tải danh sách môn học đã đăng ký...</p>
+        ) : registeredError ? (
+             <p className="text-red-500 text-center py-8">{registeredError}</p>
+        ) : (
+            // Truyền dữ liệu và trạng thái loading (để component con có thể sử dụng nếu cần)
+            <RegisteredCourses 
+              courses={registeredCourses || []} // Dùng [] cho an toàn để tránh lỗi reduce
+              loading={registeredLoading} 
+              onCancelClick={handleCancelClick} 
+            />
+        )
       ) : (
-        <AvailableCourses courses={availableCourses} onRegisterClick={handleRegisterClick} />
+        // Hiển thị Môn học có sẵn để đăng ký
+        // Component AvailableCourses tự fetch loading/error bên trong
+        <AvailableCourses onRegisterClick={handleRegisterClick} />
       )}
 
+      {/* Dialog Xác nhận Hủy */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>

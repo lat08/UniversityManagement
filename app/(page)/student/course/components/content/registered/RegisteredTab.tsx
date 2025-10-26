@@ -1,28 +1,21 @@
+// Path: components/content/registered/RegisteredTab.tsx
+
 "use client"
 
 import { Card } from "@/app/components/ui/card"
 import { CourseCard } from "../../card/CourseCard"
+import { RegisteredCoursesProps } from "../../../lib/type/courseType"
 
-interface Course {
-  id: string
-  name: string
-  code: string
-  credits: number
-  instructor: string
-  room: string
-  startDate: string
-  endDate: string
-  schedule: string
-  studentCount?: string
-}
 
-interface RegisteredCoursesProps {
-  courses: Course[]
-  onCancelClick: (courseId: string, courseName: string) => void
-}
 
-export function RegisteredCourses({ courses, onCancelClick }: RegisteredCoursesProps) {
-  const totalCredits = courses.reduce((sum, course) => sum + course.credits, 0)
+export function RegisteredCourses({ courses,loading, onCancelClick }: RegisteredCoursesProps) {
+  
+  if (loading) {
+      return <div className="text-center py-8">Đang tải danh sách môn học đã đăng ký...</div>
+  }
+  
+  // Dùng toán tử Nullish ?? [] để đảm bảo courses là mảng trước khi dùng reduce
+  const totalCredits = (courses ?? []).reduce((sum, course) => sum + course.credits, 0)
 
   return (
     <Card className="text-white pb-4" style={{backgroundColor: '#DBEDFF'}}>
@@ -33,10 +26,17 @@ export function RegisteredCourses({ courses, onCancelClick }: RegisteredCoursesP
           <span>Số môn học: {courses.length} môn học</span>
         </div>
       </div>
-      {/* Course cards nested inside semester card */}
+      
       <div className="mx-6 space-y-4">
+        {courses.length === 0 && <p className="text-gray-600">Chưa có môn học nào được đăng ký.</p>}
         {courses.map((course) => (
-          <CourseCard key={course.id} {...course} onAction={onCancelClick} actionType="cancel" />
+          <CourseCard 
+            key={course.courseId} 
+            {...course} 
+            // Truyền ID và Tên môn qua onAction, CourseCard sẽ gọi onCancelClick
+            onAction={(courseId, courseName) => onCancelClick(courseId, course.subjectName)} 
+            actionType="cancel" 
+          />
         ))}
       </div>
     </Card>
