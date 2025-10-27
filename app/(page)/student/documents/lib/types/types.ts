@@ -12,3 +12,31 @@ export interface DocumentSection {
   fileCount: number
   documents: Document[]
 }
+
+// API Types - Individual document
+export interface DocumentItem {
+  documentId: string
+  fileTitle: string
+  fileType: string
+  fileSize: number
+  description: string
+  filePath: string
+  previewUrl: string
+  downloadUrl: string
+  created: string
+}
+
+// Course group with documents
+export interface CourseGroup {
+  courseClassId: string
+  courseName: string
+  uploadedById: string
+  uploadedByName: string
+  documents: DocumentItem[]
+}
+
+export interface DocumentsApiResponse {
+  success: boolean
+  total: number
+  data: CourseGroup[]
+}

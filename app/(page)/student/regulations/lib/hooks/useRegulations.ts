@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { regulationsApi } from '../api/regulationsApi'
-import { Regulation, RegulationResponse } from '../types/types'
+import { Regulation } from '../types/types'
 
 interface UseRegulationsParams {
   pageIndex?: number
@@ -12,14 +12,6 @@ interface UseRegulationsReturn {
   regulations: Regulation[]
   loading: boolean
   error: string | null
-  pagination: {
-    totalCount: number
-    page: number
-    pageSize: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-  } | null
   refetch: () => Promise<void>
 }
 
@@ -27,25 +19,18 @@ export const useRegulations = (params: UseRegulationsParams = {}): UseRegulation
   const [regulations, setRegulations] = useState<Regulation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState<UseRegulationsReturn['pagination']>(null)
 
-  const fetchRegulations = async () => {
+  const { pageIndex, pageSize, orderBy } = params
+
+  const fetchRegulations = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const response = await regulationsApi.getRegulations(params)
+      const response = await regulationsApi.getRegulations({ pageIndex, pageSize, orderBy })
       
       if (response.isSuccess) {
         setRegulations(response.data.data)
-        setPagination({
-          totalCount: response.data.totalCount,
-          page: response.data.page,
-          pageSize: response.data.pageSize,
-          totalPages: response.data.totalPages,
-          hasNextPage: response.data.hasNextPage,
-          hasPreviousPage: response.data.hasPreviousPage
-        })
       } else {
         setError('Không thể tải dữ liệu quy chế')
       }
@@ -54,17 +39,16 @@ export const useRegulations = (params: UseRegulationsParams = {}): UseRegulation
     } finally {
       setLoading(false)
     }
-  }
+  }, [pageIndex, pageSize, orderBy])
 
   useEffect(() => {
     fetchRegulations()
-  }, [params.pageIndex, params.pageSize, params.orderBy])
+  }, [fetchRegulations])
 
   return {
     regulations,
     loading,
     error,
-    pagination,
     refetch: fetchRegulations
   }
 }

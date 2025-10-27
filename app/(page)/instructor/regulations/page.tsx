@@ -1,17 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import { Download, ExternalLink, AlertTriangle, Loader2 } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Download, ExternalLink, AlertTriangle, ChevronDown, Loader2, Search, FileText } from "lucide-react"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useRegulations } from "./lib/hooks/useRegulations"
-import { CONTACT_INFO } from "./lib/constants/contactInfo"
+import { Regulation } from "./lib/types/types"
 
 export default function InstructorRegulationsPage() {
   usePageTitle('Quy chế / Quy định');
-  const [selectedIdx, setSelectedIdx] = useState(0)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
   const { regulations, loading, error, refetch } = useRegulations()
-  
-  const selected = regulations[selectedIdx]
 
   const handleDownload = async (fileUrl: string, fileName: string) => {
     try {
@@ -25,12 +24,27 @@ export default function InstructorRegulationsPage() {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Download failed:', error)
+    } catch {
       // Fallback: mở trong tab mới
       window.open(fileUrl, '_blank')
     }
   }
+
+  const toggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id)
+  }
+
+  // Filter regulations based on search query
+  const filteredRegulations = useMemo(() => {
+    if (!searchQuery.trim()) return regulations
+    
+    const query = searchQuery.toLowerCase()
+    return regulations.filter(reg => 
+      (reg.title || '').toLowerCase().includes(query) ||
+      (reg.description || '').toLowerCase().includes(query) ||
+      (reg.category || '').toLowerCase().includes(query)
+    )
+  }, [regulations, searchQuery])
 
   if (loading) {
     return (
@@ -47,8 +61,8 @@ export default function InstructorRegulationsPage() {
     return (
       <div className="space-y-4 lg:space-y-6">
         <header className="space-y-2">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế Quy định</h1>
-          <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế - Quy định</h1>
+          <p className="text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
         </header>
         
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 lg:p-6">
@@ -74,8 +88,8 @@ export default function InstructorRegulationsPage() {
     return (
       <div className="space-y-4 lg:space-y-6">
         <header className="space-y-2">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế Quy định</h1>
-          <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế - Quy định</h1>
+          <p className="text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
         </header>
         
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 lg:p-6 text-center">
@@ -88,119 +102,128 @@ export default function InstructorRegulationsPage() {
   return (
     <div className="space-y-4 lg:space-y-6">
       <header className="space-y-2">
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế Quy định</h1>
-        <p className="text-xs lg:text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Quy chế - Quy định</h1>
+        <p className="text-sm text-gray-600">Tìm hiểu các quy định, quy chế và chính sách dành cho giảng viên</p>
       </header>
 
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {/* Left Section - DANH SÁCH */}
-        <aside className="w-full lg:w-[380px] flex-shrink-0">
-          <div className="bg-white rounded-xl border shadow overflow-hidden h-full">
-            <div className="border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4">
-              <h3 className="text-xs lg:text-sm font-semibold text-gray-900 uppercase tracking-wide">DANH SÁCH</h3>
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      {/* Regulations List */}
+      <div className="space-y-4">
+        {filteredRegulations.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+            <p className="text-gray-600">Không tìm thấy quy chế phù hợp với từ khóa &quot;{searchQuery}&quot;</p>
+          </div>
+        ) : (
+          filteredRegulations.map((regulation) => (
+            <RegulationCard
+              key={regulation.id}
+              regulation={regulation}
+              isExpanded={expandedId === regulation.id}
+              onToggle={() => toggleExpand(regulation.id)}
+              onDownload={handleDownload}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+interface RegulationCardProps {
+  regulation: Regulation
+  isExpanded: boolean
+  onToggle: () => void
+  onDownload: (fileUrl: string, fileName: string) => void
+}
+
+function RegulationCard({ regulation, isExpanded, onToggle, onDownload }: RegulationCardProps) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      {/* Card Header - Always Visible */}
+      <button
+        onClick={onToggle}
+        className="w-full px-6 py-4 flex items-center gap-4 hover:bg-blue-50 transition-colors cursor-pointer"
+      >
+        <div className="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+          <FileText className="w-6 h-6 text-blue-600" />
+        </div>
+        
+        <div className="flex-1 text-left">
+          <h3 className="font-semibold text-gray-900 mb-1">{regulation.title}</h3>
+          <p className="text-sm text-gray-500">Lần cuối cập nhật: {new Date(regulation.updatedAt || regulation.createdAt).toLocaleDateString('vi-VN')}</p>
+        </div>
+
+        <ChevronDown 
+          className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {/* Card Content - Expandable */}
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-6 pb-6 pt-2 border-t border-gray-100 space-y-4">
+          {/* Description */}
+          <div>
+            <p className="font-semibold text-sm text-gray-900 mb-2">Nội dung:</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{regulation.description}</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Xem tài liệu chi tiết:</h4>
+            
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => onDownload(regulation.fileUrl, regulation.fileName)}
+                className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                Tải file PDF
+              </button>
+
+              <a
+                href={regulation.fileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 px-5 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Xem trực tuyến
+              </a>
             </div>
 
-            <nav className="p-3 lg:p-4 space-y-2">
-              {regulations.map((r, i) => (
-                <button
-                  key={r.id}
-                  onClick={() => setSelectedIdx(i)}
-                  className={`w-full text-left px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-75 text-xs lg:text-sm cursor-pointer select-none
-                    ${
-                      i === selectedIdx
-                        ? "bg-[#EBF5FF] border border-[#B3D9FF] text-gray-900 font-medium"
-                        : "text-gray-700 hover:bg-gray-100 border border-transparent"
-                    }
-                  `}
-                >
-                  {r.title}
-                </button>
-              ))}
-            </nav>
+            {regulation.fileName && (
+              <p className="mt-2 text-xs text-gray-500">Tên file: {regulation.fileName}</p>
+            )}
+          </div>
 
-            <div className="border-t border-gray-200 px-4 lg:px-6 py-3 lg:py-4 bg-gray-50">
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Chọn một mục để xem nội dung chi tiết. Tài liệu có thể được tải xuống hoặc xem trực tuyến.
+          {/* Notice */}
+          <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200 flex gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-sm text-yellow-900 mb-1">Lưu ý</p>
+              <p className="text-sm text-yellow-800 leading-relaxed">
+                Giảng viên có trách nhiệm đọc kỹ và tuân thủ các quy định trong quy chế này. Mọi thắc mắc xin liên hệ Phòng Đào tạo hoặc Phòng Tổ chức - Nhân sự để được hướng dẫn chi tiết.
               </p>
             </div>
           </div>
-        </aside>
-
-        {/* Right Section - NỘI DUNG QUY CHẾ */}
-        <article className="flex-1 space-y-4 lg:space-y-6">
-          <div className="bg-white rounded-xl border shadow overflow-hidden">
-            <div className="border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4">
-              <h2 className="text-xs lg:text-sm font-semibold text-gray-900 uppercase tracking-wide">NỘI DUNG</h2>
-            </div>
-
-            <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
-              <div>
-                <p className="text-xs lg:text-sm text-gray-600 leading-relaxed">{selected?.description}</p>
-              </div>
-
-              <div>
-                <h4 className="text-xs lg:text-sm font-semibold text-gray-900 mb-3 lg:mb-4">Tải xuống tài liệu đầy đủ:</h4>
-
-                <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
-                   <button
-                     onClick={() => selected && handleDownload(selected.fileUrl, selected.fileName)}
-                     className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg text-xs lg:text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                     disabled={!selected?.fileUrl}
-                   >
-                    <Download className="w-4 h-4 lg:w-5 lg:h-5" />
-                    Tải file PDF
-                  </button>
-
-                  <a
-                    href={selected?.fileUrl || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-white border border-gray-300 px-4 lg:px-6 py-2 lg:py-3 rounded-lg text-xs lg:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5" />
-                    Xem trực tuyến
-                  </a>
-                </div>
-
-                {selected?.fileName && (
-                  <p className="mt-2 lg:mt-3 text-xs text-gray-500">{`Tên file: ${selected.fileName}`}</p>
-                )}
-              </div>
-
-              <div className="p-3 lg:p-4 rounded-lg bg-yellow-50 border border-yellow-200 flex gap-2 lg:gap-3">
-                <AlertTriangle className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="font-semibold text-xs lg:text-sm text-yellow-900 mb-1">Lưu ý quan trọng</p>
-                  <p className="text-xs lg:text-sm text-yellow-800 leading-relaxed">
-                    Giảng viên có trách nhiệm đọc kỹ và tuân thủ các quy định trong quy chế này. Mọi thắc mắc xin liên
-                    hệ Phòng Đào tạo hoặc Phòng Tổ chức - Nhân sự để được hướng dẫn chi tiết.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border shadow overflow-hidden">
-            <div className="border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-4">
-              <h3 className="text-xs lg:text-sm font-semibold text-gray-900 uppercase tracking-wide">THÔNG TIN LIÊN HỆ</h3>
-            </div>
-
-            <div className="p-4 lg:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8">
-                <div>
-                  <p className="font-semibold text-xs lg:text-sm text-gray-900 mb-2 lg:mb-3">{CONTACT_INFO.academicAffairs.name}</p>
-                  <p className="text-xs lg:text-sm text-gray-600 mb-1">Email: {CONTACT_INFO.academicAffairs.email}</p>
-                  <p className="text-xs lg:text-sm text-gray-600">ĐT: {CONTACT_INFO.academicAffairs.phone}</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-xs lg:text-sm text-gray-900 mb-2 lg:mb-3">{CONTACT_INFO.humanResources.name}</p>
-                  <p className="text-xs lg:text-sm text-gray-600 mb-1">Email: {CONTACT_INFO.humanResources.email}</p>
-                  <p className="text-xs lg:text-sm text-gray-600">ĐT: {CONTACT_INFO.humanResources.phone}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
+        </div>
       </div>
     </div>
   )

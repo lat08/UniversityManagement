@@ -1,25 +1,68 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ChevronDown, Printer } from "lucide-react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import ExamStatCard from "./components/ExamStatCard";
 import ExamTimeline from "./components/ExamTimeline";
 import NotesSection from "./components/NotesSection";
-import { MOCK_SEMESTERS, MOCK_EXAMS, MOCK_NOTES } from "./lib/constants/constants";
-import { ExamStatCard as ExamStatCardType } from "./lib/types/types";
+import { MOCK_NOTES } from "./lib/constants/constants";
+import { ExamStatCard as ExamStatCardType, Semester, Exam } from "./lib/types/types";
+import { getSemesters, getExamSchedule } from "./lib/api/examScheduleApi";
+import { sortExamsByStatus, transformExamData } from "./lib/utils/examUtils";
 
 export default function ExamSchedulePage() {
   usePageTitle('Lịch thi');
   
   const [isSemesterOpen, setIsSemesterOpen] = useState(false);
-  const [selectedSemester, setSelectedSemester] = useState(MOCK_SEMESTERS[0]);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch semesters on mount
+  useEffect(() => {
+    const fetchSemesters = async () => {
+      try {
+        const data = await getSemesters();
+        setSemesters(data);
+        if (data.length > 0) {
+          setSelectedSemester(data[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch semesters:', error);
+      }
+    };
+    fetchSemesters();
+  }, []);
+
+  // Fetch exams when semester changes
+  useEffect(() => {
+    const fetchExams = async () => {
+      if (!selectedSemester) return;
+      
+      setLoading(true);
+      try {
+        const data = await getExamSchedule(selectedSemester.semesterId);
+        const transformedData = transformExamData(data);
+        const sortedExams = sortExamsByStatus(transformedData);
+        setExams(sortedExams);
+      } catch (error) {
+        console.error('Failed to fetch exam schedule:', error);
+        setExams([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExams();
+  }, [selectedSemester]);
 
   // Calculate stats
   const stats = useMemo((): ExamStatCardType[] => {
-    const totalExams = MOCK_EXAMS.length;
-    const upcomingExams = MOCK_EXAMS.filter(e => e.status === 'upcoming' || e.status === 'today');
-    const completedExams = MOCK_EXAMS.filter(e => e.status === 'completed');
+    const totalExams = exams.length;
+    const upcomingExams = exams.filter(e => e.status === 'Sắp tới');
+    const pendingExams = exams.filter(e => e.status === 'Chưa tới');
+    const completedExams = exams.filter(e => e.status === 'Đã thi');
     const progress = totalExams > 0 ? Math.round((completedExams.length / totalExams) * 100) : 0;
 
     const nextExam = upcomingExams.length > 0 ? upcomingExams[0] : null;
@@ -28,16 +71,16 @@ export default function ExamSchedulePage() {
       {
         title: 'Tổng số môn thi',
         value: totalExams,
-        subtitle: selectedSemester.semesterName.split(' - ').slice(0, 2).join(' - '),
+        subtitle: selectedSemester?.semesterName.split(' - ').slice(0, 2).join(' - ') || '',
         bgColor: 'bg-blue-50',
         iconColor: 'text-blue-600',
         textColor: 'text-blue-600',
       },
       {
         title: 'Môn thi sắp tới',
-        value: upcomingExams.length,
+        value: upcomingExams.length + pendingExams.length,
         subtitle: nextExam 
-          ? `${nextExam.courseName} - ${nextExam.date.split(', ')[1]} - ${nextExam.time.split(' - ')[0]}`
+          ? `${nextExam.subjectNameCode} - ${nextExam.examDate} - ${nextExam.examTimeDuration.split('–')[0]}`
           : 'Không có lịch thi sắp tới',
         bgColor: 'bg-orange-50',
         iconColor: 'text-orange-600',
@@ -53,7 +96,7 @@ export default function ExamSchedulePage() {
         progress: progress,
       },
     ];
-  }, [selectedSemester]);
+  }, [exams, selectedSemester]);
 
   const handlePrint = () => {
     window.print();
@@ -76,15 +119,16 @@ export default function ExamSchedulePage() {
           <button 
             className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
             onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+            disabled={semesters.length === 0}
           >
             <span className="text-xs lg:text-sm text-gray-900 truncate">
-              {selectedSemester.semesterName}
+              {selectedSemester?.semesterName || 'Chọn học kỳ'}
             </span>
             <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
           </button>
           {isSemesterOpen && (
             <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {MOCK_SEMESTERS.map((semester) => (
+              {semesters.map((semester) => (
                 <button
                   key={semester.semesterId}
                   className="w-full text-left px-4 py-2.5 text-xs lg:text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
@@ -128,8 +172,13 @@ export default function ExamSchedulePage() {
               </svg>
               Lịch thi các môn
             </h2>
-            {MOCK_EXAMS.length > 0 ? (
-              <ExamTimeline exams={MOCK_EXAMS} />
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p className="text-gray-500 text-sm">Đang tải lịch thi...</p>
+              </div>
+            ) : exams.length > 0 ? (
+              <ExamTimeline exams={exams} />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
