@@ -34,7 +34,7 @@ export function RegisteredCourses({ courses,loading, onCancelClick }: Registered
             key={course.courseId} 
             {...course} 
             // Truyền ID và Tên môn qua onAction, CourseCard sẽ gọi onCancelClick
-            onAction={(courseId, courseName) => onCancelClick(courseId, course.subjectName)} 
+            onAction={(courseId) => onCancelClick(courseId, course.subjectName)} 
             actionType="cancel" 
           />
         ))}

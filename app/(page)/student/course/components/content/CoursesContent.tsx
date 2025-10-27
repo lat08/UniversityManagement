@@ -3,7 +3,7 @@
 "use client"
 
 import { useState } from "react"
-import { BookOpen, CheckCircle2 } from "lucide-react"
+import { BookOpen } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
 import {
   Dialog,
@@ -29,12 +29,7 @@ function CoursesContent() {
   const [activeTab, setActiveTab] = useState<"registered" | "available">("registered")
   
   // 1. SỬ DỤNG HOOKS ĐỂ FETCH DỮ LIỆU THỰC TỪ BE
-  const { 
-      courses: availableCourses, 
-      loading: availableLoading, 
-      error: availableError, 
-      refetch: refetchAvailable 
-  } = useAvailableCourses();
+  const { refetch: refetchAvailable } = useAvailableCourses();
 
   const { 
       courses: registeredCourses, 
@@ -60,15 +55,25 @@ function CoursesContent() {
   }
 
   // 3. XỬ LÝ HỦY (GỌI API UNENROLL)
+  // Helper to extract BE message from unknown error
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (typeof error === 'object' && error !== null) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      return err.response?.data?.message ?? err.message ?? fallback;
+    }
+    if (error instanceof Error) return error.message;
+    return fallback;
+  };
+
   const handleConfirmCancel = async () => {
     if (!selectedCourse) return;
     try {
         await coursesApi.cancelRegistration(selectedCourse.id);
         refreshAllData();
         toast.success("Đã hủy môn học thành công!", { duration: 4000 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Lỗi khi hủy môn học:", error);
-        const message = error?.response?.data?.message || "Hủy môn học thất bại. Vui lòng kiểm tra kết nối.";
+        const message = getErrorMessage(error, "Hủy môn học thất bại. Vui lòng kiểm tra kết nối.");
         toast.error(message);
     }
     setDialogOpen(false);
@@ -81,9 +86,9 @@ function CoursesContent() {
         await coursesApi.registerCourse(courseId);
         refreshAllData();
         toast.success("Đăng ký môn học thành công!", { duration: 4000 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Lỗi khi đăng ký môn học:", error);
-        const message = error?.response?.data?.message || "Đăng ký môn học thất bại. Vui lòng kiểm tra kết nối.";
+        const message = getErrorMessage(error, "Đăng ký môn học thất bại. Vui lòng kiểm tra kết nối.");
         toast.error(message);
     }
   }
