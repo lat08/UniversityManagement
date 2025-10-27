@@ -3,41 +3,45 @@
 import { TuitionFee } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
 
+import { Spinner } from "@/app/components/ui/spinner";
+import { formatCurrency } from "@/lib/utils/format";
+
 interface TuitionTableProps {
   data: TuitionFee[];
   selectedIds: string[];
   onSelectAll: (checked: boolean) => void;
   onSelectItem: (id: string, checked: boolean) => void;
+  isLoading?: boolean;
 }
 
-export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectItem }: TuitionTableProps) {
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString('vi-VN')} đ`;
-  };
+export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectItem, isLoading }: TuitionTableProps) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Spinner />
+      </div>
+    );
+  }
 
-  const getStatusText = (status: TuitionFee['status']) => {
-    switch (status) {
-      case 'paid':
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
         return 'Đã thanh toán';
-      case 'unpaid':
-        return 'Chưa thanh toán';
-      case 'partial':
-        return 'Thanh toán một phần';
+      case 'pending':
+        return 'Đang xử lý';
       default:
-        return '';
+        return 'Chưa thanh toán';
     }
   };
 
-  const getStatusColor = (status: TuitionFee['status']) => {
-    switch (status) {
-      case 'paid':
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
         return 'text-green-600';
-      case 'unpaid':
-        return 'text-red-600';
-      case 'partial':
-        return 'text-orange-600';
+      case 'pending':
+        return 'text-yellow-600';
       default:
-        return 'text-gray-600';
+        return 'text-red-600';
     }
   };
 
@@ -64,6 +68,7 @@ export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectI
                     input.indeterminate = someSelected;
                   }
                 }}
+                disabled={data.every(item => item.status === 'completed')}
                 onChange={(e) => onSelectAll(e.target.checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
               />
@@ -72,20 +77,21 @@ export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectI
         </thead>
         <tbody className="divide-y divide-gray-200">
           {data.map((item) => (
-            <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+            <tr key={item.courseId} className="hover:bg-gray-50 transition-colors">
               <td className="px-4 py-3 text-xs lg:text-sm text-gray-900">{item.courseCode}</td>
               <td className="px-4 py-3 text-xs lg:text-sm text-gray-900">{item.courseName}</td>
               <td className="px-4 py-3 text-xs lg:text-sm text-gray-900 text-center">{item.credits}</td>
-              <td className="px-4 py-3 text-xs lg:text-sm text-gray-900 text-right">{formatCurrency(item.amount)}</td>
-              <td className="px-4 py-3 text-xs lg:text-sm text-gray-900 text-right">{formatCurrency(item.outstanding)}</td>
+              <td className="px-4 py-3 text-xs lg:text-sm text-gray-900 text-right">{formatCurrency(item.courseFee)}</td>
+              <td className="px-4 py-3 text-xs lg:text-sm text-gray-900 text-right">{item.status === 'completed' ? formatCurrency(0) : formatCurrency(item.courseFee)}</td>
               <td className={cn("px-4 py-3 text-xs lg:text-sm text-center font-medium", getStatusColor(item.status))}>
                 {getStatusText(item.status)}
               </td>
               <td className="px-4 py-3 text-center">
                 <input
                   type="checkbox"
-                  checked={selectedIds.includes(item.id)}
-                  onChange={(e) => onSelectItem(item.id, e.target.checked)}
+                  checked={selectedIds.includes(item.courseId)}
+                  onChange={(e) => onSelectItem(item.courseId, e.target.checked)}
+                  disabled={item.status === 'completed'}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                 />
               </td>
