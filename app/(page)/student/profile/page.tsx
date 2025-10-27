@@ -1,0 +1,456 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent } from "@/app/components/ui/card"
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
+import { usePageTitle } from "@/lib/hooks/usePageTitle"
+import { Eye, EyeOff, Loader2, XCircle, AlertCircle } from "lucide-react"
+import { useProfile } from "./lib/hooks/useProfile"
+import { formatDate, formatGender, formatEnrollmentStatus } from "./lib/utils/formatters"
+
+export default function ProfilePage() {
+  usePageTitle("Hồ sơ cá nhân")
+  const { profile, isLoading, error, handleChangePassword } = useProfile()
+  const [activeTab, setActiveTab] = useState<"info" | "password">("info")
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  })
+
+  const handlePasswordInputChange = (field: string, value: string) => {
+    setPasswordData(prev => ({ ...prev, [field]: value }))
+    setPasswordError(null)
+    setPasswordSuccess(null)
+  }
+
+  const handleSavePassword = async () => {
+    // Validate
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordError("Vui lòng điền đầy đủ thông tin")
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError("Mật khẩu mới và xác nhận mật khẩu không khớp")
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError("Mật khẩu mới phải có ít nhất 6 ký tự")
+      return
+    }
+
+    try {
+      setIsChangingPassword(true)
+      setPasswordError(null)
+      setPasswordSuccess(null)
+
+      const result = await handleChangePassword({
+        oldPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmPassword: passwordData.confirmPassword,
+      })
+
+      if (result.success) {
+        setPasswordSuccess(result.message)
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
+        })
+        // Clear success message after 3 seconds
+        setTimeout(() => setPasswordSuccess(null), 3000)
+      } else {
+        setPasswordError(result.message)
+      }
+    } catch (err) {
+      setPasswordError("Đã xảy ra lỗi khi đổi mật khẩu")
+    } finally {
+      setIsChangingPassword(false)
+    }
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Đang tải thông tin...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !profile) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <XCircle className="h-12 w-12 text-red-500" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Không thể tải thông tin</h3>
+            <p className="text-gray-600">{error || "Đã xảy ra lỗi"}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h1>
+      </div>
+
+      <Card className="shadow-sm border border-gray-200">
+        <CardContent className="p-6">
+          {/* Tabs */}
+          <div className="flex gap-8 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("info")}
+              className={`pb-3 px-1 font-medium text-sm transition-colors relative ${
+                activeTab === "info"
+                  ? "text-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Thông tin cá nhân
+              {activeTab === "info" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("password")}
+              className={`pb-3 px-1 font-medium text-sm transition-colors relative ${
+                activeTab === "password"
+                  ? "text-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Đổi mật khẩu
+              {activeTab === "password" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+              )}
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === "info" ? (
+            <div className="space-y-6">
+              {/* Avatar & Basic Info */}
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0">
+                  <Avatar className="w-32 h-32 border-4 border-gray-100">
+                    <AvatarImage src={profile.profilePicture || ""} alt={profile.fullName} />
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-bold">
+                      {profile.fullName.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-center mt-4">
+                    <p className="text-lg font-bold text-blue-600">{profile.classCode}</p>
+                    <p className="text-sm text-gray-500">{profile.role}</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Họ và tên */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Họ và tên
+                    </label>
+                    <Input
+                      value={profile.fullName}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Mã số sinh viên */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mã số sinh viên
+                    </label>
+                    <Input
+                      value={profile.studentCode}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Giới tính */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Giới tính
+                    </label>
+                    <Input
+                      value={formatGender(profile.gender)}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Ngày sinh */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ngày sinh
+                    </label>
+                    <Input
+                      value={formatDate(profile.dateOfBirth)}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <Input
+                      value={profile.email}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* CMND / CCCD */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      CMND / CCCD
+                    </label>
+                    <Input
+                      value={profile.citizenId || "-"}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Ngành học */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ngành học
+                    </label>
+                    <Input
+                      value={profile.majorName}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Chuyên ngành */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Chuyên ngành
+                    </label>
+                    <Input
+                      value={profile.facultyName}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Lớp */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Lớp
+                    </label>
+                    <Input
+                      value={profile.className}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Tình trạng */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tình trạng
+                    </label>
+                    <Input
+                      value={formatEnrollmentStatus(profile.enrollmentStatus)}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Bậc hệ đào tạo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bậc hệ đào tạo
+                    </label>
+                    <Input
+                      value={profile.educationLevel}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+
+                  {/* Niên khóa */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Niên khóa
+                    </label>
+                    <Input
+                      value={profile.academicYear}
+                      readOnly
+                      className="bg-gray-50 border-gray-200 text-gray-700"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Hộ khẩu */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hộ khẩu
+                </label>
+                <textarea
+                  value={profile.address || "Chưa cập nhật"}
+                  readOnly
+                  rows={3}
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm resize-none focus:outline-none"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6 max-w-xl">
+              {/* Error Message */}
+              {passwordError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-800">{passwordError}</p>
+                </div>
+              )}
+
+              {/* Success Message */}
+              {passwordSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-green-800">{passwordSuccess}</p>
+                </div>
+              )}
+
+              {/* Mật khẩu hiện tại */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mật khẩu hiện tại
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={passwordData.currentPassword}
+                    onChange={(e) => handlePasswordInputChange("currentPassword", e.target.value)}
+                    placeholder="••••••••••"
+                    className="pr-10"
+                    disabled={isChangingPassword}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={isChangingPassword}
+                  >
+                    {showCurrentPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Mật khẩu mới */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mật khẩu mới
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) => handlePasswordInputChange("newPassword", e.target.value)}
+                    placeholder="••••••••••"
+                    className="pr-10"
+                    disabled={isChangingPassword}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={isChangingPassword}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Nhập lại mật khẩu mới */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nhập lại mật khẩu mới
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => handlePasswordInputChange("confirmPassword", e.target.value)}
+                    placeholder="••••••••••"
+                    className="pr-10"
+                    disabled={isChangingPassword}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={isChangingPassword}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Button */}
+              <div className="flex justify-end pt-4">
+                <Button
+                  onClick={handleSavePassword}
+                  disabled={isChangingPassword}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isChangingPassword ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    "Lưu thay đổi"
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
