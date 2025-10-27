@@ -115,7 +115,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
     {
       title: "HỆ THỐNG",
       items: [
-        { icon: Users, label: "Hồ sơ cá nhân", href: "/profile" },
+        { icon: Users, label: "Hồ sơ cá nhân", href: "/student/profile" },
         { icon: Bell, label: "Thông báo", href: "/student/notification" },
       ],
     },
