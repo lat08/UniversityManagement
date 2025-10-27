@@ -3,10 +3,11 @@ export interface Document {
   name: string
   size: string
   date: string
-  type: 'pdf' | 'zip' | 'pptx'
+  type: string
 }
 
 export interface DocumentSection {
+  id : string
   title: string
   subtitle: string
   fileCount: number
