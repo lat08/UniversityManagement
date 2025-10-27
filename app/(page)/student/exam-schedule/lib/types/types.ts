@@ -1,12 +1,22 @@
+export interface ExamScheduleResponse {
+  subjectNameCode: string;
+  examDate: string;
+  examTimeDuration: string;
+  roomCode: string;
+  studentCount: number;
+  examFormat: string;
+  status: 'Đã thi' | 'Chưa tới' | 'Sắp tới';
+}
+
 export interface Exam {
   id: string;
-  date: string;
-  time: string;
-  courseCode: string;
-  courseName: string;
-  room: string;
-  examType: string;
-  status: 'completed' | 'upcoming' | 'today';
+  subjectNameCode: string;
+  examDate: string;
+  examTimeDuration: string;
+  roomCode: string;
+  studentCount: number;
+  examFormat: string;
+  status: 'Đã thi' | 'Chưa tới' | 'Sắp tới';
 }
 
 export interface ExamStatCard {
