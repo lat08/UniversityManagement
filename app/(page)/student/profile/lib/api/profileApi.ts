@@ -8,11 +8,12 @@ export async function getStudentProfile(): Promise<StudentProfileResponse> {
   try {
     const response = await api.get<StudentProfileResponse>("/v1/students/me")
     return response.data
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status?: number; data?: { message?: string } } }
+    if (axiosError.response?.status === 401) {
       throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
     }
-    throw new Error(error.response?.data?.message || "Không thể tải thông tin profile")
+    throw new Error(axiosError.response?.data?.message || "Không thể tải thông tin profile")
   }
 }
 
@@ -23,14 +24,15 @@ export async function changePassword(data: ChangePasswordRequest): Promise<Chang
   try {
     const response = await api.post<ChangePasswordResponse>("/v1/auth/change-password", data)
     return response.data
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status?: number; data?: { message?: string } } }
+    if (axiosError.response?.status === 401) {
       throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
     }
-    if (error.response?.status === 400) {
-      throw new Error(error.response?.data?.message || "Mật khẩu không hợp lệ")
+    if (axiosError.response?.status === 400) {
+      throw new Error(axiosError.response?.data?.message || "Mật khẩu không hợp lệ")
     }
-    throw new Error(error.response?.data?.message || "Không thể đổi mật khẩu")
+    throw new Error(axiosError.response?.data?.message || "Không thể đổi mật khẩu")
   }
 }
 
