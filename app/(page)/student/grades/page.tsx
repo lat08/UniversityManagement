@@ -3,22 +3,73 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
-import { Printer, TrendingUp, BookOpen, Award, CheckCircle, XCircle, ChevronUp, List } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Printer, TrendingUp, BookOpen, Award, CheckCircle, XCircle, ChevronUp, List, Loader2 } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
-import { semesterData } from "./lib/data/semesterData"
-import { courseDetails } from "./lib/data/courseDetails"
-import { calculateGPA, getLetterGrade, getClassification, calculateSemesterStats, calculateCumulativeGPA } from "./lib/utils/gradeUtils"
+import { useGrades } from "./lib/hooks/useGrades"
+import { transformSemestersToUI, createCourseDetailsLookup } from "./lib/utils/transformers"
+import { calculateGPA, getLetterGrade } from "./lib/utils/gradeUtils"
+import type { CourseDetail } from "./lib/types/types"
 
 export default function ScoresPage() {
   usePageTitle('Điểm số');
+  const { cumulativeData, isLoading, error, exportPdf } = useGrades()
   const [selectedSemester, setSelectedSemester] = useState("all")
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
 
+  // Transform API data to UI format
+  const semesterData = useMemo(() => {
+    if (!cumulativeData) return []
+    return transformSemestersToUI(cumulativeData.semesters)
+  }, [cumulativeData])
 
+  // Create course details lookup from API data
+  const courseDetails = useMemo<Record<string, CourseDetail>>(() => {
+    if (!cumulativeData) return {}
+    const details: Record<string, CourseDetail> = {}
+    cumulativeData.semesters.forEach(semester => {
+      semester.grades.forEach(grade => {
+        details[grade.subjectCode] = createCourseDetailsLookup(grade)
+      })
+    })
+    return details
+  }, [cumulativeData])
 
-  const scoreOverview = calculateCumulativeGPA(semesterData)
+  const scoreOverview = useMemo(() => {
+    if (!cumulativeData) {
+      return {
+        gpa10: "0.00",
+        gpa4: "0.00",
+        totalCredits: 0,
+        maxCredits: 120,
+        completedCourses: 0,
+        classification: "",
+      }
+    }
+    
+    // Count completed courses
+    const completedCourses = cumulativeData.semesters.reduce((count, semester) => {
+      return count + semester.grades.filter(grade => grade.status === "Đạt").length
+    }, 0)
+
+    // Get classification based on GPA4
+    let classification = ""
+    if (cumulativeData.cumulativeGPA4 >= 3.8) classification = "Xuất sắc"
+    else if (cumulativeData.cumulativeGPA4 >= 3.2) classification = "Giỏi"
+    else if (cumulativeData.cumulativeGPA4 >= 2.5) classification = "Khá"
+    else if (cumulativeData.cumulativeGPA4 >= 2.0) classification = "Trung bình"
+    else if (cumulativeData.cumulativeGPA4 > 0) classification = "Yếu"
+
+    return {
+      gpa10: cumulativeData.cumulativeGPA10.toFixed(2),
+      gpa4: cumulativeData.cumulativeGPA4.toFixed(2),
+      totalCredits: cumulativeData.totalCompletedCredits,
+      maxCredits: 120,
+      completedCourses,
+      classification,
+    }
+  }, [cumulativeData])
 
   const handleShowDetail = (courseCode: string) => {
     if (courseDetails[courseCode]) {
@@ -69,152 +120,162 @@ export default function ScoresPage() {
   const filteredSemesters =
     selectedSemester === "all" ? semesterData : semesterData.filter((s) => s.id === selectedSemester)
 
+  // Calculate semester stats from API data
+  const calculateSemesterStats = (semesterId: string) => {
+    if (!cumulativeData) return null
+    const semester = cumulativeData.semesters.find(s => s.semesterId === semesterId)
+    if (!semester) return null
+
+    const completedCourses = semester.grades.filter(g => g.status === "Đạt")
+    const totalCredits = completedCourses.reduce((sum, g) => sum + g.credits, 0)
+
+    return {
+      semesterGPA10: semester.semesterGPA10.toFixed(2),
+      semesterGPA4: semester.semesterGPA4.toFixed(2),
+      totalCredits,
+      classification: semester.semesterClassification,
+    }
+  }
+
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <p className="text-gray-600">Đang tải dữ liệu...</p>
+          </div>
+        </div>
+    )
+  }
+
+  if (error) {
+    return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <XCircle className="h-12 w-12 text-red-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Không thể tải dữ liệu</h3>
+              <p className="text-gray-600">{error}</p>
+            </div>
+          </div>
+        </div>
+    )
+  }
+
+  if (!cumulativeData || semesterData.length === 0) {
+    return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <BookOpen className="h-12 w-12 text-gray-400" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có dữ liệu điểm</h3>
+              <p className="text-gray-600">Hiện tại chưa có dữ liệu điểm số nào</p>
+            </div>
+          </div>
+        </div>
+    )
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Điểm số</h1>
-        <p className="text-sm text-gray-600">Theo dõi kết quả học tập và tiến độ học tập</p>
-      </div>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Điểm số</h1>
+        <p className="text-sm text-gray-500">Xem kết quả học tập các môn học</p>
+        </div>
 
       {/* Tổng quan điểm số */}
       <div className="mb-8">
-        {/* Section title typography */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Tổng quan điểm số</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+          {/* Card 1: Điểm trung bình - Màu cam góc trên */}
+          <Card className="bg-white rounded-lg shadow-sm border border-gray-200 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-200 to-orange-300 rounded-bl-full opacity-60"></div>
+            <CardContent className="p-6 relative z-10">
+              <p className="text-sm text-gray-600 mb-2">Điểm trung bình</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-bold text-gray-900">{scoreOverview.gpa4}</p>
+                <span className="text-sm text-gray-500">GPA 4.0</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 2: Tổng tín chỉ hoàn thành - Màu hồng góc trên */}
+          <Card className="bg-white rounded-lg shadow-sm border border-gray-200 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-200 to-pink-300 rounded-bl-full opacity-60"></div>
+            <CardContent className="p-6 relative z-10">
+              <p className="text-sm text-gray-600 mb-2">Tổng tín chỉ hoàn thành</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-bold text-gray-900">{scoreOverview.totalCredits}</p>
+                <span className="text-sm text-gray-500">/{scoreOverview.maxCredits} tín chỉ</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Môn đã hoàn thành - Màu xanh mint góc trên */}
+          <Card className="bg-white rounded-lg shadow-sm border border-gray-200 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-teal-200 to-teal-300 rounded-bl-full opacity-60"></div>
+            <CardContent className="p-6 relative z-10">
+              <p className="text-sm text-gray-600 mb-2">Môn đã hoàn thành</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-bold text-gray-900">{scoreOverview.completedCourses}</p>
+                <span className="text-sm text-gray-500">môn học</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filter & Export */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6">
           <div className="relative">
             <select
               value={selectedSemester}
               onChange={(e) => setSelectedSemester(e.target.value)}
-              className="appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer hover:border-gray-400 transition-colors"
+              className="appearance-none h-10 px-4 pr-10 border border-gray-200 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer flex items-center"
             >
               <option value="all">Tất cả học kỳ</option>
-              <option value="hk1-2023-2024">HK1 2023 - 2024</option>
-              <option value="hk2-2023-2024">HK2 2023 - 2024</option>
-              <option value="hk3-2023-2024">HK3 2023 - 2024</option>
-              <option value="hk1-2025-2026">HK1 2025 - 2026</option>
+              {cumulativeData?.semesters.map((semester) => (
+                <option key={semester.semesterId} value={semester.semesterId}>
+                  {semester.semesterName}
+                </option>
+              ))}
             </select>
-            <ChevronUp className="h-4 w-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 rotate-180 pointer-events-none" />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Điểm trung bình */}
-          <Card className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Điểm TB tích lũy</p>
-                  <p className="text-xs text-gray-500">GPA 4.0</p>
-                </div>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="text-4xl font-bold text-gray-900">{scoreOverview.gpa4}</p>
-                <span className="text-sm text-gray-500">/ 4.0</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">Thang 10: {scoreOverview.gpa10}</p>
-            </CardContent>
-          </Card>
-
-          {/* Card 2: Tổng tín chỉ hoàn thành */}
-          <Card className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <BookOpen className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tín chỉ hoàn thành</p>
-                  <p className="text-xs text-gray-500">/ {scoreOverview.maxCredits} tín chỉ</p>
-                </div>
-              </div>
-              <div className="flex items-baseline gap-2 mb-3">
-                <p className="text-4xl font-bold text-gray-900">{scoreOverview.totalCredits}</p>
-                <span className="text-sm text-gray-500">/ {scoreOverview.maxCredits}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${(scoreOverview.totalCredits / scoreOverview.maxCredits) * 100}%` }}
-                ></div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Card 3: Xếp loại & Môn đã hoàn thành */}
-          <Card className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <Award className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Xếp loại học lực</p>
-                  <p className="text-xs text-gray-500">Tích lũy</p>
-                </div>
-              </div>
-              <Badge
-                className={`${getClassificationColor(scoreOverview.classification)} text-base font-bold px-4 py-2 mb-3`}
-              >
-                {scoreOverview.classification}
-              </Badge>
-              <p className="text-sm text-gray-600 mt-3">
-                Số môn hoàn thành: <span className="font-bold text-gray-900">{scoreOverview.completedCourses}</span>
-              </p>
-            </CardContent>
-          </Card>
+          <Button 
+            onClick={exportPdf}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 h-10 rounded-lg w-full sm:w-auto flex items-center justify-center"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            In
+          </Button>
         </div>
       </div>
 
       {/* Bảng điểm chi tiết cho từng học kỳ */}
       <div className="space-y-6">
-        {/* Section title typography */}
-        <h2 className="text-xl font-bold text-gray-900">Bảng điểm chi tiết</h2>
-
-        {filteredSemesters.map((semester) => {
-          const stats = calculateSemesterStats(semester.courses, semester.semester)
-          const hasAllScores = semester.courses.every(
-            (c) => (c.status === "Đạt" && c.score10 !== null) || c.status === "Không đạt",
-          )
-
-          // tính xếp loại học kỳ dựa trên điểm và điều kiện hasAllScores
-          const semClassification = getClassification(
-            Number.parseFloat(stats.semesterGPA4 || "0"),
-            hasAllScores,
-            semester.semester,
-          )
+        {filteredSemesters.map((semester, index) => {
+          const stats = calculateSemesterStats(semester.id)
+          if (!stats) return null
 
           return (
-            <Card key={semester.id} className="shadow-sm border border-gray-200">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                  <div className="flex items-center gap-3">
+            <Card key={semester.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <CardHeader className="px-6 py-4 bg-blue-100 border-b border-blue-200">
                     <CardTitle className="text-lg font-bold text-gray-900">{semester.semester}</CardTitle>
-                  </div>
-
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 w-full sm:w-auto">
-                    <Printer className="h-4 w-4 mr-2" />
-                    In bảng điểm
-                  </Button>
-                </div>
               </CardHeader>
-              <CardContent className="p-0">
+              <CardContent className="px-0">
                 <div className="overflow-x-auto">
-                  <table className="w-full border-collapse min-w-[800px]">
+                  <table className="w-full">
                     <thead>
-                      <tr className="bg-blue-600 text-white">
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">STT</th>
-                        <th className="text-left py-3 px-3 font-bold text-sm whitespace-nowrap">Mã MH</th>
-                        <th className="text-left py-3 px-3 font-bold text-sm whitespace-nowrap">Tên môn học</th>
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">Số TC</th>
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">Điểm (10)</th>
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">GPA (4.0)</th>
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">Điểm chữ</th>
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">Trạng thái</th>
-                        <th className="text-center py-3 px-3 font-bold text-sm whitespace-nowrap">Chi tiết</th>
+                      <tr className="bg-blue-600">
+                        <th className="text-left py-3 px-6 font-semibold text-sm text-white">Mã môn học</th>
+                        <th className="text-left py-3 px-6 font-semibold text-sm text-white">Tên môn học</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Tín chỉ</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Điểm thi</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Điểm TK (10)</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Điểm TK (4)</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Điểm TK (C)</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Kết quả</th>
+                        <th className="text-center py-3 px-4 font-semibold text-sm text-white">Chi tiết</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -225,44 +286,37 @@ export default function ScoresPage() {
                         return (
                           <tr
                             key={idx}
-                            className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                            className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                           >
-                            <td className="py-3 px-3 text-center text-gray-900 font-medium">{idx + 1}</td>
-                            <td className="py-3 px-3 text-gray-900 font-medium whitespace-nowrap">{course.code}</td>
-                            <td className="py-3 px-3 text-gray-900">{course.name}</td>
-                            <td className="py-3 px-3 text-center text-gray-900">{course.credits}</td>
-                            <td className="py-3 px-3 text-center text-gray-900 font-medium">
+                            <td className="py-3 px-6 text-gray-900 font-medium">{course.code}</td>
+                            <td className="py-3 px-6 text-gray-900">{course.name}</td>
+                            <td className="py-3 px-4 text-center text-gray-900">{course.credits}</td>
+                            <td className="py-3 px-4 text-center text-gray-900">
                               {course.score10 !== null ? course.score10.toFixed(1) : "-"}
                             </td>
-                            <td className="py-3 px-3 text-center text-gray-900 font-medium">
+                            <td className="py-3 px-4 text-center text-gray-900 font-medium">
+                              {course.score10 !== null ? course.score10.toFixed(1) : "-"}
+                            </td>
+                            <td className="py-3 px-4 text-center text-gray-900 font-medium">
                               {gpa !== null ? gpa.toFixed(1) : "-"}
                             </td>
-                            <td className="py-3 px-3 text-center">
-                              {letterGrade ? (
-                                <Badge className={`${getClassificationColor(letterGrade)} font-bold`}>
-                                  {letterGrade}
-                                </Badge>
-                              ) : (
-                                "-"
-                              )}
+                            <td className="py-3 px-4 text-center text-gray-900 font-semibold">
+                              {letterGrade || "-"}
                             </td>
-                            <td className="py-3 px-3 text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                {getStatusIcon(course.status)}
-                                <span className="text-sm text-gray-700">{course.status}</span>
-                              </div>
+                            <td className="py-3 px-4 text-center">
+                              <span className={`text-sm font-medium ${course.status === "Đạt" ? "text-green-600" : "text-red-600"}`}>
+                                {course.status}
+                              </span>
                             </td>
-                            <td className="py-3 px-3 text-center">
+                            <td className="py-3 px-4 text-center">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleShowDetail(course.code)}
-                                className="p-1.5 hover:bg-blue-50 rounded transition-colors"
-                                disabled={course.status === "Đang học" || !courseDetails[course.code]}
+                                className="p-1 hover:bg-gray-100 rounded"
+                                disabled={!courseDetails[course.code]}
                               >
-                                <List
-                                  className={`h-4 w-4 ${course.status === "Đang học" || !courseDetails[course.code] ? "text-gray-300" : "text-blue-600"}`}
-                                />
+                                <span className="text-lg">≡</span>
                               </Button>
                             </td>
                           </tr>
@@ -272,27 +326,22 @@ export default function ScoresPage() {
                   </table>
                 </div>
 
-                <div className="mt-0 p-6 bg-gray-50 border-t border-gray-200">
-                  <h3 className="font-bold text-gray-900 mb-3 text-base">Trung bình học kỳ</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <p className="text-gray-600 mb-1">GPA học kỳ (4.0)</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.semesterGPA4}</p>
+                <div className="px-6 pb-6 pt-4 space-y-3 bg-gray-100 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Điểm trung bình tích lũy hệ 4:</span>
+                    <span className="text-sm font-bold text-gray-900">{stats.semesterGPA4}</span>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <p className="text-gray-600 mb-1">Điểm TB (10)</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.semesterGPA10}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Điểm trung bình tích lũy hệ 10:</span>
+                    <span className="text-sm font-bold text-gray-900">{stats.semesterGPA10}</span>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <p className="text-gray-600 mb-1">Tín chỉ đạt</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.totalCredits}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Số tín chỉ tích lũy:</span>
+                    <span className="text-sm font-bold text-gray-900">{stats.totalCredits}</span>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <p className="text-gray-600 mb-1">Xếp loại HK</p>
-                      <Badge className={`${getClassificationColor(semClassification)} text-base font-bold mt-1`}>
-                        {semClassification || "Chưa đủ điểm"}
-                      </Badge>
-                    </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-700">Phân loại học lực học kỳ:</span>
+                    <span className="text-sm font-bold text-gray-900">{stats.classification || "-"}</span>
                   </div>
                 </div>
               </CardContent>
@@ -300,6 +349,70 @@ export default function ScoresPage() {
           )
         })}
       </div>
-    </div>
+
+      {/* Course Detail Modal */}
+      {showDetailModal && selectedCourse && courseDetails[selectedCourse] && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={handleCloseDetail}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-gray-200 bg-white">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{courseDetails[selectedCourse].name}</h3>
+                  <p className="text-sm text-gray-500">Mã môn: {selectedCourse}</p>
+                </div>
+                <button
+                  onClick={handleCloseDetail}
+                  className="text-red-500 hover:text-red-700 font-bold text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-blue-600 text-white">
+                      <th className="text-center py-3 px-4 font-bold text-sm">Số thứ tự</th>
+                      <th className="text-left py-3 px-4 font-bold text-sm">Tên thành phần</th>
+                      <th className="text-center py-3 px-4 font-bold text-sm">Trọng số %</th>
+                      <th className="text-center py-3 px-4 font-bold text-sm">Điểm thành phần</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {courseDetails[selectedCourse].components.map((component) => (
+                      <tr key={component.stt} className="border-b border-gray-200 hover:bg-gray-50">
+                        <td className="py-3 px-4 text-center text-gray-900">{component.stt}</td>
+                        <td className="py-3 px-4 text-gray-900">{component.name}</td>
+                        <td className="py-3 px-4 text-center text-gray-900">{component.weight}</td>
+                        <td className="py-3 px-4 text-center font-medium text-gray-900">
+                          {component.score > 0 ? component.score.toFixed(1) : "0.0"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+              <Button
+                onClick={handleCloseDetail}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium"
+              >
+                × Đóng
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
   )
 }
