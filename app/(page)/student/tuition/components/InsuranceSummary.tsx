@@ -13,7 +13,7 @@ export default function InsuranceSummary({ selectedItems, onPayment }: Insurance
     return null;
   }
 
-  const totalAmount = selectedItems.reduce((sum, item) => sum + item.amount, 0);
+  const totalAmount = selectedItems.reduce((sum, item) => sum + item.healthInsuranceFee, 0);
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')} đ`;
@@ -25,8 +25,8 @@ export default function InsuranceSummary({ selectedItems, onPayment }: Insurance
         <div className="flex justify-end">
           <div className="space-y-2 min-w-[250px]">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Số lượng chọn:</span>
-              <span className="font-semibold text-gray-800">{selectedItems.length}</span>
+              <span className="text-gray-600">Bảo hiểm đã chọn:</span>
+              <span className="font-semibold text-gray-800">{selectedItems[0]?.academicYear || '-'}</span>
             </div>
             <div className="border-t border-gray-300"></div>
             <div className="flex justify-between items-center">

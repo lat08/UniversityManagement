@@ -1,109 +1,109 @@
 import { api } from '@/lib/api/client';
-import { TuitionFee, Insurance, PaymentHistory, Semester } from '../types/types';
+import type { TuitionFeeResponse, InsuranceResponse, PaymentHistoryResponse, PaymentResponse } from '../types/types';
 
-/**
- * Fetch list of semesters
- */
-export async function getSemesters(): Promise<Semester[]> {
-  try {
-    const response = await api.get('/v1/finance/semesters');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching semesters:', error);
-    throw error;
-  }
-}
+export const getTuitionFees = async (): Promise<TuitionFeeResponse> => {
+  const response = await api.get('/v1/tuition-fees', {  });
+  return response.data;
+};
 
-/**
- * Fetch tuition fees for a specific semester
- * @param semesterId - The ID of the semester
- */
-export async function getTuitionFees(semesterId: string): Promise<TuitionFee[]> {
-  try {
-    const response = await api.get(`/v1/finance/tuition-fees`, {
-      params: { semesterId },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching tuition fees:', error);
-    throw error;
-  }
-}
+export const getInsurances = async (): Promise<InsuranceResponse> => {
+  const response = await api.get('/v1/insurances');
+  return response.data?.data;
+};
 
-/**
- * Fetch insurance data
- */
-export async function getInsurance(): Promise<Insurance[]> {
-  try {
-    const response = await api.get('/v1/finance/insurance');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching insurance:', error);
-    throw error;
-  }
-}
+export const getPayments = async (): Promise<PaymentHistoryResponse> => {
+  const response = await api.get('/v1/payments');
+    console.log(response.data);
 
-/**
- * Fetch payment history
- * @param semesterId - Optional semester ID to filter
- */
-export async function getPaymentHistory(semesterId?: string): Promise<PaymentHistory[]> {
-  try {
-    const response = await api.get('/v1/finance/payment-history', {
-      params: semesterId ? { semesterId } : {},
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching payment history:', error);
-    throw error;
-  }
-}
+  return response.data;
+};
 
-/**
- * Export tuition fees to Excel
- * @param semesterId - The ID of the semester
- */
-export async function exportTuitionFees(semesterId: string): Promise<Blob> {
-  try {
-    const response = await api.get(`/v1/finance/export/tuition-fees`, {
-      params: { semesterId },
-      responseType: 'blob',
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error exporting tuition fees:', error);
-    throw error;
-  }
-}
+export const payCourses = async (courseIds: string[]): Promise<PaymentResponse> => {
+  const response = await api.post('/v1/payment/student-courses', { courseIds });
+  return response.data;
+};
 
-/**
- * Export insurance to Excel
- */
-export async function exportInsurance(): Promise<Blob> {
-  try {
-    const response = await api.get(`/v1/finance/export/insurance`, {
-      responseType: 'blob',
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error exporting insurance:', error);
-    throw error;
-  }
-}
+export const paySemester = async (semesterId: string): Promise<PaymentResponse> => {
+  const response = await api.post('/v1/payment/semester', { semesterId });
+  return response.data;
+};
 
-/**
- * Export payment history to Excel
- */
-export async function exportPaymentHistory(semesterId?: string): Promise<Blob> {
-  try {
-    const response = await api.get(`/v1/finance/export/payment-history`, {
-      params: semesterId ? { semesterId } : {},
-      responseType: 'blob',
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error exporting payment history:', error);
-    throw error;
-  }
-}
+export const payInsurance = async (insuranceId: string): Promise<PaymentResponse> => {
+  const response = await api.post('/v1/payment/insurance', { insuranceId });
+  return response.data;
+};
 
+export const getPaymentPdf = async (): Promise<string> => {
+  const response = await api.get('/v1/payment/pdf');
+  return response.data;
+};
+
+export const getPaymentExcel = async (): Promise<void> => {
+  const response = await api.get('/v1/payment/xlxs', {
+    responseType: 'blob',
+    headers: {
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }
+  });
+  
+  // Create a download link
+  const blob = new Blob([response.data], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'LichSuThanhToan.xlsx';
+  document.body.appendChild(link);
+  link.click();
+  
+  // Cleanup
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+export const getTuitionExcel = async (): Promise<void> => {
+  const response = await api.get('/v1/tuition-fees/excel', {
+    responseType: 'blob',
+    headers: {
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }
+  });
+  
+  const blob = new Blob([response.data], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'DanhSachHocPhi.xlsx';
+  document.body.appendChild(link);
+  link.click();
+  
+  // Cleanup
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+export const getInsuranceExcel = async (): Promise<void> => {
+  const response = await api.get('/v1/insurances/excel', {
+    responseType: 'blob',
+    headers: {
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }
+  });
+  
+  const blob = new Blob([response.data], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'DanhSachBaoHiem.xlsx';
+  document.body.appendChild(link);
+  link.click();
+  
+  // Cleanup
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
