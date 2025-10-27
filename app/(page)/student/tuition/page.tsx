@@ -1,177 +1,357 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Button } from "@/app/components/ui/button";
-import { Badge } from "@/app/components/ui/badge";
-import { Alert, AlertDescription } from "@/app/components/ui/alert";
-import { 
-  CreditCard, 
-  Download, 
-  DollarSign, 
-  AlertTriangle,
-  Banknote,
-  Calendar,
-  CheckCircle,
-  Clock,
-  ArrowUp
-} from "lucide-react";
-import { bankInfo, directPaymentInfo, tuitionData, paymentHistory } from "./lib/data/tuitionData";
-import { formatCurrency, formatDate, formatPaymentMethod, formatPaymentStatus } from "./lib/utils/formatters";
-import { PAYMENT_METHODS, PAYMENT_STATUS, TUITION_STATUS, PAYMENT_DEADLINE_WARNING } from "./lib/constants/paymentOptions";
+import { ChevronDown, Filter, FileDown } from "lucide-react";
+import { cn } from "@/lib/utils/utils";
+import TuitionTable from "./components/TuitionTable";
+import InsuranceTable from "./components/InsuranceTable";
+import PaymentHistoryTable from "./components/PaymentHistoryTable";
+import PaymentSummary from "./components/PaymentSummary";
+import InsuranceSummary from "./components/InsuranceSummary";
+import { MOCK_SEMESTERS, MOCK_TUITION_FEES, MOCK_INSURANCE, MOCK_PAYMENT_HISTORY } from "./lib/constants/constants";
+import { TabType } from "./lib/types/types";
 
-export default function PaymentPage() {
-  usePageTitle('Học phí');
+export default function FinancePage() {
+  usePageTitle('Tài chính');
+  
+  const [activeTab, setActiveTab] = useState<TabType>('tuition');
+  const [isSemesterOpen, setIsSemesterOpen] = useState(false);
+  const [selectedSemester, setSelectedSemester] = useState(MOCK_SEMESTERS[0]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTuitionIds, setSelectedTuitionIds] = useState<string[]>([]);
+  const [selectedInsuranceIds, setSelectedInsuranceIds] = useState<string[]>([]);
+
+  const handleSelectAllTuition = (checked: boolean) => {
+    if (checked) {
+      setSelectedTuitionIds(MOCK_TUITION_FEES.map(item => item.id));
+    } else {
+      setSelectedTuitionIds([]);
+    }
+  };
+
+  const handleSelectTuition = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTuitionIds([...selectedTuitionIds, id]);
+    } else {
+      setSelectedTuitionIds(selectedTuitionIds.filter(itemId => itemId !== id));
+    }
+  };
+
+  const handleSelectAllInsurance = (checked: boolean) => {
+    if (checked) {
+      setSelectedInsuranceIds(MOCK_INSURANCE.map(item => item.id));
+    } else {
+      setSelectedInsuranceIds([]);
+    }
+  };
+
+  const handleSelectInsurance = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedInsuranceIds([...selectedInsuranceIds, id]);
+    } else {
+      setSelectedInsuranceIds(selectedInsuranceIds.filter(itemId => itemId !== id));
+    }
+  };
+
+  const handleExport = () => {
+    // Implement export logic
+    console.log('Export to Excel');
+  };
+
+  const handlePayment = () => {
+    // Implement payment logic
+    console.log('Processing payment for selected items:', selectedTuitionIds);
+  };
+
+  const handleInsurancePayment = () => {
+    // Implement insurance payment logic
+    console.log('Processing insurance payment for selected items:', selectedInsuranceIds);
+  };
+
+  // Calculate selected items for summary
+  const selectedTuitionItems = useMemo(() => {
+    return MOCK_TUITION_FEES.filter(item => selectedTuitionIds.includes(item.id));
+  }, [selectedTuitionIds]);
+
+  const selectedInsuranceItems = useMemo(() => {
+    return MOCK_INSURANCE.filter(item => selectedInsuranceIds.includes(item.id));
+  }, [selectedInsuranceIds]);
+
+  const tabs = [
+    { id: 'tuition' as TabType, label: 'Học phí' },
+    { id: 'insurance' as TabType, label: 'Bảo hiểm' },
+    { id: 'history' as TabType, label: 'Lịch sử thanh toán' },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-black mb-2">Học phí</h1>
-            <p className="text-gray-500">Thông tin học phí và lịch sử thanh toán</p>
+      <div>
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Tài chính</h1>
+        <p className="text-xs lg:text-sm text-gray-500 mt-1">
+          Thông tin học phí và lịch sử thanh toán
+        </p>
           </div>
 
-          {/* 1. Học phí kỳ 2 & cảnh báo nợ */}
-          <Card className="shadow-sm border border-gray-200">
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-bold text-black">Học phí HK2 2024-2025</h3>
-                </div>
-                <Badge variant="destructive" className="bg-red-600 text-white px-3 py-1">
-                  Hạn đóng: {tuitionData.dueDate}
-                </Badge>
+      {/* Tabs */}
+      <div className="overflow-hidden">
+        <div className="flex w-full border border-[var(--border)] rounded-lg bg-[var(--muted)] relative">
+          {/* Active tab background slider */}
+          <div 
+            className="absolute top-0 bottom-0 bg-[var(--primary)] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
+            style={{
+              width: `${100 / tabs.length}%`,
+              left: `${tabs.findIndex(t => t.id === activeTab) * (100 / tabs.length)}%`,
+              transform: 'translateX(0)'
+            }}
+          />
+          
+          {tabs.map((tab, index) => {
+            const isActive = activeTab === tab.id;
+
+            return (
+              <div key={tab.id} className="flex-1 relative z-10">
+                <button
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 relative transition-colors",
+                    isActive
+                      ? "text-[var(--primary-foreground)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  )}
+                >
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+                
+                {/* Divider */}
+                {!isActive && index < tabs.length - 1 && (
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-[var(--border)] transition-opacity duration-300"></div>
+                )}
               </div>
-            </CardHeader>
-            <CardContent>
-              {/* 5 cards học phí */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                <div className="text-center border border-gray-200 rounded-lg p-4 bg-white">
-                  <p className="text-sm text-gray-600 mb-2">Học phí chưa giảm</p>
-                  <p className="text-lg font-bold text-black">{formatCurrency(tuitionData.originalFee)}</p>
+            );
+          })}
+        </div>
                 </div>
                 
-                <div className="text-center border border-gray-200 rounded-lg p-4 bg-white">
-                  <p className="text-sm text-gray-600 mb-2">Miễn giảm</p>
-                  <p className="text-lg font-bold text-green-600">{formatCurrency(tuitionData.discount)}</p>
+      {/* Tuition Tab */}
+      {activeTab === 'tuition' && (
+        <div className="space-y-4">
+          {/* Header and Deadline */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base lg:text-lg font-bold text-gray-900">Danh sách học phí</h2>
+              <p className="text-xs lg:text-sm text-gray-600">Thông tin học phí theo chương trình và học kỳ</p>
+            </div>
+            <div className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs lg:text-sm font-medium">
+              Hạn đóng: 20/02/2025
+            </div>
                 </div>
                 
-                <div className="text-center border border-gray-200 rounded-lg p-4 bg-white">
-                  <p className="text-sm text-gray-600 mb-2">Học phí phải đóng</p>
-                  <p className="text-lg font-bold text-black">{formatCurrency(tuitionData.payableFee)}</p>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
+            {/* Semester Dropdown */}
+            <div className="relative sm:flex-[1]">
+              <button 
+                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
+                onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+              >
+                <span className="text-xs lg:text-sm text-gray-900 truncate">
+                  {selectedSemester.semesterName}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
+              </button>
+              {isSemesterOpen && (
+                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {MOCK_SEMESTERS.map((semester) => (
+                    <button
+                      key={semester.semesterId}
+                      className="w-full text-left px-4 py-2.5 text-xs lg:text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      onClick={() => {
+                        setSelectedSemester(semester);
+                        setIsSemesterOpen(false);
+                      }}
+                    >
+                      {semester.semesterName}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Filter and Export Buttons - 30% width */}
+            <div className="flex gap-3 sm:flex-initial">
+              <button
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <Filter className="w-4 h-4" />
+                <span className="text-xs lg:text-sm font-medium">Lọc</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <FileDown className="w-4 h-4" />
+                <span className="text-xs lg:text-sm font-medium">Xuất Excel</span>
+              </button>
+            </div>
                 </div>
                 
-                <div className="text-center border border-gray-200 rounded-lg p-4 bg-white">
-                  <p className="text-sm text-gray-600 mb-2">Đã thu</p>
-                  <p className="text-lg font-bold text-yellow-600">{formatCurrency(tuitionData.paid)}</p>
+          {/* Table */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <TuitionTable 
+              data={MOCK_TUITION_FEES}
+              selectedIds={selectedTuitionIds}
+              onSelectAll={handleSelectAllTuition}
+              onSelectItem={handleSelectTuition}
+            />
                 </div>
                 
-                <div className="text-center border border-red-200 rounded-lg p-4 bg-red-50">
-                  <p className="text-sm text-black mb-2">Còn nợ</p>
-                  <p className="text-lg font-bold text-red-600">{formatCurrency(tuitionData.outstanding)}</p>
+          {/* Payment Summary */}
+          <PaymentSummary 
+            selectedItems={selectedTuitionItems}
+            onPayment={handlePayment}
+          />
+        </div>
+      )}
+
+      {/* Insurance Tab */}
+      {activeTab === 'insurance' && (
+        <div className="space-y-4">
+          {/* Header and Deadline */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base lg:text-lg font-bold text-gray-900">Danh sách bảo hiểm y tế</h2>
+              <p className="text-xs lg:text-sm text-gray-600">Thông tin đóng bảo hiểm y tế theo học kỳ</p>
+            </div>
+            <div className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs lg:text-sm font-medium">
+              Hạn đóng: 20/02/2025
                 </div>
               </div>
 
-              {/* Alert cảnh báo */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-black">Bạn còn nợ học phí {formatCurrency(tuitionData.outstanding)}</p>
-                    <p className="text-sm text-black">Vui lòng thanh toán trước ngày {tuitionData.dueDate}</p>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
+            {/* Search Input */}
+            <div className="sm:flex-[1]">
+              <input
+                type="text"
+                placeholder="Tất cả năm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs lg:text-sm"
+              />
                   </div>
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Thanh toán ngay
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* 2. Thông tin thanh toán */}
-          <Card className="shadow-sm border border-gray-200">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-bold text-black">Thông tin thanh toán</CardTitle>
-            </CardHeader>
-            <CardContent className="grid md:grid-cols-2 gap-6">
-              {/* Box 1: Chuyển khoản ngân hàng */}
-              <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
-                <h3 className="font-bold text-black mb-4">Chuyển khoản ngân hàng</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Ngân hàng:</span>
-                    <span className="text-black">{bankInfo.bank}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Số tài khoản:</span>
-                    <span className="text-black font-mono">{bankInfo.accountNumber}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Chủ tài khoản:</span>
-                    <span className="text-black">{bankInfo.accountHolder}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Nội dung:</span>
-                    <span className="text-black font-mono text-sm">{bankInfo.content}</span>
-                  </div>
+            {/* Filter and Export Buttons - right aligned */}
+            <div className="flex gap-3 sm:flex-initial">
+              <button
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <Filter className="w-4 h-4" />
+                <span className="text-xs lg:text-sm font-medium">Lọc</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <FileDown className="w-4 h-4" />
+                <span className="text-xs lg:text-sm font-medium">Xuất Excel</span>
+              </button>
                 </div>
               </div>
 
-              {/* Box 2: Thanh toán trực tiếp */}
-              <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
-                <h3 className="font-bold text-black mb-4">Thanh toán trực tiếp</h3>
-                <div className="space-y-2">
-                  <p className="text-gray-600">
-                    <span className="font-semibold">Địa chỉ:</span> {directPaymentInfo.address}
-                  </p>
+          {/* Table */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <InsuranceTable 
+              data={MOCK_INSURANCE}
+              selectedIds={selectedInsuranceIds}
+              onSelectAll={handleSelectAllInsurance}
+              onSelectItem={handleSelectInsurance}
+            />
+          </div>
+
+          {/* Insurance Summary */}
+          <InsuranceSummary 
+            selectedItems={selectedInsuranceItems}
+            onPayment={handleInsurancePayment}
+          />
+        </div>
+      )}
+
+      {/* Payment History Tab */}
+      {activeTab === 'history' && (
+        <div className="space-y-4">
+          {/* Header */}
+          <div>
+            <h2 className="text-base lg:text-lg font-bold text-gray-900">Lịch sử thanh toán</h2>
+                  </div>
+
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
+            {/* Search Input */}
+            <div className="sm:flex-[1]">
+              <input
+                type="text"
+                placeholder="Tìm kiếm..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs lg:text-sm"
+              />
+                  </div>
+
+            {/* Semester Dropdown */}
+            <div className="relative sm:flex-[1]">
+              <button 
+                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
+                onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+              >
+                <span className="text-xs lg:text-sm text-gray-900 truncate">
+                  {selectedSemester.semesterName}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
+              </button>
+              {isSemesterOpen && (
+                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {MOCK_SEMESTERS.map((semester) => (
+                    <button
+                      key={semester.semesterId}
+                      className="w-full text-left px-4 py-2.5 text-xs lg:text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      onClick={() => {
+                        setSelectedSemester(semester);
+                        setIsSemesterOpen(false);
+                      }}
+                    >
+                      {semester.semesterName}
+                    </button>
+                  ))}
+                </div>
+              )}
+              </div>
+
+            {/* Filter and Export Buttons - right aligned */}
+            <div className="flex gap-3 sm:flex-initial">
+              <button
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <Filter className="w-4 h-4" />
+                <span className="text-xs lg:text-sm font-medium">Lọc</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <FileDown className="w-4 h-4" />
+                <span className="text-xs lg:text-sm font-medium">Xuất Excel</span>
+              </button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* 3. Lịch sử thanh toán */}
-          <Card className="shadow-sm border border-gray-200">
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <CardTitle className="text-xl font-bold text-black">Lịch sử thanh toán</CardTitle>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                  <ArrowUp className="h-4 w-4 mr-2" />
-                  Xuất báo cáo
-                </Button>
+          {/* Table */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <PaymentHistoryTable data={MOCK_PAYMENT_HISTORY} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Ngày</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Nội dung</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-600">Số tiền</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Phương thức</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentHistory.map((payment, index) => (
-                      <tr key={index} className="border-b border-gray-100">
-                        <td className="py-3 px-4 text-black">{formatDate(payment.date)}</td>
-                        <td className="py-3 px-4 text-black">{payment.content}</td>
-                        <td className="py-3 px-4 text-right font-medium text-black">
-                          {formatCurrency(payment.amount)}
-                        </td>
-                        <td className="py-3 px-4 text-black">{formatPaymentMethod(payment.method)}</td>
-                        <td className="py-3 px-4">
-                          <span className="text-green-600 font-medium">{formatPaymentStatus(payment.status)}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
-            </CardContent>
-          </Card>
+      )}
     </div>
   );
 }
