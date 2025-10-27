@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { usePageTitle } from "@/lib/hooks/usePageTitle";
+import { useState, useEffect } from "react";
 import { ChevronDown, Filter, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import TuitionTable from "./components/TuitionTable";
@@ -9,22 +8,71 @@ import InsuranceTable from "./components/InsuranceTable";
 import PaymentHistoryTable from "./components/PaymentHistoryTable";
 import PaymentSummary from "./components/PaymentSummary";
 import InsuranceSummary from "./components/InsuranceSummary";
-import { MOCK_SEMESTERS, MOCK_TUITION_FEES, MOCK_INSURANCE, MOCK_PAYMENT_HISTORY } from "./lib/constants/constants";
-import { TabType } from "./lib/types/types";
+import { TabType, Insurance, Payment, TuitionFeeResponse } from "./lib/types/types";
+import { getTuitionFees, getInsurances, getPayments, payCourses, paySemester, payInsurance, getPaymentExcel, getTuitionExcel, getInsuranceExcel } from "./lib/api/financeApi";
+import { MOCK_SEMESTERS } from "./lib/constants/constants";
+import { toast } from "sonner";
+import { Spinner } from "@/app/components/ui/spinner";
 
-export default function FinancePage() {
-  usePageTitle('Tài chính');
-  
+export default function TuitionPage() {
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('tuition');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isSemesterOpen, setIsSemesterOpen] = useState(false);
-  const [selectedSemester, setSelectedSemester] = useState(MOCK_SEMESTERS[0]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSemester, setSelectedSemester] = useState({ semesterId: '1', semesterName: 'Học kỳ 1 - 2024/2025' });
+  
+  const [tuitionData, setTuitionData] = useState<TuitionFeeResponse['data'] | null>(null);
+  const [insurances, setInsurances] = useState<Insurance[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  
   const [selectedTuitionIds, setSelectedTuitionIds] = useState<string[]>([]);
-  const [selectedInsuranceIds, setSelectedInsuranceIds] = useState<string[]>([]);
+  const [selectedInsuranceId, setSelectedInsuranceId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [tuitionRes, insuranceRes, paymentRes] = await Promise.all([
+          getTuitionFees(),
+          getInsurances(),
+          getPayments()
+        ]);
+        
+        if (tuitionRes.success) {
+          setTuitionData(tuitionRes.data);
+        } else {
+          if (tuitionRes.message == "Không tìm thấy thông tin học phí.") 
+            toast.error('Tải dữ liệu học phí thất bại: sinh viên chưa đăng ký môn học');
+          else 
+            toast.error('Tải dữ liệu học phí thất bại: ' + tuitionRes.message);
+        }
+        
+        if (insuranceRes.success) {
+          setInsurances(insuranceRes.data);
+        } else {
+          toast.error(insuranceRes.message || 'Tải dữ liệu bảo hiểm thất bại');
+        }
+        
+        if (paymentRes.success) {
+          setPayments(paymentRes.data);
+        } else {
+          toast.error(paymentRes.message || 'Tải dữ liệu lịch sử thanh toán thất bại');
+        }
+      } catch (error) {
+        toast.error('Failed to load data. Please try again later.');
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
 
   const handleSelectAllTuition = (checked: boolean) => {
+    if (!tuitionData) return;
     if (checked) {
-      setSelectedTuitionIds(MOCK_TUITION_FEES.map(item => item.id));
+      setSelectedTuitionIds(tuitionData.courses.map(course => course.courseId));
     } else {
       setSelectedTuitionIds([]);
     }
@@ -38,45 +86,134 @@ export default function FinancePage() {
     }
   };
 
-  const handleSelectAllInsurance = (checked: boolean) => {
-    if (checked) {
-      setSelectedInsuranceIds(MOCK_INSURANCE.map(item => item.id));
-    } else {
-      setSelectedInsuranceIds([]);
+  const handleSelectInsurance = (id: string) => {
+    setSelectedInsuranceId(selectedInsuranceId === id ? null : id);
+  };
+
+  const handleExportPayment = async () => {
+    try {
+      setIsLoading(true);
+      await getPaymentExcel();
+      toast.success('Đang tải xuống file lịch sử thanh toán');
+    } catch (error) {
+      toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
+      console.error('Export error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSelectInsurance = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedInsuranceIds([...selectedInsuranceIds, id]);
-    } else {
-      setSelectedInsuranceIds(selectedInsuranceIds.filter(itemId => itemId !== id));
+  const handleExportTuition = async () => {
+    try {
+      setIsLoading(true);
+      await getTuitionExcel();
+      toast.success('Đang tải xuống danh sách học phí');
+    } catch (error) {
+      toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
+      console.error('Export error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleExport = () => {
-    // Implement export logic
-    console.log('Export to Excel');
+  const handleExportInsurance = async () => {
+    try {
+      setIsLoading(true);
+      await getInsuranceExcel();
+      toast.success('Đang tải xuống danh sách bảo hiểm');
+    } catch (error) {
+      toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
+      console.error('Export error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handlePayment = () => {
-    // Implement payment logic
-    console.log('Processing payment for selected items:', selectedTuitionIds);
+  const handlePayment = async () => {
+    if (selectedTuitionIds.length === 0) {
+      toast.error('Hãy chọn môn học để thanh toán');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const res = await payCourses(selectedTuitionIds);
+      if (res.success) {
+        if (res.data) {
+          // Open payment page in new window
+          window.open(res.data, '_blank');
+        }
+        toast.success('Thanh toán thành công');
+      } else {
+        toast.error(res.message || 'Thanh toán thất bại');
+      }
+    } catch (error) {
+      toast.error('Xử lý thanh toán không thành công');
+      console.error('Payment error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleInsurancePayment = () => {
-    // Implement insurance payment logic
-    console.log('Processing insurance payment for selected items:', selectedInsuranceIds);
+  const handleSemesterPayment = async () => {
+    if (!tuitionData) {
+      toast.error('No semester data available');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const res = await paySemester(tuitionData.semesterId);
+      if (res.success) {
+        if (res.data) {
+          // Open payment page in new window
+          window.open(res.data, '_blank');
+        }
+        toast.success('Semester payment initiated successfully');
+      } else {
+        toast.error(res.message || 'Payment failed');
+      }
+    } catch (error) {
+      toast.error('Failed to process semester payment');
+      console.error('Payment error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInsurancePayment = async () => {
+    if (!selectedInsuranceId) {
+      toast.error('Vui lòng chọn bảo hiểm để thanh toán');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const res = await payInsurance(selectedInsuranceId);
+      if (res.success) {
+        if (res.data) {
+          window.open(res.data, '_blank');
+        }
+        toast.success('Thanh toán bảo hiểm thành công');
+      } else {
+        toast.error(res.message || 'Thanh toán thất bại');
+      }
+    } catch (error) {
+      toast.error('Không thể xử lý thanh toán bảo hiểm');
+      console.error('Payment error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Calculate selected items for summary
-  const selectedTuitionItems = useMemo(() => {
-    return MOCK_TUITION_FEES.filter(item => selectedTuitionIds.includes(item.id));
-  }, [selectedTuitionIds]);
+  const selectedTuitionItems = tuitionData?.courses.filter(
+    course => selectedTuitionIds.includes(course.courseId)
+  ) || [];
 
-  const selectedInsuranceItems = useMemo(() => {
-    return MOCK_INSURANCE.filter(item => selectedInsuranceIds.includes(item.id));
-  }, [selectedInsuranceIds]);
+  const selectedInsuranceItems = selectedInsuranceId 
+    ? insurances.filter(insurance => insurance.studentHealthInsuranceId === selectedInsuranceId)
+    : [];
 
   const tabs = [
     { id: 'tuition' as TabType, label: 'Học phí' },
@@ -137,49 +274,41 @@ export default function FinancePage() {
       {/* Tuition Tab */}
       {activeTab === 'tuition' && (
         <div className="space-y-4">
-          {/* Header and Deadline */}
+          {/* Header and Loading State */}
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base lg:text-lg font-bold text-gray-900">Danh sách học phí</h2>
-              <p className="text-xs lg:text-sm text-gray-600">Thông tin học phí theo chương trình và học kỳ</p>
+              <p className="text-xs lg:text-sm text-gray-600">
+                {isLoading ? 'Đang tải...' : `Thông tin học phí - ${tuitionData?.semesterName || ''}`}
+              </p>
             </div>
-            <div className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs lg:text-sm font-medium">
-              Hạn đóng: 20/02/2025
-            </div>
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              tuitionData && (
+                <div className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs lg:text-sm font-medium">
+                  {tuitionData.courses.length} môn học
                 </div>
-                
+              )
+            )}
+          </div>
+          
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
-            {/* Semester Dropdown */}
+            {/* Semester Info */}
             <div className="relative sm:flex-[1]">
               <button 
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none cursor-default transition-colors"
+                disabled={true}
               >
                 <span className="text-xs lg:text-sm text-gray-900 truncate">
-                  {selectedSemester.semesterName}
+                  {tuitionData ? tuitionData.semesterName : 'Loading...'}
                 </span>
-                <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
+                <ChevronDown className="w-4 h-4 ml-2 text-gray-400 flex-shrink-0" />
               </button>
-              {isSemesterOpen && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {MOCK_SEMESTERS.map((semester) => (
-                    <button
-                      key={semester.semesterId}
-                      className="w-full text-left px-4 py-2.5 text-xs lg:text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => {
-                        setSelectedSemester(semester);
-                        setIsSemesterOpen(false);
-                      }}
-                    >
-                      {semester.semesterName}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Filter and Export Buttons - 30% width */}
+            {/* Filter and Export Buttons */}
             <div className="flex gap-3 sm:flex-initial">
               <button
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
@@ -188,24 +317,26 @@ export default function FinancePage() {
                 <span className="text-xs lg:text-sm font-medium">Lọc</span>
               </button>
               <button
-                onClick={handleExport}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+                onClick={handleExportTuition}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
               >
-                <FileDown className="w-4 h-4" />
+                {isLoading ? <Spinner /> : <FileDown className="w-4 h-4" />}
                 <span className="text-xs lg:text-sm font-medium">Xuất Excel</span>
               </button>
             </div>
-                </div>
+          </div>
                 
           {/* Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <TuitionTable 
-              data={MOCK_TUITION_FEES}
+              data={tuitionData?.courses || []}
               selectedIds={selectedTuitionIds}
               onSelectAll={handleSelectAllTuition}
               onSelectItem={handleSelectTuition}
+              isLoading={isLoading}
             />
-                </div>
+          </div>
                 
           {/* Payment Summary */}
           <PaymentSummary 
@@ -226,8 +357,8 @@ export default function FinancePage() {
             </div>
             <div className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs lg:text-sm font-medium">
               Hạn đóng: 20/02/2025
-                </div>
-              </div>
+            </div>
+          </div>
 
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
@@ -240,9 +371,9 @@ export default function FinancePage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs lg:text-sm"
               />
-                  </div>
+            </div>
 
-            {/* Filter and Export Buttons - right aligned */}
+            {/* Filter and Export Buttons */}
             <div className="flex gap-3 sm:flex-initial">
               <button
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
@@ -251,22 +382,23 @@ export default function FinancePage() {
                 <span className="text-xs lg:text-sm font-medium">Lọc</span>
               </button>
               <button
-                onClick={handleExport}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+                onClick={handleExportInsurance}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
               >
-                <FileDown className="w-4 h-4" />
+                {isLoading ? <Spinner /> : <FileDown className="w-4 h-4" />}
                 <span className="text-xs lg:text-sm font-medium">Xuất Excel</span>
               </button>
-                </div>
-              </div>
+            </div>
+          </div>
 
           {/* Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <InsuranceTable 
-              data={MOCK_INSURANCE}
-              selectedIds={selectedInsuranceIds}
-              onSelectAll={handleSelectAllInsurance}
+              data={insurances}
+              selectedId={selectedInsuranceId}
               onSelectItem={handleSelectInsurance}
+              isLoading={isLoading}
             />
           </div>
 
@@ -284,7 +416,7 @@ export default function FinancePage() {
           {/* Header */}
           <div>
             <h2 className="text-base lg:text-lg font-bold text-gray-900">Lịch sử thanh toán</h2>
-                  </div>
+          </div>
 
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
@@ -297,7 +429,7 @@ export default function FinancePage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs lg:text-sm"
               />
-                  </div>
+            </div>
 
             {/* Semester Dropdown */}
             <div className="relative sm:flex-[1]">
@@ -326,9 +458,9 @@ export default function FinancePage() {
                   ))}
                 </div>
               )}
-              </div>
+            </div>
 
-            {/* Filter and Export Buttons - right aligned */}
+            {/* Filter and Export Buttons */}
             <div className="flex gap-3 sm:flex-initial">
               <button
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
@@ -337,20 +469,21 @@ export default function FinancePage() {
                 <span className="text-xs lg:text-sm font-medium">Lọc</span>
               </button>
               <button
-                onClick={handleExport}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+                onClick={handleExportPayment}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
               >
-                <FileDown className="w-4 h-4" />
+                {isLoading ? <Spinner /> : <FileDown className="w-4 h-4" />}
                 <span className="text-xs lg:text-sm font-medium">Xuất Excel</span>
               </button>
-                </div>
-              </div>
+            </div>
+          </div>
 
           {/* Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <PaymentHistoryTable data={MOCK_PAYMENT_HISTORY} />
-              </div>
-              </div>
+            <PaymentHistoryTable data={payments} isLoading={isLoading} />
+          </div>
+        </div>
       )}
     </div>
   );

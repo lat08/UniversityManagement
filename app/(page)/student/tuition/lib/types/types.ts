@@ -1,21 +1,66 @@
+export type TabType = 'tuition' | 'insurance' | 'history';
+
 export interface TuitionFee {
-  id: string;
+  courseId: string;
   courseCode: string;
   courseName: string;
   credits: number;
-  amount: number;
-  outstanding: number;
-  status: 'paid' | 'unpaid' | 'partial';
+  courseFee: number;
+  status: string;
 }
 
 export interface Insurance {
-  id: string;
-  insuranceCode: string;
-  insuranceName: string;
-  validPeriod: string;
-  amount: number;
-  outstanding: number;
-  status: 'paid' | 'unpaid';
+  academicYear: string;
+  studentHealthInsuranceId: string;
+  healthInsuranceFee: number;
+  status: string;
+}
+
+export interface Payment {
+  paymentDate: string;
+  amountPaid: number;
+  note: string;
+  paymentMethod: string;
+  status: string;
+}
+
+export interface TuitionFeeResponse {
+  success: boolean;
+  message: string;
+  data: {
+    semesterId: string;
+    semesterName: string;
+    courses: TuitionFee[];
+  };
+  errors: string[];
+}
+
+export interface InsuranceResponse {
+  success: boolean;
+  message: string;
+  data: Insurance[];
+  errors: string[];
+}
+
+export interface PaymentHistoryResponse {
+  success: boolean;
+  message: string;
+  data: Payment[];
+  errors: string[];
+}
+
+export interface PaymentResponse {
+  success: boolean;
+  message: string;
+  data: string;
+  errors: string[];
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors: string[];
 }
 
 export interface PaymentHistory {
@@ -30,6 +75,5 @@ export interface PaymentHistory {
 export interface Semester {
   semesterId: string;
   semesterName: string;
+  courses?: TuitionFee[];
 }
-
-export type TabType = 'tuition' | 'insurance' | 'history';
