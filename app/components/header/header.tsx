@@ -18,7 +18,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
     const role = (user?.role || "").toLowerCase()
     if (role.includes("instructor") || role.includes("teacher") || role === "giang_vien") return "Giảng viên"
     if (role.includes("student") || role === "sinh_vien") return "Sinh viên"
-    return "Người dùng"
+    return "Quản trị viên"
   })()
 
   const initials = (() => {

@@ -28,7 +28,7 @@ import { Button } from "@/app/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/components/ui/tooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 
-type Variant = "student" | "instructor"
+type Variant = "student" | "instructor" | "admin"
 
 interface SidebarProps {
   variant?: Variant // nếu không truyền, tự suy ra từ Redux role
@@ -50,6 +50,63 @@ type MenuItem = {
 type MenuSection = { title: string; items: MenuItem[] }
 
 function getMenuSections(variant: Variant): MenuSection[] {
+  if (variant === "admin") {
+    return [
+      {
+        title: "TỔNG QUAN",
+        items: [
+          { icon: Home, label: "Bảng điều khiển", href: "/admin/dashboard" },
+          { icon: Bell, label: "Thông báo", href: "/admin/notifications" },
+          { icon: BarChart3, label: "Báo cáo thống kê", href: "/admin/reports" },
+        ],
+      },
+      {
+        title: "QUẢN LÝ ĐÀO TẠO",
+        items: [
+          { icon: GraduationCap, label: "Quản lý ngành học", href: "/admin/majors" },
+          { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
+          { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule" },
+          { icon: Building2, label: "Lớp học & Phân công", href: "/admin/classes" },
+          { icon: BookOpen, label: "Đăng ký học phần", href: "/admin/course-registration" },
+          { icon: Building2, label: "Yêu cầu phòng học", href: "/admin/room-requests" },
+        ],
+      },
+      {
+        title: "SINH VIÊN",
+        items: [
+          { icon: Users, label: "Hồ sơ sinh viên", href: "/admin/students" },
+          { icon: FileCheck, label: "Duyệt học bổng", href: "/admin/scholarships" },
+          { icon: DollarSign, label: "Học phí sinh viên", href: "/admin/tuition" },
+        ],
+      },
+      {
+        title: "GIẢNG VIÊN",
+        items: [
+          { icon: Users, label: "Hồ sơ giảng viên", href: "/admin/instructors" },
+          { icon: FileCheck, label: "Duyệt bảng điểm", href: "/admin/grade-approval" },
+          { icon: Building2, label: "Danh sách lớp", href: "/admin/class-lists" },
+          { icon: Calendar, label: "Thời khóa biểu", href: "/admin/instructor-schedule" },
+          { icon: Bell, label: "Yêu cầu đổi lịch", href: "/admin/schedule-changes" },
+        ],
+      },
+      {
+        title: "TÀI CHÍNH",
+        items: [
+          { icon: DollarSign, label: "Chính sách học phí", href: "/admin/tuition-policy" },
+          { icon: DollarSign, label: "Thanh toán", href: "/admin/payments" },
+          { icon: FileText, label: "Báo cáo thu", href: "/admin/revenue-reports" },
+        ],
+      },
+      {
+        title: "HỆ THỐNG",
+        items: [
+          { icon: Users, label: "Hồ sơ cá nhân", href: "/admin/profile" },
+          { icon: BarChart3, label: "Cấu hình chủ đề", href: "/admin/theme-configuration" },
+        ],
+      },
+    ]
+  }
+
   if (variant === "instructor") {
     return [
       {
@@ -129,7 +186,10 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
   const logout = useAuthStore((state) => state.logout)
 
   const resolvedVariant: Variant =
-    variant || ((user?.role || "").toLowerCase().includes("instructor") || (user?.role || "") === "giang_vien" ? "instructor" : "student")
+    variant || 
+    ((user?.role || "").toLowerCase().includes("admin") ? "admin" :
+     (user?.role || "").toLowerCase().includes("instructor") || (user?.role || "") === "giang_vien" ? "instructor" : 
+     "student")
 
   const sections = getMenuSections(resolvedVariant)
 
