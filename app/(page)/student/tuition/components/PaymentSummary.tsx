@@ -14,7 +14,7 @@ export default function PaymentSummary({ selectedItems, onPayment }: PaymentSumm
   }
 
   const totalCredits = selectedItems.reduce((sum, item) => sum + item.credits, 0);
-  const totalAmount = selectedItems.reduce((sum, item) => sum + item.amount, 0);
+  const totalAmount = selectedItems.reduce((sum, item) => sum + item.courseFee, 0);
 
   const formatCurrency = (amount: number) => {
     return `${amount.toLocaleString('vi-VN')} đ`;
