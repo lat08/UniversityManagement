@@ -6,46 +6,63 @@ import AcademicResultsChart from "../AcademicResultsChart";
 import LearningStatsCard from "../LearningStatsCard";
 import EventCard from "../EventCard";
 import ClassListCard from "../ClassListCard";
-import { statCards } from "../../libs/constants/dashboardConstant";
+import { useDashboard } from "../../libs/hooks/useDashboard";
+import { useDashboardStats } from "../../libs/hooks/useStatCard"
+import { Loader2 } from "lucide-react";
+
+
+
 
 export default function DashboardContent() {
+
+  
+  const { dashboard, loading, error, refetch } = useDashboard();
+  const card = useDashboardStats();
+
   usePageTitle('Bảng điều khiển');
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center gap-2 text-gray-600">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span>Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) return <p>Lỗi: {error}</p>;
   return (
+    
     <div className="space-y-4 lg:space-y-6">
       {/* Welcome Section */}
       <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
-          Bảng điều khiển
-        </h1>
-        <p className="text-xs lg:text-sm text-gray-500 mt-1">
-          Chào mừng trở lại, Name!
-        </p>
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Bảng điều khiển</h1>
+        <p className="text-xs lg:text-sm text-gray-500 mt-1">Chào mừng trở lại, Name!</p>
       </div>
 
-      {/* Top Stats Row - Only 2 stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
-        {statCards.map((card, index) => (
+        {card.map((card, index) => (
           <StatCard key={index} data={card} />
         ))}
       </div>
 
-      {/* Academic Results and Learning Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
-          <AcademicResultsChart />
+          <AcademicResultsChart semesters={dashboard?.activeSemesters || []}
+            semesterId={dashboard?.activeSemesters?.[0]?.semesterId ?? ""} />
         </div>
         <div className="lg:col-span-4 h-full">
-          <LearningStatsCard />
+          <LearningStatsCard Kpi={dashboard?.kpi}/>
         </div>
       </div>
 
-      {/* Events and Classes Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
-          <ClassListCard />
+          <EventCard events={dashboard?.events || []} />
         </div>
-        <div className="lg:col-span-4 h-full">
-          <EventCard />
+        <div className="lg:col-span-4 h-full ">
+          <ClassListCard currentSubjects={dashboard?.currentSubjects || []} />
         </div>
       </div>
     </div>

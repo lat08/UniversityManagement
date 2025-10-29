@@ -2,7 +2,7 @@ import { api } from '@/lib/api/client';
 import type { TuitionFeeResponse, InsuranceResponse, PaymentHistoryResponse, PaymentResponse } from '../types/types';
 
 export const getTuitionFees = async (): Promise<TuitionFeeResponse> => {
-  const response = await api.get('/v1/tuition-fees', {  });
+  const response = await api.get('/v1/tuition-fees');
   return response.data;
 };
 

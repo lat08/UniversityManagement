@@ -3,8 +3,8 @@ import {
   SubjectGrade,
   LearningStats,
   ClassInfo,
-  Event,
-} from "../types/types";
+  
+}from "../types/types";
 
 // Stat cards data
 export const statCards: StatCardData[] = [
@@ -62,21 +62,6 @@ export const currentClasses: ClassInfo[] = [
   },
 ];
 
-// Upcoming events
-export const upcomingEvents: Event[] = [
-  {
-    id: "1",
-    title: "Lễ hội Halloween",
-    date: "31/10/2025",
-    type: "Sự kiện",
-  },
-  {
-    id: "2",
-    title: "Cuộc thi Face-Off",
-    date: "18/12/2025",
-    type: "Cuộc thi",
-  },
-];
 
 // Semester options for dropdown
 export const semesterOptions = [

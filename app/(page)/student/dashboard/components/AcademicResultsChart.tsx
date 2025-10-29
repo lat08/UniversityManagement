@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Bar } from "react-chartjs-2";
 import {
@@ -11,31 +11,74 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartOptions,
 } from "chart.js";
-import { subjectGrades, semesterOptions } from "../libs/constants/dashboardConstant";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { SemesterChartData, } from "../libs/types/types";
+import { useAvailableSemester } from "../libs/hooks/useAvailableSemester";
+import toast from "react-hot-toast";
 
 // Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ChartDataLabels, Title, Tooltip, Legend);
 
-export default function AcademicResultsChart() {
-  const [selectedSemester, setSelectedSemester] = useState(semesterOptions[0].value);
+export default function AcademicResultsChart({
+  semesters,
+  semesterId
+} : SemesterChartData) {
+    const [selectedSemesterId, setSelectedSemesterId] = useState<string>(semesterId);
+
+    const { semester, loading, error, refetch} = useAvailableSemester(selectedSemesterId);
+    useEffect(() => {
+        if (selectedSemesterId) refetch();
+      }, [selectedSemesterId, refetch]);
+        
+      useEffect(() => {
+        if (!loading) {
+          if (!semester || !semester.courses || semester.courses.length === 0) {
+            toast.error("Không tìm thấy kết quả học tập cho học kỳ này.");
+          }
+        }
+      }, [semester, loading]);
 
   const chartData = {
-    labels: subjectGrades.map((item) => item.subject),
+    labels: semester?.courses.map((item) => item.subjectName),
     datasets: [
       {
-        data: subjectGrades.map((item) => item.grade),
+        data: semester?.courses.map((item) => item.finalScore),
         backgroundColor: "var(--chart-6)",
-        borderRadius: 8,
+        borderRadius: 0,
         barThickness: 40,
+        borderSkipped: false,
+        datalabels: {
+          display: true, // show only on this dataset
+        },
+      },
+      {
+        data: semester?.courses.map(() => 10),
+        backgroundColor: "rgba(201, 199, 199, 1)", // gray color
+        borderRadius: 0,
+        barThickness: 40,
+        borderSkipped: false,
       },
     ],
   };
+      
 
-  const chartOptions = {
+  const chartOptions : ChartOptions<"bar"> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
+      datalabels: {
+        color: "var(--chart-6)",
+        anchor: "end",      // Position label at the end of the bar
+        align: "top",     // Move label slightly above the bar
+        offset: -4,
+        font: {
+          size: 12,
+          weight: "bold",
+        },
+        formatter: (value: number) => value.toFixed(1), // format label
+      },
       legend: {
         display: false,
       },
@@ -54,6 +97,7 @@ export default function AcademicResultsChart() {
     },
     scales: {
       x: {
+        stacked: true,
         grid: {
           display: false,
         },
@@ -67,6 +111,7 @@ export default function AcademicResultsChart() {
         },
       },
       y: {
+        stacked: true,
         beginAtZero: true,
         max: 10,
         grid: {
@@ -83,6 +128,8 @@ export default function AcademicResultsChart() {
     },
   };
 
+
+
   return (
     <Card className="shadow-sm h-full flex flex-col">
       <CardHeader className="pb-4 flex-shrink-0">
@@ -91,21 +138,31 @@ export default function AcademicResultsChart() {
             Kết quả học tập
           </CardTitle>
           <select
-            value={selectedSemester}
-            onChange={(e) => setSelectedSemester(e.target.value)}
+            value={selectedSemesterId || ""}
+              onChange={(e) => {
+                setSelectedSemesterId(e.target.value);
+              }}
             className="text-xs lg:text-sm border border-[var(--input-border)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] w-full sm:w-auto"
           >
-            {semesterOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {semesters?.map((option) => (
+              <option key={option.semesterId} value={option.semesterId}>
+                {option.semesterName}
               </option>
             ))}
           </select>
         </div>
       </CardHeader>
       <CardContent className="flex-1">
-        <div className="h-[300px] lg:h-[350px]">
-          <Bar data={chartData} options={chartOptions} />
+        <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
+          {loading ? (
+            <span className="text-gray-500 text-sm">Đang tải dữ liệu...</span>
+          ) : error ? (
+            <span className="text-red-500 text-sm">Lỗi khi tải dữ liệu: {error}</span>
+          ) : !semester?.courses?.length ? (
+            <span className="text-gray-500 text-sm">Không có môn học trong học kỳ này.</span>
+          ) : (
+            <Bar data={chartData} options={chartOptions} />
+          )}
         </div>
       </CardContent>
     </Card>

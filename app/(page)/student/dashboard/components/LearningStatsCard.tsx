@@ -4,16 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/ca
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { learningStats } from "../libs/constants/dashboardConstant";
+import { KpiData } from "../libs/types/types";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function LearningStatsCard() {
+export default function LearningStatsCard({
+Kpi
+} : KpiData) {
   const chartData = {
     labels: ["Đã hoàn thành", "Còn lại"],
     datasets: [
       {
-        data: [learningStats.credits, learningStats.totalCredits - learningStats.credits],
+        data: [Kpi!.completedCredits, Kpi!.totalCredits - Kpi!.completedCredits],
         backgroundColor: ["var(--chart-7)", "var(--chart-8)"], // Light red/coral and light purple
         borderWidth: 0,
       },
@@ -50,10 +53,10 @@ export default function LearningStatsCard() {
           </div>
           <div className="text-center">
             <span className="text-4xl font-bold text-[var(--primary)]">
-              {learningStats.gpa}
+              {Kpi?.gpa}
             </span>
             <span className="text-lg text-[var(--text-secondary)] ml-1">
-              /{learningStats.maxGpa}
+              /4
             </span>
           </div>
           <div className="w-full h-px bg-[var(--border)]"></div>
@@ -71,7 +74,7 @@ export default function LearningStatsCard() {
                 <Doughnut data={chartData} options={chartOptions} />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-2xl font-bold text-[var(--text-primary)]">
-                    {learningStats.credits}/{learningStats.totalCredits}
+                    {Kpi?.completedCredits}/{Kpi?.totalCredits}
                   </span>
                 </div>
               </div>
@@ -99,7 +102,7 @@ export default function LearningStatsCard() {
           </div>
           <div className="text-center">
             <span className="inline-block px-6 py-3 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg text-lg font-bold">
-              {learningStats.classification}
+              {Kpi?.ranking}
             </span>
           </div>
         </div>

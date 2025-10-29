@@ -7,6 +7,8 @@ export interface StatCardData {
   textColor: string;
 }
 
+
+
 export interface SubjectGrade {
   subject: string;
   grade: number;
@@ -27,10 +29,90 @@ export interface ClassInfo {
   schedule: string;
 }
 
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  type: string;
+
+export interface DashboardData {
+  kpi: Kpi;
+  totalPeriodsThisWeek: number;
+  totalExamThisWeek: number;
+  activeSemesters: Semester[];
+  currentSubjects: Subject[];
+  events: EventNotification[];
 }
 
+export const emptyDashboardData: DashboardData = {
+  kpi: {
+    gpa: 0,
+    completedCredits: 0,
+    totalCredits : 0,
+    ranking : ""
+  },
+  totalPeriodsThisWeek: 0,
+  totalExamThisWeek: 0,
+  activeSemesters: [],
+  currentSubjects: [],
+  events: [],
+};
+
+
+interface Kpi {
+  gpa: number;
+  completedCredits: number;
+  totalCredits : number;
+  ranking : string;
+}
+
+export interface KpiData {
+  Kpi? : Kpi;
+}
+
+export interface Semester {
+  semesterId: string;
+  semesterName: string;
+}
+
+interface Subject {
+  courseId: string;          // Guid → string
+  subjectCode: string;
+  subjectName: string;
+  credits: number;
+  instructorName: string;
+  roomName: string;
+  scheduleSummary: string;   // ví dụ: "Mon (1-3), Wed (4-6)"
+}
+
+export interface EventNotification {
+  notificationId: string;
+  title: string;
+  content: string;
+  createdAt: string; // ISO date string
+  type: 'event' | string;
+  isRead: boolean;
+  eventDate: string; // ISO date string
+  location: string;
+}
+
+interface Courses {
+  subjectCode : string;
+  subjectName : string; 
+  finalScore : number;
+  credits : number
+}
+
+export interface SemesterChartData {
+  semesterId : string;
+  semesters : Semester[];
+}
+
+export interface EventData {
+  events : EventNotification[];
+}
+
+export interface SemesterData {
+  semesterName : string; 
+  courses : Courses[];
+  gpa : number;
+}
+
+export interface ClassListData {
+  currentSubjects: Subject[];
+}
