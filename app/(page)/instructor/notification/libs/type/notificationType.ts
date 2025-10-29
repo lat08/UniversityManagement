@@ -24,22 +24,35 @@ interface BaseApiResponse<T> {
 }
 
 export type NotificationListResponse = BaseApiResponse<{
-  data: NotificationApiItem[]
-  totalCount: number
-  page: number
-  pageSize: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
+  role: string
+  notifications: {
+    totalCount: number
+    page: number
+    pageSize: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    data: NotificationApiItem[]
+  }
 }>
 
-export type NotificationDetailResponse = BaseApiResponse<NotificationApiItem>
+export type NotificationDetailResponse = BaseApiResponse<{
+  role: string
+  notification: NotificationApiItem
+}>
 
 export type UnreadCountResponse = BaseApiResponse<{
+  role: string
   unreadCount: number
 }>
 
+export type MarkAsReadResponse = BaseApiResponse<{
+  message: string
+  notificationId: string
+}>
+
 export type MarkAllAsReadResponse = BaseApiResponse<{
+  role: string
   message: string
   count: number
 }>
@@ -50,24 +63,4 @@ export interface NotificationQueryParams {
   SearchTerm?: string
   PageIndex?: number
   PageSize?: number
-}
-
-// Legacy type for backward compatibility (if needed)
-export interface NotificationData {
-  id: string
-  title: string
-  timeAgo: string
-  type: Exclude<NotificationType, "all">
-  content: string
-  date: string
-  time?: string
-  location?: string
-  note: string
-  isRead?: boolean
-}
-
-export interface NotificationApiResponse {
-  success: boolean
-  data: NotificationApiItem[]
-  message?: string
 }
