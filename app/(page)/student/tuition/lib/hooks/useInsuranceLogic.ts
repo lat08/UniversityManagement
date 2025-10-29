@@ -1,0 +1,77 @@
+// lib/hooks/useInsuranceLogic.ts
+import { useState, useMemo } from "react";
+import { payInsurance, getInsuranceExcel } from "../api/financeApi";
+import { useToast } from "@/app/components/ui/toast";
+import { Insurance } from "../types/types";
+
+export const useInsuranceLogic = (
+  insurances: Insurance[],
+  setIsLoading: (loading: boolean) => void,
+  setQrUrl: (url: string | null) => void,
+  setIsQrOpen: (open: boolean) => void,
+  setQrIframeLoading: (loading: boolean) => void,
+) => {
+  const toast = useToast();
+  const [selectedInsuranceId, setSelectedInsuranceId] = useState<string | null>(null);
+
+  const selectedInsuranceItems = useMemo(() => {
+    return selectedInsuranceId 
+      ? insurances.filter(insurance => insurance.studentHealthInsuranceId === selectedInsuranceId)
+      : [];
+  }, [insurances, selectedInsuranceId]);
+
+  const handleSelectInsurance = (id: string) => {
+    setSelectedInsuranceId(selectedInsuranceId === id ? null : id);
+  };
+
+  const handleExportInsurance = async () => {
+    try {
+      setIsLoading(true);
+      await getInsuranceExcel();
+      toast.success('Đang tải xuống danh sách bảo hiểm');
+    } catch (error) {
+      toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
+      console.error('Export error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInsurancePayment = async () => {
+    if (!selectedInsuranceId) {
+      toast.error('Vui lòng chọn bảo hiểm để thanh toán');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const res = await payInsurance(selectedInsuranceId);
+      
+      if (res.success) {
+        if (res.data) {
+          setQrUrl(res.data);
+          setQrIframeLoading(true);
+          setIsQrOpen(true);
+          toast.success('Tạo QR thành công'); 
+        } else {
+          toast.error('Không nhận được link thanh toán từ server');
+        }
+      } else {
+        toast.error(res.message || 'Thanh toán thất bại');
+      }
+    } catch (error) {
+      toast.error('Không thể xử lý thanh toán bảo hiểm');
+      console.error('Payment error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    selectedInsuranceId,
+    selectedInsuranceItems,
+    handleSelectInsurance,
+    handleExportInsurance,
+    handleInsurancePayment,
+  };
+};
