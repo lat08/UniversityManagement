@@ -17,7 +17,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({
   
   return (
     <div className={className}>
-      <label className="block font-poppins font-normal text-[14px] text-[#000000] mb-2">
+      <label className="block font-poppins font-normal text-[12px] lg:text-[14px] text-[#000000] mb-2">
         {label}
       </label>
       <div className="relative">
@@ -25,14 +25,14 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({
           ref={ref}
           type={inputType}
           placeholder={placeholder}
-          className={`w-full py-3 border-2 rounded-[12px] font-poppins text-[14px] text-[#333333] placeholder:text-[#999999] focus:outline-none transition-colors bg-white ${showPasswordToggle ? 'pl-4 pr-12' : 'px-4'} ${error ? 'border-red-500 focus:border-red-600' : 'border-[#CCCCCC] focus:border-[#4E8EE1]'} ${inputClassName}`}
+          className={`w-full py-2.5 lg:py-3 border-2 rounded-[12px] font-poppins text-[13px] lg:text-[14px] text-[#333333] placeholder:text-[#999999] focus:outline-none transition-colors bg-white ${showPasswordToggle ? 'pl-3 lg:pl-4 pr-10 lg:pr-12' : 'px-3 lg:px-4'} ${error ? 'border-red-500 focus:border-red-600' : 'border-[#CCCCCC] focus:border-[#4E8EE1]'} ${inputClassName}`}
           {...rest}
         />
         {showPasswordToggle && (
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+            className="absolute right-3 lg:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
           >
             {showPassword ? (
               <svg
@@ -41,7 +41,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5"
+                className="w-4 h-4 lg:w-5 lg:h-5"
               >
                 <path
                   strokeLinecap="round"
@@ -56,7 +56,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5"
+                className="w-4 h-4 lg:w-5 lg:h-5"
               >
                 <path
                   strokeLinecap="round"
@@ -74,7 +74,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(({
         )}
       </div>
       {error && (
-        <p className="mt-1 text-sm text-red-600 font-poppins">
+        <p className="mt-1 text-xs lg:text-sm text-red-600 font-poppins">
           {error}
         </p>
       )}

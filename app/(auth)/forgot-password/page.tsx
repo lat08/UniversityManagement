@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
       backHref="/login"
       backText="Quay lại đăng nhập"
     >
-      <p className="font-poppins text-[14px] text-[#666666] mb-8">
+      <p className="font-poppins text-[12px] lg:text-[14px] text-[#666666] mb-6 lg:mb-8">
         {TEXT.description}
       </p>
 
