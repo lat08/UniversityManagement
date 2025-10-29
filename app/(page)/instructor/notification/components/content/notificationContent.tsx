@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { NotificationCard } from "../notification-card/notificationCard"
 import { NotificationType, NotificationApiItem } from "../../libs/type/notificationType"
 import { notificationApi } from "../../libs/api/notificationApi"
+import { notificationFilters } from "../../libs/constants/notificationConstants"
 import { Button } from "@/app/components/ui/button"
 
 export function NotificationsContent() {
@@ -33,12 +34,11 @@ export function NotificationsContent() {
       const response = await notificationApi.getNotifications(params)
       
       if (response.isSuccess) {
-        setNotifications(response.data.data)
+        setNotifications(response.data.notifications.data)
       } else {
         setError(response.resultMessage || "Không thể tải thông báo")
       }
-    } catch (err) {
-      console.error("Error fetching notifications:", err)
+    } catch {
       setError("Đã xảy ra lỗi khi tải thông báo")
     } finally {
       setLoading(false)
@@ -65,7 +65,7 @@ export function NotificationsContent() {
   // Handle notification click (fetch detail and mark as read)
   const handleNotificationClick = async (id: string) => {
     try {
-      const response = await notificationApi.getNotificationById(id)
+      const response = await notificationApi.markAsRead(id)
       
       if (response.isSuccess) {
         // Update the notification in the list to mark it as read
@@ -103,14 +103,6 @@ export function NotificationsContent() {
     event: notifications.filter((n) => n.notificationType === "event" && !n.isRead).length,
     schedule: notifications.filter((n) => n.notificationType === "schedule" && !n.isRead).length,
   }
-
-  const filters: { key: NotificationType; label: string }[] = [
-    { key: "all", label: "Tất cả" },
-    { key: "important", label: "Quan trọng" },
-    { key: "tuition", label: "Học phí" },
-    { key: "event", label: "Sự kiện" },
-    { key: "schedule", label: "Lịch học" },
-  ]
 
   const unreadCount = notifications.filter(n => !n.isRead).length
 
@@ -151,13 +143,13 @@ export function NotificationsContent() {
           <div 
             className="absolute top-0 bottom-0 bg-[var(--primary)] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
             style={{
-              width: `${100 / filters.length}%`,
-              left: `${filters.findIndex(f => f.key === activeFilter) * (100 / filters.length)}%`,
+              width: `${100 / notificationFilters.length}%`,
+              left: `${notificationFilters.findIndex(f => f.key === activeFilter) * (100 / notificationFilters.length)}%`,
               transform: 'translateX(0)'
             }}
           />
           
-          {filters.map((filter, index) => {
+          {notificationFilters.map((filter, index) => {
             const isActive = activeFilter === filter.key
             const unreadCount = filterCounts[filter.key]
             const hasUnread = unreadCount > 0
@@ -187,7 +179,7 @@ export function NotificationsContent() {
                 </button>
                 
                 {/* Divider - chỉ hiển thị khi tab không được chọn và không phải tab cuối */}
-                {!isActive && index < filters.length - 1 && (
+                {!isActive && index < notificationFilters.length - 1 && (
                   <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-[var(--border)] transition-opacity duration-300"></div>
                 )}
               </div>

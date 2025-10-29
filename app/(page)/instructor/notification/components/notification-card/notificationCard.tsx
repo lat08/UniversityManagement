@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/app/components/ui/card"
-import { Calendar, AlertTriangle, Info, ChevronDown, DollarSign, CalendarDays } from "lucide-react"
+import { Calendar, AlertTriangle, ChevronDown, DollarSign, CalendarDays } from "lucide-react"
 import { notificationTypeConfig, NotificationCardProps} from "../../libs/constants/notificationConstants"
 import { useState, useEffect } from "react"
 
