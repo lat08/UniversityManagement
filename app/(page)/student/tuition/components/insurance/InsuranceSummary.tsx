@@ -1,7 +1,7 @@
 "use client";
 
 import { CreditCard } from "lucide-react";
-import { Insurance } from "../lib/types/types";
+import { Insurance } from "../../lib/types/types";
 
 interface InsuranceSummaryProps {
   selectedItems: Insurance[];

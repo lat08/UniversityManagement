@@ -1,7 +1,7 @@
 "use client";
 
 import { CreditCard } from "lucide-react";
-import { TuitionFee } from "../lib/types/types";
+import { TuitionFee } from "../../lib/types/types";
 
 interface PaymentSummaryProps {
   selectedItems: TuitionFee[];
