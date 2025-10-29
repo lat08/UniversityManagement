@@ -1,19 +1,41 @@
 // API Response structure from backend
 export interface InstructorSemesterScheduleApiItem {
-  courseClassId: string
-  dayOfWeek: string  // "Thứ 2", "Thứ 3", etc.
-  date: string
+  courseClassId?: string
+  dayOfWeek: string | number  // "Thứ 2", "Thứ 3", etc. or number
+  date?: string
   startPeriod: number
-  endPeriod: number
+  endPeriod?: number
+  numberOfPeriods?: number
   subjectName: string
   subjectCode: string
-  className: string
-  classCode: string
-  roomName: string
+  className?: string
+  classCode?: string
+  roomName?: string
   roomCode: string
-  courseType: string
-  note: string
-  documents: string[]
+  courseType?: string
+  note?: string
+  documents?: string[]
+  courseGroup?: string
+  credits?: number
+  scheduleStartDate?: string
+  scheduleEndDate?: string
+  instructorName?: string
+  subjectId?: string
+}
+
+// API Response wrapper structure
+export interface InstructorSemesterScheduleInfoDto {
+  Semester?: {
+    SemesterId: string
+    SemesterName: string
+    SemesterType: string
+    StartDate: string
+    EndDate: string
+    Status: string
+    AcademicYearName: string
+  }
+  ScheduleType?: string
+  Schedules?: InstructorSemesterScheduleApiItem[]
 }
 
 // Transformed structure for component use
@@ -52,7 +74,7 @@ export interface Subject {
 
 export interface InstructorSemesterScheduleResponse {
   success: boolean
-  data: InstructorSemesterScheduleApiItem[]  // API returns ApiItem format
+  data: InstructorSemesterScheduleInfoDto | InstructorSemesterScheduleApiItem[]  // Can be either wrapper object or array directly
   message?: string
 }
 

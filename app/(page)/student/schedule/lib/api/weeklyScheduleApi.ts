@@ -23,7 +23,7 @@ const mapDayOfWeekToNumber = (dayString: string): number => {
 export const weeklyScheduleApi = {
   // Lấy thời khóa biểu theo tuần
   getWeeklySchedule: async (semesterId: string, weekNumber: number): Promise<WeeklyScheduleResponse> => {
-    const response = await api.get(`/v1/schedules/weekly?semesterId=${semesterId}&weekNumber=${weekNumber}`)
+    const response = await api.get(`/v1/student-schedule/weekly?semesterId=${semesterId}&weekNumber=${weekNumber}`)
     
     // Transform the API response to match expected format
     if (response.data.success && response.data.data) {
@@ -78,7 +78,7 @@ export const weeklyScheduleApi = {
 
   // Lấy thời khóa biểu theo tuần và môn học
   getWeeklyScheduleBySubject: async (semesterId: string, weekNumber: number, subjectId: string): Promise<WeeklyScheduleResponse> => {
-    const response = await api.get(`/v1/schedules/subject-week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`)
+    const response = await api.get(`/v1/student-schedule/weekly/subject?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`)
     
     // Transform the API response to match expected format
     if (response.data.success && response.data.data) {
@@ -149,7 +149,7 @@ export const weeklyScheduleApi = {
       throw new Error('Vui lòng chọn học kỳ và tuần học')
     }
     
-    const response = await api.get(`/v1/schedules/export-pdf?semesterId=${semesterId}&weekNumber=${weekNumber}`, {
+    const response = await api.get(`/v1/student-schedule/weekly/export-pdf?semesterId=${semesterId}&weekNumber=${weekNumber}`, {
       responseType: 'blob',
       headers: {
         'Accept': '*/*',
@@ -185,7 +185,7 @@ export const weeklyScheduleApi = {
       throw new Error('Vui lòng chọn học kỳ, tuần học và môn học')
     }
     
-    const response = await api.get(`/v1/schedules/export-subject-pdf?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`, {
+    const response = await api.get(`/v1/student-schedule/weekly/subject/export-pdf?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`, {
       responseType: 'blob',
       headers: {
         'Accept': '*/*',

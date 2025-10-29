@@ -23,7 +23,7 @@ const mapDayOfWeekToNumber = (dayString: string): number => {
 export const semesterScheduleApi = {
   // Lấy thời khóa biểu cá nhân của sinh viên
   getPersonalSchedule: async (semesterId: string): Promise<SemesterScheduleResponse> => {
-    const response = await api.get(`/v1/student-schedule/students/me/schedules?semesterId=${semesterId}`)
+    const response = await api.get(`/v1/student-schedule/semester?semesterId=${semesterId}`)
     
     // Transform the API response to ensure consistent format
     if (response.data.success && response.data.data) {
@@ -76,7 +76,7 @@ export const semesterScheduleApi = {
 
   // Lấy thời khóa biểu theo môn học
   getScheduleBySubject: async (subjectId: string, semesterId: string): Promise<SemesterScheduleResponse> => {
-    const response = await api.get(`/v1/student-schedule/subjects/${subjectId}/schedules?semesterId=${semesterId}`)
+    const response = await api.get(`/v1/student-schedule/semester/subjects/${subjectId}?semesterId=${semesterId}`)
     
     // Transform the API response to ensure consistent format
     if (response.data.success && response.data.data) {
@@ -145,7 +145,7 @@ export const semesterScheduleApi = {
       throw new Error('Vui lòng chọn học kỳ')
     }
     
-    const response = await api.get(`/v1/student-schedule/students/me/schedules/export-pdf?semesterId=${semesterId}`, {
+    const response = await api.get(`/v1/student-schedule/semester/export-pdf?semesterId=${semesterId}`, {
       responseType: 'blob',
       headers: {
         'Accept': '*/*',

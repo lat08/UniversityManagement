@@ -61,9 +61,9 @@ export default function InstructorSemesterSchedulePage() {
     <div className="mx-auto max-w-[1600px]">
             {/* Header */}
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Thời khóa biểu theo học kỳ</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Khung chương trình theo học kỳ</h1>
               <p className="text-sm text-gray-600 mt-1">
-                Hiển thị lịch giảng dạy theo từng học kỳ
+                Hiển thị chương trình giảng dạy theo từng học kỳ
               </p>
             </div>
 
@@ -233,7 +233,7 @@ export default function InstructorSemesterSchedulePage() {
                   <thead className="bg-[var(--primary)]">
                     <tr>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Mã MH
+                        Mã môn
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Tên môn học
@@ -242,91 +242,83 @@ export default function InstructorSemesterSchedulePage() {
                         Nhóm tổ
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Số tín chỉ
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Lớp
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Thứ
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Tiết bắt đầu
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Số tiết
+                        Tiết
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
                         Phòng
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider">
-                        Thời gian dạy
+                        Thời gian học
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {isLoading ? (
                       <tr>
-                        <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                        <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                           Đang tải dữ liệu...
                         </td>
                       </tr>
                     ) : scheduleData.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                        <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                           Không có dữ liệu thời khóa biểu
                         </td>
                       </tr>
                     ) : (
-                      scheduleData.map((course, index) => (
-                        <tr 
-                          key={`${course.subjectId}-${course.startPeriod}-${course.dayOfWeek}-${index}`}
-                          className={cn(
-                            "hover:bg-[var(--primary-light)] transition-colors border-b border-gray-200",
-                            index % 2 === 0 ? "bg-white" : "bg-[var(--bg-secondary)]"
-                          )}
-                        >
-                          <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
-                            {course.subjectCode}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
-                            {course.subjectName}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.courseGroup || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.credits || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.classCode || "-"}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.dayOfWeek}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.startPeriod || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.numberOfPeriods || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.roomCode || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900">
-                            <div>
-                              {course.scheduleStartDate 
-                                ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN')
-                                : '-'} đến
-                            </div>
-                            <div>
-                              {course.scheduleEndDate 
-                                ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN')
-                                : '-'}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                      scheduleData.map((course, index) => {
+                        // Calculate end period for display: startPeriod + numberOfPeriods - 1
+                        const endPeriod = course.startPeriod + (course.numberOfPeriods || 1) - 1
+                        const periodDisplay = course.numberOfPeriods > 1 
+                          ? `${course.startPeriod}-${endPeriod}` 
+                          : `${course.startPeriod}`
+                        
+                        // Format dates
+                        const startDate = course.scheduleStartDate 
+                          ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          : ''
+                        const endDate = course.scheduleEndDate 
+                          ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          : ''
+                        const timeDisplay = startDate && endDate 
+                          ? `${startDate} đến ${endDate}` 
+                          : (startDate || endDate || '-')
+                        
+                        return (
+                          <tr 
+                            key={`${course.subjectId || course.subjectCode}-${course.startPeriod}-${course.dayOfWeek}-${index}`}
+                            className={cn(
+                              "hover:bg-[var(--primary-light)] transition-colors border-b border-gray-200",
+                              index % 2 === 0 ? "bg-white" : "bg-[var(--bg-secondary)]"
+                            )}
+                          >
+                            <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                              {course.subjectCode}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                              {course.subjectName}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                              {course.courseGroup || '-'}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                              {course.dayOfWeek}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                              {periodDisplay}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                              {course.roomCode || '-'}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-center text-gray-900">
+                              {timeDisplay}
+                            </td>
+                          </tr>
+                        )
+                      })
                     )}
                   </tbody>
                 </table>
