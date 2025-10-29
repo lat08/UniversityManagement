@@ -1,8 +1,10 @@
 import { api } from '@/lib/api/client';
 import type { TuitionFeeResponse, InsuranceResponse, PaymentHistoryResponse, PaymentResponse } from '../types/types';
 
-export const getTuitionFees = async (): Promise<TuitionFeeResponse> => {
-  const response = await api.get('/v1/tuition-fees');
+export const getTuitionFees = async (semesterId: string | null): Promise<TuitionFeeResponse> => {
+  const response = await api.get('/v1/tuition-fees', {
+    params: { semesterId },
+  });
   return response.data;
 };
 
@@ -18,8 +20,8 @@ export const getPayments = async (): Promise<PaymentHistoryResponse> => {
   return response.data;
 };
 
-export const payCourses = async (courseIds: string[]): Promise<PaymentResponse> => {
-  const response = await api.post('/v1/payment/student-courses', { courseIds });
+export const payCourses = async (studentCoursesId: string[]): Promise<PaymentResponse> => {
+  const response = await api.post('/v1/payment/student-courses', { studentCoursesId });
   return response.data;
 };
 
