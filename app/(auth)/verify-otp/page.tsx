@@ -112,7 +112,7 @@ function OtpVerifyContent() {
         type="button"
         onClick={handleResendOtp}
         disabled={isResending}
-        className="text-[#4E8EE1] hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="text-[#4E8EE1] hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-[11px] lg:text-[13px]"
       >
         {isResending ? 'Đang gửi...' : TEXT.resendNow}
       </button>
@@ -131,12 +131,12 @@ function OtpVerifyContent() {
       backHref="/forgot-password"
       backText="Quay lại"
     >
-      <div className="mb-8">
-        <p className="font-poppins text-[14px] text-[#666666] mb-2">
+      <div className="mb-6 lg:mb-8">
+        <p className="font-poppins text-[12px] lg:text-[14px] text-[#666666] mb-2">
           Mã xác thực đã được gửi đến email của bạn
         </p>
         {forgotPasswordFlow.email && (
-          <p className="font-poppins text-[16px] font-bold text-center text-[#1e40af]">
+          <p className="font-poppins text-[14px] lg:text-[16px] font-bold text-center text-[#1e40af]">
             {forgotPasswordFlow.email}
           </p>
         )}
@@ -157,7 +157,7 @@ function OtpVerifyContent() {
             title={`Vui lòng nhập đúng ${OTP_LENGTH} chữ số`}
             inputClassName="text-center font-bold tracking-widest"
           />
-          <p className="mt-2 text-[13px] text-[#888888]">
+          <p className="mt-2 text-[11px] lg:text-[13px] text-[#888888]">
             Bạn không nhận được mã? {helperText}
           </p>
         </div>

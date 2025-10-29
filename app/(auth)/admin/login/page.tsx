@@ -93,20 +93,20 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[90%] sm:max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center mb-6 md:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-full mb-3 md:mb-4">
+            <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Quản trị hệ thống</h1>
-          <p className="text-white/80">Đăng nhập để truy cập bảng điều khiển</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Quản trị hệ thống</h1>
+          <p className="text-sm md:text-base text-white/80">Đăng nhập để truy cập bảng điều khiển</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-2xl border border-white/20">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <AuthInput
               label="Email quản trị"
@@ -141,10 +141,10 @@ export default function AdminLoginPage() {
           </form>
 
           {/* Back to main login */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 md:mt-6 text-center">
             <Link
               href="/login"
-              className="text-white/70 hover:text-white transition-colors text-sm"
+              className="text-white/70 hover:text-white transition-colors text-xs md:text-sm"
             >
               ← Quay lại đăng nhập thông thường
             </Link>
@@ -152,8 +152,8 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-white/60 text-sm">
+        <div className="text-center mt-6 md:mt-8">
+          <p className="text-white/60 text-xs md:text-sm">
             Hệ thống quản lý trường đại học
           </p>
         </div>
