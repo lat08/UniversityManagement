@@ -15,16 +15,34 @@ export const roomBookingKeys = {
 // Hooks
 export const useRooms = (page: number = 1, pageSize: number = 10) => {
   const setRooms = useRoomBookingStore((state) => state.setRooms);
+  const filters = useRoomBookingStore((state) => state.filters);
   
   return useQuery({
-    queryKey: roomBookingKeys.rooms(page, pageSize),
+    queryKey: [...roomBookingKeys.rooms(page, pageSize), filters],
     queryFn: async () => {
       try {
+        // Build params with filters
+        const params: Record<string, string | number> = {
+          pageNumber: page,
+          pageSize: pageSize,
+        };
+
+        // Add filters to params
+        if (filters.capacity) {
+          params.minCapacity = parseInt(filters.capacity);
+        }
+        if (filters.buildingId) {
+          params.buildingId = filters.buildingId;
+        }
+        if (filters.roomType) {
+          params.roomType = filters.roomType;
+        }
+        if (filters.roomStatus) {
+          params.roomStatus = filters.roomStatus;
+        }
+
         const response = await api.get<RoomApiResponse>('/v1/function-rooms/rooms', {
-          params: {
-            pageNumber: page,
-            pageSize: pageSize,
-          },
+          params,
         });
         
         if (response.data.success && response.data.data.items) {

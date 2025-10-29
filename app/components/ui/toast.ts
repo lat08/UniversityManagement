@@ -1,23 +1,31 @@
 "use client";
 
-import { toast as sonnerToast } from "sonner";
-import type { ToasterProps } from "sonner";
+import toast from 'react-hot-toast';
 
 type ToastOptions = {
   duration?: number;
-  position?: ToasterProps["position"];
+  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 };
 
 export const useToast = () => {
   return {
     toast: (message: string, options?: ToastOptions) => {
-      sonnerToast(message, options);
+      toast(message, {
+        duration: options?.duration || 3000,
+        position: options?.position || 'bottom-right',
+      });
     },
     success: (message: string, options?: ToastOptions) => {
-      sonnerToast.success(message, options);
+      toast.success(message, {
+        duration: options?.duration || 3000,
+        position: options?.position || 'bottom-right',
+      });
     },
     error: (message: string, options?: ToastOptions) => {
-      sonnerToast.error(message, options);
+      toast.error(message, {
+        duration: options?.duration || 3000,
+        position: options?.position || 'bottom-right',
+      });
     },
   };
 };

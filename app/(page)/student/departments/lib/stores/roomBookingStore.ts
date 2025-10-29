@@ -58,6 +58,7 @@ export type RoomBookingState = {
 	selectedTimeSlot: string | null;
 	selectedRoom: Room | null;
 	filters: RoomFilters;
+	tempFilters: RoomFilters;
 	isLoading: boolean;
 	error: string | null;
 };
@@ -72,10 +73,19 @@ type RoomBookingActions = {
 	setSelectedTimeSlot: (timeSlot: string | null) => void;
 	setSelectedRoom: (room: Room | null) => void;
 	setFilters: (filters: Partial<RoomFilters>) => void;
+	setTempFilters: (filters: Partial<RoomFilters>) => void;
+	applyFilters: () => void;
 	addUserBooking: (booking: UserBooking) => void;
 	updateUserBooking: (id: string, updates: Partial<UserBooking>) => void;
 	removeUserBooking: (id: string) => void;
 	clearSelection: () => void;
+};
+
+const initialFilters: RoomFilters = {
+	capacity: '',
+	buildingId: '',
+	roomType: '',
+	roomStatus: '',
 };
 
 const initialState: RoomBookingState = {
@@ -85,12 +95,8 @@ const initialState: RoomBookingState = {
 	selectedDate: null,
 	selectedTimeSlot: null,
 	selectedRoom: null,
-	filters: {
-		capacity: '',
-		buildingId: '',
-		roomType: '',
-		roomStatus: '',
-	},
+	filters: { ...initialFilters },
+	tempFilters: { ...initialFilters },
 	isLoading: false,
 	error: null,
 };
@@ -108,6 +114,14 @@ export const useRoomBookingStore = create<RoomBookingState & RoomBookingActions>
 	setFilters: (newFilters) =>
 		set((state) => ({
 			filters: { ...state.filters, ...newFilters },
+		})),
+	setTempFilters: (newFilters) =>
+		set((state) => ({
+			tempFilters: { ...state.tempFilters, ...newFilters },
+		})),
+	applyFilters: () =>
+		set((state) => ({
+			filters: { ...state.tempFilters },
 		})),
 	addUserBooking: (booking) =>
 		set((state) => ({

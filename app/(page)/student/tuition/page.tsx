@@ -11,10 +11,11 @@ import InsuranceSummary from "./components/InsuranceSummary";
 import { TabType, Insurance, Payment, TuitionFeeResponse } from "./lib/types/types";
 import { getTuitionFees, getInsurances, getPayments, payCourses, paySemester, payInsurance, getPaymentExcel, getTuitionExcel, getInsuranceExcel } from "./lib/api/financeApi";
 import { MOCK_SEMESTERS } from "./lib/constants/constants";
-import { toast } from "sonner";
+import { useToast } from "@/app/components/ui/toast";
 import { Spinner } from "@/app/components/ui/spinner";
 
 export default function TuitionPage() {
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('tuition');
   const [searchTerm, setSearchTerm] = useState('');

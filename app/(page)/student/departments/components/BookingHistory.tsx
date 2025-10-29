@@ -1,18 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useCancelBooking } from '../lib/hooks/useRoomBooking';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
-import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
-import { Card, CardContent } from '@/app/components/ui/card';
-import { Calendar } from 'lucide-react';
+import { Calendar, ChevronDown, Search } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import type { BookingData, BookingStatus } from '../lib/types/room.types';
 import { BOOKING_STATUS_LABELS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
-import { Search } from 'lucide-react';
 import CancelBookingModal from './CancelBookingModal';
 
 interface BookingHistoryProps {
@@ -22,19 +19,19 @@ interface BookingHistoryProps {
 
 export default function BookingHistory({ bookings, isLoading }: BookingHistoryProps) {
   const cancelBookingMutation = useCancelBooking();
-  const rooms = useRoomBookingStore((state) => state.rooms) || [];
+  const filters = useRoomBookingStore((state) => state.filters);
+  const tempFilters = useRoomBookingStore((state) => state.tempFilters);
+  const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
+  const applyFilters = useRoomBookingStore((state) => state.applyFilters);
   
   // Modal state
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
   
-  // Filter states
-  const [filters, setFilters] = useState({
-    capacity: '',
-    buildingId: '',
-    roomType: '',
-    roomStatus: ''
-  });
+  // Dropdown states
+  const [isBuildingOpen, setIsBuildingOpen] = useState(false);
+  const [isRoomTypeOpen, setIsRoomTypeOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
 
   const handleCancelBooking = (booking: BookingData) => {
     setSelectedBooking(booking);
@@ -173,25 +170,78 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     }
   };
 
-  // Get unique buildings from rooms data
-  const uniqueBuildings = rooms 
-    ? Array.from(new Map(rooms.map(room => [room.building.buildingId, room.building])).values())
-    : [];
+  // Get unique buildings from bookings data
+  const uniqueBuildings = useMemo(() => {
+    const buildingMap = new Map();
+    bookings.forEach(booking => {
+      if (!buildingMap.has(booking.building.buildingId)) {
+        buildingMap.set(booking.building.buildingId, booking.building);
+      }
+    });
+    return Array.from(buildingMap.values());
+  }, [bookings]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setTempFilters({ [key]: value });
   };
 
   const handleSearch = () => {
-    // Logic tìm kiếm sẽ được implement sau
+    applyFilters();
+  };
+
+  // Filter bookings based on applied filters
+  const filteredBookings = useMemo(() => {
+    return bookings.filter(booking => {
+      if (filters.buildingId && booking.building.buildingId !== filters.buildingId) {
+        return false;
+      }
+      // Room type filter would need room data joined to booking
+      // For now, we skip it as bookings don't have roomType
+      return true;
+    });
+  }, [bookings, filters]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      const buildingDropdown = target.closest('[data-dropdown="building"]');
+      const roomTypeDropdown = target.closest('[data-dropdown="roomType"]');
+      const statusDropdown = target.closest('[data-dropdown="status"]');
+      
+      if (!buildingDropdown && !roomTypeDropdown && !statusDropdown) {
+        setIsBuildingOpen(false);
+        setIsRoomTypeOpen(false);
+        setIsStatusOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getSelectedBuildingName = () => {
+    if (!tempFilters.buildingId) return "Tất cả";
+    const building = uniqueBuildings.find(b => b.buildingId === tempFilters.buildingId);
+    return building ? `${building.buildingName} (${building.buildingCode})` : "Tất cả";
+  };
+
+  const getSelectedRoomTypeName = () => {
+    if (!tempFilters.roomType) return "Tất cả";
+    return ROOM_TYPE_LABELS[tempFilters.roomType as keyof typeof ROOM_TYPE_LABELS] || "Tất cả";
+  };
+
+  const getSelectedStatusName = () => {
+    if (!tempFilters.roomStatus) return "Tất cả";
+    return ROOM_STATUS_LABELS[tempFilters.roomStatus as keyof typeof ROOM_STATUS_LABELS] || "Tất cả";
   };
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse bg-white">
-            <CardContent className="p-6">
+          <div key={i} className="animate-pulse bg-white p-6 rounded-md shadow-sm">
               <div className="flex gap-4">
                 <div className="w-32 h-24 bg-gray-200 rounded"></div>
                 <div className="flex-1 space-y-3">
@@ -204,8 +254,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+          </div>
         ))}
       </div>
     );
@@ -214,91 +263,153 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
   return (
     <div className="space-y-6">
       {/* Filter Section */}
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Sức chứa tối thiểu */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Sức chứa tối thiểu
-            </label>
-            <input
-              type="number"
-              value={filters.capacity}
-              onChange={(e) => handleFilterChange('capacity', e.target.value)}
-              placeholder="Nhập số lượng người"
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-              min="1"
-            />
-          </div>
-
-          {/* Vị trí (Tòa nhà) */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Vị trí
-            </label>
-            <select
-              value={filters.buildingId}
-              onChange={(e) => handleFilterChange('buildingId', e.target.value)}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-            >
-              <option value="">Tất cả</option>
-              {uniqueBuildings.map((building) => (
-                <option key={building.buildingId} value={building.buildingId}>
-                  {building.buildingName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Khoa (Room Type) */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Khoa
-            </label>
-            <select
-              value={filters.roomType}
-              onChange={(e) => handleFilterChange('roomType', e.target.value)}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-            >
-              <option value="">Tất cả</option>
-              {Object.entries(ROOM_TYPE_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Trạng thái */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Trạng thái
-            </label>
-            <select
-              value={filters.roomStatus}
-              onChange={(e) => handleFilterChange('roomStatus', e.target.value)}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-            >
-              <option value="">Tất cả</option>
-              {Object.entries(ROOM_STATUS_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Search Button */}
-          <div className="flex items-end">
-            <Button
-              onClick={handleSearch}
-              className="w-full bg-[#0B5FCC] hover:bg-[#0a4fab] text-white font-medium px-8 py-2.5 rounded-lg transition-colors"
-            >
-              <Search className="h-4 w-4 mr-2" />
-              Tìm kiếm
-            </Button>
-          </div>
+      <div className="mb-4 flex gap-4 items-stretch w-full">
+        {/* Sức chứa tối thiểu */}
+        <div className="relative flex-1">
+          <input
+            type="number"
+            value={tempFilters.capacity || ''}
+            onChange={(e) => handleFilterChange('capacity', e.target.value)}
+            placeholder="Sức chứa tối thiểu"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors h-full"
+            min="1"
+          />
         </div>
+
+        {/* Vị trí (Tòa nhà) Dropdown */}
+        <div className="relative flex-1 dropdown-container" data-dropdown="building">
+          <button 
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+            onClick={() => {
+              setIsBuildingOpen(!isBuildingOpen);
+              setIsRoomTypeOpen(false);
+              setIsStatusOpen(false);
+            }}
+          >
+            <span className="text-sm text-gray-900">
+              {getSelectedBuildingName()}
+            </span>
+            <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+          </button>
+          {isBuildingOpen && (
+            <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <button
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+                onClick={() => {
+                  handleFilterChange('buildingId', '');
+                  setIsBuildingOpen(false);
+                }}
+              >
+                Tất cả
+              </button>
+              {uniqueBuildings.map((building) => (
+                <button
+                  key={building.buildingId}
+                  className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                  onClick={() => {
+                    handleFilterChange('buildingId', building.buildingId);
+                    setIsBuildingOpen(false);
+                  }}
+                >
+                  {building.buildingName} ({building.buildingCode})
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Loại phòng Dropdown */}
+        <div className="relative flex-1 dropdown-container" data-dropdown="roomType">
+          <button 
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+            onClick={() => {
+              setIsRoomTypeOpen(!isRoomTypeOpen);
+              setIsBuildingOpen(false);
+              setIsStatusOpen(false);
+            }}
+          >
+            <span className="text-sm text-gray-900">
+              {getSelectedRoomTypeName()}
+            </span>
+            <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+          </button>
+          {isRoomTypeOpen && (
+            <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <button
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+                onClick={() => {
+                  handleFilterChange('roomType', '');
+                  setIsRoomTypeOpen(false);
+                }}
+              >
+                Tất cả
+              </button>
+              {Object.entries(ROOM_TYPE_LABELS).map(([key, label]) => (
+                <button
+                  key={key}
+                  className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                  onClick={() => {
+                    handleFilterChange('roomType', key);
+                    setIsRoomTypeOpen(false);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Trạng thái Dropdown */}
+        <div className="relative flex-1 dropdown-container" data-dropdown="status">
+          <button 
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+            onClick={() => {
+              setIsStatusOpen(!isStatusOpen);
+              setIsBuildingOpen(false);
+              setIsRoomTypeOpen(false);
+            }}
+          >
+            <span className="text-sm text-gray-900">
+              {getSelectedStatusName()}
+            </span>
+            <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+          </button>
+          {isStatusOpen && (
+            <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <button
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+                onClick={() => {
+                  handleFilterChange('roomStatus', '');
+                  setIsStatusOpen(false);
+                }}
+              >
+                Tất cả
+              </button>
+              {Object.entries(ROOM_STATUS_LABELS).map(([key, label]) => (
+                <button
+                  key={key}
+                  className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                  onClick={() => {
+                    handleFilterChange('roomStatus', key);
+                    setIsStatusOpen(false);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Search Button */}
+        <button 
+          className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+          onClick={handleSearch}
+        >
+          <Search className="w-4 h-4" />
+          <span className="text-sm font-medium">Tìm kiếm</span>
+        </button>
       </div>
 
       {/* Booking List Section */}
@@ -306,97 +417,93 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
         <div className="mb-6 flex items-center gap-2">
           <Calendar className="h-5 w-5 text-gray-700" />
           <h2 className="text-lg font-semibold text-gray-900">
-          Lịch sử đăng ký phòng chức năng ({bookings.length > 0 ? `0${bookings.length}`.slice(-2) : '00'})
+            Lịch sử đăng ký phòng chức năng ({filteredBookings.length > 0 ? String(filteredBookings.length).padStart(2, '0') : '00'})
         </h2>
       </div>
 
         <div className="space-y-4">
-        {bookings.map((booking) => {
+          {filteredBookings.map((booking) => {
           const canCancel = canCancelBooking(booking);
           
           return (
-              <Card key={booking.bookingId} className="border-0 bg-white shadow-sm overflow-hidden">
-                <CardContent className="p-6">
-                  {/* Top section: Room name + Badge */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-bold text-gray-900">
+              <div key={booking.bookingId} className="bg-white shadow-sm overflow-hidden p-5 rounded-md">
+                {/* Header: Room name + Badge */}
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-base font-bold text-gray-900">
                         {booking.roomName}
                       </h3>
-                      <Badge className={`${getStatusColor(booking.bookingStatus)} px-3 py-1 text-xs font-medium rounded-md`}>
+                  <Badge className={`${getStatusColor(booking.bookingStatus)} px-2.5 py-0.5 text-xs font-medium rounded`}>
                       {getStatusText(booking.bookingStatus)}
                     </Badge>
-                    </div>
                   </div>
 
                   {/* Location */}
-                  <p className="text-sm text-gray-600 mb-4">
-                          {booking.building.buildingName}
+                <p className="text-sm text-gray-600 mb-3">
+                  Tầng 1, {booking.building.buildingName}
                         </p>
 
-                  {/* All info in one line */}
-                  <div className="flex items-center gap-8 text-sm mb-4 flex-wrap">
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2.5 text-sm mb-4">
                       {/* Ngày đăng ký */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Ngày đăng ký</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-gray-600">Ngày đăng ký</span>
                       <span className="font-semibold text-gray-900">{formatDate(booking.createdAt)}</span>
                       </div>
 
+                  {/* Mã đăng ký */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-gray-600">Mã đăng ký</span>
+                    <span className="font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded text-xs">
+                      {booking.bookingCode || 'reg-004'}
+                    </span>
+                      </div>
+
                       {/* Ngày sử dụng */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Ngày sử dụng</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-gray-600">Ngày sử dụng</span>
                       <span className="font-semibold text-gray-900">{formatDate(booking.bookingDate)}</span>
                       </div>
 
+                  {/* Số người tham gia */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-gray-600">Số người tham gia</span>
+                    <span className="font-semibold text-gray-900">10 người</span>
+                      </div>
+
                       {/* Thời gian sử dụng */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Thời gian sử dụng</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-gray-600">Thời gian sử dụng</span>
                       <span className="font-semibold text-gray-900">{booking.startTime} - {booking.endTime}</span>
-                    </div>
-
-                      {/* Mã đăng ký */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Mã đăng ký</span>
-                      <span className="font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
-                        {booking.bookingCode || 'N/A'}
-                      </span>
-                        </div>
-
-                    {/* Số người tham gia */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Số người tham gia</span>
-                      <span className="font-semibold text-gray-900">10 người</span>
                       </div>
 
                       {/* Mục đích sử dụng */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">Mục đích sử dụng</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-gray-600">Mục đích sử dụng</span>
                       <span className="font-semibold text-gray-900">{booking.purpose}</span>
                       </div>
                     </div>
 
                   {/* Cancel button - Bottom right */}
-                  <div className="flex justify-end items-center gap-2">
-                      <Button
+                <div className="flex justify-end items-center gap-2 mt-3">
+                  <button
                         onClick={() => handleCancelBooking(booking)}
                         disabled={!canCancel || cancelBookingMutation.isPending}
-                      className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                    className={`px-6 py-2 text-sm font-medium rounded-md transition-colors ${
                           canCancel 
-                          ? 'bg-[#0B5FCC] hover:bg-[#0a4fab] text-white' 
+                        ? 'bg-[var(--button-primary)] hover:bg-[var(--button-primary-hover)] text-[var(--primary-foreground)]' 
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                       title={canCancel ? undefined : getCanCancelReason(booking) || ''}
                       >
                         {cancelBookingMutation.isPending ? 'Đang hủy...' : 'Hủy đăng ký'}
-                      </Button>
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
           );
         })}
       </div>
 
-      {bookings.length === 0 && !isLoading && (
+        {filteredBookings.length === 0 && !isLoading && (
           <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
             <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium">Chưa có lịch đăng ký nào</p>

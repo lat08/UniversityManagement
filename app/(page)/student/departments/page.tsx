@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import { useRooms, useUserBookings } from './lib/hooks/useRoomBooking';
+import { useRoomBookingStore } from './lib/stores/roomBookingStore';
 import RoomFilters from './components/RoomFilters';
 import RoomList from './components/RoomList';
 import BookingHistory from './components/BookingHistory';
@@ -17,12 +18,20 @@ export default function RoomBookingPage() {
   const [activeTab, setActiveTab] = useState<'rooms' | 'history'>('rooms');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(12);
+  const applyFilters = useRoomBookingStore((state) => state.applyFilters);
   
-  const { data, isLoading: roomsLoading } = useRooms(currentPage, pageSize);
+  const { data, isLoading: roomsLoading, refetch: refetchRooms } = useRooms(currentPage, pageSize);
   const { data: userBookings, isLoading: bookingsLoading } = useUserBookings();
   
   const rooms = data?.rooms || [];
   const pagination = data?.pagination;
+
+  const handleSearch = () => {
+    applyFilters();
+    if (activeTab === 'rooms') {
+      refetchRooms();
+    }
+  };
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -75,7 +84,7 @@ export default function RoomBookingPage() {
       {activeTab === 'rooms' ? (
         <div className="space-y-4 lg:space-y-6">
           {/* Filters */}
-          <RoomFilters />
+          <RoomFilters onSearch={handleSearch} />
 
           {/* Room List */}
           <RoomList 

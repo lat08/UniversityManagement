@@ -1,22 +1,29 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
-import { Button } from '@/app/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
 
-export default function RoomFilters() {
-  const filters = useRoomBookingStore((state) => state.filters);
-  const setFilters = useRoomBookingStore((state) => state.setFilters);
-  // Không cần fetch lại toàn bộ rooms cho filter - sẽ dùng API riêng để lấy buildings
+interface RoomFiltersProps {
+  onSearch: () => void;
+}
+
+export default function RoomFilters({ onSearch }: RoomFiltersProps) {
+  const tempFilters = useRoomBookingStore((state) => state.tempFilters);
+  const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
   const rooms = useRoomBookingStore((state) => state.rooms) || [];
 
+  const [isBuildingOpen, setIsBuildingOpen] = useState(false);
+  const [isRoomTypeOpen, setIsRoomTypeOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+
   const handleFilterChange = (key: string, value: string) => {
-    setFilters({ [key]: value });
+    setTempFilters({ [key]: value });
   };
 
   const handleSearch = () => {
-    // Logic tìm kiếm sẽ được implement sau
+    onSearch();
   };
 
   // Get unique buildings from rooms data
@@ -24,92 +31,190 @@ export default function RoomFilters() {
     ? Array.from(new Map(rooms.map(room => [room.building.buildingId, room.building])).values())
     : [];
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      const buildingDropdown = target.closest('[data-dropdown="building"]');
+      const roomTypeDropdown = target.closest('[data-dropdown="roomType"]');
+      const statusDropdown = target.closest('[data-dropdown="status"]');
+      
+      if (!buildingDropdown && !roomTypeDropdown && !statusDropdown) {
+        setIsBuildingOpen(false);
+        setIsRoomTypeOpen(false);
+        setIsStatusOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getSelectedBuildingName = () => {
+    if (!tempFilters.buildingId) return "Tất cả";
+    const building = uniqueBuildings.find(b => b.buildingId === tempFilters.buildingId);
+    return building ? `${building.buildingName} (${building.buildingCode})` : "Tất cả";
+  };
+
+  const getSelectedRoomTypeName = () => {
+    if (!tempFilters.roomType) return "Tất cả";
+    return ROOM_TYPE_LABELS[tempFilters.roomType as keyof typeof ROOM_TYPE_LABELS] || "Tất cả";
+  };
+
+  const getSelectedStatusName = () => {
+    if (!tempFilters.roomStatus) return "Tất cả";
+    return ROOM_STATUS_LABELS[tempFilters.roomStatus as keyof typeof ROOM_STATUS_LABELS] || "Tất cả";
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Sức chứa tối thiểu */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">
-            Sức chứa tối thiểu
-          </label>
-          <input
-            type="number"
-            value={filters.capacity || ''}
-            onChange={(e) => handleFilterChange('capacity', e.target.value)}
-            placeholder="Nhập số lượng người"
-            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-            min="1"
-          />
-        </div>
-
-        {/* Tòa nhà */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">
-            Tòa nhà
-          </label>
-          <select
-            value={filters.buildingId}
-            onChange={(e) => handleFilterChange('buildingId', e.target.value)}
-            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-          >
-            <option value="">Tất cả</option>
-            {uniqueBuildings.map((building) => (
-              <option key={building.buildingId} value={building.buildingId}>
-                {building.buildingName} ({building.buildingCode})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Loại phòng */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">
-            Loại phòng
-          </label>
-          <select
-            value={filters.roomType}
-            onChange={(e) => handleFilterChange('roomType', e.target.value)}
-            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-          >
-            <option value="">Tất cả</option>
-            {Object.entries(ROOM_TYPE_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Trạng thái */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">
-            Trạng thái
-          </label>
-          <select
-            value={filters.roomStatus}
-            onChange={(e) => handleFilterChange('roomStatus', e.target.value)}
-            className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B5FCC] bg-white text-gray-900 text-sm"
-          >
-            <option value="">Tất cả</option>
-            {Object.entries(ROOM_STATUS_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Search Button */}
-        <div className="flex items-end">
-          <Button
-            onClick={handleSearch}
-            className="w-full bg-[#0B5FCC] hover:bg-[#0a4fab] text-white font-medium px-8 py-2.5 rounded-lg transition-colors"
-          >
-            <Search className="h-4 w-4 mr-2" />
-            Tìm kiếm
-          </Button>
-        </div>
+    <div className="mb-4 flex gap-4 items-stretch w-full">
+      {/* Sức chứa tối thiểu */}
+      <div className="relative flex-1">
+        <input
+          type="number"
+          value={tempFilters.capacity || ''}
+          onChange={(e) => handleFilterChange('capacity', e.target.value)}
+          placeholder="Sức chứa tối thiểu"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors h-full"
+          min="1"
+        />
       </div>
+
+      {/* Vị trí (Tòa nhà) Dropdown */}
+      <div className="relative flex-1 dropdown-container" data-dropdown="building">
+        <button 
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+          onClick={() => {
+            setIsBuildingOpen(!isBuildingOpen);
+            setIsRoomTypeOpen(false);
+            setIsStatusOpen(false);
+          }}
+        >
+          <span className="text-sm text-gray-900">
+            {getSelectedBuildingName()}
+          </span>
+          <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+        </button>
+        {isBuildingOpen && (
+          <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <button
+              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+              onClick={() => {
+                handleFilterChange('buildingId', '');
+                setIsBuildingOpen(false);
+              }}
+            >
+              Tất cả
+            </button>
+            {uniqueBuildings.map((building) => (
+              <button
+                key={building.buildingId}
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                onClick={() => {
+                  handleFilterChange('buildingId', building.buildingId);
+                  setIsBuildingOpen(false);
+                }}
+              >
+                {building.buildingName} ({building.buildingCode})
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Loại phòng Dropdown */}
+      <div className="relative flex-1 dropdown-container" data-dropdown="roomType">
+        <button 
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+          onClick={() => {
+            setIsRoomTypeOpen(!isRoomTypeOpen);
+            setIsBuildingOpen(false);
+            setIsStatusOpen(false);
+          }}
+        >
+          <span className="text-sm text-gray-900">
+            {getSelectedRoomTypeName()}
+          </span>
+          <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+        </button>
+        {isRoomTypeOpen && (
+          <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <button
+              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+              onClick={() => {
+                handleFilterChange('roomType', '');
+                setIsRoomTypeOpen(false);
+              }}
+            >
+              Tất cả
+            </button>
+            {Object.entries(ROOM_TYPE_LABELS).map(([key, label]) => (
+              <button
+                key={key}
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                onClick={() => {
+                  handleFilterChange('roomType', key);
+                  setIsRoomTypeOpen(false);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Trạng thái Dropdown */}
+      <div className="relative flex-1 dropdown-container" data-dropdown="status">
+        <button 
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+          onClick={() => {
+            setIsStatusOpen(!isStatusOpen);
+            setIsBuildingOpen(false);
+            setIsRoomTypeOpen(false);
+          }}
+        >
+          <span className="text-sm text-gray-900">
+            {getSelectedStatusName()}
+          </span>
+          <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+        </button>
+        {isStatusOpen && (
+          <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <button
+              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+              onClick={() => {
+                handleFilterChange('roomStatus', '');
+                setIsStatusOpen(false);
+              }}
+            >
+              Tất cả
+            </button>
+            {Object.entries(ROOM_STATUS_LABELS).map(([key, label]) => (
+              <button
+                key={key}
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
+                onClick={() => {
+                  handleFilterChange('roomStatus', key);
+                  setIsStatusOpen(false);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Search Button */}
+      <button 
+        className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
+        onClick={handleSearch}
+      >
+        <Search className="w-4 h-4" />
+        <span className="text-sm font-medium">Tìm kiếm</span>
+      </button>
     </div>
   );
 }

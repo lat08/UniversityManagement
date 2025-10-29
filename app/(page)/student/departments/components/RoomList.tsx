@@ -68,7 +68,6 @@ interface RoomListProps {
 }
 
 export default function RoomList({ rooms, isLoading, pagination, currentPage, onPageChange }: RoomListProps) {
-  const filters = useRoomBookingStore((state) => state.filters);
   const setSelectedRoom = useRoomBookingStore((state) => state.setSelectedRoom);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -90,15 +89,6 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
       color: ROOM_STATUS_COLORS[roomStatus] || 'bg-gray-100 text-gray-800'
     };
   };
-
-  // Filter rooms based on filters
-  const filteredRooms = rooms.filter((room) => {
-    if (filters.capacity && room.capacity < parseInt(filters.capacity)) return false;
-    if (filters.buildingId && room.building.buildingId !== filters.buildingId) return false;
-    if (filters.roomType && room.roomType !== filters.roomType) return false;
-    if (filters.roomStatus && room.roomStatus !== filters.roomStatus) return false;
-    return true;
-  });
 
   if (isLoading) {
     return (
@@ -137,13 +127,13 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
     <>
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          Kết quả: Tìm thấy <span className="font-semibold">{pagination?.totalItems || filteredRooms.length}</span> phòng học
+          Kết quả: Tìm thấy <span className="font-semibold">{pagination?.totalItems || rooms.length}</span> phòng học
           {pagination && ` (Trang ${pagination.currentPage}/${pagination.totalPages})`}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-        {filteredRooms.map((room) => {
+        {rooms.map((room) => {
           const roomTypeBadge = getRoomTypeBadge(room.roomType);
           const roomStatusBadge = getRoomStatusBadge(room.roomStatus);
           const isDisabled = room.roomStatus === 'inactive' || room.roomStatus === 'maintenance';
@@ -244,7 +234,7 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
         })}
       </div>
 
-      {filteredRooms.length === 0 && !isLoading && (
+      {rooms.length === 0 && !isLoading && (
         <div className="text-center py-12 text-gray-500">
           <Monitor className="h-16 w-16 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium">Không tìm thấy phòng nào</p>
