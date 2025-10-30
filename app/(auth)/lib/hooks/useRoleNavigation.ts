@@ -34,10 +34,15 @@ export const useRoleNavigation = () => {
     subPath: string, 
     replace: boolean = false
   ) => {
-    const basePath = role === 'Student' ? '/student' : 
-                     role === 'Instructor' ? '/instructor' : 
-                     role === 'Admin' ? '/admin' : 
-                     '/student'; // fallback
+    let basePath = '/student'; // fallback
+    
+    if (role === 'Student') {
+      basePath = '/student';
+    } else if (role === 'Instructor') {
+      basePath = '/instructor';
+    } else if (role?.startsWith('Admin_')) {
+      basePath = '/admin';
+    }
     
     const fullPath = `${basePath}/${subPath}`;
     

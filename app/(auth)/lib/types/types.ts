@@ -28,7 +28,14 @@ export type AuthLayoutProps = {
   formWidth?: string;
 };
 
-export type UserRole = 'Student' | 'Instructor' | 'Admin';
+export type UserRole = 
+  | 'Student' 
+  | 'Instructor' 
+  | 'Admin_Principal' 
+  | 'Admin_Accountant' 
+  | 'Admin_Facilities' 
+  | 'Admin_HR' 
+  | 'Admin_Academic';
 
 export interface RequireRoleAuthProps {
   children: React.ReactNode;

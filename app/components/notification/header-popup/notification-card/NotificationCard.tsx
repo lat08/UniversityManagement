@@ -24,9 +24,10 @@ export function NotificationCard({ notifications, onClose }: NotificationCardPro
   const handleNotificationClick = (notification: NotificationApiItem) => {
     // Determine base path based on user role
     let basePath = "/student/notification"
+    
     if (user?.role === "Instructor") {
       basePath = "/instructor/notification"
-    } else if (user?.role === "Admin") {
+    } else if (user?.role?.startsWith("Admin_")) {
       basePath = "/admin/notification"
     }
 

@@ -215,10 +215,13 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
   const onLogout = async () => {
     try {
+      const currentRefreshToken = useAuthStore.getState().refreshToken
       logout()
       router.push('/login')
       try {
-        await logoutApi()
+        if (currentRefreshToken) {
+          await logoutApi(currentRefreshToken)
+        }
       } catch {}
     } catch {
       router.push('/login')

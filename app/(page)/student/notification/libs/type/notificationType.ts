@@ -24,19 +24,27 @@ interface BaseApiResponse<T> {
 }
 
 export type NotificationListResponse = BaseApiResponse<{
-  data: NotificationApiItem[]
-  totalCount: number
-  page: number
-  pageSize: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
+  role: string
+  notifications: {
+    data: NotificationApiItem[]
+    totalCount: number
+    page: number
+    pageSize: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
 }>
 
 export type NotificationDetailResponse = BaseApiResponse<NotificationApiItem>
 
 export type UnreadCountResponse = BaseApiResponse<{
   unreadCount: number
+}>
+
+export type MarkAsReadResponse = BaseApiResponse<{
+  message: string
+  notificationId: string
 }>
 
 export type MarkAllAsReadResponse = BaseApiResponse<{

@@ -1,9 +1,9 @@
 import { api } from "@/lib/api/client"
 import { 
-  NotificationApiResponse,
   NotificationListResponse,
   NotificationDetailResponse,
   UnreadCountResponse,
+  MarkAsReadResponse,
   MarkAllAsReadResponse,
   NotificationQueryParams
 } from "../type/notificationType"
@@ -39,6 +39,12 @@ export const notificationApi = {
   // Lấy chi tiết thông báo và TỰ ĐỘNG đánh dấu đã đọc
   getNotificationById: async (id: string): Promise<NotificationDetailResponse> => {
     const response = await api.get<NotificationDetailResponse>(`/v1/notifications/${id}`)
+    return response.data
+  },
+
+  // Đánh dấu một thông báo cụ thể đã đọc
+  markAsRead: async (id: string): Promise<MarkAsReadResponse> => {
+    const response = await api.put<MarkAsReadResponse>(`/v1/notifications/${id}/mark-as-read`)
     return response.data
   },
 

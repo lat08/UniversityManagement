@@ -24,7 +24,7 @@ export default function AdminLayout({
   }
 
   return (
-    <RequireRoleAuth allowedRoles={['Admin']} redirectTo="/admin/login">
+    <RequireRoleAuth allowedRoles={['Admin_Principal']} redirectTo="/admin/login">
       <div className="flex h-screen overflow-hidden bg-[var(--bg-secondary)]" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}

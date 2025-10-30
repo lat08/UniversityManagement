@@ -27,7 +27,7 @@ export type LoginResponse = {
 };
 
 export const loginApi = async (dto: LoginDto): Promise<LoginResponse> => {
-  const { data } = await api.post('/v1/sessions', dto);
+  const { data } = await api.post('/v1/auth', dto);
   return data;
 };
 
@@ -59,6 +59,12 @@ export const sendPasswordResetOtpApi = async (dto: ForgotPasswordDto): Promise<A
   return data;
 };
 
+// Resend OTP API
+export const resendPasswordResetOtpApi = async (dto: ForgotPasswordDto): Promise<ApiResponse<boolean>> => {
+  const { data } = await api.post('/v1/passwords/reset-requests/resend', dto);
+  return data;
+};
+
 // Verify OTP và lấy PasswordResetToken
 export const verifyOtpApi = async (dto: VerifyOtpDto): Promise<ApiResponse<{ passwordResetToken: string }>> => {
   const { data } = await api.post('/v1/passwords/reset-verifications', dto);
@@ -70,8 +76,23 @@ export const resetPasswordApi = async (dto: ResetPasswordDto): Promise<ApiRespon
   return data;
 };
 
-// Logout API function
-export const logoutApi = async (): Promise<ApiResponse<boolean>> => {
-  const { data } = await api.delete('/v1/sessions');
+// Change Password Types
+export type ChangePasswordDto = {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+// Change Password API (cho user đã đăng nhập)
+export const changePasswordApi = async (dto: ChangePasswordDto): Promise<ApiResponse<boolean>> => {
+  const { data } = await api.put('/v1/users/me/password', dto);
+  return data;
+};
+
+// Logout API function (cần truyền refreshToken)
+export const logoutApi = async (refreshToken: string): Promise<ApiResponse<string>> => {
+  const { data } = await api.delete('/v1/auth', {
+    data: { refreshToken }
+  });
   return data;
 };

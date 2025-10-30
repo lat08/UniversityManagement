@@ -19,21 +19,31 @@ export function NotificationsContent() {
   const [error, setError] = useState<string | null>(null)
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false)
   const [expandedNotificationId, setExpandedNotificationId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const pageSize = 10
 
   // Fetch notifications from API
-  const fetchNotifications = async (filterType?: NotificationType) => {
+  const fetchNotifications = async (filterType?: NotificationType, page: number = 1) => {
     try {
       setLoading(true)
       setError(null)
       
-      const params = filterType && filterType !== "all" 
-        ? { NotificationType: filterType as "event" | "tuition" | "schedule" | "important" }
-        : undefined
+      const params: any = {
+        PageIndex: page,
+        PageSize: pageSize
+      }
+      
+      if (filterType && filterType !== "all") {
+        params.NotificationType = filterType
+      }
 
       const response = await notificationApi.getNotifications(params)
       
       if (response.isSuccess) {
-        setNotifications(response.data.data)
+        setNotifications(response.data.notifications.data)
+        setTotalPages(response.data.notifications.totalPages)
+        setCurrentPage(response.data.notifications.page)
       } else {
         setError(response.resultMessage || "Không thể tải thông báo")
       }
@@ -47,8 +57,16 @@ export function NotificationsContent() {
 
   // Load notifications on mount and when filter changes
   useEffect(() => {
-    fetchNotifications(activeFilter)
+    setCurrentPage(1) // Reset page when filter changes
+    fetchNotifications(activeFilter, 1)
   }, [activeFilter])
+
+  // Load notifications when page changes
+  useEffect(() => {
+    if (currentPage > 1) {
+      fetchNotifications(activeFilter, currentPage)
+    }
+  }, [currentPage])
 
   // Handle URL params on mount
   useEffect(() => {
@@ -62,10 +80,10 @@ export function NotificationsContent() {
     }
   }, [typeParam, idParam])
 
-  // Handle notification click (fetch detail and mark as read)
+  // Handle notification click (mark as read)
   const handleNotificationClick = async (id: string) => {
     try {
-      const response = await notificationApi.getNotificationById(id)
+      const response = await notificationApi.markAsRead(id)
       
       if (response.isSuccess) {
         // Update the notification in the list to mark it as read
@@ -74,7 +92,7 @@ export function NotificationsContent() {
         )
       }
     } catch (err) {
-      console.error("Error fetching notification detail:", err)
+      console.error("Error marking notification as read:", err)
     }
   }
 
@@ -223,16 +241,54 @@ export function NotificationsContent() {
         </div>
       ) : (
         /* Notifications list */
-        <div className="space-y-4">
-          {notifications.map((notification) => (
-            <NotificationCard 
-              key={notification.scheduleId} 
-              notification={notification}
-              onNotificationClick={handleNotificationClick}
-              initialExpanded={notification.scheduleId === expandedNotificationId}
-            />
-          ))}
-        </div>
+        <>
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <NotificationCard 
+                key={notification.scheduleId} 
+                notification={notification}
+                onNotificationClick={handleNotificationClick}
+                initialExpanded={notification.scheduleId === expandedNotificationId}
+              />
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1 || loading}
+              >
+                Trang trước
+              </Button>
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    disabled={loading}
+                    className="min-w-[40px]"
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages || loading}
+              >
+                Trang sau
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

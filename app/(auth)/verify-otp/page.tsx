@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { sendPasswordResetOtpApi, verifyOtpApi, type ForgotPasswordDto, type VerifyOtpDto } from '@/lib/api/auth';
+import { resendPasswordResetOtpApi, verifyOtpApi, type ForgotPasswordDto, type VerifyOtpDto } from '@/lib/api/auth';
 import { useAuthFlow } from '../lib/hooks/useAuthFlow';
 import { RouteGuard } from '../components/RouteGuard';
 import { AuthLayout } from '../components/AuthLayout';
@@ -23,7 +23,7 @@ function OtpVerifyContent() {
   const { forgotPasswordFlow, setResetToken } = useAuthFlow();
 
   const { mutate: resendOtp, isPending: isResending } = useMutation({
-    mutationFn: sendPasswordResetOtpApi,
+    mutationFn: resendPasswordResetOtpApi,
     onSuccess: (response) => {
       if (response.success) {
         toast.success('Mã OTP mới đã được gửi đến email của bạn!', {
@@ -96,7 +96,7 @@ function OtpVerifyContent() {
     verifyOtp(verifyOtpData);
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = useCallback(() => {
     if (!forgotPasswordFlow.email) {
       toast.error('Không tìm thấy email. Vui lòng thử lại từ đầu.');
       return;
@@ -104,7 +104,7 @@ function OtpVerifyContent() {
     
     const forgotPasswordData: ForgotPasswordDto = { email: forgotPasswordFlow.email };
     resendOtp(forgotPasswordData);
-  };
+  }, [forgotPasswordFlow.email, resendOtp]);
 
   const helperText = useMemo(() => {
     return finished ? (

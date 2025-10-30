@@ -49,7 +49,7 @@ api.interceptors.response.use(
                           error?.response?.headers?.['token-expired'] === 'true';
     
     // Loại trừ các endpoint đăng nhập khỏi interceptor
-    const isLoginEndpoint = originalRequest.url?.includes('/sessions') || 
+    const isLoginEndpoint = originalRequest.url?.includes('/v1/auth') || 
                            originalRequest.url?.includes('/passwords/reset') ||
                            originalRequest.url?.includes('/tokens');
     

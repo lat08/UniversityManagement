@@ -26,23 +26,19 @@ interface BaseApiResponse<T> {
 export type NotificationListResponse = BaseApiResponse<{
   role: string
   notifications: {
+    data: NotificationApiItem[]
     totalCount: number
     page: number
     pageSize: number
     totalPages: number
     hasNextPage: boolean
     hasPreviousPage: boolean
-    data: NotificationApiItem[]
   }
 }>
 
-export type NotificationDetailResponse = BaseApiResponse<{
-  role: string
-  notification: NotificationApiItem
-}>
+export type NotificationDetailResponse = BaseApiResponse<NotificationApiItem>
 
 export type UnreadCountResponse = BaseApiResponse<{
-  role: string
   unreadCount: number
 }>
 
@@ -52,7 +48,6 @@ export type MarkAsReadResponse = BaseApiResponse<{
 }>
 
 export type MarkAllAsReadResponse = BaseApiResponse<{
-  role: string
   message: string
   count: number
 }>

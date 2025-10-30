@@ -2,7 +2,21 @@
  * Utility functions for role-based navigation
  */
 
-export type UserRole = 'Student' | 'Instructor' | 'Admin';
+export type UserRole = 
+  | 'Student' 
+  | 'Instructor' 
+  | 'Admin_Principal' 
+  | 'Admin_Accountant' 
+  | 'Admin_Facilities' 
+  | 'Admin_HR' 
+  | 'Admin_Academic';
+
+/**
+ * Kiểm tra xem role có phải là Admin role không
+ */
+export const isAdminRole = (role: string | undefined | null): boolean => {
+  return role?.startsWith('Admin_') || false;
+};
 
 /**
  * Lấy route dashboard dựa trên role của user
@@ -17,8 +31,11 @@ export const getDashboardRoute = (role: string | undefined | null): string => {
       return '/student/dashboard';
     case 'Instructor':
       return '/instructor/dashboard';
-    case 'Admin':
-      // Admin có trang login riêng, nhưng để fallback
+    case 'Admin_Principal':
+    case 'Admin_Accountant':
+    case 'Admin_Facilities':
+    case 'Admin_HR':
+    case 'Admin_Academic':
       return '/admin/dashboard';
     default:
       // Fallback mặc định cho Student
@@ -32,7 +49,16 @@ export const getDashboardRoute = (role: string | undefined | null): string => {
  * @returns true nếu role hợp lệ
  */
 export const isValidRole = (role: string | undefined | null): boolean => {
-  return role === 'Student' || role === 'Instructor' || role === 'Admin';
+  const validRoles: UserRole[] = [
+    'Student',
+    'Instructor', 
+    'Admin_Principal',
+    'Admin_Accountant',
+    'Admin_Facilities',
+    'Admin_HR',
+    'Admin_Academic'
+  ];
+  return validRoles.includes(role as UserRole);
 };
 
 /**
@@ -46,8 +72,16 @@ export const getRoleDisplayName = (role: string | undefined | null): string => {
       return 'Sinh viên';
     case 'Instructor':
       return 'Giảng viên';
-    case 'Admin':
-      return 'Quản trị viên';
+    case 'Admin_Principal':
+      return 'Hiệu trưởng';
+    case 'Admin_Accountant':
+      return 'Kế toán';
+    case 'Admin_Facilities':
+      return 'Quản lý cơ sở vật chất';
+    case 'Admin_HR':
+      return 'Nhân sự';
+    case 'Admin_Academic':
+      return 'Quản lý học vụ';
     default:
       return 'Người dùng';
   }
