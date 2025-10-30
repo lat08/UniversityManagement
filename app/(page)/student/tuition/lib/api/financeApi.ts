@@ -3,7 +3,11 @@ import type { TuitionFeeResponse, InsuranceResponse, PaymentHistoryResponse, Pay
 
 export const getTuitionFees = async (semesterId: string | null): Promise<TuitionFeeResponse> => {
   const response = await api.get('/v1/tuition-fees', {
-    params: { semesterId },
+    params: {
+      studentId: null,
+      userId: null,
+      semesterId: semesterId,
+    },
   });
   return response.data;
 };
@@ -25,18 +29,8 @@ export const payCourses = async (studentCoursesId: string[]): Promise<PaymentRes
   return response.data;
 };
 
-export const paySemester = async (semesterId: string): Promise<PaymentResponse> => {
-  const response = await api.post('/v1/payment/semester', { semesterId });
-  return response.data;
-};
-
 export const payInsurance = async (insuranceId: string): Promise<PaymentResponse> => {
   const response = await api.post('/v1/payment/insurance', { insuranceId });
-  return response.data;
-};
-
-export const getPaymentPdf = async (): Promise<string> => {
-  const response = await api.get('/v1/payment/pdf');
   return response.data;
 };
 
@@ -45,7 +39,7 @@ export const getPaymentExcel = async (): Promise<void> => {
     responseType: 'blob',
     headers: {
       'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    }
+    },
   });
   
   // Create a download link
@@ -64,12 +58,17 @@ export const getPaymentExcel = async (): Promise<void> => {
   window.URL.revokeObjectURL(url);
 };
 
-export const getTuitionExcel = async (): Promise<void> => {
+export const getTuitionExcel = async (semesterId: string | null): Promise<void> => {
   const response = await api.get('/v1/tuition-fees/excel', {
     responseType: 'blob',
     headers: {
       'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    }
+    },
+    params: {
+      studentId: null,
+      userId: null,
+      semesterId: semesterId,
+    },
   });
   
   const blob = new Blob([response.data], { 

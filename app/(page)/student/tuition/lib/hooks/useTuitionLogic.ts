@@ -1,6 +1,6 @@
 // lib/hooks/useTuitionLogic.ts
 import { useState, useMemo } from "react";
-import { payCourses, paySemester, getTuitionExcel } from "../api/financeApi";
+import { payCourses, getTuitionExcel } from "../api/financeApi";
 import { useToast } from "@/app/components/ui/toast";
 import { TuitionFeeResponse } from "../types/types";
 
@@ -50,7 +50,7 @@ export const useTuitionLogic = (
   const handleExportTuition = async () => {
     try {
       setIsLoading(true);
-      await getTuitionExcel();
+      await getTuitionExcel(tuitionData?.semesterId || null);
       toast.success('Đang tải xuống danh sách học phí');
     } catch (error) {
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
@@ -76,34 +76,6 @@ export const useTuitionLogic = (
     }
   };
 
-  const handleSemesterPayment = async () => {
-    if (!tuitionData) {
-      toast.error('No semester data available');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const res = await paySemester(tuitionData.semesterId);
-      if (res.success) {
-        if (res.data) {
-          setQrUrl(res.data);
-          setQrIframeLoading(true);
-          setIsQrOpen(true);
-          toast.success('Tạo QR thành công'); 
-        } else {
-          toast.error('Không nhận được link thanh toán từ server');
-        }
-      } else {
-        toast.error(res.message || 'Payment failed');
-      }
-    } catch (error) {
-      toast.error('Failed to process semester payment');
-      console.error('Payment error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return {
     selectedTuitionIds,
@@ -112,7 +84,6 @@ export const useTuitionLogic = (
     handleSelectTuition,     // SỬA ĐỔI NÀY
     handleExportTuition,
     handlePayment,
-    handleSemesterPayment,
     availableCourses,
   };
 };
