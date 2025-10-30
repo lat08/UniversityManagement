@@ -69,6 +69,30 @@
   --chart-7: #f87171;
   --chart-8: #c4b5fd;
   
+  /* Chart Color Groups - Simplified */
+  --chart-primary: #ec4899;      /* Màu chính cho column chart (bar) */
+  --chart-secondary: #c4b5fd;    /* Màu phụ cho column chart */
+  --chart-background: #c9c7c7;   /* Màu đằng sau/background */
+  
+  /* Dashboard Component Colors */
+  --event-border: #2563eb;
+  --event-dot-border: rgba(30, 58, 138, 0.9);
+  --event-title: rgba(30, 58, 138, 0.9);
+  --event-content: #9ca3af;
+  --event-meta: #1f2937;
+  --event-timeline: #9ca3af;
+  
+  --classlist-border: #1d4ed8;
+  --classlist-title: rgba(30, 58, 138, 0.9);
+  --classlist-badge-bg: #f3f4f6;
+  --classlist-badge-text: #6b7280;
+  --classlist-text: #4b5563;
+  --classlist-icon: #9ca3af;
+  --classlist-empty-border: #d1d5db;
+  --classlist-empty-bg: #f9fafb;
+  --classlist-empty-text: #6b7280;
+  --classlist-empty-icon: #9ca3af;
+  
   /* Badge Colors for Notification Counts */
   --badge-bg: #ef4444;              /* Red background for unread badge (inactive tabs) */
   --badge-text: #ffffff;            /* White text for unread badge (inactive tabs) */
@@ -214,6 +238,30 @@
   --chart-7: #fb923c;
   --chart-8: #c4b5fd;
   
+  /* Chart Color Groups - Simplified */
+  --chart-primary: #f472b6;      /* Màu chính cho column chart (bar) */
+  --chart-secondary: #c4b5fd;    /* Màu phụ cho column chart */
+  --chart-background: #94a3b8;   /* Màu đằng sau/background */
+  
+  /* Dashboard Component Colors */
+  --event-border: #60a5fa;
+  --event-dot-border: rgba(96, 165, 250, 0.9);
+  --event-title: rgba(96, 165, 250, 0.9);
+  --event-content: #94a3b8;
+  --event-meta: #cbd5e1;
+  --event-timeline: #94a3b8;
+  
+  --classlist-border: #3b82f6;
+  --classlist-title: rgba(96, 165, 250, 0.9);
+  --classlist-badge-bg: #334155;
+  --classlist-badge-text: #94a3b8;
+  --classlist-text: #94a3b8;
+  --classlist-icon: #64748b;
+  --classlist-empty-border: #475569;
+  --classlist-empty-bg: #1e293b;
+  --classlist-empty-text: #94a3b8;
+  --classlist-empty-icon: #64748b;
+  
   /* Badge Colors for Notification Counts */
   --badge-bg: #f87171;              /* Lighter red background for unread badge (inactive tabs) */
   --badge-text: #ffffff;            /* White text for unread badge (inactive tabs) */
@@ -351,6 +399,25 @@
   --color-chart-6: var(--chart-6);
   --color-chart-7: var(--chart-7);
   --color-chart-8: var(--chart-8);
+  
+  /* Dashboard Component Colors */
+  --color-event-border: var(--event-border);
+  --color-event-dot-border: var(--event-dot-border);
+  --color-event-title: var(--event-title);
+  --color-event-content: var(--event-content);
+  --color-event-meta: var(--event-meta);
+  --color-event-timeline: var(--event-timeline);
+  
+  --color-classlist-border: var(--classlist-border);
+  --color-classlist-title: var(--classlist-title);
+  --color-classlist-badge-bg: var(--classlist-badge-bg);
+  --color-classlist-badge-text: var(--classlist-badge-text);
+  --color-classlist-text: var(--classlist-text);
+  --color-classlist-icon: var(--classlist-icon);
+  --color-classlist-empty-border: var(--classlist-empty-border);
+  --color-classlist-empty-bg: var(--classlist-empty-bg);
+  --color-classlist-empty-text: var(--classlist-empty-text);
+  --color-classlist-empty-icon: var(--classlist-empty-icon);
   
   /* Sidebar Colors */
   --color-sidebar: var(--sidebar);

@@ -92,8 +92,13 @@ export function getCompleteThemeColors(isDarkMode: boolean = false): ThemeColors
     chart4: colors.chart4 || '#ef4444',
     chart5: colors.chart5 || '#8b5cf6',
     chart6: colors.chart6 || '#ec4899',
-    chart7: colors.chart7 || '#14b8a6',
-    chart8: colors.chart8 || '#f97316',
+    chart7: colors.chart7 || '#f87171',
+    chart8: colors.chart8 || '#c4b5fd',
+    
+    // Chart Color Groups - Simplified (recommended)
+    chartPrimary: colors.chartPrimary || colors.chart6 || '#ec4899',
+    chartSecondary: colors.chartSecondary || colors.chart8 || '#c4b5fd',
+    chartBackground: colors.chartBackground || '#c9c7c7',
     
     // Sidebar Colors
     sidebar: colors.sidebar || '#f8fafc',
@@ -163,6 +168,26 @@ export function getCompleteThemeColors(isDarkMode: boolean = false): ThemeColors
     notificationImportantBg: colors.notificationImportantBg || '#fee2e2',
     notificationImportantIcon: colors.notificationImportantIcon || '#ef4444',
     notificationImportantBorder: colors.notificationImportantBorder || '#ef4444',
+    
+    // Dashboard Event Card Colors
+    eventBorder: colors.eventBorder || '#2563eb',
+    eventDotBorder: colors.eventDotBorder || 'rgba(30, 58, 138, 0.9)',
+    eventTitle: colors.eventTitle || 'rgba(30, 58, 138, 0.9)',
+    eventContent: colors.eventContent || '#9ca3af',
+    eventMeta: colors.eventMeta || '#1f2937',
+    eventTimeline: colors.eventTimeline || '#9ca3af',
+    
+    // Dashboard ClassList Card Colors
+    classlistBorder: colors.classlistBorder || '#1d4ed8',
+    classlistTitle: colors.classlistTitle || 'rgba(30, 58, 138, 0.9)',
+    classlistBadgeBg: colors.classlistBadgeBg || '#f3f4f6',
+    classlistBadgeText: colors.classlistBadgeText || '#6b7280',
+    classlistText: colors.classlistText || '#4b5563',
+    classlistIcon: colors.classlistIcon || '#9ca3af',
+    classlistEmptyBorder: colors.classlistEmptyBorder || '#d1d5db',
+    classlistEmptyBg: colors.classlistEmptyBg || '#f9fafb',
+    classlistEmptyText: colors.classlistEmptyText || '#6b7280',
+    classlistEmptyIcon: colors.classlistEmptyIcon || '#9ca3af',
   };
   
   return completeColors;

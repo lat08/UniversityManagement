@@ -35,7 +35,7 @@ export function NotificationPopup() {
       setLoading(true)
       const response = await notificationApi.getNotifications({ PageSize: 10 })
       if (response.isSuccess) {
-        setNotifications(response.data.data)
+        setNotifications(response.data.notifications.data)
       }
     } catch (err) {
       console.error("Error fetching notifications:", err)

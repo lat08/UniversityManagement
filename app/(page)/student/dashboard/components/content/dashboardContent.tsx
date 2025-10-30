@@ -23,7 +23,7 @@ export default function DashboardContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>Đang tải dữ liệu...</span>
         </div>
@@ -31,14 +31,14 @@ export default function DashboardContent() {
     )
   }
 
-  if (error) return <p>Lỗi: {error}</p>;
+  if (error) return <p className="text-[var(--error)]">Lỗi: {error}</p>;
   return (
     
     <div className="space-y-4 lg:space-y-6">
       {/* Welcome Section */}
       <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Bảng điều khiển</h1>
-        <p className="text-xs lg:text-sm text-gray-500 mt-1">Chào mừng trở lại, Name!</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text-primary)]">Bảng điều khiển</h1>
+        <p className="text-xs lg:text-sm text-[var(--text-secondary)] mt-1">Chào mừng trở lại, Name!</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">

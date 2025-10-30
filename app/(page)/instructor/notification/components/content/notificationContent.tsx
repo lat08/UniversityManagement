@@ -4,7 +4,7 @@ import { BellOff, Loader2, CheckCheck } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { NotificationCard } from "../notification-card/notificationCard"
-import { NotificationType, NotificationApiItem } from "../../libs/type/notificationType"
+import { NotificationType, NotificationApiItem, NotificationQueryParams } from "../../libs/type/notificationType"
 import { notificationApi } from "../../libs/api/notificationApi"
 import { notificationFilters } from "../../libs/constants/notificationConstants"
 import { Button } from "@/app/components/ui/button"
@@ -30,7 +30,7 @@ export function NotificationsContent() {
       setLoading(true)
       setError(null)
       
-      const params: any = {
+      const params: NotificationQueryParams = {
         PageIndex: page,
         PageSize: pageSize
       }

@@ -23,24 +23,24 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
           currentSubjects.map((classInfo) => (
             <div
               key={classInfo.courseId}
-              className="border border-blue-700 shadow shadow-md p-4 rounded-sm border border-[var(--border)] hover:border-[var(--primary)] hover:shadow-sm transition-all"
+              className="border border-[var(--classlist-border)] shadow shadow-md p-4 rounded-sm hover:border-[var(--primary)] hover:shadow-sm transition-all"
             >
               <div className="flex items-start justify-between mb-3">
-                <h4 className="text-sm lg:text-base font-bold text-blue-800/90 flex-1">
+                <h4 className="text-sm lg:text-base font-bold text-[var(--classlist-title)] flex-1">
                   {classInfo.subjectName}
                 </h4>
-                <span className="text-xs font-medium text-gray-500 px-2 py-1 bg-gray-100 rounded">
+                <span className="text-xs font-medium text-[var(--classlist-badge-text)] px-2 py-1 bg-[var(--classlist-badge-bg)] rounded">
                   {classInfo.subjectCode}
                 </span>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs lg:text-sm text-gray-600">
-                  <User className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-xs lg:text-sm text-[var(--classlist-text)]">
+                  <User className="w-4 h-4 text-[var(--classlist-icon)]" />
                   <span>{classInfo.instructorName}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs lg:text-sm text-gray-600">
-                  <Clock className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-xs lg:text-sm text-[var(--classlist-text)]">
+                  <Clock className="w-4 h-4 text-[var(--classlist-icon)]" />
                   <span>{classInfo.scheduleSummary}</span>
                 </div>
               </div>
@@ -48,9 +48,9 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
           ))
         ) : (
           // ✅ Nếu không có lớp học
-          <div className="p-4 text-center border border-dashed border-gray-300 rounded-lg bg-gray-50">
-            <div className="flex flex-col items-center justify-center space-y-2 text-gray-500">
-              <Info className="w-5 h-5 text-gray-400" />
+          <div className="p-4 text-center border border-dashed border-[var(--classlist-empty-border)] rounded-lg bg-[var(--classlist-empty-bg)]">
+            <div className="flex flex-col items-center justify-center space-y-2 text-[var(--classlist-empty-text)]">
+              <Info className="w-5 h-5 text-[var(--classlist-empty-icon)]" />
               <p className="text-sm">Không có lớp học nào.</p>
             </div>
           </div>

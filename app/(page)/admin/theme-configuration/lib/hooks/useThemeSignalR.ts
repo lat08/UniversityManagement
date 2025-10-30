@@ -9,70 +9,91 @@ export function useThemeSignalR() {
 
   useEffect(() => {
     let connection: HubConnection | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
 
     const startConnection = async () => {
       try {
-        // Create SignalR connection
-        // Use the same base URL as the API client
+        const signalREnabled = process.env.NEXT_PUBLIC_ENABLE_SIGNALR !== 'false';
+        if (!signalREnabled) return;
+
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:5001/edu/api';
-        // Extract the base URL without the /edu/api path for SignalR
         const backendUrl = apiBaseUrl.replace('/edu/api', '');
         
         connection = new HubConnectionBuilder()
           .withUrl(`${backendUrl}/edu/api/theme-hub`, {
-            // Skip negotiation and use WebSockets directly for better performance
             skipNegotiation: false,
-            withCredentials: true, // Include credentials for CORS
-          }) // SignalR hub endpoint
-          .configureLogging(LogLevel.Information)
-          .withAutomaticReconnect([0, 2000, 5000, 10000]) // Retry delays
+            withCredentials: true,
+            transport: 1,
+          })
+          .configureLogging(LogLevel.Error)
+          .withAutomaticReconnect({
+            nextRetryDelayInMilliseconds: (retryContext) => {
+              if (retryContext.previousRetryCount < 3) {
+                return Math.min(1000 * Math.pow(2, retryContext.previousRetryCount + 1), 10000);
+              }
+              return null;
+            }
+          })
           .build();
 
-        // Start connection
+        connection.onreconnected(() => {
+          connection?.invoke('JoinThemeGroup').catch(() => {});
+        });
+
+        connection.onclose(() => {});
+
         await connection.start();
 
-        // Listen for theme updates
         connection.on('ReceiveThemeUpdate', (themeData: { themes?: unknown[]; type?: string; theme?: unknown }) => {
-          // Update themes in store
-          if (themeData.themes) {
-            loadThemes(themeData.themes as never);
-          }
-          
-          // If this is a theme update with theme object, apply it
-          if (themeData.theme) {
-            setCurrentTheme(themeData.theme as never);
+          try {
+            if (themeData.themes) loadThemes(themeData.themes as never);
+            if (themeData.theme) setCurrentTheme(themeData.theme as never);
+          } catch (error) {
+            // Silently handle errors
           }
         });
 
-        // Listen for theme configuration changes
-        connection.on('ReceiveThemeConfigUpdate', (configData: unknown) => {
-          // Reload themes from server if needed
-          void configData;
+        connection.on('ReceiveThemeConfigUpdate', () => {
+          // Reserved for future use
         });
 
-        // Join theme group (for receiving updates)
         await connection.invoke('JoinThemeGroup');
         
       } catch (error) {
-        // Silently handle connection errors
-        void error;
-      }
-    };
-
-    const stopConnection = async () => {
-      if (connection) {
-        try {
-          await connection.invoke('LeaveThemeGroup');
-          await connection.stop();
-        } catch (error) {
-          // Silently handle disconnection errors
-          void error;
+        if (!reconnectTimeout) {
+          reconnectTimeout = setTimeout(() => {
+            reconnectTimeout = null;
+            if (!connection || connection.state === 'Disconnected') {
+              startConnection().catch(() => {});
+            }
+          }, 5000);
         }
       }
     };
 
+    const stopConnection = async () => {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
+      }
+
+      if (connection) {
+        try {
+          if (connection.state === 'Connected') {
+            await connection.invoke('LeaveThemeGroup').catch(() => {});
+          }
+          await connection.stop().catch(() => {});
+        } catch (error) {
+          // Silently handle errors
+        }
+        connection = null;
+      }
+    };
+
     // Start connection on mount
-    startConnection();
+    startConnection().catch(() => {
+      // Error already handled in startConnection
+    });
 
     // Cleanup on unmount
     return () => {

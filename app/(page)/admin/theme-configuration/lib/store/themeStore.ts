@@ -66,6 +66,11 @@ export interface ThemeColors {
   chart7: string;
   chart8: string;
   
+  // Chart Color Groups - Simplified
+  chartPrimary: string;
+  chartSecondary: string;
+  chartBackground: string;
+  
   // Sidebar Colors
   sidebar: string;
   sidebarForeground: string;
@@ -108,6 +113,46 @@ export interface ThemeColors {
   cardBg: string;
   cardBorder: string;
   cardShadow: string;
+  
+  // Badge Colors (for Notification Page)
+  badgeBg: string;
+  badgeText: string;
+  badgeActiveBg: string;
+  badgeActiveText: string;
+  
+  // Notification Page Colors
+  notificationEventBg: string;
+  notificationEventIcon: string;
+  notificationEventBorder: string;
+  notificationTuitionBg: string;
+  notificationTuitionIcon: string;
+  notificationTuitionBorder: string;
+  notificationScheduleBg: string;
+  notificationScheduleIcon: string;
+  notificationScheduleBorder: string;
+  notificationImportantBg: string;
+  notificationImportantIcon: string;
+  notificationImportantBorder: string;
+  
+  // Dashboard Event Card Colors
+  eventBorder: string;
+  eventDotBorder: string;
+  eventTitle: string;
+  eventContent: string;
+  eventMeta: string;
+  eventTimeline: string;
+  
+  // Dashboard ClassList Card Colors
+  classlistBorder: string;
+  classlistTitle: string;
+  classlistBadgeBg: string;
+  classlistBadgeText: string;
+  classlistText: string;
+  classlistIcon: string;
+  classlistEmptyBorder: string;
+  classlistEmptyBg: string;
+  classlistEmptyText: string;
+  classlistEmptyIcon: string;
 }
 
 export interface ThemeConfig {
@@ -208,6 +253,11 @@ const defaultThemeColors: ThemeColors = {
   chart7: '#F87171',
   chart8: '#C4B5FD',
   
+  // Chart Color Groups - Simplified
+  chartPrimary: '#ec4899',
+  chartSecondary: '#c4b5fd',
+  chartBackground: '#c9c7c7',
+  
   // Sidebar Colors
   sidebar: 'oklch(0.985 0 0)',
   sidebarForeground: 'oklch(0.145 0 0)',
@@ -250,6 +300,46 @@ const defaultThemeColors: ThemeColors = {
   cardBg: 'oklch(1 0 0)',
   cardBorder: 'oklch(0.922 0 0)',
   cardShadow: 'rgba(0, 0, 0, 0.1)',
+  
+  // Badge Colors (for Notification Page)
+  badgeBg: '#ef4444',
+  badgeText: '#ffffff',
+  badgeActiveBg: '#ffffff',
+  badgeActiveText: '#ef4444',
+  
+  // Notification Page Colors
+  notificationEventBg: '#fef3c7',
+  notificationEventIcon: '#d97706',
+  notificationEventBorder: '#d97706',
+  notificationTuitionBg: '#fef3c7',
+  notificationTuitionIcon: '#f59e0b',
+  notificationTuitionBorder: '#f59e0b',
+  notificationScheduleBg: '#dbeafe',
+  notificationScheduleIcon: '#3b82f6',
+  notificationScheduleBorder: '#3b82f6',
+  notificationImportantBg: '#fee2e2',
+  notificationImportantIcon: '#ef4444',
+  notificationImportantBorder: '#ef4444',
+  
+  // Dashboard Event Card Colors
+  eventBorder: '#2563eb',
+  eventDotBorder: 'rgba(30, 58, 138, 0.9)',
+  eventTitle: 'rgba(30, 58, 138, 0.9)',
+  eventContent: '#9ca3af',
+  eventMeta: '#1f2937',
+  eventTimeline: '#9ca3af',
+  
+  // Dashboard ClassList Card Colors
+  classlistBorder: '#1d4ed8',
+  classlistTitle: 'rgba(30, 58, 138, 0.9)',
+  classlistBadgeBg: '#f3f4f6',
+  classlistBadgeText: '#6b7280',
+  classlistText: '#4b5563',
+  classlistIcon: '#9ca3af',
+  classlistEmptyBorder: '#d1d5db',
+  classlistEmptyBg: '#f9fafb',
+  classlistEmptyText: '#6b7280',
+  classlistEmptyIcon: '#9ca3af',
 };
 
 const defaultTheme: ThemeConfig = {
@@ -274,44 +364,46 @@ export const useThemeStore = create<ThemeState>()(
       // Actions
       setCurrentTheme: (theme: ThemeConfig) => {
         set({ currentTheme: theme });
+        // Apply theme immediately after setting
         get().applyThemeToDocument();
       },
       
       setDarkMode: (isDark: boolean) => {
         set({ isDarkMode: isDark });
-        // Apply dark mode class to document
-        if (isDark) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
+        if (typeof document !== 'undefined') {
+          document.documentElement.classList.toggle('dark', isDark);
         }
       },
       
       updateThemeColors: (colors: Partial<ThemeColors>) => {
         const { currentTheme } = get();
-        if (currentTheme) {
-          const updatedTheme = {
-            ...currentTheme,
-            colors: { ...currentTheme.colors, ...colors },
-            updatedAt: new Date().toISOString(),
-          };
-          set({ currentTheme: updatedTheme });
-          get().applyThemeToDocument();
-        }
+        if (!currentTheme) return;
+        
+        const currentColors = currentTheme.colors as unknown as Record<string, string>;
+        const newColors = colors as unknown as Record<string, string>;
+        
+        const updatedTheme = {
+          ...currentTheme,
+          colors: { ...currentColors, ...newColors } as unknown as ThemeColors,
+          updatedAt: new Date().toISOString(),
+        };
+        set({ currentTheme: updatedTheme });
+        get().applyThemeToDocument();
       },
       
       applyThemeToDocument: () => {
         const { currentTheme } = get();
-        if (currentTheme && typeof document !== 'undefined') {
-          const root = document.documentElement;
-          const colors = currentTheme.colors;
-          
-          // Apply all color variables to CSS custom properties
-          Object.entries(colors).forEach(([key, value]) => {
+        if (!currentTheme || typeof document === 'undefined') return;
+        
+        const root = document.documentElement;
+        const colors = currentTheme.colors as unknown as Record<string, string>;
+        
+        Object.entries(colors).forEach(([key, value]) => {
+          if (value && typeof value === 'string') {
             const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
             root.style.setProperty(cssVarName, value);
-          });
-        }
+          }
+        });
       },
       
       loadThemes: (themes: ThemeConfig[]) => {

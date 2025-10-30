@@ -18,6 +18,15 @@ import { SemesterChartData, } from "../libs/types/types";
 import { useAvailableSemester } from "../libs/hooks/useAvailableSemester";
 import toast from "react-hot-toast";
 
+const getChartColors = () => {
+  if (typeof window === 'undefined') return { primary: '#ec4899', background: '#c9c7c7' };
+  const root = getComputedStyle(document.documentElement);
+  return {
+    primary: root.getPropertyValue('--chart-primary').trim() || '#ec4899',
+    background: root.getPropertyValue('--chart-background').trim() || '#c9c7c7',
+  };
+};
+
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, ChartDataLabels, Title, Tooltip, Legend);
 
@@ -26,8 +35,10 @@ export default function AcademicResultsChart({
   semesterId
 } : SemesterChartData) {
     const [selectedSemesterId, setSelectedSemesterId] = useState<string>(semesterId);
+    const [chartColors, setChartColors] = useState(getChartColors());
 
     const { semester, loading, error, refetch} = useAvailableSemester(selectedSemesterId);
+    
     useEffect(() => {
         if (selectedSemesterId) refetch();
       }, [selectedSemesterId, refetch]);
@@ -40,22 +51,35 @@ export default function AcademicResultsChart({
         }
       }, [semester, loading]);
 
+    useEffect(() => {
+      const updateColors = () => setChartColors(getChartColors());
+      updateColors();
+      
+      const observer = new MutationObserver(updateColors);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['style']
+      });
+      
+      return () => observer.disconnect();
+    }, []);
+
   const chartData = {
     labels: semester?.courses.map((item) => item.subjectName),
     datasets: [
       {
         data: semester?.courses.map((item) => item.finalScore),
-        backgroundColor: "var(--chart-6)",
+        backgroundColor: chartColors.primary,
         borderRadius: 0,
         barThickness: 40,
         borderSkipped: false,
         datalabels: {
-          display: true, // show only on this dataset
+          display: true,
         },
       },
       {
         data: semester?.courses.map(() => 10),
-        backgroundColor: "rgba(201, 199, 199, 1)", // gray color
+        backgroundColor: chartColors.background,
         borderRadius: 0,
         barThickness: 40,
         borderSkipped: false,
@@ -69,15 +93,15 @@ export default function AcademicResultsChart({
     maintainAspectRatio: false,
     plugins: {
       datalabels: {
-        color: "var(--chart-6)",
-        anchor: "end",      // Position label at the end of the bar
-        align: "top",     // Move label slightly above the bar
+        color: chartColors.primary,
+        anchor: "end",
+        align: "top",
         offset: -4,
         font: {
           size: 12,
           weight: "bold",
         },
-        formatter: (value: number) => value.toFixed(1), // format label
+        formatter: (value: number) => value.toFixed(1),
       },
       legend: {
         display: false,
@@ -155,11 +179,11 @@ export default function AcademicResultsChart({
       <CardContent className="flex-1">
         <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
           {loading ? (
-            <span className="text-gray-500 text-sm">Đang tải dữ liệu...</span>
+            <span className="text-[var(--text-secondary)] text-sm">Đang tải dữ liệu...</span>
           ) : error ? (
-            <span className="text-red-500 text-sm">Lỗi khi tải dữ liệu: {error}</span>
+            <span className="text-[var(--error)] text-sm">Lỗi khi tải dữ liệu: {error}</span>
           ) : !semester?.courses?.length ? (
-            <span className="text-gray-500 text-sm">Không có môn học trong học kỳ này.</span>
+            <span className="text-[var(--text-secondary)] text-sm">Không có môn học trong học kỳ này.</span>
           ) : (
             <Bar data={chartData} options={chartOptions} />
           )}

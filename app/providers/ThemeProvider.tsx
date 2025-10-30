@@ -37,18 +37,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     loadActiveTheme();
   }, [setCurrentTheme]);
 
-  // Apply theme on mount and when theme changes
   useEffect(() => {
     applyThemeToDocument();
   }, [currentTheme, applyThemeToDocument]);
 
-  // Handle dark mode
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
   // Listen for system theme changes

@@ -22,7 +22,7 @@ export default function StatCard({ data }: StatCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-sm text-gray-500 mb-4">
+        <h3 className="text-sm text-[var(--text-secondary)] mb-4">
           {data.title}
         </h3>
 
@@ -32,7 +32,7 @@ export default function StatCard({ data }: StatCardProps) {
         </div>
 
         {/* Unit */}
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-[var(--text-secondary)]">
           {data.unit}
         </div>
       </CardContent>

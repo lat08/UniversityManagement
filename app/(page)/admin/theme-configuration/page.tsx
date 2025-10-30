@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/ca
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { useTheme } from '@/app/providers/ThemeProvider';
+import { useThemeStore } from '@/app/(page)/admin/theme-configuration/lib/store/themeStore';
 import { themeApi, type ThemeConfig, type CreateThemeRequest } from './lib';
 import { getAllPages, getCompleteThemeColors, type PageThemeConfig } from './lib';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -25,6 +26,7 @@ export default function ThemeConfigurationPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('pages');
   const [selectedPage, setSelectedPage] = useState<PageThemeConfig | null>(null);
   const [editingColors, setEditingColors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newThemeName, setNewThemeName] = useState('');
   const [newThemeDescription, setNewThemeDescription] = useState('');
@@ -67,41 +69,32 @@ export default function ThemeConfigurationPage() {
     },
   });
 
-  // Page theme update mutation
   const pageUpdateMutation = useMutation({
     mutationFn: async (colors: Record<string, string>) => {
       const activeThemeResponse = await themeApi.getActive('global');
       const activeTheme = activeThemeResponse.data;
       
-      if (!activeTheme || !activeTheme.themeConfigId) {
+      if (!activeTheme?.themeConfigId) {
         throw new Error('No active theme found');
       }
       
-      const mergedColors = {
-        ...activeTheme.colors,
-        ...colors
-      };
+      // Update theme - backend will merge colors automatically
+      await themeApi.update(activeTheme.themeConfigId, { colors });
       
-      await themeApi.update(activeTheme.themeConfigId, { 
-        colors: mergedColors 
-      });
-      
+      // Apply theme to broadcast changes
       await themeApi.apply({ 
         themeConfigId: activeTheme.themeConfigId, 
-        changeReason: `Updated ${selectedPage?.pageName} colors` 
+        changeReason: 'Theme colors updated' 
       });
       
-      return mergedColors;
+      return colors;
     },
-    onSuccess: (mergedColors) => {
-      updateThemeColors(mergedColors);
-      toast.success('🎨 Cập nhật màu sắc trang thành công!');
+    onSuccess: () => {
+      toast.success('Cập nhật màu sắc thành công!');
       queryClient.invalidateQueries({ queryKey: ['themes'] });
-      setEditingColors({});
     },
-    onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi cập nhật');
+    onError: () => {
+      toast.error('Lỗi khi cập nhật màu sắc');
     },
   });
 
@@ -113,11 +106,8 @@ export default function ThemeConfigurationPage() {
       return;
     }
 
-    // Generate complete theme colors with all required fields
     const baseColors = getCompleteThemeColors(isDarkMode);
     
-    // Merge: use currentTheme colors if exists, but ensure ALL required fields are present
-    // Fill missing fields from baseColors
     const completeColors = { ...baseColors };
     if (currentTheme?.colors) {
       Object.keys(currentTheme.colors).forEach((key) => {
@@ -127,15 +117,6 @@ export default function ThemeConfigurationPage() {
         }
       });
     }
-
-    // Debug: check if sidebarHover exists
-    console.log('=== CREATE THEME DEBUG ===');
-    console.log('baseColors.sidebarHover:', baseColors.sidebarHover);
-    console.log('currentTheme.colors.sidebarHover:', currentTheme?.colors?.sidebarHover);
-    console.log('completeColors.sidebarHover:', completeColors.sidebarHover);
-    console.log('completeColors keys count:', Object.keys(completeColors).length);
-    console.log('Missing fields:', Object.keys(baseColors).filter(k => !(k in completeColors)));
-    console.log('=========================');
 
     createMutation.mutate({
       themeName: newThemeName,
@@ -163,29 +144,38 @@ export default function ThemeConfigurationPage() {
   };
 
   const handlePageSave = () => {
-    pageUpdateMutation.mutate(editingColors);
+    if (!selectedPage) return;
+    
+    // Get only the colors that belong to this page
+    const pageColors: Record<string, string> = {};
+    selectedPage.sections.forEach(section => {
+      section.colors.forEach(colorDef => {
+        const value = editingColors[colorDef.key];
+        if (value) {
+          pageColors[colorDef.key] = value;
+        }
+      });
+    });
+    
+    pageUpdateMutation.mutate(pageColors);
   };
 
   const handlePageReset = () => {
     if (currentTheme?.colors) {
-      Object.entries(currentTheme.colors).forEach(([key, value]) => {
+      const colors = currentTheme.colors as unknown as Record<string, string>;
+      Object.entries(colors).forEach(([key, value]) => {
         const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
         document.documentElement.style.setProperty(cssVarName, value);
       });
-      setEditingColors({});
+      
+      setEditingColors(colors);
       toast.success('Đã reset về màu gốc');
     }
   };
 
-  // Initialize editing colors from current theme
   useEffect(() => {
     if (currentTheme?.colors) {
-      const colorsObj = currentTheme.colors as unknown as Record<string, string>;
-      const colorRecord: Record<string, string> = {};
-      Object.keys(colorsObj).forEach(key => {
-        colorRecord[key] = colorsObj[key];
-      });
-      setEditingColors(colorRecord);
+      setEditingColors(currentTheme.colors as unknown as Record<string, string>);
     }
   }, [currentTheme]);
 

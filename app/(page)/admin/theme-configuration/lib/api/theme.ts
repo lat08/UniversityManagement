@@ -48,6 +48,10 @@ export interface ThemeColors {
   chart6: string;
   chart7: string;
   chart8: string;
+  // Chart Color Groups - Simplified
+  chartPrimary: string;
+  chartSecondary: string;
+  chartBackground: string;
   sidebar: string;
   sidebarForeground: string;
   sidebarPrimary: string;
@@ -100,6 +104,24 @@ export interface ThemeColors {
   notificationImportantBg: string;
   notificationImportantIcon: string;
   notificationImportantBorder: string;
+  // Dashboard Event Card Colors
+  eventBorder: string;
+  eventDotBorder: string;
+  eventTitle: string;
+  eventContent: string;
+  eventMeta: string;
+  eventTimeline: string;
+  // Dashboard ClassList Card Colors
+  classlistBorder: string;
+  classlistTitle: string;
+  classlistBadgeBg: string;
+  classlistBadgeText: string;
+  classlistText: string;
+  classlistIcon: string;
+  classlistEmptyBorder: string;
+  classlistEmptyBg: string;
+  classlistEmptyText: string;
+  classlistEmptyIcon: string;
 }
 
 export interface ThemeConfig {

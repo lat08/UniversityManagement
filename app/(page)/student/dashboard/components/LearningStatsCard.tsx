@@ -1,23 +1,50 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { learningStats } from "../libs/constants/dashboardConstant";
 import { KpiData } from "../libs/types/types";
 
-// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const getChartColors = () => {
+  if (typeof window === 'undefined') return { primary: '#ec4899', secondary: '#c4b5fd' };
+  const root = getComputedStyle(document.documentElement);
+  return {
+    primary: root.getPropertyValue('--chart-primary').trim() || '#ec4899',
+    secondary: root.getPropertyValue('--chart-secondary').trim() || '#c4b5fd',
+  };
+};
 
 export default function LearningStatsCard({
 Kpi
 } : KpiData) {
+  const [chartColors, setChartColors] = useState(getChartColors());
+
+  useEffect(() => {
+    const updateColors = () => setChartColors(getChartColors());
+    updateColors();
+    
+    const observer = new MutationObserver(updateColors);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
+
   const chartData = {
     labels: ["Đã hoàn thành", "Còn lại"],
     datasets: [
       {
-        data: [Kpi!.completedCredits, Kpi!.totalCredits - Kpi!.completedCredits],
-        backgroundColor: ["var(--chart-7)", "var(--chart-8)"], // Light red/coral and light purple
+        data: [
+          Kpi?.completedCredits ?? 0, 
+          (Kpi?.totalCredits ?? 0) - (Kpi?.completedCredits ?? 0)
+        ],
+        backgroundColor: [chartColors.primary, chartColors.secondary],
         borderWidth: 0,
       },
     ],
@@ -83,11 +110,17 @@ Kpi
             {/* Legend - Small and positioned at top right */}
             <div className="absolute top-0 right-0 space-y-1">
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 rounded-full bg-[var(--chart-7)]"></div>
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: chartColors.primary }}
+                ></div>
                 <span className="text-xs text-[var(--text-secondary)]">Đã hoàn thành</span>
               </div>
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 rounded-full bg-[var(--chart-8)]"></div>
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: chartColors.secondary }}
+                ></div>
                 <span className="text-xs text-[var(--text-secondary)]">Còn lại</span>
               </div>
             </div>
