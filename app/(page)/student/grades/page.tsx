@@ -13,7 +13,7 @@ import type { CourseDetail } from "./lib/types/types"
 
 export default function ScoresPage() {
   usePageTitle('Điểm số');
-  const { cumulativeData, isLoading, error, exportPdf } = useGrades()
+  const { cumulativeData, statsData, isLoading, error, exportPdf } = useGrades()
   const [selectedSemester, setSelectedSemester] = useState("all")
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
@@ -37,39 +37,31 @@ export default function ScoresPage() {
   }, [cumulativeData])
 
   const scoreOverview = useMemo(() => {
-    if (!cumulativeData) {
+    // Use statsData (from /v1/students/me/grades/stats) for the 3 cards
+    if (!statsData) {
       return {
-        gpa10: "0.00",
         gpa4: "0.00",
         totalCredits: 0,
-        maxCredits: 120,
         completedCourses: 0,
         classification: "",
       }
     }
-    
-    // Count completed courses
-    const completedCourses = cumulativeData.semesters.reduce((count, semester) => {
-      return count + semester.grades.filter(grade => grade.status === "Đạt").length
-    }, 0)
 
-    // Get classification based on GPA4
+    // Get classification based on GPA4 from stats
     let classification = ""
-    if (cumulativeData.cumulativeGPA4 >= 3.8) classification = "Xuất sắc"
-    else if (cumulativeData.cumulativeGPA4 >= 3.2) classification = "Giỏi"
-    else if (cumulativeData.cumulativeGPA4 >= 2.5) classification = "Khá"
-    else if (cumulativeData.cumulativeGPA4 >= 2.0) classification = "Trung bình"
-    else if (cumulativeData.cumulativeGPA4 > 0) classification = "Yếu"
+    if (statsData.averageGPA >= 3.8) classification = "Xuất sắc"
+    else if (statsData.averageGPA >= 3.2) classification = "Giỏi"
+    else if (statsData.averageGPA >= 2.5) classification = "Khá"
+    else if (statsData.averageGPA >= 2.0) classification = "Trung bình"
+    else if (statsData.averageGPA > 0) classification = "Yếu"
 
     return {
-      gpa10: cumulativeData.cumulativeGPA10.toFixed(2),
-      gpa4: cumulativeData.cumulativeGPA4.toFixed(2),
-      totalCredits: cumulativeData.totalCompletedCredits,
-      maxCredits: 120,
-      completedCourses,
+      gpa4: statsData.averageGPA.toFixed(2),
+      totalCredits: statsData.totalCredits,
+      completedCourses: statsData.totalSubjects,
       classification,
     }
-  }, [cumulativeData])
+  }, [statsData])
 
   const handleShowDetail = (courseCode: string) => {
     if (courseDetails[courseCode]) {
@@ -207,7 +199,7 @@ export default function ScoresPage() {
               <p className="text-sm text-gray-600 mb-2">Tổng tín chỉ hoàn thành</p>
               <div className="flex items-baseline gap-2">
                 <p className="text-4xl font-bold text-gray-900">{scoreOverview.totalCredits}</p>
-                <span className="text-sm text-gray-500">/{scoreOverview.maxCredits} tín chỉ</span>
+                <span className="text-sm text-gray-500">tín chỉ</span>
               </div>
             </CardContent>
           </Card>
