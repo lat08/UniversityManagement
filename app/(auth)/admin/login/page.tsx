@@ -43,8 +43,8 @@ export default function AdminLoginPage() {
       if (response.success) {
         const userRole = response.data.userInfo.roleName;
         
-        if (userRole !== 'Admin_Principal') {
-          toast.error('Chỉ Hiệu trưởng (Admin_Principal) mới có quyền truy cập trang quản trị!');
+        if (userRole !== 'Admin' && userRole !== 'Admin_Principal') {
+          toast.error('Chỉ Admin hoặc Hiệu trưởng (Admin_Principal) mới có quyền truy cập trang quản trị!');
           return;
         }
 

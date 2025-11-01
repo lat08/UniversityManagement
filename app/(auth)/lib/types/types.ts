@@ -35,7 +35,8 @@ export type UserRole =
   | 'Admin_Accountant' 
   | 'Admin_Facilities' 
   | 'Admin_HR' 
-  | 'Admin_Academic';
+  | 'Admin_Academic'
+  | 'Admin';
 
 export interface RequireRoleAuthProps {
   children: React.ReactNode;

@@ -4,7 +4,8 @@
 
 export type UserRole = 
   | 'Student' 
-  | 'Instructor' 
+  | 'Instructor'
+  | 'Admin'
   | 'Admin_Principal' 
   | 'Admin_Accountant' 
   | 'Admin_Facilities' 
@@ -15,7 +16,7 @@ export type UserRole =
  * Kiểm tra xem role có phải là Admin role không
  */
 export const isAdminRole = (role: string | undefined | null): boolean => {
-  return role?.startsWith('Admin_') || false;
+  return role === 'Admin' || role === 'Admin_Principal' || role?.startsWith('Admin_') || false;
 };
 
 /**
@@ -31,6 +32,7 @@ export const getDashboardRoute = (role: string | undefined | null): string => {
       return '/student/dashboard';
     case 'Instructor':
       return '/instructor/dashboard';
+    case 'Admin':
     case 'Admin_Principal':
     case 'Admin_Accountant':
     case 'Admin_Facilities':
@@ -49,16 +51,17 @@ export const getDashboardRoute = (role: string | undefined | null): string => {
  * @returns true nếu role hợp lệ
  */
 export const isValidRole = (role: string | undefined | null): boolean => {
-  const validRoles: UserRole[] = [
+  const validRoles = [
     'Student',
-    'Instructor', 
+    'Instructor',
+    'Admin',
     'Admin_Principal',
     'Admin_Accountant',
     'Admin_Facilities',
     'Admin_HR',
     'Admin_Academic'
   ];
-  return validRoles.includes(role as UserRole);
+  return validRoles.includes(role as string);
 };
 
 /**
@@ -72,6 +75,8 @@ export const getRoleDisplayName = (role: string | undefined | null): string => {
       return 'Sinh viên';
     case 'Instructor':
       return 'Giảng viên';
+    case 'Admin':
+      return 'Quản trị viên';
     case 'Admin_Principal':
       return 'Hiệu trưởng';
     case 'Admin_Accountant':

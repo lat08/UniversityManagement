@@ -1,70 +1,152 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, Edit, Trash2, Download, Plus, Search, ChevronDown } from 'lucide-react';
+import { Eye, Edit, Trash2, Download, Plus, Search, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import AddStudentModal from './components/AddStudentModal';
 import ImportExcelModal from './components/ImportExcelModal';
 import ExportStudentModal from './components/ExportStudentModal';
+import ConfirmDeleteStudentModal from './components/ConfirmDeleteStudentModal';
+import { studentsApi } from './lib/api/studentsApi';
+import { toast } from 'react-hot-toast';
+import { Student, AcademicYear, Department, STATUS_OPTIONS, getStatusDisplay } from './lib/types/types';
 
-// Dummy data
-const STATS = [
-  { label: 'Tổng sinh viên', value: '2,847', subtitle: 'Đang học', color: 'bg-orange-50', icon: '📋' },
-  { label: 'Tân sinh viên', value: '342', subtitle: 'SV mới vào năm trước', color: 'bg-teal-50', icon: '🎓' },
-  { label: 'Sắp tốt nghiệp', value: '156', subtitle: 'Năm 2024', color: 'bg-blue-50', icon: '🎯' },
-  { label: 'Bảo lưu', value: '23', subtitle: 'Tạm nghỉ', color: 'bg-red-50', icon: '📌' },
-];
 
-const STUDENTS = [
-  { mssv: '20032007', name: 'Trần Thị Thảo', major: 'Tâm lý học', class: 'K18', email: 'tranthithao18@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21122005', name: 'Lê Anh Kiệt', major: 'Khoa học máy tính', class: 'K16', email: 'leanhkiet16@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055627', name: 'Nguyễn Văn A', major: 'Quản trị kinh doanh', class: 'K16', email: 'nguyenvana16@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055542', name: 'Đào Gia B', major: 'Dược phương học', class: 'K17', email: 'daogiab17@example.com', status: 'Bảo lưu', statusColor: 'bg-gray-100 text-gray-700' },
-  { mssv: '21055543', name: 'Trần Nguyễn Kim C', major: 'Marketing', class: 'K16', email: 'trannguyenkimc17@example.com', status: 'Bảo lưu', statusColor: 'bg-gray-100 text-gray-700' },
-  { mssv: '21055544', name: 'Phan Thái D', major: 'Logistics', class: 'K17', email: 'phanthaid17@example.com', status: 'Đình chỉ', statusColor: 'bg-yellow-100 text-yellow-700' },
-  { mssv: '21055545', name: 'Huỳnh Văn E', major: 'Thương mại điện tử', class: 'K17', email: 'huynhvane17@example.com', status: 'Thôi học', statusColor: 'bg-red-100 text-red-700' },
-  { mssv: '21055546', name: 'Bùi Minh F', major: 'Quan hệ công chúng', class: 'K18', email: 'buiminhf18@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055547', name: 'Nguyễn Thị G', major: 'Tâm lý học', class: 'K18', email: 'nguyenthig18@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055548', name: 'Trần Văn H', major: 'Khoa học máy tính', class: 'K17', email: 'tranvanh17@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055549', name: 'Lê Thị I', major: 'Quản trị kinh doanh', class: 'K16', email: 'lethii16@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055550', name: 'Phạm Văn J', major: 'Marketing', class: 'K18', email: 'phamvanj18@example.com', status: 'Bảo lưu', statusColor: 'bg-gray-100 text-gray-700' },
-  { mssv: '21055551', name: 'Hoàng Thị K', major: 'Logistics', class: 'K17', email: 'hoangthik17@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055552', name: 'Vũ Văn L', major: 'Thương mại điện tử', class: 'K16', email: 'vuvanl16@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055553', name: 'Đặng Thị M', major: 'Quan hệ công chúng', class: 'K18', email: 'dangthim18@example.com', status: 'Đình chỉ', statusColor: 'bg-yellow-100 text-yellow-700' },
-  { mssv: '21055554', name: 'Bùi Văn N', major: 'Tâm lý học', class: 'K17', email: 'buivann17@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055555', name: 'Ngô Thị O', major: 'Khoa học máy tính', class: 'K16', email: 'ngothio16@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055556', name: 'Dương Văn P', major: 'Quản trị kinh doanh', class: 'K18', email: 'duongvanp18@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-  { mssv: '21055557', name: 'Lý Thị Q', major: 'Marketing', class: 'K17', email: 'lythiq17@example.com', status: 'Thôi học', statusColor: 'bg-red-100 text-red-700' },
-  { mssv: '21055558', name: 'Trương Văn R', major: 'Logistics', class: 'K16', email: 'truongvanr16@example.com', status: 'Đang học', statusColor: 'bg-green-100 text-green-700' },
-];
+const STAT_CARDS = [
+  { key: 'total', label: 'Tổng sinh viên', color: 'bg-orange-50', icon: '📋', subtitle: 'Đang học' },
+  { key: 'enrolled', label: 'Tân sinh viên', color: 'bg-teal-50', icon: '🎓', subtitle: '' },
+  { key: 'graduating', label: 'Sắp tốt nghiệp', color: 'bg-blue-50', icon: '🎯', subtitle: 'Dự kiến' },
+  { key: 'onLeave', label: 'Bảo lưu', color: 'bg-red-50', icon: '📌', subtitle: 'Tạm nghỉ' },
+] as const;
+
 
 export default function StudentProfilePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMajorOpen, setIsMajorOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [isClassOpen, setIsClassOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
-  const [selectedMajor, setSelectedMajor] = useState('Tất cả ngành');
   const [selectedClass, setSelectedClass] = useState('Tất cả khóa');
-  const [selectedStatus, setSelectedStatus] = useState('Đang học');
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingStudentId, setDeletingStudentId] = useState<string | null>(null);
+  const [deletingStudentName, setDeletingStudentName] = useState<string | undefined>(undefined);
+  
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 20;
 
-  const majors = [
-    'Tất cả ngành',
-    'Tâm lý học',
-    'Khoa học máy tính',
-    'Quản trị kinh doanh',
-    'Dược phương học',
-    'Marketing',
-    'Logistics',
-    'Thương mại điện tử',
-    'Quan hệ công chúng',
-  ];
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
+  const [stats, setStats] = useState({
+    currentYear: undefined as number | undefined,
+    totalStudents: 0,
+    enrolledThisYear: 0,
+    enrolledLastYear: undefined as number | undefined,
+    growthPercentage: undefined as number | undefined,
+    graduatingSoon: 0,
+    onLeave: 0,
+  });
+  const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>('');
+  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
 
-  const classes = ['Tất cả khóa', 'K16', 'K17', 'K18'];
-  const statuses = ['Đang học', 'Bảo lưu', 'Đình chỉ', 'Thôi học'];
+  useEffect(() => {
+    fetchDepartments();
+    fetchAcademicYears();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchKeyword(searchQuery);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [currentPage, selectedDepartmentId, selectedAcademicYearId, selectedStatus, searchKeyword]);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await studentsApi.getDepartments({
+        pageNumber: 1,
+        pageSize: 100,
+      });
+      if (response.success) {
+        setDepartments(response.data.items);
+      }
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  };
+
+  const fetchAcademicYears = async () => {
+    try {
+      const response = await studentsApi.getAcademicYears();
+      if (response.success) {
+        setAcademicYears(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching academic years:', error);
+    }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const response = await studentsApi.getStudents({
+        pageNumber: currentPage,
+        pageSize: pageSize,
+        searchKeyword: searchKeyword || undefined,
+        departmentId: selectedDepartmentId || undefined,
+        academicYearId: selectedAcademicYearId || undefined,
+        enrollmentStatus: selectedStatus || undefined,
+      });
+      
+      if (response.success) {
+        setStudents(response.data.students);
+        setTotalCount(response.data.pagination.totalCount);
+        setTotalPages(response.data.pagination.totalPages);
+        if (response.data.statistics) {
+          setStats(prev => ({ ...prev, ...response.data.statistics }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, '...', totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    
+    return pages;
+  };
 
   return (
     <div className="min-h-screen p-6">
@@ -76,23 +158,41 @@ export default function StudentProfilePage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {STATS.map((stat, index) => (
+        {STAT_CARDS.map((card, index) => {
+          const value =
+            card.key === 'total' ? stats.totalStudents :
+            card.key === 'enrolled' ? stats.enrolledThisYear :
+            card.key === 'graduating' ? stats.graduatingSoon :
+            stats.onLeave;
+          return (
           <div
             key={index}
-            className={`${stat.color} rounded-lg p-6 border border-gray-200`}
+            className={`${card.color} rounded-lg p-6 border border-gray-200`}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-sm text-gray-600 mb-2">{stat.label}</p>
+                <p className="text-sm text-gray-600 mb-2">{card.label}</p>
                 <p className="text-4xl font-bold text-gray-900 mb-1">
-                  {stat.value}
+                  {value.toLocaleString()}
                 </p>
-                <p className="text-xs text-gray-500">{stat.subtitle}</p>
+                {card.subtitle ? (
+                  <p className="text-xs text-gray-500">{card.subtitle}</p>
+                ) : null}
+                {card.key === 'enrolled' && typeof stats.growthPercentage === 'number' && (
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${stats.growthPercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {stats.growthPercentage < 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                      {`${stats.growthPercentage > 0 ? '+' : ''}${stats.growthPercentage.toFixed(1)}%`}
+                    </span>
+                    <span className="text-xs text-gray-500">so với năm trước</span>
+                  </div>
+                )}
               </div>
-              <div className="text-3xl">{stat.icon}</div>
+              <div className="text-3xl">{card.icon}</div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Main Content Card */}
@@ -147,62 +247,96 @@ export default function StudentProfilePage() {
               />
             </div>
 
-            {/* Major Dropdown */}
-            <div className="relative w-80" data-dropdown="major">
+            {/* Department Dropdown */}
+            <div className="relative w-64" data-dropdown="department">
               <button
                 className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
                 onClick={() => {
-                  setIsMajorOpen(!isMajorOpen);
+                  setIsDepartmentOpen(!isDepartmentOpen);
                   setIsClassOpen(false);
                   setIsStatusOpen(false);
                 }}
               >
-                <span className="text-sm text-gray-900">{selectedMajor}</span>
+                <span className="text-sm text-gray-900">
+                  {selectedDepartmentId 
+                    ? departments.find(d => d.departmentId === selectedDepartmentId)?.departmentName || 'Tất cả chuyên ngành'
+                    : 'Tất cả chuyên ngành'
+                  }
+                </span>
                 <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
               </button>
-              {isMajorOpen && (
+              {isDepartmentOpen && (
                 <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {majors.map((major) => (
+                  <button
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+                    onClick={() => {
+                      setSelectedDepartmentId('');
+                      setIsDepartmentOpen(false);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    Tất cả chuyên ngành
+                  </button>
+                  {departments.map((department) => (
                     <button
-                      key={major}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      key={department.departmentId}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
                       onClick={() => {
-                        setSelectedMajor(major);
-                        setIsMajorOpen(false);
+                        setSelectedDepartmentId(department.departmentId);
+                        setIsDepartmentOpen(false);
+                        setCurrentPage(1);
                       }}
                     >
-                      {major}
+                      {department.departmentName}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Class Dropdown */}
-            <div className="relative w-40" data-dropdown="class">
+            {/* Academic Year Dropdown */}
+            <div className="relative w-40" data-dropdown="academicYear">
               <button
                 className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
                 onClick={() => {
                   setIsClassOpen(!isClassOpen);
-                  setIsMajorOpen(false);
+                  setIsDepartmentOpen(false);
                   setIsStatusOpen(false);
                 }}
               >
-                <span className="text-sm text-gray-900">{selectedClass}</span>
+                <span className="text-sm text-gray-900">
+                  {selectedAcademicYearId
+                    ? academicYears.find(y => y.academicYearId === selectedAcademicYearId)?.yearCode || 'Tất cả khóa'
+                    : 'Tất cả khóa'
+                  }
+                </span>
                 <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
               </button>
               {isClassOpen && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {classes.map((cls) => (
+                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <button
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
+                    onClick={() => {
+                      setSelectedAcademicYearId('');
+                      setSelectedClass('Tất cả khóa');
+                      setIsClassOpen(false);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    Tất cả khóa
+                  </button>
+                  {academicYears.map((year) => (
                     <button
-                      key={cls}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      key={year.academicYearId}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
                       onClick={() => {
-                        setSelectedClass(cls);
+                        setSelectedAcademicYearId(year.academicYearId);
+                        setSelectedClass(year.yearCode);
                         setIsClassOpen(false);
+                        setCurrentPage(1);
                       }}
                     >
-                      {cls}
+                      {year.yearCode}
                     </button>
                   ))}
                 </div>
@@ -210,30 +344,33 @@ export default function StudentProfilePage() {
             </div>
 
             {/* Status Dropdown */}
-            <div className="relative w-40" data-dropdown="status">
+            <div className="relative w-52" data-dropdown="status">
               <button
                 className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
                 onClick={() => {
                   setIsStatusOpen(!isStatusOpen);
-                  setIsMajorOpen(false);
+                  setIsDepartmentOpen(false);
                   setIsClassOpen(false);
                 }}
               >
-                <span className="text-sm text-gray-900">{selectedStatus}</span>
+                <span className="text-sm text-gray-900">
+                  {STATUS_OPTIONS.find(s => s.value === selectedStatus)?.label || 'Tất cả'}
+                </span>
                 <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
               </button>
               {isStatusOpen && (
                 <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {statuses.map((status) => (
+                  {STATUS_OPTIONS.map((status) => (
                     <button
-                      key={status}
+                      key={status.value}
                       className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
                       onClick={() => {
-                        setSelectedStatus(status);
+                        setSelectedStatus(status.value);
                         setIsStatusOpen(false);
+                        setCurrentPage(1);
                       }}
                     >
-                      {status}
+                      {status.label}
                     </button>
                   ))}
                 </div>
@@ -257,59 +394,81 @@ export default function StudentProfilePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {STUDENTS.map((student, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {student.mssv}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {student.name}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {student.major}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {student.class}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {student.email}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <span className={`w-full text-center px-3 py-1 text-xs font-medium rounded-[5px] ${student.statusColor}`}>
-                            {student.status}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => router.push(`/admin/student-profile/${student.mssv}`)}
-                            className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-                            title="Xem chi tiết"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => router.push(`/admin/student-profile/${student.mssv}/edit`)}
-                            className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors cursor-pointer"
-                            title="Chỉnh sửa"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                        Đang tải dữ liệu...
                       </td>
                     </tr>
-                  ))}
+                  ) : students.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                        Không có dữ liệu
+                      </td>
+                    </tr>
+                  ) : (
+                    students.map((student) => {
+                      const statusDisplay = getStatusDisplay(student.enrollmentStatus);
+                      return (
+                        <tr
+                          key={student.studentId}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {student.studentCode}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {student.fullName}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {student.departmentName}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {student.className}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {student.email}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-center">
+                              <span className={`w-full text-center px-3 py-1 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
+                                {statusDisplay.label}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => router.push(`/admin/student-profile/${student.studentId}`)}
+                                className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                                title="Xem chi tiết"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => router.push(`/admin/student-profile/${student.studentId}/edit`)}
+                                className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors cursor-pointer"
+                                title="Chỉnh sửa"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDeletingStudentId(student.studentId);
+                                  setDeletingStudentName(student.fullName);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                                title="Xóa"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -319,29 +478,41 @@ export default function StudentProfilePage() {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Hiển thị <span className="font-medium">1-20</span> trong tổng số{' '}
-            <span className="font-medium">2,847</span> sinh viên
+            Hiển thị <span className="font-medium">{(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalCount)}</span> trong tổng số{' '}
+            <span className="font-medium">{totalCount}</span> sinh viên
           </div>
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 cursor-pointer">
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
               Trước
             </button>
-            <button className="px-3 py-1 text-sm bg-[#0053AD] text-white rounded cursor-pointer">
-              1
-            </button>
-            <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
-              2
-            </button>
-            <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
-              3
-            </button>
-            <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
-              ...
-            </button>
-            <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
-              143
-            </button>
-            <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
+            {getPageNumbers().map((page, index) => 
+              typeof page === 'number' ? (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 text-sm rounded cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-[#0053AD] text-white'
+                      : 'border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ) : (
+                <span key={index} className="px-3 py-1 text-sm text-gray-400">
+                  {page}
+                </span>
+              )
+            )}
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
               Sau
             </button>
           </div>
@@ -349,9 +520,46 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Modals */}
-      <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
-      <ImportExcelModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
-      <ExportStudentModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
+      <AddStudentModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onSuccess={fetchStudents}
+      />
+      <ImportExcelModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
+        onSuccess={fetchStudents}
+      />
+      <ExportStudentModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)}
+        filters={{
+          searchKeyword: searchKeyword || undefined,
+          departmentId: selectedDepartmentId || undefined,
+          facultyId: departments.find(d => d.departmentId === selectedDepartmentId)?.facultyId || undefined,
+          enrollmentStatus: selectedStatus || undefined,
+        }}
+      />
+
+      <ConfirmDeleteStudentModal
+        isOpen={isDeleteModalOpen}
+        studentName={deletingStudentName}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeletingStudentId(null);
+          setDeletingStudentName(undefined);
+        }}
+        onConfirm={async () => {
+          if (!deletingStudentId) return;
+          const res = await studentsApi.deleteStudent(deletingStudentId);
+          if (res.success) {
+            toast.success('Xoá sinh viên thành công');
+            await fetchStudents();
+          } else {
+            toast.error(res.message || 'Xoá sinh viên thất bại');
+          }
+        }}
+      />
     </div>
   );
 }

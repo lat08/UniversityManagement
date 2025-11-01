@@ -1,36 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { MapPin, Mail, Phone, Calendar, User, School, Edit } from 'lucide-react';
 import Image from 'next/image';
+import { studentsApi } from '../lib/api/studentsApi';
+import { StudentDetail, getStatusDisplay } from '../lib/types/types';
 
 export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string;
   const [activeTab, setActiveTab] = useState('basic');
+  const [studentData, setStudentData] = useState<StudentDetail | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const studentData = {
-    name: 'Nguyễn Văn A',
-    studentId: 'B1012302812',
-    email: 'nguyenvana@siu.edu.vn',
-    phone: '0909xxxxxx',
-    dob: '15/09/2005',
-    address: 'TP. Hồ Chí Minh',
-    major: 'Khoa học máy tính',
-    specialization: 'Kỹ thuật phần mềm',
-    course: 'Khóa 16 (2023 - 2024)',
-    class: '23DKM',
-    gpa: '3.45',
-    credits: '85',
-    scholarship: '60%',
-    debt: '0đ',
-    gender: 'Nam',
-    idNumber: '001203012345',
-    ethnicity: 'Kinh',
-    permanentAddress: '123 Nguyễn Văn Linh, Quận 7',
+  useEffect(() => {
+    fetchStudentDetail();
+  }, [studentId]);
+
+  const fetchStudentDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await studentsApi.getStudentById(studentId);
+      if (response.success) {
+        setStudentData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching student detail:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const tabs = [
@@ -47,6 +47,53 @@ export default function StudentDetailPage() {
     router.push('/admin/student-profile');
   };
 
+  // Format date from YYYY-MM-DD to DD/MM/YYYY
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Format gender
+  const formatGender = (gender: string) => {
+    const genderMap: Record<string, string> = {
+      male: 'Nam',
+      female: 'Nữ',
+      other: 'Khác',
+    };
+    return genderMap[gender] || gender;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!studentData) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Không tìm thấy thông tin sinh viên</div>
+          <button
+            onClick={handleBack}
+            className="mt-4 px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+          >
+            Quay lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const statusDisplay = getStatusDisplay(studentData.enrollmentStatus);
+
   return (
     <div className="min-h-screen p-6">
       {/* Header */}
@@ -62,16 +109,20 @@ export default function StudentDetailPage() {
             {/* Avatar */}
             <div className="flex-shrink-0">
               <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/login-character.png"
-                  alt="Student Avatar"
-                  width={128}
-                  height={128}
-                  className="w-full h-full object-cover"
-                />
+                {studentData.profilePicture ? (
+                  <Image
+                    src={studentData.profilePicture}
+                    alt="Student Avatar"
+                    width={128}
+                    height={128}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-16 h-16 text-gray-400" />
+                )}
               </div>
-              <button className="mt-3 w-32 text-xs text-white bg-[#0053AD] px-3 py-1.5 rounded-md hover:bg-[#003d82] cursor-pointer transition-colors">
-                Đang học
+              <button className={`mt-3 w-32 text-xs text-white px-3 py-1.5 rounded-md cursor-pointer transition-colors ${statusDisplay.color === 'bg-green-100 text-green-700' ? 'bg-[#0053AD] hover:bg-[#003d82]' : 'bg-gray-500 hover:bg-gray-600'}`}>
+                {statusDisplay.label}
               </button>
             </div>
 
@@ -79,8 +130,8 @@ export default function StudentDetailPage() {
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#D32F2F] mb-2">{studentData.name}</h2>
-                  <p className="text-sm text-gray-600 mb-1">Mã số sinh viên: {studentData.studentId}</p>
+                  <h2 className="text-2xl font-bold text-[#D32F2F] mb-2">{studentData.fullName}</h2>
+                  <p className="text-sm text-gray-600 mb-1">Mã số sinh viên: {studentData.studentCode}</p>
                 </div>
                 <button
                   onClick={handleEdit}
@@ -103,28 +154,28 @@ export default function StudentDetailPage() {
                   <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Số điện thoại</p>
-                    <p className="text-sm text-gray-900">{studentData.phone}</p>
+                    <p className="text-sm text-gray-900">{studentData.phoneNumber}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Ngày sinh</p>
-                    <p className="text-sm text-gray-900">{studentData.dob}</p>
+                    <p className="text-sm text-gray-900">{formatDate(studentData.dateOfBirth)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <School className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Ngành học</p>
-                    <p className="text-sm text-gray-900">{studentData.major}</p>
+                    <p className="text-xs text-gray-500">Chuyên ngành</p>
+                    <p className="text-sm text-gray-900">{studentData.majorName}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <School className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Khóa</p>
-                    <p className="text-sm text-gray-900">{studentData.course}</p>
+                    <p className="text-sm text-gray-900">{studentData.academicYear}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -149,7 +200,7 @@ export default function StudentDetailPage() {
             </svg>
           </div>
           <p className="text-sm text-gray-600 mb-2">GPA</p>
-          <p className="text-4xl font-bold text-gray-900 mb-1">{studentData.gpa}</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">-</p>
           <p className="text-xs text-gray-500">/4.0</p>
         </div>
 
@@ -160,7 +211,7 @@ export default function StudentDetailPage() {
             </svg>
           </div>
           <p className="text-sm text-gray-600 mb-2">Tín chỉ tích lũy</p>
-          <p className="text-4xl font-bold text-gray-900 mb-1">{studentData.credits}</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">-</p>
           <p className="text-xs text-gray-500">/120</p>
         </div>
 
@@ -171,7 +222,7 @@ export default function StudentDetailPage() {
             </svg>
           </div>
           <p className="text-sm text-gray-600 mb-2">Công nợ</p>
-          <p className="text-4xl font-bold text-gray-900 mb-1">{studentData.debt}</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">-</p>
           <p className="text-xs text-gray-500">Đã thanh toán đầy đủ</p>
         </div>
       </div>
@@ -231,23 +282,19 @@ export default function StudentDetailPage() {
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-500">Họ và tên</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.name}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.fullName}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Ngày sinh</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.dob}</p>
+                      <p className="text-sm text-gray-900 font-medium">{formatDate(studentData.dateOfBirth)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Giới tính</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.gender}</p>
+                      <p className="text-sm text-gray-900 font-medium">{formatGender(studentData.gender)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">CCCD</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.idNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Dân tộc</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.ethnicity}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.citizenId}</p>
                     </div>
                   </div>
                 </div>
@@ -262,11 +309,11 @@ export default function StudentDetailPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Số điện thoại</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.phone}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.phoneNumber}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Địa chỉ</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.permanentAddress}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.address}</p>
                     </div>
                   </div>
                 </div>
@@ -277,19 +324,23 @@ export default function StudentDetailPage() {
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-500">Ngành học</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.major}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.facultyName}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Chuyên ngành</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.specialization}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.majorName}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Khóa</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.course}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.academicYear}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Lớp</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.class}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.className}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Hệ đào tạo</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.educationLevel}</p>
                     </div>
                   </div>
                 </div>
@@ -337,80 +388,9 @@ export default function StudentDetailPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">CS201</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Hệ điều hành</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">4</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">9.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">8.8</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">3.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">B</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">Đạt</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button className="p-1 text-gray-600 hover:text-blue-600 cursor-pointer">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">CS202</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Dữ liệu lớn</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">3</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">6.5</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">8.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">3.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">B</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">Đạt</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button className="p-1 text-gray-600 hover:text-blue-600 cursor-pointer">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">CS203</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Cấu trúc dữ liệu</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">3</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">7.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">6.7</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">4.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">A</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">Đạt</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button className="p-1 text-gray-600 hover:text-blue-600 cursor-pointer">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">CS204</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Giải tích</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">2</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">1.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">3.6</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">0.0</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">F</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-red-700 bg-red-50 rounded-md">Không đạt</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button className="p-1 text-gray-600 hover:text-blue-600 cursor-pointer">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        </button>
+                    <tr>
+                      <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                        Chức năng đang được phát triển
                       </td>
                     </tr>
                   </tbody>
@@ -470,31 +450,9 @@ export default function StudentDetailPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">15/01/2025</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Toán rời rạc</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">1.700.000 đ</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Chuyển khoản</td>
-                      <td className="px-6 py-4">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">Đã thanh toán</span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">10/09/2024</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Xác xuất thống kê</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">1.700.000 đ</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Chuyển khoản</td>
-                      <td className="px-6 py-4">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">Đã thanh toán</span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-900">15/02/2024</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Mạng máy tính</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">1.700.000 đ</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">Tiền mặt</td>
-                      <td className="px-6 py-4">
-                        <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-md">Đã thanh toán</span>
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                        Chức năng đang được phát triển
                       </td>
                     </tr>
                   </tbody>
@@ -524,4 +482,3 @@ export default function StudentDetailPage() {
     </div>
   );
 }
-

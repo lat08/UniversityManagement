@@ -1,67 +1,46 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import { X, ChevronDown } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { studentsApi } from '../lib/api/studentsApi';
+import { ExportStudentsParams } from '../lib/types/types';
 
 interface ExportStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  filters?: ExportStudentsParams;
 }
 
-export default function ExportStudentModal({ isOpen, onClose }: ExportStudentModalProps) {
-  const [exportOptions, setExportOptions] = useState({
-    allStudents: false,
-    activeStudents: false,
-    byMajor: false,
-  });
-  const [fileFormat, setFileFormat] = useState('Excel (.xlsx)');
-  const [isFormatOpen, setIsFormatOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const dropdownPositionRef = useRef<{ top: number; left: number; width: number } | null>(null);
+export default function ExportStudentModal({ isOpen, onClose, filters }: ExportStudentModalProps) {
+  const [isExporting, setIsExporting] = useState(false);
 
-  // Calculate dropdown position
-  useEffect(() => {
-    if (isFormatOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      dropdownPositionRef.current = {
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
-      };
-    }
-  }, [isFormatOpen]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsFormatOpen(false);
-      }
-    };
-
-    if (isFormatOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isFormatOpen]);
-
-  const fileFormats = ['Excel (.xlsx)', 'CSV (.csv)', 'PDF (.pdf)'];
-
-  const handleExport = (e: React.FormEvent) => {
+  const handleExport = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle export
-    console.log('Export options:', exportOptions, 'Format:', fileFormat);
-    onClose();
+    
+    setIsExporting(true);
+    try {
+      // Call API using studentsApi
+      const blob = await studentsApi.exportStudents(filters || {});
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `students_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Xuất file thành công');
+      onClose();
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Xuất file thất bại');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -93,57 +72,16 @@ export default function ExportStudentModal({ isOpen, onClose }: ExportStudentMod
 
         {/* Form */}
         <form onSubmit={handleExport} className="p-6 flex-1 overflow-y-auto">
-          {/* Export Options */}
+          {/* Export Info */}
           <div className="mb-6">
             <label className="block text-base font-medium text-gray-900 mb-4">
-              Chọn dữ liệu cần xuất
+              Thông tin xuất
             </label>
-            <div className="space-y-3">
-              {/* Tất cả sinh viên */}
-              <label className="flex items-center cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={exportOptions.allStudents}
-                  onChange={(e) =>
-                    setExportOptions({ ...exportOptions, allStudents: e.target.checked })
-                  }
-                  className="w-5 h-5 border-2 border-gray-300 rounded cursor-pointer checked:bg-[#0053AD] checked:border-[#0053AD] focus:ring-2 focus:ring-[#0053AD] focus:ring-offset-2"
-                />
-                <span className="ml-3 text-base text-gray-900 group-hover:text-gray-700">
-                  Tất cả sinh viên
-                </span>
-              </label>
-
-              {/* Chỉ sinh viên đang học */}
-              <label className="flex items-center cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={exportOptions.activeStudents}
-                  onChange={(e) =>
-                    setExportOptions({ ...exportOptions, activeStudents: e.target.checked })
-                  }
-                  className="w-5 h-5 border-2 border-gray-300 rounded cursor-pointer checked:bg-[#0053AD] checked:border-[#0053AD] focus:ring-2 focus:ring-[#0053AD] focus:ring-offset-2"
-                />
-                <span className="ml-3 text-base text-gray-900 group-hover:text-gray-700">
-                  Chỉ sinh viên đang học
-                </span>
-              </label>
-
-              {/* Theo ngành học */}
-              <label className="flex items-center cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={exportOptions.byMajor}
-                  onChange={(e) =>
-                    setExportOptions({ ...exportOptions, byMajor: e.target.checked })
-                  }
-                  className="w-5 h-5 border-2 border-gray-300 rounded cursor-pointer checked:bg-[#0053AD] checked:border-[#0053AD] focus:ring-2 focus:ring-[#0053AD] focus:ring-offset-2"
-                />
-                <span className="ml-3 text-base text-gray-900 group-hover:text-gray-700">
-                  Theo ngành học
-                </span>
-              </label>
-            </div>
+            <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
+              <li>Sẽ xuất tất cả sinh viên theo bộ lọc hiện tại</li>
+              <li>Bao gồm tất cả thông tin chi tiết của sinh viên</li>
+              <li>File sẽ được tải xuống ngay sau khi xác nhận</li>
+            </ul>
           </div>
 
           {/* File Format */}
@@ -153,13 +91,12 @@ export default function ExportStudentModal({ isOpen, onClose }: ExportStudentMod
             </label>
             <div className="relative">
               <button
-                ref={buttonRef}
                 type="button"
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                onClick={() => setIsFormatOpen(!isFormatOpen)}
+                disabled
+                className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg cursor-not-allowed text-left"
               >
-                <span className="text-base text-gray-900">{fileFormat}</span>
-                <ChevronDown className="w-5 h-5 text-gray-700" />
+                <span className="text-base text-gray-900">Excel (.xlsx)</span>
+                <ChevronDown className="w-5 h-5 text-gray-400" />
               </button>
             </div>
           </div>
@@ -169,49 +106,21 @@ export default function ExportStudentModal({ isOpen, onClose }: ExportStudentMod
             <button
               type="button"
               onClick={onClose}
-              className="px-8 py-3 text-base text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              disabled={isExporting}
+              className="px-8 py-3 text-base text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-8 py-3 text-base text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+              disabled={isExporting}
+              className="px-8 py-3 text-base text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Xuất file
+              {isExporting ? 'Đang xuất...' : 'Xuất file'}
             </button>
           </div>
         </form>
       </div>
-      {/* Dropdown Portal */}
-      {isFormatOpen &&
-        dropdownPositionRef.current &&
-        typeof window !== 'undefined' &&
-        createPortal(
-          <div
-            ref={dropdownRef}
-            className="fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-lg"
-            style={{
-              top: `${dropdownPositionRef.current.top}px`,
-              left: `${dropdownPositionRef.current.left}px`,
-              width: `${dropdownPositionRef.current.width}px`,
-            }}
-          >
-            {fileFormats.map((format) => (
-              <button
-                key={format}
-                type="button"
-                className="w-full text-left px-4 py-3 text-base text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                onClick={() => {
-                  setFileFormat(format);
-                  setIsFormatOpen(false);
-                }}
-              >
-                {format}
-              </button>
-            ))}
-          </div>,
-          document.body
-        )}
     </div>
   );
 }

@@ -1,33 +1,73 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronDown, Calendar, Upload } from 'lucide-react';
+import { ChevronDown, Calendar, User, Edit2 } from 'lucide-react';
 import Image from 'next/image';
+import { studentsApi } from '../../lib/api/studentsApi';
+import { StudentDetail, Faculty, Department, ClassItem, ENROLLMENT_STATUS_OPTIONS, UpdateStudentPayload } from '../../lib/types/types';
+import { toast } from 'react-hot-toast';
 
 export default function EditStudentPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Mock data - sẽ fetch từ API sau
+  const [studentData, setStudentData] = useState<StudentDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'Hạ Vũ',
-    dob: '21/11/1990',
-    idNumber: '272916222',
-    gender: 'Nữ',
-    ethnicity: 'Kinh',
-    religion: 'Tôn giáo (nếu có)',
+    fullName: '',
+    dateOfBirth: '',
+    citizenId: '',
+    gender: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    classId: '',
+    enrollmentStatus: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const [isGenderOpen, setIsGenderOpen] = useState(false);
-  const [isEthnicityOpen, setIsEthnicityOpen] = useState(false);
-  const [isReligionOpen, setIsReligionOpen] = useState(false);
+  const [isEnrollmentStatusOpen, setIsEnrollmentStatusOpen] = useState(false);
+  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
+  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
+  const [isClassOpen, setIsClassOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const [facultySearch, setFacultySearch] = useState('');
+  const [departmentSearch, setDepartmentSearch] = useState('');
+  const [classSearch, setClassSearch] = useState('');
 
-  const genders = ['Nam', 'Nữ', 'Khác'];
-  const ethnicities = ['Kinh', 'Tày', 'Thái', 'Mường', 'Khmer', 'Hoa', 'Nùng', 'Hmông'];
-  const religions = ['Không', 'Phật giáo', 'Công giáo', 'Tin lành', 'Hồi giáo', 'Cao đài', 'Hòa Hảo'];
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [selectedFacultyId, setSelectedFacultyId] = useState<string>('');
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
+  const [profilePicturePreview, setProfilePicturePreview] = useState<string | null>(null);
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
+
+  const genders = [
+    { value: 'male', label: 'Nam' },
+    { value: 'female', label: 'Nữ' },
+    { value: 'other', label: 'Khác' },
+  ];
+
+  const filteredFaculties = faculties.filter(f => 
+    f.facultyName.toLowerCase().includes(facultySearch.toLowerCase())
+  );
+  
+  const filteredDepartments = departments.filter(d => {
+    const matchesSearch = d.departmentName.toLowerCase().includes(departmentSearch.toLowerCase());
+    const matchesFaculty = !selectedFacultyId || d.facultyId === selectedFacultyId;
+    return matchesSearch && matchesFaculty;
+  });
+  
+  const filteredClasses = classes.filter(c => 
+    c.className.toLowerCase().includes(classSearch.toLowerCase())
+  );
 
   const tabs = [
     { id: 'basic', label: 'Thông tin cơ bản' },
@@ -36,15 +76,280 @@ export default function EditStudentPage() {
     { id: 'account', label: 'Tài khoản' },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const initializeData = async () => {
+      await Promise.all([
+        fetchFaculties(),
+        fetchDepartments()
+      ]);
+      await fetchStudentDetail();
+    };
+    initializeData();
+  }, [studentId]);
+
+  useEffect(() => {
+    if (selectedFacultyId) {
+      fetchClasses(selectedFacultyId, selectedDepartmentId || undefined);
+    }
+  }, [selectedFacultyId, selectedDepartmentId]);
+
+  const fetchFaculties = async () => {
+    try {
+      const response = await studentsApi.getCommonFaculties();
+      if (response.success) {
+        setFaculties(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching faculties:', error);
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await studentsApi.getDepartments({
+        pageNumber: 1,
+        pageSize: 100,
+      });
+      if (response.success) {
+        setDepartments(response.data.items);
+      }
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+    }
+  };
+
+  const fetchClasses = async (facultyId: string, departmentId?: string) => {
+    try {
+      const response = await studentsApi.getCommonClasses({ 
+        facultyId,
+        departmentId: departmentId || undefined 
+      });
+      if (response.success) {
+        setClasses(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
+
+  const fetchStudentDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await studentsApi.getStudentById(studentId);
+      if (response.success) {
+        const student = response.data;
+        setStudentData(student);
+        setProfilePicturePreview(student.profilePicture);
+        
+        // Match faculty by name
+        const matchedFaculty = faculties.find(f => f.facultyName === student.facultyName);
+        // Match department by name
+        const matchedDepartment = departments.find(d => d.departmentName === student.majorName);
+        
+        const finalFacultyId = matchedFaculty?.facultyId || '';
+        const finalDepartmentId = matchedDepartment?.departmentId || '';
+        let finalClassId = student.classId || '';
+        
+        // Set faculty and department IDs
+        if (finalFacultyId) {
+          setSelectedFacultyId(finalFacultyId);
+        }
+
+        if (finalDepartmentId) {
+          setSelectedDepartmentId(finalDepartmentId);
+        }
+
+        // Fetch classes based on matched faculty/department
+        if (finalFacultyId) {
+          const classResponse = await studentsApi.getCommonClasses({ 
+            facultyId: finalFacultyId,
+            departmentId: finalDepartmentId || undefined 
+          });
+          if (classResponse.success) {
+            setClasses(classResponse.data);
+            
+            // If classId is not provided, try to match by className
+            if (!finalClassId && student.className) {
+              const matchedClass = classResponse.data.find(c => c.className === student.className);
+              if (matchedClass) {
+                finalClassId = matchedClass.classId;
+              }
+            }
+          }
+        }
+
+        // Set form data with all matched IDs
+        setFormData({
+          fullName: student.fullName,
+          dateOfBirth: student.dateOfBirth.split('T')[0],
+          citizenId: student.citizenId,
+          gender: student.gender,
+          email: student.email,
+          phoneNumber: student.phoneNumber,
+          address: student.address,
+          classId: finalClassId,
+          enrollmentStatus: student.enrollmentStatus,
+          password: '',
+          confirmPassword: '',
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching student detail:', error);
+      toast.error('Không thể tải thông tin sinh viên');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Chỉ chấp nhận file ảnh có định dạng: .jpg, .jpeg, .png');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Kích thước ảnh không được vượt quá 5MB');
+        return;
+      }
+
+      // Lưu File object để gửi lên backend
+      setProfilePictureFile(file);
+      
+      // Tạo preview URL để hiển thị
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicturePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      toast.success('Ảnh đã được chọn');
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle save logic
-    console.log('Save student data:', formData);
+
+    if (!formData.fullName || !formData.fullName.trim()) {
+      toast.error('Vui lòng nhập họ và tên');
+      return;
+    }
+
+    if (!formData.dateOfBirth) {
+      toast.error('Vui lòng chọn ngày sinh');
+      return;
+    }
+
+    if (!formData.gender) {
+      toast.error('Vui lòng chọn giới tính');
+      return;
+    }
+
+    if (!formData.classId || formData.classId.trim() === '') {
+      toast.error('Vui lòng chọn lớp');
+      return;
+    }
+
+    if (!formData.enrollmentStatus) {
+      toast.error('Vui lòng chọn trạng thái');
+      return;
+    }
+
+    if (formData.password || formData.confirmPassword) {
+      if (formData.password !== formData.confirmPassword) {
+        toast.error('Mật khẩu xác nhận không khớp');
+        return;
+      }
+      if (formData.password.length < 6) {
+        toast.error('Mật khẩu phải có ít nhất 6 ký tự');
+        return;
+      }
+    }
+
+    try {
+      setSaving(true);
+      
+      const payload: UpdateStudentPayload = {
+        fullName: formData.fullName.trim(),
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        phoneNumber: formData.phoneNumber || '',
+        citizenId: formData.citizenId || '',
+        address: formData.address || '',
+        classId: formData.classId,
+        enrollmentStatus: formData.enrollmentStatus,
+      };
+
+      if (profilePictureFile) {
+        payload.profilePicture = profilePictureFile;
+      }
+
+      if (formData.password && formData.password.trim()) {
+        payload.password = formData.password;
+        payload.confirmPassword = formData.confirmPassword;
+      }
+
+      const response = await studentsApi.updateStudent(studentId, payload);
+
+      if (response.success) {
+        toast.success('Cập nhật thông tin sinh viên thành công');
+        router.push(`/admin/student-profile/${studentId}`);
+      } else {
+        toast.error(response.message || 'Cập nhật thông tin thất bại');
+      }
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
+                           (error as { message?: string })?.message || 
+                           'Có lỗi xảy ra khi cập nhật thông tin';
+      toast.error(errorMessage);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
     router.push('/admin/student-profile');
   };
+
+  const getGenderLabel = (genderValue: string) => {
+    return genders.find(g => g.value === genderValue)?.label || genderValue;
+  };
+
+  const getEnrollmentStatusLabel = (statusValue: string) => {
+    return ENROLLMENT_STATUS_OPTIONS.find(s => s.value === statusValue)?.label || statusValue;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!studentData) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Không tìm thấy thông tin sinh viên</div>
+          <button
+            onClick={handleCancel}
+            className="mt-4 px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+          >
+            Quay lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6">
@@ -113,22 +418,39 @@ export default function EditStudentPage() {
                 <div className="flex gap-8">
                   {/* Avatar Section */}
                   <div className="flex-shrink-0">
-                    <div className="w-40 h-40 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
-                      <Image
-                        src="/login-character.png"
-                        alt="Avatar"
-                        width={160}
-                        height={160}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="relative group">
+                      <div 
+                        className="w-40 h-40 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-200 cursor-pointer"
+                        onClick={handleAvatarClick}
+                      >
+                        {profilePicturePreview ? (
+                          <Image
+                            src={profilePicturePreview}
+                            alt="Avatar"
+                            width={160}
+                            height={160}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-20 h-20 text-gray-400" />
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAvatarClick}
+                        className="absolute bottom-0 right-0 w-10 h-10 bg-[#0053AD] rounded-full flex items-center justify-center text-white hover:bg-[#003d82] transition-colors shadow-lg cursor-pointer"
+                        title="Tải ảnh lên"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="mt-4 w-40 px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Tải ảnh lên
-                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
                   </div>
 
                   {/* Form Fields */}
@@ -136,12 +458,12 @@ export default function EditStudentPage() {
                     {/* Họ và tên */}
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Họ và tên
+                        Họ và tên <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                       />
                     </div>
@@ -149,14 +471,13 @@ export default function EditStudentPage() {
                     {/* Ngày sinh */}
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Ngày sinh
+                        Ngày sinh <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <input
-                          type="text"
-                          value={formData.dob}
-                          onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                          placeholder="DD/MM/YYYY"
+                          type="date"
+                          value={formData.dateOfBirth}
+                          onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                           className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                         />
                         <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -173,26 +494,24 @@ export default function EditStudentPage() {
                         className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
                         onClick={() => {
                           setIsGenderOpen(!isGenderOpen);
-                          setIsEthnicityOpen(false);
-                          setIsReligionOpen(false);
                         }}
                       >
-                        <span className="text-sm text-gray-900">{formData.gender}</span>
+                        <span className="text-sm text-gray-900">{getGenderLabel(formData.gender)}</span>
                         <ChevronDown className="w-4 h-4 text-gray-700" />
                       </button>
                       {isGenderOpen && (
                         <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
                           {genders.map((gender) => (
                             <button
-                              key={gender}
+                              key={gender.value}
                               type="button"
                               className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
                               onClick={() => {
-                                setFormData({ ...formData, gender });
+                                setFormData({ ...formData, gender: gender.value });
                                 setIsGenderOpen(false);
                               }}
                             >
-                              {gender}
+                              {gender.label}
                             </button>
                           ))}
                         </div>
@@ -206,82 +525,10 @@ export default function EditStudentPage() {
                       </label>
                       <input
                         type="text"
-                        value={formData.idNumber}
-                        onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
+                        value={formData.citizenId}
+                        onChange={(e) => setFormData({ ...formData, citizenId: e.target.value })}
                         className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                       />
-                    </div>
-
-                    {/* Dân tộc */}
-                    <div className="relative">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Dân tộc
-                      </label>
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                        onClick={() => {
-                          setIsEthnicityOpen(!isEthnicityOpen);
-                          setIsGenderOpen(false);
-                          setIsReligionOpen(false);
-                        }}
-                      >
-                        <span className="text-sm text-gray-900">{formData.ethnicity}</span>
-                        <ChevronDown className="w-4 h-4 text-gray-700" />
-                      </button>
-                      {isEthnicityOpen && (
-                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {ethnicities.map((ethnicity) => (
-                            <button
-                              key={ethnicity}
-                              type="button"
-                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                              onClick={() => {
-                                setFormData({ ...formData, ethnicity });
-                                setIsEthnicityOpen(false);
-                              }}
-                            >
-                              {ethnicity}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Tôn giáo */}
-                    <div className="relative">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Tôn giáo
-                      </label>
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                        onClick={() => {
-                          setIsReligionOpen(!isReligionOpen);
-                          setIsGenderOpen(false);
-                          setIsEthnicityOpen(false);
-                        }}
-                      >
-                        <span className="text-sm text-gray-400">{formData.religion}</span>
-                        <ChevronDown className="w-4 h-4 text-gray-700" />
-                      </button>
-                      {isReligionOpen && (
-                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                          {religions.map((religion) => (
-                            <button
-                              key={religion}
-                              type="button"
-                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                              onClick={() => {
-                                setFormData({ ...formData, religion });
-                                setIsReligionOpen(false);
-                              }}
-                            >
-                              {religion}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -304,8 +551,10 @@ export default function EditStudentPage() {
                     </label>
                     <input
                       type="email"
-                      placeholder="legiakiet@siu.edu.vn"
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                      value={formData.email}
+                      disabled
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                      title="Email không thể chỉnh sửa"
                     />
                   </div>
 
@@ -316,19 +565,22 @@ export default function EditStudentPage() {
                     </label>
                     <input
                       type="tel"
-                      placeholder="0901234567"
+                      value={formData.phoneNumber}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                     />
                   </div>
 
-                  {/* Hộ khẩu - Full width */}
+                  {/* Địa chỉ - Full width */}
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Hộ khẩu
+                      Địa chỉ
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="03 Sông Thao, Phường 2, Quận Tân Bình, Tp.HCM 03 Sông Thao Str, Ward 2, Tan Binh Dist, HCM City, 03 Sông Thao, Phường 2, Tân Bình, Thành phố Hồ Chí Minh 700000, Việt Nam"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Nhập địa chỉ đầy đủ"
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent resize-none"
                     />
                   </div>
@@ -345,6 +597,53 @@ export default function EditStudentPage() {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6">
+                  {/* Hệ đào tạo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Hệ đào tạo
+                    </label>
+                    <input
+                      type="text"
+                      value="Đại học chính quy"
+                      disabled
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Trạng thái */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Trạng thái <span className="text-red-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
+                      onClick={() => {
+                        setIsEnrollmentStatusOpen(!isEnrollmentStatusOpen);
+                      }}
+                    >
+                      <span className="text-sm text-gray-900">{getEnrollmentStatusLabel(formData.enrollmentStatus)}</span>
+                      <ChevronDown className="w-4 h-4 text-gray-700" />
+                    </button>
+                    {isEnrollmentStatusOpen && (
+                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {ENROLLMENT_STATUS_OPTIONS.map((status) => (
+                          <button
+                            key={status.value}
+                            type="button"
+                            className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                            onClick={() => {
+                              setFormData({ ...formData, enrollmentStatus: status.value });
+                              setIsEnrollmentStatusOpen(false);
+                            }}
+                          >
+                            {status.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Ngành học */}
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -353,10 +652,67 @@ export default function EditStudentPage() {
                     <button
                       type="button"
                       className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
+                      onClick={() => {
+                        setIsFacultyOpen(!isFacultyOpen);
+                        setIsDepartmentOpen(false);
+                        setIsClassOpen(false);
+                        setFacultySearch('');
+                      }}
                     >
-                      <span className="text-sm text-gray-900">Khoa học máy tính</span>
+                      <span className="text-sm text-gray-900">
+                        {selectedFacultyId 
+                          ? faculties.find(f => f.facultyId === selectedFacultyId)?.facultyName || 'Chọn ngành học'
+                          : 'Chọn ngành học'
+                        }
+                      </span>
                       <ChevronDown className="w-4 h-4 text-gray-700" />
                     </button>
+                    {isFacultyOpen && (
+                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
+                        {/* Search input */}
+                        <div className="p-2 border-b border-gray-200">
+                          <input
+                            type="text"
+                            placeholder="Tìm kiếm ngành học..."
+                            value={facultySearch}
+                            onChange={(e) => setFacultySearch(e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {filteredFaculties.length === 0 ? (
+                            <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
+                              Không tìm thấy ngành học
+                            </div>
+                          ) : (
+                            filteredFaculties.map((faculty) => {
+                              const isSelected = faculty.facultyId === selectedFacultyId;
+                              return (
+                                <button
+                                  key={faculty.facultyId}
+                                  type="button"
+                                  className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                                    isSelected 
+                                      ? 'bg-[#0053AD] text-white hover:bg-[#003d82]' 
+                                      : 'text-gray-900 hover:bg-gray-100'
+                                  }`}
+                                  onClick={() => {
+                                    setSelectedFacultyId(faculty.facultyId);
+                                    setSelectedDepartmentId('');
+                                    setFormData({ ...formData, classId: '' });
+                                    setIsFacultyOpen(false);
+                                    setFacultySearch('');
+                                  }}
+                                >
+                                  {faculty.facultyName}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Chuyên ngành */}
@@ -367,50 +723,149 @@ export default function EditStudentPage() {
                     <button
                       type="button"
                       className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
+                      onClick={() => {
+                        setIsDepartmentOpen(!isDepartmentOpen);
+                        setIsFacultyOpen(false);
+                        setIsClassOpen(false);
+                        setDepartmentSearch('');
+                      }}
                     >
-                      <span className="text-sm text-gray-900">Kỹ thuật phần mềm</span>
+                      <span className="text-sm text-gray-900">
+                        {selectedDepartmentId 
+                          ? departments.find(d => d.departmentId === selectedDepartmentId)?.departmentName || 'Chọn chuyên ngành'
+                          : 'Chọn chuyên ngành'
+                        }
+                      </span>
                       <ChevronDown className="w-4 h-4 text-gray-700" />
                     </button>
+                    {isDepartmentOpen && (
+                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
+                        {/* Search input */}
+                        <div className="p-2 border-b border-gray-200">
+                          <input
+                            type="text"
+                            placeholder="Tìm kiếm chuyên ngành..."
+                            value={departmentSearch}
+                            onChange={(e) => setDepartmentSearch(e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {filteredDepartments.length === 0 ? (
+                            <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
+                              Không tìm thấy chuyên ngành
+                            </div>
+                          ) : (
+                            filteredDepartments.map((department) => {
+                              const isSelected = department.departmentId === selectedDepartmentId;
+                              return (
+                                <button
+                                  key={department.departmentId}
+                                  type="button"
+                                  className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                                    isSelected 
+                                      ? 'bg-[#0053AD] text-white hover:bg-[#003d82]' 
+                                      : 'text-gray-900 hover:bg-gray-100'
+                                  }`}
+                                  onClick={() => {
+                                    setSelectedDepartmentId(department.departmentId);
+                                    setFormData({ ...formData, classId: '' });
+                                    setIsDepartmentOpen(false);
+                                    setDepartmentSearch('');
+                                  }}
+                                >
+                                  {department.departmentName}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Khóa */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Khóa
-                    </label>
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                    >
-                      <span className="text-sm text-gray-900">K21 (2021-2025)</span>
-                      <ChevronDown className="w-4 h-4 text-gray-700" />
-                    </button>
-                  </div>
-
-                  {/* Lớp */}
+                  {/* Mã sinh viên */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Lớp
+                      Mã sinh viên
                     </label>
                     <input
                       type="text"
-                      placeholder="CNTT21A"
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                      value={studentData.studentCode}
+                      disabled
+                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                      title="Mã sinh viên không thể chỉnh sửa"
                     />
                   </div>
 
-                  {/* Trạng thái */}
+                  {/* Lớp */}
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Trạng thái
+                      Lớp <span className="text-red-500">*</span>
                     </label>
                     <button
                       type="button"
                       className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
+                      onClick={() => {
+                        setIsClassOpen(!isClassOpen);
+                        setIsFacultyOpen(false);
+                        setIsDepartmentOpen(false);
+                        setClassSearch('');
+                      }}
                     >
-                      <span className="text-sm text-gray-900">Đang học</span>
+                      <span className="text-sm text-gray-900">
+                        {formData.classId 
+                          ? classes.find(c => c.classId === formData.classId)?.className || 'Chọn lớp'
+                          : 'Chọn lớp'
+                        }
+                      </span>
                       <ChevronDown className="w-4 h-4 text-gray-700" />
                     </button>
+                    {isClassOpen && (
+                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
+                        {/* Search input */}
+                        <div className="p-2 border-b border-gray-200">
+                          <input
+                            type="text"
+                            placeholder="Tìm kiếm lớp..."
+                            value={classSearch}
+                            onChange={(e) => setClassSearch(e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {filteredClasses.length === 0 ? (
+                            <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
+                              Không tìm thấy lớp
+                            </div>
+                          ) : (
+                            filteredClasses.map((classItem) => {
+                              const isSelected = classItem.classId === formData.classId;
+                              return (
+                                <button
+                                  key={classItem.classId}
+                                  type="button"
+                                  className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                                    isSelected 
+                                      ? 'bg-[#0053AD] text-white hover:bg-[#003d82]' 
+                                      : 'text-gray-900 hover:bg-gray-100'
+                                  }`}
+                                  onClick={() => {
+                                    setFormData({ ...formData, classId: classItem.classId });
+                                    setIsClassOpen(false);
+                                    setClassSearch('');
+                                  }}
+                                >
+                                  {classItem.className}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -432,9 +887,12 @@ export default function EditStudentPage() {
                     </label>
                     <input
                       type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="Để trống nếu không đổi"
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                     />
+                    <p className="mt-1 text-xs text-gray-500">Mật khẩu phải có ít nhất 6 ký tự</p>
                   </div>
 
                   {/* Xác nhận mật khẩu mới */}
@@ -444,9 +902,12 @@ export default function EditStudentPage() {
                     </label>
                     <input
                       type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       placeholder="Để trống nếu không đổi"
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                     />
+                    <p className="mt-1 text-xs text-gray-500">Nhập lại mật khẩu để xác nhận</p>
                   </div>
                 </div>
               </div>
@@ -454,19 +915,21 @@ export default function EditStudentPage() {
           </div>
 
           {/* Footer Buttons */}
-          <div className="px-6 py-4 flex justify-end gap-3">
+          <div className="px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
+              disabled={saving}
+              className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Quay lại
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+              disabled={saving}
+              className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Lưu thay đổi
+              {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>
           </div>
         </form>
@@ -474,4 +937,3 @@ export default function EditStudentPage() {
     </div>
   );
 }
-
