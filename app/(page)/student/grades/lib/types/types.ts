@@ -52,6 +52,19 @@ export interface SemesterGradeResponse {
   errors: null | unknown
 }
 
+export interface GradesStatsData {
+  averageGPA: number
+  totalCredits: number
+  totalSubjects: number
+}
+
+export interface GradesStatsResponse {
+  success: boolean
+  message: string
+  data: GradesStatsData
+  errors: null | unknown
+}
+
 // UI Display Types
 export interface Course {
   code: string

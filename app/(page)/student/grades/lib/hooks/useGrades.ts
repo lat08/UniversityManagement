@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { gradesApi } from '../api/gradesApi'
-import { CumulativeGradesData, SemesterGrade } from '../types/types'
+import { CumulativeGradesData, SemesterGrade, GradesStatsData } from '../types/types'
 
 interface UseGradesReturn {
   cumulativeData: CumulativeGradesData | null
+  statsData: GradesStatsData | null
   selectedSemesterId: string | null
   isLoading: boolean
   error: string | null
@@ -14,6 +15,7 @@ interface UseGradesReturn {
 
 export const useGrades = (): UseGradesReturn => {
   const [cumulativeData, setCumulativeData] = useState<CumulativeGradesData | null>(null)
+  const [statsData, setStatsData] = useState<GradesStatsData | null>(null)
   const [selectedSemesterId, setSelectedSemesterId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,12 +25,23 @@ export const useGrades = (): UseGradesReturn => {
       setIsLoading(true)
       setError(null)
       
-      const response = await gradesApi.getCumulativeGrades()
+      // Fetch both cumulative grades and stats in parallel
+      const [cumulativeResponse, statsResponse] = await Promise.all([
+        gradesApi.getCumulativeGrades(),
+        gradesApi.getGradesStats()
+      ])
       
-      if (response.success) {
-        setCumulativeData(response.data)
+      if (cumulativeResponse.success) {
+        setCumulativeData(cumulativeResponse.data)
       } else {
-        setError(response.message || 'Không thể tải dữ liệu điểm')
+        setError(cumulativeResponse.message || 'Không thể tải dữ liệu điểm')
+      }
+
+      if (statsResponse.success) {
+        setStatsData(statsResponse.data)
+      } else {
+        // Stats failure should not block the page, just log it
+        console.warn('Failed to load stats:', statsResponse.message)
       }
     } catch (err) {
       console.error('Error fetching grades:', err)
@@ -70,6 +83,7 @@ export const useGrades = (): UseGradesReturn => {
 
   return {
     cumulativeData,
+    statsData,
     selectedSemesterId,
     isLoading,
     error,

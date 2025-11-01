@@ -1,5 +1,5 @@
 import { api } from '@/lib/api/client'
-import { CumulativeGradesResponse, SemesterGradeResponse } from '../types/types'
+import { CumulativeGradesResponse, SemesterGradeResponse, GradesStatsResponse } from '../types/types'
 
 export const gradesApi = {
   /**
@@ -50,6 +50,22 @@ export const gradesApi = {
         throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
       }
       throw new Error('Không thể xuất file PDF')
+    }
+  },
+
+  /**
+   * Lấy thống kê học tập tổng quan
+   */
+  getGradesStats: async (): Promise<GradesStatsResponse> => {
+    try {
+      const response = await api.get<GradesStatsResponse>('/v1/students/me/grades/stats')
+      return response.data
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number; data?: { message?: string } } }
+      if (axiosError.response?.status === 401) {
+        throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+      }
+      throw new Error(axiosError.response?.data?.message || 'Không thể tải thống kê học tập')
     }
   },
 }
