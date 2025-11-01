@@ -115,25 +115,53 @@ export default function InstructorProfilePage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        {/* Tab Header */}
-        <div className="border-b border-gray-200">
-          <div className="px-8 py-4 flex space-x-6">
+      {/* Tabs */}
+      <div className="overflow-hidden">
+        <div className="flex w-full border border-gray-200 rounded-lg bg-gray-50 relative">
+          {/* Active tab background slider */}
+          <div 
+            className="absolute top-0 bottom-0 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
+            style={{
+              width: '50%',
+              left: activeTab === 'profile' ? '0%' : '50%',
+              transform: 'translateX(0)',
+              backgroundColor: '#0053AD'
+            }}
+          />
+          
+          <div className="flex-1 relative z-10">
             <button 
               onClick={() => setActiveTab('profile')}
-              className={`text-sm font-medium pb-3 cursor-pointer ${activeTab === 'profile' ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
+                activeTab === 'profile'
+                  ? "text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
             >
               Thông tin cá nhân
             </button>
+            
+            {activeTab !== 'profile' && (
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-200 transition-opacity duration-300"></div>
+            )}
+          </div>
+          
+          <div className="flex-1 relative z-10">
             <button 
               onClick={() => setActiveTab('password')}
-              className={`text-sm font-medium pb-3 cursor-pointer ${activeTab === 'password' ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
+                activeTab === 'password'
+                  ? "text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
             >
               Đổi mật khẩu
             </button>
           </div>
         </div>
+      </div>
 
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Content */}
         <div className="p-8">
           {activeTab === 'profile' ? (

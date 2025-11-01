@@ -73,20 +73,22 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
     <div className="mb-4 flex gap-4 items-stretch w-full">
       {/* Sức chứa tối thiểu */}
       <div className="relative flex-1">
+        <label className="block text-sm font-medium text-[#0053AD] mb-2">Sức chứa tối thiểu</label>
         <input
           type="number"
           value={tempFilters.capacity || ''}
           onChange={(e) => handleFilterChange('capacity', e.target.value)}
-          placeholder="Sức chứa tối thiểu"
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors h-full"
+          placeholder="Nhập số lượng người"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors"
           min="1"
         />
       </div>
 
       {/* Vị trí (Tòa nhà) Dropdown */}
       <div className="relative flex-1 dropdown-container" data-dropdown="building">
+        <label className="block text-sm font-medium text-[#0053AD] mb-2">Cơ sở</label>
         <button 
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
           onClick={() => {
             setIsBuildingOpen(!isBuildingOpen);
             setIsRoomTypeOpen(false);
@@ -127,8 +129,9 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
 
       {/* Loại phòng Dropdown */}
       <div className="relative flex-1 dropdown-container" data-dropdown="roomType">
+        <label className="block text-sm font-medium text-[#0053AD] mb-2">Khoa</label>
         <button 
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
           onClick={() => {
             setIsRoomTypeOpen(!isRoomTypeOpen);
             setIsBuildingOpen(false);
@@ -169,8 +172,9 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
 
       {/* Trạng thái Dropdown */}
       <div className="relative flex-1 dropdown-container" data-dropdown="status">
+        <label className="block text-sm font-medium text-[#0053AD] mb-2">Trạng thái</label>
         <button 
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
           onClick={() => {
             setIsStatusOpen(!isStatusOpen);
             setIsBuildingOpen(false);

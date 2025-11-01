@@ -8,7 +8,7 @@ export interface StudentProfile {
   email: string
   phoneNumber: string | null
   citizenId: string | null
-  majorName: string
+  departmentName: string
   facultyName: string
   classCode: string
   className: string

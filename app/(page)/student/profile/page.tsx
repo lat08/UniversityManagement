@@ -114,53 +114,68 @@ export default function ProfilePage() {
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h1>
       </div>
 
-      <Card className="shadow-sm border border-gray-200">
-        <CardContent className="p-6">
-          {/* Tabs */}
-          <div className="flex gap-8 mb-6 border-b border-gray-200">
+      {/* Tabs */}
+      <div className="overflow-hidden">
+        <div className="flex w-full border border-gray-200 rounded-lg bg-gray-50 relative">
+          {/* Active tab background slider */}
+          <div 
+            className="absolute top-0 bottom-0 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
+            style={{
+              width: '50%',
+              left: activeTab === "info" ? '0%' : '50%',
+              transform: 'translateX(0)',
+              backgroundColor: '#0053AD'
+            }}
+          />
+          
+          <div className="flex-1 relative z-10">
             <button
               onClick={() => setActiveTab("info")}
-              className={`pb-3 px-1 font-medium text-sm transition-colors relative ${
+              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
                 activeTab === "info"
-                  ? "text-blue-600"
+                  ? "text-white"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Thông tin cá nhân
-              {activeTab === "info" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-              )}
             </button>
+            
+            {activeTab !== "info" && (
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-200 transition-opacity duration-300"></div>
+            )}
+          </div>
+          
+          <div className="flex-1 relative z-10">
             <button
               onClick={() => setActiveTab("password")}
-              className={`pb-3 px-1 font-medium text-sm transition-colors relative ${
+              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
                 activeTab === "password"
-                  ? "text-blue-600"
+                  ? "text-white"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Đổi mật khẩu
-              {activeTab === "password" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-              )}
             </button>
           </div>
+        </div>
+      </div>
 
+      <Card className="shadow-sm border border-gray-200">
+        <CardContent className="p-6">
           {/* Tab Content */}
           {activeTab === "info" ? (
             <div className="space-y-6">
               {/* Avatar & Basic Info */}
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0">
-                  <Avatar className="w-32 h-32 border-4 border-gray-100">
+                  <Avatar className="w-32 h-32 border border-gray-200 shadow-md">
                     <AvatarImage src={profile.profilePicture || ""} alt={profile.fullName} />
                     <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-bold">
                       {profile.fullName.split(" ").map(n => n[0]).join("").slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-center mt-4">
-                    <p className="text-lg font-bold text-blue-600">{profile.classCode}</p>
-                    <p className="text-sm text-gray-500">{profile.role}</p>
+                    <p className="text-sm text-gray-500">Sinh viên</p>
                   </div>
                 </div>
 
@@ -173,7 +188,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.fullName}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -185,7 +200,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.studentCode}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -197,7 +212,7 @@ export default function ProfilePage() {
                     <Input
                       value={formatGender(profile.gender)}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -209,7 +224,7 @@ export default function ProfilePage() {
                     <Input
                       value={formatDate(profile.dateOfBirth)}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -221,7 +236,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.email}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -233,7 +248,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.citizenId || "-"}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -243,9 +258,9 @@ export default function ProfilePage() {
                       Ngành học
                     </label>
                     <Input
-                      value={profile.majorName}
+                      value={profile.departmentName}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -257,7 +272,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.facultyName}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -269,7 +284,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.className}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -281,7 +296,7 @@ export default function ProfilePage() {
                     <Input
                       value={formatEnrollmentStatus(profile.enrollmentStatus)}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -293,7 +308,7 @@ export default function ProfilePage() {
                     <Input
                       value={profile.educationLevel}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
 
@@ -305,27 +320,30 @@ export default function ProfilePage() {
                     <Input
                       value={profile.academicYear}
                       readOnly
-                      className="bg-gray-50 border-gray-200 text-gray-700"
+                      className="bg-gray-50 border-gray-200 text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none cursor-text"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Hộ khẩu */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hộ khẩu
-                </label>
-                <textarea
-                  value={profile.address || "Chưa cập nhật"}
-                  readOnly
-                  rows={3}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm resize-none focus:outline-none"
-                />
+              {/* Hộ khẩu - Full width */}
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0 w-32"></div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hộ khẩu
+                  </label>
+                  <textarea
+                    value={profile.address || "Chưa cập nhật"}
+                    readOnly
+                    rows={3}
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm resize-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 cursor-text"
+                  />
+                </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-6 max-w-xl">
+            <div className="space-y-6">
               {/* Error Message */}
               {passwordError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
@@ -341,6 +359,8 @@ export default function ProfilePage() {
                   <p className="text-sm text-green-800">{passwordSuccess}</p>
                 </div>
               )}
+
+              <div className="max-w-xl space-y-6">
 
               {/* Mật khẩu hiện tại */}
               <div>
@@ -427,6 +447,8 @@ export default function ProfilePage() {
                     )}
                   </button>
                 </div>
+              </div>
+
               </div>
 
               {/* Button */}
