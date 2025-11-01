@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { studentsApi } from '../lib/api/studentsApi';
@@ -15,7 +15,7 @@ interface ExportStudentModalProps {
 export default function ExportStudentModal({ isOpen, onClose, filters }: ExportStudentModalProps) {
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = async (e: React.FormEvent) => {
+  const handleExport = async (e: FormEvent) => {
     e.preventDefault();
     
     setIsExporting(true);
@@ -43,6 +43,19 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isExporting) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, isExporting, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -64,7 +77,7 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
           <button
             type="button"
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>

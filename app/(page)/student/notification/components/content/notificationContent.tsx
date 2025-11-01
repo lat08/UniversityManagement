@@ -22,6 +22,31 @@ export function NotificationsContent() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const pageSize = 10
+  const [unreadCounts, setUnreadCounts] = useState({
+    all: 0,
+    event: 0,
+    tuition: 0,
+    schedule: 0,
+    important: 0
+  })
+
+  // Fetch unread counts from API
+  const fetchUnreadCounts = async () => {
+    try {
+      const response = await notificationApi.getUnreadCountByCategory()
+      if (response.isSuccess) {
+        setUnreadCounts({
+          all: response.data.countByCategory.total,
+          event: response.data.countByCategory.event,
+          tuition: response.data.countByCategory.tuition,
+          schedule: response.data.countByCategory.schedule,
+          important: response.data.countByCategory.important
+        })
+      }
+    } catch (err) {
+      console.error("Error fetching unread counts:", err)
+    }
+  }
 
   // Fetch notifications from API
   const fetchNotifications = async (filterType?: NotificationType, page: number = 1) => {
@@ -54,6 +79,11 @@ export function NotificationsContent() {
       setLoading(false)
     }
   }
+
+  // Load unread counts on mount
+  useEffect(() => {
+    fetchUnreadCounts()
+  }, [])
 
   // Load notifications on mount and when filter changes
   useEffect(() => {
@@ -90,6 +120,8 @@ export function NotificationsContent() {
         setNotifications(prev => 
           prev.map(n => n.scheduleId === id ? { ...n, isRead: true } : n)
         )
+        // Refresh unread counts
+        fetchUnreadCounts()
       }
     } catch (err) {
       console.error("Error marking notification as read:", err)
@@ -105,21 +137,14 @@ export function NotificationsContent() {
       if (response.isSuccess) {
         // Update all notifications to mark as read
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+        // Refresh unread counts
+        fetchUnreadCounts()
       }
     } catch (err) {
       console.error("Error marking all as read:", err)
     } finally {
       setMarkingAllAsRead(false)
     }
-  }
-
-  // Calculate filter counts - CHỈ đếm thông báo chưa đọc
-  const filterCounts = {
-    all: notifications.filter((n) => !n.isRead).length,
-    important: notifications.filter((n) => n.notificationType === "important" && !n.isRead).length,
-    tuition: notifications.filter((n) => n.notificationType === "tuition" && !n.isRead).length,
-    event: notifications.filter((n) => n.notificationType === "event" && !n.isRead).length,
-    schedule: notifications.filter((n) => n.notificationType === "schedule" && !n.isRead).length,
   }
 
   const filters: { key: NotificationType; label: string }[] = [
@@ -130,15 +155,13 @@ export function NotificationsContent() {
     { key: "schedule", label: "Lịch học" },
   ]
 
-  const unreadCount = notifications.filter(n => !n.isRead).length
-
   return (
     <div className="space-y-6">
       {/* Header with Mark All as Read button */}
-      {unreadCount > 0 && (
+      {unreadCounts.all > 0 && (
         <div className="flex justify-between items-center">
           <div className="text-sm text-[var(--text-secondary)]">
-            {unreadCount} thông báo chưa đọc
+            {unreadCounts.all} thông báo chưa đọc
           </div>
           <Button
             variant="outline"
@@ -177,7 +200,7 @@ export function NotificationsContent() {
           
           {filters.map((filter, index) => {
             const isActive = activeFilter === filter.key
-            const unreadCount = filterCounts[filter.key]
+            const unreadCount = unreadCounts[filter.key]
             const hasUnread = unreadCount > 0
 
             return (

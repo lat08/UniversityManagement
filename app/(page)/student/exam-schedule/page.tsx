@@ -26,8 +26,18 @@ export default function ExamSchedulePage() {
       try {
         const data = await getSemesters();
         setSemesters(data);
+        
         if (data.length > 0) {
-          setSelectedSemester(data[0]);
+          // Find semester that matches current date
+          const currentDate = new Date();
+          const currentSemester = data.find((semester) => {
+            const startDate = new Date(semester.startDate);
+            const endDate = new Date(semester.endDate);
+            return currentDate >= startDate && currentDate <= endDate;
+          });
+          
+          // Set current semester or fallback to first semester
+          setSelectedSemester(currentSemester || data[0]);
         }
       } catch (error) {
         console.error('Failed to fetch semesters:', error);

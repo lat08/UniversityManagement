@@ -81,6 +81,7 @@ export interface ExportStudentsParams {
   searchKeyword?: string;
   departmentId?: string;
   facultyId?: string;
+  academicYearId?: string;
   enrollmentStatus?: string;
 }
 
@@ -133,12 +134,12 @@ export interface StudentDetail {
   citizenId: string;
   majorName: string;
   facultyName: string;
-  facultyId?: string;
-  departmentId?: string;
+  facultyId: string;
+  departmentId: string;
   departmentName?: string;
   classCode: string;
   className: string;
-  classId?: string;
+  classId: string;
   enrollmentStatus: string;
   educationLevel: string;
   academicYear: string;
@@ -186,5 +187,62 @@ export interface UpdateStudentPayload {
   profilePicture?: File | string; // File object or base64 string
   password?: string;
   confirmPassword?: string;
+}
+
+export interface Semester {
+  semesterId: string;
+  semesterName: string;
+  semesterCode: string;
+  startDate: string;
+  endDate: string;
+  academicYearId: string;
+  yearRange: string;
+}
+
+export interface TuitionFeeCourse {
+  courseId: string;
+  courseCode: string;
+  courseName: string;
+  credits: number;
+  courseFee: number;
+  status: string;
+}
+
+export interface TuitionFee {
+  semesterId: string;
+  semesterName: string;
+  courses: TuitionFeeCourse[];
+}
+
+export interface Insurance {
+  studentHealthInsuranceId: string;
+  academicYear: string;
+  healthInsuranceFee: number;
+  status: string;
+}
+
+export interface Grade {
+  semesterId: string;
+  semesterName: string;
+  subjectId: string;
+  subjectCode: string;
+  subjectName: string;
+  credits: number;
+  midtermGrade: number | null;
+  finalGrade: number | null;
+  attendanceGrade: number | null;
+  finalGrade10: number | null;
+  finalGrade4: number;
+  gradeLetter: string;
+  status: string;
+}
+
+export interface SemesterGrades {
+  semesterId: string;
+  semesterName: string;
+  semesterGPA10: number;
+  semesterGPA4: number;
+  semesterClassification: string;
+  grades: Grade[];
 }
 

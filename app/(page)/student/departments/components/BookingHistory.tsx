@@ -183,10 +183,10 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
 
   const handleFilterChange = (key: string, value: string) => {
     setTempFilters({ [key]: value });
-  };
-
-  const handleSearch = () => {
-    applyFilters();
+    // Apply filters immediately (real-time search)
+    setTimeout(() => {
+      applyFilters();
+    }, 0);
   };
 
   // Filter bookings based on applied filters
@@ -402,14 +402,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
           )}
         </div>
 
-        {/* Search Button */}
-        <button 
-          className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
-          onClick={handleSearch}
-        >
-          <Search className="w-4 h-4" />
-          <span className="text-sm font-medium">Tìm kiếm</span>
-        </button>
       </div>
 
       {/* Booking List Section */}
@@ -488,7 +480,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
                   <button
                         onClick={() => handleCancelBooking(booking)}
                         disabled={!canCancel || cancelBookingMutation.isPending}
-                    className={`px-6 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`px-6 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                           canCancel 
                         ? 'bg-[var(--button-primary)] hover:bg-[var(--button-primary-hover)] text-[var(--primary-foreground)]' 
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'

@@ -141,19 +141,19 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
           return (
             <Card
               key={room.roomId}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 bg-white"
+              className="overflow-hidden border border-gray-200 bg-white"
             >
               {/* Room Image */}
               <div className="relative w-full h-[230px] overflow-hidden">
                 <RoomImage src={room.imageUrl} alt={room.roomName} />
                 
                 {/* Status Badges on Image - Positioned separately */}
-                <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 left-3 z-10 pointer-events-none">
                   <Badge className={`${roomTypeBadge.color} px-3 py-1 text-xs font-medium rounded-md shadow-md`}>
                     {roomTypeBadge.text}
                   </Badge>
                 </div>
-                <div className="absolute top-3 right-3 z-10">
+                <div className="absolute top-3 right-3 z-10 pointer-events-none">
                   <Badge className={`${roomStatusBadge.color} px-3 py-1 text-xs font-medium rounded-md shadow-md`}>
                     {roomStatusBadge.text}
                   </Badge>
@@ -195,7 +195,7 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
                         {room.amenities.slice(0, 3).map((amenity) => (
                           <Badge
                             key={amenity.amenityId}
-                            className="text-xs bg-blue-50 text-[#0B5FCC] border-0 px-2 py-1 w-full flex justify-center"
+                            className="text-xs bg-blue-50 text-[#0B5FCC] border-0 px-2 py-1 w-full flex justify-center pointer-events-none"
                             title={amenity.amenityName}
                           >
                             {amenity.amenityName.length > 15 
@@ -205,7 +205,7 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
                           </Badge>
                         ))}
                         {room.amenities.length > 3 && (
-                          <Badge className="text-xs bg-gray-50 text-gray-600 border-0 px-2 py-1 w-full flex justify-center">
+                          <Badge className="text-xs bg-gray-50 text-gray-600 border-0 px-2 py-1 w-full flex justify-center pointer-events-none">
                             +{room.amenities.length - 3} tiện ích khác
                           </Badge>
                         )}

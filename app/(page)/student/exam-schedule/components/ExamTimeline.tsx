@@ -3,12 +3,27 @@
 import { Eye } from "lucide-react";
 import { Exam } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
+import { useRef } from "react";
 
 interface ExamTimelineProps {
   exams: Exam[];
 }
 
 export default function ExamTimeline({ exams }: ExamTimelineProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const element = scrollRef.current;
+    if (!element) return;
+
+    const isScrollingDown = e.deltaY > 0;
+    const isAtTop = element.scrollTop === 0;
+    const isAtBottom = element.scrollHeight - element.scrollTop === element.clientHeight;
+
+    if ((isAtTop && !isScrollingDown) || (isAtBottom && isScrollingDown)) {
+      e.preventDefault();
+    }
+  };
   const getStatusColor = (status: Exam['status']) => {
     switch (status) {
       case 'Đã thi':
@@ -49,7 +64,11 @@ export default function ExamTimeline({ exams }: ExamTimelineProps) {
   };
 
   return (
-    <div className="relative">
+    <div 
+      ref={scrollRef}
+      onWheel={handleWheel}
+      className="relative max-h-[600px] overflow-y-auto pr-2 overscroll-contain"
+    >
       {/* Timeline line */}
       <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
 

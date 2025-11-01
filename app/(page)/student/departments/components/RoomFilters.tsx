@@ -12,6 +12,7 @@ interface RoomFiltersProps {
 export default function RoomFilters({ onSearch }: RoomFiltersProps) {
   const tempFilters = useRoomBookingStore((state) => state.tempFilters);
   const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
+  const applyFilters = useRoomBookingStore((state) => state.applyFilters);
   const rooms = useRoomBookingStore((state) => state.rooms) || [];
 
   const [isBuildingOpen, setIsBuildingOpen] = useState(false);
@@ -20,10 +21,11 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
 
   const handleFilterChange = (key: string, value: string) => {
     setTempFilters({ [key]: value });
-  };
-
-  const handleSearch = () => {
-    onSearch();
+    // Apply filters immediately and trigger search
+    setTimeout(() => {
+      applyFilters();
+      onSearch();
+    }, 0);
   };
 
   // Get unique buildings from rooms data
@@ -206,15 +208,6 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
           </div>
         )}
       </div>
-
-      {/* Search Button */}
-      <button 
-        className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap"
-        onClick={handleSearch}
-      >
-        <Search className="w-4 h-4" />
-        <span className="text-sm font-medium">Tìm kiếm</span>
-      </button>
     </div>
   );
 }

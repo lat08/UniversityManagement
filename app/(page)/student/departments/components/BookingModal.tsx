@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { useCreateBooking } from '../lib/hooks/useRoomBooking';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
 import { Card, CardContent } from '@/app/components/ui/card';
-import { DayPicker } from 'react-day-picker';
-import { Users, MapPin, Monitor, X, Calendar, Clock } from 'lucide-react';
-import { format } from 'date-fns';
+import { Users, MapPin, Monitor, X, Calendar, Clock, ChevronDown } from 'lucide-react';
+import { format, parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { DayPicker } from 'react-day-picker';
 import toast from 'react-hot-toast';
 import 'react-day-picker/dist/style.css';
 
@@ -93,12 +93,63 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const createBookingMutation = useCreateBooking();
   
   const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
+  const [dateInputValue, setDateInputValue] = useState<string>('');
+  const [showCalendar, setShowCalendar] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<string>('');
   const [endTime, setEndTime] = useState<string>('');
   const [purpose, setPurpose] = useState<string>('');
+  const [studentCount, setStudentCount] = useState<number>(1);
+  const [isStartTimeOpen, setIsStartTimeOpen] = useState<boolean>(false);
+  const [isEndTimeOpen, setIsEndTimeOpen] = useState<boolean>(false);
+  
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const startTimeRef = useRef<HTMLDivElement>(null);
+  const endTimeRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      
+      if (calendarRef.current && !calendarRef.current.contains(target)) {
+        setShowCalendar(false);
+      }
+      if (startTimeRef.current && !startTimeRef.current.contains(target)) {
+        setIsStartTimeOpen(false);
+      }
+      if (endTimeRef.current && !endTimeRef.current.contains(target)) {
+        setIsEndTimeOpen(false);
+      }
+    };
+
+    if (showCalendar || isStartTimeOpen || isEndTimeOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCalendar, isStartTimeOpen, isEndTimeOpen]);
+
+  // Close modal when pressing ESC
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
 
   const handleConfirmBooking = () => {
-    if (!selectedRoom || !bookingDate || !startTime || !endTime || !purpose.trim()) {
+    if (!selectedRoom || !bookingDate || !startTime || !endTime || !purpose.trim() || !studentCount) {
       toast.error('Vui lòng điền đầy đủ thông tin');
       return;
     }
@@ -106,6 +157,17 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     // Validate purpose length
     if (purpose.length > 500) {
       toast.error('Mục đích sử dụng không được vượt quá 500 ký tự');
+      return;
+    }
+
+    // Validate student count
+    if (studentCount < 1) {
+      toast.error('Số lượng người tham gia phải lớn hơn 0');
+      return;
+    }
+
+    if (studentCount > selectedRoom.capacity) {
+      toast.error(`Số lượng người tham gia không được vượt quá sức chứa của phòng (${selectedRoom.capacity} người)`);
       return;
     }
 
@@ -162,15 +224,18 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       startTime,
       endTime,
       purpose: purpose.trim(),
+      studentCount,
     }, {
       onSuccess: () => {
         toast.success('Đăng ký phòng thành công! Trạng thái: Chờ xác nhận');
         onClose();
         // Reset form
         setBookingDate(undefined);
+        setDateInputValue('');
         setStartTime('');
         setEndTime('');
         setPurpose('');
+        setStudentCount(1);
       },
       onError: (error: Error) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -183,16 +248,47 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
   const handleStartTimeChange = (value: string) => {
     setStartTime(value);
+    setIsStartTimeOpen(false);
     // Reset end time when start time changes
     setEndTime('');
+    setIsEndTimeOpen(false);
   };
 
-  const handleDateChange = (date: Date | undefined) => {
-    setBookingDate(date);
-    // Reset time selections when date changes
-    setStartTime('');
-    setEndTime('');
+  const handleEndTimeChange = (value: string) => {
+    setEndTime(value);
+    setIsEndTimeOpen(false);
   };
+
+  const handleDateInputChange = (value: string) => {
+    setDateInputValue(value);
+    
+    // Try to parse the date from dd/mm/yyyy format
+    if (value.length === 10) {
+      try {
+        const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
+        if (!isNaN(parsedDate.getTime())) {
+          setBookingDate(parsedDate);
+          // Reset time selections when date changes
+          setStartTime('');
+          setEndTime('');
+        }
+      } catch {
+        // Invalid date format
+      }
+    }
+  };
+
+  const handleCalendarSelect = (date: Date | undefined) => {
+    if (date) {
+      setBookingDate(date);
+      setDateInputValue(format(date, 'dd/MM/yyyy'));
+      setShowCalendar(false);
+      // Reset time selections when date changes
+      setStartTime('');
+      setEndTime('');
+    }
+  };
+
 
   if (!isOpen || !selectedRoom) return null;
 
@@ -222,8 +318,17 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-6 border-b">
@@ -264,17 +369,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
                   {selectedRoom.amenities && selectedRoom.amenities.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {selectedRoom.amenities.slice(0, 5).map((amenity) => (
+                      {selectedRoom.amenities.map((amenity) => (
                         <Badge key={amenity.amenityId} variant="outline" className="text-xs bg-white text-black border-gray-300">
-                          <Monitor className="h-3 w-3 mr-1" />
                           {amenity.amenityName}
                         </Badge>
                       ))}
-                      {selectedRoom.amenities.length > 5 && (
-                        <Badge variant="outline" className="text-xs bg-white text-black border-gray-300">
-                          +{selectedRoom.amenities.length - 5} tiện ích khác
-                        </Badge>
-                      )}
                     </div>
                   )}
                 </div>
@@ -286,56 +385,132 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
           </Card>
 
           {/* Booking Date */}
-          <div>
+          <div className="relative">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Ngày sử dụng
             </h3>
-            <div className="border rounded-lg p-3 max-w-fit mx-auto">
-              <DayPicker
-                mode="single"
-                selected={bookingDate}
-                onSelect={handleDateChange}
-                disabled={{ before: new Date() }}
-                locale={vi}
-                className="mx-auto"
-                classNames={{
-                  day_selected: 'bg-[#4E8EE1] text-white',
-                  day_today: 'bg-[#4E8EE1]/20 text-[#4E8EE1] font-semibold',
-                  day_disabled: 'text-gray-300',
-                  day: 'hover:bg-gray-100 rounded',
+            <div className="relative">
+              <input
+                type="text"
+                value={dateInputValue}
+                onChange={(e) => handleDateInputChange(e.target.value)}
+                onFocus={() => setShowCalendar(true)}
+                placeholder="dd/mm/yyyy"
+                maxLength={10}
+                className="w-full p-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
+                onKeyDown={(e) => {
+                  // Only allow numbers and /
+                  if (!/[0-9/]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
+                    e.preventDefault();
+                  }
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <Calendar className="h-5 w-5" />
+              </button>
             </div>
+            
+            {/* Calendar Dropdown */}
+            {showCalendar && (
+              <div 
+                ref={calendarRef}
+                className="absolute z-10 mt-2 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
+              >
+                <DayPicker
+                  mode="single"
+                  selected={bookingDate}
+                  onSelect={handleCalendarSelect}
+                  disabled={{ before: new Date() }}
+                  locale={vi}
+                  classNames={{
+                    day_selected: 'bg-[#4E8EE1] text-white',
+                    day_today: 'bg-[#4E8EE1]/20 text-[#4E8EE1] font-semibold',
+                    day_disabled: 'text-gray-300',
+                    day: 'hover:bg-gray-100 rounded',
+                  }}
+                />
+              </div>
+            )}
+            
+            {bookingDate && (
+              <p className="text-sm text-gray-600 mt-2">
+                Ngày đã chọn: {format(bookingDate, 'EEEE, dd/MM/yyyy', { locale: vi })}
+              </p>
+            )}
+          </div>
+
+          {/* Student Count */}
+          <div>
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Số lượng người tham gia
+            </h3>
+            <input
+              type="number"
+              value={studentCount}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setStudentCount(Math.max(1, Math.min(value, selectedRoom?.capacity || 1000)));
+              }}
+              min={1}
+              max={selectedRoom?.capacity || 1000}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1]"
+              placeholder="Nhập số lượng người tham gia"
+            />
+            <p className="text-sm text-gray-500 mt-2">
+              Sức chứa tối đa: {selectedRoom?.capacity || 0} người
+            </p>
           </div>
 
           {/* Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Start Time */}
-            <div>
+            <div className="relative" ref={startTimeRef}>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Thời gian bắt đầu
               </h3>
-              <select
-                value={startTime}
-                onChange={(e) => handleStartTimeChange(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
+              <button
+                type="button"
+                onClick={() => {
+                  if (bookingDate && generateTimeOptions(bookingDate).length > 0) {
+                    setIsStartTimeOpen(!isStartTimeOpen);
+                    setIsEndTimeOpen(false);
+                  }
+                }}
                 disabled={!bookingDate}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">
+                <span className="text-sm text-gray-900">
                   {!bookingDate 
                     ? 'Vui lòng chọn ngày trước' 
                     : generateTimeOptions(bookingDate).length === 0 
                     ? 'Không có thời gian khả dụng cho hôm nay'
+                    : startTime 
+                    ? generateTimeOptions(bookingDate).find(o => o.value === startTime)?.label || 'Chọn thời gian bắt đầu'
                     : 'Chọn thời gian bắt đầu'}
-                </option>
-                {bookingDate && generateTimeOptions(bookingDate).map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+              </button>
+              {isStartTimeOpen && bookingDate && (
+                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {generateTimeOptions(bookingDate).map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      onClick={() => handleStartTimeChange(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               {bookingDate && generateTimeOptions(bookingDate).length === 0 && (
                 <p className="text-sm text-amber-600 mt-2">
                   ⚠️ Không còn khung giờ khả dụng cho hôm nay. Vui lòng chọn ngày khác.
@@ -344,24 +519,43 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             </div>
 
             {/* End Time */}
-            <div>
+            <div className="relative" ref={endTimeRef}>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Thời gian kết thúc
               </h3>
-              <select
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
+              <button
+                type="button"
+                onClick={() => {
+                  if (startTime) {
+                    setIsEndTimeOpen(!isEndTimeOpen);
+                    setIsStartTimeOpen(false);
+                  }
+                }}
                 disabled={!startTime}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Chọn thời gian kết thúc</option>
-                {startTime && generateEndTimeOptions(startTime).map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <span className="text-sm text-gray-900">
+                  {endTime 
+                    ? generateEndTimeOptions(startTime).find(o => o.value === endTime)?.label || 'Chọn thời gian kết thúc'
+                    : 'Chọn thời gian kết thúc'}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+              </button>
+              {isEndTimeOpen && startTime && (
+                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {generateEndTimeOptions(startTime).map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      onClick={() => handleEndTimeChange(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

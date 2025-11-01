@@ -12,6 +12,10 @@ import {
   StudentDetail,
   ClassItem,
   UpdateStudentPayload,
+  Semester,
+  TuitionFee,
+  Insurance,
+  SemesterGrades,
 } from '../types/types';
 
 export const studentsApi = {
@@ -72,11 +76,11 @@ export const studentsApi = {
    * Export danh sách sinh viên ra Excel theo bộ lọc hiện tại
    */
   exportStudents: async (params: ExportStudentsParams = {}): Promise<Blob> => {
-    const response = await api.get('/v1/admin/students/export', {
+    const response = await api.get('/v1/student-excel/export', {
       params: {
-        searchKeyword: params.searchKeyword || undefined,
         departmentId: params.departmentId || undefined,
         facultyId: params.facultyId || undefined,
+        academicYearId: params.academicYearId || undefined,
         enrollmentStatus: params.enrollmentStatus || undefined,
       },
       responseType: 'blob',
@@ -144,8 +148,12 @@ export const studentsApi = {
   /**
    * Lấy danh sách năm học
    */
-  getAcademicYears: async (): Promise<ApiResponse<AcademicYear[]>> => {
-    const response = await api.get<ApiResponse<AcademicYear[]>>('/v1/common/academic-years');
+  getAcademicYears: async (params?: { count?: number }): Promise<ApiResponse<AcademicYear[]>> => {
+    const response = await api.get<ApiResponse<AcademicYear[]>>('/v1/common/academic-years', {
+      params: {
+        count: params?.count || undefined,
+      },
+    });
     return response.data;
   },
 
@@ -255,6 +263,80 @@ export const studentsApi = {
       params: {
         departmentId: params.departmentId || undefined,
         facultyId: params.facultyId || undefined,
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Lấy danh sách tất cả học kì
+   */
+  getSemesters: async (): Promise<ApiResponse<Semester[]>> => {
+    const response = await api.get<ApiResponse<Semester[]>>('/v1/common/semesters');
+    return response.data;
+  },
+
+  /**
+   * Lấy danh sách học phí của sinh viên theo học kì
+   */
+  getTuitionFees: async (params: { studentId: string; semesterId?: string }): Promise<ApiResponse<TuitionFee>> => {
+    const response = await api.get<ApiResponse<TuitionFee>>('/v1/tuition-fees', {
+      params: {
+        StudentId: params.studentId,
+        SemesterId: params.semesterId || undefined,
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Lấy danh sách bảo hiểm y tế của sinh viên theo học kì
+   */
+  getInsurances: async (params: { studentId: string; semesterId?: string }): Promise<ApiResponse<Insurance[]>> => {
+    const response = await api.get<ApiResponse<Insurance[]>>('/v1/insurances', {
+      params: {
+        StudentId: params.studentId,
+        SemesterId: params.semesterId || undefined,
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Xuất Excel học phí theo học kì
+   */
+  exportTuitionFees: async (params: { studentId: string; semesterId?: string }): Promise<Blob> => {
+    const response = await api.get('/v1/tuition-fees/excel', {
+      params: {
+        StudentId: params.studentId,
+        SemesterId: params.semesterId || undefined,
+      },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /**
+   * Xuất Excel bảo hiểm y tế theo học kì
+   */
+  exportInsurances: async (params: { studentId: string; semesterId?: string }): Promise<Blob> => {
+    const response = await api.get('/v1/insurances/excel', {
+      params: {
+        StudentId: params.studentId,
+        SemesterId: params.semesterId || undefined,
+      },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  /**
+   * Lấy điểm học kỳ của sinh viên
+   */
+  getSemesterGrades: async (params: { studentId: string; semesterId: string }): Promise<ApiResponse<SemesterGrades>> => {
+    const response = await api.get<ApiResponse<SemesterGrades>>(`/v1/students/semesters/${params.semesterId}/grades`, {
+      params: {
+        studentId: params.studentId,
       },
     });
     return response.data;

@@ -114,6 +114,7 @@ export interface CreateBookingRequest {
   startTime: string; // Format: "HH:mm" (e.g., "07:15")
   endTime: string; // Format: "HH:mm" (e.g., "10:00")
   purpose: string; // Max 500 characters
+  studentCount: number; // Number of participants
 }
 
 export interface BookingApiResponse {

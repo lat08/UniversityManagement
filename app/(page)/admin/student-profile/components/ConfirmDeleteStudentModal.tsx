@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface ConfirmDeleteStudentModalProps {
@@ -12,6 +12,19 @@ interface ConfirmDeleteStudentModalProps {
 
 export default function ConfirmDeleteStudentModal({ isOpen, studentName, onClose, onConfirm }: ConfirmDeleteStudentModalProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isProcessing) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, isProcessing, onClose]);
 
   if (!isOpen) return null;
 
@@ -30,7 +43,7 @@ export default function ConfirmDeleteStudentModal({ isOpen, studentName, onClose
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Xác nhận xoá sinh viên</h3>
-          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>

@@ -114,6 +114,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
         items: [
           { icon: Home, label: "Bảng điều khiển", href: "/instructor/dashboard" },
           { icon: FileText, label: "Quy chế / Quy định", href: "/instructor/regulations" },
+          { icon: Bell, label: "Thông báo", href: "/instructor/notification" },
         ],
       },
       {
@@ -126,7 +127,6 @@ function getMenuSections(variant: Variant): MenuSection[] {
               { label: "TKB theo học kỳ", href: "/instructor/schedule/semester" },
             ],
           },
-          { icon: Building2, label: "Khoa học phụ trách", href: "/instructor/departments" },
           { icon: BarChart3, label: "Bài giảng & Giáo trình", href: "/instructor/materials" },
           { icon: FileCheck, label: "Đề thi", href: "/instructor/exams" },
           { icon: Notebook, label: "Điểm số", href: "/instructor/grades" },
@@ -136,7 +136,6 @@ function getMenuSections(variant: Variant): MenuSection[] {
         title: "HỆ THỐNG",
         items: [
           { icon: Users, label: "Hồ sơ cá nhân", href: "/instructor/profile" },
-          { icon: Bell, label: "Thông báo", href: "/instructor/notification" },
         ],
       },
     ]
@@ -148,6 +147,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
       items: [
         { icon: Home, label: "Bảng điều khiển", href: "/student/dashboard" },
         { icon: FileText, label: "Quy chế / Quy định", href: "/student/regulations" },
+        { icon: Bell, label: "Thông báo", href: "/student/notification" },
       ],
     },
     {
@@ -166,14 +166,12 @@ function getMenuSections(variant: Variant): MenuSection[] {
         { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
         { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
         { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
-        { icon: GraduationCap, label: "Xét học bổng", href: "/student/scholarships" },
       ],
     },
     {
       title: "HỆ THỐNG",
       items: [
         { icon: Users, label: "Hồ sơ cá nhân", href: "/student/profile" },
-        { icon: Bell, label: "Thông báo", href: "/student/notification" },
       ],
     },
   ]

@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, Edit, Trash2, Download, Plus, Search, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { Download, Plus, Search, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import AddStudentModal from './components/AddStudentModal';
 import ImportExcelModal from './components/ImportExcelModal';
 import ExportStudentModal from './components/ExportStudentModal';
 import ConfirmDeleteStudentModal from './components/ConfirmDeleteStudentModal';
+import StudentTableRow from './components/StudentTableRow';
 import { studentsApi } from './lib/api/studentsApi';
 import { toast } from 'react-hot-toast';
-import { Student, AcademicYear, Department, STATUS_OPTIONS, getStatusDisplay } from './lib/types/types';
-
+import { Student, AcademicYear, Department, STATUS_OPTIONS } from './lib/types/types';
+import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
 
 const STAT_CARDS = [
   { key: 'total', label: 'Tổng sinh viên', color: 'bg-orange-50', icon: '📋', subtitle: 'Đang học' },
@@ -19,14 +20,12 @@ const STAT_CARDS = [
   { key: 'onLeave', label: 'Bảo lưu', color: 'bg-red-50', icon: '📌', subtitle: 'Tạm nghỉ' },
 ] as const;
 
-
 export default function StudentProfilePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isClassOpen, setIsClassOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState('Tất cả khóa');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -57,11 +56,18 @@ export default function StudentProfilePage() {
   const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>('');
   const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
 
+  // Priority 1: Fetch dropdowns in parallel first for better UX
   useEffect(() => {
-    fetchDepartments();
-    fetchAcademicYears();
+    const fetchDropdownData = async () => {
+      await Promise.all([
+        fetchDepartments(),
+        fetchAcademicYears(),
+      ]);
+    };
+    fetchDropdownData();
   }, []);
 
+  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchKeyword(searchQuery);
@@ -71,9 +77,25 @@ export default function StudentProfilePage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Priority 2: Fetch students after dropdowns loaded
   useEffect(() => {
     fetchStudents();
   }, [currentPage, selectedDepartmentId, selectedAcademicYearId, selectedStatus, searchKeyword]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      if (!target.closest('[data-dropdown]')) {
+        setIsDepartmentOpen(false);
+        setIsClassOpen(false);
+        setIsStatusOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchDepartments = async () => {
     try {
@@ -91,7 +113,7 @@ export default function StudentProfilePage() {
 
   const fetchAcademicYears = async () => {
     try {
-      const response = await studentsApi.getAcademicYears();
+      const response = await studentsApi.getAcademicYears({ count: 4 });
       if (response.success) {
         setAcademicYears(response.data);
       }
@@ -127,7 +149,8 @@ export default function StudentProfilePage() {
     }
   };
   
-  const getPageNumbers = () => {
+  // Memoized pagination calculation
+  const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
     
@@ -146,6 +169,38 @@ export default function StudentProfilePage() {
     }
     
     return pages;
+  }, [currentPage, totalPages]);
+
+  // Memoized stat cards values
+  const statValues = useMemo(() => ({
+    total: stats.totalStudents,
+    enrolled: stats.enrolledThisYear,
+    graduating: stats.graduatingSoon,
+    onLeave: stats.onLeave,
+  }), [stats]);
+
+  // Prefetch handler for hover
+  const handlePrefetchStudent = useCallback((studentId: string) => {
+    // Prefetch the student detail page
+    router.prefetch(`/admin/student-profile/${studentId}`);
+  }, [router]);
+
+  // Delete handler
+  const handleDeleteClick = useCallback((studentId: string, studentName: string) => {
+    setDeletingStudentId(studentId);
+    setDeletingStudentName(studentName);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingStudentId) return;
+    const res = await studentsApi.deleteStudent(deletingStudentId);
+    if (res.success) {
+      toast.success('Xoá sinh viên thành công');
+      await fetchStudents();
+    } else {
+      toast.error(res.message || 'Xoá sinh viên thất bại');
+    }
   };
 
   return (
@@ -157,43 +212,43 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {STAT_CARDS.map((card, index) => {
-          const value =
-            card.key === 'total' ? stats.totalStudents :
-            card.key === 'enrolled' ? stats.enrolledThisYear :
-            card.key === 'graduating' ? stats.graduatingSoon :
-            stats.onLeave;
-          return (
-          <div
-            key={index}
-            className={`${card.color} rounded-lg p-6 border border-gray-200`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-600 mb-2">{card.label}</p>
-                <p className="text-4xl font-bold text-gray-900 mb-1">
-                  {value.toLocaleString()}
-                </p>
-                {card.subtitle ? (
-                  <p className="text-xs text-gray-500">{card.subtitle}</p>
-                ) : null}
-                {card.key === 'enrolled' && typeof stats.growthPercentage === 'number' && (
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${stats.growthPercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {stats.growthPercentage < 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                      {`${stats.growthPercentage > 0 ? '+' : ''}${stats.growthPercentage.toFixed(1)}%`}
-                    </span>
-                    <span className="text-xs text-gray-500">so với năm trước</span>
-                  </div>
-                )}
+      {loading && students.length === 0 ? (
+        <StatCardsSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {STAT_CARDS.map((card, index) => {
+            const value = statValues[card.key];
+            return (
+            <div
+              key={index}
+              className={`${card.color} rounded-lg p-6 border border-gray-200`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-2">{card.label}</p>
+                  <p className="text-4xl font-bold text-gray-900 mb-1">
+                    {value.toLocaleString()}
+                  </p>
+                  {card.subtitle ? (
+                    <p className="text-xs text-gray-500">{card.subtitle}</p>
+                  ) : null}
+                  {card.key === 'enrolled' && typeof stats.growthPercentage === 'number' && (
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium ${stats.growthPercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {stats.growthPercentage < 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                        {`${stats.growthPercentage > 0 ? '+' : ''}${stats.growthPercentage.toFixed(1)}%`}
+                      </span>
+                      <span className="text-xs text-gray-500">so với năm trước</span>
+                    </div>
+                  )}
+                </div>
+                <div className="text-3xl">{card.icon}</div>
               </div>
-              <div className="text-3xl">{card.icon}</div>
             </div>
-          </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Main Content Card */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -318,7 +373,6 @@ export default function StudentProfilePage() {
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
                     onClick={() => {
                       setSelectedAcademicYearId('');
-                      setSelectedClass('Tất cả khóa');
                       setIsClassOpen(false);
                       setCurrentPage(1);
                     }}
@@ -331,7 +385,6 @@ export default function StudentProfilePage() {
                       className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
                       onClick={() => {
                         setSelectedAcademicYearId(year.academicYearId);
-                        setSelectedClass(year.yearCode);
                         setIsClassOpen(false);
                         setCurrentPage(1);
                       }}
@@ -396,8 +449,8 @@ export default function StudentProfilePage() {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                        Đang tải dữ liệu...
+                      <td colSpan={7} className="p-0">
+                        <TableSkeleton />
                       </td>
                     </tr>
                   ) : students.length === 0 ? (
@@ -407,67 +460,14 @@ export default function StudentProfilePage() {
                       </td>
                     </tr>
                   ) : (
-                    students.map((student) => {
-                      const statusDisplay = getStatusDisplay(student.enrollmentStatus);
-                      return (
-                        <tr
-                          key={student.studentId}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {student.studentCode}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {student.fullName}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {student.departmentName}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {student.className}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {student.email}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex justify-center">
-                              <span className={`w-full text-center px-3 py-1 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
-                                {statusDisplay.label}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center justify-center gap-2">
-                              <button
-                                onClick={() => router.push(`/admin/student-profile/${student.studentId}`)}
-                                className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-                                title="Xem chi tiết"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => router.push(`/admin/student-profile/${student.studentId}/edit`)}
-                                className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors cursor-pointer"
-                                title="Chỉnh sửa"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setDeletingStudentId(student.studentId);
-                                  setDeletingStudentName(student.fullName);
-                                  setIsDeleteModalOpen(true);
-                                }}
-                                className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                                title="Xóa"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    students.map((student) => (
+                      <StudentTableRow
+                        key={student.studentId}
+                        student={student}
+                        onDelete={handleDeleteClick}
+                        onPrefetch={() => handlePrefetchStudent(student.studentId)}
+                      />
+                    ))
                   )}
                 </tbody>
               </table>
@@ -489,7 +489,7 @@ export default function StudentProfilePage() {
             >
               Trước
             </button>
-            {getPageNumbers().map((page, index) => 
+            {pageNumbers.map((page, index) => 
               typeof page === 'number' ? (
                 <button
                   key={index}
@@ -537,6 +537,7 @@ export default function StudentProfilePage() {
           searchKeyword: searchKeyword || undefined,
           departmentId: selectedDepartmentId || undefined,
           facultyId: departments.find(d => d.departmentId === selectedDepartmentId)?.facultyId || undefined,
+          academicYearId: selectedAcademicYearId || undefined,
           enrollmentStatus: selectedStatus || undefined,
         }}
       />
@@ -549,16 +550,7 @@ export default function StudentProfilePage() {
           setDeletingStudentId(null);
           setDeletingStudentName(undefined);
         }}
-        onConfirm={async () => {
-          if (!deletingStudentId) return;
-          const res = await studentsApi.deleteStudent(deletingStudentId);
-          if (res.success) {
-            toast.success('Xoá sinh viên thành công');
-            await fetchStudents();
-          } else {
-            toast.error(res.message || 'Xoá sinh viên thất bại');
-          }
-        }}
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   );

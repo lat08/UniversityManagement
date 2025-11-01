@@ -3,6 +3,7 @@ import {
   NotificationListResponse,
   NotificationDetailResponse,
   UnreadCountResponse,
+  UnreadCountByCategoryResponse,
   MarkAsReadResponse,
   MarkAllAsReadResponse,
   NotificationQueryParams
@@ -57,6 +58,12 @@ export const notificationApi = {
   // Lấy số lượng thông báo chưa đọc
   getUnreadCount: async (): Promise<UnreadCountResponse> => {
     const response = await api.get<UnreadCountResponse>('/v1/notifications/unread-count')
+    return response.data
+  },
+
+  // Lấy số lượng thông báo chưa đọc theo danh mục
+  getUnreadCountByCategory: async (): Promise<UnreadCountByCategoryResponse> => {
+    const response = await api.get<UnreadCountByCategoryResponse>('/v1/notifications/unread-count-by-category')
     return response.data
   }
 }

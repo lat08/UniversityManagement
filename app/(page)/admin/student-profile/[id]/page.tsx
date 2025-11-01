@@ -1,43 +1,81 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { MapPin, Mail, Phone, Calendar, User, School, Edit } from 'lucide-react';
+import { MapPin, Mail, Phone, Calendar, User, School, Edit, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { studentsApi } from '../lib/api/studentsApi';
-import { StudentDetail, getStatusDisplay } from '../lib/types/types';
+import { getStatusDisplay } from '../lib/types/types';
+import { useStudentDetail } from '../lib/hooks/useStudentDetail';
+import { useSemesters } from '../lib/hooks/useSemesters';
+import { useTuitionFees } from '../lib/hooks/useTuitionFees';
+import { useInsurances } from '../lib/hooks/useInsurances';
+import { useGrades } from '../lib/hooks/useGrades';
+import { DetailPageSkeleton } from '../components/LoadingSkeleton';
+import { GradeDetailModal } from '../components/GradeDetailModal';
+import { Grade } from '../lib/types/types';
 
 export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string;
+  
   const [activeTab, setActiveTab] = useState('basic');
-  const [studentData, setStudentData] = useState<StudentDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedTuitionSemester, setSelectedTuitionSemester] = useState<string>('');
+  const [selectedInsuranceSemester, setSelectedInsuranceSemester] = useState<string>('');
+  const [selectedAcademicSemester, setSelectedAcademicSemester] = useState<string>('');
+  const [isTuitionSemesterOpen, setIsTuitionSemesterOpen] = useState(false);
+  const [isInsuranceSemesterOpen, setIsInsuranceSemesterOpen] = useState(false);
+  const [isAcademicSemesterOpen, setIsAcademicSemesterOpen] = useState(false);
+  const [exportingTuition, setExportingTuition] = useState(false);
+  const [exportingInsurance, setExportingInsurance] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
+  const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
 
+  // Custom hooks for data fetching
+  const { studentData, loading: loadingStudent } = useStudentDetail(studentId);
+  const { semesters, getCurrentSemester } = useSemesters();
+  const { tuitionFees, loading: loadingTuition, fetchTuitionFees } = useTuitionFees(studentId);
+  const { insurances, loading: loadingInsurance, fetchInsurances } = useInsurances(studentId);
+  const { grades, loading: loadingGrades, fetchGrades } = useGrades(studentId);
+
+  // Initialize semester selection when semesters are loaded
   useEffect(() => {
-    fetchStudentDetail();
-  }, [studentId]);
-
-  const fetchStudentDetail = async () => {
-    try {
-      setLoading(true);
-      const response = await studentsApi.getStudentById(studentId);
-      if (response.success) {
-        setStudentData(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching student detail:', error);
-    } finally {
-      setLoading(false);
+    if (semesters.length > 0 && !selectedTuitionSemester) {
+      const currentSemester = getCurrentSemester();
+      const defaultSemester = currentSemester ? currentSemester.semesterId : semesters[0].semesterId;
+      setSelectedTuitionSemester(defaultSemester);
+      setSelectedInsuranceSemester(defaultSemester);
+      setSelectedAcademicSemester(defaultSemester);
     }
-  };
+  }, [semesters, selectedTuitionSemester, getCurrentSemester]);
 
-  const tabs = [
+  // Lazy load tuition fees only when tuition tab is active
+  useEffect(() => {
+    if (activeTab === 'tuition' && selectedTuitionSemester) {
+      fetchTuitionFees(selectedTuitionSemester);
+    }
+  }, [selectedTuitionSemester, activeTab, fetchTuitionFees]);
+
+  // Lazy load insurances only when tuition tab is active
+  useEffect(() => {
+    if (activeTab === 'tuition' && selectedInsuranceSemester) {
+      fetchInsurances(selectedInsuranceSemester);
+    }
+  }, [selectedInsuranceSemester, activeTab, fetchInsurances]);
+
+  // Lazy load grades only when academic tab is active
+  useEffect(() => {
+    if (activeTab === 'academic' && selectedAcademicSemester) {
+      fetchGrades(selectedAcademicSemester);
+    }
+  }, [selectedAcademicSemester, activeTab, fetchGrades]);
+
+  const tabs = useMemo(() => [
     { id: 'basic', label: 'Thông tin cơ bản' },
     { id: 'academic', label: 'Kết quả học tập' },
     { id: 'tuition', label: 'Học phí' },
-  ];
+  ], []);
 
   const handleEdit = () => {
     router.push(`/admin/student-profile/${studentId}/edit`);
@@ -45,35 +83,116 @@ export default function StudentDetailPage() {
 
   const handleBack = () => {
     router.push('/admin/student-profile');
+    router.refresh(); // Refresh to ensure list is up to date
   };
 
-  // Format date from YYYY-MM-DD to DD/MM/YYYY
-  const formatDate = (dateString: string) => {
+  // Format helpers - memoized
+  const formatDate = useMemo(() => (dateString: string) => {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
-  };
+  }, []);
 
-  // Format gender
-  const formatGender = (gender: string) => {
+  const formatGender = useMemo(() => (gender: string) => {
     const genderMap: Record<string, string> = {
       male: 'Nam',
       female: 'Nữ',
       other: 'Khác',
     };
     return genderMap[gender] || gender;
+  }, []);
+
+  const formatCurrency = useMemo(() => (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null) return '0';
+    return amount.toLocaleString('vi-VN');
+  }, []);
+
+  const formatDateTime = useMemo(() => (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }, []);
+
+  const getPaymentStatusDisplay = useMemo(() => (status: string) => {
+    const statusMap: Record<string, { label: string; color: string }> = {
+      paid: { label: 'Đã thanh toán', color: 'bg-green-100 text-green-700' },
+      pending: { label: 'Chưa thanh toán', color: 'bg-yellow-100 text-yellow-700' },
+      failed: { label: 'Thất bại', color: 'bg-red-100 text-red-700' },
+      partial: { label: 'Thanh toán một phần', color: 'bg-blue-100 text-blue-700' },
+    };
+    return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
+  }, []);
+
+  const getPaymentMethodDisplay = useMemo(() => (method: string | null) => {
+    if (!method) return '-';
+    const methodMap: Record<string, string> = {
+      cash: 'Tiền mặt',
+      bank_transfer: 'Chuyển khoản',
+      credit_card: 'Thẻ tín dụng',
+      momo: 'Ví MoMo',
+      zalopay: 'ZaloPay',
+    };
+    return methodMap[method] || method;
+  }, []);
+
+  // Export handlers
+  const handleExportTuition = async () => {
+    try {
+      setExportingTuition(true);
+      const blob = await studentsApi.exportTuitionFees({
+        studentId,
+        semesterId: selectedTuitionSemester,
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const semester = semesters.find(s => s.semesterId === selectedTuitionSemester);
+      const fileName = `HocPhi_${studentData?.studentCode}_${semester?.semesterCode || 'All'}.xlsx`;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting tuition fees:', error);
+    } finally {
+      setExportingTuition(false);
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg text-gray-600">Đang tải dữ liệu...</div>
-        </div>
-      </div>
-    );
+  const handleExportInsurance = async () => {
+    try {
+      setExportingInsurance(true);
+      const blob = await studentsApi.exportInsurances({
+        studentId,
+        semesterId: selectedInsuranceSemester,
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const semester = semesters.find(s => s.semesterId === selectedInsuranceSemester);
+      const fileName = `BaoHiem_${studentData?.studentCode}_${semester?.semesterCode || 'All'}.xlsx`;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting insurances:', error);
+    } finally {
+      setExportingInsurance(false);
+    }
+  };
+
+  if (loadingStudent) {
+    return <DetailPageSkeleton />;
   }
 
   if (!studentData) {
@@ -107,7 +226,7 @@ export default function StudentDetailPage() {
         <div className="p-6">
           <div className="flex items-start gap-6">
             {/* Avatar */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex flex-col items-center">
               <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
                 {studentData.profilePicture ? (
                   <Image
@@ -121,9 +240,9 @@ export default function StudentDetailPage() {
                   <User className="w-16 h-16 text-gray-400" />
                 )}
               </div>
-              <button className={`mt-3 w-32 text-xs text-white px-3 py-1.5 rounded-md cursor-pointer transition-colors ${statusDisplay.color === 'bg-green-100 text-green-700' ? 'bg-[#0053AD] hover:bg-[#003d82]' : 'bg-gray-500 hover:bg-gray-600'}`}>
+              <span className={`mt-4 w-32 text-center px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
                 {statusDisplay.label}
-              </button>
+              </span>
             </div>
 
             {/* Student Details */}
@@ -200,7 +319,11 @@ export default function StudentDetailPage() {
             </svg>
           </div>
           <p className="text-sm text-gray-600 mb-2">GPA</p>
-          <p className="text-4xl font-bold text-gray-900 mb-1">-</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">
+            {studentData.averageGPA !== null && studentData.averageGPA !== undefined 
+              ? studentData.averageGPA.toFixed(2) 
+              : '-'}
+          </p>
           <p className="text-xs text-gray-500">/4.0</p>
         </div>
 
@@ -211,8 +334,10 @@ export default function StudentDetailPage() {
             </svg>
           </div>
           <p className="text-sm text-gray-600 mb-2">Tín chỉ tích lũy</p>
-          <p className="text-4xl font-bold text-gray-900 mb-1">-</p>
-          <p className="text-xs text-gray-500">/120</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">
+            {studentData.earnedCredits ?? '-'}
+          </p>
+          <p className="text-xs text-gray-500">/{studentData.totalCreditsRequired ?? '-'}</p>
         </div>
 
         <div className="bg-orange-50 rounded-lg p-6 border border-gray-200 relative">
@@ -222,8 +347,16 @@ export default function StudentDetailPage() {
             </svg>
           </div>
           <p className="text-sm text-gray-600 mb-2">Công nợ</p>
-          <p className="text-4xl font-bold text-gray-900 mb-1">-</p>
-          <p className="text-xs text-gray-500">Đã thanh toán đầy đủ</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">
+            {studentData.unpaidAmount && studentData.unpaidAmount > 0 
+              ? `${formatCurrency(studentData.unpaidAmount)} ₫` 
+              : '0 ₫'}
+          </p>
+          <p className="text-xs text-gray-500">
+            {studentData.unpaidAmount && studentData.unpaidAmount > 0 
+              ? 'Chưa thanh toán đầy đủ' 
+              : 'Đã thanh toán đầy đủ'}
+          </p>
         </div>
       </div>
 
@@ -270,11 +403,11 @@ export default function StudentDetailPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6">
-          {/* Basic Info Tab */}
-          {activeTab === 'basic' && (
-            <div>
+      <div>
+        {/* Basic Info Tab */}
+        {activeTab === 'basic' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6">
               <div className="grid grid-cols-3 gap-x-12 gap-y-6">
                 {/* Thông tin cơ bản */}
                 <div>
@@ -346,29 +479,95 @@ export default function StudentDetailPage() {
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Academic Results Tab */}
-          {activeTab === 'academic' && (
-            <div>
+            {/* Footer Buttons */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={handleBack}
+                className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
+              >
+                Quay lại
+              </button>
+              <button
+                onClick={handleEdit}
+                className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+              >
+                Chỉnh sửa
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Academic Results Tab */}
+        {activeTab === 'academic' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-1">Kết quả học tập</h2>
                 <p className="text-sm text-gray-600">Bảng điểm và kết quả học tập theo học kỳ</p>
               </div>
 
-              {/* Semester Selector */}
-              <div className="mb-6">
+              {/* Semester Selector and GPA Summary */}
+              <div className="flex items-center justify-between mb-6">
                 <div className="relative w-80">
-                  <select className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent appearance-none cursor-pointer">
-                    <option>Học kỳ I (2021 - 2022)</option>
-                    <option>Học kỳ II (2021 - 2022)</option>
-                    <option>Học kỳ I (2022 - 2023)</option>
-                    <option>Học kỳ II (2022 - 2023)</option>
-                  </select>
-                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAcademicSemesterOpen(!isAcademicSemesterOpen);
+                      setIsTuitionSemesterOpen(false);
+                      setIsInsuranceSemesterOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
+                  >
+                    <span className="text-sm text-gray-900">
+                      {semesters.find(s => s.semesterId === selectedAcademicSemester)?.semesterName || 'Chọn học kì'} - {semesters.find(s => s.semesterId === selectedAcademicSemester)?.yearRange || ''}
+                    </span>
+                    <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+                  </button>
+                  {isAcademicSemesterOpen && (
+                    <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {semesters.map((semester) => (
+                        <button
+                          key={semester.semesterId}
+                          type="button"
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                          onClick={() => {
+                            setSelectedAcademicSemester(semester.semesterId);
+                            setIsAcademicSemesterOpen(false);
+                          }}
+                        >
+                          {semester.semesterName} - {semester.yearRange}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* GPA Summary */}
+                {grades && (
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600 mb-1">GPA thang 10</p>
+                      <p className="text-2xl font-bold text-[#0053AD]">{grades.semesterGPA10.toFixed(2)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600 mb-1">GPA thang 4</p>
+                      <p className="text-2xl font-bold text-[#0053AD]">{grades.semesterGPA4.toFixed(2)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600 mb-1">Xếp loại</p>
+                      <span className={`inline-block px-4 py-1.5 text-sm font-semibold rounded-lg ${
+                        grades.semesterClassification === 'Xuất sắc' ? 'bg-purple-100 text-purple-700' :
+                        grades.semesterClassification === 'Giỏi' ? 'bg-green-100 text-green-700' :
+                        grades.semesterClassification === 'Khá' ? 'bg-blue-100 text-blue-700' :
+                        grades.semesterClassification === 'Trung bình' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {grades.semesterClassification}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Grades Table */}
@@ -382,103 +581,356 @@ export default function StudentDetailPage() {
                       <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm thi</th>
                       <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK (10)</th>
                       <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK (4)</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK ( C )</th>
+                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK (C)</th>
                       <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Kết quả</th>
                       <th className="px-6 py-4 text-center font-semibold">Chi tiết</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    <tr>
-                      <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
-                        Chức năng đang được phát triển
-                      </td>
-                    </tr>
+                    {loadingGrades ? (
+                      <tr>
+                        <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                          <div className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-5 w-5 text-[#0053AD]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Đang tải...
+                          </div>
+                        </td>
+                      </tr>
+                    ) : !grades || grades.grades.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                          Không có dữ liệu điểm
+                        </td>
+                      </tr>
+                    ) : (
+                      grades.grades.map((grade) => (
+                        <tr key={grade.subjectId} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectCode}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                            {grade.finalGrade !== null ? grade.finalGrade.toFixed(2) : '-'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                            {grade.finalGrade10 !== null ? grade.finalGrade10.toFixed(2) : '-'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                            {grade.finalGrade4.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-center font-semibold">
+                            {grade.gradeLetter}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${
+                              grade.status === 'Đạt' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                            }`}>
+                              {grade.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={() => {
+                                setSelectedGrade(grade);
+                                setIsGradeModalOpen(true);
+                              }}
+                              className="text-gray-600 hover:text-[#0053AD] cursor-pointer transition-colors"
+                            >
+                              <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          )}
 
-          {/* Tuition Tab */}
-          {activeTab === 'tuition' && (
+            {/* Footer Buttons */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={handleBack}
+                className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
+              >
+                Quay lại
+              </button>
+              <button
+                onClick={handleEdit}
+                className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+              >
+                Chỉnh sửa
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Tuition Tab */}
+        {activeTab === 'tuition' && (
             <div>
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">Lịch sử học phí</h2>
-                <p className="text-sm text-gray-600">Thông tin thanh toán học phí</p>
+              {/* Tuition Fee Section */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div className="p-6">
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Lịch sử học phí</h2>
+                    <p className="text-sm text-gray-600">Thông tin thanh toán học phí</p>
+                  </div>
+
+                  {/* Semester Selector and Export */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="relative w-80">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsTuitionSemesterOpen(!isTuitionSemesterOpen);
+                          setIsInsuranceSemesterOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
+                      >
+                        <span className="text-sm text-gray-900">
+                          {semesters.find(s => s.semesterId === selectedTuitionSemester)?.semesterName || 'Chọn học kì'} - {semesters.find(s => s.semesterId === selectedTuitionSemester)?.yearRange || ''}
+                        </span>
+                        <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+                      </button>
+                      {isTuitionSemesterOpen && (
+                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {semesters.map((semester) => (
+                            <button
+                              key={semester.semesterId}
+                              type="button"
+                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                              onClick={() => {
+                                setSelectedTuitionSemester(semester.semesterId);
+                                setIsTuitionSemesterOpen(false);
+                              }}
+                            >
+                              {semester.semesterName} - {semester.yearRange}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button 
+                      onClick={handleExportTuition}
+                      disabled={exportingTuition || !tuitionFees || tuitionFees.courses.length === 0}
+                      className="px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {exportingTuition ? 'Đang xuất...' : 'Xuất Excel'}
+                    </button>
+                  </div>
+
+                  {/* Tuition Table */}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-[#0053AD] text-white text-sm">
+                          <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Mã môn học</th>
+                          <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Tên môn học</th>
+                          <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Số tín chỉ</th>
+                          <th className="px-6 py-4 text-right font-semibold border-r border-blue-400">Học phí</th>
+                          <th className="px-6 py-4 text-center font-semibold">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {loadingTuition ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                              <div className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-5 w-5 text-[#0053AD]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Đang tải...
+                              </div>
+                            </td>
+                          </tr>
+                        ) : !tuitionFees || tuitionFees.courses.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                              Không có dữ liệu học phí
+                            </td>
+                          </tr>
+                        ) : (
+                          <>
+                            {tuitionFees.courses.map((course) => {
+                              const statusDisplay = getPaymentStatusDisplay(course.status);
+                              return (
+                                <tr key={course.courseId} className="hover:bg-gray-50">
+                                  <td className="px-6 py-4 text-sm text-gray-900">{course.courseCode}</td>
+                                  <td className="px-6 py-4 text-sm text-gray-900">{course.courseName}</td>
+                                  <td className="px-6 py-4 text-sm text-gray-900 text-center">{course.credits}</td>
+                                  <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(course.courseFee)} ₫</td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
+                                      {statusDisplay.label}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                            <tr className="bg-gray-50 font-semibold">
+                              <td colSpan={2} className="px-6 py-4 text-sm text-gray-900 text-right">Tổng cộng:</td>
+                              <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                                {tuitionFees.courses.reduce((sum, course) => sum + course.credits, 0)} TC
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900 text-right">
+                                {formatCurrency(tuitionFees.courses.reduce((sum, course) => sum + course.courseFee, 0))} ₫
+                              </td>
+                              <td></td>
+                            </tr>
+                          </>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
 
-              {/* Semester Selector and Actions */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="relative w-80">
-                  <select className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent appearance-none cursor-pointer">
-                    <option>Học kỳ II - Năm học 2024 - 2025</option>
-                    <option>Học kỳ I - Năm học 2024 - 2025</option>
-                    <option>Học kỳ II - Năm học 2023 - 2024</option>
-                    <option>Học kỳ I - Năm học 2023 - 2024</option>
-                  </select>
-                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                <div className="flex gap-3">
-                  <button className="px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    In
-                  </button>
-                  <button className="px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Xuất Excel
-                  </button>
+              {/* Insurance Section */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="p-6">
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Lịch sử Bảo hiểm y tế</h2>
+                    <p className="text-sm text-gray-600">Thông tin thanh toán bảo hiểm y tế</p>
+                  </div>
+
+                  {/* Semester Selector and Export */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="relative w-80">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsInsuranceSemesterOpen(!isInsuranceSemesterOpen);
+                          setIsTuitionSemesterOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
+                      >
+                        <span className="text-sm text-gray-900">
+                          {semesters.find(s => s.semesterId === selectedInsuranceSemester)?.semesterName || 'Chọn học kì'} - {semesters.find(s => s.semesterId === selectedInsuranceSemester)?.yearRange || ''}
+                        </span>
+                        <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
+                      </button>
+                      {isInsuranceSemesterOpen && (
+                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {semesters.map((semester) => (
+                            <button
+                              key={semester.semesterId}
+                              type="button"
+                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                              onClick={() => {
+                                setSelectedInsuranceSemester(semester.semesterId);
+                                setIsInsuranceSemesterOpen(false);
+                              }}
+                            >
+                              {semester.semesterName} - {semester.yearRange}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button 
+                      onClick={handleExportInsurance}
+                      disabled={exportingInsurance || insurances.length === 0}
+                      className="px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {exportingInsurance ? 'Đang xuất...' : 'Xuất Excel'}
+                    </button>
+                  </div>
+
+                  {/* Insurance Table */}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-[#0053AD] text-white text-sm">
+                          <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Năm học</th>
+                          <th className="px-6 py-4 text-right font-semibold border-r border-blue-400">Phí bảo hiểm</th>
+                          <th className="px-6 py-4 text-center font-semibold">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {loadingInsurance ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                              <div className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-5 w-5 text-[#0053AD]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Đang tải...
+                              </div>
+                            </td>
+                          </tr>
+                        ) : insurances.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                              Không có dữ liệu bảo hiểm y tế
+                            </td>
+                          </tr>
+                        ) : (
+                          insurances.map((insurance) => {
+                            const statusDisplay = getPaymentStatusDisplay(insurance.status);
+                            return (
+                              <tr key={insurance.studentHealthInsuranceId} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 text-sm text-gray-900">{insurance.academicYear}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(insurance.healthInsuranceFee)} ₫</td>
+                                <td className="px-6 py-4 text-center">
+                                  <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
+                                    {statusDisplay.label}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
-              {/* Tuition Table */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-[#0053AD] text-white text-sm">
-                      <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Ngày</th>
-                      <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Nội dung</th>
-                      <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Số tiền</th>
-                      <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Phương thức</th>
-                      <th className="px-6 py-4 text-left font-semibold">Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                        Chức năng đang được phát triển
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              {/* Footer Buttons */}
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={handleBack}
+                  className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
+                >
+                  Quay lại
+                </button>
+                <button
+                  onClick={handleEdit}
+                  className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+                >
+                  Chỉnh sửa
+                </button>
               </div>
             </div>
           )}
-
-        </div>
-
-        {/* Footer Buttons */}
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            onClick={handleBack}
-            className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
-          >
-            Quay lại
-          </button>
-          <button
-            onClick={handleEdit}
-            className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
-          >
-            Chỉnh sửa
-          </button>
-        </div>
       </div>
+
+      {/* Grade Detail Modal */}
+      <GradeDetailModal
+        isOpen={isGradeModalOpen}
+        onClose={() => {
+          setIsGradeModalOpen(false);
+          setSelectedGrade(null);
+        }}
+        grade={selectedGrade}
+      />
     </div>
   );
 }
+

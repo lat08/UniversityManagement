@@ -117,6 +117,19 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, isSubmitting, onClose]);
+
   const fetchFaculties = async () => {
     try {
       const response = await studentsApi.getFaculties({
@@ -232,7 +245,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
           <button
             type="button"
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>

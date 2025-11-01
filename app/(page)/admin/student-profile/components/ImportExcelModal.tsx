@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { X, Upload, Download, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { studentsApi } from '../lib/api/studentsApi';
@@ -20,7 +20,7 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
   const [isImporting, setIsImporting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
@@ -72,7 +72,7 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!selectedFile || validationStatus !== 'valid') {
@@ -135,6 +135,19 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isImporting && validationStatus !== 'validating') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, isImporting, validationStatus, onClose]);
+
   const getInputBorderColor = () => {
     switch (validationStatus) {
       case 'valid':
@@ -169,7 +182,7 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
           <button
             type="button"
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>

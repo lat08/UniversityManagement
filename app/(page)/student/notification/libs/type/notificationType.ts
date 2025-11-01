@@ -42,6 +42,17 @@ export type UnreadCountResponse = BaseApiResponse<{
   unreadCount: number
 }>
 
+export type UnreadCountByCategoryResponse = BaseApiResponse<{
+  role: string
+  countByCategory: {
+    event: number
+    tuition: number
+    schedule: number
+    important: number
+    total: number
+  }
+}>
+
 export type MarkAsReadResponse = BaseApiResponse<{
   message: string
   notificationId: string
