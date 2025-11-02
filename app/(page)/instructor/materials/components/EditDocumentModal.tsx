@@ -26,6 +26,8 @@ interface EditDocumentModalProps {
   onClose: () => void;
   onSubmit?: (data: EditFormData) => void;
   document: Document | null;
+  courseClasses?: { id: string; name: string }[];
+  documentTypes?: { id: string; name: string }[];
 }
 
 export interface EditFormData {
@@ -43,6 +45,8 @@ export function EditDocumentModal({
   onClose,
   onSubmit,
   document,
+  courseClasses = [],
+  documentTypes = [],
 }: EditDocumentModalProps) {
   const [formData, setFormData] = useState<EditFormData>({
     subjectClass: "",
@@ -57,30 +61,15 @@ export function EditDocumentModal({
   const [errors, setErrors] = useState<Partial<Record<keyof EditFormData, string>>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const subjectClasses = [
-    { id: "web-230pm", name: "Lập trình web - 230PM" },
-    { id: "web-231pm", name: "Lập trình web - 231PM" },
-    { id: "network-230pm", name: "Mạng máy tính - 230PM" },
-    { id: "database-230pm", name: "Cơ sở dữ liệu - 230PM" },
-  ];
-
-  const documentTypes = [
-    { id: "slide", name: "Slide" },
-    { id: "document", name: "Tài liệu" },
-    { id: "exercise", name: "Bài tập" },
-  ];
-
   useEffect(() => {
     if (document && isOpen) {
-      // Map document data to form data
-      const subjectClassId = `${document.subject.toLowerCase().replace(/\s+/g, "-")}-${document.classCode.toLowerCase()}`;
       setFormData({
-        subjectClass: subjectClassId,
-        documentType: document.type,
+        subjectClass: document.courseClassId || "",
+        documentType: document.documentType || "",
         documentName: document.title,
-        description: "",
+        description: document.description || "",
         file: null,
-        existingFileName: `Baigiangso1.ppt`, // TODO: Get actual filename from API
+        existingFileName: document.title, // Use title as filename display
         shouldDeleteFile: false,
       });
       setErrors({});
@@ -205,9 +194,9 @@ export function EditDocumentModal({
                 <SelectValue placeholder="Chọn phương án" />
               </SelectTrigger>
               <SelectContent>
-                {subjectClasses.map((subjectClass) => (
-                  <SelectItem key={subjectClass.id} value={subjectClass.id}>
-                    {subjectClass.name}
+                {courseClasses.map((courseClass) => (
+                  <SelectItem key={courseClass.id} value={courseClass.id}>
+                    {courseClass.name}
                   </SelectItem>
                 ))}
               </SelectContent>

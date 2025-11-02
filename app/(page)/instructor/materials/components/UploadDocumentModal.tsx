@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react";
-import { Upload, X } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import {
@@ -24,6 +24,8 @@ interface UploadDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: UploadFormData) => void;
+  courseClasses?: { id: string; name: string }[];
+  documentTypes?: { id: string; name: string }[];
 }
 
 export interface UploadFormData {
@@ -38,6 +40,8 @@ export function UploadDocumentModal({
   isOpen,
   onClose,
   onSubmit,
+  courseClasses = [],
+  documentTypes = [],
 }: UploadDocumentModalProps) {
   const [formData, setFormData] = useState<UploadFormData>({
     subjectClass: "",
@@ -49,19 +53,6 @@ export function UploadDocumentModal({
 
   const [errors, setErrors] = useState<Partial<Record<keyof UploadFormData, string>>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const subjectClasses = [
-    { id: "web-230pm", name: "Lập trình web - 230PM" },
-    { id: "web-231pm", name: "Lập trình web - 231PM" },
-    { id: "network-230pm", name: "Mạng máy tính - 230PM" },
-    { id: "database-230pm", name: "Cơ sở dữ liệu - 230PM" },
-  ];
-
-  const documentTypes = [
-    { id: "slide", name: "Slide" },
-    { id: "document", name: "Tài liệu" },
-    { id: "exercise", name: "Bài tập" },
-  ];
 
   const handleInputChange = (field: keyof UploadFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -167,9 +158,9 @@ export function UploadDocumentModal({
                 <SelectValue placeholder="Chọn phương án" />
               </SelectTrigger>
               <SelectContent>
-                {subjectClasses.map((subjectClass) => (
-                  <SelectItem key={subjectClass.id} value={subjectClass.id}>
-                    {subjectClass.name}
+                {courseClasses.map((courseClass) => (
+                  <SelectItem key={courseClass.id} value={courseClass.id}>
+                    {courseClass.name}
                   </SelectItem>
                 ))}
               </SelectContent>
