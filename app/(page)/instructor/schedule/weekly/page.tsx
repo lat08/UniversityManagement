@@ -50,14 +50,14 @@ export default function InstructorWeeklySchedulePage() {
   const getColorClasses = (color: string, isHovered: boolean) => {
     const colors: Record<string, { bg: string; hover: string; border: string }> = {
       blue: {
-        bg: "bg-[var(--chart-1)]",
-        hover: "bg-[var(--primary-hover)]",
-        border: "border-[var(--primary)]",
+        bg: "bg-[var(--schedule-theory-bg)]",
+        hover: "bg-[var(--schedule-theory-bg-hover)]",
+        border: "border-[var(--schedule-theory-border)]",
       },
       red: {
-        bg: "bg-[var(--chart-4)]",
-        hover: "bg-[var(--error)]",
-        border: "border-[var(--error)]",
+        bg: "bg-[var(--schedule-practice-bg)]",
+        hover: "bg-[var(--schedule-practice-bg-hover)]",
+        border: "border-[var(--schedule-practice-border)]",
       },
       green: {
         bg: "bg-[var(--chart-2)]",
@@ -72,7 +72,7 @@ export default function InstructorWeeklySchedulePage() {
     }
 
     const colorClass = colors[color] || colors.blue
-    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--text-primary)]`
+    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--schedule-cell-text)]`
   }
 
   const handleMouseEnter = (courseId: string, event: React.MouseEvent) => {
@@ -383,7 +383,7 @@ export default function InstructorWeeklySchedulePage() {
               </div>
 
               {/* Print Button */}
-              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+              <button className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--schedule-print-bg)] text-[var(--schedule-print-text)] rounded-lg hover:bg-[var(--schedule-print-bg-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -512,7 +512,7 @@ export default function InstructorWeeklySchedulePage() {
                     <div className="w-[90px] flex-shrink-0">
                       <button 
                         className={cn(
-                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
+                          "w-full h-[60px] text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center transition-colors bg-[var(--schedule-header-bg)]",
                           canGoPrevious 
                             ? "cursor-pointer hover:opacity-90" 
                             : "cursor-not-allowed opacity-50"
@@ -533,7 +533,7 @@ export default function InstructorWeeklySchedulePage() {
                       return (
                         <div
                           key={day.value}
-                          className="flex-1 min-w-[120px] text-[var(--primary-foreground)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--primary)]"
+                          className="flex-1 min-w-[120px] text-[var(--schedule-header-text)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--schedule-header-bg)]"
                         >
                           <div className="font-semibold text-sm">{day.label}</div>
                           <div className="text-xs mt-1">{formattedDate || day.subLabel}</div>
@@ -545,7 +545,7 @@ export default function InstructorWeeklySchedulePage() {
                     <div className="w-[90px] flex-shrink-0">
                       <button 
                         className={cn(
-                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
+                          "w-full h-[60px] text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center transition-colors bg-[var(--schedule-header-bg)]",
                           canGoNext 
                             ? "cursor-pointer hover:opacity-90" 
                             : "cursor-not-allowed opacity-50"
@@ -563,7 +563,7 @@ export default function InstructorWeeklySchedulePage() {
                     {PERIODS.map((period: number) => (
                       <div key={period} className="flex gap-2 mb-2">
                         {/* Period Label */}
-                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
+                        <div className="w-[90px] flex-shrink-0 text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--schedule-header-bg)]">
                           Tiết {period}
                         </div>
 
@@ -576,7 +576,7 @@ export default function InstructorWeeklySchedulePage() {
                           return (
                             <div
                               key={`${day.value}-${period}`}
-                              className="flex-1 min-w-[100px] bg-gray-50 border border-gray-200 rounded-lg relative h-[52px]"
+                              className="flex-1 min-w-[100px] bg-[var(--schedule-empty-bg)] border border-[var(--schedule-empty-border)] rounded-lg relative h-[52px]"
                             >
                               {course && (
                                 <div
@@ -611,7 +611,7 @@ export default function InstructorWeeklySchedulePage() {
                         })}
 
                         {/* Time Column */}
-                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
+                        <div className="w-[90px] flex-shrink-0 text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--schedule-header-bg)]">
                           {PERIOD_TIMES.find((p: { period: number; time: string }) => p.period === period)?.time || ''}
                         </div>
                       </div>
@@ -690,7 +690,7 @@ export default function InstructorWeeklySchedulePage() {
                             <div className="pt-2 border-t border-gray-700">
                               <button
                                 onClick={() => handleScheduleChangeRequest(course.id)}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[var(--primary-foreground)] rounded text-xs font-medium transition-colors cursor-pointer bg-[var(--primary)] hover:bg-[var(--primary-hover)]"
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[var(--schedule-print-text)] rounded text-xs font-medium transition-colors cursor-pointer bg-[var(--schedule-print-bg)] hover:bg-[var(--schedule-print-bg-hover)]"
                               >
                                 <Calendar className="w-3 h-3" />
                                 Đề xuất đổi lịch

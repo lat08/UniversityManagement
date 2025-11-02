@@ -22,14 +22,14 @@ export default function WeeklySchedulePage() {
   const getColorClasses = (color: string, isHovered: boolean) => {
     const colors: Record<string, { bg: string; hover: string; border: string }> = {
       blue: {
-        bg: "bg-[var(--chart-1)]",
-        hover: "bg-[var(--primary-hover)]",
-        border: "border-[var(--primary)]",
+        bg: "bg-[var(--schedule-theory-bg)]",
+        hover: "bg-[var(--schedule-theory-bg-hover)]",
+        border: "border-[var(--schedule-theory-border)]",
       },
       red: {
-        bg: "bg-[var(--chart-4)]",
-        hover: "bg-[var(--error)]",
-        border: "border-[var(--error)]",
+        bg: "bg-[var(--schedule-practice-bg)]",
+        hover: "bg-[var(--schedule-practice-bg-hover)]",
+        border: "border-[var(--schedule-practice-border)]",
       },
       green: {
         bg: "bg-[var(--chart-2)]",
@@ -44,7 +44,7 @@ export default function WeeklySchedulePage() {
     }
 
     const colorClass = colors[color] || colors.blue
-    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--text-primary)]`
+    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--schedule-cell-text)]`
   }
 
   const handleMouseEnter = (courseId: string, event: React.MouseEvent) => {
@@ -425,7 +425,7 @@ export default function WeeklySchedulePage() {
 
               {/* Print Button */}
               <button 
-                className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--button-primary)] text-[var(--primary-foreground)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[var(--schedule-print-bg)] text-[var(--schedule-print-text)] rounded-lg hover:bg-[var(--schedule-print-bg-hover)] focus:outline-none cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleExportPDF}
                 disabled={isLoading || !selectedSemester || !selectedWeek || (viewType === 'subject' && !selectedSubject)}
               >
@@ -555,7 +555,7 @@ export default function WeeklySchedulePage() {
                     <div className="w-[90px] flex-shrink-0">
                       <button 
                         className={cn(
-                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
+                          "w-full h-[60px] text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center transition-colors bg-[var(--schedule-header-bg)]",
                           canGoPrevious 
                             ? "cursor-pointer hover:opacity-90" 
                             : "cursor-not-allowed opacity-50"
@@ -576,7 +576,7 @@ export default function WeeklySchedulePage() {
                       return (
                         <div
                           key={day.value}
-                          className="flex-1 min-w-[120px] text-[var(--primary-foreground)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--primary)]"
+                          className="flex-1 min-w-[120px] text-[var(--schedule-header-text)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--schedule-header-bg)]"
                         >
                           <div className="font-semibold text-sm">{day.label}</div>
                           <div className="text-xs mt-1">{formattedDate || day.subLabel}</div>
@@ -588,7 +588,7 @@ export default function WeeklySchedulePage() {
                     <div className="w-[90px] flex-shrink-0">
                       <button 
                         className={cn(
-                          "w-full h-[60px] text-[var(--primary-foreground)] rounded-lg flex items-center justify-center transition-colors bg-[var(--primary)]",
+                          "w-full h-[60px] text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center transition-colors bg-[var(--schedule-header-bg)]",
                           canGoNext 
                             ? "cursor-pointer hover:opacity-90" 
                             : "cursor-not-allowed opacity-50"
@@ -606,7 +606,7 @@ export default function WeeklySchedulePage() {
                     {PERIODS.map((period: number) => (
                       <div key={period} className="flex gap-2 mb-2">
                         {/* Period Label */}
-                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
+                        <div className="w-[90px] flex-shrink-0 text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--schedule-header-bg)]">
                           Tiết {period}
                         </div>
 
@@ -619,7 +619,7 @@ export default function WeeklySchedulePage() {
                           return (
                             <div
                               key={`${day.value}-${period}`}
-                              className="flex-1 min-w-[100px] bg-gray-50 border border-gray-200 rounded-lg relative h-[52px]"
+                              className="flex-1 min-w-[100px] bg-[var(--schedule-empty-bg)] border border-[var(--schedule-empty-border)] rounded-lg relative h-[52px]"
                             >
                               {course && (
                                 <div
@@ -654,7 +654,7 @@ export default function WeeklySchedulePage() {
                         })}
 
                         {/* Time Column */}
-                        <div className="w-[90px] flex-shrink-0 text-[var(--primary-foreground)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--primary)]">
+                        <div className="w-[90px] flex-shrink-0 text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--schedule-header-bg)]">
                           {PERIOD_TIMES.find((p: { period: number; time: string }) => p.period === period)?.time || ''}
                         </div>
                       </div>

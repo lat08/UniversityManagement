@@ -198,7 +198,7 @@ export default function ScoresPage() {
       {/* Tổng quan điểm số - Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Card 1: Điểm trung bình */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-gpa-bg)', borderColor: 'var(--grade-card-gpa-border)', borderWidth: '1px', borderStyle: 'solid' }}>
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Điểm trung bình</p>
           <div className="flex items-baseline gap-2">
             <p className="text-3xl sm:text-4xl font-bold text-gray-900">{scoreOverview.gpa4}</p>
@@ -207,7 +207,7 @@ export default function ScoresPage() {
         </div>
 
         {/* Card 2: Tổng tín chỉ hoàn thành */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-credit-bg)', borderColor: 'var(--grade-card-credit-border)', borderWidth: '1px', borderStyle: 'solid' }}>
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Tổng tín chỉ hoàn thành</p>
           <div className="flex items-baseline gap-2">
             <p className="text-3xl sm:text-4xl font-bold text-gray-900">{scoreOverview.totalCredits}</p>
@@ -216,7 +216,7 @@ export default function ScoresPage() {
         </div>
 
         {/* Card 3: Môn đã hoàn thành */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-course-bg)', borderColor: 'var(--grade-card-course-border)', borderWidth: '1px', borderStyle: 'solid' }}>
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Môn đã hoàn thành</p>
           <div className="flex items-baseline gap-2">
             <p className="text-3xl sm:text-4xl font-bold text-gray-900">{scoreOverview.completedCourses}</p>
@@ -252,7 +252,7 @@ export default function ScoresPage() {
               <div className="flex gap-2 p-2 border-b border-gray-200">
                 <button
                   type="button"
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-[#0053AD] rounded hover:bg-[#003d82] cursor-pointer transition-colors"
+                  className="flex-1 px-3 py-1.5 text-xs font-medium text-white rounded cursor-pointer transition-colors bg-[var(--grade-filter-select-bg)] hover:bg-[var(--grade-filter-select-hover)]"
                   onClick={() => {
                     setSelectedSemesters(commonSemesters.map(s => s.semesterId));
                   }}
@@ -294,7 +294,7 @@ export default function ScoresPage() {
                     >
                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                         isSelected 
-                          ? 'bg-[#0053AD] border-[#0053AD]' 
+                          ? 'bg-[var(--grade-filter-checkbox-bg)] border-[var(--grade-filter-checkbox-border)]' 
                           : 'border-gray-300'
                       }`}>
                         {isSelected && (
@@ -317,7 +317,7 @@ export default function ScoresPage() {
           </label>
           <Button 
             onClick={exportPdf}
-            className="bg-[#0053AD] hover:bg-[#003d82] text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg w-full sm:w-auto flex items-center justify-center transition-colors cursor-pointer text-xs sm:text-sm"
+            className="text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg w-full sm:w-auto flex items-center justify-center transition-colors cursor-pointer text-xs sm:text-sm bg-[var(--grade-export-bg)] hover:bg-[var(--grade-export-hover)]"
           >
             <Printer className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             In bảng điểm
@@ -334,7 +334,7 @@ export default function ScoresPage() {
           return (
             <div key={semester.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               {/* Semester Header */}
-              <div className="px-3 sm:px-6 py-3 sm:py-4 bg-[#ADD8E6]">
+              <div className="px-3 sm:px-6 py-3 sm:py-4 bg-[var(--grade-semester-header-bg)]">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">{semester.semester}</h3>
               </div>
 
@@ -342,16 +342,16 @@ export default function ScoresPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs sm:text-sm">
                   <thead>
-                    <tr className="bg-[#0053AD]">
-                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-white whitespace-nowrap">Mã MH</th>
-                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-white min-w-[120px] sm:min-w-0">Tên môn học</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-white">TC</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-white whitespace-nowrap">Điểm thi</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-white whitespace-nowrap">TK (10)</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-white whitespace-nowrap">TK (4)</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-white whitespace-nowrap">TK (C)</th>
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-white whitespace-nowrap">Kết quả</th>
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-white whitespace-nowrap">Chi tiết</th>
+                    <tr className="bg-[var(--grade-table-header-bg)]">
+                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Mã MH</th>
+                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-[var(--grade-table-header-text)] min-w-[120px] sm:min-w-0">Tên môn học</th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)]">TC</th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Điểm thi</th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">TK (10)</th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">TK (4)</th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">TK (C)</th>
+                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Kết quả</th>
+                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Chi tiết</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white">
@@ -380,7 +380,7 @@ export default function ScoresPage() {
                             {letterGrade || "-"}
                           </td>
                           <td className="py-2 px-2 sm:py-3.5 sm:px-3 text-center">
-                            <span className={`font-medium ${course.status === "Đạt" ? "text-green-600" : "text-red-600"}`}>
+                            <span className={`font-medium ${course.status === "Đạt" ? "text-[var(--grade-pass-text)]" : "text-[var(--grade-fail-text)]"}`}>
                               {course.status}
                             </span>
                           </td>
@@ -402,34 +402,35 @@ export default function ScoresPage() {
               </div>
 
               {/* Summary Section - Separated Block */}
-              <div className="bg-[#E8E8E8] px-3 sm:px-6 py-3 sm:py-5">
+              <div className="bg-[var(--grade-summary-bg)] px-3 sm:px-6 py-3 sm:py-5">
                 <div className="space-y-1.5 sm:space-y-2">
                   <div className="flex items-center">
                     <span className="text-xs sm:text-sm font-bold text-gray-900">
-                      Điểm trung bình tích lũy hệ 4: <span className="text-[#4196F0]">{stats.semesterGPA4}</span>
+                      Điểm trung bình tích lũy hệ 4: <span className="text-[var(--grade-summary-highlight)]">{stats.semesterGPA4}</span>
                     </span>
                   </div>
                   <div className="flex items-center">
                     <span className="text-xs sm:text-sm font-bold text-gray-900">
-                      Điểm trung bình tích lũy hệ 10: <span className="text-[#4196F0]">{stats.semesterGPA10}</span>
+                      Điểm trung bình tích lũy hệ 10: <span className="text-[var(--grade-summary-highlight)]">{stats.semesterGPA10}</span>
                     </span>
                   </div>
                   <div className="flex items-center">
                     <span className="text-xs sm:text-sm font-bold text-gray-900">
-                      Số tín chỉ tích lũy: <span className="text-[#4196F0]">{stats.totalCredits}</span>
+                      Số tín chỉ tích lũy: <span className="text-[var(--grade-summary-highlight)]">{stats.totalCredits}</span>
                     </span>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs sm:text-sm font-bold text-gray-900">Phân loại học lực học kỳ:</span>
                     {stats.classification && (
-                      <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold ${
-                        stats.classification === "Xuất sắc" ? "bg-yellow-400 text-gray-900" :
-                        stats.classification === "Giỏi" ? "bg-green-500 text-white" :
-                        stats.classification === "Khá" ? "bg-blue-500 text-white" :
-                        stats.classification === "Trung bình" ? "bg-orange-500 text-white" :
-                        stats.classification === "Yếu" ? "bg-red-500 text-white" :
-                        "bg-gray-400 text-white"
-                      }`}>
+                      <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-white`} style={{
+                        backgroundColor: 
+                          stats.classification === "Xuất sắc" ? "var(--grade-class-excellent-bg)" :
+                          stats.classification === "Giỏi" ? "var(--grade-class-good-bg)" :
+                          stats.classification === "Khá" ? "var(--grade-class-fair-bg)" :
+                          stats.classification === "Trung bình" ? "var(--grade-class-average-bg)" :
+                          stats.classification === "Yếu" ? "var(--grade-class-weak-bg)" :
+                          "#9ca3af"
+                      }}>
                         {stats.classification}
                       </span>
                     )}
@@ -453,7 +454,7 @@ export default function ScoresPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-[#0053AD] to-[#003d82] border-b border-gray-200">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ background: 'var(--grade-modal-header-bg)' }}>
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <h3 className="text-base sm:text-xl font-semibold text-white mb-1">{courseDetails[selectedCourse].name}</h3>
@@ -501,7 +502,7 @@ export default function ScoresPage() {
             <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex justify-end rounded-b-lg">
               <button
                 onClick={handleCloseDetail}
-                className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
+                className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-lg cursor-pointer transition-colors bg-[var(--grade-modal-close-btn)] hover:bg-[var(--grade-modal-close-btn-hover)]"
               >
                 Đóng
               </button>

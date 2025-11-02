@@ -122,6 +122,53 @@ export interface ThemeColors {
   classlistEmptyBg: string;
   classlistEmptyText: string;
   classlistEmptyIcon: string;
+  // Schedule Page Colors - Weekly View
+  scheduleHeaderBg: string;
+  scheduleHeaderText: string;
+  scheduleTheoryBg: string;
+  scheduleTheoryBgHover: string;
+  scheduleTheoryBorder: string;
+  schedulePracticeBg: string;
+  schedulePracticeBgHover: string;
+  schedulePracticeBorder: string;
+  scheduleCellText: string;
+  schedulePrintBg: string;
+  schedulePrintBgHover: string;
+  schedulePrintText: string;
+  scheduleEmptyBg: string;
+  scheduleEmptyBorder: string;
+  // Grades Page Colors - Overview Cards
+  gradeCardGpaBg: string;
+  gradeCardGpaBorder: string;
+  gradeCardCreditBg: string;
+  gradeCardCreditBorder: string;
+  gradeCardCourseBg: string;
+  gradeCardCourseBorder: string;
+  // Grades Page Colors - Filter & Export
+  gradeFilterSelectBg: string;
+  gradeFilterSelectHover: string;
+  gradeFilterCheckboxBg: string;
+  gradeFilterCheckboxBorder: string;
+  gradeExportBg: string;
+  gradeExportHover: string;
+  // Grades Page Colors - Table
+  gradeSemesterHeaderBg: string;
+  gradeTableHeaderBg: string;
+  gradeTableHeaderText: string;
+  gradePassText: string;
+  gradeFailText: string;
+  // Grades Page Colors - Summary
+  gradeSummaryBg: string;
+  gradeSummaryHighlight: string;
+  gradeClassExcellentBg: string;
+  gradeClassGoodBg: string;
+  gradeClassFairBg: string;
+  gradeClassAverageBg: string;
+  gradeClassWeakBg: string;
+  // Grades Page Colors - Modal
+  gradeModalHeaderBg: string;
+  gradeModalCloseBtn: string;
+  gradeModalCloseBtnHover: string;
 }
 
 export interface ThemeConfig {

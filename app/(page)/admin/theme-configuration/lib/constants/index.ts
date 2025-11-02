@@ -188,6 +188,59 @@ export function getCompleteThemeColors(isDarkMode: boolean = false): ThemeColors
     classlistEmptyBg: colors.classlistEmptyBg || '#f9fafb',
     classlistEmptyText: colors.classlistEmptyText || '#6b7280',
     classlistEmptyIcon: colors.classlistEmptyIcon || '#9ca3af',
+    
+    // Schedule Page Colors - Weekly View
+    scheduleHeaderBg: colors.scheduleHeaderBg || '#4E8EE1',
+    scheduleHeaderText: colors.scheduleHeaderText || '#ffffff',
+    scheduleTheoryBg: colors.scheduleTheoryBg || '#dbeafe',
+    scheduleTheoryBgHover: colors.scheduleTheoryBgHover || '#3b82f6',
+    scheduleTheoryBorder: colors.scheduleTheoryBorder || '#4E8EE1',
+    schedulePracticeBg: colors.schedulePracticeBg || '#fee2e2',
+    schedulePracticeBgHover: colors.schedulePracticeBgHover || '#ef4444',
+    schedulePracticeBorder: colors.schedulePracticeBorder || '#ef4444',
+    scheduleCellText: colors.scheduleCellText || '#1f2937',
+    schedulePrintBg: colors.schedulePrintBg || '#4E8EE1',
+    schedulePrintBgHover: colors.schedulePrintBgHover || '#3d7bc9',
+    schedulePrintText: colors.schedulePrintText || '#ffffff',
+    scheduleEmptyBg: colors.scheduleEmptyBg || '#f9fafb',
+    scheduleEmptyBorder: colors.scheduleEmptyBorder || '#e5e7eb',
+    
+    // Grades Page Colors - Overview Cards
+    gradeCardGpaBg: colors.gradeCardGpaBg || 'linear-gradient(to bottom right, #ffedd5, #fed7aa)',
+    gradeCardGpaBorder: colors.gradeCardGpaBorder || '#fdba74',
+    gradeCardCreditBg: colors.gradeCardCreditBg || 'linear-gradient(to bottom right, #fce7f3, #fbcfe8)',
+    gradeCardCreditBorder: colors.gradeCardCreditBorder || '#f9a8d4',
+    gradeCardCourseBg: colors.gradeCardCourseBg || 'linear-gradient(to bottom right, #ccfbf1, #99f6e4)',
+    gradeCardCourseBorder: colors.gradeCardCourseBorder || '#5eead4',
+    
+    // Grades Page Colors - Filter & Export
+    gradeFilterSelectBg: colors.gradeFilterSelectBg || '#0053AD',
+    gradeFilterSelectHover: colors.gradeFilterSelectHover || '#003d82',
+    gradeFilterCheckboxBg: colors.gradeFilterCheckboxBg || '#0053AD',
+    gradeFilterCheckboxBorder: colors.gradeFilterCheckboxBorder || '#0053AD',
+    gradeExportBg: colors.gradeExportBg || '#0053AD',
+    gradeExportHover: colors.gradeExportHover || '#003d82',
+    
+    // Grades Page Colors - Table
+    gradeSemesterHeaderBg: colors.gradeSemesterHeaderBg || '#ADD8E6',
+    gradeTableHeaderBg: colors.gradeTableHeaderBg || '#0053AD',
+    gradeTableHeaderText: colors.gradeTableHeaderText || '#ffffff',
+    gradePassText: colors.gradePassText || '#16a34a',
+    gradeFailText: colors.gradeFailText || '#dc2626',
+    
+    // Grades Page Colors - Summary
+    gradeSummaryBg: colors.gradeSummaryBg || '#E8E8E8',
+    gradeSummaryHighlight: colors.gradeSummaryHighlight || '#4196F0',
+    gradeClassExcellentBg: colors.gradeClassExcellentBg || '#facc15',
+    gradeClassGoodBg: colors.gradeClassGoodBg || '#22c55e',
+    gradeClassFairBg: colors.gradeClassFairBg || '#3b82f6',
+    gradeClassAverageBg: colors.gradeClassAverageBg || '#f97316',
+    gradeClassWeakBg: colors.gradeClassWeakBg || '#ef4444',
+    
+    // Grades Page Colors - Modal
+    gradeModalHeaderBg: colors.gradeModalHeaderBg || 'linear-gradient(to right, #0053AD, #003d82)',
+    gradeModalCloseBtn: colors.gradeModalCloseBtn || '#0053AD',
+    gradeModalCloseBtnHover: colors.gradeModalCloseBtnHover || '#003d82',
   };
   
   return completeColors;
