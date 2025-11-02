@@ -82,8 +82,6 @@ pipeline {
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://136.110.20.54:9000 \
                             -Dsonar.login="$SONAR_TOKEN" \
-                            -Dsonar.branch.name=develop \
-                            -Dsonar.branch.target=deploy \
                             -Dsonar.exclusions=**/.next/**,**/node_modules/**,**/coverage/** \
                             -Dsonar.sourceEncoding=UTF-8
                         
