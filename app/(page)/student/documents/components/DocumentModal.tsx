@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { X, Download, Eye, ChevronDown, HardDrive, FileText, Book, User, BookText } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import type { CourseGroup, DocumentItem } from '../types/types';
-import { formatFileSize, formatDate } from '../utils/documentUtils';
-import { useState } from 'react';
+import type { CourseGroup, DocumentItem } from '../lib/types/types';
+import { formatFileSize, formatDate } from '../lib/utils/documentUtils';
 
 interface DocumentModalProps {
   courseGroup: CourseGroup | null;
@@ -25,8 +25,6 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
     window.open(doc.previewUrl, '_blank');
   };
 
-
-
   const toggleDocExpand = (docId: string) => {
     setExpandedDocId(expandedDocId === docId ? null : docId);
   };
@@ -34,21 +32,22 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-sm shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="bg-blue-500 text-white px-6 py-4 rounded-t-sm">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold">{courseGroup.courseName}</h2>
             </div>
-            <button onClick={onClose} className="text-white hover:bg-blue-700 rounded-full p-1 transition-colors">
+            <button 
+              onClick={onClose} 
+              className="text-white hover:bg-blue-700 rounded-full p-1 transition-colors"
+              aria-label="Đóng"
+            >
               <X className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6">
-          {/* I. General Information */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">I. Thông tin chung</h3>
             <div className="space-y-3">
@@ -71,12 +70,9 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                   <p className="font-medium text-gray-900">{courseGroup.uploadedByName}</p>
                 </div>
               </div>
-
-              
             </div>
           </div>
 
-          {/* II. Related Documents */}
           {courseGroup.documents && courseGroup.documents.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">II. Bài giảng chi tiết</h3>
@@ -84,8 +80,7 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                 {courseGroup.documents.map((doc) => {
                   const isExpanded = expandedDocId === doc.documentId;
                   return (
-                    <div key={doc.documentId} className="border border-black-900 bg-gray-50 rounded-sm overflow-hidden">
-                      {/* Document Header - Always visible */}
+                    <div key={doc.documentId} className="border border-gray-900 bg-gray-50 rounded-sm overflow-hidden">
                       <div 
                         onClick={() => toggleDocExpand(doc.documentId)}
                         className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
@@ -96,11 +91,9 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                           </div>
                           <div>
                             <h4 className="font-medium text-gray-900">{doc.fileTitle}</h4>
-                            
-                              <p className="text-sm text-gray-500">
-                                {formatDate(doc.created)}
-                              </p>
-                            
+                            <p className="text-sm text-gray-500">
+                              {formatDate(doc.created)}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center">
@@ -110,11 +103,9 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                         </div>
                       </div>
                       
-                      {/* Expanded Content */}
                       {isExpanded && (
                         <div className="px-4 pb-4 pt-1">
                           <div className="flex justify-between items-start space-y-2 mb-3">
-
                             <div className="flex flex-col items-start gap-2">
                               {doc.description && (
                                 <div className="flex items-center text-sm text-gray-600">
@@ -128,16 +119,23 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <Button onClick={() => handleViewOnline(doc)} variant="outline" size="sm" className="w-full border-blue-600 text-blue-600 hover:bg-blue-50">
+                              <Button 
+                                onClick={() => handleViewOnline(doc)} 
+                                variant="outline" 
+                                size="sm" 
+                                className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                              >
                                 <Eye className="w-4 h-4 mr-1" /> Xem
                               </Button>
-                              <Button onClick={() => handleDownload(doc)} size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                              <Button 
+                                onClick={() => handleDownload(doc)} 
+                                size="sm" 
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                              >
                                 <Download className="w-4 h-4 mr-1" /> Tải
                               </Button>
                             </div>
-
                           </div>
-                          
                         </div>
                       )}
                     </div>
@@ -151,5 +149,4 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
     </div>
   );
 };
-
 

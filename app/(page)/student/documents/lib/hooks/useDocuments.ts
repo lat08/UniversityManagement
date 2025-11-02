@@ -1,37 +1,89 @@
 import { useState, useEffect, useCallback } from 'react';
 import { documentsApi } from '../api/documentsApi';
-import { CourseGroup } from '../types/types';
+import { CourseGroup, GetMaterialsParams } from '../types/types';
+import { AxiosError } from 'axios';
 
 interface UseDocumentsReturn {
   courseGroups: CourseGroup[];
   loading: boolean;
   error: string | null;
-  refetch: () => Promise<void>;
+  refetch: () => void;
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
-export const useDocuments = (): UseDocumentsReturn => {
+/**
+ * Custom hook to fetch and manage documents data
+ * @param params - Optional search and filter parameters
+ * @returns Documents data, loading state, error state, and refetch function
+ */
+export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn => {
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [hasNext, setHasNext] = useState<boolean>(false);
+  const [hasPrevious, setHasPrevious] = useState<boolean>(false);
 
   const fetchDocuments = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await documentsApi.getDocuments();
+      console.log('[useDocuments] 🔍 Fetching with params:', params);
+      const response = await documentsApi.getMaterials(params);
       
-      if (response.success) {
-        setCourseGroups(response.data);
+      console.log('[useDocuments] 📦 Full response:', response);
+      console.log('[useDocuments] 📦 Response data:', response.data);
+      console.log('[useDocuments] 📦 Response data.data:', response.data?.data);
+      
+      if (response.success && response.data) {
+        const items = response.data.data || [];
+        console.log('[useDocuments] ✅ Setting courseGroups:', items);
+        console.log('[useDocuments] ✅ Items count:', items.length);
+        
+        setCourseGroups(items);
+        setTotalCount(response.data.total || 0);
+        // Since the new API doesn't return pagination info, we'll use defaults
+        setPageNumber(params?.pageNumber || 1);
+        setPageSize(params?.pageSize || 10);
+        setTotalPages(0);
+        setHasNext(false);
+        setHasPrevious(false);
       } else {
-        setError('Không thể tải dữ liệu tài liệu');
+        console.warn('[useDocuments] ⚠️ Response not successful:', response);
+        setError(response.message || 'Không thể tải dữ liệu tài liệu');
+        setCourseGroups([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
+      console.error('[useDocuments] Error:', err);
+      const axiosErr = err as AxiosError<{ message?: string; data?: { message?: string } }>;
+      const errorMessage = 
+        axiosErr.response?.data?.message || 
+        axiosErr.response?.data?.data?.message ||
+        axiosErr.message ||
+        'Đã xảy ra lỗi khi tải tài liệu. Vui lòng thử lại sau.';
+      setError(errorMessage);
+      setCourseGroups([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    params?.searchTerm, 
+    params?.documentType,
+    params?.semesterId,
+    params?.subjectId,
+    params?.pageNumber, 
+    params?.pageSize
+  ]);
 
   useEffect(() => {
     fetchDocuments();
@@ -41,8 +93,13 @@ export const useDocuments = (): UseDocumentsReturn => {
     courseGroups,
     loading,
     error,
-    refetch: fetchDocuments
+    refetch: fetchDocuments,
+    totalCount,
+    pageNumber,
+    pageSize,
+    totalPages,
+    hasNext,
+    hasPrevious,
   };
 };
-
 
