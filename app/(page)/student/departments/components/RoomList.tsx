@@ -6,7 +6,6 @@ import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Monitor } from 'lucide-react';
-import Image from 'next/image';
 import BookingModal from './BookingModal';
 import type { Room } from '../lib/stores/roomBookingStore';
 import { 
@@ -42,14 +41,11 @@ const RoomImage = ({ src, alt }: { src: string | null; alt: string }) => {
   }
 
   return (
-    <Image
+    <img
       src={src}
       alt={alt}
-      fill
-      className="object-cover"
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      className="w-full h-full object-cover"
       onError={() => setImageError(true)}
-      unoptimized={!src.includes('supabase')}
     />
   );
 };
