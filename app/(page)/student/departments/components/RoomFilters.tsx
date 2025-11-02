@@ -70,9 +70,9 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
   };
 
   return (
-    <div className="mb-4 flex gap-4 items-stretch w-full">
+    <div className="mb-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
       {/* Sức chứa tối thiểu */}
-      <div className="relative flex-1">
+      <div className="relative">
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Sức chứa tối thiểu</label>
         <input
           type="number"
@@ -85,7 +85,7 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
       </div>
 
       {/* Vị trí (Tòa nhà) Dropdown */}
-      <div className="relative flex-1 dropdown-container" data-dropdown="building">
+      <div className="relative dropdown-container" data-dropdown="building">
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Cơ sở</label>
         <button 
           className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
@@ -128,7 +128,7 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
       </div>
 
       {/* Loại phòng Dropdown */}
-      <div className="relative flex-1 dropdown-container" data-dropdown="roomType">
+      <div className="relative dropdown-container" data-dropdown="roomType">
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Khoa</label>
         <button 
           className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
@@ -171,7 +171,7 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
       </div>
 
       {/* Trạng thái Dropdown */}
-      <div className="relative flex-1 dropdown-container" data-dropdown="status">
+      <div className="relative dropdown-container" data-dropdown="status">
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Trạng thái</label>
         <button 
           className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"

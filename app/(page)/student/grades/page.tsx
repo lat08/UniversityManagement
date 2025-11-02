@@ -188,15 +188,15 @@ export default function ScoresPage() {
   }
 
   return (
-      <div className="min-h-screen p-3 sm:p-6">
+      <div className="space-y-4 lg:space-y-6">
         {/* Header */}
-        <div className="mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Điểm số</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Xem kết quả học tập các môn học</p>
-        </div>
+        <header className="space-y-2">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Điểm số</h1>
+          <p className="text-sm text-gray-600">Xem kết quả học tập các môn học</p>
+        </header>
 
       {/* Tổng quan điểm số - Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Card 1: Điểm trung bình */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Điểm trung bình</p>
@@ -226,7 +226,7 @@ export default function ScoresPage() {
       </div>
 
       {/* Filter & Export */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="relative w-full sm:w-auto" ref={semesterRef}>
           <label className="block text-xs sm:text-sm font-medium text-gray-900 mb-2">
             Lọc theo học kỳ (Multi-select)
