@@ -21,20 +21,28 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Initialize SignalR connection for real-time theme updates
   useThemeSignalR();
 
-  // Load active theme from backend on mount
+  // Load active theme from backend on mount - CRITICAL for theme sync
   useEffect(() => {
+    let isMounted = true;
+    
     const loadActiveTheme = async () => {
       try {
         const response = await themeApi.getActive('global');
-        if (response.data) {
+        if (response.data && isMounted) {
+          // Force update the theme from backend (overwrites persisted state)
           setCurrentTheme(response.data);
+          console.log('[ThemeProvider] Loaded active theme from backend:', response.data.themeName);
         }
       } catch (error) {
-        // Continue with default theme from store
+        console.warn('[ThemeProvider] Failed to load active theme from backend, using persisted theme');
       }
     };
     
     loadActiveTheme();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [setCurrentTheme]);
 
   useEffect(() => {

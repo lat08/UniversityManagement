@@ -19,7 +19,8 @@ export default function ThemeConfigurationPage() {
     currentTheme, 
     updateThemeColors, 
     toggleDarkMode,
-    isDarkMode
+    isDarkMode,
+    setCurrentTheme
   } = useTheme();
   
   const queryClient = useQueryClient();
@@ -79,7 +80,7 @@ export default function ThemeConfigurationPage() {
       }
       
       // Update theme - backend will merge colors automatically
-      await themeApi.update(activeTheme.themeConfigId, { colors });
+      const updateResponse = await themeApi.update(activeTheme.themeConfigId, { colors });
       
       // Apply theme to broadcast changes
       await themeApi.apply({ 
@@ -87,10 +88,19 @@ export default function ThemeConfigurationPage() {
         changeReason: 'Theme colors updated' 
       });
       
-      return colors;
+      return updateResponse.data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedTheme) => {
       toast.success('Cập nhật màu sắc thành công!');
+      
+      // CRITICAL: Update the entire theme in Zustand store with the backend response
+      if (updatedTheme) {
+        setCurrentTheme(updatedTheme);
+        
+        // Also update the editing colors state to reflect the saved values
+        setEditingColors(updatedTheme.colors as unknown as Record<string, string>);
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['themes'] });
     },
     onError: () => {
@@ -175,7 +185,15 @@ export default function ThemeConfigurationPage() {
 
   useEffect(() => {
     if (currentTheme?.colors) {
-      setEditingColors(currentTheme.colors as unknown as Record<string, string>);
+      const colors = currentTheme.colors as unknown as Record<string, string>;
+      // Filter out null/undefined values before setting editing colors
+      const cleanColors = Object.entries(colors).reduce((acc, [key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      setEditingColors(cleanColors);
     }
   }, [currentTheme]);
 

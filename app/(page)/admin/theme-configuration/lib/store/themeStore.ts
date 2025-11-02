@@ -153,6 +153,59 @@ export interface ThemeColors {
   classlistEmptyBg: string;
   classlistEmptyText: string;
   classlistEmptyIcon: string;
+  
+  // Schedule Page Colors - Weekly View
+  scheduleHeaderBg: string;
+  scheduleHeaderText: string;
+  scheduleTheoryBg: string;
+  scheduleTheoryBgHover: string;
+  scheduleTheoryBorder: string;
+  schedulePracticeBg: string;
+  schedulePracticeBgHover: string;
+  schedulePracticeBorder: string;
+  scheduleCellText: string;
+  schedulePrintBg: string;
+  schedulePrintBgHover: string;
+  schedulePrintText: string;
+  scheduleEmptyBg: string;
+  scheduleEmptyBorder: string;
+  
+  // Grades Page Colors - Overview Cards
+  gradeCardGpaBg: string;
+  gradeCardGpaBorder: string;
+  gradeCardCreditBg: string;
+  gradeCardCreditBorder: string;
+  gradeCardCourseBg: string;
+  gradeCardCourseBorder: string;
+  
+  // Grades Page Colors - Filter & Export
+  gradeFilterSelectBg: string;
+  gradeFilterSelectHover: string;
+  gradeFilterCheckboxBg: string;
+  gradeFilterCheckboxBorder: string;
+  gradeExportBg: string;
+  gradeExportHover: string;
+  
+  // Grades Page Colors - Table
+  gradeSemesterHeaderBg: string;
+  gradeTableHeaderBg: string;
+  gradeTableHeaderText: string;
+  gradePassText: string;
+  gradeFailText: string;
+  
+  // Grades Page Colors - Summary
+  gradeSummaryBg: string;
+  gradeSummaryHighlight: string;
+  gradeClassExcellentBg: string;
+  gradeClassGoodBg: string;
+  gradeClassFairBg: string;
+  gradeClassAverageBg: string;
+  gradeClassWeakBg: string;
+  
+  // Grades Page Colors - Modal
+  gradeModalHeaderBg: string;
+  gradeModalCloseBtn: string;
+  gradeModalCloseBtnHover: string;
 }
 
 export interface ThemeConfig {
@@ -340,6 +393,59 @@ const defaultThemeColors: ThemeColors = {
   classlistEmptyBg: '#f9fafb',
   classlistEmptyText: '#6b7280',
   classlistEmptyIcon: '#9ca3af',
+  
+  // Schedule Page Colors - Weekly View
+  scheduleHeaderBg: '#4E8EE1',
+  scheduleHeaderText: '#ffffff',
+  scheduleTheoryBg: '#dbeafe',
+  scheduleTheoryBgHover: '#3b82f6',
+  scheduleTheoryBorder: '#4E8EE1',
+  schedulePracticeBg: '#fee2e2',
+  schedulePracticeBgHover: '#ef4444',
+  schedulePracticeBorder: '#ef4444',
+  scheduleCellText: '#1f2937',
+  schedulePrintBg: '#4E8EE1',
+  schedulePrintBgHover: '#3d7bc9',
+  schedulePrintText: '#ffffff',
+  scheduleEmptyBg: '#f9fafb',
+  scheduleEmptyBorder: '#e5e7eb',
+  
+  // Grades Page Colors - Overview Cards
+  gradeCardGpaBg: 'linear-gradient(to bottom right, #ffedd5, #fed7aa)',
+  gradeCardGpaBorder: '#fdba74',
+  gradeCardCreditBg: 'linear-gradient(to bottom right, #fce7f3, #fbcfe8)',
+  gradeCardCreditBorder: '#f9a8d4',
+  gradeCardCourseBg: 'linear-gradient(to bottom right, #ccfbf1, #99f6e4)',
+  gradeCardCourseBorder: '#5eead4',
+  
+  // Grades Page Colors - Filter & Export
+  gradeFilterSelectBg: '#0053AD',
+  gradeFilterSelectHover: '#003d82',
+  gradeFilterCheckboxBg: '#0053AD',
+  gradeFilterCheckboxBorder: '#0053AD',
+  gradeExportBg: '#0053AD',
+  gradeExportHover: '#003d82',
+  
+  // Grades Page Colors - Table
+  gradeSemesterHeaderBg: '#ADD8E6',
+  gradeTableHeaderBg: '#0053AD',
+  gradeTableHeaderText: '#ffffff',
+  gradePassText: '#16a34a',
+  gradeFailText: '#dc2626',
+  
+  // Grades Page Colors - Summary
+  gradeSummaryBg: '#E8E8E8',
+  gradeSummaryHighlight: '#4196F0',
+  gradeClassExcellentBg: '#facc15',
+  gradeClassGoodBg: '#22c55e',
+  gradeClassFairBg: '#3b82f6',
+  gradeClassAverageBg: '#f97316',
+  gradeClassWeakBg: '#ef4444',
+  
+  // Grades Page Colors - Modal
+  gradeModalHeaderBg: 'linear-gradient(to right, #0053AD, #003d82)',
+  gradeModalCloseBtn: '#0053AD',
+  gradeModalCloseBtnHover: '#003d82',
 };
 
 const defaultTheme: ThemeConfig = {
@@ -363,6 +469,36 @@ export const useThemeStore = create<ThemeState>()(
       
       // Actions
       setCurrentTheme: (theme: ThemeConfig) => {
+        // CRITICAL FIX: Merge incoming theme colors with existing defaults
+        // This prevents null/undefined values from overwriting existing colors
+        const { currentTheme: existingTheme } = get();
+        
+        if (existingTheme && theme.colors) {
+          const existingColors = existingTheme.colors as unknown as Record<string, string>;
+          const newColors = theme.colors as unknown as Record<string, string>;
+          const defaultColors = defaultThemeColors as unknown as Record<string, string>;
+          
+          // Merge: start with defaults, then existing, then new (skip null/undefined/empty)
+          const mergedColors: Record<string, string> = { ...defaultColors };
+          
+          Object.entries(existingColors).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+              mergedColors[key] = value;
+            }
+          });
+          
+          Object.entries(newColors).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+              mergedColors[key] = value;
+            }
+          });
+          
+          theme = {
+            ...theme,
+            colors: mergedColors as unknown as ThemeColors
+          };
+        }
+        
         set({ currentTheme: theme });
         // Apply theme immediately after setting
         get().applyThemeToDocument();
@@ -399,7 +535,8 @@ export const useThemeStore = create<ThemeState>()(
         const colors = currentTheme.colors as unknown as Record<string, string>;
         
         Object.entries(colors).forEach(([key, value]) => {
-          if (value && typeof value === 'string') {
+          // CRITICAL: Skip null, undefined, empty string values
+          if (value && typeof value === 'string' && value.trim() !== '') {
             const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
             root.style.setProperty(cssVarName, value);
           }
