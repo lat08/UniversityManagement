@@ -58,7 +58,7 @@ export default function InstructorSemesterSchedulePage() {
   }, [])
 
   return (
-    <div className="mx-auto max-w-[1600px]">
+    <div style={{ minWidth: '1000px' }}>
             {/* Header */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900">Khung chương trình theo học kỳ</h1>
@@ -228,8 +228,8 @@ export default function InstructorSemesterSchedulePage() {
 
             {/* Schedule Table */}
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 border border-gray-300">
+              <div>
+                <table className="w-full divide-y divide-gray-200 border border-gray-300">
                   <thead className="bg-[var(--primary)]">
                     <tr>
                       <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">

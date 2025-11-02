@@ -25,7 +25,7 @@ export default function InstructorLayout({
 
   return (
     <RequireRoleAuth allowedRoles={['Instructor']}>
-      <div className="flex h-screen overflow-hidden bg-[var(--bg-secondary)]" suppressHydrationWarning>
+      <div className="flex h-screen bg-[var(--bg-secondary)]" suppressHydrationWarning>
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -36,14 +36,14 @@ export default function InstructorLayout({
 
         <div
           className={cn(
-            "flex flex-1 flex-col transition-all duration-300",
+            "flex flex-1 flex-col transition-all duration-300 overflow-hidden",
             "ml-0 lg:ml-20",
             !isSidebarCollapsed && "lg:ml-64",
           )}
         >
           <Header onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
           
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-auto p-4 lg:p-6">
             {children}
           </main>
         </div>

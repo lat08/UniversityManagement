@@ -98,9 +98,9 @@ export default function InstructorProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Hồ sơ cá nhân</h1>
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Hồ sơ cá nhân</h1>
       </header>
 
       {updateError && activeTab === 'password' && (
@@ -132,7 +132,7 @@ export default function InstructorProfilePage() {
           <div className="flex-1 relative z-10">
             <button 
               onClick={() => setActiveTab('profile')}
-              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
+              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
                 activeTab === 'profile'
                   ? "text-white"
                   : "text-gray-600 hover:text-gray-900"
@@ -149,7 +149,7 @@ export default function InstructorProfilePage() {
           <div className="flex-1 relative z-10">
             <button 
               onClick={() => setActiveTab('password')}
-              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
+              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
                 activeTab === 'password'
                   ? "text-white"
                   : "text-gray-600 hover:text-gray-900"
@@ -163,11 +163,11 @@ export default function InstructorProfilePage() {
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 lg:p-8">
           {activeTab === 'profile' ? (
-            <div className="flex gap-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               {/* Left Side - Avatar */}
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex justify-center lg:block">
                 <ProfileAvatar
                   profilePicture={profile.profilePicture}
                   fullName={profile.fullName}
@@ -180,7 +180,7 @@ export default function InstructorProfilePage() {
               
               {/* Right Side - Form Fields */}
               <div className="flex-1">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5">
                   {/* Row 1 */}
                   <ProfileField
                     label="Họ và tên"

@@ -87,15 +87,12 @@ export default function InstructorWeeklySchedulePage() {
     
     const element = event.currentTarget as HTMLElement
     const rect = element.getBoundingClientRect()
-    const container = element.closest('.mx-auto')
-    const containerRect = container?.getBoundingClientRect()
     
-    if (containerRect) {
-      setHoverPosition({
-        x: rect.right - containerRect.left + 10, // Position to the right of the cell, relative to container
-        y: rect.top - containerRect.top,
-      })
-    }
+    // Use fixed positioning based on viewport
+    setHoverPosition({
+      x: rect.right + 10,
+      y: rect.top,
+    })
   }
 
   const handleMouseLeave = () => {
@@ -295,7 +292,7 @@ export default function InstructorWeeklySchedulePage() {
   }, [hideTimeout])
 
   return (
-    <div className="mx-auto max-w-[1600px] relative">
+    <div className="relative" style={{ minWidth: '1200px' }}>
             {/* Header */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900">Thời khóa biểu giảng dạy theo tuần</h1>
@@ -507,7 +504,7 @@ export default function InstructorWeeklySchedulePage() {
 
             {/* Schedule Grid */}
             <div className="bg-white rounded-lg shadow-sm overflow-hidden p-3">
-              <div className="overflow-x-auto">
+              <div>
                 <div className="inline-block min-w-full align-middle">
                   {/* Header Row */}
                   <div className="flex gap-2 mb-2">
@@ -627,7 +624,7 @@ export default function InstructorWeeklySchedulePage() {
             {/* Enhanced Hover Tooltip with Documents and Schedule Change Button */}
             {hoveredCourse && (
               <div
-                className="absolute z-50 course-tooltip"
+                className="fixed z-50 course-tooltip"
                 style={{
                   left: `${hoverPosition.x}px`,
                   top: `${hoverPosition.y}px`,

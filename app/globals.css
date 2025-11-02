@@ -863,3 +863,14 @@ body {
     border-color: #d1d5db !important;
   }
 }
+
+/* Mobile Touch Scroll Enhancement */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.touch-pan-x {
+  touch-action: pan-x;
+}

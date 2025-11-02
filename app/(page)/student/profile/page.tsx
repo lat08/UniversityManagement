@@ -108,10 +108,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h1>
+      <div className="mb-4 lg:mb-6">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h1>
       </div>
 
       {/* Tabs */}
@@ -131,7 +131,7 @@ export default function ProfilePage() {
           <div className="flex-1 relative z-10">
             <button
               onClick={() => setActiveTab("info")}
-              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
+              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
                 activeTab === "info"
                   ? "text-white"
                   : "text-gray-600 hover:text-gray-900"
@@ -148,7 +148,7 @@ export default function ProfilePage() {
           <div className="flex-1 relative z-10">
             <button
               onClick={() => setActiveTab("password")}
-              className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-colors ${
+              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
                 activeTab === "password"
                   ? "text-white"
                   : "text-gray-600 hover:text-gray-900"
@@ -161,13 +161,13 @@ export default function ProfilePage() {
       </div>
 
       <Card className="shadow-sm border border-gray-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 lg:p-6">
           {/* Tab Content */}
           {activeTab === "info" ? (
             <div className="space-y-6">
               {/* Avatar & Basic Info */}
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0">
+              <div className="flex flex-col lg:flex-row items-start gap-6">
+                <div className="flex-shrink-0 flex flex-col items-center lg:block w-full lg:w-auto">
                   <Avatar className="w-32 h-32 border border-gray-200 shadow-md">
                     <AvatarImage src={profile.profilePicture || ""} alt={profile.fullName} />
                     <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-bold">
@@ -179,7 +179,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Họ và tên */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -327,9 +327,9 @@ export default function ProfilePage() {
               </div>
 
               {/* Hộ khẩu - Full width */}
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-32"></div>
-                <div className="flex-1">
+              <div className="flex flex-col lg:flex-row items-start gap-6">
+                <div className="flex-shrink-0 hidden lg:block lg:w-32"></div>
+                <div className="flex-1 w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hộ khẩu
                   </label>
