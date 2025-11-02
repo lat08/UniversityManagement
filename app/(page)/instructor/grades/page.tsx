@@ -1,122 +1,136 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FileDown, Send, Lock, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileDown, Send, Lock, AlertCircle, Search } from 'lucide-react';
 import GradeTable from './components/GradeTable';
 import GradeFilters from './components/GradeFilters';
 import SubmitApprovalModal from './components/SubmitApprovalModal';
-import { StudentGrade } from './lib/types/types';
-
-// Mock data
-const mockStudents: StudentGrade[] = [
-  {
-    studentId: '1',
-    studentCode: '12550446',
-    fullName: 'Nguyễn Văn A',
-    className: 'K16',
-    classCode: '23DAI',
-    attendanceScore: 6.5,
-    midtermScore: 5.0,
-    finalScore: 4.8,
-    averageScore: 5.2,
-  },
-  {
-    studentId: '2',
-    studentCode: '21122005',
-    fullName: 'Lê Anh Kiệt',
-    className: 'K16',
-    classCode: '23DPM',
-    attendanceScore: 10,
-    midtermScore: 8.5,
-    finalScore: 9.0,
-    averageScore: 9.1,
-  },
-  {
-    studentId: '3',
-    studentCode: '20032007',
-    fullName: 'Trần Thị Thảo',
-    className: 'K18',
-    classCode: '25DMMT',
-    attendanceScore: 10,
-    midtermScore: 9.5,
-    finalScore: 9.0,
-    averageScore: 9.4,
-  },
-  {
-    studentId: '4',
-    studentCode: '25577512',
-    fullName: 'Phạm Xuân M',
-    className: 'K17',
-    classCode: '24DCNTT',
-    attendanceScore: 8.5,
-    midtermScore: 7.0,
-    finalScore: 6.4,
-    averageScore: 7.0,
-  },
-];
+import GradeHistoryTable from './components/GradeHistoryTable';
+import { StudentGrade, GradeHistory, Semester, CourseClass, CourseClassGrades } from './lib/types/types';
+import { gradesApi } from './lib/api/gradesApi';
+import { toast } from 'react-hot-toast';
 
 const InstructorGradesPage = () => {
-  const [students, setStudents] = useState<StudentGrade[]>(mockStudents);
-  const [selectedCourse, setSelectedCourse] = useState('CNTT01');
-  const [selectedClass, setSelectedClass] = useState('');
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [courseClasses, setCourseClasses] = useState<CourseClass[]>([]);
+  const [courseClassData, setCourseClassData] = useState<CourseClassGrades | null>(null);
+  const [history] = useState<GradeHistory[]>([]);
+  
+  const [selectedSemester, setSelectedSemester] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleGradeChange = (studentId: string, field: keyof StudentGrade, value: number | null) => {
-    setStudents((prev) =>
-      prev.map((student) =>
-        student.studentId === studentId ? { ...student, [field]: value } : student
-      )
-    );
+  // Fetch semesters on mount
+  useEffect(() => {
+    const fetchSemesters = async () => {
+      const response = await gradesApi.getSemesters();
+      if (response.success) {
+        setSemesters(response.data);
+        if (response.data.length > 0) {
+          setSelectedSemester(response.data[0].semesterId);
+        }
+      }
+      setLoading(false);
+    };
+    fetchSemesters();
+  }, []);
+
+  // Fetch course classes when semester changes
+  useEffect(() => {
+    if (selectedSemester) {
+      const fetchCourseClasses = async () => {
+        const response = await gradesApi.getCourseClassesBySemester(selectedSemester);
+        if (response.success) {
+          setCourseClasses(response.data);
+          if (response.data.length > 0) {
+            setSelectedCourse(response.data[0].courseClassId);
+          } else {
+            setSelectedCourse('');
+            setCourseClassData(null);
+          }
+        }
+      };
+      fetchCourseClasses();
+    }
+  }, [selectedSemester]);
+
+  // Fetch grades when course changes
+  useEffect(() => {
+    if (selectedCourse) {
+      const fetchGrades = async () => {
+        const response = await gradesApi.getCourseClassGrades(selectedCourse);
+        if (response.success) {
+          setCourseClassData(response.data);
+        }
+      };
+      fetchGrades();
+    }
+  }, [selectedCourse]);
+
+  const handleGradeChange = (enrollmentId: string, field: keyof StudentGrade, value: number | null) => {
+    if (!courseClassData) return;
+    
+    setCourseClassData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        students: prev.students.map((student) =>
+          student.enrollmentId === enrollmentId ? { ...student, [field]: value } : student
+        ),
+      };
+    });
   };
 
   const handleSubmitApproval = () => {
     console.log('Submitting grades for approval...');
-    setIsLocked(true);
     setIsModalOpen(false);
+    toast.success('Đã gửi điểm để duyệt');
     // Here you would call the API to submit grades
   };
 
   const handleExportExcel = () => {
     console.log('Exporting to Excel...');
+    toast.success('Đang xuất file Excel...');
     // Here you would implement Excel export functionality
   };
 
-  const filteredStudents = students.filter((student) => {
-    const matchesClass = !selectedClass || student.className === selectedClass;
+  const filteredStudents = courseClassData?.students.filter((student) => {
     const matchesSearch =
       !searchQuery ||
       student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.studentCode.includes(searchQuery);
-    return matchesClass && matchesSearch;
-  });
+      student.mssv.includes(searchQuery);
+    return matchesSearch;
+  }) || [];
 
-  const totalStudents = filteredStudents.length;
+  const totalStudents = courseClassData?.totalStudents || 0;
   const submittedCount = filteredStudents.filter(
-    (s) => s.attendanceScore !== null && s.midtermScore !== null && s.finalScore !== null
+    (s) => s.attendanceGrade !== null && s.midtermGrade !== null && s.finalGrade !== null
   ).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Điểm số</h1>
-          <p className="text-gray-600">Nhập và quản lý điểm sinh viên</p>
-        </div>
+    <div className="min-h-screen p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Điểm số</h1>
+        <p className="text-gray-600 mt-1">Nhập và quản lý điểm sinh viên</p>
+      </div>
 
-        {/* Course Info Card */}
+      {/* Course Info Card */}
+      {courseClassData && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                Lập trình Web - CNTT01
+                {courseClassData.courseName} - {courseClassData.courseCode}
               </h2>
-              <p className="text-sm text-gray-600">Học kỳ 1 - Năm học 2024-2025</p>
+              <p className="text-sm text-gray-600">
+                {courseClasses.find(c => c.courseClassId === selectedCourse)?.semesterName || ''}
+              </p>
             </div>
             <div className="flex items-center gap-2">
-              {isLocked ? (
+              {!courseClassData.canEditGrades ? (
                 <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">
                   <Lock className="w-4 h-4" />
                   <span className="text-sm font-medium">Đã khóa</span>
@@ -130,81 +144,110 @@ const InstructorGradesPage = () => {
             </div>
           </div>
         </div>
+      )}
 
-        {/* Filters */}
-        <GradeFilters
-          selectedCourse={selectedCourse}
-          selectedClass={selectedClass}
-          searchQuery={searchQuery}
-          onCourseChange={setSelectedCourse}
-          onClassChange={setSelectedClass}
-          onSearchChange={setSearchQuery}
-        />
+      {/* Filters */}
+      <GradeFilters
+        selectedCourse={selectedCourse}
+        selectedSemester={selectedSemester}
+        onCourseChange={setSelectedCourse}
+        onSemesterChange={setSelectedSemester}
+        semesters={semesters}
+        courseClasses={courseClasses}
+      />
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">Tổng sinh viên</p>
-            <p className="text-2xl font-bold text-gray-900">{totalStudents}</p>
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="bg-orange-50 rounded-lg p-6 border border-gray-200">
+          <p className="text-sm text-gray-600 mb-2">Tổng sinh viên</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{totalStudents}</p>
+          <p className="text-xs text-gray-500">Đang học</p>
+        </div>
+        <div className="bg-teal-50 rounded-lg p-6 border border-gray-200">
+          <p className="text-sm text-gray-600 mb-2">Đã nhập điểm</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{submittedCount}</p>
+          <p className="text-xs text-gray-500">Hoàn thành</p>
+        </div>
+        <div className="bg-red-50 rounded-lg p-6 border border-gray-200">
+          <p className="text-sm text-gray-600 mb-2">Chưa nhập</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">{totalStudents - submittedCount}</p>
+          <p className="text-xs text-gray-500">Cần cập nhật</p>
+        </div>
+      </div>
+
+      {/* Grade Table Wrapper with Search and Actions */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        {/* Header with Search and Actions */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Bảng điểm sinh viên
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Nhấp vào ô điểm để chỉnh sửa
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleExportExcel}
+                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+              >
+                <FileDown className="w-4 h-4" />
+                Xuất Excel
+              </button>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                disabled={!courseClassData?.canEditGrades}
+                className={`px-4 py-2 text-sm text-white rounded-lg flex items-center gap-2 cursor-pointer ${
+                  !courseClassData?.canEditGrades
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-[#0053AD] hover:bg-[#003d82]'
+                }`}
+              >
+                <Send className="w-4 h-4" />
+                Gửi duyệt
+              </button>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">Đã nhập điểm</p>
-            <p className="text-2xl font-bold text-blue-600">{submittedCount}</p>
+
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo MSSV, tên..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+            />
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">Chưa nhập</p>
-            <p className="text-2xl font-bold text-orange-600">{totalStudents - submittedCount}</p>
+
+          {/* Table with border */}
+          <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
+            <GradeTable
+              students={filteredStudents}
+              isLocked={!courseClassData?.canEditGrades}
+              onGradeChange={handleGradeChange}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <AlertCircle className="w-4 h-4" />
-            <span>Nhấp vào ô điểm để chỉnh sửa</span>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleExportExcel}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <FileDown className="w-4 h-4" />
-              Xuất excel
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              disabled={isLocked}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors ${
-                isLocked
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              <Send className="w-4 h-4" />
-              Gửi duyệt
-            </button>
-          </div>
-        </div>
+      {/* Grade History Table */}
+      <GradeHistoryTable history={history} />
 
-        {/* Grade Table */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <GradeTable
-            students={filteredStudents}
-            isLocked={isLocked}
-            onGradeChange={handleGradeChange}
-          />
-        </div>
-
-        {/* Submit Approval Modal */}
+      {/* Submit Approval Modal */}
+      {courseClassData && (
         <SubmitApprovalModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onConfirm={handleSubmitApproval}
           totalStudents={totalStudents}
           submittedCount={submittedCount}
-          courseName="Lập trình Web - CNTT01"
+          courseName={`${courseClassData.courseName} - ${courseClassData.courseCode}`}
         />
-      </div>
+      )}
     </div>
   );
 };

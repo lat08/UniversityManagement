@@ -25,17 +25,17 @@ export interface InstructorSemesterScheduleApiItem {
 
 // API Response wrapper structure
 export interface InstructorSemesterScheduleInfoDto {
-  Semester?: {
-    SemesterId: string
-    SemesterName: string
-    SemesterType: string
-    StartDate: string
-    EndDate: string
-    Status: string
-    AcademicYearName: string
+  semester?: {
+    semesterId: string
+    semesterName: string
+    semesterType: string
+    startDate: string
+    endDate: string
+    status: string
+    academicYearName: string
   }
-  ScheduleType?: string
-  Schedules?: InstructorSemesterScheduleApiItem[]
+  scheduleType?: string
+  schedules?: InstructorSemesterScheduleApiItem[]
 }
 
 // Transformed structure for component use

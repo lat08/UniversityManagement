@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ChevronDown, Calendar, User, Edit2 } from 'lucide-react';
-import Image from 'next/image';
 import { studentsApi } from '../../lib/api/studentsApi';
 import { StudentDetail, Faculty, Department, ClassItem, ENROLLMENT_STATUS_OPTIONS, UpdateStudentPayload } from '../../lib/types/types';
 import { toast } from 'react-hot-toast';
@@ -492,11 +491,9 @@ export default function EditStudentPage() {
                         onClick={handleAvatarClick}
                       >
                         {profilePicturePreview ? (
-                          <Image
+                          <img
                             src={profilePicturePreview}
                             alt="Avatar"
-                            width={160}
-                            height={160}
                             className="w-full h-full object-cover"
                           />
                         ) : (

@@ -20,13 +20,13 @@ const GradeTable: React.FC<GradeTableProps> = ({ students, isLocked, onGradeChan
     setEditValue(currentValue?.toString() ?? '');
   };
 
-  const handleSave = (studentId: string, field: keyof StudentGrade) => {
+  const handleSave = (enrollmentId: string, field: keyof StudentGrade) => {
     const numValue = editValue === '' ? null : parseFloat(editValue);
     if (numValue !== null && (numValue < 0 || numValue > 10)) {
       alert('Điểm phải nằm trong khoảng 0-10');
       return;
     }
-    onGradeChange(studentId, field, numValue);
+    onGradeChange(enrollmentId, field, numValue);
     setEditingCell(null);
   };
 
@@ -36,19 +36,19 @@ const GradeTable: React.FC<GradeTableProps> = ({ students, isLocked, onGradeChan
   };
 
   const calculateAverage = (student: StudentGrade): number | null => {
-    const { attendanceScore, midtermScore, finalScore } = student;
-    if (attendanceScore === null || midtermScore === null || finalScore === null) {
+    const { attendanceGrade, midtermGrade, finalGrade } = student;
+    if (attendanceGrade === null || midtermGrade === null || finalGrade === null) {
       return null;
     }
-    return parseFloat((attendanceScore * 0.2 + midtermScore * 0.3 + finalScore * 0.5).toFixed(1));
+    return parseFloat((attendanceGrade * 0.2 + midtermGrade * 0.3 + finalGrade * 0.5).toFixed(1));
   };
 
   const renderEditableCell = (
     student: StudentGrade,
-    field: 'attendanceScore' | 'midtermScore' | 'finalScore',
+    field: 'attendanceGrade' | 'midtermGrade' | 'finalGrade',
     value: number | null
   ) => {
-    const isEditing = editingCell?.studentId === student.studentId && editingCell?.field === field;
+    const isEditing = editingCell?.studentId === student.enrollmentId && editingCell?.field === field;
 
     if (isEditing) {
       return (
@@ -61,14 +61,14 @@ const GradeTable: React.FC<GradeTableProps> = ({ students, isLocked, onGradeChan
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSave(student.studentId, field);
+              if (e.key === 'Enter') handleSave(student.enrollmentId, field);
               if (e.key === 'Escape') handleCancel();
             }}
             className="w-16 px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
           <button
-            onClick={() => handleSave(student.studentId, field)}
+            onClick={() => handleSave(student.enrollmentId, field)}
             className="p-1 text-green-600 hover:bg-green-50 rounded"
             title="Lưu"
           >
@@ -92,7 +92,7 @@ const GradeTable: React.FC<GradeTableProps> = ({ students, isLocked, onGradeChan
         </span>
         {!isLocked && (
           <button
-            onClick={() => handleEdit(student.studentId, field, value)}
+            onClick={() => handleEdit(student.enrollmentId, field, value)}
             className="opacity-0 group-hover:opacity-100 p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
             title="Chỉnh sửa"
           >
@@ -104,70 +104,60 @@ const GradeTable: React.FC<GradeTableProps> = ({ students, isLocked, onGradeChan
   };
 
   return (
-    <div className="overflow-x-auto border border-gray-200 rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-blue-600">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-              MSSV
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-              Họ và tên
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Khóa
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Lớp
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="bg-[#0053AD] text-white text-sm">
+            <th className="px-6 py-4 text-left font-semibold">MSSV</th>
+            <th className="px-6 py-4 text-left font-semibold">Họ và tên</th>
+            <th className="px-6 py-4 text-center font-semibold">
               Chuyên cần<br />(20%)
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
+            <th className="px-6 py-4 text-center font-semibold">
               Giữa kỳ<br />(30%)
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
+            <th className="px-6 py-4 text-center font-semibold">
               Cuối kỳ<br />(50%)
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Trung bình
-            </th>
+            <th className="px-6 py-4 text-center font-semibold">Trung bình</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {students.map((student) => {
-            const average = calculateAverage(student);
-            return (
-              <tr key={student.studentId} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {student.studentCode}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {student.fullName}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-600">
-                  {student.className}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-600">
-                  {student.classCode}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-900">
-                  {renderEditableCell(student, 'attendanceScore', student.attendanceScore)}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-900">
-                  {renderEditableCell(student, 'midtermScore', student.midtermScore)}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-900">
-                  {renderEditableCell(student, 'finalScore', student.finalScore)}
-                </td>
-                <td className="px-6 py-4 text-sm text-center">
-                  <span className={`font-medium ${average !== null && average >= 5 ? 'text-green-600' : average !== null ? 'text-red-600' : 'text-gray-400'}`}>
-                    {average !== null ? average.toFixed(1) : '-'}
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
+        <tbody className="divide-y divide-gray-200 bg-white">
+          {students.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                Không có dữ liệu
+              </td>
+            </tr>
+          ) : (
+            students.map((student) => {
+              const average = calculateAverage(student);
+              return (
+                <tr key={student.enrollmentId} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {student.mssv}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {student.fullName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-center text-gray-900">
+                    {renderEditableCell(student, 'attendanceGrade', student.attendanceGrade)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-center text-gray-900">
+                    {renderEditableCell(student, 'midtermGrade', student.midtermGrade)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-center text-gray-900">
+                    {renderEditableCell(student, 'finalGrade', student.finalGrade)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-center">
+                    <span className={`font-medium ${average !== null && average >= 5 ? 'text-green-600' : average !== null ? 'text-red-600' : 'text-gray-400'}`}>
+                      {average !== null ? average.toFixed(1) : '-'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })
+          )}
         </tbody>
       </table>
     </div>

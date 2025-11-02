@@ -117,7 +117,10 @@ export default function InstructorDashboardPage() {
                 </svg>
                 Lịch dạy trong tuần
               </h2>
-              <button className="text-xs lg:text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/instructor/schedule/weekly'}
+                className="text-xs lg:text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+              >
                 Xem tuần
               </button>
             </div>

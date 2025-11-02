@@ -53,7 +53,7 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
   };
 
   return (
-    <div className="bg-[#DBEDFF] rounded-lg p-4 lg:p-6 h-full min-h-[400px] flex flex-col border-2 border-[#4196F0]">
+    <div className="bg-white rounded-lg p-4 lg:p-6 h-full min-h-[400px] flex flex-col shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base lg:text-lg font-bold text-gray-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
       </div>
 
       {/* Reminders list */}
-      <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto">
+      <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto pr-1">
         {reminders.length > 0 ? (
           reminders.map((reminder) => (
             <div
@@ -107,4 +107,5 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
     </div>
   );
 }
+
 

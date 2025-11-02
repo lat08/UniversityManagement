@@ -24,28 +24,20 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
     }
   };
 
-  const getDayOfWeekColor = (dayOfWeek: string) => {
-    // Thứ Ba & Thứ Năm - Red
-    if (dayOfWeek === 'Thứ Ba' || dayOfWeek === 'Thứ Năm') {
+  const getClassTypeColor = (classType: string) => {
+    // Thực hành - Red
+    if (classType === 'Thực hành') {
       return {
         dot: 'bg-white border-[#B41E14]',
         card: 'border-[#B41E14] bg-[#B41E14]/5',
         date: 'text-[#B41E14]'
       };
     }
-    // Thứ Tư - Green
-    if (dayOfWeek === 'Thứ Tư') {
-      return {
-        dot: 'bg-white border-[#1B6E53]',
-        card: 'border-[#1B6E53] bg-[#1B6E53]/5',
-        date: 'text-[#1B6E53]'
-      };
-    }
-    // Default - Gray
+    // Lý thuyết - Blue
     return {
-      dot: 'bg-white border-[#757575]',
-      card: 'border-[#757575] bg-[#757575]/5',
-      date: 'text-[#757575]'
+      dot: 'bg-white border-[#4196F0]',
+      card: 'border-[#4196F0] bg-[#4196F0]/5',
+      date: 'text-[#4196F0]'
     };
   };
 
@@ -55,19 +47,20 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
       onWheel={handleWheel}
       className="relative max-h-[600px] overflow-y-auto pr-2 overscroll-contain"
     >
-      {/* Timeline line */}
-      <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
-
       {/* Timeline items */}
-      <div className="space-y-3 lg:space-y-4">
-        {schedules.map((schedule) => {
-          const colors = getDayOfWeekColor(schedule.dayOfWeek);
+      <div className="relative space-y-3 lg:space-y-4">
+        {/* Timeline line - extends through all items */}
+        <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
+        
+        {schedules.map((schedule, index) => {
+          const colors = getClassTypeColor(schedule.classType);
+          const isLast = index === schedules.length - 1;
           
           return (
-            <div key={schedule.courseClassId} className="relative pl-8 lg:pl-10">
+            <div key={schedule.courseClassId} className={cn("relative pl-8 lg:pl-10", isLast && "pb-4")}>
               {/* Timeline dot */}
               <div className={cn(
-                "absolute left-[0px] top-3 w-5 h-5 rounded-full border-4 border-white shadow-sm z-10",
+                "absolute left-[0px] top-3 w-5 h-5 rounded-full border-4 shadow-sm z-10",
                 colors.dot
               )} />
 
@@ -125,4 +118,5 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
     </div>
   );
 }
+
 

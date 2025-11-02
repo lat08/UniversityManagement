@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { MapPin, Mail, Phone, Calendar, User, School, Edit, ChevronDown } from 'lucide-react';
-import Image from 'next/image';
 import { studentsApi } from '../lib/api/studentsApi';
 import { getStatusDisplay } from '../lib/types/types';
 import { useStudentDetail } from '../lib/hooks/useStudentDetail';
@@ -229,11 +228,9 @@ export default function StudentDetailPage() {
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
                 {studentData.profilePicture ? (
-                  <Image
+                  <img
                     src={studentData.profilePicture}
                     alt="Student Avatar"
-                    width={128}
-                    height={128}
                     className="w-full h-full object-cover"
                   />
                 ) : (

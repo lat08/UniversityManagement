@@ -11,6 +11,7 @@ export interface WeeklySchedule {
   subjectName: string;
   classCode: string;
   roomName: string;
+  classType: string;
   roomCode: string;
   dayOfWeek: string;
   timeRange: string;
@@ -32,4 +33,5 @@ export interface DashboardStatCard {
   iconColor: string;
   textColor: string;
 }
+
 
