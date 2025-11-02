@@ -52,7 +52,6 @@ export const useInstructorWeeklySchedule = () => {
     }
   }, [])
 
-  // Tạo danh sách tuần dựa trên học kỳ
   const fetchWeeks = useCallback(async (semesterId: string) => {
     try {
       setIsLoading(true)
@@ -61,8 +60,10 @@ export const useInstructorWeeklySchedule = () => {
       const response = await instructorWeeklyScheduleApi.getWeeks(semesterId)
       
       if (response.success) {
+        const currentWeek = response.data.find((week: Week & { isCurrent?: boolean }) => week.isCurrent)
+        
         setWeeks(response.data)
-        setSelectedWeek(response.data[0])
+        setSelectedWeek(currentWeek || response.data[0])
       } else {
         setWeeks([])
         setSelectedWeek(null)

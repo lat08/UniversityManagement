@@ -2,7 +2,8 @@ import { api } from "@/lib/api/client"
 import { 
   WeeklyScheduleResponse, 
   SemestersResponse, 
-  SubjectsResponse
+  SubjectsResponse,
+  WeekResponse
 } from "../types/weeklyTypes"
 
 // Helper function to map day of week string to number
@@ -213,5 +214,10 @@ export const weeklyScheduleApi = {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
+  },
+
+  getWeeks: async (semesterId: string): Promise<WeekResponse> => {
+    const response = await api.get(`/v1/enrollments/semesters/${semesterId}/weeks`)
+    return response.data
   }
 }

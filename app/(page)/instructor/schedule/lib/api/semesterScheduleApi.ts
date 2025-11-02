@@ -31,22 +31,22 @@ const transformScheduleData = (apiData: InstructorSemesterScheduleApiItem[]): In
 }
 
 export const instructorSemesterScheduleApi = {
-  // Lấy thời khóa biểu giảng viên theo học kỳ
   getInstructorSchedule: async (semesterId: string): Promise<{ success: boolean; data: InstructorSemesterScheduleItem[]; message?: string }> => {
     const response = await api.get(`/v1/instructor-schedule/semester-schedule?semesterId=${semesterId}`)
     const apiResponse: InstructorSemesterScheduleResponse = response.data
     
-    // API returns { success, data: { Semester, ScheduleType, Schedules: [...] } }
-    // or { success, data: [...] } directly
     let schedulesData: InstructorSemesterScheduleApiItem[] = []
     
     if (Array.isArray(apiResponse.data)) {
-      // If data is directly an array
       schedulesData = apiResponse.data
-    } else if (apiResponse.data && typeof apiResponse.data === 'object' && 'Schedules' in apiResponse.data) {
-      // If data is an object with Schedules property
-      const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
-      schedulesData = dataObj.Schedules || []
+    } else if (apiResponse.data && typeof apiResponse.data === 'object') {
+      if ('schedules' in apiResponse.data) {
+        const dataObj = apiResponse.data as { schedules: InstructorSemesterScheduleApiItem[] }
+        schedulesData = dataObj.schedules || []
+      } else if ('Schedules' in apiResponse.data) {
+        const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
+        schedulesData = dataObj.Schedules || []
+      }
     }
     
     return {
@@ -56,22 +56,22 @@ export const instructorSemesterScheduleApi = {
     }
   },
 
-  // Lọc thời khóa biểu giảng viên theo môn học cụ thể
   getScheduleBySubject: async (semesterId: string, subjectId: string): Promise<{ success: boolean; data: InstructorSemesterScheduleItem[]; message?: string }> => {
-    const response = await api.get(`/v1/instructor-schedule/subject-week-schedule?semesterId=${semesterId}&subjectId=${subjectId}`)
+    const response = await api.get(`/v1/instructor-schedule/semester-schedule?SemesterId=${semesterId}&SubjectId=${subjectId}`)
     const apiResponse: InstructorSemesterScheduleResponse = response.data
     
-    // API returns { success, data: { Semester, ScheduleType, Schedules: [...] } }
-    // or { success, data: [...] } directly
     let schedulesData: InstructorSemesterScheduleApiItem[] = []
     
     if (Array.isArray(apiResponse.data)) {
-      // If data is directly an array
       schedulesData = apiResponse.data
-    } else if (apiResponse.data && typeof apiResponse.data === 'object' && 'Schedules' in apiResponse.data) {
-      // If data is an object with Schedules property
-      const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
-      schedulesData = dataObj.Schedules || []
+    } else if (apiResponse.data && typeof apiResponse.data === 'object') {
+      if ('schedules' in apiResponse.data) {
+        const dataObj = apiResponse.data as { schedules: InstructorSemesterScheduleApiItem[] }
+        schedulesData = dataObj.schedules || []
+      } else if ('Schedules' in apiResponse.data) {
+        const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
+        schedulesData = dataObj.Schedules || []
+      }
     }
     
     return {

@@ -1,6 +1,14 @@
 export interface DashboardResponse {
   totalClasses: number;
-  documentsThisWeek: number;
+  documents: {
+    totalDocuments: number;
+    newDocumentsThisWeek: number;
+  };
+  currentSemester: string;
+  requests: {
+    totalRequests: number;
+    newRequestsToday: number;
+  };
   weeklySchedule: WeeklySchedule[];
   reminders: Reminder[];
 }
@@ -11,6 +19,7 @@ export interface WeeklySchedule {
   subjectName: string;
   classCode: string;
   roomName: string;
+  classType: string;
   roomCode: string;
   dayOfWeek: string;
   timeRange: string;
@@ -20,7 +29,7 @@ export interface Reminder {
   notificationId: string;
   title: string;
   content: string;
-  notificationType: 'tuition' | 'schedule' | 'important';
+  notificationType: 'tuition' | 'schedule' | 'important' | 'event';
   createdAt: string;
 }
 

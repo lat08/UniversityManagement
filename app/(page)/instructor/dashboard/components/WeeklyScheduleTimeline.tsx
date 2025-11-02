@@ -24,28 +24,18 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
     }
   };
 
-  const getDayOfWeekColor = (dayOfWeek: string) => {
-    // Thứ Ba & Thứ Năm - Red
-    if (dayOfWeek === 'Thứ Ba' || dayOfWeek === 'Thứ Năm') {
+  const getClassTypeColor = (classType: string) => {
+    if (classType === 'Lý thuyết') {
       return {
-        dot: 'bg-white border-[#B41E14]',
-        card: 'border-[#B41E14] bg-[#B41E14]/5',
-        date: 'text-[#B41E14]'
+        dot: 'bg-white border-blue-600',
+        card: 'border-blue-600 bg-blue-50',
+        date: 'text-blue-600'
       };
     }
-    // Thứ Tư - Green
-    if (dayOfWeek === 'Thứ Tư') {
-      return {
-        dot: 'bg-white border-[#1B6E53]',
-        card: 'border-[#1B6E53] bg-[#1B6E53]/5',
-        date: 'text-[#1B6E53]'
-      };
-    }
-    // Default - Gray
     return {
-      dot: 'bg-white border-[#757575]',
-      card: 'border-[#757575] bg-[#757575]/5',
-      date: 'text-[#757575]'
+      dot: 'bg-white border-red-600',
+      card: 'border-red-600 bg-red-50',
+      date: 'text-red-600'
     };
   };
 
@@ -61,7 +51,7 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
       {/* Timeline items */}
       <div className="space-y-3 lg:space-y-4">
         {schedules.map((schedule) => {
-          const colors = getDayOfWeekColor(schedule.dayOfWeek);
+          const colors = getClassTypeColor(schedule.classType);
           
           return (
             <div key={schedule.courseClassId} className="relative pl-8 lg:pl-10">
@@ -108,12 +98,23 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                       </div>
 
                       {/* Class code */}
-                      <div className="flex items-center gap-1">
-                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <span>Lớp: {schedule.classCode}</span>
-                      </div>
+                      {schedule.classCode && (
+                        <div className="flex items-center gap-1">
+                          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                          <span>Lớp: {schedule.classCode}</span>
+                        </div>
+                      )}
+
+                      {/* Class type */}
+                      {schedule.classType && (
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                            {schedule.classType}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

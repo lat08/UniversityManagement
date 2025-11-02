@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import DashboardStatCard from "./components/DashboardStatCard";
 import WeeklyScheduleTimeline from "./components/WeeklyScheduleTimeline";
@@ -36,7 +37,7 @@ export default function InstructorDashboardPage() {
         {
           title: 'Lớp giảng dạy',
           value: 0,
-          subtitle: 'Học kỳ 2, 2024 - 2025',
+          subtitle: '',
           bgColor: 'bg-blue-50',
           iconColor: 'text-blue-600',
           textColor: 'text-blue-600',
@@ -44,7 +45,7 @@ export default function InstructorDashboardPage() {
         {
           title: 'Tài liệu tuần này',
           value: 0,
-          subtitle: '3 tài liệu mới',
+          subtitle: '0 tài liệu mới',
           bgColor: 'bg-pink-50',
           iconColor: 'text-pink-600',
           textColor: 'text-pink-600',
@@ -52,7 +53,7 @@ export default function InstructorDashboardPage() {
         {
           title: 'Yêu cầu chờ duyệt',
           value: 0,
-          subtitle: '2 yêu cầu mới',
+          subtitle: '0 yêu cầu mới',
           bgColor: 'bg-orange-50',
           iconColor: 'text-orange-600',
           textColor: 'text-orange-600',
@@ -60,27 +61,35 @@ export default function InstructorDashboardPage() {
       ];
     }
 
+    const documentsSubtitle = dashboardData.documents.newDocumentsThisWeek > 0
+      ? `${dashboardData.documents.newDocumentsThisWeek} tài liệu mới`
+      : '0 tài liệu mới';
+
+    const requestsSubtitle = dashboardData.requests.newRequestsToday > 0
+      ? `${dashboardData.requests.newRequestsToday} yêu cầu mới`
+      : '0 yêu cầu mới';
+
     return [
       {
         title: 'Lớp giảng dạy',
         value: dashboardData.totalClasses,
-        subtitle: 'Học kỳ 2, 2024 - 2025',
+        subtitle: dashboardData.currentSemester,
         bgColor: 'bg-blue-50',
         iconColor: 'text-blue-600',
         textColor: 'text-blue-600',
       },
       {
         title: 'Tài liệu tuần này',
-        value: dashboardData.documentsThisWeek,
-        subtitle: '3 tài liệu mới',
+        value: dashboardData.documents.totalDocuments,
+        subtitle: documentsSubtitle,
         bgColor: 'bg-pink-50',
         iconColor: 'text-pink-600',
         textColor: 'text-pink-600',
       },
       {
         title: 'Yêu cầu chờ duyệt',
-        value: 4,
-        subtitle: '2 yêu cầu mới',
+        value: dashboardData.requests.totalRequests,
+        subtitle: requestsSubtitle,
         bgColor: 'bg-orange-50',
         iconColor: 'text-orange-600',
         textColor: 'text-orange-600',
@@ -117,9 +126,12 @@ export default function InstructorDashboardPage() {
                 </svg>
                 Lịch dạy trong tuần
               </h2>
-              <button className="text-xs lg:text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <Link 
+                href="/instructor/schedule/weekly"
+                className="text-xs lg:text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+              >
                 Xem tuần
-              </button>
+              </Link>
             </div>
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
