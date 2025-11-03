@@ -49,8 +49,9 @@ export const useSemesters = () => {
         setError('Không thể tải danh sách học kỳ');
         setSemesters([]);
       }
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi tải danh sách học kỳ';
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } }, message?: string };
+      const errorMessage = e.response?.data?.message || e.message || 'Đã xảy ra lỗi khi tải danh sách học kỳ';
       setError(errorMessage);
       setSemesters([]);
     } finally {
@@ -81,8 +82,9 @@ export const useSubjects = () => {
         setError('Không thể tải danh sách môn học');
         setSubjects([]);
       }
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Đã xảy ra lỗi khi tải danh sách môn học';
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } }, message?: string };
+      const errorMessage = e.response?.data?.message || e.message || 'Đã xảy ra lỗi khi tải danh sách môn học';
       setError(errorMessage);
       setSubjects([]);
     } finally {

@@ -26,7 +26,6 @@ interface UploadExamModalProps {
   onSubmit?: (data: UploadExamFormData) => void;
   isLoading?: boolean;
   courseClasses?: { id: string; name: string }[];
-  examEntryId?: string | null;
 }
 
 export interface UploadExamFormData {
@@ -44,7 +43,6 @@ export function UploadExamModal({
   onSubmit,
   isLoading = false,
   courseClasses = [],
-  examEntryId = null,
 }: UploadExamModalProps) {
   const [formData, setFormData] = useState<UploadExamFormData>({
     courseClassId: "",

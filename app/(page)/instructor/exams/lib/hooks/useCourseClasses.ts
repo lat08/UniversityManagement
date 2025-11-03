@@ -42,11 +42,10 @@ export const useCourseClasses = () => {
         setError('Không thể tải danh sách lớp học phần');
         setCourseClasses([]);
       }
-    } catch (err: any) {
+    } catch (_err: unknown) {
       // If endpoint doesn't exist, return empty array (can be populated from exam entries)
       console.warn('Course classes endpoint not available, using empty list');
       setCourseClasses([]);
-      setLoading(false);
       // Don't set error if endpoint doesn't exist
       return;
     } finally {

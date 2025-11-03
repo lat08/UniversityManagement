@@ -11,14 +11,14 @@ import { useSemesters, useSubjects } from "../lib/hooks/useSemestersAndSubjects"
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { SEARCH_DEBOUNCE_MS } from "../lib/constants";
-import type { GetExamEntriesParams } from "../lib/types";
+import type { GetExamEntriesParams, UpdateExamRequest } from "../lib/types";
 
 export function ExamsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("all");
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedExamType, setSelectedExamType] = useState("all");
+  // We don't filter by examType in UI for now
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
@@ -36,8 +36,7 @@ export function ExamsContent() {
     semesterId: selectedSemester !== "all" ? selectedSemester : undefined,
     subjectId: selectedSubject !== "all" ? selectedSubject : undefined,
     entryStatus: selectedStatus !== "all" ? selectedStatus : undefined,
-    examType: selectedExamType !== "all" ? selectedExamType : undefined,
-  }), [debouncedSearchQuery, selectedSemester, selectedSubject, selectedStatus, selectedExamType]);
+  }), [debouncedSearchQuery, selectedSemester, selectedSubject, selectedStatus]);
 
   // Fetch exam entries
   const { examEntries, loading, error, refetch } = useExamEntries(filterParams);
@@ -94,7 +93,7 @@ export function ExamsContent() {
   const handleUploadSubmit = async (data: UploadExamFormData) => {
     // If editing, use updateExam instead
     if (selectedExamId) {
-      const updateData: any = {};
+      const updateData: UpdateExamRequest = {};
       if (data.durationMinutes) updateData.durationMinutes = data.durationMinutes;
       if (data.description) updateData.description = data.description;
       if (data.questionFile) updateData.questionFile = data.questionFile;
@@ -207,7 +206,6 @@ export function ExamsContent() {
         onSubmit={handleUploadSubmit}
         isLoading={isUploading || isUpdating}
         courseClasses={courseClassesOptions}
-        examEntryId={selectedExamId}
       />
 
       <ExamDetailModal

@@ -20,11 +20,10 @@ export const useExamActions = (onSuccess?: () => void) => {
         toast.error(response.message || 'Tải lên đề thi thất bại');
         return false;
       }
-    } catch (err: any) {
-      const errorMessage = 
-        err?.response?.data?.message ||
-        err?.message ||
-        'Lỗi khi tải lên đề thi';
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } }, message?: string })?.response?.data?.message
+        || (err as { message?: string }).message
+        || 'Lỗi khi tải lên đề thi';
       toast.error(errorMessage);
       return false;
     } finally {
@@ -45,11 +44,10 @@ export const useExamActions = (onSuccess?: () => void) => {
         toast.error(response.message || 'Cập nhật đề thi thất bại');
         return false;
       }
-    } catch (err: any) {
-      const errorMessage = 
-        err?.response?.data?.message ||
-        err?.message ||
-        'Lỗi khi cập nhật đề thi';
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } }, message?: string })?.response?.data?.message
+        || (err as { message?: string }).message
+        || 'Lỗi khi cập nhật đề thi';
       toast.error(errorMessage);
       return false;
     } finally {
@@ -77,11 +75,10 @@ export const useExamActions = (onSuccess?: () => void) => {
       
       toast.success('Tải xuống thành công!');
       return true;
-    } catch (err: any) {
-      const errorMessage = 
-        err?.response?.data?.message ||
-        err?.message ||
-        'Lỗi khi tải xuống file';
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } }, message?: string })?.response?.data?.message
+        || (err as { message?: string }).message
+        || 'Lỗi khi tải xuống file';
       toast.error(errorMessage);
       return false;
     }
