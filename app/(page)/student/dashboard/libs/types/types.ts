@@ -67,7 +67,7 @@ export interface KpiData {
 
 import { Semester as CommonSemester } from "@/lib/types";
 
-export type Semester = Pick<CommonSemester, 'semesterId' | 'semesterName'>;
+export type Semester = Pick<CommonSemester, 'semesterId' | 'semesterName' | 'startDate' | 'endDate'>;
 
 export interface Subject {
   courseId: string;

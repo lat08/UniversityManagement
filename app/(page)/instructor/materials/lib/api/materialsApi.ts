@@ -15,14 +15,23 @@ export const materialsApi = {
   getMaterials: async (params?: GetMaterialsParams): Promise<ApiResponse<MaterialsData>> => {
     const queryParams = new URLSearchParams()
     
-    if (params?.searchQuery) {
-      queryParams.append('searchQuery', params.searchQuery)
+    if (params?.keyword && params.keyword.trim()) {
+      queryParams.append('Keyword', params.keyword.trim())
     }
-    if (params?.pageNumber) {
-      queryParams.append('pageNumber', params.pageNumber.toString())
+    if (params?.documentType && params.documentType.trim()) {
+      queryParams.append('DocumentType', params.documentType.trim())
     }
-    if (params?.pageSize) {
-      queryParams.append('pageSize', params.pageSize.toString())
+    if (params?.semesterId && params.semesterId.trim()) {
+      queryParams.append('SemesterId', params.semesterId.trim())
+    }
+    if (params?.subjectId && params.subjectId.trim()) {
+      queryParams.append('SubjectId', params.subjectId.trim())
+    }
+    if (params?.pageNumber && params.pageNumber > 0) {
+      queryParams.append('PageNumber', params.pageNumber.toString())
+    }
+    if (params?.pageSize && params.pageSize > 0) {
+      queryParams.append('PageSize', params.pageSize.toString())
     }
 
     const queryString = queryParams.toString()
@@ -34,7 +43,7 @@ export const materialsApi = {
 
   // Lấy danh sách loại tài liệu
   getDocumentTypes: async (): Promise<ApiResponse<DocumentType[]>> => {
-    const response = await api.get<ApiResponse<DocumentType[]>>(MATERIALS_API.GET_DOCUMENT_TYPES)
+    const response = await api.get<ApiResponse<DocumentType[]>>('/v1/materials/student/document-types')
     return response.data
   },
 

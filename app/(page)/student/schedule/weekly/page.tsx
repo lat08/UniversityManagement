@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from "react"
 import { Dropdown, DropdownSearch } from "@/app/components/ui"
 import { WeeklyScheduleGrid, ScheduleTooltip, ScheduleConflictsNotification, type CourseItem } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
-import { DAYS_OF_WEEK } from "../lib/constants/index"
 import { useScheduleData } from "../lib/hooks/useScheduleData"
 
 export default function WeeklySchedulePage() {

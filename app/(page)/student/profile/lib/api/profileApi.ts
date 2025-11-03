@@ -1,9 +1,7 @@
 import { api } from "@/lib/api/client"
+import { changePasswordApi } from "@/lib/api/auth"
 import type { StudentProfileResponse, ChangePasswordRequest, ChangePasswordResponse } from "../types/types"
 
-/**
- * Lấy thông tin profile của sinh viên đang đăng nhập
- */
 export async function getStudentProfile(): Promise<StudentProfileResponse> {
   try {
     const response = await api.get<StudentProfileResponse>("/v1/students/me")
@@ -17,13 +15,9 @@ export async function getStudentProfile(): Promise<StudentProfileResponse> {
   }
 }
 
-/**
- * Đổi mật khẩu sinh viên
- */
 export async function changePassword(data: ChangePasswordRequest): Promise<ChangePasswordResponse> {
   try {
-    const response = await api.post<ChangePasswordResponse>("/v1/auth/change-password", data)
-    return response.data
+    return await changePasswordApi(data)
   } catch (error: unknown) {
     const axiosError = error as { response?: { status?: number; data?: { message?: string } } }
     if (axiosError.response?.status === 401) {

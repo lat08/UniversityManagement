@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { regulationsApi } from '../api/regulationsApi'
-import { Regulation } from '../types/types'
 
 interface UseRegulationsParams {
   pageIndex?: number
@@ -9,14 +8,14 @@ interface UseRegulationsParams {
 }
 
 interface UseRegulationsReturn {
-  regulations: Regulation[]
+  regulations: any[]
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
 }
 
 export const useRegulations = (params: UseRegulationsParams = {}): UseRegulationsReturn => {
-  const [regulations, setRegulations] = useState<Regulation[]>([])
+  const [regulations, setRegulations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

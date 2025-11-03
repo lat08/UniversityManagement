@@ -26,7 +26,6 @@ export default function NotesSection({ notes, onToggleNote }: NotesSectionProps)
         </h3>
       </div>
 
-      {/* Notes list */}
       <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto">
         {notes.length > 0 ? (
           notes.map((note) => (

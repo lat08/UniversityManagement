@@ -1,8 +1,5 @@
 import { SemesterGrade, SemesterData, Course, GradeItem } from '../types/types'
 
-/**
- * Transform API semester grade data to UI format
- */
 export const transformSemesterGradeToUI = (semesterGrade: SemesterGrade): SemesterData => {
   return {
     id: semesterGrade.semesterId,
@@ -11,9 +8,6 @@ export const transformSemesterGradeToUI = (semesterGrade: SemesterGrade): Semest
   }
 }
 
-/**
- * Transform API grade item to UI course format
- */
 export const transformGradeItemToCourse = (gradeItem: GradeItem): Course => {
   return {
     code: gradeItem.subjectCode,
@@ -24,17 +18,10 @@ export const transformGradeItemToCourse = (gradeItem: GradeItem): Course => {
   }
 }
 
-/**
- * Transform array of semester grades to UI format
- */
 export const transformSemestersToUI = (semesters: SemesterGrade[]): SemesterData[] => {
   return semesters.map(transformSemesterGradeToUI)
 }
 
-/**
- * Create course detail lookup from grade items
- * This maps subjectCode to grade components
- */
 export const createCourseDetailsLookup = (gradeItem: GradeItem) => {
   return {
     name: gradeItem.subjectName,

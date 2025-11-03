@@ -1,7 +1,6 @@
 'use client';
 
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
-import { Search } from 'lucide-react';
 import { Dropdown } from '@/app/components/ui/dropdown';
 import { ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
 

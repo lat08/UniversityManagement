@@ -1,22 +1,12 @@
 import { api } from "@/lib/api/client"
+import { DAY_NAME_TO_NUMBER } from "@/lib/constants/schedule"
 import { 
   WeeklyScheduleResponse,
   WeekResponse
 } from "../types/weeklyTypes"
 
-// Helper function to map day of week string to number
 const mapDayOfWeekToNumber = (dayString: string): number => {
-  const dayMap: { [key: string]: number } = {
-    "Thứ 2": 2,
-    "Thứ 3": 3,
-    "Thứ 4": 4,
-    "Thứ 5": 5,
-    "Thứ 6": 6,
-    "Thứ 7": 7,
-    "Chủ Nhật": 8,
-    "CN": 8
-  }
-  return dayMap[dayString] || 2
+  return DAY_NAME_TO_NUMBER[dayString] || 2
 }
 
 export const weeklyScheduleApi = {

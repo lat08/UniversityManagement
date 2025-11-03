@@ -2,85 +2,74 @@ import { useState, useEffect, useCallback } from "react"
 import { materialsApi } from "../api/materialsApi"
 import { 
   CourseClassMaterials,
-  DocumentType,
   GetMaterialsParams,
   UploadMaterialRequest,
   UpdateMaterialRequest
 } from "../type"
 import { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER } from "../constants"
 import toast from "react-hot-toast"
+import { AxiosError } from 'axios'
 
-export const useMaterials = () => {
+interface UseMaterialsReturn {
+  materials: CourseClassMaterials[]
+  loading: boolean
+  error: string | null
+  refetch: () => void
+  totalCount: number
+  uploadMaterial: (data: UploadMaterialRequest) => Promise<boolean>
+  updateMaterial: (documentId: string, data: UpdateMaterialRequest) => Promise<boolean>
+  deleteMaterial: (documentId: string) => Promise<boolean>
+}
+
+export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn => {
   const [materials, setMaterials] = useState<CourseClassMaterials[]>([])
-  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE_NUMBER)
-  const [pageSize] = useState(DEFAULT_PAGE_SIZE)
-  const [totalCount, setTotalCount] = useState(0)
-  const [totalPages, setTotalPages] = useState(0)
-  const [hasNext, setHasNext] = useState(false)
-  const [hasPrevious, setHasPrevious] = useState(false)
+  const [totalCount, setTotalCount] = useState<number>(0)
 
-  // Search state
-  const [searchQuery, setSearchQuery] = useState("")
-
-  // Fetch materials
-  const fetchMaterials = useCallback(async (params?: GetMaterialsParams) => {
+  const fetchMaterials = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setLoading(true)
       setError(null)
 
-      const queryParams: GetMaterialsParams = {
-        searchQuery: params?.searchQuery ?? searchQuery,
-        pageNumber: params?.pageNumber ?? currentPage,
-        pageSize: params?.pageSize ?? pageSize,
-      }
-
-      const response = await materialsApi.getMaterials(queryParams)
+      const response = await materialsApi.getMaterials(params)
       
       if (response.success && response.data) {
-        setMaterials(response.data.items)
-        setTotalCount(response.data.totalCount)
-        setTotalPages(response.data.totalPages)
-        setHasNext(response.data.hasNext)
-        setHasPrevious(response.data.hasPrevious)
-        setCurrentPage(response.data.pageNumber)
+        const items = response.data.items || []
+        setMaterials(items)
+        setTotalCount(response.data.totalCount || 0)
       } else {
-        setMaterials([])
         setError(response.message || "Không thể tải danh sách tài liệu")
+        setMaterials([])
       }
     } catch (err) {
-      setError("Lỗi khi tải danh sách tài liệu")
+      const axiosErr = err as AxiosError<{ message?: string; data?: { message?: string } }>
+      const errorMessage = 
+        axiosErr.response?.data?.message || 
+        axiosErr.response?.data?.data?.message ||
+        axiosErr.message ||
+        'Đã xảy ra lỗi khi tải tài liệu. Vui lòng thử lại sau.'
+      setError(errorMessage)
       setMaterials([])
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
-  }, [searchQuery, currentPage, pageSize])
+  }, [
+    params?.keyword,
+    params?.documentType,
+    params?.semesterId,
+    params?.subjectId,
+    params?.pageNumber,
+    params?.pageSize
+  ])
 
-  // Fetch document types
-  const fetchDocumentTypes = useCallback(async () => {
-    try {
-      const response = await materialsApi.getDocumentTypes()
-      
-      if (response.success && response.data) {
-        setDocumentTypes(response.data)
-      }
-    } catch (err) {
-    }
-  }, [])
-
-  // Upload material
   const uploadMaterial = useCallback(async (data: UploadMaterialRequest) => {
     try {
-      setIsLoading(true)
+      setLoading(true)
       const response = await materialsApi.uploadMaterial(data)
       
       if (response.success) {
         toast.success(response.message || "Tải lên tài liệu thành công!")
-        // Refresh materials list
         await fetchMaterials()
         return true
       } else {
@@ -91,19 +80,17 @@ export const useMaterials = () => {
       toast.error("Lỗi khi tải lên tài liệu")
       return false
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }, [fetchMaterials])
 
-  // Update material
   const updateMaterial = useCallback(async (documentId: string, data: UpdateMaterialRequest) => {
     try {
-      setIsLoading(true)
+      setLoading(true)
       const response = await materialsApi.updateMaterial(documentId, data)
       
       if (response.success) {
         toast.success(response.message || "Cập nhật tài liệu thành công!")
-        // Refresh materials list
         await fetchMaterials()
         return true
       } else {
@@ -114,19 +101,17 @@ export const useMaterials = () => {
       toast.error("Lỗi khi cập nhật tài liệu")
       return false
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }, [fetchMaterials])
 
-  // Delete material
   const deleteMaterial = useCallback(async (documentId: string) => {
     try {
-      setIsLoading(true)
+      setLoading(true)
       const response = await materialsApi.deleteMaterial(documentId)
       
       if (response.success) {
         toast.success(response.message || "Xóa tài liệu thành công!")
-        // Refresh materials list
         await fetchMaterials()
         return true
       } else {
@@ -137,55 +122,22 @@ export const useMaterials = () => {
       toast.error("Lỗi khi xóa tài liệu")
       return false
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }, [fetchMaterials])
 
-  // Handle search
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query)
-    setCurrentPage(DEFAULT_PAGE_NUMBER) // Reset to first page when searching
-  }, [])
-
-  // Handle page change
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page)
-  }, [])
-
-  // Load initial data
   useEffect(() => {
     fetchMaterials()
-    fetchDocumentTypes()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run on mount
-
-  // Fetch materials when search or page changes
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchMaterials()
-    }, 300) // Debounce search
-
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery, currentPage, fetchMaterials])
+  }, [fetchMaterials])
 
   return {
     materials,
-    documentTypes,
-    isLoading,
+    loading,
     error,
-    currentPage,
-    pageSize,
+    refetch: fetchMaterials,
     totalCount,
-    totalPages,
-    hasNext,
-    hasPrevious,
-    searchQuery,
-    fetchMaterials,
     uploadMaterial,
     updateMaterial,
     deleteMaterial,
-    handleSearch,
-    handlePageChange,
   }
 }
-

@@ -1,4 +1,5 @@
 import { api } from "@/lib/api/client"
+import { DAY_NAME_TO_NUMBER } from "@/lib/constants/schedule"
 import { 
   InstructorWeeklyScheduleResponse,
   InstructorWeeklyScheduleItem,
@@ -6,18 +7,8 @@ import {
   WeekResponse 
 } from "../types/weeklyTypes"
 
-// Helper function to convert day name to number
 const convertDayOfWeekToNumber = (dayName: string): number => {
-  const dayMap: Record<string, number> = {
-    "Thứ 2": 2,
-    "Thứ 3": 3,
-    "Thứ 4": 4,
-    "Thứ 5": 5,
-    "Thứ 6": 6,
-    "Thứ 7": 7,
-    "Chủ nhật": 8,
-  }
-  return dayMap[dayName] || 2
+  return DAY_NAME_TO_NUMBER[dayName] || 2
 }
 
 // Helper function to transform API response to component format

@@ -1,15 +1,12 @@
-// API Response Types
 export interface RoomApiResponse {
   success: boolean;
   message: string;
   data: {
     items: RoomApiData[];
-    // API trả về format này
     pageNumber?: number;
     pageSize?: number;
     totalCount?: number;
     totalPages?: number;
-    // Hoặc có thể có format cũ
     pagination?: {
       currentPage: number;
       totalPages: number;
@@ -110,11 +107,11 @@ export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
 export interface CreateBookingRequest {
   roomId: string;
-  bookingDate: string; // ISO 8601 format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-  startTime: string; // Format: "HH:mm" (e.g., "07:15")
-  endTime: string; // Format: "HH:mm" (e.g., "10:00")
-  purpose: string; // Max 500 characters
-  studentCount: number; // Number of participants
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  purpose: string;
+  studentCount: number;
 }
 
 export interface BookingApiResponse {
@@ -159,3 +156,8 @@ export const BOOKING_STATUS_COLORS: Record<BookingStatus, string> = {
   completed: 'bg-green-600 text-white',
 };
 
+export interface CancelBookingResponse {
+  success: boolean;
+  message: string;
+  data: unknown;
+}

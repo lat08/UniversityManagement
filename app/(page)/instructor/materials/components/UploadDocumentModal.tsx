@@ -12,13 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/app/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
+import { DropdownSearch, Dropdown } from "@/app/components/ui";
 
 interface UploadDocumentModalProps {
   isOpen: boolean;
@@ -150,21 +144,16 @@ export function UploadDocumentModal({
               Môn học - lớp
               <span className="text-red-500">*</span>
             </label>
-            <Select
+            <DropdownSearch
+              options={courseClasses.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
               value={formData.subjectClass}
-              onValueChange={(value) => handleInputChange("subjectClass", value)}
-            >
-              <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder="Chọn phương án" />
-              </SelectTrigger>
-              <SelectContent>
-                {courseClasses.map((courseClass) => (
-                  <SelectItem key={courseClass.id} value={courseClass.id}>
-                    {courseClass.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(value) => handleInputChange("subjectClass", value)}
+              placeholder="Chọn phương án"
+              buttonClassName="border-gray-300"
+            />
             {errors.subjectClass && (
               <p className="text-sm text-red-500">{errors.subjectClass}</p>
             )}
@@ -176,21 +165,16 @@ export function UploadDocumentModal({
               Loại tài liệu
               <span className="text-red-500">*</span>
             </label>
-            <Select
+            <Dropdown
+              options={documentTypes.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
               value={formData.documentType}
-              onValueChange={(value) => handleInputChange("documentType", value)}
-            >
-              <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder="Chọn loại" />
-              </SelectTrigger>
-              <SelectContent>
-                {documentTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(value) => handleInputChange("documentType", value)}
+              placeholder="Chọn loại"
+              buttonClassName="border-gray-300"
+            />
             {errors.documentType && (
               <p className="text-sm text-red-500">{errors.documentType}</p>
             )}

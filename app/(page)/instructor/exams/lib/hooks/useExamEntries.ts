@@ -1,23 +1,28 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { examsApi } from '../api/examsApi';
 import { ExamEntry, ExamEntryDetail, GetExamEntriesParams } from '../types';
-import { useDebounce } from '@/lib/hooks/useDebounce';
-import { SEARCH_DEBOUNCE_MS } from '../constants';
 
 interface UseExamEntriesReturn {
   examEntries: ExamEntry[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
-/**
- * Custom hook to fetch and manage exam entries
- * @param params - Optional search and filter parameters
- * @returns Exam entries data, loading state, error state, and refetch function
- */
 export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesReturn => {
   const [examEntries, setExamEntries] = useState<ExamEntry[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
+  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,10 +34,17 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
       const response = await examsApi.getExamEntries(params);
       
       if (response.success && response.data) {
-        setExamEntries(response.data);
+        setExamEntries(response.data.items);
+        setTotalCount(response.data.totalCount);
+        setPageNumber(response.data.pageNumber);
+        setPageSize(response.data.pageSize);
+        setTotalPages(response.data.totalPages);
+        setHasPreviousPage(response.data.hasPreviousPage);
+        setHasNextPage(response.data.hasNextPage);
       } else {
         setError(response.message || 'Không thể tải danh sách đề thi');
         setExamEntries([]);
+        setTotalCount(0);
       }
     } catch (err: any) {
       const errorMessage = 
@@ -41,15 +53,18 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
         'Đã xảy ra lỗi khi tải danh sách đề thi. Vui lòng thử lại sau.';
       setError(errorMessage);
       setExamEntries([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
   }, [
-    params?.searchTerm,
+    params?.searchKeyword,
     params?.examType,
-    params?.entryStatus,
+    params?.status,
     params?.semesterId,
     params?.subjectId,
+    params?.pageNumber,
+    params?.pageSize,
   ]);
 
   useEffect(() => {
@@ -58,6 +73,12 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
 
   return {
     examEntries,
+    totalCount,
+    pageNumber,
+    pageSize,
+    totalPages,
+    hasPreviousPage,
+    hasNextPage,
     loading,
     error,
     refetch: fetchExamEntries,
@@ -71,11 +92,6 @@ interface UseExamEntryDetailReturn {
   refetch: () => void;
 }
 
-/**
- * Custom hook to fetch exam entry detail
- * @param examEntryId - Exam entry ID
- * @returns Exam entry detail, loading state, error state, and refetch function
- */
 export const useExamEntryDetail = (
   examEntryId: string | null
 ): UseExamEntryDetailReturn => {
@@ -123,22 +139,5 @@ export const useExamEntryDetail = (
     error,
     refetch: fetchExamEntryDetail,
   };
-};
-
-/**
- * Hook for real-time search with debounce
- */
-export const useExamEntriesSearch = (
-  searchQuery: string,
-  filters: Omit<GetExamEntriesParams, 'searchTerm'>
-) => {
-  const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
-
-  const params: GetExamEntriesParams = useMemo(() => ({
-    searchTerm: debouncedSearchQuery || undefined,
-    ...filters,
-  }), [debouncedSearchQuery, filters]);
-
-  return useExamEntries(params);
 };
 

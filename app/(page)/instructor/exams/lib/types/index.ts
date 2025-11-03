@@ -1,4 +1,3 @@
-// Exam Entry Types based on API response
 export interface ExamEntry {
   examEntryId: string;
   examId: string;
@@ -27,11 +26,18 @@ export interface ExamEntryDetail extends ExamEntry {
   description?: string;
 }
 
-// API Response Types
 export interface GetExamEntriesResponse {
   success: boolean;
   message: string;
-  data: ExamEntry[];
+  data: {
+    items: ExamEntry[];
+    totalCount: number;
+    pageNumber: number;
+    pageSize: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
   errors: string[] | null;
 }
 
@@ -76,16 +82,16 @@ export interface UpdateExamResponse {
   errors: string[] | null;
 }
 
-// Filter and Search Types
 export interface GetExamEntriesParams {
-  searchTerm?: string;
-  examType?: string;
-  entryStatus?: string;
   semesterId?: string;
   subjectId?: string;
+  status?: string;
+  examType?: string;
+  searchKeyword?: string;
+  pageNumber?: number;
+  pageSize?: number;
 }
 
-// Course Class for dropdown
 export interface CourseClass {
   courseClassId: string;
   courseClassCode: string;

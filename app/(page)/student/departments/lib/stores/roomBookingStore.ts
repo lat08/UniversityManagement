@@ -1,25 +1,7 @@
 import { create } from 'zustand';
-import type { RoomType, RoomStatus } from '../types/room.types';
+import type { RoomApiData } from '../types/room.types';
 
-export type Room = {
-	roomId: string;
-	roomCode: string;
-	roomName: string;
-	capacity: number;
-	roomType: RoomType;
-	roomStatus: RoomStatus;
-	imageUrl: string | null;
-	building: {
-		buildingId: string;
-		buildingName: string;
-		buildingCode: string;
-		address: string;
-	};
-	amenities: {
-		amenityId: string;
-		amenityName: string;
-	}[];
-};
+export type Room = RoomApiData;
 
 export type BookingSlot = {
 	id: string;
@@ -32,17 +14,6 @@ export type BookingSlot = {
 	status: 'available' | 'booked' | 'cancelled';
 };
 
-export type UserBooking = {
-	id: string;
-	roomId: string;
-	roomName: string;
-	date: string;
-	startTime: string;
-	endTime: string;
-	status: 'confirmed' | 'pending' | 'cancelled';
-	studentCount: number;
-};
-
 export type RoomFilters = {
 	capacity: string;
 	buildingId: string;
@@ -53,7 +24,6 @@ export type RoomFilters = {
 export type RoomBookingState = {
 	rooms: Room[];
 	bookingSlots: BookingSlot[];
-	userBookings: UserBooking[];
 	selectedDate: string | null;
 	selectedTimeSlot: string | null;
 	selectedRoom: Room | null;
@@ -68,16 +38,12 @@ type RoomBookingActions = {
 	setError: (error: string | null) => void;
 	setRooms: (rooms: Room[]) => void;
 	setBookingSlots: (slots: BookingSlot[]) => void;
-	setUserBookings: (bookings: UserBooking[]) => void;
 	setSelectedDate: (date: string | null) => void;
 	setSelectedTimeSlot: (timeSlot: string | null) => void;
 	setSelectedRoom: (room: Room | null) => void;
 	setFilters: (filters: Partial<RoomFilters>) => void;
 	setTempFilters: (filters: Partial<RoomFilters>) => void;
 	applyFilters: () => void;
-	addUserBooking: (booking: UserBooking) => void;
-	updateUserBooking: (id: string, updates: Partial<UserBooking>) => void;
-	removeUserBooking: (id: string) => void;
 	clearSelection: () => void;
 };
 
@@ -91,7 +57,6 @@ const initialFilters: RoomFilters = {
 const initialState: RoomBookingState = {
 	rooms: [],
 	bookingSlots: [],
-	userBookings: [],
 	selectedDate: null,
 	selectedTimeSlot: null,
 	selectedRoom: null,
@@ -107,7 +72,6 @@ export const useRoomBookingStore = create<RoomBookingState & RoomBookingActions>
 	setError: (error) => set({ error }),
 	setRooms: (rooms) => set({ rooms }),
 	setBookingSlots: (bookingSlots) => set({ bookingSlots }),
-	setUserBookings: (userBookings) => set({ userBookings }),
 	setSelectedDate: (selectedDate) => set({ selectedDate }),
 	setSelectedTimeSlot: (selectedTimeSlot) => set({ selectedTimeSlot }),
 	setSelectedRoom: (selectedRoom) => set({ selectedRoom }),
@@ -122,20 +86,6 @@ export const useRoomBookingStore = create<RoomBookingState & RoomBookingActions>
 	applyFilters: () =>
 		set((state) => ({
 			filters: { ...state.tempFilters },
-		})),
-	addUserBooking: (booking) =>
-		set((state) => ({
-			userBookings: [...state.userBookings, booking],
-		})),
-	updateUserBooking: (id, updates) =>
-		set((state) => ({
-			userBookings: state.userBookings.map((booking) =>
-				booking.id === id ? { ...booking, ...updates } : booking
-			),
-		})),
-	removeUserBooking: (id) =>
-		set((state) => ({
-			userBookings: state.userBookings.filter((booking) => booking.id !== id),
 		})),
 	clearSelection: () =>
 		set({

@@ -1,4 +1,4 @@
-import { NotificationApiItem } from "@/app/(page)/student/notification/libs/type/notificationType"
+import { NotificationApiItem } from "@/lib/types/notification"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store/authStore"
 
@@ -11,18 +11,7 @@ export function NotificationCard({ notifications, onClose }: NotificationCardPro
   const router = useRouter()
   const { user } = useAuthStore()
 
-  // Format date from ISO string
-  const formatDate = (isoString: string) => {
-    const date = new Date(isoString)
-    return date.toLocaleDateString('vi-VN', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
-    })
-  }
-
   const handleNotificationClick = (notification: NotificationApiItem) => {
-    // Determine base path based on user role
     let basePath = "/student/notification"
     
     if (user?.role === "Instructor") {
@@ -31,16 +20,13 @@ export function NotificationCard({ notifications, onClose }: NotificationCardPro
       basePath = "/admin/notification"
     }
 
-    // Navigate with query params for filter and notification ID
     router.push(`${basePath}?type=${notification.notificationType}&id=${notification.scheduleId}`)
-    
-    // Close popup
     onClose?.()
   }
 
   return (
     <div className="space-y-2.5">
-      {notifications.map((notification, index) => (
+      {notifications.map((notification) => (
         <div
           key={notification.scheduleId}
           onClick={() => handleNotificationClick(notification)}

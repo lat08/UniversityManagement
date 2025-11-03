@@ -4,9 +4,10 @@ import { BellOff, Loader2, CheckCheck } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Tabs } from "@/app/components/ui/tabs"
-import { NotificationCard } from "../notification-card/notificationCard"
-import { NotificationType, NotificationApiItem, NotificationQueryParams } from "../../libs/type/notificationType"
-import { notificationApi } from "../../libs/api/notificationApi"
+import { NotificationCard } from "@/app/components/notification/NotificationCard"
+import { NotificationType, NotificationApiItem, NotificationQueryParams } from "@/lib/types/notification"
+import { notificationApi } from "@/lib/api/notification"
+import { notificationFilters } from "@/lib/constants/notification"
 import { Button } from "@/app/components/ui/button"
 
 export function NotificationsContent() {
@@ -31,7 +32,6 @@ export function NotificationsContent() {
     important: 0
   })
 
-  // Fetch unread counts from API
   const fetchUnreadCounts = async () => {
     try {
       const response = await notificationApi.getUnreadCountByCategory()
@@ -45,10 +45,10 @@ export function NotificationsContent() {
         })
       }
     } catch (err) {
+      // Error handled silently
     }
   }
 
-  // Fetch notifications from API
   const fetchNotifications = async (filterType?: NotificationType, page: number = 1) => {
     try {
       setLoading(true)
@@ -79,82 +79,64 @@ export function NotificationsContent() {
     }
   }
 
-  // Load unread counts on mount
   useEffect(() => {
     fetchUnreadCounts()
   }, [])
 
-  // Load notifications on mount and when filter changes
   useEffect(() => {
-    setCurrentPage(1) // Reset page when filter changes
+    setCurrentPage(1)
     fetchNotifications(activeFilter, 1)
   }, [activeFilter])
 
-  // Load notifications when page changes
   useEffect(() => {
     if (currentPage > 1) {
       fetchNotifications(activeFilter, currentPage)
     }
   }, [currentPage])
 
-  // Handle URL params on mount
   useEffect(() => {
     if (typeParam && (typeParam === 'event' || typeParam === 'tuition' || typeParam === 'schedule' || typeParam === 'important')) {
       setActiveFilter(typeParam as NotificationType)
     }
     if (idParam) {
       setExpandedNotificationId(idParam)
-      // Mark as read when opened via URL
       handleNotificationClick(idParam)
     }
   }, [typeParam, idParam])
 
-  // Handle notification click (mark as read)
   const handleNotificationClick = async (id: string) => {
     try {
       const response = await notificationApi.markAsRead(id)
       
       if (response.isSuccess) {
-        // Update the notification in the list to mark it as read
         setNotifications(prev => 
           prev.map(n => n.scheduleId === id ? { ...n, isRead: true } : n)
         )
-        // Refresh unread counts
         fetchUnreadCounts()
       }
     } catch (err) {
+      // Error handled silently
     }
   }
 
-  // Handle mark all as read
   const handleMarkAllAsRead = async () => {
     try {
       setMarkingAllAsRead(true)
       const response = await notificationApi.markAllAsRead()
       
       if (response.isSuccess) {
-        // Update all notifications to mark as read
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-        // Refresh unread counts
         fetchUnreadCounts()
       }
     } catch (err) {
+      // Error handled silently
     } finally {
       setMarkingAllAsRead(false)
     }
   }
 
-  const filters: { key: NotificationType; label: string }[] = [
-    { key: "all", label: "Tất cả" },
-    { key: "important", label: "Quan trọng" },
-    { key: "tuition", label: "Học phí" },
-    { key: "event", label: "Sự kiện" },
-    { key: "schedule", label: "Lịch học" },
-  ]
-
   return (
     <div className="space-y-6">
-      {/* Header with Mark All as Read button */}
       {unreadCounts.all > 0 && (
         <div className="flex justify-between items-center">
           <div className="text-sm text-[var(--text-secondary)]">
@@ -182,9 +164,8 @@ export function NotificationsContent() {
         </div>
       )}
 
-      {/* Filter tabs */}
       <Tabs
-        items={filters.map(filter => ({
+        items={notificationFilters.map(filter => ({
           key: filter.key,
           label: filter.label,
           badge: unreadCounts[filter.key] > 0 ? unreadCounts[filter.key] : undefined,
@@ -194,14 +175,12 @@ export function NotificationsContent() {
         disabled={loading}
       />
 
-      {/* Loading state */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Loader2 className="h-16 w-16 text-[var(--primary)] mb-4 animate-spin" />
           <p className="text-lg font-medium text-[var(--text-secondary)] mb-2">Đang tải thông báo...</p>
         </div>
       ) : error ? (
-        /* Error state */
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <BellOff className="h-16 w-16 text-[var(--error)] mb-4" />
           <p className="text-lg font-medium text-[var(--error)] mb-2">Lỗi tải thông báo</p>
@@ -211,7 +190,6 @@ export function NotificationsContent() {
           </Button>
         </div>
       ) : notifications.length === 0 ? (
-        /* Empty state */
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <BellOff className="h-16 w-16 text-[var(--muted-foreground)] mb-4" />
           <p className="text-lg font-medium text-[var(--text-secondary)] mb-2">Không có thông báo</p>
@@ -220,7 +198,6 @@ export function NotificationsContent() {
           </p>
         </div>
       ) : (
-        /* Notifications list */
         <>
           <div className="space-y-4">
             {notifications.map((notification) => (
@@ -233,7 +210,6 @@ export function NotificationsContent() {
             ))}
           </div>
           
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-6">
               <Button

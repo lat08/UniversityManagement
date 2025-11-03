@@ -1,35 +1,19 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import DashboardStatCard from "./components/DashboardStatCard";
 import WeeklyScheduleTimeline from "./components/WeeklyScheduleTimeline";
 import RemindersSection from "./components/RemindersSection";
-import { DashboardStatCard as DashboardStatCardType, DashboardResponse } from "./lib/types/types";
-import { getDashboardData } from "./lib/api/dashboardApi";
+import { DashboardStatCard as DashboardStatCardType } from "./lib/types/types";
+import { useDashboard } from "./lib/hooks/useDashboard";
 
 export default function InstructorDashboardPage() {
   usePageTitle('Bảng điều khiển');
 
-  const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { dashboard: dashboardData, loading } = useDashboard();
 
-  // Fetch dashboard data on mount
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const data = await getDashboardData();
-        setDashboardData(data);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDashboardData();
-  }, []);
-
-  // Calculate stats
   const stats = useMemo((): DashboardStatCardType[] => {
     if (!dashboardData) {
       return [
@@ -98,7 +82,6 @@ export default function InstructorDashboardPage() {
 
   return (
     <div className="space-y-4 lg:space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Bảng điều khiển</h1>
         <p className="text-xs lg:text-sm text-gray-500 mt-1">
@@ -106,16 +89,13 @@ export default function InstructorDashboardPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
         {stats.map((stat, index) => (
           <DashboardStatCard key={index} data={stat} />
         ))}
       </div>
 
-      {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-        {/* Left side - Weekly Schedule (2/3 width) */}
         <div className="lg:col-span-8">
           <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm min-h-[400px]">
             <div className="flex items-center justify-between mb-4 lg:mb-6">
@@ -150,7 +130,6 @@ export default function InstructorDashboardPage() {
           </div>
         </div>
 
-        {/* Right side - Reminders (1/3 width) */}
         <div className="lg:col-span-4">
           {dashboardData ? (
             <RemindersSection reminders={dashboardData.reminders} />

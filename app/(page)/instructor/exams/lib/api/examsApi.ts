@@ -11,29 +11,30 @@ import {
 import { EXAMS_API } from "../constants";
 
 export const examsApi = {
-  /**
-   * Get list of exam entries with optional filters
-   * @param params - Search and filter parameters
-   * @returns Promise with exam entries response
-   */
   getExamEntries: async (params?: GetExamEntriesParams): Promise<GetExamEntriesResponse> => {
     try {
       const queryParams = new URLSearchParams();
       
-      if (params?.searchTerm && params.searchTerm.trim()) {
-        queryParams.append('searchTerm', params.searchTerm.trim());
-      }
-      if (params?.examType && params.examType.trim()) {
-        queryParams.append('examType', params.examType.trim());
-      }
-      if (params?.entryStatus && params.entryStatus.trim()) {
-        queryParams.append('entryStatus', params.entryStatus.trim());
-      }
       if (params?.semesterId && params.semesterId.trim()) {
-        queryParams.append('semesterId', params.semesterId.trim());
+        queryParams.append('SemesterId', params.semesterId.trim());
       }
       if (params?.subjectId && params.subjectId.trim()) {
-        queryParams.append('subjectId', params.subjectId.trim());
+        queryParams.append('SubjectId', params.subjectId.trim());
+      }
+      if (params?.status && params.status.trim()) {
+        queryParams.append('Status', params.status.trim());
+      }
+      if (params?.examType && params.examType.trim()) {
+        queryParams.append('ExamType', params.examType.trim());
+      }
+      if (params?.searchKeyword && params.searchKeyword.trim()) {
+        queryParams.append('SearchKeyword', params.searchKeyword.trim());
+      }
+      if (params?.pageNumber !== undefined) {
+        queryParams.append('PageNumber', params.pageNumber.toString());
+      }
+      if (params?.pageSize !== undefined) {
+        queryParams.append('PageSize', params.pageSize.toString());
       }
 
       const queryString = queryParams.toString();
@@ -46,11 +47,6 @@ export const examsApi = {
     }
   },
 
-  /**
-   * Get exam entry detail by ID
-   * @param examEntryId - Exam entry ID
-   * @returns Promise with exam entry detail response
-   */
   getExamEntryDetail: async (examEntryId: string): Promise<GetExamEntryDetailResponse> => {
     try {
       const response = await api.get<GetExamEntryDetailResponse>(
@@ -62,11 +58,6 @@ export const examsApi = {
     }
   },
 
-  /**
-   * Upload new exam entry
-   * @param data - Exam entry data with files
-   * @returns Promise with upload response
-   */
   uploadExamEntry: async (data: UploadExamRequest): Promise<UploadExamResponse> => {
     try {
       const formData = new FormData();
@@ -92,12 +83,6 @@ export const examsApi = {
     }
   },
 
-  /**
-   * Update exam entry
-   * @param examEntryId - Exam entry ID
-   * @param data - Updated exam entry data
-   * @returns Promise with update response
-   */
   updateExamEntry: async (
     examEntryId: string,
     data: UpdateExamRequest
@@ -133,12 +118,6 @@ export const examsApi = {
     }
   },
 
-  /**
-   * Download exam file (question or answer)
-   * @param examEntryId - Exam entry ID
-   * @param fileType - 'question' or 'answer'
-   * @returns Promise with blob response
-   */
   downloadExamFile: async (
     examEntryId: string,
     fileType: 'question' | 'answer'

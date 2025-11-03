@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { Dropdown } from "@/app/components/ui";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -38,6 +39,12 @@ export default function AcademicResultsChart({
     const [chartColors, setChartColors] = useState(getChartColors());
 
     const { semester, loading, error, refetch} = useAvailableSemester(selectedSemesterId);
+    
+    useEffect(() => {
+      if (semesterId && semesterId !== selectedSemesterId) {
+        setSelectedSemesterId(semesterId);
+      }
+    }, [semesterId]);
     
     useEffect(() => {
         if (selectedSemesterId) refetch();
@@ -161,19 +168,17 @@ export default function AcademicResultsChart({
           <CardTitle className="text-sm lg:text-base font-semibold">
             Kết quả học tập
           </CardTitle>
-          <select
-            value={selectedSemesterId || ""}
-              onChange={(e) => {
-                setSelectedSemesterId(e.target.value);
-              }}
-            className="text-xs lg:text-sm border border-[var(--input-border)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] w-full sm:w-auto"
-          >
-            {semesters?.map((option) => (
-              <option key={option.semesterId} value={option.semesterId}>
-                {option.semesterName}
-              </option>
-            ))}
-          </select>
+          <div className="w-full sm:w-auto">
+            <Dropdown
+              options={semesters?.map((option) => ({
+                value: option.semesterId,
+                label: option.semesterName,
+              })) || []}
+              value={selectedSemesterId || ""}
+              placeholder="Chọn học kỳ"
+              onChange={(value) => setSelectedSemesterId(value)}
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1">

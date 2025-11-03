@@ -1,33 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { gradesApi } from '../api/gradesApi'
-import { CumulativeGradesData, SemesterGrade, GradesStatsData } from '../types/types'
-
-interface CommonSemester {
-  semesterId: string
-  semesterName: string
-  semesterType: string
-  startDate: string
-  endDate: string
-  status: string
-}
+import { CumulativeGradesData, GradesStatsData } from '../types/types'
+import { Semester } from '@/lib/types/common'
 
 interface UseGradesReturn {
   cumulativeData: CumulativeGradesData | null
   statsData: GradesStatsData | null
-  commonSemesters: CommonSemester[]
-  selectedSemesterId: string | null
+  commonSemesters: Semester[]
   isLoading: boolean
   error: string | null
-  refetch: () => Promise<void>
   exportPdf: () => Promise<void>
-  setSelectedSemester: (semesterId: string) => void
 }
 
 export const useGrades = (): UseGradesReturn => {
   const [cumulativeData, setCumulativeData] = useState<CumulativeGradesData | null>(null)
   const [statsData, setStatsData] = useState<GradesStatsData | null>(null)
-  const [commonSemesters, setCommonSemesters] = useState<CommonSemester[]>([])
-  const [selectedSemesterId, setSelectedSemesterId] = useState<string | null>(null)
+  const [commonSemesters, setCommonSemesters] = useState<Semester[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,7 +24,6 @@ export const useGrades = (): UseGradesReturn => {
       setIsLoading(true)
       setError(null)
       
-      // Fetch cumulative grades, stats, and common semesters in parallel
       const [cumulativeResponse, statsResponse, semestersResponse] = await Promise.all([
         gradesApi.getCumulativeGrades(),
         gradesApi.getGradesStats(),
@@ -51,13 +38,10 @@ export const useGrades = (): UseGradesReturn => {
 
       if (statsResponse.success) {
         setStatsData(statsResponse.data)
-      } else {
-        // Stats failure should not block the page, just log it
       }
 
       if (semestersResponse.success) {
         setCommonSemesters(semestersResponse.data)
-      } else {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
@@ -72,18 +56,10 @@ export const useGrades = (): UseGradesReturn => {
       setError(null)
       
       const blob = await gradesApi.exportTranscriptPdf()
+      const fileName = `BangDiem_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.pdf`
       
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `BangDiem_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      const { downloadFileBlob } = await import('@/lib/utils/fileDownload')
+      downloadFileBlob(blob, fileName)
     } catch (err) {
       setError('Không thể xuất file PDF')
     } finally {
@@ -99,11 +75,8 @@ export const useGrades = (): UseGradesReturn => {
     cumulativeData,
     statsData,
     commonSemesters,
-    selectedSemesterId,
     isLoading,
     error,
-    refetch: fetchGrades,
     exportPdf,
-    setSelectedSemester: setSelectedSemesterId,
   }
 }

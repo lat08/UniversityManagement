@@ -20,7 +20,6 @@ export interface WeeklySchedule {
   classCode: string;
   roomName: string;
   classType: string;
-  roomCode: string;
   dayOfWeek: string;
   timeRange: string;
 }

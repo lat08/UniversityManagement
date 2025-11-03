@@ -49,7 +49,6 @@ export const useRooms = (page: number = 1, pageSize: number = 10) => {
           const rooms = response.data.data.items;
           setRooms(rooms);
           
-          // Map API response to pagination format
           const apiData = response.data.data;
           return {
             rooms,
@@ -77,7 +76,6 @@ export const useBookingSlots = (date?: string) => {
   return useQuery({
     queryKey: roomBookingKeys.bookingSlots(date),
     queryFn: async (): Promise<BookingSlot[]> => {
-      // Mock API call
       await new Promise(resolve => setTimeout(resolve, 300));
       const mockSlots: BookingSlot[] = [
         {
@@ -145,8 +143,7 @@ export const useCreateBooking = () => {
         const response = await createRoomBooking(bookingData);
         return response;
       } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const apiError = error as any;
+        const apiError = error as { response?: { data?: { message?: string } } };
         const errorMessage = apiError?.response?.data?.message || 'Không thể tạo đăng ký phòng';
         throw new Error(errorMessage);
       }
@@ -175,8 +172,7 @@ export const useCancelBooking = () => {
         const response = await cancelRoomBooking(bookingId);
         return response;
       } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const apiError = error as any;
+        const apiError = error as { response?: { data?: { message?: string } } };
         const errorMessage = apiError?.response?.data?.message || 'Không thể hủy đăng ký';
         throw new Error(errorMessage);
       }

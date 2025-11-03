@@ -58,20 +58,6 @@ export default function EditStudentPage() {
     { value: 'other', label: 'Khác' },
   ];
 
-  const filteredFaculties = faculties.filter(f => 
-    f.facultyName.toLowerCase().includes(facultySearch.toLowerCase())
-  );
-  
-  const filteredDepartments = departments.filter(d => {
-    const matchesSearch = d.departmentName.toLowerCase().includes(departmentSearch.toLowerCase());
-    const matchesFaculty = !selectedFacultyId || d.facultyId === selectedFacultyId;
-    return matchesSearch && matchesFaculty;
-  });
-  
-  const filteredClasses = classes.filter(c => 
-    c.className.toLowerCase().includes(classSearch.toLowerCase())
-  );
-
   const tabs = [
     { id: 'basic', label: 'Thông tin cơ bản' },
     { id: 'contact', label: 'Thông tin liên hệ' },

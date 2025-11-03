@@ -34,7 +34,6 @@ export function ExamDetailModal({
 
   if (!isOpen || !examEntryId) return null;
 
-
   const handleDownload = async (fileType: 'question' | 'answer') => {
     if (!examEntryId) return;
     await downloadExamFile(examEntryId, fileType);

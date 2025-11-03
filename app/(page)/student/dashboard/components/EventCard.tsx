@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/ca
 import { Clock, MapPin } from "lucide-react";
 import { useState } from "react";
 import { EventData, EventNotification } from "../libs/types/types";
-import { formatDate } from "../../profile/lib/utils/formatters";
+import { formatDate } from "@/lib/utils/format";
 
 export default function EventCard({ events }: EventData) {
   const [upcomingEvents] = useState<EventNotification[]>(events);

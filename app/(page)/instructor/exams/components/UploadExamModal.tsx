@@ -140,7 +140,6 @@ export function UploadExamModal({
     e.preventDefault();
     if (validateForm()) {
       onSubmit?.(formData);
-      // Don't close immediately - let parent handle success/error
     }
   };
 

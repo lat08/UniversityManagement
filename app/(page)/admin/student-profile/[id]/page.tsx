@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { MapPin, Mail, Phone, Calendar, User, School, Edit } from 'lucide-react';
+import { MapPin, Mail, Phone, Calendar, User, School, ArrowLeft, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs } from '@/app/components/ui/tabs';
 import { Table, type TableColumn, Dropdown } from '@/app/components/ui';
@@ -77,10 +77,6 @@ export default function StudentDetailPage() {
     { id: 'academic', label: 'Kết quả học tập' },
     { id: 'tuition', label: 'Học phí' },
   ], []);
-
-  const handleEdit = () => {
-    router.push(`/admin/student-profile/${studentId}/edit`);
-  };
 
   const handleBack = () => {
     router.push('/admin/student-profile');
@@ -210,6 +206,13 @@ export default function StudentDetailPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Chi tiết Sinh viên</h1>
         <p className="text-gray-600 mt-1">Thông tin chi tiết và lịch sử học tập của sinh viên</p>
+        <button
+          onClick={handleBack}
+          className="mt-4 px-4 py-2 text-sm text-[#0053AD] bg-blue-50 border border-[#0053AD] rounded-lg hover:bg-blue-100 flex items-center gap-2 cursor-pointer transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Quay lại
+        </button>
       </div>
 
       {/* Student Info Card */}
@@ -244,7 +247,7 @@ export default function StudentDetailPage() {
                   <p className="text-sm text-gray-600 mb-1">Mã số sinh viên: {studentData.studentCode}</p>
                 </div>
                 <button
-                  onClick={handleEdit}
+                  onClick={() => router.push(`/admin/student-profile/${studentId}/edit`)}
                   className="px-4 py-2 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <Edit className="w-4 h-4" />
@@ -253,43 +256,43 @@ export default function StudentDetailPage() {
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-start gap-2">
+                  <Mail className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Email</p>
                     <p className="text-sm text-gray-900 truncate">{studentData.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-start gap-2">
+                  <Phone className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Số điện thoại</p>
                     <p className="text-sm text-gray-900">{studentData.phoneNumber}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-start gap-2">
+                  <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Ngày sinh</p>
                     <p className="text-sm text-gray-900">{formatDate(studentData.dateOfBirth)}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <School className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-start gap-2">
+                  <School className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Chuyên ngành</p>
-                    <p className="text-sm text-gray-900">{studentData.majorName}</p>
+                    <p className="text-sm text-gray-900">{studentData.departmentName || studentData.majorName || '-'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <School className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-start gap-2">
+                  <School className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Khóa</p>
                     <p className="text-sm text-gray-900">{studentData.academicYear}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs text-gray-500">Địa chỉ</p>
                     <p className="text-sm text-gray-900">{studentData.address}</p>
@@ -315,7 +318,7 @@ export default function StudentDetailPage() {
               ? studentData.averageGPA.toFixed(2) 
               : '-'}
           </p>
-          <p className="text-xs text-gray-500">/4.0</p>
+          <p className="text-xs text-gray-500">/10.0</p>
         </div>
 
         <div className="bg-blue-50 rounded-lg p-6 border border-gray-200 relative">
@@ -326,9 +329,9 @@ export default function StudentDetailPage() {
           </div>
           <p className="text-sm text-gray-600 mb-2">Tín chỉ tích lũy</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
-            {studentData.earnedCredits ?? '-'}
+            {studentData.creditsEarnedInCurriculum ?? studentData.earnedCredits ?? '-'}
           </p>
-          <p className="text-xs text-gray-500">/{studentData.totalCreditsRequired ?? '-'}</p>
+          <p className="text-xs text-gray-500">/{studentData.totalCreditsInCurriculum ?? studentData.totalCreditsRequired ?? '-'}</p>
         </div>
 
         <div className="bg-orange-50 rounded-lg p-6 border border-gray-200 relative">
@@ -340,8 +343,8 @@ export default function StudentDetailPage() {
           <p className="text-sm text-gray-600 mb-2">Công nợ</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
             {studentData.unpaidAmount && studentData.unpaidAmount > 0 
-              ? `${formatCurrency(studentData.unpaidAmount)} ₫` 
-              : '0 ₫'}
+              ? formatCurrency(studentData.unpaidAmount)
+              : formatCurrency(0)}
           </p>
           <p className="text-xs text-gray-500">
             {studentData.unpaidAmount && studentData.unpaidAmount > 0 
@@ -419,7 +422,7 @@ export default function StudentDetailPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Chuyên ngành</p>
-                      <p className="text-sm text-gray-900 font-medium">{studentData.majorName}</p>
+                      <p className="text-sm text-gray-900 font-medium">{studentData.departmentName || studentData.majorName || '-'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Khóa</p>
@@ -437,22 +440,6 @@ export default function StudentDetailPage() {
                 </div>
               </div>
             </div>
-
-            {/* Footer Buttons */}
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-              <button
-                onClick={handleBack}
-                className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
-              >
-                Quay lại
-              </button>
-              <button
-                onClick={handleEdit}
-                className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
-              >
-                Chỉnh sửa
-              </button>
-            </div>
           </div>
         )}
 
@@ -465,13 +452,13 @@ export default function StudentDetailPage() {
                 <p className="text-sm text-gray-600">Bảng điểm và kết quả học tập theo học kỳ</p>
               </div>
 
-              {/* Semester Selector and GPA Summary */}
-              <div className="flex items-center justify-between mb-6">
+              {/* Semester Selector */}
+              <div className="mb-6">
                 <div className="w-80">
                   <Dropdown
                     options={semesters.map(s => ({
                       value: s.semesterId,
-                      label: `${s.semesterName} - ${s.yearRange}`,
+                      label: s.yearRange ? `${s.semesterName} - ${s.yearRange}` : s.semesterName,
                     }))}
                     value={selectedAcademicSemester}
                     placeholder="Chọn học kì"
@@ -479,108 +466,110 @@ export default function StudentDetailPage() {
                     disabled={loadingGrades || semesters.length === 0}
                   />
                 </div>
+              </div>
 
-                {/* GPA Summary */}
+              {/* Grades Table */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <Table
+                  columns={[
+                    { key: 'subjectCode', label: 'Mã MH', align: 'left' },
+                    { key: 'subjectName', label: 'Tên môn học', align: 'left' },
+                    { key: 'credits', label: 'TC', align: 'center' },
+                    { key: 'finalGrade', label: 'Điểm thi', align: 'center' },
+                    { key: 'finalGrade10', label: 'TK (10)', align: 'center' },
+                    { key: 'finalGrade4', label: 'TK (4)', align: 'center' },
+                    { key: 'gradeLetter', label: 'TK (C)', align: 'center' },
+                    { key: 'status', label: 'Kết quả', align: 'center' },
+                    { key: 'details', label: 'Chi tiết', align: 'center' },
+                  ]}
+                  data={grades?.grades || []}
+                  isLoading={loadingGrades}
+                  emptyMessage="Không có dữ liệu điểm"
+                  className="border-0 rounded-none"
+                  renderRow={(grade) => (
+                    <>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{grade.subjectCode}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                        {grade.finalGrade !== null ? grade.finalGrade.toFixed(1) : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
+                        {grade.finalGrade10 !== null ? grade.finalGrade10.toFixed(1) : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
+                        {grade.finalGrade4.toFixed(1)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
+                        {grade.gradeLetter || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`font-medium ${
+                          grade.status === 'Đạt' 
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          {grade.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => {
+                            setSelectedGrade(grade);
+                            setIsGradeModalOpen(true);
+                          }}
+                          className="p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                          title="Xem chi tiết"
+                        >
+                          <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                          </svg>
+                        </button>
+                      </td>
+                    </>
+                  )}
+                />
+
+                {/* Summary Section */}
                 {grades && (
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600 mb-1">GPA thang 10</p>
-                      <p className="text-2xl font-bold text-[#0053AD]">{grades.semesterGPA10.toFixed(2)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600 mb-1">GPA thang 4</p>
-                      <p className="text-2xl font-bold text-[#0053AD]">{grades.semesterGPA4.toFixed(2)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600 mb-1">Xếp loại</p>
-                      <span className={`inline-block px-4 py-1.5 text-sm font-semibold rounded-lg ${
-                        grades.semesterClassification === 'Xuất sắc' ? 'bg-purple-100 text-purple-700' :
-                        grades.semesterClassification === 'Giỏi' ? 'bg-green-100 text-green-700' :
-                        grades.semesterClassification === 'Khá' ? 'bg-blue-100 text-blue-700' :
-                        grades.semesterClassification === 'Trung bình' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {grades.semesterClassification}
-                      </span>
+                  <div className="bg-gray-50 px-6 py-5 border-t border-gray-200">
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <span className="text-sm font-bold text-gray-900">
+                          Điểm trung bình tích lũy hệ 4: <span className="text-[#0053AD]">{grades.semesterGPA4.toFixed(2)}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm font-bold text-gray-900">
+                          Điểm trung bình tích lũy hệ 10: <span className="text-[#0053AD]">{grades.semesterGPA10.toFixed(2)}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm font-bold text-gray-900">
+                          Số tín chỉ tích lũy: <span className="text-[#0053AD]">
+                            {grades.grades.filter(g => g.status === 'Đạt').reduce((sum, g) => sum + g.credits, 0)}
+                          </span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-gray-900">Phân loại học lực học kỳ:</span>
+                        {grades.semesterClassification && (
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                            grades.semesterClassification === 'Xuất sắc' ? 'bg-gradient-to-r from-[#FF512F] to-[#DD2476]' :
+                            grades.semesterClassification === 'Giỏi' ? 'bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA]' :
+                            grades.semesterClassification === 'Khá' ? 'bg-gradient-to-r from-[#56ab2f] to-[#a8e063]' :
+                            grades.semesterClassification === 'Trung bình' ? 'bg-gradient-to-r from-[#F7971E] to-[#FFD200]' :
+                            'bg-gradient-to-r from-[#ED213A] to-[#93291E]'
+                          }`}>
+                            {grades.semesterClassification}
+                          </span>
+                        )}
+                        {!grades.semesterClassification && <span className="text-sm text-gray-500">-</span>}
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
-
-              {/* Grades Table */}
-              <Table
-                columns={[
-                  { key: 'subjectCode', label: 'Mã MH', align: 'left' },
-                  { key: 'subjectName', label: 'Tên môn học', align: 'left' },
-                  { key: 'credits', label: 'TC', align: 'center' },
-                  { key: 'finalGrade', label: 'Điểm thi', align: 'center' },
-                  { key: 'finalGrade10', label: 'Điểm TK (10)', align: 'center' },
-                  { key: 'finalGrade4', label: 'Điểm TK (4)', align: 'center' },
-                  { key: 'gradeLetter', label: 'Điểm TK (C)', align: 'center' },
-                  { key: 'status', label: 'Kết quả', align: 'center' },
-                  { key: 'details', label: 'Chi tiết', align: 'center' },
-                ]}
-                data={grades?.grades || []}
-                isLoading={loadingGrades}
-                emptyMessage="Không có dữ liệu điểm"
-                renderRow={(grade) => (
-                  <>
-                    <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectCode}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                      {grade.finalGrade !== null ? grade.finalGrade.toFixed(2) : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                      {grade.finalGrade10 !== null ? grade.finalGrade10.toFixed(2) : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                      {grade.finalGrade4.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 text-center font-semibold">
-                      {grade.gradeLetter}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${
-                        grade.status === 'Đạt' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                        {grade.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => {
-                          setSelectedGrade(grade);
-                          setIsGradeModalOpen(true);
-                        }}
-                        className="text-gray-600 hover:text-[#0053AD] cursor-pointer transition-colors"
-                      >
-                        <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                        </svg>
-                      </button>
-                    </td>
-                  </>
-                )}
-              />
-            </div>
-
-            {/* Footer Buttons */}
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-              <button
-                onClick={handleBack}
-                className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
-              >
-                Quay lại
-              </button>
-              <button
-                onClick={handleEdit}
-                className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
-              >
-                Chỉnh sửa
-              </button>
             </div>
           </div>
         )}
@@ -602,7 +591,7 @@ export default function StudentDetailPage() {
                       <Dropdown
                         options={semesters.map(s => ({
                           value: s.semesterId,
-                          label: `${s.semesterName} - ${s.yearRange}`,
+                          label: s.yearRange ? `${s.semesterName} - ${s.yearRange}` : s.semesterName,
                         }))}
                         value={selectedTuitionSemester}
                         placeholder="Chọn học kì"
@@ -643,7 +632,7 @@ export default function StudentDetailPage() {
                             <td className="px-6 py-4 text-sm text-gray-900">{course.courseCode}</td>
                             <td className="px-6 py-4 text-sm text-gray-900">{course.courseName}</td>
                             <td className="px-6 py-4 text-sm text-gray-900 text-center">{course.credits}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(course.courseFee)} ₫</td>
+                            <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(course.courseFee)}</td>
                             <td className="px-6 py-4 text-center">
                               <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
                                 {statusDisplay.label}
@@ -663,7 +652,7 @@ export default function StudentDetailPage() {
                                 {tuitionFees.courses.reduce((sum, course) => sum + course.credits, 0)} TC
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-900 text-right">
-                                {formatCurrency(tuitionFees.courses.reduce((sum, course) => sum + course.courseFee, 0))} ₫
+                                {formatCurrency(tuitionFees.courses.reduce((sum, course) => sum + course.courseFee, 0))}
                               </td>
                               <td></td>
                             </tr>
@@ -689,7 +678,7 @@ export default function StudentDetailPage() {
                       <Dropdown
                         options={semesters.map(s => ({
                           value: s.semesterId,
-                          label: `${s.semesterName} - ${s.yearRange}`,
+                          label: s.yearRange ? `${s.semesterName} - ${s.yearRange}` : s.semesterName,
                         }))}
                         value={selectedInsuranceSemester}
                         placeholder="Chọn học kì"
@@ -725,7 +714,7 @@ export default function StudentDetailPage() {
                       return (
                         <>
                           <td className="px-6 py-4 text-sm text-gray-900">{insurance.academicYear}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(insurance.healthInsuranceFee)} ₫</td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(insurance.healthInsuranceFee)}</td>
                           <td className="px-6 py-4 text-center">
                             <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
                               {statusDisplay.label}
@@ -736,22 +725,6 @@ export default function StudentDetailPage() {
                     }}
                   />
                 </div>
-              </div>
-
-              {/* Footer Buttons */}
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  onClick={handleBack}
-                  className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors"
-                >
-                  Quay lại
-                </button>
-                <button
-                  onClick={handleEdit}
-                  className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
-                >
-                  Chỉnh sửa
-                </button>
               </div>
             </div>
           )}

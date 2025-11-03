@@ -23,7 +23,6 @@ export function ExamCard({
   const statusClassName = ENTRY_STATUS_COLORS[exam.entryStatus] || "bg-gray-100 text-gray-700";
   const examTypeLabel = EXAM_TYPE_LABELS[exam.examType] || exam.examType;
 
-
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">

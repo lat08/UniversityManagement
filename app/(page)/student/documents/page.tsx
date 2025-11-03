@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useDocuments, useDocumentTypes } from './lib/hooks';
 import { useSemesters, useSubjects } from '@/lib/hooks';
+import { Pagination } from '@/app/components/ui/pagination';
 import {
   DocumentCard,
   DocumentModal,
@@ -26,26 +27,29 @@ export default function DocumentsPage() {
   const [selectedSemesterId, setSelectedSemesterId] = useState<string>('');
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
   const [query, setQuery] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE_NUMBER);
   
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS);
   
   const materialsParams = useMemo(() => ({
-    searchTerm: debouncedQuery || undefined,
+    keyword: debouncedQuery || undefined,
     documentType: selectedDocumentType || undefined,
     semesterId: selectedSemesterId || undefined,
     subjectId: selectedSubjectId || undefined,
-    pageNumber: DEFAULT_PAGE_NUMBER,
+    pageNumber: currentPage,
     pageSize: DEFAULT_PAGE_SIZE,
-  }), [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId]);
+  }), [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId, currentPage]);
   
   const { documentTypes, loading: typesLoading } = useDocumentTypes();
   const { data: semesters, loading: semestersLoading } = useSemesters();
   const { data: subjects, loading: subjectsLoading } = useSubjects();
-  const { courseGroups, loading, error, refetch } = useDocuments(materialsParams);
+  const { courseGroups, loading, error, refetch, totalCount } = useDocuments(materialsParams);
 
   const safeCourseGroups = useMemo(() => {
     return Array.isArray(courseGroups) ? courseGroups : [];
   }, [courseGroups]);
+
+  const totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
 
   const hasFilters = Boolean(
     debouncedQuery || 
@@ -53,6 +57,10 @@ export default function DocumentsPage() {
     selectedSemesterId || 
     selectedSubjectId
   );
+
+  useEffect(() => {
+    setCurrentPage(DEFAULT_PAGE_NUMBER);
+  }, [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId]);
 
   const handleView = (group: CourseGroup) => {
     setSelectedGroup(group);
@@ -71,14 +79,6 @@ export default function DocumentsPage() {
       }
     });
   };
-
-  if (loading) {
-    return <DocumentsLoading />;
-  }
-
-  if (error) {
-    return <DocumentsError error={error} onRetry={refetch} />;
-  }
 
   return (
     <>
@@ -102,20 +102,38 @@ export default function DocumentsPage() {
           subjectsLoading={subjectsLoading}
         />
 
-        <div className="space-y-4">
-          {safeCourseGroups.length === 0 ? (
-            <DocumentsEmpty hasFilters={hasFilters} />
-          ) : (
-            safeCourseGroups.map((group) => (
-              <DocumentCard
-                key={group.courseClassId}
-                courseGroup={group}
-                onView={handleView}
-                onDownloadAll={handleDownloadAll}
-              />
-            ))
-          )}
-        </div>
+        {error ? (
+          <DocumentsError error={error} onRetry={refetch} />
+        ) : loading ? (
+          <DocumentsLoading />
+        ) : (
+          <div className="space-y-4">
+            {safeCourseGroups.length === 0 ? (
+              <DocumentsEmpty hasFilters={hasFilters} />
+            ) : (
+              safeCourseGroups.map((group) => (
+                <DocumentCard
+                  key={group.courseClassId}
+                  courseGroup={group}
+                  onView={handleView}
+                  onDownloadAll={handleDownloadAll}
+                />
+              ))
+            )}
+          </div>
+        )}
+
+        {!loading && !error && totalCount > 0 && (
+          <div className="pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={DEFAULT_PAGE_SIZE}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
 
       <DocumentModal

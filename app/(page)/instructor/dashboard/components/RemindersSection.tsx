@@ -65,7 +65,6 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
         </h3>
       </div>
 
-      {/* Reminders list */}
       <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto">
         {reminders.length > 0 ? (
           reminders.map((reminder) => (

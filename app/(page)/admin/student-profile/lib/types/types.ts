@@ -121,6 +121,7 @@ export const STATUS_OPTIONS = [
   { value: 'inactive', label: 'Đình chỉ' },
   { value: 'dropped_out', label: 'Thôi học' },
   { value: 'suspended', label: 'Bảo lưu' },
+  { value: 'qualified', label: 'Đủ điều kiện TN' },
 ];
 
 export interface StudentDetail {
@@ -132,11 +133,11 @@ export interface StudentDetail {
   email: string;
   phoneNumber: string;
   citizenId: string;
-  majorName: string;
+  majorName?: string;
   facultyName: string;
   facultyId: string;
   departmentId: string;
-  departmentName?: string;
+  departmentName: string;
   classCode: string;
   className: string;
   classId: string;
@@ -153,6 +154,9 @@ export interface StudentDetail {
   averageGPA?: number | null;
   earnedCredits?: number;
   totalCreditsRequired?: number;
+  totalCreditsInCurriculum?: number;
+  creditsEarnedInCurriculum?: number;
+  creditsEarnedOutsideCurriculum?: number;
   unpaidAmount?: number;
   unpaidEnrollmentsCount?: number;
   isQualifiedToGraduate?: boolean;
@@ -164,6 +168,7 @@ export const getStatusDisplay = (status: string) => {
     inactive: { label: 'Đình chỉ', color: 'bg-gray-100 text-gray-700' },
     dropped_out: { label: 'Thôi học', color: 'bg-red-100 text-red-700' },
     suspended: { label: 'Bảo lưu', color: 'bg-yellow-100 text-yellow-700' },
+    qualified: { label: 'Đủ điều kiện TN', color: 'bg-blue-100 text-blue-700' },
   };
   return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
 };
@@ -173,6 +178,7 @@ export const ENROLLMENT_STATUS_OPTIONS = [
   { value: 'inactive', label: 'Đình chỉ' },
   { value: 'dropped_out', label: 'Thôi học' },
   { value: 'suspended', label: 'Bảo lưu' },
+  { value: 'qualified', label: 'Đủ điều kiện TN' },
 ];
 
 export interface UpdateStudentPayload {

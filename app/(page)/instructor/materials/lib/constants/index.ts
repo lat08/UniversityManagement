@@ -1,7 +1,6 @@
 // API Endpoints
 export const MATERIALS_API = {
   GET_MATERIALS: '/v1/materials/GetMaterials',
-  GET_DOCUMENT_TYPES: '/v1/materials/student/document-types',
   UPLOAD_MATERIAL: '/v1/materials/instructor/UploadMaterial',
   UPDATE_MATERIAL: '/v1/materials/instructor/UpdateMaterial',
   DELETE_MATERIAL: '/v1/materials/instructor/DeleteMaterial',
@@ -24,6 +23,7 @@ export const DOCUMENT_TYPE_COLORS: Record<string, string> = {
 };
 
 // Pagination
-export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_PAGE_SIZE = 10;
 export const DEFAULT_PAGE_NUMBER = 1;
+export const SEARCH_DEBOUNCE_MS = 500;
 

@@ -1,4 +1,5 @@
-// Student Profile Types
+import type { ApiResponse, ChangePasswordDto } from "@/lib/api/auth"
+
 export interface StudentProfile {
   studentId: string
   fullName: string
@@ -20,23 +21,7 @@ export interface StudentProfile {
   role: string
 }
 
-export interface StudentProfileResponse {
-  success: boolean
-  message: string
-  data: StudentProfile
-  errors: string[] | null
-}
-
-export interface ChangePasswordRequest {
-  oldPassword: string
-  newPassword: string
-  confirmPassword: string
-}
-
-export interface ChangePasswordResponse {
-  success: boolean
-  message: string
-  data: null
-  errors: string[] | null
-}
+export type StudentProfileResponse = ApiResponse<StudentProfile>
+export type ChangePasswordRequest = ChangePasswordDto
+export type ChangePasswordResponse = ApiResponse<boolean>
 

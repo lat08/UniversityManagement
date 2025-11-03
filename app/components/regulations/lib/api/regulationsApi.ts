@@ -1,10 +1,34 @@
-import { api } from '../../../../../../lib/api/client'
-import { ApiResponse, RegulationResponse } from '../types/types'
+import { api } from '@/lib/api/client'
+
+export interface Regulation {
+  id: string
+  title: string
+  category: string
+  description: string
+  fileUrl: string
+  fileName: string
+  createdAt: string
+  updatedAt: string | null
+  isActive: boolean
+}
+
+export interface RegulationResponse {
+  totalCount: number
+  page: number
+  pageSize: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+  data: Regulation[]
+}
+
+export interface ApiResponse<T> {
+  httpStatus: number
+  isSuccess: boolean
+  data: T
+}
 
 export const regulationsApi = {
-  /**
-   * Lấy danh sách quy chế cho giảng viên với phân trang
-   */
   getRegulations: async (params: {
     pageIndex?: number
     pageSize?: number
@@ -18,7 +42,6 @@ export const regulationsApi = {
       orderBy: orderBy.toString()
     })
 
-    // Sử dụng cùng endpoint - backend sẽ phân biệt dựa trên role trong token
     const response = await api.get(`/v1/regulations?${searchParams}`)
     return response.data
   }

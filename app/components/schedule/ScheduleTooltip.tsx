@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode } from "react"
-import { DAYS_OF_WEEK } from "@/app/(page)/student/schedule/lib/constants/index"
+import { DAYS_OF_WEEK } from "@/lib/constants/schedule"
 
 interface CourseItem {
   id: string

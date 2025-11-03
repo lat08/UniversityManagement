@@ -166,14 +166,14 @@ export default function InstructorProfilePage() {
                   {/* Row 2 */}
                   <ProfileField
                     label="Giới tính"
-                    value={isEditing ? editedData.gender || '' : profile.gender === 'male' ? 'Nam' : profile.gender === 'female' ? 'Nữ' : 'Khác'}
+                    value={isEditing ? editedData.gender || profile.gender || '' : (profile.gender === 'male' ? 'Nam' : profile.gender === 'female' ? 'Nữ' : profile.gender === 'other' ? 'Khác' : '')}
                     editable={isEditing}
-                    type="select"
-                    options={[
+                    type={isEditing ? 'select' : 'text'}
+                    options={isEditing ? [
                       { value: 'male', label: 'Nam' },
                       { value: 'female', label: 'Nữ' },
                       { value: 'other', label: 'Khác' }
-                    ]}
+                    ] : undefined}
                     onChange={(value) => setEditedData({ ...editedData, gender: value as 'male' | 'female' | 'other' })}
                   />
                   

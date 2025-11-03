@@ -1,7 +1,5 @@
-// data structure for notifications
 export type NotificationType = "all" | "event" | "tuition" | "schedule" | "important"
 
-// API Response Types
 export interface NotificationApiItem {
   scheduleId: string
   notificationType: "event" | "tuition" | "schedule" | "important"
@@ -14,7 +12,6 @@ export interface NotificationApiItem {
   timeAgo: string
 }
 
-// Base API Response (matches backend structure)
 interface BaseApiResponse<T> {
   httpStatus: number
   isSuccess: boolean
@@ -71,22 +68,3 @@ export interface NotificationQueryParams {
   PageSize?: number
 }
 
-// Legacy type for backward compatibility (if needed)
-export interface NotificationData {
-  id: string
-  title: string
-  timeAgo: string
-  type: Exclude<NotificationType, "all">
-  content: string
-  date: string
-  time?: string
-  location?: string
-  note: string
-  isRead?: boolean
-}
-
-export interface NotificationApiResponse {
-  success: boolean
-  data: NotificationApiItem[]
-  message?: string
-}

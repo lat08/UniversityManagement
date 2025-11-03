@@ -5,12 +5,12 @@ import { useCancelBooking } from '../lib/hooks/useRoomBooking';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { Badge } from '@/app/components/ui/badge';
 import { Dropdown } from '@/app/components/ui/dropdown';
-import { Calendar, Search } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import type { BookingData, BookingStatus } from '../lib/types/room.types';
-import { BOOKING_STATUS_LABELS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
+import { BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
 import CancelBookingModal from './CancelBookingModal';
 
 interface BookingHistoryProps {
@@ -25,7 +25,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
   const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
   const applyFilters = useRoomBookingStore((state) => state.applyFilters);
   
-  // Modal state
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
 
@@ -56,19 +55,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     }
   };
 
-  const getStatusColor = (status: BookingStatus) => {
-    const colors: Record<BookingStatus, string> = {
-      pending: 'bg-yellow-500 text-white',
-      confirmed: 'bg-blue-600 text-white',
-      cancelled: 'bg-gray-500 text-white',
-      completed: 'bg-green-600 text-white'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getStatusText = (status: BookingStatus) => {
-    return BOOKING_STATUS_LABELS[status] || 'Không xác định';
-  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -79,16 +65,12 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
   };
 
   const canCancelBooking = (booking: BookingData) => {
-    // Chỉ cho phép hủy nếu status là pending hoặc confirmed
     if (booking.bookingStatus === 'cancelled' || booking.bookingStatus === 'completed') {
       return false;
     }
     
     try {
-      // Kiểm tra xem đã qua thời gian BẮT ĐẦU sử dụng chưa
       const now = new Date();
-      
-      // Parse booking date
       let bookingDateTime: Date;
       try {
         bookingDateTime = parseISO(booking.bookingDate);
@@ -96,22 +78,18 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
         bookingDateTime = new Date(booking.bookingDate);
       }
       
-      // Kiểm tra nếu parse date thất bại
       if (isNaN(bookingDateTime.getTime())) {
         return false;
       }
       
-      // Parse startTime (thay vì endTime) và set vào booking date
       const [startHour, startMinute] = booking.startTime.split(':').map(Number);
       
-      // Kiểm tra nếu parse time thất bại
       if (isNaN(startHour) || isNaN(startMinute)) {
         return false;
       }
       
       bookingDateTime.setHours(startHour, startMinute, 0, 0);
       
-      // Nếu đã qua thời gian BẮT ĐẦU sử dụng thì không cho hủy
       if (now > bookingDateTime) {
         return false;
       }
@@ -132,8 +110,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     
     try {
       const now = new Date();
-      
-      // Parse booking date
       let bookingDateTime: Date;
       try {
         bookingDateTime = parseISO(booking.bookingDate);
@@ -141,15 +117,12 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
         bookingDateTime = new Date(booking.bookingDate);
       }
       
-      // Kiểm tra nếu parse date thất bại
       if (isNaN(bookingDateTime.getTime())) {
         return 'Lỗi định dạng ngày';
       }
       
-      // Parse startTime và set vào booking date
       const [startHour, startMinute] = booking.startTime.split(':').map(Number);
       
-      // Kiểm tra nếu parse time thất bại
       if (isNaN(startHour) || isNaN(startMinute)) {
         return 'Lỗi định dạng giờ';
       }
@@ -166,7 +139,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     }
   };
 
-  // Get unique buildings from bookings data
   const uniqueBuildings = useMemo(() => {
     const buildingMap = new Map();
     bookings.forEach(booking => {
@@ -179,13 +151,11 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
 
   const handleFilterChange = (key: string, value: string) => {
     setTempFilters({ [key]: value });
-    // Apply filters immediately (real-time search)
     setTimeout(() => {
       applyFilters();
     }, 0);
   };
 
-  // Filter bookings based on applied filters
   const filteredBookings = useMemo(() => {
     return bookings.filter(booking => {
       if (filters.buildingId && booking.building.buildingId !== filters.buildingId) {
@@ -308,8 +278,8 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
                   <h3 className="text-base font-bold text-gray-900">
                         {booking.roomName}
                       </h3>
-                  <Badge className={`${getStatusColor(booking.bookingStatus)} px-2.5 py-0.5 text-xs font-medium rounded`}>
-                      {getStatusText(booking.bookingStatus)}
+                  <Badge className={`${BOOKING_STATUS_COLORS[booking.bookingStatus] || 'bg-gray-100 text-gray-800'} px-2.5 py-0.5 text-xs font-medium rounded`}>
+                      {BOOKING_STATUS_LABELS[booking.bookingStatus] || 'Không xác định'}
                     </Badge>
                   </div>
 

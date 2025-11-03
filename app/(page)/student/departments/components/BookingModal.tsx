@@ -12,6 +12,7 @@ import { format, parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import toast from 'react-hot-toast';
+import { ROOM_STATUS_LABELS, ROOM_STATUS_COLORS } from '../lib/types/room.types';
 import 'react-day-picker/dist/style.css';
 
 interface BookingModalProps {
@@ -19,7 +20,6 @@ interface BookingModalProps {
   onClose: () => void;
 }
 
-// Khung giờ tiết học chuẩn
 const CLASS_PERIODS = [
   { period: 1, startTime: '07:15', endTime: '08:05', label: 'Tiết 1' },
   { period: 2, startTime: '08:10', endTime: '09:00', label: 'Tiết 2' },
@@ -36,7 +36,6 @@ const CLASS_PERIODS = [
   { period: 13, startTime: '19:55', endTime: '20:45', label: 'Tiết 13' },
 ];
 
-// Tạo các options cho thời gian bắt đầu (lọc theo ngày được chọn)
 const generateTimeOptions = (selectedDate?: Date) => {
   if (!selectedDate) return [];
   
@@ -46,7 +45,6 @@ const generateTimeOptions = (selectedDate?: Date) => {
     selectedDate.getMonth() === now.getMonth() &&
     selectedDate.getFullYear() === now.getFullYear();
   
-  // Nếu là ngày hôm nay, chỉ hiển thị các tiết học sau thời điểm hiện tại
   if (isToday) {
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
@@ -54,11 +52,8 @@ const generateTimeOptions = (selectedDate?: Date) => {
     
     return CLASS_PERIODS
       .filter(period => {
-        // Parse thời gian bắt đầu của tiết học
         const [startHour, startMinute] = period.startTime.split(':').map(Number);
         const periodStartInMinutes = startHour * 60 + startMinute;
-        
-        // Chỉ hiển thị các tiết có thời gian bắt đầu sau thời điểm hiện tại
         return periodStartInMinutes > currentTimeInMinutes;
       })
       .map(period => ({
@@ -68,7 +63,6 @@ const generateTimeOptions = (selectedDate?: Date) => {
       }));
   }
   
-  // Nếu là ngày trong tương lai, hiển thị tất cả các tiết
   return CLASS_PERIODS.map(period => ({
     value: period.startTime,
     label: `${period.label} (${period.startTime})`,
@@ -103,7 +97,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  // Close calendar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -122,7 +115,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     };
   }, [showCalendar]);
 
-  // Close modal when pressing ESC
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -145,13 +137,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       return;
     }
 
-    // Validate purpose length
     if (purpose.length > 500) {
       toast.error('Mục đích sử dụng không được vượt quá 500 ký tự');
       return;
     }
 
-    // Validate student count
     if (studentCount < 1) {
       toast.error('Số lượng người tham gia phải lớn hơn 0');
       return;
@@ -162,7 +152,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       return;
     }
 
-    // Validate date is not in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const selectedDate = new Date(bookingDate);
@@ -173,7 +162,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       return;
     }
 
-    // Validate time is not in the past if booking today
     const now = new Date();
     const isToday = 
       bookingDate.getDate() === now.getDate() &&
@@ -191,7 +179,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       }
     }
 
-    // Validate max 8 consecutive periods
     const startPeriod = CLASS_PERIODS.find(p => p.startTime === startTime);
     const endPeriod = CLASS_PERIODS.find(p => p.endTime === endTime);
     
@@ -202,7 +189,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         return;
       }
 
-      // Check if booking spans across lunch break (period 5 to 6)
       if (startPeriod.period <= 5 && endPeriod.period >= 6 && periodCount > 1) {
         toast.error('Không được đặt xuyên qua giờ nghỉ trưa (tiết 5 → tiết 6)');
         return;
@@ -220,7 +206,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       onSuccess: () => {
         toast.success('Đăng ký phòng thành công! Trạng thái: Chờ xác nhận');
         onClose();
-        // Reset form
         setBookingDate(undefined);
         setDateInputValue('');
         setStartTime('');
@@ -229,8 +214,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         setStudentCount(1);
       },
       onError: (error: Error) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const apiError = error as any;
+        const apiError = error as { response?: { data?: { message?: string } } };
         const errorMessage = apiError?.response?.data?.message || error.message || 'Đăng ký phòng thất bại!';
         toast.error(errorMessage);
       }
@@ -241,18 +225,15 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const handleDateInputChange = (value: string) => {
     setDateInputValue(value);
     
-    // Try to parse the date from dd/mm/yyyy format
     if (value.length === 10) {
       try {
         const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
         if (!isNaN(parsedDate.getTime())) {
           setBookingDate(parsedDate);
-          // Reset time selections when date changes
           setStartTime('');
           setEndTime('');
         }
       } catch {
-        // Invalid date format
       }
     }
   };
@@ -262,7 +243,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       setBookingDate(date);
       setDateInputValue(format(date, 'dd/MM/yyyy'));
       setShowCalendar(false);
-      // Reset time selections when date changes
       setStartTime('');
       setEndTime('');
     }
@@ -270,32 +250,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
 
   if (!isOpen || !selectedRoom) return null;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-600 text-white';
-      case 'inactive':
-        return 'bg-gray-500 text-white';
-      case 'maintenance':
-        return 'bg-yellow-600 text-white';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'Hoạt động';
-      case 'inactive':
-        return 'Ngừng hoạt động';
-      case 'maintenance':
-        return 'Bảo trì';
-      default:
-        return 'Không xác định';
-    }
-  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -356,8 +310,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                   )}
                 </div>
-                <Badge className={getStatusColor(selectedRoom.roomStatus)}>
-                  {getStatusText(selectedRoom.roomStatus)}
+                <Badge className={ROOM_STATUS_COLORS[selectedRoom.roomStatus] || 'bg-gray-100 text-gray-800'}>
+                  {ROOM_STATUS_LABELS[selectedRoom.roomStatus] || 'Không xác định'}
                 </Badge>
               </div>
             </CardContent>
@@ -379,7 +333,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 maxLength={10}
                 className="w-full p-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
                 onKeyDown={(e) => {
-                  // Only allow numbers and /
                   if (!/[0-9/]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
                     e.preventDefault();
                   }
@@ -394,7 +347,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </button>
             </div>
             
-            {/* Calendar Dropdown */}
             {showCalendar && (
               <div 
                 ref={calendarRef}

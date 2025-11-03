@@ -20,13 +20,11 @@ export default function ScoresPage() {
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
   const semesterRef = useRef<HTMLDivElement>(null)
 
-  // Transform API data to UI format
   const semesterData = useMemo(() => {
     if (!cumulativeData) return []
     return transformSemestersToUI(cumulativeData.semesters)
   }, [cumulativeData])
 
-  // Create course details lookup from API data
   const courseDetails = useMemo<Record<string, CourseDetail>>(() => {
     if (!cumulativeData) return {}
     const details: Record<string, CourseDetail> = {}
@@ -39,7 +37,6 @@ export default function ScoresPage() {
   }, [cumulativeData])
 
   const scoreOverview = useMemo(() => {
-    // Use statsData (from /v1/students/me/grades/stats) for the 3 cards
     if (!statsData) {
       return {
         gpa4: "0.00",
@@ -49,7 +46,6 @@ export default function ScoresPage() {
       }
     }
 
-    // Get classification based on GPA4 from stats
     let classification = ""
     if (statsData.averageGPA >= 3.8) classification = "Xuất sắc"
     else if (statsData.averageGPA >= 3.2) classification = "Giỏi"
@@ -77,7 +73,6 @@ export default function ScoresPage() {
     setSelectedCourse(null)
   }
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -131,7 +126,6 @@ export default function ScoresPage() {
       ? semesterData 
       : semesterData.filter((s) => selectedSemesters.includes(s.id))
 
-  // Calculate semester stats from API data
   const calculateSemesterStats = (semesterId: string) => {
     if (!cumulativeData) return null
     const semester = cumulativeData.semesters.find(s => s.semesterId === semesterId)
@@ -195,9 +189,7 @@ export default function ScoresPage() {
           <p className="text-sm text-gray-600">Xem kết quả học tập các môn học</p>
         </header>
 
-      {/* Tổng quan điểm số - Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Card 1: Điểm trung bình */}
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-gpa-bg)', borderColor: 'var(--grade-card-gpa-border)', borderWidth: '1px', borderStyle: 'solid' }}>
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Điểm trung bình</p>
           <div className="flex items-baseline gap-2">
@@ -206,7 +198,6 @@ export default function ScoresPage() {
           </div>
         </div>
 
-        {/* Card 2: Tổng tín chỉ hoàn thành */}
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-credit-bg)', borderColor: 'var(--grade-card-credit-border)', borderWidth: '1px', borderStyle: 'solid' }}>
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Tổng tín chỉ hoàn thành</p>
           <div className="flex items-baseline gap-2">
@@ -215,7 +206,6 @@ export default function ScoresPage() {
           </div>
         </div>
 
-        {/* Card 3: Môn đã hoàn thành */}
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-course-bg)', borderColor: 'var(--grade-card-course-border)', borderWidth: '1px', borderStyle: 'solid' }}>
           <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Môn đã hoàn thành</p>
           <div className="flex items-baseline gap-2">
@@ -225,7 +215,6 @@ export default function ScoresPage() {
         </div>
       </div>
 
-      {/* Filter & Export */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="relative w-full sm:w-auto" ref={semesterRef}>
           <label className="block text-xs sm:text-sm font-medium text-gray-900 mb-2">
@@ -268,7 +257,6 @@ export default function ScoresPage() {
                 </button>
               </div>
               
-              {/* Semester List - Dùng commonSemesters từ /v1/common/semesters để giữ đúng thứ tự API */}
               <div className="max-h-52 overflow-y-auto">
                 {commonSemesters.map((semester, index) => {
                   const isSelected = selectedSemesters.includes(semester.semesterId);
@@ -325,7 +313,6 @@ export default function ScoresPage() {
         </div>
       </div>
 
-      {/* Bảng điểm chi tiết cho từng học kỳ */}
       <div className="space-y-4 sm:space-y-6">
         {filteredSemesters.map((semester, index) => {
           const stats = calculateSemesterStats(semester.id)
@@ -333,12 +320,10 @@ export default function ScoresPage() {
 
           return (
             <div key={semester.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {/* Semester Header */}
               <div className="px-3 sm:px-6 py-3 sm:py-4 bg-[var(--grade-semester-header-bg)]">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">{semester.semester}</h3>
               </div>
 
-              {/* Table Section */}
               <div className="overflow-x-auto">
                 <table className="w-full text-xs sm:text-sm">
                   <thead>
@@ -401,7 +386,6 @@ export default function ScoresPage() {
                 </table>
               </div>
 
-              {/* Summary Section - Separated Block */}
               <div className="bg-[var(--grade-summary-bg)] px-3 sm:px-6 py-3 sm:py-5">
                 <div className="space-y-1.5 sm:space-y-2">
                   <div className="flex items-center">
@@ -443,7 +427,6 @@ export default function ScoresPage() {
         })}
       </div>
 
-      {/* Course Detail Modal */}
       {showDetailModal && selectedCourse && courseDetails[selectedCourse] && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
@@ -453,7 +436,6 @@ export default function ScoresPage() {
             className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ background: 'var(--grade-modal-header-bg)' }}>
               <div className="flex justify-between items-start gap-2">
                 <div>
@@ -470,7 +452,6 @@ export default function ScoresPage() {
               </div>
             </div>
             
-            {/* Modal Body */}
             <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
               <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
                 <table className="w-full text-xs sm:text-sm">
@@ -498,7 +479,6 @@ export default function ScoresPage() {
               </div>
             </div>
             
-            {/* Modal Footer */}
             <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex justify-end rounded-b-lg">
               <button
                 onClick={handleCloseDetail}

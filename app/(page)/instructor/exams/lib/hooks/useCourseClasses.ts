@@ -1,14 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api/client';
-
-export interface CourseClass {
-  courseClassId: string;
-  courseClassCode: string;
-  courseClassName: string;
-  subjectName: string;
-  subjectCode: string;
-  semesterName?: string;
-}
+import { CourseClass } from '../types';
 
 interface CourseClassesResponse {
   success: boolean;
@@ -29,11 +21,6 @@ export const useCourseClasses = () => {
     try {
       setLoading(true);
       setError(null);
-      // TODO: Replace with actual API endpoint for instructor course classes
-      // Example: const response = await api.get<CourseClassesResponse>('/v1/instructor/course-classes');
-      
-      // For now, we'll use a placeholder or get from exam entries
-      // This is a temporary solution until we have the correct endpoint
       const response = await api.get<CourseClassesResponse>('/v1/instructor/course-classes');
       
       if (response.data.success && response.data.data) {
@@ -43,10 +30,8 @@ export const useCourseClasses = () => {
         setCourseClasses([]);
       }
     } catch (err: any) {
-      // If endpoint doesn't exist, return empty array (can be populated from exam entries)
       setCourseClasses([]);
       setLoading(false);
-      // Don't set error if endpoint doesn't exist
       return;
     } finally {
       setLoading(false);

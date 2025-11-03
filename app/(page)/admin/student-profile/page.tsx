@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, Plus, Search, TrendingUp, TrendingDown, Eye, Edit, Trash2 } from 'lucide-react';
-import { Dropdown } from '@/app/components/ui/dropdown';
+import { Download, Plus, TrendingUp, TrendingDown, Eye, Edit, Trash2 } from 'lucide-react';
+import { Dropdown, StatCard, SearchInput, Button } from '@/app/components/ui';
 import { Table } from '@/app/components/ui/table';
 import { Pagination } from '@/app/components/ui/pagination';
 import AddStudentModal from './components/AddStudentModal';
@@ -195,28 +195,34 @@ export default function StudentProfilePage() {
         </td>
         <td className="px-6 py-4">
           <div className="flex items-center justify-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => router.push(`/admin/student-profile/${student.studentId}`)}
               onMouseEnter={() => handlePrefetchStudent(student.studentId)}
-              className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               title="Xem chi tiết"
             >
               <Eye className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => router.push(`/admin/student-profile/${student.studentId}/edit`)}
-              className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-green-600 hover:bg-green-50"
               title="Chỉnh sửa"
             >
               <Edit className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => handleDeleteClick(student.studentId, student.fullName)}
-              className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-red-600 hover:bg-red-50"
               title="Xóa"
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </td>
       </>
@@ -250,32 +256,18 @@ export default function StudentProfilePage() {
           {STAT_CARDS.map((card, index) => {
             const value = statValues[card.key];
             return (
-            <div
-              key={index}
-              className={`${card.color} rounded-lg p-6 border border-gray-200`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-2">{card.label}</p>
-                  <p className="text-4xl font-bold text-gray-900 mb-1">
-                    {value.toLocaleString()}
-                  </p>
-                  {card.subtitle ? (
-                    <p className="text-xs text-gray-500">{card.subtitle}</p>
-                  ) : null}
-                  {card.key === 'enrolled' && typeof stats.growthPercentage === 'number' && (
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className={`inline-flex items-center gap-1 text-xs font-medium ${stats.growthPercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        {stats.growthPercentage < 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                        {`${stats.growthPercentage > 0 ? '+' : ''}${stats.growthPercentage.toFixed(1)}%`}
-                      </span>
-                      <span className="text-xs text-gray-500">so với năm trước</span>
-                    </div>
-                  )}
-                </div>
-                <div className="text-3xl">{card.icon}</div>
-              </div>
-            </div>
+              <StatCard
+                key={index}
+                label={card.label}
+                value={value}
+                subtitle={card.subtitle || undefined}
+                icon={card.icon}
+                color={card.color}
+                growth={card.key === 'enrolled' && typeof stats.growthPercentage === 'number' ? {
+                  percentage: stats.growthPercentage,
+                  label: 'so với năm trước'
+                } : undefined}
+              />
             );
           })}
         </div>
@@ -295,43 +287,38 @@ export default function StudentProfilePage() {
               </p>
             </div>
             <div className="flex gap-3">
-              <button 
+              <Button
+                variant="outline"
                 onClick={() => setIsImportModalOpen(true)}
-                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 Nhập Excel
-              </button>
-              <button 
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setIsExportModalOpen(true)}
-                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 Xuất Excel
-              </button>
-              <button 
+              </Button>
+              <Button
                 onClick={() => setIsAddModalOpen(true)}
-                className="px-4 py-2 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] flex items-center gap-2 cursor-pointer"
+                className="bg-[#0053AD] hover:bg-[#003d82] text-white"
               >
                 <Plus className="w-4 h-4" />
                 Thêm sinh viên
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Filters */}
           <div className="flex gap-4">
             {/* Search Input */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm theo MSSV, tên..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-              />
-            </div>
+            <SearchInput
+              placeholder="Tìm kiếm theo MSSV, tên..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
 
             {/* Department Dropdown */}
             <div className="w-64">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import StatCard from "../StatCard";
 import AcademicResultsChart from "../AcademicResultsChart";
@@ -9,15 +10,44 @@ import ClassListCard from "../ClassListCard";
 import { useDashboard } from "../../libs/hooks/useDashboard";
 import { useDashboardStats } from "../../libs/hooks/useStatCard"
 import { Loader2 } from "lucide-react";
+import { Semester } from "../../libs/types/types";
 
-
-
+const getActiveSemesterId = (semesters: Semester[]): string => {
+  if (!semesters || semesters.length === 0) return "";
+  
+  const now = new Date();
+  
+  const activeSemester = semesters.find(semester => {
+    if (!semester.startDate || !semester.endDate) return false;
+    const startDate = new Date(semester.startDate);
+    const endDate = new Date(semester.endDate);
+    return now >= startDate && now <= endDate;
+  });
+  
+  if (activeSemester) return activeSemester.semesterId;
+  
+  const upcomingSemester = semesters
+    .filter(semester => semester.startDate && new Date(semester.startDate) > now)
+    .sort((a, b) => new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime())[0];
+  
+  if (upcomingSemester) return upcomingSemester.semesterId;
+  
+  const pastSemester = semesters
+    .filter(semester => semester.endDate && new Date(semester.endDate) < now)
+    .sort((a, b) => new Date(b.endDate!).getTime() - new Date(a.endDate!).getTime())[0];
+  
+  return pastSemester?.semesterId || semesters[0]?.semesterId || "";
+};
 
 export default function DashboardContent() {
 
   
   const { dashboard, loading, error, refetch } = useDashboard();
   const card = useDashboardStats();
+
+  const activeSemesterId = useMemo(() => {
+    return getActiveSemesterId(dashboard?.activeSemesters || []);
+  }, [dashboard?.activeSemesters]);
 
   usePageTitle('Bảng điều khiển');
   if (loading) {
@@ -50,7 +80,7 @@ export default function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
           <AcademicResultsChart semesters={dashboard?.activeSemesters || []}
-            semesterId={dashboard?.activeSemesters?.[0]?.semesterId ?? ""} />
+            semesterId={activeSemesterId} />
         </div>
         <div className="lg:col-span-4 h-full">
           <LearningStatsCard Kpi={dashboard?.kpi}/>

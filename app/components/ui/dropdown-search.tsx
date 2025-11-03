@@ -147,7 +147,10 @@ export function DropdownSearch<T = string>({
               <button
                 type="button"
                 onClick={() => handleSelect(undefined as T)}
-                className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
+                className={cn(
+                  "w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors",
+                  value === undefined && "bg-blue-50 text-blue-700 font-medium"
+                )}
               >
                 {emptyOptionLabel}
               </button>

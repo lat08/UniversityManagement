@@ -68,7 +68,10 @@ export interface UploadMaterialResponse {
 
 // Query Params
 export interface GetMaterialsParams {
-  searchQuery?: string;
+  keyword?: string;
+  semesterId?: string;
+  subjectId?: string;
+  documentType?: string;
   pageNumber?: number;
   pageSize?: number;
 }

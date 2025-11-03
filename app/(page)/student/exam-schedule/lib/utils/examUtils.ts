@@ -1,8 +1,5 @@
 import { Exam, ExamScheduleResponse } from '../types/types';
 
-/**
- * Sort exams by status priority: Sắp tới -> Chưa tới -> Đã thi
- */
 export function sortExamsByStatus(exams: Exam[]): Exam[] {
   const statusPriority: Record<Exam['status'], number> = {
     'Sắp tới': 1,
@@ -15,9 +12,6 @@ export function sortExamsByStatus(exams: Exam[]): Exam[] {
   });
 }
 
-/**
- * Transform API response to Exam format
- */
 export function transformExamData(data: ExamScheduleResponse[]): Exam[] {
   return data.map((item, index) => ({
     id: `${item.subjectNameCode}-${index}`,

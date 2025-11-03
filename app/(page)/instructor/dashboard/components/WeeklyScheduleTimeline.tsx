@@ -45,30 +45,25 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
       onWheel={handleWheel}
       className="relative max-h-[600px] overflow-y-auto pr-2 overscroll-contain"
     >
-      {/* Timeline line */}
       <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
 
-      {/* Timeline items */}
       <div className="space-y-3 lg:space-y-4">
         {schedules.map((schedule) => {
           const colors = getClassTypeColor(schedule.classType);
           
           return (
             <div key={schedule.courseClassId} className="relative pl-8 lg:pl-10">
-              {/* Timeline dot */}
               <div className={cn(
                 "absolute left-[0px] top-3 w-5 h-5 rounded-full border-4 border-white shadow-sm z-10",
                 colors.dot
               )} />
 
-              {/* Schedule card */}
               <div className={cn(
                 "p-3 lg:p-4 rounded-lg border-2 transition-all hover:shadow-md",
                 colors.card
               )}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    {/* Day and time */}
                     <div className={cn(
                       "text-xs lg:text-sm font-bold mb-1",
                       colors.date
@@ -76,7 +71,6 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                       {schedule.dayOfWeek}, {schedule.timeRange}
                     </div>
 
-                    {/* Subject name and code */}
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <div className="text-sm lg:text-base font-bold text-gray-900">
                         {schedule.subjectName}
@@ -86,9 +80,7 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                       </span>
                     </div>
 
-                    {/* Schedule details */}
                     <div className="flex items-center gap-3 text-xs lg:text-sm text-gray-600 flex-wrap">
-                      {/* Room */}
                       <div className="flex items-center gap-1">
                         <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -97,7 +89,6 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                         <span>{schedule.roomName}</span>
                       </div>
 
-                      {/* Class code */}
                       {schedule.classCode && (
                         <div className="flex items-center gap-1">
                           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +98,6 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                         </div>
                       )}
 
-                      {/* Class type */}
                       {schedule.classType && (
                         <div className="flex items-center gap-1">
                           <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium">

@@ -4,20 +4,7 @@ import { Card } from "@/app/components/ui/card"
 import { Calendar, AlertTriangle, ChevronDown, DollarSign, CalendarDays } from "lucide-react"
 import { useState, useEffect } from "react"
 import { formatDate } from "@/lib/utils/format"
-
-export type NotificationType = "event" | "tuition" | "schedule" | "important"
-
-export interface NotificationApiItem {
-  scheduleId: string
-  notificationType: NotificationType
-  title: string
-  content: string
-  createdAt: string
-  visibleFrom: string
-  isRead: boolean
-  status: string
-  timeAgo: string
-}
+import { NotificationApiItem } from "@/lib/types/notification"
 
 export interface NotificationCardProps {
   notification: NotificationApiItem

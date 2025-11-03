@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { Dropdown, DropdownSearch } from '@/app/components/ui';
+import { Dropdown, DropdownSearch, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Button, Input } from '@/app/components/ui';
 import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -94,18 +93,6 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
   }, [formValues.departmentId, setValue]);
 
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isSubmitting) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, [isOpen, isSubmitting, onClose]);
 
   const fetchFaculties = async () => {
     try {
@@ -210,41 +197,25 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col m-4">
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-lg flex-shrink-0">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Thêm sinh viên mới</h2>
-            <p className="text-sm text-gray-600 mt-1">Nhập thông tin sinh viên</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Thêm sinh viên mới</DialogTitle>
+          <DialogDescription>Nhập thông tin sinh viên</DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto flex-1 p-6">
           <div className="grid grid-cols-2 gap-6">
             {/* Họ và tên */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Họ và tên <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <Input
                 placeholder="Nguyễn Văn A"
                 {...register('name')}
-                className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={errors.name ? 'border-red-500' : ''}
               />
               {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
             </div>
@@ -254,13 +225,10 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 CMND / CCCD <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <Input
                 placeholder="012345678900"
                 {...register('citizenId')}
-                className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent ${
-                  errors.citizenId ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={errors.citizenId ? 'border-red-500' : ''}
               />
               {errors.citizenId && <p className="mt-1 text-xs text-red-500">{errors.citizenId.message}</p>}
             </div>
@@ -270,12 +238,12 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Ngày sinh <span className="text-red-500">*</span>
               </label>
-              <input
+              <Input
                 type="date"
                 value={dobISO}
                 max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => {
-                  const iso = e.target.value; // YYYY-MM-DD
+                  const iso = e.target.value;
                   setDobISO(iso);
                   if (iso) {
                     const [y, m, d] = iso.split('-');
@@ -284,9 +252,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
                     setValue('dob', '', { shouldValidate: true });
                   }
                 }}
-                className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent ${
-                  errors.dob ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={errors.dob ? 'border-red-500' : ''}
               />
               <input type="hidden" {...register('dob')} />
               {errors.dob && <p className="mt-1 text-xs text-red-500">{errors.dob.message}</p>}
@@ -315,13 +281,11 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Số điện thoại <span className="text-red-500">*</span>
               </label>
-              <input
+              <Input
                 type="tel"
                 placeholder="0000000000"
                 {...register('phone')}
-                className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={errors.phone ? 'border-red-500' : ''}
               />
               {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
             </div>
@@ -404,37 +368,34 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Địa chỉ <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <Input
                 placeholder="Nhập địa chỉ"
                 {...register('address')}
-                className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent ${
-                  errors.address ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={errors.address ? 'border-red-500' : ''}
               />
               {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>}
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 mt-8">
-            <button
+          <DialogFooter>
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-6 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#0053AD] hover:bg-[#003d82] text-white"
             >
               {isSubmitting ? 'Đang lưu...' : 'Lưu'}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

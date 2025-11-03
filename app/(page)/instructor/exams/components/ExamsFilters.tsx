@@ -1,7 +1,6 @@
 "use client"
 
-import { Search, X } from "lucide-react";
-import { Dropdown } from "@/app/components/ui";
+import { Dropdown, DropdownSearch, SearchInput } from "@/app/components/ui";
 
 interface ExamsFiltersProps {
   searchQuery: string;
@@ -12,9 +11,12 @@ interface ExamsFiltersProps {
   onSubjectChange: (value: string) => void;
   selectedStatus: string;
   onStatusChange: (value: string) => void;
+  selectedExamType: string;
+  onExamTypeChange: (value: string) => void;
   semesters: { id: string; name: string }[];
   subjects: { id: string; name: string }[];
   statuses: { id: string; name: string }[];
+  examTypes: { id: string; name: string }[];
   semestersLoading?: boolean;
   subjectsLoading?: boolean;
 }
@@ -28,46 +30,25 @@ export function ExamsFilters({
   onSubjectChange,
   selectedStatus,
   onStatusChange,
+  selectedExamType,
+  onExamTypeChange,
   semesters,
   subjects,
   statuses,
+  examTypes,
   semestersLoading = false,
   subjectsLoading = false,
 }: ExamsFiltersProps) {
-  const hasActiveFilters = searchQuery || selectedSemester !== "all" || selectedSubject !== "all" || selectedStatus !== "all";
-
-  const handleClearFilters = () => {
-    onSearchChange('');
-    onSemesterChange('all');
-    onSubjectChange('all');
-    onStatusChange('all');
-  };
-
   return (
-    <div className="space-y-3">
-      <div className="flex gap-4 items-stretch w-full">
-        {/* Search input */}
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <Search className="w-4 h-4" />
-          </span>
-          <input
-            type="text"
-            aria-label="Tìm kiếm theo tên môn học hoặc giảng viên"
-            placeholder="Tìm kiếm theo tên môn học, giảng viên..."
+    <div className="flex gap-4 items-stretch w-full">
+        <div className="flex-1">
+          <SearchInput
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors h-full"
+            placeholder="Tìm kiếm theo tên môn học, giảng viên..."
+            aria-label="Tìm kiếm theo tên môn học hoặc giảng viên"
+            className="h-full py-2.5 border-gray-300 rounded-lg hover:border-gray-600 focus-visible:border-gray-600 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Xóa tìm kiếm"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
         </div>
 
         <Dropdown
@@ -80,14 +61,15 @@ export function ExamsFilters({
           buttonClassName={selectedSemester !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
         />
 
-        <Dropdown
+        <DropdownSearch
           options={subjects.map(s => ({ value: s.id, label: s.name }))}
-          value={selectedSubject}
+          value={selectedSubject !== "all" ? selectedSubject : undefined}
           placeholder="Tất cả môn học"
-          onChange={onSubjectChange}
+          onChange={(value) => onSubjectChange(value || "all")}
           disabled={subjectsLoading}
           className="flex-1"
-          buttonClassName={selectedSubject !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+          showEmptyOption
+          emptyOptionLabel="Tất cả môn học"
         />
 
         <Dropdown
@@ -98,20 +80,15 @@ export function ExamsFilters({
           className="flex-1"
           buttonClassName={selectedStatus !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
         />
-      </div>
 
-      {/* Clear filters button */}
-      {hasActiveFilters && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleClearFilters}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Xóa tất cả bộ lọc
-          </button>
-        </div>
-      )}
+        <Dropdown
+          options={examTypes.map(t => ({ value: t.id, label: t.name }))}
+          value={selectedExamType}
+          placeholder="Tất cả loại"
+          onChange={onExamTypeChange}
+          className="flex-1"
+          buttonClassName={selectedExamType !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+        />
     </div>
   );
 }

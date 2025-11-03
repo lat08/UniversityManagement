@@ -1,4 +1,3 @@
-// API Response Types
 export interface GradeItem {
   semesterId: string
   semesterName: string
@@ -65,20 +64,12 @@ export interface GradesStatsResponse {
   errors: null | unknown
 }
 
-// UI Display Types
 export interface Course {
   code: string
   name: string
   credits: number
   score10: number | null
   status: string
-}
-
-export interface SemesterStats {
-  semesterGPA10: string
-  semesterGPA4: string
-  totalCredits: number
-  classification: string
 }
 
 export interface CourseComponent {

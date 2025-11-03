@@ -6,8 +6,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/app/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 import { NotificationCard } from "@/app/components/notification/header-popup/notification-card/NotificationCard"
-import { notificationApi } from "@/app/(page)/student/notification/libs/api/notificationApi"
-import { NotificationApiItem } from "@/app/(page)/student/notification/libs/type/notificationType"
+import { notificationApi } from "@/lib/api/notification"
+import { NotificationApiItem } from "@/lib/types/notification"
 import { useAuthStore } from "@/lib/store/authStore"
 
 export function NotificationPopup() {
@@ -17,7 +17,6 @@ export function NotificationPopup() {
   const [isOpen, setIsOpen] = useState(false)
   const { user } = useAuthStore()
 
-  // Fetch unread count
   const fetchUnreadCount = async () => {
     try {
       const response = await notificationApi.getUnreadCount()
@@ -25,11 +24,10 @@ export function NotificationPopup() {
         setUnreadCount(response.data.unreadCount)
       }
     } catch (err) {
-      console.error("Error fetching unread count:", err)
+      // Error handled silently
     }
   }
 
-  // Fetch recent notifications when popup opens (max 10)
   const fetchRecentNotifications = async () => {
     try {
       setLoading(true)
@@ -38,13 +36,12 @@ export function NotificationPopup() {
         setNotifications(response.data.notifications.data)
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err)
+      // Error handled silently
     } finally {
       setLoading(false)
     }
   }
 
-  // Poll unread count every 30 seconds when user is logged in
   useEffect(() => {
     if (user) {
       fetchUnreadCount()
@@ -53,14 +50,12 @@ export function NotificationPopup() {
     }
   }, [user])
 
-  // Fetch notifications when popup opens
   useEffect(() => {
     if (isOpen && user) {
       fetchRecentNotifications()
     }
   }, [isOpen, user])
 
-  // Determine notification link based on role
   const getNotificationLink = () => {
     if (!user) return "/login"
     if (user.role === "Student") return "/student/notification"

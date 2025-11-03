@@ -33,8 +33,13 @@ export interface GetMaterialsResponse {
   success: boolean
   message: string
   data: {
-    total: number
-    data: CourseGroup[]
+    items: CourseGroup[]
+    totalCount: number
+    pageNumber: number
+    pageSize: number
+    totalPages: number
+    hasPrevious: boolean
+    hasNext: boolean
   }
   errors?: string[] | null
 }
@@ -51,7 +56,7 @@ export interface GetDocumentTypesResponse {
 }
 
 export interface GetMaterialsParams {
-  searchTerm?: string
+  keyword?: string
   documentType?: string
   semesterId?: string
   subjectId?: string

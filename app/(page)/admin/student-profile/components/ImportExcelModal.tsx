@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
-import { X, Upload, Download, CheckCircle2, XCircle } from 'lucide-react';
+import { Upload, Download, CheckCircle2, XCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Button, Input } from '@/app/components/ui';
 import { toast } from 'react-hot-toast';
 import { studentsApi } from '../lib/api/studentsApi';
 
@@ -129,18 +130,6 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isImporting && validationStatus !== 'validating') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, [isOpen, isImporting, validationStatus, onClose]);
 
   const getInputBorderColor = () => {
     switch (validationStatus) {
@@ -155,46 +144,27 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col m-4">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-lg flex-shrink-0">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Nhập sinh viên từ Excel</h2>
-            <p className="text-sm text-gray-600 mt-1">Tải file Excel chứa danh sách sinh viên mới</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !isImporting && validationStatus !== 'validating' && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Nhập sinh viên từ Excel</DialogTitle>
+          <DialogDescription>Tải file Excel chứa danh sách sinh viên mới</DialogDescription>
+        </DialogHeader>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1">
           {/* Download Template Button */}
           <div className="mb-6">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handleDownloadTemplate}
               disabled={isDownloading}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[#0053AD] bg-blue-50 border border-[#0053AD] rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-[#0053AD] bg-blue-50 border-[#0053AD] hover:bg-blue-100"
             >
               <Download className="w-4 h-4" />
               {isDownloading ? 'Đang tải...' : 'Tải xuống file mẫu'}
-            </button>
+            </Button>
           </div>
 
           {/* File Upload */}
@@ -203,12 +173,12 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
               Chọn file Excel <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <input
+              <Input
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleFileChange}
                 disabled={validationStatus === 'validating'}
-                className={`w-full px-4 py-3 text-sm border-2 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${getInputBorderColor()}`}
+                className={`cursor-pointer transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 ${getInputBorderColor()}`}
               />
               
               {/* File Info & Validation Status */}
@@ -260,27 +230,26 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex justify-end gap-3 mt-8">
-            <button
+          <DialogFooter>
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isImporting || validationStatus === 'validating'}
-              className="px-6 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isImporting || validationStatus !== 'valid'}
-              className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#0053AD] hover:bg-[#003d82] text-white"
             >
               {isImporting ? 'Đang nhập...' : 'Nhập'}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

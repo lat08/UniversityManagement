@@ -35,4 +35,3 @@ export interface Note {
   completed: boolean;
 }
 
-

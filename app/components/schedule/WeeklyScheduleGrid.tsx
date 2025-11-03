@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
-import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "@/app/(page)/student/schedule/lib/constants/index"
+import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "@/lib/constants/schedule"
 
 export interface CourseItem {
   id: string

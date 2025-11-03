@@ -9,7 +9,7 @@ import { Tabs } from "@/app/components/ui/tabs"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { Eye, EyeOff, Loader2, XCircle, AlertCircle } from "lucide-react"
 import { useProfile } from "./lib/hooks/useProfile"
-import { formatDate, formatGender, formatEnrollmentStatus } from "./lib/utils/formatters"
+import { formatDate, formatGender, formatEnrollmentStatus } from "@/lib/utils/format"
 
 export default function ProfilePage() {
   usePageTitle("Hồ sơ cá nhân")
@@ -35,7 +35,6 @@ export default function ProfilePage() {
   }
 
   const handleSavePassword = async () => {
-    // Validate
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       setPasswordError("Vui lòng điền đầy đủ thông tin")
       return
@@ -69,7 +68,6 @@ export default function ProfilePage() {
           newPassword: "",
           confirmPassword: ""
         })
-        // Clear success message after 3 seconds
         setTimeout(() => setPasswordSuccess(null), 3000)
       } else {
         setPasswordError(result.message)
@@ -81,7 +79,6 @@ export default function ProfilePage() {
     }
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -93,7 +90,6 @@ export default function ProfilePage() {
     )
   }
 
-  // Error state
   if (error || !profile) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -110,12 +106,10 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-4 lg:space-y-6">
-      {/* Header */}
       <div className="mb-4 lg:mb-6">
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h1>
       </div>
 
-      {/* Tabs */}
       <div className="mb-6">
         <Tabs
           items={[
@@ -129,10 +123,8 @@ export default function ProfilePage() {
 
       <Card className="shadow-sm border border-gray-200">
         <CardContent className="p-4 lg:p-6">
-          {/* Tab Content */}
           {activeTab === "info" ? (
             <div className="space-y-6">
-              {/* Avatar & Basic Info */}
               <div className="flex flex-col lg:flex-row items-start gap-6">
                 <div className="flex-shrink-0 flex flex-col items-center lg:block w-full lg:w-auto">
                   <Avatar className="w-32 h-32 border border-gray-200 shadow-md">
@@ -147,7 +139,6 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Họ và tên */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Họ và tên
@@ -159,7 +150,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Mã số sinh viên */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Mã số sinh viên
@@ -171,7 +161,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Giới tính */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Giới tính
@@ -183,7 +172,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Ngày sinh */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Ngày sinh
@@ -195,7 +183,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email
@@ -207,7 +194,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* CMND / CCCD */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       CMND / CCCD
@@ -219,7 +205,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Ngành học */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Ngành học
@@ -231,7 +216,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Chuyên ngành */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Chuyên ngành
@@ -243,7 +227,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Lớp */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Lớp
@@ -255,7 +238,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Tình trạng */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Tình trạng
@@ -267,7 +249,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Bậc hệ đào tạo */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Bậc hệ đào tạo
@@ -279,7 +260,6 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Niên khóa */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Niên khóa
@@ -293,7 +273,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Hộ khẩu - Full width */}
               <div className="flex flex-col lg:flex-row items-start gap-6">
                 <div className="flex-shrink-0 hidden lg:block lg:w-32"></div>
                 <div className="flex-1 w-full">
@@ -311,7 +290,6 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Error Message */}
               {passwordError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -319,7 +297,6 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Success Message */}
               {passwordSuccess && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -328,8 +305,6 @@ export default function ProfilePage() {
               )}
 
               <div className="max-w-xl space-y-6">
-
-              {/* Mật khẩu hiện tại */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Mật khẩu hiện tại
@@ -358,7 +333,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Mật khẩu mới */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Mật khẩu mới
@@ -387,7 +361,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Nhập lại mật khẩu mới */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nhập lại mật khẩu mới
@@ -418,7 +391,6 @@ export default function ProfilePage() {
 
               </div>
 
-              {/* Button */}
               <div className="flex justify-end pt-4">
                 <Button
                   onClick={handleSavePassword}

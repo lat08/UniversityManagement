@@ -29,8 +29,8 @@ export default function SemesterSchedulePage() {
   }))
 
   const viewTypeOptions = [
-    { value: 'personal', label: 'Cá nhân' },
-    { value: 'subject', label: 'Theo môn học' },
+    { value: 'personal', label: 'Thời khoá biểu cá nhân' },
+    { value: 'subject', label: 'Thời khoá biểu theo môn học' },
   ]
 
   const subjectOptions = subjects.map(s => ({

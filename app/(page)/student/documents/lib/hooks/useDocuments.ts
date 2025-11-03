@@ -40,15 +40,14 @@ export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn =>
       const response = await documentsApi.getMaterials(params);
       
       if (response.success && response.data) {
-        const items = response.data.data || [];
+        const items = response.data.items || [];
         setCourseGroups(items);
-        setTotalCount(response.data.total || 0);
-        // Since the new API doesn't return pagination info, we'll use defaults
-        setPageNumber(params?.pageNumber || 1);
-        setPageSize(params?.pageSize || 10);
-        setTotalPages(0);
-        setHasNext(false);
-        setHasPrevious(false);
+        setTotalCount(response.data.totalCount || 0);
+        setPageNumber(response.data.pageNumber || 1);
+        setPageSize(response.data.pageSize || 10);
+        setTotalPages(response.data.totalPages || 0);
+        setHasNext(response.data.hasNext || false);
+        setHasPrevious(response.data.hasPrevious || false);
       } else {
         setError(response.message || 'Không thể tải dữ liệu tài liệu');
         setCourseGroups([]);
@@ -67,7 +66,7 @@ export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn =>
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    params?.searchTerm, 
+    params?.keyword, 
     params?.documentType,
     params?.semesterId,
     params?.subjectId,

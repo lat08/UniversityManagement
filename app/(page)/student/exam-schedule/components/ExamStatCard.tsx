@@ -20,24 +20,19 @@ export default function ExamStatCard({ data }: ExamStatCardProps) {
   return (
     <Card className={`${data.bgColor} border-none shadow-sm`}>
       <CardContent className="p-4 lg:p-5 relative">
-        {/* Icon ở góc phải trên */}
         <div className="absolute top-4 right-4">
           <div className={`${data.iconColor} opacity-10`}>
             <Icon className="w-10 h-10 lg:w-12 lg:h-12" />
           </div>
         </div>
 
-        {/* Title */}
         <h3 className="text-xs lg:text-sm text-gray-700 mb-3 font-medium">
           {data.title}
         </h3>
 
-        {/* Value */}
         <div className={`text-4xl lg:text-5xl font-bold ${data.textColor} mb-2`}>
           {data.value}
         </div>
-
-        {/* Subtitle or Progress */}
         {data.progress !== undefined ? (
           <div className="mt-3">
             <div className="flex items-center justify-between text-xs text-gray-600 mb-2">

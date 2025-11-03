@@ -14,8 +14,8 @@ export const documentsApi = {
   getMaterials: async (params?: GetMaterialsParams): Promise<GetMaterialsResponse> => {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.searchTerm && params.searchTerm.trim()) {
-        queryParams.append('searchTerm', params.searchTerm.trim());
+      if (params?.keyword && params.keyword.trim()) {
+        queryParams.append('Keyword', params.keyword.trim());
       }
       if (params?.documentType && params.documentType.trim()) {
         queryParams.append('DocumentType', params.documentType.trim());
@@ -27,10 +27,10 @@ export const documentsApi = {
         queryParams.append('SubjectId', params.subjectId.trim());
       }
       if (params?.pageNumber && params.pageNumber > 0) {
-        queryParams.append('pageNumber', params.pageNumber.toString());
+        queryParams.append('PageNumber', params.pageNumber.toString());
       }
       if (params?.pageSize && params.pageSize > 0) {
-        queryParams.append('pageSize', params.pageSize.toString());
+        queryParams.append('PageSize', params.pageSize.toString());
       }
       
       const url = `/v1/materials/GetMaterials${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
@@ -43,8 +43,8 @@ export const documentsApi = {
       }
       
       if (apiResponse.data) {
-        if (!Array.isArray(apiResponse.data.data)) {
-          apiResponse.data.data = [];
+        if (!Array.isArray(apiResponse.data.items)) {
+          apiResponse.data.items = [];
         }
       }
       
