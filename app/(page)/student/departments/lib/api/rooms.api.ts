@@ -9,7 +9,6 @@ export const fetchRooms = async (): Promise<RoomApiResponse> => {
     const response = await api.get<RoomApiResponse>('/v1/function-rooms/rooms');
     return response.data;
   } catch (error) {
-    console.error('Error fetching rooms:', error);
     throw error;
   }
 };
@@ -29,7 +28,6 @@ export const fetchRoomsWithFilters = async (params: {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching rooms with filters:', error);
     throw error;
   }
 };
@@ -42,7 +40,6 @@ export const fetchRoomById = async (roomId: string): Promise<RoomApiResponse> =>
     const response = await api.get<RoomApiResponse>(`/v1/function-rooms/rooms/${roomId}`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching room ${roomId}:`, error);
     throw error;
   }
 };
@@ -55,7 +52,6 @@ export const createRoomBooking = async (bookingData: CreateBookingRequest): Prom
     const response = await api.post<BookingApiResponse>('/v1/function-rooms/bookings', bookingData);
     return response.data;
   } catch (error) {
-    console.error('Error creating room booking:', error);
     throw error;
   }
 };
@@ -75,7 +71,6 @@ export const cancelRoomBooking = async (bookingId: string): Promise<CancelBookin
     const response = await api.put<CancelBookingResponse>(`/v1/function-rooms/bookings/${bookingId}/cancel`);
     return response.data;
   } catch (error) {
-    console.error(`Error cancelling room booking ${bookingId}:`, error);
     throw error;
   }
 };

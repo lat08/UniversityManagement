@@ -72,8 +72,8 @@ export interface PaymentHistory {
   status: 'completed' | 'pending' | 'failed';
 }
 
-export interface Semester {
-  semesterId: string;
-  semesterName: string;
+import { Semester as CommonSemester } from "@/lib/types";
+
+export type Semester = Pick<CommonSemester, 'semesterId' | 'semesterName'> & {
   courses?: TuitionFee[];
-}
+};

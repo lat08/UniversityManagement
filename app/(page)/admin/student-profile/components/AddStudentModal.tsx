@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, Search } from 'lucide-react';
+import { X } from 'lucide-react';
+import { Dropdown, DropdownSearch } from '@/app/components/ui';
 import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -62,20 +63,12 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     }
   });
 
-  const [isGenderOpen, setIsGenderOpen] = useState(false);
-  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
-  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
-  const [isClassOpen, setIsClassOpen] = useState(false);
-  const [isEnrollmentStatusOpen, setIsEnrollmentStatusOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dobISO, setDobISO] = useState('');
 
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [facultySearch, setFacultySearch] = useState('');
-  const [departmentSearch, setDepartmentSearch] = useState('');
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [classSearch, setClassSearch] = useState('');
 
   const formValues = watch();
 
@@ -100,22 +93,6 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     setValue('classId', '');
   }, [formValues.departmentId, setValue]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      
-      if (!target.closest('[data-dropdown]')) {
-        setIsGenderOpen(false);
-        setIsFacultyOpen(false);
-        setIsDepartmentOpen(false);
-        setIsClassOpen(false);
-        setIsEnrollmentStatusOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -175,14 +152,17 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     { value: 'other', label: 'Khác' },
   ];
 
-  const filteredFaculties = faculties.filter(faculty =>
-    faculty.facultyName.toLowerCase().includes(facultySearch.toLowerCase())
-  );
+  const genderOptions = genders.map(g => ({ value: g.value, label: g.label }));
 
-  const filteredDepartments = departments.filter(department =>
-    department.departmentName.toLowerCase().includes(departmentSearch.toLowerCase()) &&
-    (!formValues.facultyId || department.facultyId === formValues.facultyId)
-  );
+  const facultyOptions = faculties.map(f => ({ value: f.facultyId, label: f.facultyName }));
+
+  const departmentOptions = departments
+    .filter(d => !formValues.facultyId || d.facultyId === formValues.facultyId)
+    .map(d => ({ value: d.departmentId, label: d.departmentName }));
+
+  const classOptions = classes.map(c => ({ value: c.classId, label: c.className }));
+
+  const enrollmentStatusOptions = ENROLLMENT_STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }));
 
   const selectedFaculty = faculties.find(f => f.facultyId === formValues.facultyId);
   const selectedDepartment = departments.find(d => d.departmentId === formValues.departmentId);
@@ -313,46 +293,21 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
             </div>
 
             {/* Giới tính */}
-            <div className="relative" data-dropdown="gender">
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Giới tính <span className="text-red-500">*</span>
               </label>
-              <button
-                type="button"
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left ${
-                  errors.gender ? 'border-red-500' : 'border-gray-300'
-                }`}
-                onClick={() => {
-                  setIsGenderOpen(!isGenderOpen);
-                  setIsFacultyOpen(false);
-                  setIsDepartmentOpen(false);
-                  setIsClassOpen(false);
+              <Dropdown
+                options={genderOptions}
+                value={formValues.gender || ''}
+                placeholder="Chọn giới tính"
+                onChange={(value) => {
+                  setValue('gender', value);
+                  clearErrors('gender');
                 }}
-              >
-                <span className={`text-sm ${formValues.gender ? 'text-gray-900' : 'text-gray-400'}`}>
-                  {genders.find(g => g.value === formValues.gender)?.label || 'Chọn giới tính'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-700" />
-              </button>
+                buttonClassName={errors.gender ? 'border-red-500' : ''}
+              />
               {errors.gender && <p className="mt-1 text-xs text-red-500">{errors.gender.message}</p>}
-              {isGenderOpen && (
-                <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {genders.map((gender) => (
-                    <button
-                      key={gender.value}
-                      type="button"
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => {
-                        setValue('gender', gender.value);
-                        clearErrors('gender');
-                        setIsGenderOpen(false);
-                      }}
-                    >
-                      {gender.label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Số điện thoại */}
@@ -372,232 +327,76 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
             </div>
 
             {/* Ngành học */}
-            <div className="relative" data-dropdown="faculty">
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Ngành học <span className="text-red-500">*</span>
               </label>
-              <button
-                type="button"
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left ${
-                  errors.facultyId ? 'border-red-500' : 'border-gray-300'
-                }`}
-                onClick={() => {
-                  setIsFacultyOpen(!isFacultyOpen);
-                  setIsGenderOpen(false);
-                  setIsDepartmentOpen(false);
-                  setIsClassOpen(false);
-                  setFacultySearch('');
+              <DropdownSearch
+                options={facultyOptions}
+                value={formValues.facultyId || ''}
+                placeholder="Chọn ngành"
+                searchPlaceholder="Tìm kiếm ngành..."
+                onChange={(value) => {
+                  setValue('facultyId', value);
+                  setValue('departmentId', '');
+                  clearErrors('facultyId');
                 }}
-              >
-                <span className={`text-sm ${formValues.facultyId ? 'text-gray-900' : 'text-gray-400'}`}>
-                  {selectedFaculty?.facultyName || 'Chọn ngành'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-700" />
-              </button>
+                buttonClassName={errors.facultyId ? 'border-red-500' : ''}
+              />
               {errors.facultyId && <p className="mt-1 text-xs text-red-500">{errors.facultyId.message}</p>}
-              {isFacultyOpen && (
-                <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-                  <div className="p-2 border-b border-gray-200">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm ngành..."
-                        value={facultySearch}
-                        onChange={(e) => setFacultySearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {filteredFaculties.map((faculty) => (
-                      <button
-                        key={faculty.facultyId}
-                        type="button"
-                        className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setValue('facultyId', faculty.facultyId);
-                          setValue('departmentId', '');
-                          clearErrors('facultyId');
-                          setIsFacultyOpen(false);
-                          setFacultySearch('');
-                        }}
-                      >
-                        {faculty.facultyName}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Chuyên ngành */}
-            <div className="relative" data-dropdown="department">
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Chuyên ngành <span className="text-red-500">*</span>
               </label>
-              <button
-                type="button"
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left ${
-                  errors.departmentId ? 'border-red-500' : 'border-gray-300'
-                } ${!formValues.facultyId ? 'opacity-50' : ''}`}
-                onClick={() => {
-                  setIsDepartmentOpen(!isDepartmentOpen);
-                  setIsGenderOpen(false);
-                  setIsFacultyOpen(false);
-                  setIsClassOpen(false);
-                  setDepartmentSearch('');
+              <DropdownSearch
+                options={departmentOptions}
+                value={formValues.departmentId || ''}
+                placeholder="Chọn chuyên ngành"
+                searchPlaceholder="Tìm kiếm chuyên ngành..."
+                onChange={(value) => {
+                  setValue('departmentId', value);
+                  clearErrors('departmentId');
                 }}
                 disabled={!formValues.facultyId}
-              >
-                <span className={`text-sm ${formValues.departmentId ? 'text-gray-900' : 'text-gray-400'} ${!formValues.facultyId ? 'opacity-50' : ''}`}>
-                  {selectedDepartment?.departmentName || 'Chọn chuyên ngành'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-700" />
-              </button>
+                buttonClassName={errors.departmentId ? 'border-red-500' : ''}
+              />
               {errors.departmentId && <p className="mt-1 text-xs text-red-500">{errors.departmentId.message}</p>}
-              {isDepartmentOpen && formValues.facultyId && (
-                <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-                  <div className="p-2 border-b border-gray-200">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm chuyên ngành..."
-                        value={departmentSearch}
-                        onChange={(e) => setDepartmentSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {filteredDepartments.length > 0 ? (
-                      filteredDepartments.map((department) => (
-                        <button
-                          key={department.departmentId}
-                          type="button"
-                          className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
-                          onClick={() => {
-                            setValue('departmentId', department.departmentId);
-                            clearErrors('departmentId');
-                            setIsDepartmentOpen(false);
-                            setDepartmentSearch('');
-                          }}
-                        >
-                          {department.departmentName}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
-                        Không có chuyên ngành
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Lớp (Class) */}
-            <div className="relative" data-dropdown="class">
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Lớp <span className="text-red-500">*</span>
               </label>
-              <button
-                type="button"
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left ${
-                  errors.classId ? 'border-red-500' : 'border-gray-300'
-                } ${!formValues.departmentId ? 'opacity-50' : ''}`}
-                onClick={() => {
-                  if (!formValues.departmentId) return;
-                  setIsClassOpen(!isClassOpen);
-                  setIsGenderOpen(false);
-                  setIsFacultyOpen(false);
-                  setIsDepartmentOpen(false);
-                  setClassSearch('');
+              <DropdownSearch
+                options={classOptions}
+                value={formValues.classId || ''}
+                placeholder="Chọn lớp"
+                searchPlaceholder="Tìm kiếm lớp..."
+                onChange={(value) => {
+                  setValue('classId', value);
+                  clearErrors('classId');
                 }}
                 disabled={!formValues.departmentId}
-              >
-                <span className={`text-sm ${formValues.classId ? 'text-gray-900' : 'text-gray-400'} ${!formValues.departmentId ? 'opacity-50' : ''}`}>
-                  {formValues.departmentId && selectedClass?.className ? selectedClass.className : 'Chọn lớp'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-700" />
-              </button>
+                buttonClassName={errors.classId ? 'border-red-500' : ''}
+              />
               {errors.classId && <p className="mt-1 text-xs text-red-500">{errors.classId.message}</p>}
-              {isClassOpen && formValues.departmentId && (
-                <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-                  <div className="p-2 border-b border-gray-200">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm lớp..."
-                        value={classSearch}
-                        onChange={(e) => setClassSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {classes
-                      .filter(c => c.className.toLowerCase().includes(classSearch.toLowerCase()))
-                      .map((cls) => (
-                        <button
-                          key={cls.classId}
-                          type="button"
-                          className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
-                          onClick={() => {
-                            setValue('classId', cls.classId);
-                            clearErrors('classId');
-                            setIsClassOpen(false);
-                            setClassSearch('');
-                          }}
-                        >
-                          {cls.className}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Trạng thái nhập học */}
-            <div className="relative" data-dropdown="enrollmentStatus">
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 Trạng thái
               </label>
-              <button
-                type="button"
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left border-gray-300`}
-                onClick={() => {
-                  setIsEnrollmentStatusOpen(!isEnrollmentStatusOpen);
-                  setIsGenderOpen(false);
-                  setIsFacultyOpen(false);
-                  setIsDepartmentOpen(false);
-                  setIsClassOpen(false);
-                }}
-              >
-                <span className={`text-sm ${formValues.enrollmentStatus ? 'text-gray-900' : 'text-gray-400'}`}>
-                  {selectedEnrollmentStatus?.label || 'Chọn trạng thái'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-700" />
-              </button>
-              {isEnrollmentStatusOpen && (
-                <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {ENROLLMENT_STATUS_OPTIONS.map((status) => (
-                    <button
-                      key={status.value}
-                      type="button"
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => {
-                        setValue('enrollmentStatus', status.value);
-                        setIsEnrollmentStatusOpen(false);
-                      }}
-                    >
-                      {status.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <Dropdown
+                options={enrollmentStatusOptions}
+                value={formValues.enrollmentStatus || 'active'}
+                placeholder="Chọn trạng thái"
+                onChange={(value) => setValue('enrollmentStatus', value)}
+              />
             </div>
 
             {/* Địa chỉ - Full width */}

@@ -53,16 +53,13 @@ export const useGrades = (): UseGradesReturn => {
         setStatsData(statsResponse.data)
       } else {
         // Stats failure should not block the page, just log it
-        console.warn('Failed to load stats:', statsResponse.message)
       }
 
       if (semestersResponse.success) {
         setCommonSemesters(semestersResponse.data)
       } else {
-        console.warn('Failed to load common semesters:', semestersResponse)
       }
     } catch (err) {
-      console.error('Error fetching grades:', err)
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
     } finally {
       setIsLoading(false)
@@ -88,7 +85,6 @@ export const useGrades = (): UseGradesReturn => {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
     } catch (err) {
-      console.error('Error exporting PDF:', err)
       setError('Không thể xuất file PDF')
     } finally {
       setIsLoading(false)

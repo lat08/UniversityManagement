@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { AlertTriangle, Loader2 } from "lucide-react"
+import { Tabs } from "@/app/components/ui/tabs"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useProfile } from "./lib/hooks/useProfile"
 import { ProfileField } from "./components/ProfileField"
@@ -116,49 +117,15 @@ export default function InstructorProfilePage() {
       )}
 
       {/* Tabs */}
-      <div className="overflow-hidden">
-        <div className="flex w-full border border-gray-200 rounded-lg bg-gray-50 relative">
-          {/* Active tab background slider */}
-          <div 
-            className="absolute top-0 bottom-0 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-            style={{
-              width: '50%',
-              left: activeTab === 'profile' ? '0%' : '50%',
-              transform: 'translateX(0)',
-              backgroundColor: '#0053AD'
-            }}
-          />
-          
-          <div className="flex-1 relative z-10">
-            <button 
-              onClick={() => setActiveTab('profile')}
-              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
-                activeTab === 'profile'
-                  ? "text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Thông tin cá nhân
-            </button>
-            
-            {activeTab !== 'profile' && (
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-200 transition-opacity duration-300"></div>
-            )}
-          </div>
-          
-          <div className="flex-1 relative z-10">
-            <button 
-              onClick={() => setActiveTab('password')}
-              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
-                activeTab === 'password'
-                  ? "text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Đổi mật khẩu
-            </button>
-          </div>
-        </div>
+      <div className="mb-6">
+        <Tabs
+          items={[
+            { key: 'profile', label: 'Thông tin cá nhân' },
+            { key: 'password', label: 'Đổi mật khẩu' },
+          ]}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">

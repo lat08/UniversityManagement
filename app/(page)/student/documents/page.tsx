@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { useDocuments, useDocumentTypes, useSemesters, useSubjects } from './lib/hooks';
+import { useDocuments, useDocumentTypes } from './lib/hooks';
+import { useSemesters, useSubjects } from '@/lib/hooks';
 import {
   DocumentCard,
   DocumentModal,
@@ -38,8 +39,8 @@ export default function DocumentsPage() {
   }), [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId]);
   
   const { documentTypes, loading: typesLoading } = useDocumentTypes();
-  const { semesters, loading: semestersLoading } = useSemesters();
-  const { subjects, loading: subjectsLoading } = useSubjects();
+  const { data: semesters, loading: semestersLoading } = useSemesters();
+  const { data: subjects, loading: subjectsLoading } = useSubjects();
   const { courseGroups, loading, error, refetch } = useDocuments(materialsParams);
 
   const safeCourseGroups = useMemo(() => {

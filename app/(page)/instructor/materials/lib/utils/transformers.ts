@@ -1,5 +1,6 @@
 import { CourseClassMaterials, MaterialDocument } from "../type"
 import { Document } from "../../components/DocumentCard"
+import { formatDate } from "@/lib/utils/format"
 
 /**
  * Transform API response to Document format for components
@@ -31,18 +32,6 @@ export const transformMaterialDocumentToDocument = (
     'Bài LAB': 'exercise', // Map "Bài LAB" to exercise
   }
 
-  // Format date from ISO string to DD/MM/YYYY
-  const formatDate = (isoDate: string): string => {
-    try {
-      const date = new Date(isoDate)
-      const day = date.getDate().toString().padStart(2, '0')
-      const month = (date.getMonth() + 1).toString().padStart(2, '0')
-      const year = date.getFullYear()
-      return `${day}/${month}/${year}`
-    } catch {
-      return isoDate
-    }
-  }
 
   // Extract class code from course name if possible
   // Example: "Lập trình web - 230PM" -> "230PM"

@@ -72,7 +72,6 @@ function CoursesContent() {
         refreshAllData();
         toast.success("Đã hủy môn học thành công!", { duration: 4000 });
     } catch (error: unknown) {
-        console.error("Lỗi khi hủy môn học:", error);
         const message = getErrorMessage(error, "Hủy môn học thất bại. Vui lòng kiểm tra kết nối.");
         toast.error(message);
     }
@@ -87,7 +86,6 @@ function CoursesContent() {
         refreshAllData();
         toast.success("Đăng ký môn học thành công!", { duration: 4000 });
     } catch (error: unknown) {
-        console.error("Lỗi khi đăng ký môn học:", error);
         const message = getErrorMessage(error, "Đăng ký môn học thất bại. Vui lòng kiểm tra kết nối.");
         toast.error(message);
     }

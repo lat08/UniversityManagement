@@ -17,35 +17,8 @@ export interface SemesterScheduleItem {
   note?: string
 }
 
-export interface Semester {
-  semesterId: string
-  semesterName: string
-  semesterType: string
-  startDate: string
-  endDate: string
-  status: string
-}
-
-export interface Subject {
-  subjectId: string
-  subjectCode: string
-  subjectName: string
-}
-
 export interface SemesterScheduleResponse {
   success: boolean
   data: SemesterScheduleItem[]
-  message?: string
-}
-
-export interface SemestersResponse {
-  success: boolean
-  data: Semester[]
-  message?: string
-}
-
-export interface SubjectsResponse {
-  success: boolean
-  data: Subject[]
   message?: string
 }

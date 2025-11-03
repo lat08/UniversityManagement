@@ -1,14 +1,7 @@
 "use client"
 
-import { useState, useEffect } from 'react';
 import { Search, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
+import { Dropdown } from "@/app/components/ui";
 
 interface ExamsFiltersProps {
   searchQuery: string;
@@ -77,58 +70,34 @@ export function ExamsFilters({
           )}
         </div>
 
-        <Select 
-          value={selectedSemester} 
-          onValueChange={onSemesterChange}
+        <Dropdown
+          options={semesters.map(s => ({ value: s.id, label: s.name }))}
+          value={selectedSemester}
+          placeholder="Tất cả học kỳ"
+          onChange={onSemesterChange}
           disabled={semestersLoading}
-        >
-          <SelectTrigger className={`flex-1 border-gray-300 rounded-lg ${
-            selectedSemester !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''
-          }`}>
-            <SelectValue placeholder="Tất cả học kỳ" />
-          </SelectTrigger>
-          <SelectContent>
-            {semesters.map((semester) => (
-              <SelectItem key={semester.id} value={semester.id}>
-                {semester.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          className="flex-1"
+          buttonClassName={selectedSemester !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+        />
 
-        <Select 
-          value={selectedSubject} 
-          onValueChange={onSubjectChange}
+        <Dropdown
+          options={subjects.map(s => ({ value: s.id, label: s.name }))}
+          value={selectedSubject}
+          placeholder="Tất cả môn học"
+          onChange={onSubjectChange}
           disabled={subjectsLoading}
-        >
-          <SelectTrigger className={`flex-1 border-gray-300 rounded-lg ${
-            selectedSubject !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''
-          }`}>
-            <SelectValue placeholder="Tất cả môn học" />
-          </SelectTrigger>
-          <SelectContent>
-            {subjects.map((subject) => (
-              <SelectItem key={subject.id} value={subject.id}>
-                {subject.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          className="flex-1"
+          buttonClassName={selectedSubject !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+        />
 
-        <Select value={selectedStatus} onValueChange={onStatusChange}>
-          <SelectTrigger className={`flex-1 border-gray-300 rounded-lg ${
-            selectedStatus !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''
-          }`}>
-            <SelectValue placeholder="Tất cả trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            {statuses.map((status) => (
-              <SelectItem key={status.id} value={status.id}>
-                {status.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Dropdown
+          options={statuses.map(s => ({ value: s.id, label: s.name }))}
+          value={selectedStatus}
+          placeholder="Tất cả trạng thái"
+          onChange={onStatusChange}
+          className="flex-1"
+          buttonClassName={selectedStatus !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+        />
       </div>
 
       {/* Clear filters button */}

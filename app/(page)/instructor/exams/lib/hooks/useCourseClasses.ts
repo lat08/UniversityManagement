@@ -44,7 +44,6 @@ export const useCourseClasses = () => {
       }
     } catch (err: any) {
       // If endpoint doesn't exist, return empty array (can be populated from exam entries)
-      console.warn('Course classes endpoint not available, using empty list');
       setCourseClasses([]);
       setLoading(false);
       // Don't set error if endpoint doesn't exist

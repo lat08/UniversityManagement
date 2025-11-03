@@ -2,8 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { MapPin, Mail, Phone, Calendar, User, School, Edit, ChevronDown } from 'lucide-react';
+import { MapPin, Mail, Phone, Calendar, User, School, Edit } from 'lucide-react';
 import Image from 'next/image';
+import { Tabs } from '@/app/components/ui/tabs';
+import { Table, type TableColumn, Dropdown } from '@/app/components/ui';
+import { formatCurrency as formatCurrencyUtil } from '@/lib/utils/format';
+import { getPaymentStatusDisplay } from '@/lib/utils/statusDisplay';
 import { studentsApi } from '../lib/api/studentsApi';
 import { getStatusDisplay } from '../lib/types/types';
 import { useStudentDetail } from '../lib/hooks/useStudentDetail';
@@ -24,9 +28,6 @@ export default function StudentDetailPage() {
   const [selectedTuitionSemester, setSelectedTuitionSemester] = useState<string>('');
   const [selectedInsuranceSemester, setSelectedInsuranceSemester] = useState<string>('');
   const [selectedAcademicSemester, setSelectedAcademicSemester] = useState<string>('');
-  const [isTuitionSemesterOpen, setIsTuitionSemesterOpen] = useState(false);
-  const [isInsuranceSemesterOpen, setIsInsuranceSemesterOpen] = useState(false);
-  const [isAcademicSemesterOpen, setIsAcademicSemesterOpen] = useState(false);
   const [exportingTuition, setExportingTuition] = useState(false);
   const [exportingInsurance, setExportingInsurance] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
@@ -106,7 +107,7 @@ export default function StudentDetailPage() {
 
   const formatCurrency = useMemo(() => (amount: number | undefined | null) => {
     if (amount === undefined || amount === null) return '0';
-    return amount.toLocaleString('vi-VN');
+    return formatCurrencyUtil(amount);
   }, []);
 
   const formatDateTime = useMemo(() => (dateString: string | null) => {
@@ -116,16 +117,6 @@ export default function StudentDetailPage() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
-  }, []);
-
-  const getPaymentStatusDisplay = useMemo(() => (status: string) => {
-    const statusMap: Record<string, { label: string; color: string }> = {
-      paid: { label: 'Đã thanh toán', color: 'bg-green-100 text-green-700' },
-      pending: { label: 'Chưa thanh toán', color: 'bg-yellow-100 text-yellow-700' },
-      failed: { label: 'Thất bại', color: 'bg-red-100 text-red-700' },
-      partial: { label: 'Thanh toán một phần', color: 'bg-blue-100 text-blue-700' },
-    };
-    return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
   }, []);
 
   const getPaymentMethodDisplay = useMemo(() => (method: string | null) => {
@@ -362,44 +353,11 @@ export default function StudentDetailPage() {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="overflow-hidden">
-          <div className="flex w-full border border-gray-300 rounded-lg bg-gray-100 relative">
-            {/* Active tab background slider */}
-            <div 
-              className="absolute top-0 bottom-0 bg-[#0053AD] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-              style={{
-                width: `${100 / tabs.length}%`,
-                left: `${tabs.findIndex(t => t.id === activeTab) * (100 / tabs.length)}%`,
-                transform: 'translateX(0)'
-              }}
-            />
-            
-            {tabs.map((tab, index) => {
-              const isActive = activeTab === tab.id
-
-              return (
-                <div key={tab.id} className="flex-1 relative z-10">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 relative transition-colors ${
-                      isActive
-                        ? "text-white"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    <span className="relative z-100">{tab.label}</span>
-                  </button>
-                  
-                  {/* Divider */}
-                  {!isActive && index < tabs.length - 1 && (
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-300 transition-opacity duration-300"></div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <Tabs
+          items={tabs.map(tab => ({ key: tab.id, label: tab.label }))}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       {/* Tab Content */}
@@ -509,38 +467,17 @@ export default function StudentDetailPage() {
 
               {/* Semester Selector and GPA Summary */}
               <div className="flex items-center justify-between mb-6">
-                <div className="relative w-80">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAcademicSemesterOpen(!isAcademicSemesterOpen);
-                      setIsTuitionSemesterOpen(false);
-                      setIsInsuranceSemesterOpen(false);
-                    }}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                  >
-                    <span className="text-sm text-gray-900">
-                      {semesters.find(s => s.semesterId === selectedAcademicSemester)?.semesterName || 'Chọn học kì'} - {semesters.find(s => s.semesterId === selectedAcademicSemester)?.yearRange || ''}
-                    </span>
-                    <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-                  </button>
-                  {isAcademicSemesterOpen && (
-                    <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {semesters.map((semester) => (
-                        <button
-                          key={semester.semesterId}
-                          type="button"
-                          className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                          onClick={() => {
-                            setSelectedAcademicSemester(semester.semesterId);
-                            setIsAcademicSemesterOpen(false);
-                          }}
-                        >
-                          {semester.semesterName} - {semester.yearRange}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <div className="w-80">
+                  <Dropdown
+                    options={semesters.map(s => ({
+                      value: s.semesterId,
+                      label: `${s.semesterName} - ${s.yearRange}`,
+                    }))}
+                    value={selectedAcademicSemester}
+                    placeholder="Chọn học kì"
+                    onChange={(value) => setSelectedAcademicSemester(value)}
+                    disabled={loadingGrades || semesters.length === 0}
+                  />
                 </div>
 
                 {/* GPA Summary */}
@@ -571,86 +508,63 @@ export default function StudentDetailPage() {
               </div>
 
               {/* Grades Table */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-[#0053AD] text-white text-sm">
-                      <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Mã MH</th>
-                      <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Tên môn học</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">TC</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm thi</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK (10)</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK (4)</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Điểm TK (C)</th>
-                      <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Kết quả</th>
-                      <th className="px-6 py-4 text-center font-semibold">Chi tiết</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {loadingGrades ? (
-                      <tr>
-                        <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
-                          <div className="flex items-center justify-center gap-2">
-                            <svg className="animate-spin h-5 w-5 text-[#0053AD]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Đang tải...
-                          </div>
-                        </td>
-                      </tr>
-                    ) : !grades || grades.grades.length === 0 ? (
-                      <tr>
-                        <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
-                          Không có dữ liệu điểm
-                        </td>
-                      </tr>
-                    ) : (
-                      grades.grades.map((grade) => (
-                        <tr key={grade.subjectId} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectCode}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                            {grade.finalGrade !== null ? grade.finalGrade.toFixed(2) : '-'}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                            {grade.finalGrade10 !== null ? grade.finalGrade10.toFixed(2) : '-'}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                            {grade.finalGrade4.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center font-semibold">
-                            {grade.gradeLetter}
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${
-                              grade.status === 'Đạt' 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
-                            }`}>
-                              {grade.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <button
-                              onClick={() => {
-                                setSelectedGrade(grade);
-                                setIsGradeModalOpen(true);
-                              }}
-                              className="text-gray-600 hover:text-[#0053AD] cursor-pointer transition-colors"
-                            >
-                              <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                              </svg>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <Table
+                columns={[
+                  { key: 'subjectCode', label: 'Mã MH', align: 'left' },
+                  { key: 'subjectName', label: 'Tên môn học', align: 'left' },
+                  { key: 'credits', label: 'TC', align: 'center' },
+                  { key: 'finalGrade', label: 'Điểm thi', align: 'center' },
+                  { key: 'finalGrade10', label: 'Điểm TK (10)', align: 'center' },
+                  { key: 'finalGrade4', label: 'Điểm TK (4)', align: 'center' },
+                  { key: 'gradeLetter', label: 'Điểm TK (C)', align: 'center' },
+                  { key: 'status', label: 'Kết quả', align: 'center' },
+                  { key: 'details', label: 'Chi tiết', align: 'center' },
+                ]}
+                data={grades?.grades || []}
+                isLoading={loadingGrades}
+                emptyMessage="Không có dữ liệu điểm"
+                renderRow={(grade) => (
+                  <>
+                    <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectCode}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                      {grade.finalGrade !== null ? grade.finalGrade.toFixed(2) : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                      {grade.finalGrade10 !== null ? grade.finalGrade10.toFixed(2) : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                      {grade.finalGrade4.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 text-center font-semibold">
+                      {grade.gradeLetter}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${
+                        grade.status === 'Đạt' 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {grade.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedGrade(grade);
+                          setIsGradeModalOpen(true);
+                        }}
+                        className="text-gray-600 hover:text-[#0053AD] cursor-pointer transition-colors"
+                      >
+                        <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                        </svg>
+                      </button>
+                    </td>
+                  </>
+                )}
+              />
             </div>
 
             {/* Footer Buttons */}
@@ -684,37 +598,17 @@ export default function StudentDetailPage() {
 
                   {/* Semester Selector and Export */}
                   <div className="flex items-center justify-between mb-6">
-                    <div className="relative w-80">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsTuitionSemesterOpen(!isTuitionSemesterOpen);
-                          setIsInsuranceSemesterOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                      >
-                        <span className="text-sm text-gray-900">
-                          {semesters.find(s => s.semesterId === selectedTuitionSemester)?.semesterName || 'Chọn học kì'} - {semesters.find(s => s.semesterId === selectedTuitionSemester)?.yearRange || ''}
-                        </span>
-                        <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-                      </button>
-                      {isTuitionSemesterOpen && (
-                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {semesters.map((semester) => (
-                            <button
-                              key={semester.semesterId}
-                              type="button"
-                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                              onClick={() => {
-                                setSelectedTuitionSemester(semester.semesterId);
-                                setIsTuitionSemesterOpen(false);
-                              }}
-                            >
-                              {semester.semesterName} - {semester.yearRange}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                    <div className="w-80">
+                      <Dropdown
+                        options={semesters.map(s => ({
+                          value: s.semesterId,
+                          label: `${s.semesterName} - ${s.yearRange}`,
+                        }))}
+                        value={selectedTuitionSemester}
+                        placeholder="Chọn học kì"
+                        onChange={(value) => setSelectedTuitionSemester(value)}
+                        disabled={loadingTuition || semesters.length === 0}
+                      />
                     </div>
                     
                     <button 
@@ -731,54 +625,39 @@ export default function StudentDetailPage() {
 
                   {/* Tuition Table */}
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-[#0053AD] text-white text-sm">
-                          <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Mã môn học</th>
-                          <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Tên môn học</th>
-                          <th className="px-6 py-4 text-center font-semibold border-r border-blue-400">Số tín chỉ</th>
-                          <th className="px-6 py-4 text-right font-semibold border-r border-blue-400">Học phí</th>
-                          <th className="px-6 py-4 text-center font-semibold">Trạng thái</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {loadingTuition ? (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                              <div className="flex items-center justify-center gap-2">
-                                <svg className="animate-spin h-5 w-5 text-[#0053AD]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Đang tải...
-                              </div>
-                            </td>
-                          </tr>
-                        ) : !tuitionFees || tuitionFees.courses.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                              Không có dữ liệu học phí
-                            </td>
-                          </tr>
-                        ) : (
+                    <Table
+                      columns={[
+                        { key: 'courseCode', label: 'Mã môn học', align: 'left' },
+                        { key: 'courseName', label: 'Tên môn học', align: 'left' },
+                        { key: 'credits', label: 'Số tín chỉ', align: 'center' },
+                        { key: 'courseFee', label: 'Học phí', align: 'right' },
+                        { key: 'status', label: 'Trạng thái', align: 'center' },
+                      ]}
+                      data={tuitionFees?.courses || []}
+                      isLoading={loadingTuition}
+                      emptyMessage="Không có dữ liệu học phí"
+                      renderRow={(course) => {
+                        const statusDisplay = getPaymentStatusDisplay(course.status);
+                        return (
                           <>
-                            {tuitionFees.courses.map((course) => {
-                              const statusDisplay = getPaymentStatusDisplay(course.status);
-                              return (
-                                <tr key={course.courseId} className="hover:bg-gray-50">
-                                  <td className="px-6 py-4 text-sm text-gray-900">{course.courseCode}</td>
-                                  <td className="px-6 py-4 text-sm text-gray-900">{course.courseName}</td>
-                                  <td className="px-6 py-4 text-sm text-gray-900 text-center">{course.credits}</td>
-                                  <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(course.courseFee)} ₫</td>
-                                  <td className="px-6 py-4 text-center">
-                                    <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
-                                      {statusDisplay.label}
-                                    </span>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                            <tr className="bg-gray-50 font-semibold">
+                            <td className="px-6 py-4 text-sm text-gray-900">{course.courseCode}</td>
+                            <td className="px-6 py-4 text-sm text-gray-900">{course.courseName}</td>
+                            <td className="px-6 py-4 text-sm text-gray-900 text-center">{course.credits}</td>
+                            <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(course.courseFee)} ₫</td>
+                            <td className="px-6 py-4 text-center">
+                              <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
+                                {statusDisplay.label}
+                              </span>
+                            </td>
+                          </>
+                        );
+                      }}
+                    />
+                    {tuitionFees && tuitionFees.courses.length > 0 && (
+                      <div className="bg-gray-50 border-t border-gray-200">
+                        <table className="w-full">
+                          <tbody>
+                            <tr className="font-semibold">
                               <td colSpan={2} className="px-6 py-4 text-sm text-gray-900 text-right">Tổng cộng:</td>
                               <td className="px-6 py-4 text-sm text-gray-900 text-center">
                                 {tuitionFees.courses.reduce((sum, course) => sum + course.credits, 0)} TC
@@ -788,10 +667,10 @@ export default function StudentDetailPage() {
                               </td>
                               <td></td>
                             </tr>
-                          </>
-                        )}
-                      </tbody>
-                    </table>
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -806,37 +685,17 @@ export default function StudentDetailPage() {
 
                   {/* Semester Selector and Export */}
                   <div className="flex items-center justify-between mb-6">
-                    <div className="relative w-80">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsInsuranceSemesterOpen(!isInsuranceSemesterOpen);
-                          setIsTuitionSemesterOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                      >
-                        <span className="text-sm text-gray-900">
-                          {semesters.find(s => s.semesterId === selectedInsuranceSemester)?.semesterName || 'Chọn học kì'} - {semesters.find(s => s.semesterId === selectedInsuranceSemester)?.yearRange || ''}
-                        </span>
-                        <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-                      </button>
-                      {isInsuranceSemesterOpen && (
-                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {semesters.map((semester) => (
-                            <button
-                              key={semester.semesterId}
-                              type="button"
-                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                              onClick={() => {
-                                setSelectedInsuranceSemester(semester.semesterId);
-                                setIsInsuranceSemesterOpen(false);
-                              }}
-                            >
-                              {semester.semesterName} - {semester.yearRange}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                    <div className="w-80">
+                      <Dropdown
+                        options={semesters.map(s => ({
+                          value: s.semesterId,
+                          label: `${s.semesterName} - ${s.yearRange}`,
+                        }))}
+                        value={selectedInsuranceSemester}
+                        placeholder="Chọn học kì"
+                        onChange={(value) => setSelectedInsuranceSemester(value)}
+                        disabled={loadingInsurance || semesters.length === 0}
+                      />
                     </div>
                     
                     <button 
@@ -852,53 +711,30 @@ export default function StudentDetailPage() {
                   </div>
 
                   {/* Insurance Table */}
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-[#0053AD] text-white text-sm">
-                          <th className="px-6 py-4 text-left font-semibold border-r border-blue-400">Năm học</th>
-                          <th className="px-6 py-4 text-right font-semibold border-r border-blue-400">Phí bảo hiểm</th>
-                          <th className="px-6 py-4 text-center font-semibold">Trạng thái</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {loadingInsurance ? (
-                          <tr>
-                            <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                              <div className="flex items-center justify-center gap-2">
-                                <svg className="animate-spin h-5 w-5 text-[#0053AD]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Đang tải...
-                              </div>
-                            </td>
-                          </tr>
-                        ) : insurances.length === 0 ? (
-                          <tr>
-                            <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                              Không có dữ liệu bảo hiểm y tế
-                            </td>
-                          </tr>
-                        ) : (
-                          insurances.map((insurance) => {
-                            const statusDisplay = getPaymentStatusDisplay(insurance.status);
-                            return (
-                              <tr key={insurance.studentHealthInsuranceId} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 text-sm text-gray-900">{insurance.academicYear}</td>
-                                <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(insurance.healthInsuranceFee)} ₫</td>
-                                <td className="px-6 py-4 text-center">
-                                  <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
-                                    {statusDisplay.label}
-                                  </span>
-                                </td>
-                              </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <Table
+                    columns={[
+                      { key: 'academicYear', label: 'Năm học', align: 'left' },
+                      { key: 'healthInsuranceFee', label: 'Phí bảo hiểm', align: 'right' },
+                      { key: 'status', label: 'Trạng thái', align: 'center' },
+                    ]}
+                    data={insurances}
+                    isLoading={loadingInsurance}
+                    emptyMessage="Không có dữ liệu bảo hiểm y tế"
+                    renderRow={(insurance) => {
+                      const statusDisplay = getPaymentStatusDisplay(insurance.status);
+                      return (
+                        <>
+                          <td className="px-6 py-4 text-sm text-gray-900">{insurance.academicYear}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900 text-right">{formatCurrency(insurance.healthInsuranceFee)} ₫</td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
+                              {statusDisplay.label}
+                            </span>
+                          </td>
+                        </>
+                      );
+                    }}
+                  />
                 </div>
               </div>
 

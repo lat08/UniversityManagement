@@ -19,8 +19,6 @@ export const getInsurances = async (): Promise<InsuranceResponse> => {
 
 export const getPayments = async (): Promise<PaymentHistoryResponse> => {
   const response = await api.get('/v1/payments');
-    console.log(response.data);
-
   return response.data;
 };
 

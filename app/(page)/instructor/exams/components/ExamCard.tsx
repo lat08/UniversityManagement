@@ -4,6 +4,7 @@ import { FileText, Download, Upload as UploadIcon, Eye } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import type { ExamEntry } from "../lib/types";
 import { EXAM_TYPE_LABELS, ENTRY_STATUS_LABELS, ENTRY_STATUS_COLORS } from "../lib/constants";
+import { formatDate } from "@/lib/utils/format";
 
 interface ExamCardProps {
   exam: ExamEntry;
@@ -22,12 +23,6 @@ export function ExamCard({
   const statusClassName = ENTRY_STATUS_COLORS[exam.entryStatus] || "bg-gray-100 text-gray-700";
   const examTypeLabel = EXAM_TYPE_LABELS[exam.examType] || exam.examType;
 
-  // Format date
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
-  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow">
@@ -58,7 +53,7 @@ export function ExamCard({
           <div className="space-y-1 text-sm text-gray-600">
             <p>{exam.subjectName} - {exam.courseClassCode}</p>
             <p>Thời lượng: {exam.durationMinutes} phút</p>
-            <p>Ngày tạo: {formatDate(exam.createdAt)}</p>
+            <p>Ngày tạo: {exam.createdAt ? formatDate(exam.createdAt) : 'N/A'}</p>
             {exam.reviewerName && (
               <p>Người duyệt: {exam.reviewerName}</p>
             )}

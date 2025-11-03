@@ -3,6 +3,7 @@
 import { BellOff, Loader2, CheckCheck } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { Tabs } from "@/app/components/ui/tabs"
 import { NotificationCard } from "../notification-card/notificationCard"
 import { NotificationType, NotificationApiItem, NotificationQueryParams } from "../../libs/type/notificationType"
 import { notificationApi } from "../../libs/api/notificationApi"
@@ -44,7 +45,6 @@ export function NotificationsContent() {
         })
       }
     } catch (err) {
-      console.error("Error fetching unread counts:", err)
     }
   }
 
@@ -73,7 +73,6 @@ export function NotificationsContent() {
         setError(response.resultMessage || "Không thể tải thông báo")
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err)
       setError("Đã xảy ra lỗi khi tải thông báo")
     } finally {
       setLoading(false)
@@ -124,7 +123,6 @@ export function NotificationsContent() {
         fetchUnreadCounts()
       }
     } catch (err) {
-      console.error("Error marking notification as read:", err)
     }
   }
 
@@ -141,7 +139,6 @@ export function NotificationsContent() {
         fetchUnreadCounts()
       }
     } catch (err) {
-      console.error("Error marking all as read:", err)
     } finally {
       setMarkingAllAsRead(false)
     }
@@ -186,56 +183,16 @@ export function NotificationsContent() {
       )}
 
       {/* Filter tabs */}
-      <div className="overflow-hidden">
-        <div className="flex w-full border border-[var(--border)] rounded-lg bg-[var(--muted)] relative">
-          {/* Active tab background slider */}
-          <div 
-            className="absolute top-0 bottom-0 bg-[var(--primary)] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-            style={{
-              width: `${100 / filters.length}%`,
-              left: `${filters.findIndex(f => f.key === activeFilter) * (100 / filters.length)}%`,
-              transform: 'translateX(0)'
-            }}
-          />
-          
-          {filters.map((filter, index) => {
-            const isActive = activeFilter === filter.key
-            const unreadCount = unreadCounts[filter.key]
-            const hasUnread = unreadCount > 0
-
-            return (
-              <div key={filter.key} className="flex-1 relative z-10">
-                <button
-                  onClick={() => setActiveFilter(filter.key)}
-                  disabled={loading}
-                  className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 relative ${
-                    isActive
-                      ? "text-[var(--primary-foreground)]"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  <span className="relative z-100">{filter.label}</span>
-                  {/* Chỉ hiển thị badge khi có thông báo chưa đọc */}
-                  {hasUnread && (
-                    <span className={`flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
-                      isActive 
-                        ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] scale-110 shadow-sm" 
-                        : "bg-[var(--badge-bg)] text-[var(--badge-text)] hover:scale-105 hover:shadow-sm"
-                    }`}>
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-                
-                {/* Divider - chỉ hiển thị khi tab không được chọn và không phải tab cuối */}
-                {!isActive && index < filters.length - 1 && (
-                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-[var(--border)] transition-opacity duration-300"></div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      <Tabs
+        items={filters.map(filter => ({
+          key: filter.key,
+          label: filter.label,
+          badge: unreadCounts[filter.key] > 0 ? unreadCounts[filter.key] : undefined,
+        }))}
+        activeKey={activeFilter}
+        onChange={setActiveFilter}
+        disabled={loading}
+      />
 
       {/* Loading state */}
       {loading ? (

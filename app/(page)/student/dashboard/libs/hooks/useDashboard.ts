@@ -15,7 +15,6 @@ export const useDashboard = () => {
             const data = await dashboardApi.getDashBoard();
             setDashboard(data);
         } catch (err : unknown) {
-            console.error("Lỗi khi lấy danh sách khóa học có sẵn:", err);
             setError("Không thể tải danh sách khóa học có sẵn");
         } finally {
           setLoading(false); // ✅ luôn tắt loading dù có lỗi hay không

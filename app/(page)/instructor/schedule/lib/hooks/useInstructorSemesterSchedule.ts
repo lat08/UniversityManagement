@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react"
 import { instructorSemesterScheduleApi } from "../api/semesterScheduleApi"
-import { 
-  InstructorSemesterScheduleItem, 
-  Semester, 
-  Subject 
-} from "../types/semesterTypes"
+import { InstructorSemesterScheduleItem } from "../types/semesterTypes"
+import { Semester, Subject } from "@/lib/types"
+import { useSemesters, useSubjects } from "@/lib/hooks"
 
 export const useInstructorSemesterSchedule = () => {
+  const { data: semestersData, loading: semestersLoading } = useSemesters()
+  const { data: subjectsData, loading: subjectsLoading } = useSubjects()
+  
   const [semesters, setSemesters] = useState<Semester[]>([])
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null)
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -16,61 +17,32 @@ export const useInstructorSemesterSchedule = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch danh sách học kỳ
-  const fetchSemesters = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await instructorSemesterScheduleApi.getSemesters()
-      
-      if (response.success && response.data.length > 0) {
-        // Sắp xếp học kỳ theo startDate (mới nhất trước)
-        const sortedSemesters = response.data.sort((a, b) => 
-          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-        )
-        
-        // Tìm học kỳ hiện tại dựa vào startDate và endDate
-        const currentDate = new Date()
-        const currentSemester = sortedSemesters.find(semester => {
-          const startDate = new Date(semester.startDate)
-          const endDate = new Date(semester.endDate)
-          return currentDate >= startDate && currentDate <= endDate
-        })
-        
-        setSemesters(sortedSemesters)
+  useEffect(() => {
+    if (semestersData.length > 0) {
+      const sortedSemesters = [...semestersData].sort((a, b) => 
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      )
+      const currentDate = new Date()
+      const currentSemester = sortedSemesters.find(semester => {
+        const startDate = new Date(semester.startDate)
+        const endDate = new Date(semester.endDate)
+        return currentDate >= startDate && currentDate <= endDate
+      })
+      setSemesters(sortedSemesters)
+      if (!selectedSemester) {
         setSelectedSemester(currentSemester || sortedSemesters[0])
-      } else {
-        setError("Không có dữ liệu học kỳ")
       }
-    } catch {
-      setError("Lỗi khi tải danh sách học kỳ")
-    } finally {
-      setIsLoading(false)
     }
-  }, [])
+  }, [semestersData])
 
-  // Fetch danh sách môn học của giảng viên
-  const fetchSubjects = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await instructorSemesterScheduleApi.getSubjects()
-      
-      if (response.success) {
-        setSubjects(response.data)
-        setSelectedSubject(response.data.length > 0 ? response.data[0] : null)
-      } else {
-        setSubjects([])
-        setSelectedSubject(null)
+  useEffect(() => {
+    if (subjectsData.length > 0) {
+      setSubjects(subjectsData)
+      if (!selectedSubject) {
+        setSelectedSubject(subjectsData[0])
       }
-    } catch {
-      setError("Lỗi khi tải danh sách môn học")
-      setSubjects([])
-      setSelectedSubject(null)
-    } finally {
-      setIsLoading(false)
     }
-  }, [])
+  }, [subjectsData])
 
   // Fetch thời khóa biểu giảng viên
   const fetchInstructorSchedule = useCallback(async (semesterId: string) => {
@@ -166,21 +138,14 @@ export const useInstructorSemesterSchedule = () => {
     }
   }, [])
 
-  // Load initial data
-  useEffect(() => {
-    fetchSemesters()
-  }, [fetchSemesters])
-
   // Load schedule when semester changes
   useEffect(() => {
     if (selectedSemester) {
       if (viewType === "personal") {
         fetchInstructorSchedule(selectedSemester.semesterId)
-      } else {
-        fetchSubjects()
       }
     }
-  }, [selectedSemester, viewType, fetchInstructorSchedule, fetchSubjects])
+  }, [selectedSemester, viewType, fetchInstructorSchedule])
 
   // Load subject schedule when subject changes
   useEffect(() => {
@@ -220,7 +185,7 @@ export const useInstructorSemesterSchedule = () => {
     selectedSubject,
     scheduleData,
     viewType,
-    isLoading,
+    isLoading: isLoading || semestersLoading || subjectsLoading,
     error,
     handleSemesterChange,
     handleViewTypeChange,

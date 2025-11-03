@@ -57,36 +57,9 @@ export interface InstructorSemesterScheduleItem {
   note?: string
 }
 
-export interface Semester {
-  semesterId: string
-  semesterName: string
-  semesterType: string
-  startDate: string
-  endDate: string
-  status: string
-}
-
-export interface Subject {
-  subjectId: string
-  subjectCode: string
-  subjectName: string
-}
-
 export interface InstructorSemesterScheduleResponse {
   success: boolean
-  data: InstructorSemesterScheduleInfoDto | InstructorSemesterScheduleApiItem[]  // Can be either wrapper object or array directly
-  message?: string
-}
-
-export interface SemestersResponse {
-  success: boolean
-  data: Semester[]
-  message?: string
-}
-
-export interface SubjectsResponse {
-  success: boolean
-  data: Subject[]
+  data: InstructorSemesterScheduleInfoDto | InstructorSemesterScheduleApiItem[]
   message?: string
 }
 

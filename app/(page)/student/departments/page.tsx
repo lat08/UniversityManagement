@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';
+import { Tabs } from '@/app/components/ui/tabs';
 import { useRooms, useUserBookings } from './lib/hooks/useRoomBooking';
 import { useRoomBookingStore } from './lib/stores/roomBookingStore';
 import RoomFilters from './components/RoomFilters';
@@ -41,44 +42,12 @@ export default function RoomBookingPage() {
         <p className="text-xs lg:text-sm text-gray-500">Đăng ký sử dụng phòng chức năng</p>
       </div>
 
-      {/* Tabs - Design giống trang thông báo */}
-      <div className="overflow-hidden">
-        <div className="flex w-full border border-[var(--border)] rounded-lg bg-[var(--muted)] relative">
-          {/* Active tab background slider */}
-          <div 
-            className="absolute top-0 bottom-0 bg-[var(--primary)] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-            style={{
-              width: `${100 / tabs.length}%`,
-              left: `${tabs.findIndex(t => t.key === activeTab) * (100 / tabs.length)}%`,
-              transform: 'translateX(0)'
-            }}
-          />
-          
-          {tabs.map((tab, index) => {
-            const isActive = activeTab === tab.key;
-
-            return (
-              <div key={tab.key} className="flex-1 relative z-10">
-                <button
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center transition-all duration-300 ${
-                    isActive
-                      ? "text-[var(--primary-foreground)]"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  <span className="relative z-100">{tab.label}</span>
-                </button>
-                
-                {/* Divider - chỉ hiển thị khi tab không được chọn và không phải tab cuối */}
-                {!isActive && index < tabs.length - 1 && (
-                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-[var(--border)] transition-opacity duration-300"></div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      {/* Tabs */}
+      <Tabs
+        items={tabs.map(tab => ({ key: tab.key, label: tab.label }))}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      />
 
       {/* Content based on active tab */}
       {activeTab === 'rooms' ? (

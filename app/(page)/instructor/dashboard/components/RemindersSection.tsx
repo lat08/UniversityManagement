@@ -2,6 +2,7 @@
 
 import { Reminder } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
+import { formatDate } from "@/lib/utils/format";
 
 interface RemindersSectionProps {
   reminders: Reminder[];
@@ -52,13 +53,6 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
 
   return (
     <div className="bg-[#DBEDFF] rounded-lg p-4 lg:p-6 h-full min-h-[400px] flex flex-col border-2 border-[#4196F0]">

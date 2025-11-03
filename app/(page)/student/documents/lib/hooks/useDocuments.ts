@@ -37,18 +37,10 @@ export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn =>
       setLoading(true);
       setError(null);
       
-      console.log('[useDocuments] 🔍 Fetching with params:', params);
       const response = await documentsApi.getMaterials(params);
-      
-      console.log('[useDocuments] 📦 Full response:', response);
-      console.log('[useDocuments] 📦 Response data:', response.data);
-      console.log('[useDocuments] 📦 Response data.data:', response.data?.data);
       
       if (response.success && response.data) {
         const items = response.data.data || [];
-        console.log('[useDocuments] ✅ Setting courseGroups:', items);
-        console.log('[useDocuments] ✅ Items count:', items.length);
-        
         setCourseGroups(items);
         setTotalCount(response.data.total || 0);
         // Since the new API doesn't return pagination info, we'll use defaults
@@ -58,12 +50,10 @@ export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn =>
         setHasNext(false);
         setHasPrevious(false);
       } else {
-        console.warn('[useDocuments] ⚠️ Response not successful:', response);
         setError(response.message || 'Không thể tải dữ liệu tài liệu');
         setCourseGroups([]);
       }
     } catch (err) {
-      console.error('[useDocuments] Error:', err);
       const axiosErr = err as AxiosError<{ message?: string; data?: { message?: string } }>;
       const errorMessage = 
         axiosErr.response?.data?.message || 

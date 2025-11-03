@@ -4,8 +4,6 @@ import {
   InstructorSemesterScheduleItem,
   InstructorSemesterScheduleApiItem,
   InstructorSemesterScheduleInfoDto,
-  SemestersResponse, 
-  SubjectsResponse 
 } from "../types/semesterTypes"
 
 // Helper function to transform API response to component format
@@ -81,16 +79,5 @@ export const instructorSemesterScheduleApi = {
     }
   },
 
-  // Lấy danh sách học kỳ
-  getSemesters: async (): Promise<SemestersResponse> => {
-    const response = await api.get('/v1/common/semesters')
-    return response.data
-  },
-
-  // Lấy danh sách môn học của giảng viên
-  getSubjects: async (): Promise<SubjectsResponse> => {
-    const response = await api.get('/v1/common/subjects')
-    return response.data
-  }
 }
 

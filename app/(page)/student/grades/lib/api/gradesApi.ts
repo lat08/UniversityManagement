@@ -1,19 +1,6 @@
 import { api } from '@/lib/api/client'
 import { CumulativeGradesResponse, SemesterGradeResponse, GradesStatsResponse } from '../types/types'
-
-interface CommonSemester {
-  semesterId: string
-  semesterName: string
-  semesterType: string
-  startDate: string
-  endDate: string
-  status: string
-}
-
-interface CommonSemestersResponse {
-  success: boolean
-  data: CommonSemester[]
-}
+import { commonApi } from '@/lib/api'
 
 export const gradesApi = {
   /**
@@ -83,19 +70,7 @@ export const gradesApi = {
     }
   },
 
-  /**
-   * Lấy danh sách tất cả học kỳ (từ common API)
-   */
-  getCommonSemesters: async (): Promise<CommonSemestersResponse> => {
-    try {
-      const response = await api.get<CommonSemestersResponse>('/v1/common/semesters')
-      return response.data
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { status?: number; data?: { message?: string } } }
-      if (axiosError.response?.status === 401) {
-        throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
-      }
-      throw new Error(axiosError.response?.data?.message || 'Không thể tải danh sách học kỳ')
-    }
+  getCommonSemesters: async () => {
+    return commonApi.getSemesters()
   },
 }

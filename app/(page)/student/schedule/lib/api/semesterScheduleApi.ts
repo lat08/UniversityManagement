@@ -1,9 +1,5 @@
 import { api } from "@/lib/api/client"
-import { 
-  SemesterScheduleResponse, 
-  SemestersResponse, 
-  SubjectsResponse 
-} from "../types/semesterTypes"
+import { SemesterScheduleResponse } from "../types/semesterTypes"
 
 // Helper function to map day of week string to number
 const mapDayOfWeekToNumber = (dayString: string): number => {
@@ -127,17 +123,6 @@ export const semesterScheduleApi = {
     return response.data
   },
 
-  // Lấy danh sách học kỳ
-  getSemesters: async (): Promise<SemestersResponse> => {
-    const response = await api.get('/v1/common/semesters')
-    return response.data
-  },
-
-  // Lấy danh sách môn học
-  getSubjects: async (): Promise<SubjectsResponse> => {
-    const response = await api.get('/v1/common/subjects')
-    return response.data
-  },
 
   // Export PDF thời khóa biểu cá nhân
   exportPersonalSchedulePDF: async (semesterId: string): Promise<void> => {

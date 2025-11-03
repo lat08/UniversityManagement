@@ -12,13 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/app/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
+import { Dropdown } from "@/app/components/ui";
 
 interface UploadExamModalProps {
   isOpen: boolean;
@@ -188,26 +182,17 @@ export function UploadExamModal({
               Môn học
               <span className="text-red-500">*</span>
             </label>
-            <Select
+            <Dropdown
+              options={courseClasses.map(c => ({ value: c.id, label: c.name }))}
               value={formData.courseClassId}
-              onValueChange={(value) => handleInputChange("courseClassId", value)}
+              placeholder={
+                courseClasses.length === 0 
+                  ? "Đang tải danh sách lớp học phần..." 
+                  : "Chọn lớp học phần"
+              }
+              onChange={(value) => handleInputChange("courseClassId", value)}
               disabled={courseClasses.length === 0}
-            >
-              <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder={
-                  courseClasses.length === 0 
-                    ? "Đang tải danh sách lớp học phần..." 
-                    : "Chọn lớp học phần"
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {courseClasses.map((courseClass) => (
-                  <SelectItem key={courseClass.id} value={courseClass.id}>
-                    {courseClass.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
             {errors.courseClassId && (
               <p className="text-sm text-red-500">{errors.courseClassId}</p>
             )}
@@ -222,21 +207,12 @@ export function UploadExamModal({
               Loại đề thi
               <span className="text-red-500">*</span>
             </label>
-            <Select
+            <Dropdown
+              options={examTypes.map(t => ({ value: t.id, label: t.name }))}
               value={formData.examType}
-              onValueChange={(value) => handleInputChange("examType", value)}
-            >
-              <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder="Chọn loại" />
-              </SelectTrigger>
-              <SelectContent>
-                {examTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Chọn loại"
+              onChange={(value) => handleInputChange("examType", value)}
+            />
             {errors.examType && (
               <p className="text-sm text-red-500">{errors.examType}</p>
             )}

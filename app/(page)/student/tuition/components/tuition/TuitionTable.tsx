@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/utils";
 
 import { Spinner } from "@/app/components/ui/spinner";
 import { formatCurrency } from "@/lib/utils/format";
+import { getStatusText, getStatusColor } from "@/lib/utils/statusDisplay";
 
 interface TuitionTableProps {
   data: TuitionFee[];
@@ -24,27 +25,6 @@ export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectI
     );
   }
 
-  const getStatusText = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'Đã thanh toán';
-      case 'pending':
-        return 'Đang xử lý';
-      default:
-        return 'Chưa thanh toán';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'text-green-600';
-      case 'pending':
-        return 'text-yellow-600';
-      default:
-        return 'text-red-600';
-    }
-  };
 
   // Lọc ra các mục có thể chọn (trạng thái không phải 'completed')
   const selectableData = data.filter(item => item.status.toLowerCase() !== 'completed');

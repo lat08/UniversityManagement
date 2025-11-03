@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback } from "react"
 import { weeklyScheduleApi } from "../api/weeklyScheduleApi"
 import { 
   WeeklyScheduleItem, 
-  Semester, 
-  Subject,
   Week 
 } from "../types/weeklyTypes"
+import { Semester, Subject } from "@/lib/types"
+import { useSemesters, useSubjects } from "@/lib/hooks"
 import toast from "react-hot-toast"
 
 export const useScheduleData = () => {
+  const { data: semestersData, loading: semestersLoading } = useSemesters()
+  const { data: subjectsData, loading: subjectsLoading } = useSubjects()
+  
   const [semesters, setSemesters] = useState<Semester[]>([])
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null)
   const [weeks, setWeeks] = useState<Week[]>([])
@@ -20,38 +23,32 @@ export const useScheduleData = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch danh sách học kỳ
-  const fetchSemesters = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await weeklyScheduleApi.getSemesters()
-      
-      if (response.success && response.data.length > 0) {
-        // Sắp xếp học kỳ theo startDate (mới nhất trước)
-        const sortedSemesters = response.data.sort((a, b) => 
-          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-        )
-        
-        // Tìm học kỳ hiện tại dựa vào startDate và endDate
-        const currentDate = new Date()
-        const currentSemester = sortedSemesters.find(semester => {
-          const startDate = new Date(semester.startDate)
-          const endDate = new Date(semester.endDate)
-          return currentDate >= startDate && currentDate <= endDate
-        })
-        
-        setSemesters(sortedSemesters)
+  useEffect(() => {
+    if (semestersData.length > 0) {
+      const sortedSemesters = [...semestersData].sort((a, b) => 
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      )
+      const currentDate = new Date()
+      const currentSemester = sortedSemesters.find(semester => {
+        const startDate = new Date(semester.startDate)
+        const endDate = new Date(semester.endDate)
+        return currentDate >= startDate && currentDate <= endDate
+      })
+      setSemesters(sortedSemesters)
+      if (!selectedSemester) {
         setSelectedSemester(currentSemester || sortedSemesters[0])
-      } else {
-        setError("Không có dữ liệu học kỳ")
       }
-    } catch {
-      setError("Lỗi khi tải danh sách học kỳ")
-    } finally {
-      setIsLoading(false)
     }
-  }, [])
+  }, [semestersData])
+
+  useEffect(() => {
+    if (subjectsData.length > 0) {
+      setSubjects(subjectsData)
+      if (!selectedSubject) {
+        setSelectedSubject(subjectsData[0])
+      }
+    }
+  }, [subjectsData])
 
   const fetchWeeks = useCallback(async (semesterId: string) => {
     try {
@@ -78,28 +75,6 @@ export const useScheduleData = () => {
     }
   }, [])
 
-  // Fetch danh sách môn học
-  const fetchSubjects = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await weeklyScheduleApi.getSubjects()
-      
-      if (response.success) {
-        setSubjects(response.data)
-        setSelectedSubject(response.data.length > 0 ? response.data[0] : null)
-      } else {
-        setSubjects([])
-        setSelectedSubject(null)
-      }
-    } catch {
-      setError("Lỗi khi tải danh sách môn học")
-      setSubjects([])
-      setSelectedSubject(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
 
   // Fetch thời khóa biểu theo tuần
   const fetchWeeklySchedule = useCallback(async (semesterId: string, weekNumber: number) => {
@@ -195,10 +170,6 @@ export const useScheduleData = () => {
     }
   }, [])
 
-  // Load initial data
-  useEffect(() => {
-    fetchSemesters()
-  }, [fetchSemesters])
 
   // Load weeks when semester changes
   useEffect(() => {
@@ -212,11 +183,9 @@ export const useScheduleData = () => {
     if (selectedSemester && selectedWeek) {
       if (viewType === "week") {
         fetchWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
-      } else {
-        fetchSubjects()
       }
     }
-  }, [selectedSemester, selectedWeek, viewType, fetchWeeklySchedule, fetchSubjects])
+  }, [selectedSemester, selectedWeek, viewType, fetchWeeklySchedule, fetchWeeks])
 
   // Load subject schedule when subject changes
   useEffect(() => {
@@ -290,7 +259,6 @@ export const useScheduleData = () => {
       }
       toast.success('Tải file PDF thành công!')
     } catch (error: unknown) {
-      console.error('Error exporting PDF:', error)
       const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string }
       
       // Xử lý lỗi 406 - thường là không có dữ liệu
@@ -315,7 +283,7 @@ export const useScheduleData = () => {
     selectedSubject,
     scheduleData,
     viewType,
-    isLoading,
+    isLoading: isLoading || semestersLoading || subjectsLoading,
     error,
     handleSemesterChange,
     handleWeekChange,

@@ -1,20 +1,21 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { ChevronDown, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
+import { Dropdown } from "@/app/components/ui/dropdown";
 import ExamStatCard from "./components/ExamStatCard";
 import ExamTimeline from "./components/ExamTimeline";
 import NotesSection from "./components/NotesSection";
 import { MOCK_NOTES } from "./lib/constants/constants";
-import { ExamStatCard as ExamStatCardType, Semester, Exam } from "./lib/types/types";
+import { ExamStatCard as ExamStatCardType, Exam } from "./lib/types/types";
+import { Semester } from "@/lib/types";
 import { getSemesters, getExamSchedule } from "./lib/api/examScheduleApi";
 import { sortExamsByStatus, transformExamData } from "./lib/utils/examUtils";
 
 export default function ExamSchedulePage() {
   usePageTitle('Lịch thi');
   
-  const [isSemesterOpen, setIsSemesterOpen] = useState(false);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
   const [exams, setExams] = useState<Exam[]>([]);
@@ -40,7 +41,6 @@ export default function ExamSchedulePage() {
           setSelectedSemester(currentSemester || data[0]);
         }
       } catch (error) {
-        console.error('Failed to fetch semesters:', error);
       }
     };
     fetchSemesters();
@@ -58,7 +58,6 @@ export default function ExamSchedulePage() {
         const sortedExams = sortExamsByStatus(transformedData);
         setExams(sortedExams);
       } catch (error) {
-        console.error('Failed to fetch exam schedule:', error);
         setExams([]);
       } finally {
         setLoading(false);
@@ -125,33 +124,17 @@ export default function ExamSchedulePage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 items-stretch justify-between">
         {/* Semester Dropdown */}
-        <div className="relative flex-1 max-w-full sm:max-w-md">
-          <button 
-            className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full"
-            onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+        <div className="flex-1 max-w-full sm:max-w-md">
+          <Dropdown
+            options={semesters.map(s => ({ value: s.semesterId, label: s.semesterName }))}
+            value={selectedSemester?.semesterId || ''}
+            placeholder="Chọn học kỳ"
+            onChange={(value) => {
+              const semester = semesters.find(s => s.semesterId === value);
+              setSelectedSemester(semester || null);
+            }}
             disabled={semesters.length === 0}
-          >
-            <span className="text-xs lg:text-sm text-gray-900 truncate">
-              {selectedSemester?.semesterName || 'Chọn học kỳ'}
-            </span>
-            <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
-          </button>
-          {isSemesterOpen && (
-            <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {semesters.map((semester) => (
-                <button
-                  key={semester.semesterId}
-                  className="w-full text-left px-4 py-2.5 text-xs lg:text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                  onClick={() => {
-                    setSelectedSemester(semester);
-                    setIsSemesterOpen(false);
-                  }}
-                >
-                  {semester.semesterName}
-                </button>
-              ))}
-            </div>
-          )}
+          />
         </div>
 
         {/* Print Button */}
@@ -206,7 +189,6 @@ export default function ExamSchedulePage() {
             notes={MOCK_NOTES} 
             onToggleNote={(id) => {
               // Handle toggle note - can be implemented with API call
-              console.log('Toggle note:', id);
             }}
           />
         </div>

@@ -2,6 +2,7 @@
 
 import { CreditCard } from "lucide-react";
 import { TuitionFee } from "../../lib/types/types";
+import { formatCurrency } from "@/lib/utils/format";
 
 interface PaymentSummaryProps {
   selectedItems: TuitionFee[];
@@ -15,10 +16,6 @@ export default function PaymentSummary({ selectedItems, onPayment }: PaymentSumm
 
   const totalCredits = selectedItems.reduce((sum, item) => sum + item.credits, 0);
   const totalAmount = selectedItems.reduce((sum, item) => sum + item.courseFee, 0);
-
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString('vi-VN')} đ`;
-  };
 
   return (
     <div className="space-y-4">

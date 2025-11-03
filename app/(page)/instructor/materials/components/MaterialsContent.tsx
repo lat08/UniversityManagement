@@ -9,6 +9,7 @@ import { DeleteDocumentModal } from "./DeleteDocumentModal";
 import { EditDocumentModal, type EditFormData } from "./EditDocumentModal";
 import { useMaterials } from "../lib/hooks/useMaterials";
 import { transformMaterialsToDocuments, getCourseClassesOptions } from "../lib/utils/transformers";
+import { downloadFile } from "@/lib/utils/fileDownload";
 
 export function MaterialsContent() {
   const [selectedSemester, setSelectedSemester] = useState("all");
@@ -113,11 +114,10 @@ export function MaterialsContent() {
     }
   };
 
-  const handleDownload = (id: string) => {
+  const handleDownload = async (id: string) => {
     const doc = allDocuments.find((d) => d.id === id);
     if (doc?.downloadUrl) {
-      // Open download URL in new tab
-      window.open(doc.downloadUrl, '_blank');
+      await downloadFile(doc.downloadUrl, doc.title || doc.fileName || 'document');
     }
   };
 

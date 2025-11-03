@@ -54,7 +54,6 @@ export const useTuitionLogic = (
       toast.success('Đang tải xuống danh sách học phí');
     } catch (error) {
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
-      console.error('Export error:', error);
     } finally {
       setIsLoading(false);
     }

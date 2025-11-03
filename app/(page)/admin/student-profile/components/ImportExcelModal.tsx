@@ -118,14 +118,8 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
     setIsDownloading(true);
     try {
       const blob = await studentsApi.downloadExcelTemplate();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `student_template_${new Date().getTime()}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const { downloadFile } = await import('@/lib/utils/fileDownload');
+      await downloadFile(URL.createObjectURL(blob), `student_template_${new Date().getTime()}.xlsx`);
       toast.success('Tải xuống template thành công');
     } catch (error: unknown) {
       console.error('Download template error:', error);

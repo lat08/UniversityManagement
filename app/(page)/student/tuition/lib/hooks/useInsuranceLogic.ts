@@ -31,7 +31,6 @@ export const useInsuranceLogic = (
       toast.success('Đang tải xuống danh sách bảo hiểm');
     } catch (error) {
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
-      console.error('Export error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +60,6 @@ export const useInsuranceLogic = (
       }
     } catch (error) {
       toast.error('Không thể xử lý thanh toán bảo hiểm');
-      console.error('Payment error:', error);
     } finally {
       setIsLoading(false);
     }

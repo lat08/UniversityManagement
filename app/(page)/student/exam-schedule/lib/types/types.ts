@@ -35,10 +35,4 @@ export interface Note {
   completed: boolean;
 }
 
-export interface Semester {
-  semesterId: string;
-  semesterName: string;
-  startDate: string;
-  endDate: string;
-}
 

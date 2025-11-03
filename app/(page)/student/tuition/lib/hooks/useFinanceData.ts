@@ -3,13 +3,14 @@ import { useState, useEffect, useCallback } from "react";
 import { getTuitionFees, getInsurances, getPayments } from "../api/financeApi";
 import { TuitionFeeResponse, Insurance, Payment } from "../types/types";
 import { useToast } from "@/app/components/ui/toast";
-import {  Semester } from "../../../dashboard/libs/types/types";
-import { dashboardApi } from "../../../dashboard/libs/api/dashboardApi";
+import { Semester } from "../types/types";
+import { commonApi } from "@/lib/api/common";
 
 export type FinanceDataState = {
   isLoading: boolean;
   tuitionData: TuitionFeeResponse['data'] | null;
   semesters: Semester[];
+  defaultSemesterId: string | null;
   insurances: Insurance[];
   payments: Payment[];
   refreshData: (semesterId: string | null) => void;
@@ -22,11 +23,11 @@ export const useFinanceData = (): FinanceDataState => {
   const [insurances, setInsurances] = useState<Insurance[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [semesters, setSemester] = useState<Semester[]>([]);
+  const [defaultSemesterId, setDefaultSemesterId] = useState<string | null>(null);
 
   
   const loadData = async (semesterId: string | null) => {
     setIsLoading(true);
-    console.log(semesterId)
     try {
       const [tuitionRes, insuranceRes, paymentRes] = await Promise.all([
         getTuitionFees(semesterId),
@@ -34,7 +35,6 @@ export const useFinanceData = (): FinanceDataState => {
         getPayments(),
       ]);
 
-      console.log(tuitionRes)
 
       if (tuitionRes.success) {
         setTuitionData(tuitionRes.data);
@@ -58,7 +58,6 @@ export const useFinanceData = (): FinanceDataState => {
       }
     } catch (error) {
       toast.error('Failed to load data. Please try again later.');
-      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -66,17 +65,36 @@ export const useFinanceData = (): FinanceDataState => {
 
   useEffect(() => {
     const fetchData = async () => {
-    const data = await dashboardApi.getDashBoard();
-    setSemester(data.activeSemesters);
+      const response = await commonApi.getSemesters();
+      if (response.success && response.data) {
+        const allSemesters = response.data.map(s => ({
+          semesterId: s.semesterId,
+          semesterName: s.semesterName
+        }));
+        setSemester(allSemesters);
+
+        const now = new Date();
+        const activeSemester = response.data.find(semester => {
+          const startDate = new Date(semester.startDate);
+          const endDate = new Date(semester.endDate);
+          return now >= startDate && now <= endDate;
+        });
+        
+        if (activeSemester) {
+          setDefaultSemesterId(activeSemester.semesterId);
+          loadData(activeSemester.semesterId);
+        } else {
+          loadData(null);
+        }
+      }
     };
 
     fetchData();
-    loadData(null);
   }, []);
   
   const refreshData = useCallback((semesterId: string | null) => {
     loadData(semesterId);
   }, []);
 
-  return { isLoading, tuitionData, semesters, insurances, payments, refreshData };
+  return { isLoading, tuitionData, semesters, defaultSemesterId, insurances, payments, refreshData };
 };

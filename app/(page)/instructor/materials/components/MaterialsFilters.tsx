@@ -2,13 +2,7 @@
 
 import { Search } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
+import { Dropdown } from "@/app/components/ui";
 
 interface MaterialsFiltersProps {
   searchQuery: string;
@@ -50,44 +44,29 @@ export function MaterialsFilters({
         />
       </div>
       
-      <Select value={selectedSemester} onValueChange={onSemesterChange}>
-        <SelectTrigger className="w-full sm:w-[280px] border-gray-300 rounded-lg">
-          <SelectValue placeholder="Chọn học kỳ" />
-        </SelectTrigger>
-        <SelectContent>
-          {semesters.map((semester) => (
-            <SelectItem key={semester.id} value={semester.id}>
-              {semester.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Dropdown
+        options={semesters.map(s => ({ value: s.id, label: s.name }))}
+        value={selectedSemester}
+        placeholder="Chọn học kỳ"
+        onChange={onSemesterChange}
+        className="w-full sm:w-[280px]"
+      />
 
-      <Select value={selectedSubject} onValueChange={onSubjectChange}>
-        <SelectTrigger className="w-full sm:w-[200px] border-gray-300 rounded-lg">
-          <SelectValue placeholder="Chọn môn học" />
-        </SelectTrigger>
-        <SelectContent>
-          {subjects.map((subject) => (
-            <SelectItem key={subject.id} value={subject.id}>
-              {subject.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Dropdown
+        options={subjects.map(s => ({ value: s.id, label: s.name }))}
+        value={selectedSubject}
+        placeholder="Chọn môn học"
+        onChange={onSubjectChange}
+        className="w-full sm:w-[200px]"
+      />
 
-      <Select value={selectedType} onValueChange={onTypeChange}>
-        <SelectTrigger className="w-full sm:w-[160px] border-gray-300 rounded-lg">
-          <SelectValue placeholder="Chọn loại" />
-        </SelectTrigger>
-        <SelectContent>
-          {types.map((type) => (
-            <SelectItem key={type.id} value={type.id}>
-              {type.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Dropdown
+        options={types.map(t => ({ value: t.id, label: t.name }))}
+        value={selectedType}
+        placeholder="Chọn loại"
+        onChange={onTypeChange}
+        className="w-full sm:w-[160px]"
+      />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { ExamCard } from "./ExamCard";
 import { UploadExamModal, type UploadExamFormData } from "./UploadExamModal";
 import { ExamDetailModal } from "./ExamDetailModal";
 import { useExamEntries } from "../lib/hooks/useExamEntries";
-import { useSemesters, useSubjects } from "../lib/hooks/useSemestersAndSubjects";
+import { useSemesters, useSubjects } from "@/lib/hooks";
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { SEARCH_DEBOUNCE_MS } from "../lib/constants";
@@ -24,8 +24,8 @@ export function ExamsContent() {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
 
   // Fetch semesters and subjects
-  const { semesters, loading: semestersLoading } = useSemesters();
-  const { subjects, loading: subjectsLoading } = useSubjects();
+  const { data: semesters, loading: semestersLoading } = useSemesters();
+  const { data: subjects, loading: subjectsLoading } = useSubjects();
 
   // Debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);

@@ -1,7 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/app/components/ui/dialog';
-import { Button } from '@/app/components/ui/button';
+import { ConfirmDialog } from '@/app/components/ui/confirm-dialog';
 import type { BookingData } from '../lib/types/room.types';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -33,34 +32,17 @@ export default function CancelBookingModal({
   if (!booking) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Xác nhận hủy đăng ký</DialogTitle>
-          <DialogDescription className="text-base">
-            Bạn có chắc chắn muốn hủy đăng ký phòng <span className="font-semibold text-gray-900">{booking.roomName}</span> vào ngày <span className="font-semibold text-gray-900">{formatDate(booking.bookingDate)}</span>, khung giờ <span className="font-semibold text-gray-900">{booking.startTime} - {booking.endTime}</span>?
-          </DialogDescription>
-        </DialogHeader>
-        
-        <DialogFooter className="gap-3 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-            className="sm:flex-1"
-          >
-            Hủy
-          </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={isLoading}
-            className="sm:flex-1 bg-[#0B5FCC] hover:bg-[#0a4fab] text-white"
-          >
-            {isLoading ? 'Đang xử lý...' : 'Xác nhận'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      onConfirm={onConfirm}
+      title="Xác nhận hủy đăng ký"
+      description={`Bạn có chắc chắn muốn hủy đăng ký phòng ${booking.roomName} vào ngày ${formatDate(booking.bookingDate)}, khung giờ ${booking.startTime} - ${booking.endTime}?`}
+      confirmText="Xác nhận"
+      cancelText="Hủy"
+      variant="warning"
+      isLoading={isLoading}
+    />
   );
 }
 

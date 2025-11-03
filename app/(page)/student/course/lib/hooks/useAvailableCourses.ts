@@ -15,7 +15,6 @@ export const useAvailableCourses = () => {
       const data = await coursesApi.getAvailable();
       setCourses(data);
     } catch (err: unknown) {
-      console.error("Lỗi khi lấy danh sách khóa học có sẵn:", err);
       setError("Không thể tải danh sách khóa học có sẵn");
       setCourses([]);
     } finally {

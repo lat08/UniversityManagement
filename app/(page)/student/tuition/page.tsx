@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils/utils";
 import { TabType } from "./lib/types/types";
+import { Tabs } from "@/app/components/ui/tabs";
 import QrPaymentModal from "./components/qrPaymentModal";
 import { useFinanceData } from "./lib/hooks/useFinanceData";
 
@@ -25,6 +25,7 @@ export default function TuitionPage() {
     isLoading: isInitialLoading, 
     tuitionData, 
     semesters,
+    defaultSemesterId,
     insurances, 
     payments,
     refreshData // Thêm refreshData nếu cần
@@ -61,42 +62,11 @@ export default function TuitionPage() {
       </div>
 
       {/* Tabs */}
-      <div className="overflow-hidden">
-        <div className="flex w-full border border-[var(--border)] rounded-lg bg-[var(--muted)] relative">
-          <div 
-            className="absolute top-0 bottom-0 bg-[var(--primary)] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-            style={{
-              width: `${100 / tabs.length}%`,
-              left: `${tabs.findIndex(t => t.id === activeTab) * (100 / tabs.length)}%`,
-              transform: 'translateX(0)'
-            }}
-          />
-          
-          {tabs.map((tab, index) => {
-            const isActive = activeTab === tab.id;
-
-            return (
-              <div key={tab.id} className="flex-1 relative z-10">
-                <button
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 relative transition-colors",
-                    isActive
-                      ? "text-[var(--primary-foreground)]"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  )}
-                >
-                  <span className="relative z-10">{tab.label}</span>
-                </button>
-                
-                {!isActive && index < tabs.length - 1 && (
-                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-[var(--border)] transition-opacity duration-300"></div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <Tabs
+        items={tabs.map(tab => ({ key: tab.id, label: tab.label }))}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      />
                 
       {/* Content based on Active Tab */}
       {activeTab === 'tuition' && (
@@ -108,6 +78,7 @@ export default function TuitionPage() {
           setIsQrOpen={setIsQrOpen}
           setQrIframeLoading={setQrIframeLoading}
           semesters={semesters}
+          defaultSemesterId={defaultSemesterId}
           refreshData={refreshData}
         />
       )}

@@ -1,18 +1,20 @@
 // components/TuitionTab.tsx
-import { ChevronDown, Filter, FileDown } from "lucide-react";
+import { FileDown } from "lucide-react";
 import { Spinner } from "@/app/components/ui/spinner";
+import { Dropdown } from "@/app/components/ui/dropdown";
 import TuitionTable from "../tuition/TuitionTable";
 import PaymentSummary from "../tuition/PaymentSummary";
 import { TuitionFeeResponse } from "../../lib/types/types";
 import { useTuitionLogic } from "../../lib/hooks/useTuitionLogic";
 import { useEffect, useState } from "react";
-import { Semester } from "../../../dashboard/libs/types/types";
+import { Semester } from "../../lib/types/types";
 import { useFinanceData } from "../../lib/hooks/useFinanceData";
 
 type TuitionTabProps = {
   isLoading: boolean;
   tuitionData: TuitionFeeResponse['data'] | null;
   semesters : Semester[];
+  defaultSemesterId: string | null;
   setIsLoading: (loading: boolean) => void;
   setQrUrl: (url: string | null) => void;
   setIsQrOpen: (open: boolean) => void;
@@ -24,6 +26,7 @@ export default function TuitionTab({
   isLoading,
   tuitionData,
   semesters,
+  defaultSemesterId,
   setIsLoading,
   setQrUrl,
   setIsQrOpen,
@@ -49,15 +52,21 @@ export default function TuitionTab({
   );
 
   const [selectedSemesterId, setSelectedSemesterId] = useState<string>("");
+  
   useEffect(() => {
-    if (tuitionData?.semesterId) {
-      setSelectedSemesterId(tuitionData.semesterId);
+    if (defaultSemesterId) {
+      setSelectedSemesterId(defaultSemesterId);
     }
-  }, [tuitionData]);
+  }, [defaultSemesterId]);
 
   useEffect(() => {
-        if (selectedSemesterId) refreshData(selectedSemesterId);
-      }, [selectedSemesterId, refreshData]);
+    if (selectedSemesterId) refreshData(selectedSemesterId);
+  }, [selectedSemesterId, refreshData]);
+
+  const semesterOptions = semesters.map(s => ({
+    value: s.semesterId,
+    label: s.semesterName,
+  }));
 
   return (
     <div className="space-y-4">
@@ -82,22 +91,15 @@ export default function TuitionTab({
       
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-between">
-        {/* Semester Info (Fixed/Disabled) */}
-        <div className="relative sm:flex-[1]">
-          <select
-            value={selectedSemesterId || ""}
-              onChange={(e) => {
-                setSelectedSemesterId(e.target.value);
-              }}
-            className="max-h-60 overflow-y-auto w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none cursor-default transition-colors"
-          >
-            {semesters?.map((option) => (
-              <option key={option.semesterId} value={option.semesterId}>
-                {option.semesterName}
-              </option>
-            ))}
-          </select>
-          
+        {/* Semester Dropdown */}
+        <div className="sm:flex-[1]">
+          <Dropdown
+            options={semesterOptions}
+            value={selectedSemesterId}
+            placeholder="Chọn học kỳ"
+            onChange={setSelectedSemesterId}
+            disabled={isLoading}
+          />
         </div>
 
         {/* Filter and Export Buttons */}

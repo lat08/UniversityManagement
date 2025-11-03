@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronDown, Calendar, User, Edit2 } from 'lucide-react';
+import { Calendar, User, Edit2 } from 'lucide-react';
 import Image from 'next/image';
+import { Tabs } from '@/app/components/ui/tabs';
+import { Dropdown, DropdownSearch } from '@/app/components/ui';
 import { studentsApi } from '../../lib/api/studentsApi';
 import { StudentDetail, Faculty, Department, ClassItem, ENROLLMENT_STATUS_OPTIONS, UpdateStudentPayload } from '../../lib/types/types';
 import { toast } from 'react-hot-toast';
@@ -35,20 +37,7 @@ export default function EditStudentPage() {
     confirmPassword: '',
   });
 
-  const [isGenderOpen, setIsGenderOpen] = useState(false);
-  const [isEnrollmentStatusOpen, setIsEnrollmentStatusOpen] = useState(false);
-  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
-  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
-  const [isClassOpen, setIsClassOpen] = useState(false);
-  const genderRef = useRef<HTMLDivElement>(null);
-  const enrollmentStatusRef = useRef<HTMLDivElement>(null);
-  const facultyRef = useRef<HTMLDivElement>(null);
-  const departmentRef = useRef<HTMLDivElement>(null);
-  const classRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState('basic');
-  const [facultySearch, setFacultySearch] = useState('');
-  const [departmentSearch, setDepartmentSearch] = useState('');
-  const [classSearch, setClassSearch] = useState('');
   const [showDobCalendar, setShowDobCalendar] = useState(false);
   const [dobDate, setDobDate] = useState<Date | undefined>(undefined);
   const [dobInputValue, setDobInputValue] = useState<string>('');
@@ -221,7 +210,7 @@ export default function EditStudentPage() {
     }
   };
 
-  // Close dropdowns when clicking outside
+  // Close DOB calendar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -231,19 +220,13 @@ export default function EditStudentPage() {
         const insideDob = dobWrapperRef.current?.contains(target) || dobCalendarRef.current?.contains(target);
         if (!insideDob) setShowDobCalendar(false);
       }
-
-      if (isGenderOpen && !genderRef.current?.contains(target)) setIsGenderOpen(false);
-      if (isEnrollmentStatusOpen && !enrollmentStatusRef.current?.contains(target)) setIsEnrollmentStatusOpen(false);
-      if (isFacultyOpen && !facultyRef.current?.contains(target)) setIsFacultyOpen(false);
-      if (isDepartmentOpen && !departmentRef.current?.contains(target)) setIsDepartmentOpen(false);
-      if (isClassOpen && !classRef.current?.contains(target)) setIsClassOpen(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showDobCalendar, isGenderOpen, isEnrollmentStatusOpen, isFacultyOpen, isDepartmentOpen, isClassOpen]);
+  }, [showDobCalendar]);
 
   const handleDobInputChange = (value: string) => {
     setDobInputValue(value);
@@ -385,13 +368,6 @@ export default function EditStudentPage() {
     router.refresh(); // Refresh to ensure list is up to date
   };
 
-  const getGenderLabel = (genderValue: string) => {
-    return genders.find(g => g.value === genderValue)?.label || genderValue;
-  };
-
-  const getEnrollmentStatusLabel = (statusValue: string) => {
-    return ENROLLMENT_STATUS_OPTIONS.find(s => s.value === statusValue)?.label || statusValue;
-  };
 
   if (loading) {
     return (
@@ -429,44 +405,11 @@ export default function EditStudentPage() {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="overflow-hidden">
-          <div className="flex w-full border border-gray-300 rounded-lg bg-gray-100 relative">
-            {/* Active tab background slider */}
-            <div 
-              className="absolute top-0 bottom-0 bg-[#0053AD] rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-              style={{
-                width: `${100 / tabs.length}%`,
-                left: `${tabs.findIndex(t => t.id === activeTab) * (100 / tabs.length)}%`,
-                transform: 'translateX(0)'
-              }}
-            />
-            
-            {tabs.map((tab, index) => {
-              const isActive = activeTab === tab.id
-
-              return (
-                <div key={tab.id} className="flex-1 relative z-10">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full cursor-pointer px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 relative transition-colors ${
-                      isActive
-                        ? "text-white"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    <span className="relative z-100">{tab.label}</span>
-                  </button>
-                  
-                  {/* Divider - chỉ hiển thị khi tab không được chọn và không phải tab cuối */}
-                  {!isActive && index < tabs.length - 1 && (
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-300 transition-opacity duration-300"></div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <Tabs
+          items={tabs.map(tab => ({ key: tab.id, label: tab.label }))}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       {/* Main Content */}
@@ -591,37 +534,16 @@ export default function EditStudentPage() {
                     </div>
 
                     {/* Giới tính */}
-                    <div className="relative" ref={genderRef}>
+                    <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
                         Giới tính
                       </label>
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                        onClick={() => {
-                          setIsGenderOpen(!isGenderOpen);
-                        }}
-                      >
-                        <span className="text-sm text-gray-900">{getGenderLabel(formData.gender)}</span>
-                        <ChevronDown className="w-4 h-4 text-gray-700" />
-                      </button>
-                      {isGenderOpen && (
-                        <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                          {genders.map((gender) => (
-                            <button
-                              key={gender.value}
-                              type="button"
-                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                              onClick={() => {
-                                setFormData({ ...formData, gender: gender.value });
-                                setIsGenderOpen(false);
-                              }}
-                            >
-                              {gender.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      <Dropdown
+                        options={genders}
+                        value={formData.gender}
+                        placeholder="Chọn giới tính"
+                        onChange={(value) => setFormData({ ...formData, gender: value })}
+                      />
                     </div>
 
                     {/* CMND / CCCD */}
@@ -731,251 +653,81 @@ export default function EditStudentPage() {
                   </div>
 
                   {/* Ngành học */}
-                  <div className="relative" ref={facultyRef}>
+                  <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Ngành học
                     </label>
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                      onClick={() => {
-                        setIsFacultyOpen(!isFacultyOpen);
-                        setIsDepartmentOpen(false);
-                        setIsClassOpen(false);
-                        setFacultySearch('');
+                    <DropdownSearch
+                      options={faculties.map(f => ({
+                        value: f.facultyId,
+                        label: f.facultyName,
+                      }))}
+                      value={selectedFacultyId}
+                      placeholder="Chọn ngành học"
+                      searchPlaceholder="Tìm kiếm ngành học..."
+                      onChange={(value) => {
+                        setSelectedFacultyId(value);
+                        setSelectedDepartmentId('');
+                        setFormData({ ...formData, classId: '' });
+                        setClasses([]);
                       }}
-                    >
-                      <span className="text-sm text-gray-900">
-                        {selectedFacultyId 
-                          ? faculties.find(f => f.facultyId === selectedFacultyId)?.facultyName || 'Chọn ngành học'
-                          : 'Chọn ngành học'
-                        }
-                      </span>
-                      <ChevronDown className="w-4 h-4 text-gray-700" />
-                    </button>
-                    {isFacultyOpen && (
-                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
-                        {/* Search input */}
-                        <div className="p-2 border-b border-gray-200">
-                          <input
-                            type="text"
-                            placeholder="Tìm kiếm ngành học..."
-                            value={facultySearch}
-                            onChange={(e) => setFacultySearch(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                        <div className="max-h-48 overflow-y-auto">
-                          {filteredFaculties.length === 0 ? (
-                            <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
-                              Không tìm thấy ngành học
-                            </div>
-                          ) : (
-                            filteredFaculties.map((faculty) => {
-                              const isSelected = faculty.facultyId === selectedFacultyId;
-                              return (
-                                <button
-                                  key={faculty.facultyId}
-                                  type="button"
-                                  className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors ${
-                                    isSelected 
-                                      ? 'bg-[#0053AD] text-white hover:bg-[#003d82]' 
-                                      : 'text-gray-900 hover:bg-gray-100'
-                                  }`}
-                                  onClick={() => {
-                                    // When changing faculty, clear department and class
-                                    setSelectedFacultyId(faculty.facultyId);
-                                    setSelectedDepartmentId('');
-                                    setFormData({ ...formData, classId: '' });
-                                    setClasses([]);
-                                    setIsFacultyOpen(false);
-                                    setFacultySearch('');
-                                  }}
-                                >
-                                  {faculty.facultyName}
-                                </button>
-                              );
-                            })
-                          )}
-                        </div>
-                      </div>
-                    )}
+                      disabled={!faculties.length}
+                    />
                   </div>
 
                   {/* Chuyên ngành */}
-                  <div className="relative" ref={departmentRef}>
+                  <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Chuyên ngành
                     </label>
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                      onClick={() => {
-                        setIsDepartmentOpen(!isDepartmentOpen);
-                        setIsFacultyOpen(false);
-                        setIsClassOpen(false);
-                        setDepartmentSearch('');
+                    <DropdownSearch
+                      options={departments
+                        .filter(d => !selectedFacultyId || d.facultyId === selectedFacultyId)
+                        .map(d => ({
+                          value: d.departmentId,
+                          label: d.departmentName,
+                        }))}
+                      value={selectedDepartmentId}
+                      placeholder="Chọn chuyên ngành"
+                      searchPlaceholder="Tìm kiếm chuyên ngành..."
+                      onChange={(value) => {
+                        setSelectedDepartmentId(value);
+                        setFormData({ ...formData, classId: '' });
+                        setClasses([]);
                       }}
-                    >
-                      <span className="text-sm text-gray-900">
-                        {selectedDepartmentId 
-                          ? departments.find(d => d.departmentId === selectedDepartmentId)?.departmentName || 'Chọn chuyên ngành'
-                          : 'Chọn chuyên ngành'
-                        }
-                      </span>
-                      <ChevronDown className="w-4 h-4 text-gray-700" />
-                    </button>
-                    {isDepartmentOpen && (
-                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
-                        {/* Search input */}
-                        <div className="p-2 border-b border-gray-200">
-                          <input
-                            type="text"
-                            placeholder="Tìm kiếm chuyên ngành..."
-                            value={departmentSearch}
-                            onChange={(e) => setDepartmentSearch(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                        <div className="max-h-48 overflow-y-auto">
-                          {filteredDepartments.length === 0 ? (
-                            <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
-                              Không tìm thấy chuyên ngành
-                            </div>
-                          ) : (
-                            filteredDepartments.map((department) => {
-                              const isSelected = department.departmentId === selectedDepartmentId;
-                              return (
-                                <button
-                                  key={department.departmentId}
-                                  type="button"
-                                  className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors ${
-                                    isSelected 
-                                      ? 'bg-[#0053AD] text-white hover:bg-[#003d82]' 
-                                      : 'text-gray-900 hover:bg-gray-100'
-                                  }`}
-                                  onClick={() => {
-                                    // When changing department, clear class only
-                                    setSelectedDepartmentId(department.departmentId);
-                                    setFormData({ ...formData, classId: '' });
-                                    setClasses([]);
-                                    setIsDepartmentOpen(false);
-                                    setDepartmentSearch('');
-                                  }}
-                                >
-                                  {department.departmentName}
-                                </button>
-                              );
-                            })
-                          )}
-                        </div>
-                      </div>
-                    )}
+                      disabled={!departments.length || !selectedFacultyId}
+                    />
                   </div>
 
                   {/* Lớp */}
-                  <div className="relative" ref={classRef}>
+                  <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Lớp <span className="text-red-500">*</span>
                     </label>
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                      onClick={() => {
-                        setIsClassOpen(!isClassOpen);
-                        setIsFacultyOpen(false);
-                        setIsDepartmentOpen(false);
-                        setClassSearch('');
-                      }}
-                    >
-                      <span className="text-sm text-gray-900">
-                        {formData.classId 
-                          ? classes.find(c => c.classId === formData.classId)?.className || 'Chọn lớp'
-                          : 'Chọn lớp'
-                        }
-                      </span>
-                      <ChevronDown className="w-4 h-4 text-gray-700" />
-                    </button>
-                    {isClassOpen && (
-                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
-                        {/* Search input */}
-                        <div className="p-2 border-b border-gray-200">
-                          <input
-                            type="text"
-                            placeholder="Tìm kiếm lớp..."
-                            value={classSearch}
-                            onChange={(e) => setClassSearch(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                        <div className="max-h-48 overflow-y-auto">
-                          {filteredClasses.length === 0 ? (
-                            <div className="px-4 py-2.5 text-sm text-gray-500 text-center">
-                              Không tìm thấy lớp
-                            </div>
-                          ) : (
-                            filteredClasses.map((classItem) => {
-                              const isSelected = classItem.classId === formData.classId;
-                              return (
-                                <button
-                                  key={classItem.classId}
-                                  type="button"
-                                  className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors ${
-                                    isSelected 
-                                      ? 'bg-[#0053AD] text-white hover:bg-[#003d82]' 
-                                      : 'text-gray-900 hover:bg-gray-100'
-                                  }`}
-                                  onClick={() => {
-                                    setFormData({ ...formData, classId: classItem.classId });
-                                    setIsClassOpen(false);
-                                    setClassSearch('');
-                                  }}
-                                >
-                                  {classItem.className}
-                                </button>
-                              );
-                            })
-                          )}
-                        </div>
-                      </div>
-                    )}
+                    <DropdownSearch
+                      options={classes.map(c => ({
+                        value: c.classId,
+                        label: c.className,
+                      }))}
+                      value={formData.classId}
+                      placeholder="Chọn lớp"
+                      searchPlaceholder="Tìm kiếm lớp..."
+                      onChange={(value) => setFormData({ ...formData, classId: value })}
+                      disabled={!classes.length || !selectedFacultyId}
+                    />
                   </div>
 
                   {/* Trạng thái */}
-                  <div className="relative" ref={enrollmentStatusRef}>
+                  <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Trạng thái <span className="text-red-500">*</span>
                     </label>
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
-                      onClick={() => {
-                        setIsEnrollmentStatusOpen(!isEnrollmentStatusOpen);
-                      }}
-                    >
-                      <span className="text-sm text-gray-900">{getEnrollmentStatusLabel(formData.enrollmentStatus)}</span>
-                      <ChevronDown className="w-4 h-4 text-gray-700" />
-                    </button>
-                    {isEnrollmentStatusOpen && (
-                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {ENROLLMENT_STATUS_OPTIONS.map((status) => (
-                          <button
-                            key={status.value}
-                            type="button"
-                            className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                            onClick={() => {
-                              setFormData({ ...formData, enrollmentStatus: status.value });
-                              setIsEnrollmentStatusOpen(false);
-                            }}
-                          >
-                            {status.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    <Dropdown
+                      options={ENROLLMENT_STATUS_OPTIONS}
+                      value={formData.enrollmentStatus}
+                      placeholder="Chọn trạng thái"
+                      onChange={(value) => setFormData({ ...formData, enrollmentStatus: value })}
+                    />
                   </div>
                 </div>
               </div>

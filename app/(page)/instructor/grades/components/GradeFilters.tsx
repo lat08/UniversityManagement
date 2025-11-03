@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search } from 'lucide-react';
+import { Dropdown } from '@/app/components/ui';
 
 interface GradeFiltersProps {
   selectedCourse: string;
@@ -22,32 +23,32 @@ const GradeFilters: React.FC<GradeFiltersProps> = ({
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
-      {/* Course Select */}
       <div className="flex-1">
-        <select
+        <Dropdown
+          options={[
+            { value: '', label: 'Chọn môn học' },
+            { value: 'CNTT01', label: 'Lập trình Web - CNTT01' },
+            { value: 'CNTT02', label: 'Cơ sở dữ liệu - CNTT02' },
+            { value: 'CNTT03', label: 'Mạng máy tính - CNTT03' },
+          ]}
           value={selectedCourse}
-          onChange={(e) => onCourseChange(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-        >
-          <option value="">Chọn môn học</option>
-          <option value="CNTT01">Lập trình Web - CNTT01</option>
-          <option value="CNTT02">Cơ sở dữ liệu - CNTT02</option>
-          <option value="CNTT03">Mạng máy tính - CNTT03</option>
-        </select>
+          placeholder="Chọn môn học"
+          onChange={onCourseChange}
+        />
       </div>
 
-      {/* Class Select */}
       <div className="flex-1">
-        <select
+        <Dropdown
+          options={[
+            { value: '', label: 'Chọn lớp' },
+            { value: 'K16', label: 'K16' },
+            { value: 'K17', label: 'K17' },
+            { value: 'K18', label: 'K18' },
+          ]}
           value={selectedClass}
-          onChange={(e) => onClassChange(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-        >
-          <option value="">Chọn lớp</option>
-          <option value="K16">K16</option>
-          <option value="K17">K17</option>
-          <option value="K18">K18</option>
-        </select>
+          placeholder="Chọn lớp"
+          onChange={onClassChange}
+        />
       </div>
 
       {/* Search Input */}

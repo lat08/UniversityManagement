@@ -65,19 +65,18 @@ export interface KpiData {
   Kpi? : Kpi;
 }
 
-export interface Semester {
-  semesterId: string;
-  semesterName: string;
-}
+import { Semester as CommonSemester } from "@/lib/types";
 
-interface Subject {
-  courseId: string;          // Guid → string
+export type Semester = Pick<CommonSemester, 'semesterId' | 'semesterName'>;
+
+export interface Subject {
+  courseId: string;
   subjectCode: string;
   subjectName: string;
   credits: number;
   instructorName: string;
   roomName: string;
-  scheduleSummary: string;   // ví dụ: "Mon (1-3), Wed (4-6)"
+  scheduleSummary: string;
 }
 
 export interface EventNotification {

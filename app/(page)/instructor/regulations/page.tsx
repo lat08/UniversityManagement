@@ -5,6 +5,7 @@ import { Download, ExternalLink, AlertTriangle, ChevronDown, Loader2, Search, Fi
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useRegulations } from "./lib/hooks/useRegulations"
 import { Regulation } from "./lib/types/types"
+import { downloadFile } from "@/lib/utils/fileDownload"
 
 export default function InstructorRegulationsPage() {
   usePageTitle('Quy chế / Quy định');
@@ -12,23 +13,6 @@ export default function InstructorRegulationsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const { regulations, loading, error, refetch } = useRegulations()
 
-  const handleDownload = async (fileUrl: string, fileName: string) => {
-    try {
-      const response = await fetch(fileUrl)
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch {
-      // Fallback: mở trong tab mới
-      window.open(fileUrl, '_blank')
-    }
-  }
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id)
@@ -131,7 +115,6 @@ export default function InstructorRegulationsPage() {
               regulation={regulation}
               isExpanded={expandedId === regulation.id}
               onToggle={() => toggleExpand(regulation.id)}
-              onDownload={handleDownload}
             />
           ))
         )}
@@ -144,10 +127,9 @@ interface RegulationCardProps {
   regulation: Regulation
   isExpanded: boolean
   onToggle: () => void
-  onDownload: (fileUrl: string, fileName: string) => void
 }
 
-function RegulationCard({ regulation, isExpanded, onToggle, onDownload }: RegulationCardProps) {
+function RegulationCard({ regulation, isExpanded, onToggle }: RegulationCardProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       {/* Card Header - Always Visible */}
@@ -190,7 +172,7 @@ function RegulationCard({ regulation, isExpanded, onToggle, onDownload }: Regula
             
             <div className="flex flex-col sm:flex-row gap-2">
               <button
-                onClick={() => onDownload(regulation.fileUrl, regulation.fileName)}
+                onClick={() => downloadFile(regulation.fileUrl, regulation.fileName)}
                 className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
               >
                 <Download className="w-4 h-4" />

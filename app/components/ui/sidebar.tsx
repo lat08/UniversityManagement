@@ -75,7 +75,6 @@ function getMenuSections(variant: Variant): MenuSection[] {
         title: "SINH VIÊN",
         items: [
           { icon: Users, label: "Hồ sơ sinh viên", href: "/admin/student-profile" },
-          { icon: FileCheck, label: "Duyệt học bổng", href: "/admin/scholarships" },
           { icon: DollarSign, label: "Học phí sinh viên", href: "/admin/tuition" },
         ],
       },

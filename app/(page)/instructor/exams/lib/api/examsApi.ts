@@ -42,7 +42,6 @@ export const examsApi = {
       const response = await api.get<GetExamEntriesResponse>(url);
       return response.data;
     } catch (err) {
-      console.error("[examsApi] ❌ Error fetching exam entries:", err);
       throw err;
     }
   },
@@ -59,7 +58,6 @@ export const examsApi = {
       );
       return response.data;
     } catch (err) {
-      console.error("[examsApi] ❌ Error fetching exam entry detail:", err);
       throw err;
     }
   },
@@ -90,7 +88,6 @@ export const examsApi = {
       );
       return response.data;
     } catch (err) {
-      console.error("[examsApi] ❌ Error uploading exam entry:", err);
       throw err;
     }
   },
@@ -132,7 +129,6 @@ export const examsApi = {
       );
       return response.data;
     } catch (err) {
-      console.error("[examsApi] ❌ Error updating exam entry:", err);
       throw err;
     }
   },
@@ -156,7 +152,6 @@ export const examsApi = {
       );
       return response.data;
     } catch (err) {
-      console.error("[examsApi] ❌ Error downloading exam file:", err);
       throw err;
     }
   },

@@ -45,7 +45,6 @@ export function NotificationsContent() {
         })
       }
     } catch (err) {
-      console.error("Error fetching unread counts:", err)
     }
   }
 
@@ -124,7 +123,6 @@ export function NotificationsContent() {
         fetchUnreadCounts()
       }
     } catch (err) {
-      console.error("Error fetching notification detail:", err)
     }
   }
 
@@ -141,7 +139,6 @@ export function NotificationsContent() {
         fetchUnreadCounts()
       }
     } catch (err) {
-      console.error("Error marking all as read:", err)
     } finally {
       setMarkingAllAsRead(false)
     }

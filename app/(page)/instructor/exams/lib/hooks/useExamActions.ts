@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { examsApi } from '../api/examsApi';
 import { UploadExamRequest, UpdateExamRequest } from '../types';
+import { downloadFileBlob } from '@/lib/utils/fileDownload';
 import toast from 'react-hot-toast';
 
 export const useExamActions = (onSuccess?: () => void) => {
@@ -64,17 +65,7 @@ export const useExamActions = (onSuccess?: () => void) => {
   ) => {
     try {
       const blob = await examsApi.downloadExamFile(examEntryId, fileType);
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName || `exam_${fileType}_${examEntryId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
+      downloadFileBlob(blob, fileName || `exam_${fileType}_${examEntryId}.pdf`);
       toast.success('Tải xuống thành công!');
       return true;
     } catch (err: any) {

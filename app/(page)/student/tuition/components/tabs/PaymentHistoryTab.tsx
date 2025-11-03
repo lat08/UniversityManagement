@@ -19,13 +19,9 @@ export default function PaymentHistoryTab({
   const {
     searchTerm,
     setSearchTerm,
-    isSemesterOpen,
-    setIsSemesterOpen,
-    selectedSemester,
-    setSelectedSemester,
     handleExportPayment,
-    filteredPayments, // Lấy dữ liệu đã lọc từ hook
-  } = usePaymentHistoryLogic(payments, setIsLoading); // TRUYỀN: Truyền dữ liệu payments vào hook
+    filteredPayments,
+  } = usePaymentHistoryLogic(payments, setIsLoading);
 
   return (
     <div className="space-y-4">

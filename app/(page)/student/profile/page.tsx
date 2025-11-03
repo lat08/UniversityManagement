@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
 import { Input } from "@/app/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
+import { Tabs } from "@/app/components/ui/tabs"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { Eye, EyeOff, Loader2, XCircle, AlertCircle } from "lucide-react"
 import { useProfile } from "./lib/hooks/useProfile"
@@ -115,49 +116,15 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="overflow-hidden">
-        <div className="flex w-full border border-gray-200 rounded-lg bg-gray-50 relative">
-          {/* Active tab background slider */}
-          <div 
-            className="absolute top-0 bottom-0 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-0"
-            style={{
-              width: '50%',
-              left: activeTab === "info" ? '0%' : '50%',
-              transform: 'translateX(0)',
-              backgroundColor: '#0053AD'
-            }}
-          />
-          
-          <div className="flex-1 relative z-10">
-            <button
-              onClick={() => setActiveTab("info")}
-              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
-                activeTab === "info"
-                  ? "text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Thông tin cá nhân
-            </button>
-            
-            {activeTab !== "info" && (
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-6 bg-gray-200 transition-opacity duration-300"></div>
-            )}
-          </div>
-          
-          <div className="flex-1 relative z-10">
-            <button
-              onClick={() => setActiveTab("password")}
-              className={`w-full cursor-pointer px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-semibold flex items-center justify-center transition-colors ${
-                activeTab === "password"
-                  ? "text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Đổi mật khẩu
-            </button>
-          </div>
-        </div>
+      <div className="mb-6">
+        <Tabs
+          items={[
+            { key: 'info', label: 'Thông tin cá nhân' },
+            { key: 'password', label: 'Đổi mật khẩu' },
+          ]}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       <Card className="shadow-sm border border-gray-200">

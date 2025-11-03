@@ -72,14 +72,12 @@ const InstructorGradesPage = () => {
   };
 
   const handleSubmitApproval = () => {
-    console.log('Submitting grades for approval...');
     setIsLocked(true);
     setIsModalOpen(false);
     // Here you would call the API to submit grades
   };
 
   const handleExportExcel = () => {
-    console.log('Exporting to Excel...');
     // Here you would implement Excel export functionality
   };
 

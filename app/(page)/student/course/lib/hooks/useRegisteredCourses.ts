@@ -15,7 +15,6 @@ export const useRegisteredCourses = () => {
       const data = await coursesApi.getRegistered();
       setCourses(data);
     } catch (err: unknown) {
-      console.error("Lỗi khi lấy danh sách khóa học đã đăng ký:", err);
       setError("Không thể tải danh sách khóa học đã đăng ký");
       setCourses([]);
     } finally {

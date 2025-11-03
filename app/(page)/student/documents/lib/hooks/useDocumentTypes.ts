@@ -32,7 +32,6 @@ export const useDocumentTypes = (): UseDocumentTypesReturn => {
         setError(response.message || 'Không thể tải danh sách loại tài liệu');
       }
     } catch (err) {
-      console.error('[useDocumentTypes] Error:', err);
       const axiosErr = err as AxiosError<{ message?: string }>;
       setError(
         axiosErr.response?.data?.message || 

@@ -2,6 +2,7 @@
 
 import { CreditCard } from "lucide-react";
 import { Insurance } from "../../lib/types/types";
+import { formatCurrency } from "@/lib/utils/format";
 
 interface InsuranceSummaryProps {
   selectedItems: Insurance[];
@@ -14,10 +15,6 @@ export default function InsuranceSummary({ selectedItems, onPayment }: Insurance
   }
 
   const totalAmount = selectedItems.reduce((sum, item) => sum + item.healthInsuranceFee, 0);
-
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString('vi-VN')} đ`;
-  };
 
   return (
     <div className="space-y-4">

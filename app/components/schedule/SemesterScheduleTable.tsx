@@ -1,0 +1,202 @@
+"use client"
+
+import { cn } from "@/lib/utils/utils"
+
+interface SemesterCourse {
+  subjectId?: string
+  subjectCode: string
+  subjectName: string
+  courseGroup?: string | null
+  credits?: number
+  classCode?: string | null
+  dayOfWeek: string | number
+  startPeriod: number
+  numberOfPeriods?: number
+  roomCode?: string | null
+  instructorName?: string | null
+  scheduleStartDate?: string | null
+  scheduleEndDate?: string | null
+}
+
+interface SemesterScheduleTableProps {
+  scheduleData: SemesterCourse[]
+  isLoading: boolean
+  showCredits?: boolean
+  showClass?: boolean
+  showInstructor?: boolean
+}
+
+export function SemesterScheduleTable({
+  scheduleData,
+  isLoading,
+  showCredits = true,
+  showClass = true,
+  showInstructor = true,
+}: SemesterScheduleTableProps) {
+  const getColumns = () => {
+    const baseColumns = [
+      { key: 'subjectCode', label: showInstructor ? 'Mã MH' : 'Mã môn', className: '' },
+      { key: 'subjectName', label: 'Tên môn học', className: '' },
+      { key: 'courseGroup', label: 'Nhóm tổ', className: 'text-center' },
+    ]
+
+    if (showCredits) {
+      baseColumns.push({ key: 'credits', label: 'Số tín chỉ', className: 'text-center' })
+    }
+
+    if (showClass) {
+      baseColumns.push({ key: 'classCode', label: 'Lớp', className: 'text-center' })
+    }
+
+    baseColumns.push(
+      { key: 'dayOfWeek', label: 'Thứ', className: 'text-center' },
+      { key: 'startPeriod', label: showInstructor ? 'Tiết bắt đầu' : 'Tiết', className: 'text-center' },
+    )
+
+    if (showInstructor) {
+      baseColumns.push({ key: 'numberOfPeriods', label: 'Số tiết', className: 'text-center' })
+    }
+
+    baseColumns.push({ key: 'roomCode', label: 'Phòng', className: 'text-center' })
+
+    if (showInstructor) {
+      baseColumns.push({ key: 'instructorName', label: 'Giảng viên', className: '' })
+    }
+
+    baseColumns.push({ key: 'schedule', label: 'Thời gian học', className: 'text-center' })
+
+    return baseColumns
+  }
+
+  const columns = getColumns()
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div>
+        <table className="w-full divide-y divide-gray-200 border border-gray-300">
+          <thead className="bg-[var(--primary)]">
+            <tr>
+              {columns.map((column, index) => (
+                <th
+                  key={column.key}
+                  className={cn(
+                    "px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider",
+                    index < columns.length - 1 && "border-r border-white",
+                    column.className
+                  )}
+                >
+                  {column.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {isLoading ? (
+              <tr>
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
+                  Đang tải dữ liệu...
+                </td>
+              </tr>
+            ) : scheduleData.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
+                  Không có dữ liệu thời khóa biểu
+                </td>
+              </tr>
+            ) : (
+              scheduleData.map((course, index) => {
+                let periodDisplay: string
+                if (showInstructor) {
+                  periodDisplay = String(course.startPeriod || '-')
+                } else {
+                  const endPeriod = course.startPeriod + (course.numberOfPeriods || 1) - 1
+                  periodDisplay = course.numberOfPeriods && course.numberOfPeriods > 1
+                    ? `${course.startPeriod}-${endPeriod}`
+                    : String(course.startPeriod)
+                }
+
+                const startDate = course.scheduleStartDate
+                  ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                  : ''
+                const endDate = course.scheduleEndDate
+                  ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                  : ''
+                const timeDisplay = startDate && endDate
+                  ? `${startDate} đến ${endDate}`
+                  : (startDate || endDate || '-')
+
+                return (
+                  <tr
+                    key={`${course.subjectId || course.subjectCode}-${course.startPeriod}-${course.dayOfWeek}-${index}`}
+                    className={cn(
+                      "hover:bg-[var(--primary-light)] transition-colors border-b border-gray-200",
+                      index % 2 === 0 ? "bg-white" : "bg-[var(--bg-secondary)]"
+                    )}
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                      {course.subjectCode}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                      {course.subjectName}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                      {course.courseGroup || '-'}
+                    </td>
+                    {showCredits && (
+                      <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                        {course.credits || '-'}
+                      </td>
+                    )}
+                    {showClass && (
+                      <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                        {course.classCode || '-'}
+                      </td>
+                    )}
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                      {typeof course.dayOfWeek === 'number' ? String(course.dayOfWeek) : course.dayOfWeek}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                      {periodDisplay}
+                    </td>
+                    {showInstructor && (
+                      <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                        {course.numberOfPeriods || '-'}
+                      </td>
+                    )}
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
+                      {course.roomCode || '-'}
+                    </td>
+                    {showInstructor && (
+                      <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                        {course.instructorName || '-'}
+                      </td>
+                    )}
+                    <td className="px-4 py-3 text-sm text-center text-gray-900">
+                      {showInstructor ? (
+                        <div>
+                          <div>
+                            {course.scheduleStartDate
+                              ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN')
+                              : '-'} đến
+                          </div>
+                          <div>
+                            {course.scheduleEndDate
+                              ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN')
+                              : '-'}
+                          </div>
+                        </div>
+                      ) : (
+                        timeDisplay
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+

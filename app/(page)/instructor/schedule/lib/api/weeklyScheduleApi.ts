@@ -3,8 +3,6 @@ import {
   InstructorWeeklyScheduleResponse,
   InstructorWeeklyScheduleItem,
   InstructorWeeklyScheduleApiItem,
-  SemestersResponse, 
-  SubjectsResponse,
   WeekResponse 
 } from "../types/weeklyTypes"
 
@@ -69,17 +67,6 @@ export const instructorWeeklyScheduleApi = {
     }
   },
 
-  // Lấy danh sách học kỳ
-  getSemesters: async (): Promise<SemestersResponse> => {
-    const response = await api.get('/v1/common/semesters')
-    return response.data
-  },
-
-  // Lấy danh sách môn học của giảng viên
-  getSubjects: async (): Promise<SubjectsResponse> => {
-    const response = await api.get('/v1/common/subjects')
-    return response.data
-  },
 
   getWeeks: async (semesterId: string): Promise<WeekResponse> => {
     const response = await api.get(`/v1/enrollments/semesters/${semesterId}/weeks`)

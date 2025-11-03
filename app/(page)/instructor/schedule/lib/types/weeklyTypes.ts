@@ -42,36 +42,9 @@ export interface Week {
   endDate: string
 }
 
-export interface Semester {
-  semesterId: string
-  semesterName: string
-  semesterType: string
-  startDate: string
-  endDate: string
-  status: string
-}
-
-export interface Subject {
-  subjectId: string
-  subjectCode: string
-  subjectName: string
-}
-
 export interface InstructorWeeklyScheduleResponse {
   success: boolean
-  data: InstructorWeeklyScheduleApiItem[]  // API returns ApiItem format
-  message?: string
-}
-
-export interface SemestersResponse {
-  success: boolean
-  data: Semester[]
-  message?: string
-}
-
-export interface SubjectsResponse {
-  success: boolean
-  data: Subject[]
+  data: InstructorWeeklyScheduleApiItem[]
   message?: string
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ChevronDown } from 'lucide-react'
+import { Dropdown } from '@/app/components/ui'
 
 interface ProfileFieldProps {
   label: string
@@ -32,31 +32,14 @@ export const ProfileField: React.FC<ProfileFieldProps> = ({
         {label}
       </label>
       
-      {type === 'select' && editable ? (
-        <div className="relative">
-          <select
-            value={value}
-            onChange={handleChange}
-            className="w-full px-4 py-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          >
-            {options.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-        </div>
-      ) : type === 'select' && !editable ? (
-        <div className="relative">
-          <input
-            type="text"
-            value={value}
-            disabled
-            className="w-full px-4 py-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed"
-          />
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-        </div>
+      {type === 'select' ? (
+        <Dropdown
+          options={options}
+          value={value}
+          placeholder={placeholder}
+          onChange={onChange}
+          disabled={!editable}
+        />
       ) : (
         <input
           type={type === 'date' ? 'text' : type}

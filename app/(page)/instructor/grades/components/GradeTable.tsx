@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
 import { StudentGrade } from '../lib/types/types';
+import { Table, type TableColumn } from '@/app/components/ui/table';
 
 interface GradeTableProps {
   students: StudentGrade[];
@@ -103,74 +104,58 @@ const GradeTable: React.FC<GradeTableProps> = ({ students, isLocked, onGradeChan
     );
   };
 
+  const columns: TableColumn<StudentGrade>[] = [
+    { key: 'studentCode', label: 'MSSV', align: 'left' },
+    { key: 'fullName', label: 'Họ và tên', align: 'left' },
+    { key: 'className', label: 'Khóa', align: 'center' },
+    { key: 'classCode', label: 'Lớp', align: 'center' },
+    { key: 'attendanceScore', label: 'Chuyên cần (20%)', align: 'center' },
+    { key: 'midtermScore', label: 'Giữa kỳ (30%)', align: 'center' },
+    { key: 'finalScore', label: 'Cuối kỳ (50%)', align: 'center' },
+    { key: 'average', label: 'Trung bình', align: 'center' },
+  ];
+
+  const renderStudentRow = (student: StudentGrade) => {
+    const average = calculateAverage(student);
+    return (
+      <>
+        <td className="px-6 py-4 text-sm text-gray-900">
+          {student.studentCode}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-900">
+          {student.fullName}
+        </td>
+        <td className="px-6 py-4 text-sm text-center text-gray-600">
+          {student.className}
+        </td>
+        <td className="px-6 py-4 text-sm text-center text-gray-600">
+          {student.classCode}
+        </td>
+        <td className="px-6 py-4 text-sm text-center text-gray-900">
+          {renderEditableCell(student, 'attendanceScore', student.attendanceScore)}
+        </td>
+        <td className="px-6 py-4 text-sm text-center text-gray-900">
+          {renderEditableCell(student, 'midtermScore', student.midtermScore)}
+        </td>
+        <td className="px-6 py-4 text-sm text-center text-gray-900">
+          {renderEditableCell(student, 'finalScore', student.finalScore)}
+        </td>
+        <td className="px-6 py-4 text-sm text-center">
+          <span className={`font-medium ${average !== null && average >= 5 ? 'text-green-600' : average !== null ? 'text-red-600' : 'text-gray-400'}`}>
+            {average !== null ? average.toFixed(1) : '-'}
+          </span>
+        </td>
+      </>
+    );
+  };
+
   return (
-    <div className="overflow-x-auto border border-gray-200 rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-blue-600">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-              MSSV
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-              Họ và tên
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Khóa
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Lớp
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Chuyên cần<br />(20%)
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Giữa kỳ<br />(30%)
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Cuối kỳ<br />(50%)
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
-              Trung bình
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {students.map((student) => {
-            const average = calculateAverage(student);
-            return (
-              <tr key={student.studentId} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {student.studentCode}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {student.fullName}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-600">
-                  {student.className}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-600">
-                  {student.classCode}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-900">
-                  {renderEditableCell(student, 'attendanceScore', student.attendanceScore)}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-900">
-                  {renderEditableCell(student, 'midtermScore', student.midtermScore)}
-                </td>
-                <td className="px-6 py-4 text-sm text-center text-gray-900">
-                  {renderEditableCell(student, 'finalScore', student.finalScore)}
-                </td>
-                <td className="px-6 py-4 text-sm text-center">
-                  <span className={`font-medium ${average !== null && average >= 5 ? 'text-green-600' : average !== null ? 'text-red-600' : 'text-gray-400'}`}>
-                    {average !== null ? average.toFixed(1) : '-'}
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <Table
+      columns={columns}
+      data={students}
+      renderRow={renderStudentRow}
+      emptyMessage="Không có sinh viên nào"
+    />
   );
 };
 

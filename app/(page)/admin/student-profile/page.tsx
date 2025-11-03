@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, Plus, Search, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
+import { Download, Plus, Search, TrendingUp, TrendingDown, Eye, Edit, Trash2 } from 'lucide-react';
+import { Dropdown } from '@/app/components/ui/dropdown';
+import { Table } from '@/app/components/ui/table';
+import { Pagination } from '@/app/components/ui/pagination';
 import AddStudentModal from './components/AddStudentModal';
 import ImportExcelModal from './components/ImportExcelModal';
 import ExportStudentModal from './components/ExportStudentModal';
 import ConfirmDeleteStudentModal from './components/ConfirmDeleteStudentModal';
-import StudentTableRow from './components/StudentTableRow';
 import { studentsApi } from './lib/api/studentsApi';
 import { toast } from 'react-hot-toast';
-import { Student, AcademicYear, Department, STATUS_OPTIONS } from './lib/types/types';
+import { Student, AcademicYear, Department, STATUS_OPTIONS, getStatusDisplay } from './lib/types/types';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
 
 const STAT_CARDS = [
@@ -24,8 +26,6 @@ export default function StudentProfilePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [isClassOpen, setIsClassOpen] = useState(false);
-  const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -54,7 +54,6 @@ export default function StudentProfilePage() {
     onLeave: 0,
   });
   const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>('');
-  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
 
   // Priority 1: Fetch dropdowns in parallel first for better UX
   useEffect(() => {
@@ -82,20 +81,6 @@ export default function StudentProfilePage() {
     fetchStudents();
   }, [currentPage, selectedDepartmentId, selectedAcademicYearId, selectedStatus, searchKeyword]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      
-      if (!target.closest('[data-dropdown]')) {
-        setIsDepartmentOpen(false);
-        setIsClassOpen(false);
-        setIsStatusOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const fetchDepartments = async () => {
     try {
@@ -149,27 +134,6 @@ export default function StudentProfilePage() {
     }
   };
   
-  // Memoized pagination calculation
-  const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 5;
-    
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, '...', totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-      }
-    }
-    
-    return pages;
-  }, [currentPage, totalPages]);
 
   // Memoized stat cards values
   const statValues = useMemo(() => ({
@@ -181,7 +145,6 @@ export default function StudentProfilePage() {
 
   // Prefetch handler for hover
   const handlePrefetchStudent = useCallback((studentId: string) => {
-    // Prefetch the student detail page
     router.prefetch(`/admin/student-profile/${studentId}`);
   }, [router]);
 
@@ -191,6 +154,74 @@ export default function StudentProfilePage() {
     setDeletingStudentName(studentName);
     setIsDeleteModalOpen(true);
   }, []);
+
+  // Table columns
+  const tableColumns = [
+    { key: 'studentCode', label: 'MSSV', align: 'left' as const },
+    { key: 'fullName', label: 'Họ và tên', align: 'left' as const },
+    { key: 'departmentName', label: 'Ngành học', align: 'left' as const },
+    { key: 'academicYear', label: 'Khóa', align: 'left' as const },
+    { key: 'email', label: 'Email', align: 'left' as const },
+    { key: 'status', label: 'Trạng thái', align: 'center' as const },
+    { key: 'actions', label: 'Thao tác', align: 'center' as const },
+  ];
+
+  // Table row renderer
+  const renderStudentRow = useCallback((student: Student, index: number) => {
+    const statusDisplay = getStatusDisplay(student.enrollmentStatus);
+    return (
+      <>
+        <td className="px-6 py-4 text-sm text-gray-900">
+          {student.studentCode}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-900">
+          {student.fullName}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-600">
+          {student.departmentName}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-600">
+          {student.academicYear}
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-600">
+          {student.email}
+        </td>
+        <td className="px-6 py-4">
+          <div className="flex justify-center">
+            <span className={`w-full text-center px-3 py-1 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
+              {statusDisplay.label}
+            </span>
+          </div>
+        </td>
+        <td className="px-6 py-4">
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => router.push(`/admin/student-profile/${student.studentId}`)}
+              onMouseEnter={() => handlePrefetchStudent(student.studentId)}
+              className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+              title="Xem chi tiết"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => router.push(`/admin/student-profile/${student.studentId}/edit`)}
+              className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors cursor-pointer"
+              title="Chỉnh sửa"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleDeleteClick(student.studentId, student.fullName)}
+              className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+              title="Xóa"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </>
+    );
+  }, [router, handlePrefetchStudent, handleDeleteClick]);
 
   const handleDeleteConfirm = async () => {
     if (!deletingStudentId) return;
@@ -303,219 +334,78 @@ export default function StudentProfilePage() {
             </div>
 
             {/* Department Dropdown */}
-            <div className="relative w-64" data-dropdown="department">
-              <button
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                onClick={() => {
-                  setIsDepartmentOpen(!isDepartmentOpen);
-                  setIsClassOpen(false);
-                  setIsStatusOpen(false);
+            <div className="w-64">
+              <Dropdown
+                options={[
+                  { value: '', label: 'Tất cả chuyên ngành' },
+                  ...departments.map(d => ({ value: d.departmentId, label: d.departmentName }))
+                ]}
+                value={selectedDepartmentId || ''}
+                placeholder="Tất cả chuyên ngành"
+                onChange={(value) => {
+                  setSelectedDepartmentId(value);
+                  setCurrentPage(1);
                 }}
-              >
-                <span className="text-sm text-gray-900">
-                  {selectedDepartmentId 
-                    ? departments.find(d => d.departmentId === selectedDepartmentId)?.departmentName || 'Tất cả chuyên ngành'
-                    : 'Tất cả chuyên ngành'
-                  }
-                </span>
-                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-              </button>
-              {isDepartmentOpen && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  <button
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
-                    onClick={() => {
-                      setSelectedDepartmentId('');
-                      setIsDepartmentOpen(false);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    Tất cả chuyên ngành
-                  </button>
-                  {departments.map((department) => (
-                    <button
-                      key={department.departmentId}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
-                      onClick={() => {
-                        setSelectedDepartmentId(department.departmentId);
-                        setIsDepartmentOpen(false);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {department.departmentName}
-                    </button>
-                  ))}
-                </div>
-              )}
+              />
             </div>
 
             {/* Academic Year Dropdown */}
-            <div className="relative w-40" data-dropdown="academicYear">
-              <button
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                onClick={() => {
-                  setIsClassOpen(!isClassOpen);
-                  setIsDepartmentOpen(false);
-                  setIsStatusOpen(false);
+            <div className="w-40">
+              <Dropdown
+                options={[
+                  { value: '', label: 'Tất cả khóa' },
+                  ...academicYears.map(y => ({ value: y.academicYearId, label: y.yearCode }))
+                ]}
+                value={selectedAcademicYearId || ''}
+                placeholder="Tất cả khóa"
+                onChange={(value) => {
+                  setSelectedAcademicYearId(value);
+                  setCurrentPage(1);
                 }}
-              >
-                <span className="text-sm text-gray-900">
-                  {selectedAcademicYearId
-                    ? academicYears.find(y => y.academicYearId === selectedAcademicYearId)?.yearCode || 'Tất cả khóa'
-                    : 'Tất cả khóa'
-                  }
-                </span>
-                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-              </button>
-              {isClassOpen && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  <button
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
-                    onClick={() => {
-                      setSelectedAcademicYearId('');
-                      setIsClassOpen(false);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    Tất cả khóa
-                  </button>
-                  {academicYears.map((year) => (
-                    <button
-                      key={year.academicYearId}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
-                      onClick={() => {
-                        setSelectedAcademicYearId(year.academicYearId);
-                        setIsClassOpen(false);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {year.yearCode}
-                    </button>
-                  ))}
-                </div>
-              )}
+              />
             </div>
 
             {/* Status Dropdown */}
-            <div className="relative w-52" data-dropdown="status">
-              <button
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors"
-                onClick={() => {
-                  setIsStatusOpen(!isStatusOpen);
-                  setIsDepartmentOpen(false);
-                  setIsClassOpen(false);
+            <div className="w-52">
+              <Dropdown
+                options={STATUS_OPTIONS}
+                value={selectedStatus || ''}
+                placeholder="Tất cả"
+                onChange={(value) => {
+                  setSelectedStatus(value);
+                  setCurrentPage(1);
                 }}
-              >
-                <span className="text-sm text-gray-900">
-                  {STATUS_OPTIONS.find(s => s.value === selectedStatus)?.label || 'Tất cả'}
-                </span>
-                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-              </button>
-              {isStatusOpen && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                  {STATUS_OPTIONS.map((status) => (
-                    <button
-                      key={status.value}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => {
-                        setSelectedStatus(status.value);
-                        setIsStatusOpen(false);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {status.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              />
             </div>
           </div>
 
           {/* Table */}
-          <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-[#0053AD] text-white text-sm">
-                    <th className="px-6 py-4 text-left font-semibold">MSSV</th>
-                    <th className="px-6 py-4 text-left font-semibold">Họ và tên</th>
-                    <th className="px-6 py-4 text-left font-semibold">Ngành học</th>
-                    <th className="px-6 py-4 text-left font-semibold">Khóa</th>
-                    <th className="px-6 py-4 text-left font-semibold">Email</th>
-                    <th className="px-6 py-4 text-center font-semibold">Trạng thái</th>
-                    <th className="px-6 py-4 text-center font-semibold">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={7} className="p-0">
-                        <TableSkeleton />
-                      </td>
-                    </tr>
-                  ) : students.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                        Không có dữ liệu
-                      </td>
-                    </tr>
-                  ) : (
-                    students.map((student) => (
-                      <StudentTableRow
-                        key={student.studentId}
-                        student={student}
-                        onDelete={handleDeleteClick}
-                        onPrefetch={() => handlePrefetchStudent(student.studentId)}
-                      />
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <div className="mt-6">
+            <Table
+              columns={tableColumns}
+              data={students}
+              renderRow={renderStudentRow}
+              isLoading={loading}
+              loadingComponent={
+                <tr>
+                  <td colSpan={7} className="p-0">
+                    <TableSkeleton />
+                  </td>
+                </tr>
+              }
+              emptyMessage="Không có dữ liệu"
+            />
           </div>
         </div>
 
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            Hiển thị <span className="font-medium">{(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalCount)}</span> trong tổng số{' '}
-            <span className="font-medium">{totalCount}</span> sinh viên
-          </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Trước
-            </button>
-            {pageNumbers.map((page, index) => 
-              typeof page === 'number' ? (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 text-sm rounded cursor-pointer ${
-                    currentPage === page
-                      ? 'bg-[#0053AD] text-white'
-                      : 'border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              ) : (
-                <span key={index} className="px-3 py-1 text-sm text-gray-400">
-                  {page}
-                </span>
-              )
-            )}
-            <button 
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
+        <div className="px-6 py-4 border-t border-gray-200">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
 

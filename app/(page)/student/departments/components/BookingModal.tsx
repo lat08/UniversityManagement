@@ -6,7 +6,8 @@ import { useCreateBooking } from '../lib/hooks/useRoomBooking';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
 import { Card, CardContent } from '@/app/components/ui/card';
-import { Users, MapPin, Monitor, X, Calendar, Clock, ChevronDown } from 'lucide-react';
+import { Users, MapPin, Monitor, X, Calendar, Clock } from 'lucide-react';
+import { Dropdown } from '@/app/components/ui';
 import { format, parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -99,14 +100,10 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [endTime, setEndTime] = useState<string>('');
   const [purpose, setPurpose] = useState<string>('');
   const [studentCount, setStudentCount] = useState<number>(1);
-  const [isStartTimeOpen, setIsStartTimeOpen] = useState<boolean>(false);
-  const [isEndTimeOpen, setIsEndTimeOpen] = useState<boolean>(false);
   
   const calendarRef = useRef<HTMLDivElement>(null);
-  const startTimeRef = useRef<HTMLDivElement>(null);
-  const endTimeRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns when clicking outside
+  // Close calendar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -114,22 +111,16 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       if (calendarRef.current && !calendarRef.current.contains(target)) {
         setShowCalendar(false);
       }
-      if (startTimeRef.current && !startTimeRef.current.contains(target)) {
-        setIsStartTimeOpen(false);
-      }
-      if (endTimeRef.current && !endTimeRef.current.contains(target)) {
-        setIsEndTimeOpen(false);
-      }
     };
 
-    if (showCalendar || isStartTimeOpen || isEndTimeOpen) {
+    if (showCalendar) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showCalendar, isStartTimeOpen, isEndTimeOpen]);
+  }, [showCalendar]);
 
   // Close modal when pressing ESC
   useEffect(() => {
@@ -246,18 +237,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     });
   };
 
-  const handleStartTimeChange = (value: string) => {
-    setStartTime(value);
-    setIsStartTimeOpen(false);
-    // Reset end time when start time changes
-    setEndTime('');
-    setIsEndTimeOpen(false);
-  };
-
-  const handleEndTimeChange = (value: string) => {
-    setEndTime(value);
-    setIsEndTimeOpen(false);
-  };
 
   const handleDateInputChange = (value: string) => {
     setDateInputValue(value);
@@ -470,47 +449,27 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
           {/* Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Start Time */}
-            <div className="relative" ref={startTimeRef}>
+            <div>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Thời gian bắt đầu
               </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  if (bookingDate && generateTimeOptions(bookingDate).length > 0) {
-                    setIsStartTimeOpen(!isStartTimeOpen);
-                    setIsEndTimeOpen(false);
-                  }
-                }}
-                disabled={!bookingDate}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="text-sm text-gray-900">
-                  {!bookingDate 
+              <Dropdown
+                options={bookingDate ? generateTimeOptions(bookingDate) : []}
+                value={startTime}
+                placeholder={
+                  !bookingDate 
                     ? 'Vui lòng chọn ngày trước' 
                     : generateTimeOptions(bookingDate).length === 0 
                     ? 'Không có thời gian khả dụng cho hôm nay'
-                    : startTime 
-                    ? generateTimeOptions(bookingDate).find(o => o.value === startTime)?.label || 'Chọn thời gian bắt đầu'
-                    : 'Chọn thời gian bắt đầu'}
-                </span>
-                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-              </button>
-              {isStartTimeOpen && bookingDate && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {generateTimeOptions(bookingDate).map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => handleStartTimeChange(option.value)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                    : 'Chọn thời gian bắt đầu'
+                }
+                onChange={(value) => {
+                  setStartTime(value);
+                  setEndTime('');
+                }}
+                disabled={!bookingDate || (bookingDate && generateTimeOptions(bookingDate).length === 0)}
+              />
               {bookingDate && generateTimeOptions(bookingDate).length === 0 && (
                 <p className="text-sm text-amber-600 mt-2">
                   ⚠️ Không còn khung giờ khả dụng cho hôm nay. Vui lòng chọn ngày khác.
@@ -519,43 +478,18 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             </div>
 
             {/* End Time */}
-            <div className="relative" ref={endTimeRef}>
+            <div>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 Thời gian kết thúc
               </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  if (startTime) {
-                    setIsEndTimeOpen(!isEndTimeOpen);
-                    setIsStartTimeOpen(false);
-                  }
-                }}
+              <Dropdown
+                options={startTime ? generateEndTimeOptions(startTime) : []}
+                value={endTime}
+                placeholder="Chọn thời gian kết thúc"
+                onChange={(value) => setEndTime(value)}
                 disabled={!startTime}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="text-sm text-gray-900">
-                  {endTime 
-                    ? generateEndTimeOptions(startTime).find(o => o.value === endTime)?.label || 'Chọn thời gian kết thúc'
-                    : 'Chọn thời gian kết thúc'}
-                </span>
-                <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-              </button>
-              {isEndTimeOpen && startTime && (
-                <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {generateEndTimeOptions(startTime).map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                      onClick={() => handleEndTimeChange(option.value)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              />
             </div>
           </div>
 

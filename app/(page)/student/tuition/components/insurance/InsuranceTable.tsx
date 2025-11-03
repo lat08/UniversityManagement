@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/utils";
 
 import { formatCurrency } from "@/lib/utils/format";
 import { Spinner } from "@/app/components/ui/spinner";
+import { getStatusText, getStatusColor } from "@/lib/utils/statusDisplay";
 
 interface InsuranceTableProps {
   data: Insurance[];
@@ -22,27 +23,6 @@ export default function InsuranceTable({ data, selectedId, onSelectItem, isLoadi
     );
   }
 
-  const getStatusText = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'Đã thanh toán';
-      case 'pending':
-        return 'Đang xử lý';
-      default:
-        return 'Chưa thanh toán';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'text-green-600';
-      case 'pending':
-        return 'text-yellow-600';
-      default:
-        return 'text-red-600';
-    }
-  };
 
   // Thêm giao diện khi không có dữ liệu
   if (!data || data.length === 0) {

@@ -1,17 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ChevronDown } from "lucide-react"
-import { cn } from "@/lib/utils/utils"
+import { Dropdown, DropdownSearch } from "@/app/components/ui"
+import { SemesterScheduleTable } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useSemesterSchedule } from "../lib/hooks/useSemesterSchedule"
 
 export default function SemesterSchedulePage() {
   usePageTitle('TKB theo học kỳ');
-  const [isSemesterOpen, setIsSemesterOpen] = useState(false)
-  const [isViewOpen, setIsViewOpen] = useState(false)
-  const [isSubjectOpen, setIsSubjectOpen] = useState(false)
-  const [subjectSearchTerm, setSubjectSearchTerm] = useState("")
 
   const {
     semesters,
@@ -28,34 +23,20 @@ export default function SemesterSchedulePage() {
     handleExportPDF,
   } = useSemesterSchedule()
 
-  // Filter subjects based on search term
-  const filteredSubjects = subjects.filter(subject => 
-    subject.subjectName.toLowerCase().includes(subjectSearchTerm.toLowerCase()) ||
-    subject.subjectCode.toLowerCase().includes(subjectSearchTerm.toLowerCase())
-  )
+  const semesterOptions = semesters.map(s => ({
+    value: s.semesterId,
+    label: s.semesterName,
+  }))
 
-  // Close dropdowns when clicking outside or on other dropdowns
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      
-      // Check if clicking on any dropdown container
-      const semesterDropdown = target.closest('[data-dropdown="semester"]')
-      const viewDropdown = target.closest('[data-dropdown="view"]')
-      const subjectDropdown = target.closest('[data-dropdown="subject"]')
-      
-      // If clicking outside all dropdowns, close all
-      if (!semesterDropdown && !viewDropdown && !subjectDropdown) {
-        setIsSemesterOpen(false)
-        setIsViewOpen(false)
-        setIsSubjectOpen(false)
-        setSubjectSearchTerm("")
-      }
-    }
+  const viewTypeOptions = [
+    { value: 'personal', label: 'Cá nhân' },
+    { value: 'subject', label: 'Theo môn học' },
+  ]
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  const subjectOptions = subjects.map(s => ({
+    value: s.subjectCode,
+    label: `${s.subjectCode} - ${s.subjectName}`,
+  }))
 
   return (
     <div style={{ minWidth: '1200px' }}>
@@ -77,38 +58,14 @@ export default function SemesterSchedulePage() {
             {/* Filters */}
             <div className="mb-4 flex gap-4 items-stretch w-full">
               {/* Semester Dropdown */}
-              <div className="relative flex-1 dropdown-container" data-dropdown="semester">
-                <button 
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => {
-                    setIsSemesterOpen(!isSemesterOpen)
-                    setIsViewOpen(false)
-                    setIsSubjectOpen(false)
-                    setSubjectSearchTerm("")
-                  }}
+              <div className="flex-1">
+                <Dropdown
+                  options={semesterOptions}
+                  value={selectedSemester?.semesterId || ''}
+                  placeholder="Đang tải..."
+                  onChange={(value) => handleSemesterChange(value)}
                   disabled={isLoading}
-                >
-                  <span className="text-sm text-gray-900">
-                    {selectedSemester?.semesterName || "Đang tải..."}
-                  </span>
-                  <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-                </button>
-                {isSemesterOpen && (
-                  <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {semesters.map((semester) => (
-                      <button
-                        key={semester.semesterId}
-                        className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
-                        onClick={() => {
-                          handleSemesterChange(semester.semesterId)
-                          setIsSemesterOpen(false)
-                        }}
-                      >
-                        {semester.semesterName}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                />
               </div>
 
               {/* Print Button */}
@@ -127,103 +84,27 @@ export default function SemesterSchedulePage() {
             {/* View Type and Subject Filters */}
             <div className="mb-6 flex gap-4 items-stretch w-full mt-2">
               {/* View Type Dropdown */}
-              <div className="relative flex-1 dropdown-container" data-dropdown="view">
-                <button 
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => {
-                    setIsViewOpen(!isViewOpen)
-                    setIsSemesterOpen(false)
-                    setIsSubjectOpen(false)
-                    setSubjectSearchTerm("")
-                  }}
+              <div className="flex-1">
+                <Dropdown
+                  options={viewTypeOptions}
+                  value={viewType || 'personal'}
+                  placeholder="Chọn loại xem"
+                  onChange={(value) => handleViewTypeChange(value as 'personal' | 'subject')}
                   disabled={isLoading}
-                >
-                  <span className="text-sm text-gray-900">
-                    {viewType === "personal" ? "Thời khóa biểu cá nhân" : "Thời khóa biểu theo môn học"}
-                  </span>
-                  <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-                </button>
-                {isViewOpen && (
-                  <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-                    <button
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
-                      onClick={() => {
-                        handleViewTypeChange("personal")
-                        setIsViewOpen(false)
-                      }}
-                    >
-                      Thời khóa biểu cá nhân
-                    </button>
-                    <button
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors last:rounded-b-lg"
-                      onClick={() => {
-                        handleViewTypeChange("subject")
-                        setIsViewOpen(false)
-                      }}
-                    >
-                      Thời khóa biểu theo môn học
-                    </button>
-                  </div>
-                )}
+                />
               </div>
 
               {/* Subject Dropdown or Spacer */}
               {viewType === "subject" ? (
-                <div className="relative flex-1 dropdown-container" data-dropdown="subject">
-                  <button 
-                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors h-full disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => {
-                      setIsSubjectOpen(!isSubjectOpen)
-                      setIsSemesterOpen(false)
-                      setIsViewOpen(false)
-                    }}
+                <div className="flex-1">
+                  <DropdownSearch
+                    options={subjectOptions}
+                    value={selectedSubject?.subjectCode || ''}
+                    placeholder="Chọn môn học"
+                    searchPlaceholder="Tìm kiếm môn học..."
+                    onChange={(value) => handleSubjectChange(value)}
                     disabled={isLoading || subjects.length === 0}
-                  >
-                    <span className="text-sm text-gray-900">
-                      {selectedSubject 
-                        ? `${selectedSubject.subjectCode} - ${selectedSubject.subjectName}`
-                        : "Chọn môn học"}
-                    </span>
-                    <ChevronDown className="w-4 h-4 ml-2 text-gray-700" />
-                  </button>
-                  {isSubjectOpen && (
-                    <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
-                      {/* Search input */}
-                      <div className="p-3 border-b border-gray-200">
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm môn học..."
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          value={subjectSearchTerm}
-                          onChange={(e) => setSubjectSearchTerm(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                      
-                      {/* Subject list */}
-                      <div className="max-h-48 overflow-y-auto">
-                        {filteredSubjects.length > 0 ? (
-                          filteredSubjects.map((subject) => (
-                            <button
-                              key={subject.subjectId}
-                              className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
-                              onClick={() => {
-                                handleSubjectChange(subject.subjectCode)
-                                setIsSubjectOpen(false)
-                                setSubjectSearchTerm("")
-                              }}
-                            >
-                              {subject.subjectCode} - {subject.subjectName}
-                            </button>
-                          ))
-                        ) : (
-                          <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                            Không tìm thấy môn học
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  />
                 </div>
               ) : (
                 <div className="flex-1"></div>
@@ -231,117 +112,13 @@ export default function SemesterSchedulePage() {
             </div>
 
             {/* Schedule Table */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div>
-                <table className="w-full divide-y divide-gray-200 border border-gray-300">
-                  <thead className="bg-[var(--primary)]">
-                    <tr>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Mã MH
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Tên môn học
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Nhóm tổ
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Số tín chỉ
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Lớp
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Thứ
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Tiết bắt đầu
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Số tiết
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Phòng
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider border-r border-white">
-                        Giảng viên
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--primary-foreground)] uppercase tracking-wider">
-                        Thời gian học
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {isLoading ? (
-                      <tr>
-                        <td colSpan={11} className="px-4 py-8 text-center text-gray-500">
-                          Đang tải dữ liệu...
-                        </td>
-                      </tr>
-                    ) : scheduleData.length === 0 ? (
-                      <tr>
-                        <td colSpan={11} className="px-4 py-8 text-center text-gray-500">
-                          Không có dữ liệu thời khóa biểu
-                        </td>
-                      </tr>
-                    ) : (
-                      scheduleData.map((course, index) => (
-                        <tr 
-                          key={`${course.subjectId}-${course.startPeriod}-${course.dayOfWeek}-${index}`}
-                          className={cn(
-                            "hover:bg-[var(--primary-light)] transition-colors border-b border-gray-200",
-                            index % 2 === 0 ? "bg-white" : "bg-[var(--bg-secondary)]"
-                          )}
-                        >
-                          <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
-                            {course.subjectCode}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
-                            {course.subjectName}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.courseGroup || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.credits || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.classCode || "-"}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.dayOfWeek}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.startPeriod || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.numberOfPeriods || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
-                            {course.roomCode || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
-                            {course.instructorName || '-'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-900">
-                            <div>
-                              {course.scheduleStartDate 
-                                ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN')
-                                : '-'} đến
-                            </div>
-                            <div>
-                              {course.scheduleEndDate 
-                                ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN')
-                                : '-'}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-          </div>
+            <SemesterScheduleTable
+              scheduleData={scheduleData}
+              isLoading={isLoading}
+              showCredits={true}
+              showClass={true}
+              showInstructor={true}
+            />
     </div>
   )
 }

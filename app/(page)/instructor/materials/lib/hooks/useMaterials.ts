@@ -53,7 +53,6 @@ export const useMaterials = () => {
         setError(response.message || "Không thể tải danh sách tài liệu")
       }
     } catch (err) {
-      console.error("Error fetching materials:", err)
       setError("Lỗi khi tải danh sách tài liệu")
       setMaterials([])
     } finally {
@@ -70,7 +69,6 @@ export const useMaterials = () => {
         setDocumentTypes(response.data)
       }
     } catch (err) {
-      console.error("Error fetching document types:", err)
     }
   }, [])
 
@@ -90,7 +88,6 @@ export const useMaterials = () => {
         return false
       }
     } catch (err) {
-      console.error("Error uploading material:", err)
       toast.error("Lỗi khi tải lên tài liệu")
       return false
     } finally {
@@ -114,7 +111,6 @@ export const useMaterials = () => {
         return false
       }
     } catch (err) {
-      console.error("Error updating material:", err)
       toast.error("Lỗi khi cập nhật tài liệu")
       return false
     } finally {
@@ -138,7 +134,6 @@ export const useMaterials = () => {
         return false
       }
     } catch (err) {
-      console.error("Error deleting material:", err)
       toast.error("Lỗi khi xóa tài liệu")
       return false
     } finally {

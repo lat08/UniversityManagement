@@ -12,6 +12,7 @@ import {
 import { useExamEntryDetail } from "../lib/hooks/useExamEntries";
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { EXAM_TYPE_LABELS, ENTRY_STATUS_LABELS, ENTRY_STATUS_COLORS } from "../lib/constants";
+import { formatDate } from "@/lib/utils/format";
 
 interface ExamDetailModalProps {
   examEntryId: string | null;
@@ -33,17 +34,6 @@ export function ExamDetailModal({
 
   if (!isOpen || !examEntryId) return null;
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   const handleDownload = async (fileType: 'question' | 'answer') => {
     if (!examEntryId) return;
@@ -188,12 +178,12 @@ export function ExamDetailModal({
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
               <div>
                 <label className="text-sm font-bold text-gray-900">Ngày tạo</label>
-                <p className="text-sm text-gray-900 mt-1">{formatDate(examEntryDetail.createdAt)}</p>
+                <p className="text-sm text-gray-900 mt-1">{examEntryDetail.createdAt ? formatDate(examEntryDetail.createdAt) : 'N/A'}</p>
               </div>
               {examEntryDetail.reviewedAt && (
                 <div>
                   <label className="text-sm font-bold text-gray-900">Ngày duyệt</label>
-                  <p className="text-sm text-gray-900 mt-1">{formatDate(examEntryDetail.reviewedAt)}</p>
+                  <p className="text-sm text-gray-900 mt-1">{examEntryDetail.reviewedAt ? formatDate(examEntryDetail.reviewedAt) : 'N/A'}</p>
                 </div>
               )}
               {examEntryDetail.reviewerName && (
