@@ -3,7 +3,7 @@
 import { ReactNode } from "react"
 import { cn } from "@/lib/utils/utils"
 
-export interface TableColumn<T = any> {
+export interface TableColumn<T = unknown> {
   key: string
   label: string
   className?: string
@@ -11,7 +11,7 @@ export interface TableColumn<T = any> {
   align?: "left" | "center" | "right"
 }
 
-interface TableProps<T = any> {
+interface TableProps<T = unknown> {
   columns: TableColumn<T>[]
   data: T[]
   renderRow: (item: T, index: number) => ReactNode
@@ -24,7 +24,7 @@ interface TableProps<T = any> {
   loadingComponent?: ReactNode
 }
 
-export function Table<T = any>({
+export function Table<T = unknown>({
   columns,
   data,
   renderRow,

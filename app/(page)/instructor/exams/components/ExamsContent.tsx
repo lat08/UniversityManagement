@@ -8,6 +8,7 @@ import { UploadExamModal, type UploadExamFormData } from "./UploadExamModal";
 import { ExamDetailModal } from "./ExamDetailModal";
 import { useExamEntries } from "../lib/hooks/useExamEntries";
 import { useSemesters, useSubjects } from "@/lib/hooks";
+import { UpdateExamRequest } from "../lib/types";
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { Pagination } from "@/app/components/ui/pagination";
@@ -93,7 +94,7 @@ export function ExamsContent() {
 
   const handleUploadSubmit = async (data: UploadExamFormData) => {
     if (selectedExamId) {
-      const updateData: any = {};
+      const updateData: Partial<UpdateExamRequest> = {};
       if (data.durationMinutes) updateData.durationMinutes = data.durationMinutes;
       if (data.description) updateData.description = data.description;
       if (data.questionFile) updateData.questionFile = data.questionFile;

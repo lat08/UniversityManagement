@@ -158,11 +158,11 @@ export default function WeeklySchedulePage() {
   };
 
   // Check if navigation buttons should be disabled
-  const canGoPrevious = selectedWeek && weeks.length > 0 && 
-    weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) > 0;
+  const canGoPrevious = !!(selectedWeek && weeks.length > 0 && 
+    weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) > 0);
   
-  const canGoNext = selectedWeek && weeks.length > 0 && 
-    weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) < weeks.length - 1;
+  const canGoNext = !!(selectedWeek && weeks.length > 0 && 
+    weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) < weeks.length - 1);
 
 
   // Calculate dates for the current week
@@ -269,7 +269,7 @@ export default function WeeklySchedulePage() {
                   name: course.name,
                   code: course.code,
                   room: course.room,
-                  teacher: course.teacher,
+                  teacher: course.teacher || '',
                   courseType: course.courseType || '',
                 }))
               };
@@ -282,7 +282,7 @@ export default function WeeklySchedulePage() {
                   name: course2.name,
                   code: course2.code,
                   room: course2.room,
-                  teacher: course2.teacher,
+                  teacher: course2.teacher || '',
                   courseType: course2.courseType || '',
                 });
               }

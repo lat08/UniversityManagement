@@ -29,7 +29,7 @@ export const useCourseClasses = () => {
         setError('Không thể tải danh sách lớp học phần');
         setCourseClasses([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setCourseClasses([]);
       setLoading(false);
       return;

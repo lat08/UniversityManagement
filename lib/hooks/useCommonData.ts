@@ -32,10 +32,10 @@ export const useSemesters = (): UseCommonDataReturn<Semester> => {
         setError('Không thể tải danh sách học kỳ');
         setData([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách học kỳ.';
       setError(errorMessage);
       setData([]);
@@ -67,10 +67,10 @@ export const useSubjects = (): UseCommonDataReturn<Subject> => {
         setError('Không thể tải danh sách môn học');
         setData([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách môn học.';
       setError(errorMessage);
       setData([]);
@@ -102,10 +102,10 @@ export const useFaculties = (): UseCommonDataReturn<Faculty> => {
         setError('Không thể tải danh sách khoa');
         setData([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách khoa.';
       setError(errorMessage);
       setData([]);
@@ -137,10 +137,10 @@ export const useDepartments = (params?: { facultyId?: string }): UseCommonDataRe
         setError('Không thể tải danh sách bộ môn');
         setData([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách bộ môn.';
       setError(errorMessage);
       setData([]);
@@ -172,10 +172,10 @@ export const useClasses = (params?: { departmentId?: string; facultyId?: string 
         setError('Không thể tải danh sách lớp học');
         setData([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách lớp học.';
       setError(errorMessage);
       setData([]);
@@ -207,10 +207,10 @@ export const useAcademicYears = (params?: { count?: number }): UseCommonDataRetu
         setError('Không thể tải danh sách năm học');
         setData([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách năm học.';
       setError(errorMessage);
       setData([]);

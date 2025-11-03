@@ -37,7 +37,7 @@ export const ProfileField: React.FC<ProfileFieldProps> = ({
           options={options}
           value={value}
           placeholder={placeholder}
-          onChange={onChange}
+          onChange={onChange || (() => {})}
           disabled={!editable}
         />
       ) : (

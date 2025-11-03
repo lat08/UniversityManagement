@@ -105,7 +105,7 @@ export default function MaterialsPage() {
   const handleDownload = async (id: string) => {
     const doc = allDocuments.find((d) => d.id === id)
     if (doc?.downloadUrl) {
-      await downloadFile(doc.downloadUrl, doc.title || doc.fileName || 'document')
+      await downloadFile(doc.downloadUrl, doc.title || 'document')
     }
   }
 

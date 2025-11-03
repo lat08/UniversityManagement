@@ -55,12 +55,12 @@ export interface ApiResponse<T> {
   errors?: string[] | null;
 }
 
-export interface GetSemestersResponse extends ApiResponse<Semester[]> {}
-export interface GetSubjectsResponse extends ApiResponse<Subject[]> {}
-export interface GetFacultiesResponse extends ApiResponse<Faculty[]> {}
-export interface GetDepartmentsResponse extends ApiResponse<Department[]> {}
-export interface GetClassesResponse extends ApiResponse<Class[]> {}
-export interface GetAcademicYearsResponse extends ApiResponse<AcademicYear[]> {}
+export type GetSemestersResponse = ApiResponse<Semester[]>;
+export type GetSubjectsResponse = ApiResponse<Subject[]>;
+export type GetFacultiesResponse = ApiResponse<Faculty[]>;
+export type GetDepartmentsResponse = ApiResponse<Department[]>;
+export type GetClassesResponse = ApiResponse<Class[]>;
+export type GetAcademicYearsResponse = ApiResponse<AcademicYear[]>;
 
 export interface GetClassesParams {
   departmentId?: string;

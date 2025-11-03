@@ -8,6 +8,7 @@ import { UploadDocumentModal, type UploadFormData } from "./UploadDocumentModal"
 import { DeleteDocumentModal } from "./DeleteDocumentModal";
 import { EditDocumentModal, type EditFormData } from "./EditDocumentModal";
 import { useMaterials } from "../lib/hooks/useMaterials";
+import { useDocumentTypes } from "../lib/hooks/useDocumentTypes";
 import { transformMaterialsToDocuments, getCourseClassesOptions } from "../lib/utils/transformers";
 import { downloadFile } from "@/lib/utils/fileDownload";
 
@@ -15,23 +16,28 @@ export function MaterialsContent() {
   const [selectedSemester, setSelectedSemester] = useState("all");
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const [documentToEdit, setDocumentToEdit] = useState<Document | null>(null);
 
-  // Use materials hook
   const {
     materials,
-    documentTypes,
-    isLoading,
-    searchQuery,
+    loading,
     uploadMaterial,
     updateMaterial,
     deleteMaterial,
-    handleSearch,
   } = useMaterials();
+
+  const { documentTypes, loading: documentTypesLoading } = useDocumentTypes();
+
+  const isLoading = loading;
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
   // Transform API data to component format
   const allDocuments = useMemo(() => {
@@ -117,7 +123,7 @@ export function MaterialsContent() {
   const handleDownload = async (id: string) => {
     const doc = allDocuments.find((d) => d.id === id);
     if (doc?.downloadUrl) {
-      await downloadFile(doc.downloadUrl, doc.title || doc.fileName || 'document');
+      await downloadFile(doc.downloadUrl, doc.title || 'document');
     }
   };
 
@@ -183,6 +189,9 @@ export function MaterialsContent() {
         semesters={semesters}
         subjects={subjects}
         types={types}
+        semestersLoading={false}
+        subjectsLoading={false}
+        typesLoading={documentTypesLoading}
       />
 
       <div className="space-y-4">

@@ -46,10 +46,10 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
         setExamEntries([]);
         setTotalCount(0);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = 
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải danh sách đề thi. Vui lòng thử lại sau.';
       setError(errorMessage);
       setExamEntries([]);
@@ -117,10 +117,10 @@ export const useExamEntryDetail = (
         setError(response.message || 'Không thể tải chi tiết đề thi');
         setExamEntryDetail(null);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = 
-        err?.response?.data?.message ||
-        err?.message ||
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
         'Đã xảy ra lỗi khi tải chi tiết đề thi. Vui lòng thử lại sau.';
       setError(errorMessage);
       setExamEntryDetail(null);
