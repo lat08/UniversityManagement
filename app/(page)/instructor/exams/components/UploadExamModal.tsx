@@ -24,14 +24,17 @@ interface UploadExamModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: UploadExamFormData) => void;
+  isLoading?: boolean;
+  courseClasses?: { id: string; name: string }[];
+  examEntryId?: string | null;
 }
 
 export interface UploadExamFormData {
-  subject: string;
+  courseClassId: string;
   examType: string;
-  duration: number;
+  durationMinutes: number;
   description: string;
-  examFile: File | null;
+  questionFile: File | null;
   answerFile: File | null;
 }
 
@@ -39,25 +42,22 @@ export function UploadExamModal({
   isOpen,
   onClose,
   onSubmit,
+  isLoading = false,
+  courseClasses = [],
+  examEntryId = null,
 }: UploadExamModalProps) {
   const [formData, setFormData] = useState<UploadExamFormData>({
-    subject: "",
+    courseClassId: "",
     examType: "",
-    duration: 3,
+    durationMinutes: 120,
     description: "",
-    examFile: null,
+    questionFile: null,
     answerFile: null,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof UploadExamFormData, string>>>({});
   const examFileInputRef = useRef<HTMLInputElement>(null);
   const answerFileInputRef = useRef<HTMLInputElement>(null);
-
-  const subjects = [
-    { id: "web", name: "Lập trình web" },
-    { id: "network", name: "Mạng máy tính" },
-    { id: "database", name: "Cơ sở dữ liệu" },
-  ];
 
   const examTypes = [
     { id: "midterm", name: "Giữa kỳ" },
@@ -72,11 +72,11 @@ export function UploadExamModal({
     }
   };
 
-  const handleExamFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleQuestionFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, examFile: file }));
-    if (errors.examFile) {
-      setErrors((prev) => ({ ...prev, examFile: undefined }));
+    setFormData((prev) => ({ ...prev, questionFile: file }));
+    if (errors.questionFile) {
+      setErrors((prev) => ({ ...prev, questionFile: undefined }));
     }
   };
 
@@ -96,13 +96,13 @@ export function UploadExamModal({
     answerFileInputRef.current?.click();
   };
 
-  const handleExamFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleQuestionFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0] || null;
     if (file) {
-      setFormData((prev) => ({ ...prev, examFile: file }));
-      if (errors.examFile) {
-        setErrors((prev) => ({ ...prev, examFile: undefined }));
+      setFormData((prev) => ({ ...prev, questionFile: file }));
+      if (errors.questionFile) {
+        setErrors((prev) => ({ ...prev, questionFile: undefined }));
       }
     }
   };
@@ -125,14 +125,17 @@ export function UploadExamModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UploadExamFormData, string>> = {};
 
-    if (!formData.subject) {
-      newErrors.subject = "Vui lòng chọn môn học";
+    if (!formData.courseClassId) {
+      newErrors.courseClassId = "Vui lòng chọn lớp học phần";
     }
     if (!formData.examType) {
       newErrors.examType = "Vui lòng chọn loại đề thi";
     }
-    if (!formData.examFile) {
-      newErrors.examFile = "Vui lòng chọn file đề thi";
+    if (!formData.questionFile) {
+      newErrors.questionFile = "Vui lòng chọn file đề thi";
+    }
+    if (!formData.answerFile) {
+      newErrors.answerFile = "Vui lòng chọn file đáp án";
     }
 
     setErrors(newErrors);
@@ -143,17 +146,17 @@ export function UploadExamModal({
     e.preventDefault();
     if (validateForm()) {
       onSubmit?.(formData);
-      handleClose();
+      // Don't close immediately - let parent handle success/error
     }
   };
 
   const handleClose = () => {
     setFormData({
-      subject: "",
+      courseClassId: "",
       examType: "",
-      duration: 3,
+      durationMinutes: 120,
       description: "",
-      examFile: null,
+      questionFile: null,
       answerFile: null,
     });
     setErrors({});
@@ -186,22 +189,30 @@ export function UploadExamModal({
               <span className="text-red-500">*</span>
             </label>
             <Select
-              value={formData.subject}
-              onValueChange={(value) => handleInputChange("subject", value)}
+              value={formData.courseClassId}
+              onValueChange={(value) => handleInputChange("courseClassId", value)}
+              disabled={courseClasses.length === 0}
             >
               <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder="Chọn môn học" />
+                <SelectValue placeholder={
+                  courseClasses.length === 0 
+                    ? "Đang tải danh sách lớp học phần..." 
+                    : "Chọn lớp học phần"
+                } />
               </SelectTrigger>
               <SelectContent>
-                {subjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name}
+                {courseClasses.map((courseClass) => (
+                  <SelectItem key={courseClass.id} value={courseClass.id}>
+                    {courseClass.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.subject && (
-              <p className="text-sm text-red-500">{errors.subject}</p>
+            {errors.courseClassId && (
+              <p className="text-sm text-red-500">{errors.courseClassId}</p>
+            )}
+            {courseClasses.length === 0 && (
+              <p className="text-xs text-gray-500">Vui lòng chờ danh sách lớp học phần được tải</p>
             )}
           </div>
 
@@ -239,9 +250,10 @@ export function UploadExamModal({
             <Input
               type="number"
               min="1"
-              value={formData.duration}
-              onChange={(e) => handleInputChange("duration", parseInt(e.target.value) || 0)}
+              value={formData.durationMinutes}
+              onChange={(e) => handleInputChange("durationMinutes", parseInt(e.target.value) || 0)}
               className="border-gray-300"
+              placeholder="Thời lượng (phút)"
             />
           </div>
 
@@ -267,13 +279,13 @@ export function UploadExamModal({
             <input
               ref={examFileInputRef}
               type="file"
-              onChange={handleExamFileChange}
+              onChange={handleQuestionFileChange}
               className="hidden"
               accept=".pdf,.doc,.docx"
             />
             <div
               onClick={handleExamFileClick}
-              onDrop={handleExamFileDrop}
+              onDrop={handleQuestionFileDrop}
               onDragOver={handleDragOver}
               className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
             >
@@ -283,16 +295,16 @@ export function UploadExamModal({
                   <p className="text-sm font-medium text-gray-700">
                     Click to Upload
                   </p>
-                  {formData.examFile && (
+                  {formData.questionFile && (
                     <p className="text-xs text-gray-500 mt-1">
-                      {formData.examFile.name}
+                      {formData.questionFile.name}
                     </p>
                   )}
                 </div>
               </div>
             </div>
-            {errors.examFile && (
-              <p className="text-sm text-red-500">{errors.examFile}</p>
+            {errors.questionFile && (
+              <p className="text-sm text-red-500">{errors.questionFile}</p>
             )}
           </div>
 
@@ -342,8 +354,9 @@ export function UploadExamModal({
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isLoading}
             >
-              Tải lên
+              {isLoading ? "Đang tải lên..." : "Tải lên"}
             </Button>
           </DialogFooter>
         </form>
