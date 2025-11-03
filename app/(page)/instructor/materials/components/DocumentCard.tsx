@@ -10,6 +10,12 @@ export interface Document {
   date: string;
   type: "slide" | "document" | "exercise";
   classCode: string;
+  // Additional fields from API
+  courseClassId?: string;
+  documentType?: string;
+  description?: string;
+  downloadUrl?: string;
+  previewUrl?: string;
 }
 
 interface DocumentCardProps {
@@ -72,6 +78,7 @@ export function DocumentCard({
             size="icon"
             onClick={() => onEdit?.(document.id)}
             className="h-8 w-8"
+            title="Chỉnh sửa"
           >
             <Edit className="w-4 h-4 text-gray-700" />
           </Button>
@@ -80,6 +87,7 @@ export function DocumentCard({
             size="icon"
             onClick={() => onDownload?.(document.id)}
             className="h-8 w-8"
+            title="Tải xuống"
           >
             <Download className="w-4 h-4 text-gray-700" />
           </Button>
@@ -88,6 +96,7 @@ export function DocumentCard({
             size="icon"
             onClick={() => onDelete?.(document.id)}
             className="h-8 w-8"
+            title="Xóa"
           >
             <Trash2 className="w-4 h-4 text-red-600" />
           </Button>
