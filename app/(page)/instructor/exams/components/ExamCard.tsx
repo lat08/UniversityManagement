@@ -1,62 +1,33 @@
 "use client"
 
-import { FileText, Download, Upload as UploadIcon } from "lucide-react";
+import { FileText, Download, Upload as UploadIcon, Eye } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
-
-export interface Exam {
-  id: string;
-  title: string;
-  subject: string;
-  duration: string;
-  date: string;
-  status: "approved" | "rejected" | "pending";
-  examType: "midterm" | "final" | "quiz";
-  rejectionReason?: string;
-}
+import type { ExamEntry } from "../lib/types";
+import { EXAM_TYPE_LABELS, ENTRY_STATUS_LABELS, ENTRY_STATUS_COLORS } from "../lib/constants";
 
 interface ExamCardProps {
-  exam: Exam;
-  onDownload?: (id: string) => void;
+  exam: ExamEntry;
+  onDownload?: (id: string, fileType: 'question' | 'answer') => void;
   onResubmit?: (id: string) => void;
+  onView?: (id: string) => void;
 }
-
-const statusConfig = {
-  approved: {
-    label: "Đã duyệt",
-    className: "bg-blue-100 text-blue-700",
-  },
-  rejected: {
-    label: "Từ chối",
-    className: "bg-red-100 text-red-700",
-  },
-  pending: {
-    label: "Chờ duyệt",
-    className: "bg-yellow-100 text-yellow-700",
-  },
-};
-
-const examTypeConfig = {
-  midterm: {
-    label: "Giữa kỳ",
-    className: "bg-gray-200 text-gray-700",
-  },
-  final: {
-    label: "Cuối kỳ",
-    className: "bg-gray-200 text-gray-700",
-  },
-  quiz: {
-    label: "15 phút",
-    className: "bg-gray-200 text-gray-700",
-  },
-};
 
 export function ExamCard({
   exam,
   onDownload,
   onResubmit,
+  onView,
 }: ExamCardProps) {
-  const status = statusConfig[exam.status];
-  const examType = examTypeConfig[exam.examType];
+  const statusLabel = ENTRY_STATUS_LABELS[exam.entryStatus] || exam.entryStatus;
+  const statusClassName = ENTRY_STATUS_COLORS[exam.entryStatus] || "bg-gray-100 text-gray-700";
+  const examTypeLabel = EXAM_TYPE_LABELS[exam.examType] || exam.examType;
+
+  // Format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow">
@@ -68,47 +39,79 @@ export function ExamCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <h3 className="font-semibold text-gray-900 truncate">
-              {exam.title}
+              {exam.displayName || `${exam.courseClassCode} - ${exam.subjectName}`}
             </h3>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${status.className}`}>
-                {status.label}
+              <span className={`px-2 py-1 rounded text-xs font-medium ${statusClassName}`}>
+                {statusLabel}
               </span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${examType.className}`}>
-                {examType.label}
+              <span className="px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-700">
+                {examTypeLabel}
               </span>
+              {exam.entryCode && (
+                <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+                  Mã: {exam.entryCode}
+                </span>
+              )}
             </div>
           </div>
-          <p className="text-sm text-gray-600 mb-2">
-            {exam.subject} - Thời lượng: {exam.duration} - {exam.date}
-          </p>
+          <div className="space-y-1 text-sm text-gray-600">
+            <p>{exam.subjectName} - {exam.courseClassCode}</p>
+            <p>Thời lượng: {exam.durationMinutes} phút</p>
+            <p>Ngày tạo: {formatDate(exam.createdAt)}</p>
+            {exam.reviewerName && (
+              <p>Người duyệt: {exam.reviewerName}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {exam.status === "approved" && (
-            <Button
-              variant="outline"
-              onClick={() => onDownload?.(exam.id)}
-              className="flex items-center gap-2 border-gray-300"
-            >
-              <Download className="w-4 h-4" />
-              <span>Tải xuống</span>
-            </Button>
+          {exam.entryStatus === "approved" && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => onDownload?.(exam.examEntryId, 'question')}
+                className="flex items-center gap-2 border-gray-300"
+                size="sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>Tải đề</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onDownload?.(exam.examEntryId, 'answer')}
+                className="flex items-center gap-2 border-gray-300"
+                size="sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>Tải đáp án</span>
+              </Button>
+            </>
           )}
-          {exam.status === "rejected" && (
+          {exam.entryStatus === "rejected" && (
             <Button
               variant="outline"
-              onClick={() => onResubmit?.(exam.id)}
+              onClick={() => onResubmit?.(exam.examEntryId)}
               className="flex items-center gap-2 border-gray-300"
+              size="sm"
             >
               <UploadIcon className="w-4 h-4" />
               <span>Gửi lại</span>
             </Button>
           )}
+          <Button
+            variant="outline"
+            onClick={() => onView?.(exam.examEntryId)}
+            className="flex items-center gap-2 border-gray-300"
+            size="sm"
+          >
+            <Eye className="w-4 h-4" />
+            <span>Xem</span>
+          </Button>
         </div>
       </div>
       
-      {exam.status === "rejected" && exam.rejectionReason && (
+      {exam.entryStatus === "rejected" && exam.rejectionReason && (
         <div className="mt-3">
           <div className="bg-red-50 border border-red-200 rounded-lg p-3">
             <p className="text-sm text-red-800">
@@ -120,4 +123,5 @@ export function ExamCard({
     </div>
   );
 }
+
 
