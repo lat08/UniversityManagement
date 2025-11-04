@@ -48,6 +48,14 @@ export interface AcademicYear {
   yearCode: string;
 }
 
+export interface Building {
+  buildingId: string;
+  buildingCode: string;
+  buildingName: string;
+  address: string;
+  status: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message?: string;
@@ -61,6 +69,7 @@ export type GetFacultiesResponse = ApiResponse<Faculty[]>;
 export type GetDepartmentsResponse = ApiResponse<Department[]>;
 export type GetClassesResponse = ApiResponse<Class[]>;
 export type GetAcademicYearsResponse = ApiResponse<AcademicYear[]>;
+export type GetBuildingsResponse = ApiResponse<Building[]>;
 
 export interface GetClassesParams {
   departmentId?: string;

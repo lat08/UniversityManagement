@@ -6,6 +6,7 @@ import {
   GetDepartmentsResponse,
   GetClassesResponse,
   GetAcademicYearsResponse,
+  GetBuildingsResponse,
   GetClassesParams,
   GetDepartmentsParams,
   GetAcademicYearsParams,
@@ -52,6 +53,11 @@ export const commonApi = {
         count: params?.count || undefined,
       },
     });
+    return response.data;
+  },
+
+  getBuildings: async (): Promise<GetBuildingsResponse> => {
+    const response = await api.get<GetBuildingsResponse>('/v1/common/buildings');
     return response.data;
   },
 };

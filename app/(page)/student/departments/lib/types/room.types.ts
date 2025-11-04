@@ -130,6 +130,7 @@ export interface BookingData {
   startTime: string;
   endTime: string;
   purpose: string;
+  studentCount: number;
   bookingStatus: BookingStatus;
   createdAt: string;
   building: {

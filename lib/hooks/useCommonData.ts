@@ -7,6 +7,7 @@ import {
   Department,
   Class,
   AcademicYear,
+  Building,
 } from '../types/common';
 
 interface UseCommonDataReturn<T> {
@@ -245,6 +246,45 @@ export const useAcademicYears = (params?: { count?: number }): UseCommonDataRetu
 
   const handleRefetch = useCallback(() => {
     fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
+};
+
+export const useBuildings = (): UseCommonDataReturn<Building> => {
+  const [data, setData] = useState<Building[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await commonApi.getBuildings();
+      if (response.success && response.data) {
+        setData(Array.isArray(response.data) ? response.data : []);
+      } else {
+        setError('Không thể tải danh sách cơ sở');
+        setData([]);
+      }
+    } catch (err: unknown) {
+      const errorMessage =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        'Đã xảy ra lỗi khi tải danh sách cơ sở.';
+      setError(errorMessage);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  const handleRefetch = useCallback(() => {
+    void fetchData();
   }, [fetchData]);
 
   return { data, loading, error, refetch: handleRefetch };

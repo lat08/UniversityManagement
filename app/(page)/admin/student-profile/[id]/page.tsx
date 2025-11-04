@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { MapPin, Mail, Phone, Calendar, User, School, ArrowLeft, Edit } from 'lucide-react';
-import Image from 'next/image';
+import { MapPin, Mail, Phone, Calendar, School, ArrowLeft, Edit } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
 import { Tabs } from '@/app/components/ui/tabs';
 import { Table, Dropdown } from '@/app/components/ui';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/utils/format';
@@ -221,19 +221,12 @@ export default function StudentDetailPage() {
           <div className="flex items-start gap-6">
             {/* Avatar */}
             <div className="flex-shrink-0 flex flex-col items-center">
-              <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
-                {studentData.profilePicture ? (
-                  <Image
-                    src={studentData.profilePicture}
-                    alt="Student Avatar"
-                    width={128}
-                    height={128}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-16 h-16 text-gray-400" />
-                )}
-              </div>
+              <Avatar className="w-32 h-32 border border-gray-200 shadow-md">
+                <AvatarImage src={studentData.profilePicture || ""} alt={studentData.fullName} />
+                <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl font-bold">
+                  {studentData.fullName.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
               <span className={`mt-4 w-32 text-center px-3 py-1.5 text-xs font-medium rounded-[5px] ${statusDisplay.color}`}>
                 {statusDisplay.label}
               </span>
