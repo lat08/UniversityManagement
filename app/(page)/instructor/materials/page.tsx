@@ -164,18 +164,27 @@ export default function MaterialsPage() {
           typesLoading={typesLoading}
         />
 
-        {error ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-red-600">{error}</p>
-            <button onClick={refetch} className="mt-4 text-blue-600 hover:text-blue-800">
-              Thử lại
-            </button>
-          </div>
-        ) : loading ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600">Đang tải dữ liệu...</p>
-          </div>
-        ) : (
+        {(() => {
+          if (error) {
+            return (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                <p className="text-red-600">{error}</p>
+                <button onClick={refetch} className="mt-4 text-blue-600 hover:text-blue-800">
+                  Thử lại
+                </button>
+              </div>
+            );
+          }
+          
+          if (loading) {
+            return (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                <p className="text-gray-600">Đang tải dữ liệu...</p>
+              </div>
+            );
+          }
+          
+          return (
           <div className="space-y-4">
             {allDocuments.length === 0 ? (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
@@ -193,7 +202,8 @@ export default function MaterialsPage() {
               ))
             )}
           </div>
-        )}
+          );
+        })()}
 
         {!loading && !error && totalCount > 0 && (
           <div className="pt-4">

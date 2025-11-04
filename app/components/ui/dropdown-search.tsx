@@ -11,20 +11,20 @@ interface DropdownSearchOption<T = string> {
 }
 
 interface DropdownSearchProps<T = string> {
-  options: DropdownSearchOption<T>[]
-  value?: T
-  placeholder?: string
-  searchPlaceholder?: string
-  onChange: (value: T) => void
-  disabled?: boolean
-  className?: string
-  buttonClassName?: string
-  dropdownClassName?: string
-  showEmptyOption?: boolean
-  emptyOptionLabel?: string
-  renderValue?: (value: T | undefined, selectedOption?: DropdownSearchOption<T>) => ReactNode
-  onSearch?: (query: string) => void
-  filterOptions?: (options: DropdownSearchOption<T>[], query: string) => DropdownSearchOption<T>[]
+  readonly options: DropdownSearchOption<T>[]
+  readonly value?: T
+  readonly placeholder?: string
+  readonly searchPlaceholder?: string
+  readonly onChange: (value: T) => void
+  readonly disabled?: boolean
+  readonly className?: string
+  readonly buttonClassName?: string
+  readonly dropdownClassName?: string
+  readonly showEmptyOption?: boolean
+  readonly emptyOptionLabel?: string
+  readonly renderValue?: (value: T | undefined, selectedOption?: DropdownSearchOption<T>) => ReactNode
+  readonly onSearch?: (query: string) => void
+  readonly filterOptions?: (options: DropdownSearchOption<T>[], query: string) => DropdownSearchOption<T>[]
 }
 
 export function DropdownSearch<T = string>({

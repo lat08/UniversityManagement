@@ -20,14 +20,14 @@ interface CourseItem {
 }
 
 interface ScheduleTooltipProps {
-  course: CourseItem
-  position: { x: number; y: number }
-  onMouseEnter?: () => void
-  onMouseLeave?: () => void
-  onClick?: (e: React.MouseEvent) => void
-  showClass?: boolean
-  showTeacher?: boolean
-  actionButton?: ReactNode
+  readonly course: CourseItem
+  readonly position: { x: number; y: number }
+  readonly onMouseEnter?: () => void
+  readonly onMouseLeave?: () => void
+  readonly onClick?: (e: React.MouseEvent) => void
+  readonly showClass?: boolean
+  readonly showTeacher?: boolean
+  readonly actionButton?: ReactNode
 }
 
 export function ScheduleTooltip({
@@ -45,6 +45,7 @@ export function ScheduleTooltip({
 
   return (
     <div
+      role="tooltip"
       className="fixed z-50 course-tooltip"
       style={{
         left: `${position.x}px`,
@@ -53,6 +54,12 @@ export function ScheduleTooltip({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && onMouseLeave) {
+          onMouseLeave();
+        }
+      }}
+      tabIndex={0}
     >
       <div className="relative">
         <div 

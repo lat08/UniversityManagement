@@ -40,8 +40,7 @@ const generateTimeOptions = (selectedDate?: Date) => {
   if (!selectedDate) return [];
   
   const now = new Date();
-  const isToday = 
-    selectedDate.getDate() === now.getDate() &&
+  const isToday = selectedDate.getDate() === now.getDate() &&
     selectedDate.getMonth() === now.getMonth() &&
     selectedDate.getFullYear() === now.getFullYear();
   
@@ -385,7 +384,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               type="number"
               value={studentCount}
               onChange={(e) => {
-                const value = parseInt(e.target.value) || 1;
+                const value = Number.parseInt(e.target.value) || 1;
                 setStudentCount(Math.max(1, Math.min(value, selectedRoom?.capacity || 1000)));
               }}
               min={1}

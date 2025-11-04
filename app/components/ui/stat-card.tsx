@@ -2,14 +2,14 @@ import { ReactNode } from 'react';
 import { Card, CardContent } from './card';
 
 export interface StatCardProps {
-  label: string;
-  value: number | string;
-  subtitle?: string;
-  icon?: string | ReactNode;
-  color?: string;
-  growth?: {
-    percentage: number;
-    label?: string;
+  readonly label: string;
+  readonly value: number | string;
+  readonly subtitle?: string;
+  readonly icon?: string | ReactNode;
+  readonly color?: string;
+  readonly growth?: {
+    readonly percentage: number;
+    readonly label?: string;
   };
 }
 

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "@/lib/constants/schedule"
@@ -22,18 +21,18 @@ export interface CourseItem {
 }
 
 interface WeeklyScheduleGridProps {
-  scheduleData: CourseItem[]
-  weekDates: Date[]
-  onCourseHover?: (courseId: string, event: React.MouseEvent) => void
-  onCourseLeave?: () => void
-  hoveredCourseId?: string | null
-  onPreviousWeek?: () => void
-  onNextWeek?: () => void
-  canGoPrevious?: boolean
-  canGoNext?: boolean
-  showClass?: boolean
-  showTeacher?: boolean
-  showCode?: boolean
+  readonly scheduleData: CourseItem[]
+  readonly weekDates: Date[]
+  readonly onCourseHover?: (courseId: string, event: React.MouseEvent) => void
+  readonly onCourseLeave?: () => void
+  readonly hoveredCourseId?: string | null
+  readonly onPreviousWeek?: () => void
+  readonly onNextWeek?: () => void
+  readonly canGoPrevious?: boolean
+  readonly canGoNext?: boolean
+  readonly showClass?: boolean
+  readonly showTeacher?: boolean
+  readonly showCode?: boolean
 }
 
 export function WeeklyScheduleGrid({
@@ -155,9 +154,10 @@ export function WeeklyScheduleGrid({
                       className="flex-1 min-w-[100px] bg-[var(--schedule-empty-bg)] border border-[var(--schedule-empty-border)] rounded-lg relative h-[52px]"
                     >
                       {course && (
-                        <div
+                        <button
+                          type="button"
                           className={cn(
-                            "absolute inset-0 rounded-lg p-2.5 cursor-pointer transition-all duration-200 z-10 course-cell",
+                            "absolute inset-0 rounded-lg p-2.5 cursor-pointer transition-all duration-200 z-10 course-cell text-left",
                             getColorClasses(course.color, hoveredCourseId === course.id)
                           )}
                           style={{
@@ -165,6 +165,7 @@ export function WeeklyScheduleGrid({
                           }}
                           onMouseEnter={(e) => onCourseHover?.(course.id, e)}
                           onMouseLeave={onCourseLeave}
+                          onClick={(e) => onCourseHover?.(course.id, e)}
                         >
                           <div className="text-xs font-semibold leading-tight mb-1.5 text-gray-900">
                             {course.name}
@@ -189,7 +190,7 @@ export function WeeklyScheduleGrid({
                               </div>
                             )}
                           </div>
-                        </div>
+                        </button>
                       )}
                     </div>
                   )

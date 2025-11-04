@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { MapPin, Mail, Phone, Calendar, User, School, ArrowLeft, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs } from '@/app/components/ui/tabs';
-import { Table, type TableColumn, Dropdown } from '@/app/components/ui';
+import { Table, Dropdown } from '@/app/components/ui';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/utils/format';
 import { getPaymentStatusDisplay } from '@/lib/utils/statusDisplay';
 import { studentsApi } from '../lib/api/studentsApi';
@@ -314,9 +314,9 @@ export default function StudentDetailPage() {
           </div>
           <p className="text-sm text-gray-600 mb-2">GPA</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
-            {studentData.averageGPA !== null && studentData.averageGPA !== undefined 
-              ? studentData.averageGPA.toFixed(2) 
-              : '-'}
+            {studentData.averageGPA === null || studentData.averageGPA === undefined 
+              ? '-' 
+              : studentData.averageGPA.toFixed(2)}
           </p>
           <p className="text-xs text-gray-500">/10.0</p>
         </div>
@@ -342,14 +342,10 @@ export default function StudentDetailPage() {
           </div>
           <p className="text-sm text-gray-600 mb-2">Công nợ</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
-            {studentData.unpaidAmount && studentData.unpaidAmount > 0 
-              ? formatCurrency(studentData.unpaidAmount)
-              : formatCurrency(0)}
+            {formatCurrency(studentData.unpaidAmount && studentData.unpaidAmount > 0 ? studentData.unpaidAmount : 0)}
           </p>
           <p className="text-xs text-gray-500">
-            {studentData.unpaidAmount && studentData.unpaidAmount > 0 
-              ? 'Chưa thanh toán đầy đủ' 
-              : 'Đã thanh toán đầy đủ'}
+            {studentData.unpaidAmount && studentData.unpaidAmount > 0 ? 'Chưa thanh toán đầy đủ' : 'Đã thanh toán đầy đủ'}
           </p>
         </div>
       </div>
@@ -553,18 +549,26 @@ export default function StudentDetailPage() {
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-bold text-gray-900">Phân loại học lực học kỳ:</span>
-                        {grades.semesterClassification && (
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
-                            grades.semesterClassification === 'Xuất sắc' ? 'bg-gradient-to-r from-[#FF512F] to-[#DD2476]' :
-                            grades.semesterClassification === 'Giỏi' ? 'bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA]' :
-                            grades.semesterClassification === 'Khá' ? 'bg-gradient-to-r from-[#56ab2f] to-[#a8e063]' :
-                            grades.semesterClassification === 'Trung bình' ? 'bg-gradient-to-r from-[#F7971E] to-[#FFD200]' :
-                            'bg-gradient-to-r from-[#ED213A] to-[#93291E]'
-                          }`}>
-                            {grades.semesterClassification}
-                          </span>
-                        )}
-                        {!grades.semesterClassification && <span className="text-sm text-gray-500">-</span>}
+                        {(() => {
+                          if (!grades.semesterClassification) {
+                            return <span className="text-sm text-gray-500">-</span>;
+                          }
+                          
+                          const classificationMap: Record<string, string> = {
+                            'Xuất sắc': 'bg-gradient-to-r from-[#FF512F] to-[#DD2476]',
+                            'Giỏi': 'bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA]',
+                            'Khá': 'bg-gradient-to-r from-[#56ab2f] to-[#a8e063]',
+                            'Trung bình': 'bg-gradient-to-r from-[#F7971E] to-[#FFD200]',
+                          };
+                          
+                          const bgClass = classificationMap[grades.semesterClassification] || 'bg-gradient-to-r from-[#ED213A] to-[#93291E]';
+                          
+                          return (
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${bgClass}`}>
+                              {grades.semesterClassification}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -645,6 +649,15 @@ export default function StudentDetailPage() {
                     {tuitionFees && tuitionFees.courses.length > 0 && (
                       <div className="bg-gray-50 border-t border-gray-200">
                         <table className="w-full">
+                          <thead className="sr-only">
+                            <tr>
+                              <th scope="col">Mã môn học</th>
+                              <th scope="col">Tên môn học</th>
+                              <th scope="col">Số tín chỉ</th>
+                              <th scope="col">Học phí</th>
+                              <th scope="col">Trạng thái</th>
+                            </tr>
+                          </thead>
                           <tbody>
                             <tr className="font-semibold">
                               <td colSpan={2} className="px-6 py-4 text-sm text-gray-900 text-right">Tổng cộng:</td>

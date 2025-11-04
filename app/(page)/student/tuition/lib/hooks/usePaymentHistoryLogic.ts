@@ -35,6 +35,7 @@ export const usePaymentHistoryLogic = (
       await getPaymentExcel();
       toast.success('Đang tải xuống file lịch sử thanh toán');
     } catch (error) {
+      console.error('Error exporting payment history:', error);
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);

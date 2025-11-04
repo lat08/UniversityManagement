@@ -1,9 +1,8 @@
 // lib/hooks/useFinanceData.ts
 import { useState, useEffect, useCallback } from "react";
 import { getTuitionFees, getInsurances, getPayments } from "../api/financeApi";
-import { TuitionFeeResponse, Insurance, Payment } from "../types/types";
+import { TuitionFeeResponse, Insurance, Payment, Semester } from "../types/types";
 import { useToast } from "@/app/components/ui/toast";
-import { Semester } from "../types/types";
 import { commonApi } from "@/lib/api/common";
 
 export type FinanceDataState = {
@@ -57,6 +56,7 @@ export const useFinanceData = (): FinanceDataState => {
         toast.error(paymentRes.message || 'Tải dữ liệu lịch sử thanh toán thất bại');
       }
     } catch (error) {
+      console.error('Error loading finance data:', error);
       toast.error('Failed to load data. Please try again later.');
     } finally {
       setIsLoading(false);

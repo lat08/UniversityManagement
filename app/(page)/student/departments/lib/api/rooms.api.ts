@@ -1,5 +1,5 @@
 import { api } from '@/lib/api/client';
-import type { RoomApiResponse, CreateBookingRequest, BookingApiResponse, CancelBookingResponse } from '../types/room.types';
+import type { CreateBookingRequest, BookingApiResponse, CancelBookingResponse } from '../types/room.types';
 export const createRoomBooking = async (bookingData: CreateBookingRequest): Promise<BookingApiResponse> => {
   const response = await api.post<BookingApiResponse>('/v1/function-rooms/bookings', bookingData);
   return response.data;

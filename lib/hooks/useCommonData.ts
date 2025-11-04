@@ -45,7 +45,7 @@ export const useSemesters = (): UseCommonDataReturn<Semester> => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, [fetchData]);
 
   return { data, loading, error, refetch: fetchData };
@@ -80,7 +80,7 @@ export const useSubjects = (): UseCommonDataReturn<Subject> => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, [fetchData]);
 
   return { data, loading, error, refetch: fetchData };

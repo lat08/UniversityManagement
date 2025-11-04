@@ -58,12 +58,12 @@ export function ExamsFilters({
           onChange={onSemesterChange}
           disabled={semestersLoading}
           className="flex-1"
-          buttonClassName={selectedSemester !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+          buttonClassName={selectedSemester === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}
         />
 
         <DropdownSearch
           options={subjects.map(s => ({ value: s.id, label: s.name }))}
-          value={selectedSubject !== "all" ? selectedSubject : undefined}
+          value={selectedSubject === "all" ? undefined : selectedSubject}
           placeholder="Tất cả môn học"
           onChange={(value) => onSubjectChange(value || "all")}
           disabled={subjectsLoading}
@@ -78,7 +78,7 @@ export function ExamsFilters({
           placeholder="Tất cả trạng thái"
           onChange={onStatusChange}
           className="flex-1"
-          buttonClassName={selectedStatus !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+          buttonClassName={selectedStatus === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}
         />
 
         <Dropdown
@@ -87,7 +87,7 @@ export function ExamsFilters({
           placeholder="Tất cả loại"
           onChange={onExamTypeChange}
           className="flex-1"
-          buttonClassName={selectedExamType !== "all" ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+          buttonClassName={selectedExamType === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}
         />
     </div>
   );

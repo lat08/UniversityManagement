@@ -166,7 +166,19 @@ export default function InstructorProfilePage() {
                   {/* Row 2 */}
                   <ProfileField
                     label="Giới tính"
-                    value={isEditing ? editedData.gender || profile.gender || '' : (profile.gender === 'male' ? 'Nam' : profile.gender === 'female' ? 'Nữ' : profile.gender === 'other' ? 'Khác' : '')}
+                    value={(() => {
+                      if (isEditing) {
+                        return editedData.gender || profile.gender || '';
+                      }
+                      
+                      const genderMap: Record<string, string> = {
+                        'male': 'Nam',
+                        'female': 'Nữ',
+                        'other': 'Khác'
+                      };
+                      
+                      return genderMap[profile.gender] || '';
+                    })()}
                     editable={isEditing}
                     type={isEditing ? 'select' : 'text'}
                     options={isEditing ? [

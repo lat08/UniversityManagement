@@ -4,12 +4,11 @@ import { useState, useMemo } from "react"
 import { Loader2, Search, AlertTriangle } from "lucide-react"
 import { useRegulations } from "./lib/hooks/useRegulations"
 import { RegulationCard } from "./RegulationCard"
-import { Regulation } from "./lib/api/regulationsApi"
 
 interface RegulationsPageProps {
-  pageTitle: string
-  description: string
-  noticeText?: string
+  readonly pageTitle: string
+  readonly description: string
+  readonly noticeText?: string
 }
 
 export function RegulationsPage({ pageTitle, description, noticeText }: RegulationsPageProps) {

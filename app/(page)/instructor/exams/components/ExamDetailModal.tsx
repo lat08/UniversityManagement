@@ -1,6 +1,6 @@
 "use client"
 
-import { Download, X } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import {
   Dialog,
@@ -15,10 +15,10 @@ import { EXAM_TYPE_LABELS, ENTRY_STATUS_LABELS, ENTRY_STATUS_COLORS } from "../l
 import { formatDate } from "@/lib/utils/format";
 
 interface ExamDetailModalProps {
-  examEntryId: string | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onEdit?: (examEntryId: string) => void;
+  readonly examEntryId: string | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onEdit?: (examEntryId: string) => void;
 }
 
 export function ExamDetailModal({
@@ -126,9 +126,9 @@ export function ExamDetailModal({
             {/* Files */}
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-bold text-gray-900 mb-2 block">File đề thi</label>
+                <label htmlFor="question-file-info" className="text-sm font-bold text-gray-900 mb-2 block">File đề thi</label>
                 <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0" id="question-file-info">
                     <p className="text-sm text-gray-900 truncate">
                       {examEntryDetail.questionFilePath?.split('/').pop() || 'File đề thi'}
                     </p>
@@ -149,9 +149,9 @@ export function ExamDetailModal({
               </div>
 
               <div>
-                <label className="text-sm font-bold text-gray-900 mb-2 block">File đáp án</label>
+                <label htmlFor="answer-file-info" className="text-sm font-bold text-gray-900 mb-2 block">File đáp án</label>
                 <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0" id="answer-file-info">
                     <p className="text-sm text-gray-900 truncate">
                       {examEntryDetail.answerFilePath?.split('/').pop() || 'File đáp án'}
                     </p>

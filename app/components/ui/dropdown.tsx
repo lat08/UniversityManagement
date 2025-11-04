@@ -11,17 +11,17 @@ interface DropdownOption<T = string> {
 }
 
 interface DropdownProps<T = string> {
-  options: DropdownOption<T>[]
-  value?: T
-  placeholder?: string
-  onChange: (value: T) => void
-  disabled?: boolean
-  className?: string
-  buttonClassName?: string
-  dropdownClassName?: string
-  showEmptyOption?: boolean
-  emptyOptionLabel?: string
-  renderValue?: (value: T | undefined, selectedOption?: DropdownOption<T>) => ReactNode
+  readonly options: DropdownOption<T>[]
+  readonly value?: T
+  readonly placeholder?: string
+  readonly onChange: (value: T) => void
+  readonly disabled?: boolean
+  readonly className?: string
+  readonly buttonClassName?: string
+  readonly dropdownClassName?: string
+  readonly showEmptyOption?: boolean
+  readonly emptyOptionLabel?: string
+  readonly renderValue?: (value: T | undefined, selectedOption?: DropdownOption<T>) => ReactNode
 }
 
 export function Dropdown<T = string>({

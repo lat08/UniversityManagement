@@ -5,10 +5,10 @@ import { downloadFile } from "@/lib/utils/fileDownload"
 import { Regulation } from "./lib/api/regulationsApi"
 
 interface RegulationCardProps {
-  regulation: Regulation
-  isExpanded: boolean
-  onToggle: () => void
-  noticeText?: string
+  readonly regulation: Regulation
+  readonly isExpanded: boolean
+  readonly onToggle: () => void
+  readonly noticeText?: string
 }
 
 export function RegulationCard({ regulation, isExpanded, onToggle, noticeText }: RegulationCardProps) {

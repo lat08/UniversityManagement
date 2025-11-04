@@ -11,11 +11,11 @@ export interface TabItem<T = string> {
 }
 
 interface TabsProps<T = string> {
-  items: TabItem<T>[]
-  activeKey: T
-  onChange: (key: T) => void
-  className?: string
-  disabled?: boolean
+  readonly items: TabItem<T>[]
+  readonly activeKey: T
+  readonly onChange: (key: T) => void
+  readonly className?: string
+  readonly disabled?: boolean
 }
 
 export function Tabs<T = string>({
@@ -67,7 +67,7 @@ export function Tabs<T = string>({
                         : "bg-[var(--badge-bg)] text-[var(--badge-text)] hover:scale-105 hover:shadow-sm"
                     )}
                   >
-                    {typeof item.badge === "number" ? item.badge : item.badge}
+                    {item.badge}
                   </span>
                 )}
               </button>

@@ -35,7 +35,7 @@ export const materialsApi = {
     }
 
     const queryString = queryParams.toString()
-    const url = `${MATERIALS_API.GET_MATERIALS}${queryString ? `?${queryString}` : ''}`
+    const url = queryString ? `${MATERIALS_API.GET_MATERIALS}?${queryString}` : MATERIALS_API.GET_MATERIALS
     
     const response = await api.get<ApiResponse<MaterialsData>>(url)
     return response.data

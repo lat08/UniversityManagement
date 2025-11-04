@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, Plus, TrendingUp, TrendingDown, Eye, Edit, Trash2 } from 'lucide-react';
+import { Download, Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { Dropdown, StatCard, SearchInput, Button } from '@/app/components/ui';
 import { Table } from '@/app/components/ui/table';
 import { Pagination } from '@/app/components/ui/pagination';

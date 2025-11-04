@@ -19,11 +19,11 @@ interface SemesterCourse {
 }
 
 interface SemesterScheduleTableProps {
-  scheduleData: SemesterCourse[]
-  isLoading: boolean
-  showCredits?: boolean
-  showClass?: boolean
-  showInstructor?: boolean
+  readonly scheduleData: SemesterCourse[]
+  readonly isLoading: boolean
+  readonly showCredits?: boolean
+  readonly showClass?: boolean
+  readonly showInstructor?: boolean
 }
 
 export function SemesterScheduleTable({
@@ -105,15 +105,16 @@ export function SemesterScheduleTable({
               </tr>
             ) : (
               scheduleData.map((course, index) => {
-                let periodDisplay: string
-                if (showInstructor) {
-                  periodDisplay = String(course.startPeriod || '-')
-                } else {
-                  const endPeriod = course.startPeriod + (course.numberOfPeriods || 1) - 1
-                  periodDisplay = course.numberOfPeriods && course.numberOfPeriods > 1
-                    ? `${course.startPeriod}-${endPeriod}`
-                    : String(course.startPeriod)
-                }
+                const periodDisplay = (() => {
+                  if (showInstructor) {
+                    return String(course.startPeriod || '-');
+                  }
+                  const endPeriod = course.startPeriod + (course.numberOfPeriods || 1) - 1;
+                  if (course.numberOfPeriods && course.numberOfPeriods > 1) {
+                    return `${course.startPeriod}-${endPeriod}`;
+                  }
+                  return String(course.startPeriod);
+                })();
 
                 const startDate = course.scheduleStartDate
                   ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -121,9 +122,12 @@ export function SemesterScheduleTable({
                 const endDate = course.scheduleEndDate
                   ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
                   : ''
-                const timeDisplay = startDate && endDate
-                  ? `${startDate} đến ${endDate}`
-                  : (startDate || endDate || '-')
+                const timeDisplay = (() => {
+                  if (startDate && endDate) {
+                    return `${startDate} đến ${endDate}`;
+                  }
+                  return startDate || endDate || '-';
+                })();
 
                 return (
                   <tr
@@ -172,22 +176,25 @@ export function SemesterScheduleTable({
                       </td>
                     )}
                     <td className="px-4 py-3 text-sm text-center text-gray-900">
-                      {showInstructor ? (
-                        <div>
-                          <div>
-                            {course.scheduleStartDate
-                              ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN')
-                              : '-'} đến
-                          </div>
-                          <div>
-                            {course.scheduleEndDate
-                              ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN')
-                              : '-'}
-                          </div>
-                        </div>
-                      ) : (
-                        timeDisplay
-                      )}
+                      {(() => {
+                        if (showInstructor) {
+                          return (
+                            <div>
+                              <div>
+                                {course.scheduleStartDate
+                                  ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN')
+                                  : '-'} đến
+                              </div>
+                              <div>
+                                {course.scheduleEndDate
+                                  ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN')
+                                  : '-'}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return timeDisplay;
+                      })()}
                     </td>
                   </tr>
                 )

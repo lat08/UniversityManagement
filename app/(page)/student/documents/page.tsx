@@ -73,11 +73,11 @@ export default function DocumentsPage() {
   };
 
   const handleDownloadAll = (group: CourseGroup) => {
-    (group.documents || []).forEach(doc => {
+    for (const doc of group.documents || []) {
       if (doc.downloadUrl) {
         window.open(doc.downloadUrl, '_blank');
       }
-    });
+    }
   };
 
   return (
@@ -102,26 +102,30 @@ export default function DocumentsPage() {
           subjectsLoading={subjectsLoading}
         />
 
-        {error ? (
-          <DocumentsError error={error} onRetry={refetch} />
-        ) : loading ? (
-          <DocumentsLoading />
-        ) : (
-          <div className="space-y-4">
-            {safeCourseGroups.length === 0 ? (
-              <DocumentsEmpty hasFilters={hasFilters} />
-            ) : (
-              safeCourseGroups.map((group) => (
-                <DocumentCard
-                  key={group.courseClassId}
-                  courseGroup={group}
-                  onView={handleView}
-                  onDownloadAll={handleDownloadAll}
-                />
-              ))
-            )}
-          </div>
-        )}
+        {(() => {
+          if (error) {
+            return <DocumentsError error={error} onRetry={refetch} />;
+          }
+          if (loading) {
+            return <DocumentsLoading />;
+          }
+          return (
+            <div className="space-y-4">
+              {safeCourseGroups.length === 0 ? (
+                <DocumentsEmpty hasFilters={hasFilters} />
+              ) : (
+                safeCourseGroups.map((group) => (
+                  <DocumentCard
+                    key={group.courseClassId}
+                    courseGroup={group}
+                    onView={handleView}
+                    onDownloadAll={handleDownloadAll}
+                  />
+                ))
+              )}
+            </div>
+          );
+        })()}
 
         {!loading && !error && totalCount > 0 && (
           <div className="pt-4">

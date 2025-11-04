@@ -8,11 +8,11 @@ import { formatDate } from "@/lib/utils/format"
 export const transformMaterialsToDocuments = (materials: CourseClassMaterials[]): Document[] => {
   const documents: Document[] = []
 
-  materials.forEach((courseClass) => {
-    courseClass.documents.forEach((doc) => {
+  for (const courseClass of materials) {
+    for (const doc of courseClass.documents) {
       documents.push(transformMaterialDocumentToDocument(doc, courseClass))
-    })
-  })
+    }
+  }
 
   return documents
 }
