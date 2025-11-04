@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Calendar, User, Edit2 } from 'lucide-react';
-import Image from 'next/image';
+import { Calendar, Edit2 } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
 import { Tabs } from '@/app/components/ui/tabs';
 import { Dropdown, DropdownSearch } from '@/app/components/ui';
 import { studentsApi } from '../../lib/api/studentsApi';
@@ -417,20 +417,15 @@ export default function EditStudentPage() {
                   <div className="flex-shrink-0">
                     <div className="relative group">
                       <div 
-                        className="w-40 h-40 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-200 cursor-pointer"
+                        className="cursor-pointer"
                         onClick={handleAvatarClick}
                       >
-                        {profilePicturePreview ? (
-                          <Image
-                            src={profilePicturePreview}
-                            alt="Avatar"
-                            width={160}
-                            height={160}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User className="w-20 h-20 text-gray-400" />
-                        )}
+                        <Avatar className="w-40 h-40 border-2 border-gray-200 shadow-md">
+                          <AvatarImage src={profilePicturePreview || ""} alt={studentData.fullName} />
+                          <AvatarFallback className="bg-blue-100 text-blue-600 text-3xl font-bold">
+                            {studentData.fullName.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
                       <button
                         type="button"

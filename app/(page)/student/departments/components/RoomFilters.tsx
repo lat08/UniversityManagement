@@ -3,6 +3,7 @@
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { Dropdown } from '@/app/components/ui/dropdown';
 import { ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
+import { useBuildings } from '@/lib/hooks/useCommonData';
 
 interface RoomFiltersProps {
   onSearch: () => void;
@@ -17,7 +18,7 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
   const tempFilters = useRoomBookingStore((state) => state.tempFilters);
   const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
   const applyFilters = useRoomBookingStore((state) => state.applyFilters);
-  const rooms = useRoomBookingStore((state) => state.rooms) || [];
+  const { data: buildings } = useBuildings();
 
   const handleFilterChange = (key: string, value: string) => {
     setTempFilters({ [key]: value });
@@ -27,13 +28,9 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
     }, 0);
   };
 
-  const uniqueBuildings = rooms 
-    ? Array.from(new Map(rooms.map(room => [room.building.buildingId, room.building])).values())
-    : [];
-
   const buildingOptions = [
     { value: '', label: 'Tất cả' },
-    ...uniqueBuildings.map(b => ({ 
+    ...buildings.map(b => ({ 
       value: b.buildingId, 
       label: `${b.buildingName} (${b.buildingCode})` 
     }))
@@ -70,7 +67,7 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
 
       {/* Loại phòng Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-[#0053AD] mb-2">Khoa</label>
+        <label className="block text-sm font-medium text-[#0053AD] mb-2">Loại phòng</label>
         <Dropdown
           options={roomTypeOptions}
           value={tempFilters.roomType || ''}

@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import type { BookingData } from '../lib/types/room.types';
 import { BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
 import CancelBookingModal from './CancelBookingModal';
+import { useBuildings } from '@/lib/hooks/useCommonData';
 
 const createDropdownOptions = (labels: Record<string, string>) => [
   { value: '', label: 'Tất cả' },
@@ -29,6 +30,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
   const tempFilters = useRoomBookingStore((state) => state.tempFilters);
   const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
   const applyFilters = useRoomBookingStore((state) => state.applyFilters);
+  const { data: buildings } = useBuildings();
   
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
@@ -144,16 +146,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     }
   };
 
-  const uniqueBuildings = useMemo(() => {
-    const buildingMap = new Map();
-    bookings.forEach(booking => {
-      if (!buildingMap.has(booking.building.buildingId)) {
-        buildingMap.set(booking.building.buildingId, booking.building);
-      }
-    });
-    return Array.from(buildingMap.values());
-  }, [bookings]);
-
   const handleFilterChange = (key: string, value: string) => {
     setTempFilters({ [key]: value });
     setTimeout(() => {
@@ -172,7 +164,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
 
   const buildingOptions = [
     { value: '', label: 'Tất cả' },
-    ...uniqueBuildings.map(b => ({ 
+    ...buildings.map(b => ({ 
       value: b.buildingId, 
       label: `${b.buildingName} (${b.buildingCode})` 
     }))
@@ -234,7 +226,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
 
         {/* Loại phòng Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-[#0053AD] mb-2">Khoa</label>
+          <label className="block text-sm font-medium text-[#0053AD] mb-2">Loại phòng</label>
           <Dropdown
             options={roomTypeOptions}
             value={tempFilters.roomType || ''}
@@ -311,7 +303,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
                   {/* Số người tham gia */}
                   <div className="flex items-baseline gap-2">
                     <span className="text-gray-600">Số người tham gia</span>
-                    <span className="font-semibold text-gray-900">10 người</span>
+                    <span className="font-semibold text-gray-900">{booking.studentCount ?? 0} người</span>
                       </div>
 
                       {/* Thời gian sử dụng */}

@@ -20,9 +20,9 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
       <CardContent className="space-y-4 flex-1 max-h-[400px] overflow-y-auto">
         {/* ✅ Nếu có lớp */}
         {hasClasses ? (
-          currentSubjects.map((classInfo) => (
+          currentSubjects.map((classInfo, index) => (
             <div
-              key={classInfo.courseId}
+              key={`${classInfo.courseId}-${classInfo.subjectCode}-${index}`}
               className="border border-[var(--classlist-border)] shadow shadow-md p-4 rounded-sm hover:border-[var(--primary)] hover:shadow-sm transition-all"
             >
               <div className="flex items-start justify-between mb-3">
