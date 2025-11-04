@@ -43,6 +43,39 @@ const validationSchema = yup.object({
 
 type FormData = InferType<typeof validationSchema>;
 
+const fetchFaculties = async (): Promise<Faculty[]> => {
+  try {
+    const response = await studentsApi.getFaculties({
+      pageNumber: 1,
+      pageSize: 100,
+    });
+    return response.success ? response.data.items : [];
+  } catch {
+    return [];
+  }
+};
+
+const fetchDepartments = async (): Promise<Department[]> => {
+  try {
+    const response = await studentsApi.getDepartments({
+      pageNumber: 1,
+      pageSize: 100,
+    });
+    return response.success ? response.data.items : [];
+  } catch {
+    return [];
+  }
+};
+
+const fetchClasses = async (departmentId?: string): Promise<ClassItem[]> => {
+  try {
+    const response = await studentsApi.getClasses({ departmentId });
+    return response.success ? response.data : [];
+  } catch {
+    return [];
+  }
+};
+
 export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalProps) {
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset, clearErrors } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
@@ -73,9 +106,9 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
 
   useEffect(() => {
     if (isOpen) {
-      fetchFaculties();
-      fetchDepartments();
-      fetchClasses();
+      fetchFaculties().then(setFaculties);
+      fetchDepartments().then(setDepartments);
+      fetchClasses().then(setClasses);
     }
   }, [isOpen]);
 
@@ -86,52 +119,9 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
   }, [formValues.facultyId, setValue]);
 
   useEffect(() => {
-    // reload classes when department changes (filter optional)
-    fetchClasses(formValues.departmentId || undefined);
-    // clear selected classId when department changes
+    fetchClasses(formValues.departmentId || undefined).then(setClasses);
     setValue('classId', '');
   }, [formValues.departmentId, setValue]);
-
-
-
-  const fetchFaculties = async () => {
-    try {
-      const response = await studentsApi.getFaculties({
-        pageNumber: 1,
-        pageSize: 100,
-      });
-      if (response.success) {
-        setFaculties(response.data.items);
-      }
-    } catch (error) {
-      console.error('Error fetching faculties:', error);
-    }
-  };
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await studentsApi.getDepartments({
-        pageNumber: 1,
-        pageSize: 100,
-      });
-      if (response.success) {
-        setDepartments(response.data.items);
-      }
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    }
-  };
-
-  const fetchClasses = async (departmentId?: string) => {
-    try {
-      const response = await studentsApi.getClasses({ departmentId });
-      if (response.success) {
-        setClasses(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching classes:', error);
-    }
-  };
 
   const genders = [
     { value: 'male', label: 'Nam' },
