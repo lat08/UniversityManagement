@@ -53,13 +53,6 @@ export function ScheduleTooltip({
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape' && onMouseLeave) {
-          onMouseLeave();
-        }
-      }}
-      tabIndex={0}
     >
       <div className="relative">
         <div 

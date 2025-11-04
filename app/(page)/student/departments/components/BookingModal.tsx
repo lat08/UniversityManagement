@@ -409,7 +409,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 options={bookingDate ? generateTimeOptions(bookingDate) : []}
                 value={startTime}
                 placeholder={
-                  !bookingDate 
+                  bookingDate === null
                     ? 'Vui lòng chọn ngày trước' 
                     : generateTimeOptions(bookingDate).length === 0 
                     ? 'Không có thời gian khả dụng cho hôm nay'

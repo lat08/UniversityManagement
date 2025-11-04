@@ -91,20 +91,26 @@ export function SemesterScheduleTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                  Đang tải dữ liệu...
-                </td>
-              </tr>
-            ) : scheduleData.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                  Không có dữ liệu thời khóa biểu
-                </td>
-              </tr>
-            ) : (
-              scheduleData.map((course, index) => {
+            {(() => {
+              if (isLoading) {
+                return (
+                  <tr>
+                    <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
+                      Đang tải dữ liệu...
+                    </td>
+                  </tr>
+                );
+              }
+              if (scheduleData.length === 0) {
+                return (
+                  <tr>
+                    <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
+                      Không có dữ liệu thời khóa biểu
+                    </td>
+                  </tr>
+                );
+              }
+              return scheduleData.map((course, index) => {
                 const periodDisplay = (() => {
                   if (showInstructor) {
                     return String(course.startPeriod || '-');
@@ -197,9 +203,9 @@ export function SemesterScheduleTable({
                       })()}
                     </td>
                   </tr>
-                )
-              })
-            )}
+                );
+              });
+            })()}
           </tbody>
         </table>
       </div>

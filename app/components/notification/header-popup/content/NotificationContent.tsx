@@ -23,7 +23,7 @@ export function NotificationPopup() {
       if (response.isSuccess) {
         setUnreadCount(response.data.unreadCount)
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching unread count:', err);
     }
   }
@@ -35,7 +35,7 @@ export function NotificationPopup() {
       if (response.isSuccess) {
         setNotifications(response.data.notifications.data)
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching notifications:', err);
     } finally {
       setLoading(false)
@@ -44,15 +44,17 @@ export function NotificationPopup() {
 
   useEffect(() => {
     if (user) {
-      fetchUnreadCount()
-      const interval = setInterval(fetchUnreadCount, 30000) // 30 seconds
+      void fetchUnreadCount()
+      const interval = setInterval(() => {
+        void fetchUnreadCount()
+      }, 30000)
       return () => clearInterval(interval)
     }
   }, [user])
 
   useEffect(() => {
     if (isOpen && user) {
-      fetchRecentNotifications()
+      void fetchRecentNotifications()
     }
   }, [isOpen, user])
 

@@ -48,7 +48,11 @@ export const useSemesters = (): UseCommonDataReturn<Semester> => {
     void fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refetch: fetchData };
+  const handleRefetch = useCallback(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
 };
 
 export const useSubjects = (): UseCommonDataReturn<Subject> => {
@@ -83,7 +87,11 @@ export const useSubjects = (): UseCommonDataReturn<Subject> => {
     void fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refetch: fetchData };
+  const handleRefetch = useCallback(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
 };
 
 export const useFaculties = (): UseCommonDataReturn<Faculty> => {
@@ -118,7 +126,11 @@ export const useFaculties = (): UseCommonDataReturn<Faculty> => {
     fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refetch: fetchData };
+  const handleRefetch = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
 };
 
 export const useDepartments = (params?: { facultyId?: string }): UseCommonDataReturn<Department> => {
@@ -153,7 +165,11 @@ export const useDepartments = (params?: { facultyId?: string }): UseCommonDataRe
     fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refetch: fetchData };
+  const handleRefetch = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
 };
 
 export const useClasses = (params?: { departmentId?: string; facultyId?: string }): UseCommonDataReturn<Class> => {
@@ -188,7 +204,11 @@ export const useClasses = (params?: { departmentId?: string; facultyId?: string 
     fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refetch: fetchData };
+  const handleRefetch = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
 };
 
 export const useAcademicYears = (params?: { count?: number }): UseCommonDataReturn<AcademicYear> => {
@@ -223,6 +243,10 @@ export const useAcademicYears = (params?: { count?: number }): UseCommonDataRetu
     fetchData();
   }, [fetchData]);
 
-  return { data, loading, error, refetch: fetchData };
+  const handleRefetch = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: handleRefetch };
 };
 

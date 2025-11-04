@@ -42,11 +42,15 @@ export const useDocumentTypes = (): UseDocumentTypesReturn => {
     void fetchDocumentTypes()
   }, [fetchDocumentTypes])
 
+  const handleRefetch = useCallback(() => {
+    void fetchDocumentTypes()
+  }, [fetchDocumentTypes])
+
   return {
     documentTypes,
     loading,
     error,
-    refetch: fetchDocumentTypes,
+    refetch: handleRefetch,
   }
 }
 

@@ -61,7 +61,8 @@ export const useGrades = (): UseGradesReturn => {
       
       const { downloadFileBlob } = await import('@/lib/utils/fileDownload')
       downloadFileBlob(blob, fileName)
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error('Error exporting PDF:', err)
       setError('Không thể xuất file PDF')
     } finally {
       setIsLoading(false)

@@ -44,7 +44,8 @@ export default function ExamSchedulePage() {
         const transformedData = transformExamData(data);
         const sortedExams = sortExamsByStatus(transformedData);
         setExams(sortedExams);
-      } catch (error) {
+      } catch (error: unknown) {
+        console.error('Error fetching exam schedule:', error);
         setExams([]);
       } finally {
         setLoading(false);

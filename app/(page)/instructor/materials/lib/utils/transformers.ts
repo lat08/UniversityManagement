@@ -36,7 +36,8 @@ export const transformMaterialDocumentToDocument = (
   // Extract class code from course name if possible
   // Example: "Lập trình web - 230PM" -> "230PM"
   const extractClassCode = (courseName: string): string => {
-    const match = courseName.match(/\s-\s(\w+)$/)
+    const regex = /\s-\s(\w+)$/
+    const match = regex.exec(courseName)
     return match ? match[1] : ''
   }
 

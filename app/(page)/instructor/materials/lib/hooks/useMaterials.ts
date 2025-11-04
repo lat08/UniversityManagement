@@ -77,7 +77,8 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
         return false
       }
     } catch (err) {
-      toast.error("Lỗi khi tải lên tài liệu")
+      const axiosErr = err as AxiosError<{ message?: string }>
+      toast.error(axiosErr.response?.data?.message || "Lỗi khi tải lên tài liệu")
       return false
     } finally {
       setLoading(false)
@@ -98,7 +99,8 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
         return false
       }
     } catch (err) {
-      toast.error("Lỗi khi cập nhật tài liệu")
+      const axiosErr = err as AxiosError<{ message?: string }>
+      toast.error(axiosErr.response?.data?.message || "Lỗi khi cập nhật tài liệu")
       return false
     } finally {
       setLoading(false)
@@ -119,7 +121,8 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
         return false
       }
     } catch (err) {
-      toast.error("Lỗi khi xóa tài liệu")
+      const axiosErr = err as AxiosError<{ message?: string }>
+      toast.error(axiosErr.response?.data?.message || "Lỗi khi xóa tài liệu")
       return false
     } finally {
       setLoading(false)
@@ -130,11 +133,15 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
     void fetchMaterials()
   }, [fetchMaterials])
 
+  const handleRefetch = useCallback(() => {
+    void fetchMaterials()
+  }, [fetchMaterials])
+
   return {
     materials,
     loading,
     error,
-    refetch: fetchMaterials,
+    refetch: handleRefetch,
     totalCount,
     uploadMaterial,
     updateMaterial,

@@ -78,11 +78,15 @@ export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn =>
     void fetchDocuments();
   }, [fetchDocuments]);
 
+  const handleRefetch = useCallback(() => {
+    void fetchDocuments();
+  }, [fetchDocuments]);
+
   return {
     courseGroups,
     loading,
     error,
-    refetch: fetchDocuments,
+    refetch: handleRefetch,
     totalCount,
     pageNumber,
     pageSize,

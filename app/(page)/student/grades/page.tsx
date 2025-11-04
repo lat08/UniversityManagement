@@ -407,20 +407,22 @@ export default function ScoresPage() {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs sm:text-sm font-bold text-gray-900">Phân loại học lực học kỳ:</span>
-                    {stats.classification && (
+                    {stats.classification ? (
                       <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-white`} style={{
-                        backgroundColor: 
-                          stats.classification === "Xuất sắc" ? "var(--grade-class-excellent-bg)" :
-                          stats.classification === "Giỏi" ? "var(--grade-class-good-bg)" :
-                          stats.classification === "Khá" ? "var(--grade-class-fair-bg)" :
-                          stats.classification === "Trung bình" ? "var(--grade-class-average-bg)" :
-                          stats.classification === "Yếu" ? "var(--grade-class-weak-bg)" :
-                          "#9ca3af"
+                        backgroundColor: (() => {
+                          if (stats.classification === "Xuất sắc") return "var(--grade-class-excellent-bg)";
+                          if (stats.classification === "Giỏi") return "var(--grade-class-good-bg)";
+                          if (stats.classification === "Khá") return "var(--grade-class-fair-bg)";
+                          if (stats.classification === "Trung bình") return "var(--grade-class-average-bg)";
+                          if (stats.classification === "Yếu") return "var(--grade-class-weak-bg)";
+                          return "#9ca3af";
+                        })()
                       }}>
                         {stats.classification}
                       </span>
+                    ) : (
+                      <span className="text-xs sm:text-sm text-gray-500">-</span>
                     )}
-                    {!stats.classification && <span className="text-xs sm:text-sm text-gray-500">-</span>}
                   </div>
                 </div>
               </div>

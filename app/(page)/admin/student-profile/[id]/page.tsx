@@ -488,10 +488,10 @@ export default function StudentDetailPage() {
                       <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
                       <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                        {grade.finalGrade !== null ? grade.finalGrade.toFixed(1) : '-'}
+                        {grade.finalGrade === null ? '-' : grade.finalGrade.toFixed(1)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
-                        {grade.finalGrade10 !== null ? grade.finalGrade10.toFixed(1) : '-'}
+                        {grade.finalGrade10 === null ? '-' : grade.finalGrade10.toFixed(1)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
                         {grade.finalGrade4.toFixed(1)}
