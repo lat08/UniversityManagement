@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/app/components/ui/dialog";
 import { DropdownSearch, Dropdown } from "@/app/components/ui";
+import { handleFileClick, handleFileDrop, handleDragOver, handleFileInputChange } from "../lib/utils/modalHandlers";
 
 interface UploadDocumentModalProps {
   isOpen: boolean;
@@ -56,31 +57,16 @@ export function UploadDocumentModal({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, file }));
-    if (errors.file) {
-      setErrors((prev) => ({ ...prev, file: undefined }));
-    }
+    handleFileInputChange(e, setFormData, setErrors, false);
   };
 
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
+  const onFileClick = () => handleFileClick(fileInputRef);
+
+  const onFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    handleFileDrop(e, setFormData, setErrors, false);
   };
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0] || null;
-    if (file) {
-      setFormData((prev) => ({ ...prev, file }));
-      if (errors.file) {
-        setErrors((prev) => ({ ...prev, file: undefined }));
-      }
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
+  const onDragOver = handleDragOver;
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UploadFormData, string>> = {};
@@ -222,9 +208,9 @@ export function UploadDocumentModal({
               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
             />
             <div
-              onClick={handleFileClick}
-              onDrop={handleFileDrop}
-              onDragOver={handleDragOver}
+              onClick={onFileClick}
+              onDrop={onFileDrop}
+              onDragOver={onDragOver}
               className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
             >
               <div className="flex flex-col items-center gap-3">

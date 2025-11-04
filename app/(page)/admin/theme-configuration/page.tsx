@@ -72,15 +72,14 @@ export default function ThemeConfigurationPage() {
 
   const pageUpdateMutation = useMutation({
     mutationFn: async (colors: Record<string, string>) => {
-      const activeThemeResponse = await themeApi.getActive('global');
-      const activeTheme = activeThemeResponse.data;
+      const activeTheme = await themeApi.getActive('global');
       
       if (!activeTheme?.themeConfigId) {
         throw new Error('No active theme found');
       }
       
       // Update theme - backend will merge colors automatically
-      const updateResponse = await themeApi.update(activeTheme.themeConfigId, { colors });
+      const updatedTheme = await themeApi.update(activeTheme.themeConfigId, { colors });
       
       // Apply theme to broadcast changes
       await themeApi.apply({ 
@@ -88,7 +87,7 @@ export default function ThemeConfigurationPage() {
         changeReason: 'Theme colors updated' 
       });
       
-      return updateResponse.data;
+      return updatedTheme;
     },
     onSuccess: (updatedTheme) => {
       toast.success('Cập nhật màu sắc thành công!');
@@ -108,7 +107,7 @@ export default function ThemeConfigurationPage() {
     },
   });
 
-  const themes = themesData?.data?.data || [];
+  const themes = themesData?.data || [];
 
   const handleCreateTheme = () => {
     if (!newThemeName.trim()) {

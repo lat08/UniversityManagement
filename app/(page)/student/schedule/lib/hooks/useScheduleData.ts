@@ -7,6 +7,7 @@ import {
 import { Semester, Subject } from "@/lib/types"
 import { useSemesters, useSubjects } from "@/lib/hooks"
 import toast from "react-hot-toast"
+import { getScheduleErrorMessage, handleScheduleError } from "@/lib/utils/scheduleErrorHandling"
 
 export const useScheduleData = () => {
   const { data: semestersData, loading: semestersLoading } = useSemesters()
@@ -76,7 +77,6 @@ export const useScheduleData = () => {
   }, [])
 
 
-  // Fetch thời khóa biểu theo tuần
   const fetchWeeklySchedule = useCallback(async (semesterId: string, weekNumber: number) => {
     try {
       setIsLoading(true)
@@ -87,18 +87,11 @@ export const useScheduleData = () => {
         setScheduleData(response.data)
       } else {
         setScheduleData([])
-        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
+        setError(getScheduleErrorMessage(response))
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { success?: boolean; message?: string } } }
-      if (err?.response?.data?.success === false) {
-        const response = err.response.data
-        setScheduleData([])
-        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
-      } else {
-        setError("Lỗi khi tải thời khóa biểu theo tuần")
-        setScheduleData([])
-      }
+      setScheduleData([])
+      setError(handleScheduleError(error) || "Lỗi khi tải thời khóa biểu theo tuần")
     } finally {
       setIsLoading(false)
     }
@@ -114,18 +107,11 @@ export const useScheduleData = () => {
         setScheduleData(response.data)
       } else {
         setScheduleData([])
-        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
+        setError(getScheduleErrorMessage(response))
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { success?: boolean; message?: string } } }
-      if (err?.response?.data?.success === false) {
-        const response = err.response.data
-        setScheduleData([])
-        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
-      } else {
-        setError("Lỗi khi tải thời khóa biểu theo tuần và môn học")
-        setScheduleData([])
-      }
+      setScheduleData([])
+      setError(handleScheduleError(error) || "Lỗi khi tải thời khóa biểu theo tuần và môn học")
     } finally {
       setIsLoading(false)
     }

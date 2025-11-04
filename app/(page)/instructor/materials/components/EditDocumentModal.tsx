@@ -14,6 +14,7 @@ import {
 } from "@/app/components/ui/dialog";
 import { DropdownSearch, Dropdown } from "@/app/components/ui";
 import type { Document } from "./DocumentCard";
+import { handleFileClick, handleFileDrop, handleDragOver, handleFileInputChange } from "../lib/utils/modalHandlers";
 
 interface EditDocumentModalProps {
   isOpen: boolean;
@@ -78,31 +79,16 @@ export function EditDocumentModal({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, file, shouldDeleteFile: false }));
-    if (errors.file) {
-      setErrors((prev) => ({ ...prev, file: undefined }));
-    }
+    handleFileInputChange(e, setFormData, setErrors, true);
   };
 
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
+  const onFileClick = () => handleFileClick(fileInputRef);
+
+  const onFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    handleFileDrop(e, setFormData, setErrors, true);
   };
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0] || null;
-    if (file) {
-      setFormData((prev) => ({ ...prev, file, shouldDeleteFile: false }));
-      if (errors.file) {
-        setErrors((prev) => ({ ...prev, file: undefined }));
-      }
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
+  const onDragOver = handleDragOver;
 
   const handleDeleteFile = () => {
     setFormData((prev) => ({
@@ -258,9 +244,9 @@ export function EditDocumentModal({
               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
             />
             <div
-              onClick={handleFileClick}
-              onDrop={handleFileDrop}
-              onDragOver={handleDragOver}
+              onClick={onFileClick}
+              onDrop={onFileDrop}
+              onDragOver={onDragOver}
               className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
             >
               <div className="flex flex-col items-center gap-3">
