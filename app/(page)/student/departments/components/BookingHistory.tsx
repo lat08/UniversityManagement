@@ -13,6 +13,11 @@ import type { BookingData } from '../lib/types/room.types';
 import { BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
 import CancelBookingModal from './CancelBookingModal';
 
+const createDropdownOptions = (labels: Record<string, string>) => [
+  { value: '', label: 'Tất cả' },
+  ...Object.entries(labels).map(([key, label]) => ({ value: key, label }))
+];
+
 interface BookingHistoryProps {
   bookings: BookingData[];
   isLoading: boolean;
@@ -173,15 +178,8 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     }))
   ];
 
-  const roomTypeOptions = [
-    { value: '', label: 'Tất cả' },
-    ...Object.entries(ROOM_TYPE_LABELS).map(([key, label]) => ({ value: key, label }))
-  ];
-
-  const statusOptions = [
-    { value: '', label: 'Tất cả' },
-    ...Object.entries(ROOM_STATUS_LABELS).map(([key, label]) => ({ value: key, label }))
-  ];
+  const roomTypeOptions = createDropdownOptions(ROOM_TYPE_LABELS);
+  const statusOptions = createDropdownOptions(ROOM_STATUS_LABELS);
 
   if (isLoading) {
     return (

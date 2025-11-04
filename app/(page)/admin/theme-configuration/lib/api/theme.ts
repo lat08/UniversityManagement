@@ -214,58 +214,34 @@ export interface ThemeFilterParams {
   pageSize?: number;
 }
 
-// API Functions
+const executeApiCall = async <T>(apiCall: () => Promise<{ data: T }>): Promise<T> => {
+  const response = await apiCall();
+  return response.data;
+};
+
 export const themeApi = {
-  // Get theme list
-  getList: async (params?: ThemeFilterParams) => {
-    const response = await apiClient.get('/v1/theme', { params });
-    return response.data;
-  },
+  getList: (params?: ThemeFilterParams): Promise<{ data: ThemeConfig[]; totalCount?: number }> =>
+    executeApiCall(() => apiClient.get('/v1/theme', { params })),
 
-  // Get theme by ID
-  getById: async (id: string) => {
-    const response = await apiClient.get(`/v1/theme/${id}`);
-    return response.data;
-  },
+  getById: (id: string): Promise<ThemeConfig> =>
+    executeApiCall(() => apiClient.get(`/v1/theme/${id}`)),
 
-  // Get active theme
-  getActive: async (scopeType: string = 'global', scopeTarget?: string) => {
-    const response = await apiClient.get('/v1/theme/active', {
-      params: { scopeType, scopeTarget }
-    });
-    return response.data;
-  },
+  getActive: (scopeType: string = 'global', scopeTarget?: string): Promise<ThemeConfig> =>
+    executeApiCall(() => apiClient.get('/v1/theme/active', { params: { scopeType, scopeTarget } })),
 
-  // Create theme
-  create: async (data: CreateThemeRequest) => {
-    const response = await apiClient.post('/v1/theme', data);
-    return response.data;
-  },
+  create: (data: CreateThemeRequest): Promise<ThemeConfig> =>
+    executeApiCall(() => apiClient.post('/v1/theme', data)),
 
-  // Update theme
-  update: async (id: string, data: UpdateThemeRequest) => {
-    const response = await apiClient.put(`/v1/theme/${id}`, data);
-    return response.data;
-  },
+  update: (id: string, data: UpdateThemeRequest): Promise<ThemeConfig> =>
+    executeApiCall(() => apiClient.put(`/v1/theme/${id}`, data)),
 
-  // Delete theme
-  delete: async (id: string) => {
-    const response = await apiClient.delete(`/v1/theme/${id}`);
-    return response.data;
-  },
+  delete: (id: string): Promise<void> =>
+    executeApiCall(() => apiClient.delete(`/v1/theme/${id}`)),
 
-  // Apply theme
-  apply: async (data: ApplyThemeRequest) => {
-    const response = await apiClient.post('/v1/theme/apply', data);
-    return response.data;
-  },
+  apply: (data: ApplyThemeRequest): Promise<void> =>
+    executeApiCall(() => apiClient.post('/v1/theme/apply', data)),
 
-  // Get theme history
-  getHistory: async (id: string, limit: number = 50) => {
-    const response = await apiClient.get(`/v1/theme/${id}/history`, {
-      params: { limit }
-    });
-    return response.data;
-  },
+  getHistory: (id: string, limit: number = 50): Promise<ThemeConfig[]> =>
+    executeApiCall(() => apiClient.get(`/v1/theme/${id}/history`, { params: { limit } })),
 };
 

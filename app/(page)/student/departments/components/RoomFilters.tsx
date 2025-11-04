@@ -8,6 +8,11 @@ interface RoomFiltersProps {
   onSearch: () => void;
 }
 
+const createDropdownOptions = (labels: Record<string, string>) => [
+  { value: '', label: 'Tất cả' },
+  ...Object.entries(labels).map(([key, label]) => ({ value: key, label }))
+];
+
 export default function RoomFilters({ onSearch }: RoomFiltersProps) {
   const tempFilters = useRoomBookingStore((state) => state.tempFilters);
   const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
@@ -34,15 +39,8 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
     }))
   ];
 
-  const roomTypeOptions = [
-    { value: '', label: 'Tất cả' },
-    ...Object.entries(ROOM_TYPE_LABELS).map(([key, label]) => ({ value: key, label }))
-  ];
-
-  const statusOptions = [
-    { value: '', label: 'Tất cả' },
-    ...Object.entries(ROOM_STATUS_LABELS).map(([key, label]) => ({ value: key, label }))
-  ];
+  const roomTypeOptions = createDropdownOptions(ROOM_TYPE_LABELS);
+  const statusOptions = createDropdownOptions(ROOM_STATUS_LABELS);
 
   return (
     <div className="mb-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">

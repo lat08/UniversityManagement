@@ -28,10 +28,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const loadActiveTheme = async () => {
       try {
         const response = await themeApi.getActive('global');
-        if (response.data && isMounted) {
+        if (response && isMounted) {
           // Force update the theme from backend (overwrites persisted state)
-          setCurrentTheme(response.data);
-          console.log('[ThemeProvider] Loaded active theme from backend:', response.data.themeName);
+          setCurrentTheme(response);
+          console.log('[ThemeProvider] Loaded active theme from backend:', response.themeName);
         }
       } catch (error) {
         console.warn('[ThemeProvider] Failed to load active theme from backend, using persisted theme');

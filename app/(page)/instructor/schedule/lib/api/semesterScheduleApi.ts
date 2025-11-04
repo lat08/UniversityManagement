@@ -28,55 +28,40 @@ const transformScheduleData = (apiData: InstructorSemesterScheduleApiItem[]): In
   }))
 }
 
+const extractSchedulesData = (apiResponse: InstructorSemesterScheduleResponse): InstructorSemesterScheduleApiItem[] => {
+  if (Array.isArray(apiResponse.data)) {
+    return apiResponse.data
+  }
+  
+  if (apiResponse.data && typeof apiResponse.data === 'object') {
+    if ('schedules' in apiResponse.data) {
+      const dataObj = apiResponse.data as { schedules: InstructorSemesterScheduleApiItem[] }
+      return dataObj.schedules || []
+    }
+    if ('Schedules' in apiResponse.data) {
+      const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
+      return dataObj.Schedules || []
+    }
+  }
+  
+  return []
+}
+
+const processScheduleResponse = (apiResponse: InstructorSemesterScheduleResponse) => ({
+  success: apiResponse.success,
+  data: transformScheduleData(extractSchedulesData(apiResponse)),
+  message: apiResponse.message
+})
+
 export const instructorSemesterScheduleApi = {
   getInstructorSchedule: async (semesterId: string): Promise<{ success: boolean; data: InstructorSemesterScheduleItem[]; message?: string }> => {
     const response = await api.get(`/v1/instructor-schedule/semester-schedule?semesterId=${semesterId}`)
-    const apiResponse: InstructorSemesterScheduleResponse = response.data
-    
-    let schedulesData: InstructorSemesterScheduleApiItem[] = []
-    
-    if (Array.isArray(apiResponse.data)) {
-      schedulesData = apiResponse.data
-    } else if (apiResponse.data && typeof apiResponse.data === 'object') {
-      if ('schedules' in apiResponse.data) {
-        const dataObj = apiResponse.data as { schedules: InstructorSemesterScheduleApiItem[] }
-        schedulesData = dataObj.schedules || []
-      } else if ('Schedules' in apiResponse.data) {
-        const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
-        schedulesData = dataObj.Schedules || []
-      }
-    }
-    
-    return {
-      success: apiResponse.success,
-      data: transformScheduleData(schedulesData),
-      message: apiResponse.message
-    }
+    return processScheduleResponse(response.data)
   },
 
   getScheduleBySubject: async (semesterId: string, subjectId: string): Promise<{ success: boolean; data: InstructorSemesterScheduleItem[]; message?: string }> => {
     const response = await api.get(`/v1/instructor-schedule/semester-schedule?SemesterId=${semesterId}&SubjectId=${subjectId}`)
-    const apiResponse: InstructorSemesterScheduleResponse = response.data
-    
-    let schedulesData: InstructorSemesterScheduleApiItem[] = []
-    
-    if (Array.isArray(apiResponse.data)) {
-      schedulesData = apiResponse.data
-    } else if (apiResponse.data && typeof apiResponse.data === 'object') {
-      if ('schedules' in apiResponse.data) {
-        const dataObj = apiResponse.data as { schedules: InstructorSemesterScheduleApiItem[] }
-        schedulesData = dataObj.schedules || []
-      } else if ('Schedules' in apiResponse.data) {
-        const dataObj = apiResponse.data as InstructorSemesterScheduleInfoDto
-        schedulesData = dataObj.Schedules || []
-      }
-    }
-    
-    return {
-      success: apiResponse.success,
-      data: transformScheduleData(schedulesData),
-      message: apiResponse.message
-    }
+    return processScheduleResponse(response.data)
   },
 
 }
