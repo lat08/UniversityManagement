@@ -75,6 +75,10 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
     fetchExamEntries();
   }, [fetchExamEntries]);
 
+  const handleRefetch = useCallback(() => {
+    fetchExamEntries();
+  }, [fetchExamEntries]);
+
   return {
     examEntries,
     totalCount,
@@ -85,7 +89,7 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
     hasNextPage,
     loading,
     error,
-    refetch: fetchExamEntries,
+    refetch: handleRefetch,
   };
 };
 
@@ -134,14 +138,18 @@ export const useExamEntryDetail = (
   }, [examEntryId]);
 
   useEffect(() => {
-    fetchExamEntryDetail();
+    void fetchExamEntryDetail();
+  }, [fetchExamEntryDetail]);
+
+  const handleRefetch = useCallback(() => {
+    void fetchExamEntryDetail();
   }, [fetchExamEntryDetail]);
 
   return {
     examEntryDetail,
     loading,
     error,
-    refetch: fetchExamEntryDetail,
+    refetch: handleRefetch,
   };
 };
 

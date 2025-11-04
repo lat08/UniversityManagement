@@ -70,33 +70,33 @@ export function ExamDetailModal({
             {/* Basic Info */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-bold text-gray-900">Môn học</label>
+                <div className="text-sm font-bold text-gray-900">Môn học</div>
                 <p className="text-sm text-gray-900 mt-1">
                   {examEntryDetail.subjectName} ({examEntryDetail.subjectCode})
                 </p>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-900">Lớp học phần</label>
+                <div className="text-sm font-bold text-gray-900">Lớp học phần</div>
                 <p className="text-sm text-gray-900 mt-1">
                   {examEntryDetail.courseClassCode} - {examEntryDetail.courseClassName}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-900">Học kỳ</label>
+                <div className="text-sm font-bold text-gray-900">Học kỳ</div>
                 <p className="text-sm text-gray-900 mt-1">{examEntryDetail.semesterName}</p>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-900">Loại đề thi</label>
+                <div className="text-sm font-bold text-gray-900">Loại đề thi</div>
                 <p className="text-sm text-gray-900 mt-1">
                   {EXAM_TYPE_LABELS[examEntryDetail.examType] || examEntryDetail.examType}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-900">Thời lượng</label>
+                <div className="text-sm font-bold text-gray-900">Thời lượng</div>
                 <p className="text-sm text-gray-900 mt-1">{examEntryDetail.durationMinutes} phút</p>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-900">Trạng thái</label>
+                <div className="text-sm font-bold text-gray-900">Trạng thái</div>
                 <p className="mt-1">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     ENTRY_STATUS_COLORS[examEntryDetail.entryStatus] || "bg-gray-100 text-gray-700"
@@ -107,7 +107,7 @@ export function ExamDetailModal({
               </div>
               {examEntryDetail.entryCode && (
                 <div>
-                  <label className="text-sm font-bold text-gray-900">Mã đề thi</label>
+                  <div className="text-sm font-bold text-gray-900">Mã đề thi</div>
                   <p className="text-sm text-gray-900 mt-1">{examEntryDetail.entryCode}</p>
                 </div>
               )}
@@ -116,7 +116,7 @@ export function ExamDetailModal({
             {/* Description */}
             {examEntryDetail.description && (
               <div>
-                <label className="text-sm font-bold text-gray-900">Mô tả</label>
+                <div className="text-sm font-bold text-gray-900">Mô tả</div>
                 <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">
                   {examEntryDetail.description}
                 </p>
@@ -176,18 +176,18 @@ export function ExamDetailModal({
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
               <div>
-                <label className="text-sm font-bold text-gray-900">Ngày tạo</label>
+                <div className="text-sm font-bold text-gray-900">Ngày tạo</div>
                 <p className="text-sm text-gray-900 mt-1">{examEntryDetail.createdAt ? formatDate(examEntryDetail.createdAt) : 'N/A'}</p>
               </div>
               {examEntryDetail.reviewedAt && (
                 <div>
-                  <label className="text-sm font-bold text-gray-900">Ngày duyệt</label>
+                  <div className="text-sm font-bold text-gray-900">Ngày duyệt</div>
                   <p className="text-sm text-gray-900 mt-1">{examEntryDetail.reviewedAt ? formatDate(examEntryDetail.reviewedAt) : 'N/A'}</p>
                 </div>
               )}
               {examEntryDetail.reviewerName && (
                 <div>
-                  <label className="text-sm font-bold text-gray-900">Người duyệt</label>
+                  <div className="text-sm font-bold text-gray-900">Người duyệt</div>
                   <p className="text-sm text-gray-900 mt-1">{examEntryDetail.reviewerName}</p>
                 </div>
               )}

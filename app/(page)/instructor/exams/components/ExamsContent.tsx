@@ -33,10 +33,10 @@ export function ExamsContent() {
 
   const filterParams = useMemo<GetExamEntriesParams>(() => ({
     searchKeyword: debouncedSearchQuery || undefined,
-    semesterId: selectedSemester !== "all" ? selectedSemester : undefined,
-    subjectId: selectedSubject !== "all" ? selectedSubject : undefined,
-    status: selectedStatus !== "all" ? selectedStatus : undefined,
-    examType: selectedExamType !== "all" ? selectedExamType : undefined,
+    semesterId: selectedSemester === "all" ? undefined : selectedSemester,
+    subjectId: selectedSubject === "all" ? undefined : selectedSubject,
+    status: selectedStatus === "all" ? undefined : selectedStatus,
+    examType: selectedExamType === "all" ? undefined : selectedExamType,
     pageNumber: currentPage,
     pageSize: DEFAULT_PAGE_SIZE,
   }), [debouncedSearchQuery, selectedSemester, selectedSubject, selectedStatus, selectedExamType, currentPage]);

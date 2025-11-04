@@ -95,8 +95,9 @@ export function Table<T = unknown>({
               }
               return data.map((item, index) => {
                 const rowClass = typeof rowClassName === "function" ? rowClassName(item, index) : rowClassName;
+                const itemKey = (item as { id?: string | number }).id || `row-${index}`;
                 return (
-                  <tr key={`row-${index}`} className={cn("hover:bg-gray-50", rowClass)}>
+                  <tr key={itemKey} className={cn("hover:bg-gray-50", rowClass)}>
                     {renderRow(item, index)}
                   </tr>
                 );

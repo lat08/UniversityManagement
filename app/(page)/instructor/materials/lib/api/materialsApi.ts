@@ -15,16 +15,16 @@ export const materialsApi = {
   getMaterials: async (params?: GetMaterialsParams): Promise<ApiResponse<MaterialsData>> => {
     const queryParams = new URLSearchParams()
     
-    if (params?.keyword && params.keyword.trim()) {
+    if (params?.keyword?.trim()) {
       queryParams.append('Keyword', params.keyword.trim())
     }
-    if (params?.documentType && params.documentType.trim()) {
+    if (params?.documentType?.trim()) {
       queryParams.append('DocumentType', params.documentType.trim())
     }
-    if (params?.semesterId && params.semesterId.trim()) {
+    if (params?.semesterId?.trim()) {
       queryParams.append('SemesterId', params.semesterId.trim())
     }
-    if (params?.subjectId && params.subjectId.trim()) {
+    if (params?.subjectId?.trim()) {
       queryParams.append('SubjectId', params.subjectId.trim())
     }
     if (params?.pageNumber && params.pageNumber > 0) {

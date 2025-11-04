@@ -44,8 +44,8 @@ export function NotificationsContent() {
           important: response.data.countByCategory.important
         })
       }
-    } catch (err) {
-      // Error handled silently
+    } catch (err: unknown) {
+      console.error('Error fetching unread counts:', err)
     }
   }
 
@@ -72,7 +72,8 @@ export function NotificationsContent() {
       } else {
         setError(response.resultMessage || "Không thể tải thông báo")
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error('Error fetching notifications:', err)
       setError("Đã xảy ra lỗi khi tải thông báo")
     } finally {
       setLoading(false)
@@ -114,8 +115,8 @@ export function NotificationsContent() {
         )
         fetchUnreadCounts()
       }
-    } catch (err) {
-      // Error handled silently
+    } catch (err: unknown) {
+      console.error('Error marking notification as read:', err)
     }
   }
 
@@ -128,8 +129,8 @@ export function NotificationsContent() {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
         fetchUnreadCounts()
       }
-    } catch (err) {
-      // Error handled silently
+    } catch (err: unknown) {
+      console.error('Error marking all as read:', err)
     } finally {
       setMarkingAllAsRead(false)
     }

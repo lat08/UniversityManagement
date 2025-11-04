@@ -81,10 +81,10 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className={`font-semibold text-base text-gray-900 ${!notification.isRead ? 'font-bold' : ''}`}>
+              <h3 className={`font-semibold text-base text-gray-900 ${notification.isRead === false ? 'font-bold' : ''}`}>
                 {notification.title}
               </h3>
-              {!notification.isRead && (
+              {notification.isRead === false && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   Mới
                 </span>

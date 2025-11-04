@@ -20,19 +20,41 @@ export function Pagination({
   className = ""
 }: PaginationProps) {
   const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = []
+    const pages: Array<{ type: 'page' | 'ellipsis'; value: number | string }> = []
     const maxVisible = 5
     
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
+        pages.push({ type: 'page', value: i })
       }
     } else if (currentPage <= 3) {
-      pages.push(1, 2, 3, 4, '...', totalPages)
+      pages.push(
+        { type: 'page', value: 1 },
+        { type: 'page', value: 2 },
+        { type: 'page', value: 3 },
+        { type: 'page', value: 4 },
+        { type: 'ellipsis', value: 'end' },
+        { type: 'page', value: totalPages }
+      )
     } else if (currentPage >= totalPages - 2) {
-      pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
+      pages.push(
+        { type: 'page', value: 1 },
+        { type: 'ellipsis', value: 'start' },
+        { type: 'page', value: totalPages - 3 },
+        { type: 'page', value: totalPages - 2 },
+        { type: 'page', value: totalPages - 1 },
+        { type: 'page', value: totalPages }
+      )
     } else {
-      pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages)
+      pages.push(
+        { type: 'page', value: 1 },
+        { type: 'ellipsis', value: 'start' },
+        { type: 'page', value: currentPage - 1 },
+        { type: 'page', value: currentPage },
+        { type: 'page', value: currentPage + 1 },
+        { type: 'ellipsis', value: 'end' },
+        { type: 'page', value: totalPages }
+      )
     }
     
     return pages
@@ -52,22 +74,22 @@ export function Pagination({
         >
           Trước
         </button>
-        {pageNumbers.map((page, index) => 
-          typeof page === 'number' ? (
+        {pageNumbers.map((item) => 
+          item.type === 'page' ? (
             <button
-              key={`page-${page}`}
-              onClick={() => onPageChange(page)}
+              key={`page-${item.value}`}
+              onClick={() => onPageChange(item.value as number)}
               className={`px-3 py-1 text-sm rounded cursor-pointer ${
-                currentPage === page
+                currentPage === item.value
                   ? 'bg-[#0053AD] text-white'
                   : 'border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              {page}
+              {item.value}
             </button>
           ) : (
-            <span key={`ellipsis-${index}`} className="px-3 py-1 text-sm text-gray-400">
-              {page}
+            <span key={`ellipsis-${item.value}`} className="px-3 py-1 text-sm text-gray-400">
+              ...
             </span>
           )
         )}
