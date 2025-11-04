@@ -6,7 +6,6 @@ import {
   UploadMaterialRequest,
   UpdateMaterialRequest
 } from "../type"
-import { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER } from "../constants"
 import toast from "react-hot-toast"
 import { AxiosError } from 'axios'
 
@@ -44,6 +43,7 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
       }
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string; data?: { message?: string } }>
+      console.error('Error fetching materials:', axiosErr)
       const errorMessage = 
         axiosErr.response?.data?.message || 
         axiosErr.response?.data?.data?.message ||
@@ -127,7 +127,7 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
   }, [fetchMaterials])
 
   useEffect(() => {
-    fetchMaterials()
+    void fetchMaterials()
   }, [fetchMaterials])
 
   return {

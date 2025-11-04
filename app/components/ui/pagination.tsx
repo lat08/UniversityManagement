@@ -3,12 +3,12 @@
 import { useMemo } from "react"
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  totalCount: number
-  pageSize: number
-  onPageChange: (page: number) => void
-  className?: string
+  readonly currentPage: number
+  readonly totalPages: number
+  readonly totalCount: number
+  readonly pageSize: number
+  readonly onPageChange: (page: number) => void
+  readonly className?: string
 }
 
 export function Pagination({
@@ -27,14 +27,12 @@ export function Pagination({
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i)
       }
+    } else if (currentPage <= 3) {
+      pages.push(1, 2, 3, 4, '...', totalPages)
+    } else if (currentPage >= totalPages - 2) {
+      pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
     } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, '...', totalPages)
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
-      } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages)
-      }
+      pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages)
     }
     
     return pages
@@ -57,7 +55,7 @@ export function Pagination({
         {pageNumbers.map((page, index) => 
           typeof page === 'number' ? (
             <button
-              key={index}
+              key={`page-${page}`}
               onClick={() => onPageChange(page)}
               className={`px-3 py-1 text-sm rounded cursor-pointer ${
                 currentPage === page
@@ -68,7 +66,7 @@ export function Pagination({
               {page}
             </button>
           ) : (
-            <span key={index} className="px-3 py-1 text-sm text-gray-400">
+            <span key={`ellipsis-${index}`} className="px-3 py-1 text-sm text-gray-400">
               {page}
             </span>
           )

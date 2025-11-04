@@ -30,9 +30,9 @@ export const useCourseClasses = () => {
         setCourseClasses([]);
       }
     } catch (err: unknown) {
+      console.error('Error fetching course classes:', err);
+      setError('Không thể tải danh sách lớp học phần');
       setCourseClasses([]);
-      setLoading(false);
-      return;
     } finally {
       setLoading(false);
     }

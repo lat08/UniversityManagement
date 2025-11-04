@@ -4,11 +4,9 @@ import { Spinner } from "@/app/components/ui/spinner";
 import { Dropdown } from "@/app/components/ui/dropdown";
 import TuitionTable from "../tuition/TuitionTable";
 import PaymentSummary from "../tuition/PaymentSummary";
-import { TuitionFeeResponse } from "../../lib/types/types";
+import { TuitionFeeResponse, Semester } from "../../lib/types/types";
 import { useTuitionLogic } from "../../lib/hooks/useTuitionLogic";
 import { useEffect, useState } from "react";
-import { Semester } from "../../lib/types/types";
-import { useFinanceData } from "../../lib/hooks/useFinanceData";
 
 type TuitionTabProps = {
   isLoading: boolean;

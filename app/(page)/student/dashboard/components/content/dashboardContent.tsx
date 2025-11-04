@@ -28,13 +28,21 @@ const getActiveSemesterId = (semesters: Semester[]): string => {
   
   const upcomingSemester = semesters
     .filter(semester => semester.startDate && new Date(semester.startDate) > now)
-    .sort((a, b) => new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime())[0];
+    .sort((a, b) => {
+      const aStart = a.startDate ? new Date(a.startDate).getTime() : 0;
+      const bStart = b.startDate ? new Date(b.startDate).getTime() : 0;
+      return aStart - bStart;
+    })[0];
   
   if (upcomingSemester) return upcomingSemester.semesterId;
   
   const pastSemester = semesters
     .filter(semester => semester.endDate && new Date(semester.endDate) < now)
-    .sort((a, b) => new Date(b.endDate!).getTime() - new Date(a.endDate!).getTime())[0];
+    .sort((a, b) => {
+      const aEnd = a.endDate ? new Date(a.endDate).getTime() : 0;
+      const bEnd = b.endDate ? new Date(b.endDate).getTime() : 0;
+      return bEnd - aEnd;
+    })[0];
   
   return pastSemester?.semesterId || semesters[0]?.semesterId || "";
 };

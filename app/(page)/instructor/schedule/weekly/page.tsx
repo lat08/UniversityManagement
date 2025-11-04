@@ -6,6 +6,7 @@ import { Dropdown, DropdownSearch } from "@/app/components/ui"
 import { WeeklyScheduleGrid, ScheduleTooltip, type CourseItem } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useInstructorWeeklySchedule } from "../lib/hooks/useInstructorWeeklySchedule"
+import { formatWeekDisplay, getColorByCourseType, generateWeekDates } from "@/lib/utils/scheduleHelpers"
 
 
 export default function InstructorWeeklySchedulePage() {
@@ -15,7 +16,6 @@ export default function InstructorWeeklySchedulePage() {
   const [isTooltipPinned, setIsTooltipPinned] = useState(false)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isScheduleChangeModalOpen, setIsScheduleChangeModalOpen] = useState(false)
-  const [selectedCourseForChange, setSelectedCourseForChange] = useState<string | null>(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("")
 
   const {
@@ -35,12 +35,6 @@ export default function InstructorWeeklySchedulePage() {
     handleSubjectChange,
   } = useInstructorWeeklySchedule()
 
-  const formatWeekDisplay = (week: { weekNumber: number; startDate: string; endDate: string } | null) => {
-    if (!week) return "Chọn tuần";
-    const start = new Date(week.startDate).toLocaleDateString('vi-VN');
-    const end = new Date(week.endDate).toLocaleDateString('vi-VN');
-    return `Tuần ${week.weekNumber} [từ ngày ${start} đến ngày ${end}]`;
-  }
 
   const semesterOptions = semesters.map(s => ({
     value: s.semesterId,
@@ -118,8 +112,7 @@ export default function InstructorWeeklySchedulePage() {
     e.stopPropagation()
   }
 
-  const handleScheduleChangeRequest = (courseId: string) => {
-    setSelectedCourseForChange(courseId)
+  const handleScheduleChangeRequest = () => {
     setIsScheduleChangeModalOpen(true)
     setHoveredCourse(null) // Đóng tooltip
     setIsTooltipPinned(false)
@@ -127,7 +120,6 @@ export default function InstructorWeeklySchedulePage() {
 
   const handleCloseModal = () => {
     setIsScheduleChangeModalOpen(false)
-    setSelectedCourseForChange(null)
     setSelectedTimeSlot("")
   }
 
@@ -171,32 +163,10 @@ export default function InstructorWeeklySchedulePage() {
   const canGoNext = selectedWeek && weeks.length > 0 && 
     weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) < weeks.length - 1;
 
-  const getColorByCourseType = (courseType?: string): string => {
-    if (!courseType) return 'blue';
-    const lowerType = courseType.toLowerCase();
-    if (lowerType.includes('lý thuyết') || lowerType.includes('ly thuyet')) {
-      return 'blue';
-    }
-    if (lowerType.includes('thực hành') || lowerType.includes('thuc hanh')) {
-      return 'red';
-    }
-    return 'blue';
-  };
-
   const weekDates = useMemo(() => {
-    if (!selectedWeek) return [];
-    
-    const startDate = new Date(selectedWeek.startDate);
-    const dates = [];
-    
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date);
-    }
-    
-    return dates;
-  }, [selectedWeek]);
+    if (!selectedWeek) return []
+    return generateWeekDates(selectedWeek.startDate)
+  }, [selectedWeek])
 
   const transformedSchedule: CourseItem[] = useMemo(() => {
     return scheduleData.map((item) => ({
@@ -282,7 +252,7 @@ export default function InstructorWeeklySchedulePage() {
                   options={weekOptions}
                   value={selectedWeek?.weekNumber.toString() || ''}
                   placeholder="Chọn tuần"
-                  onChange={(value) => handleWeekChange(parseInt(value))}
+                  onChange={(value) => handleWeekChange(Number.parseInt(value))}
                   disabled={isLoading || weeks.length === 0}
                 />
               </div>
@@ -359,7 +329,7 @@ export default function InstructorWeeklySchedulePage() {
                 showTeacher={false}
                 actionButton={
                   <button
-                    onClick={() => handleScheduleChangeRequest(hoveredCourse)}
+                    onClick={handleScheduleChangeRequest}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[var(--schedule-print-text)] rounded text-xs font-medium transition-colors cursor-pointer bg-[var(--schedule-print-bg)] hover:bg-[var(--schedule-print-bg-hover)]"
                   >
                     <Calendar className="w-3 h-3" />

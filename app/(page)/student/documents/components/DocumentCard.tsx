@@ -14,11 +14,11 @@ export const DocumentCard = ({ courseGroup, onView, onDownloadAll }: DocumentCar
   const documentCount = courseGroup.documents?.length || 0;
 
   const handleDownloadAll = () => {
-    (courseGroup.documents || []).forEach(doc => {
+    for (const doc of courseGroup.documents || []) {
       if (doc.downloadUrl) {
         window.open(doc.downloadUrl, '_blank');
       }
-    });
+    }
   };
 
   return (

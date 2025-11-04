@@ -26,37 +26,41 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchExamEntries = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await examsApi.getExamEntries(params);
-      
-      if (response.success && response.data) {
-        setExamEntries(response.data.items);
-        setTotalCount(response.data.totalCount);
-        setPageNumber(response.data.pageNumber);
-        setPageSize(response.data.pageSize);
-        setTotalPages(response.data.totalPages);
-        setHasPreviousPage(response.data.hasPreviousPage);
-        setHasNextPage(response.data.hasNextPage);
-      } else {
-        setError(response.message || 'Không thể tải danh sách đề thi');
+  const fetchExamEntries = useCallback(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await examsApi.getExamEntries(params);
+        
+        if (response.success && response.data) {
+          setExamEntries(response.data.items);
+          setTotalCount(response.data.totalCount);
+          setPageNumber(response.data.pageNumber);
+          setPageSize(response.data.pageSize);
+          setTotalPages(response.data.totalPages);
+          setHasPreviousPage(response.data.hasPreviousPage);
+          setHasNextPage(response.data.hasNextPage);
+        } else {
+          setError(response.message || 'Không thể tải danh sách đề thi');
+          setExamEntries([]);
+          setTotalCount(0);
+        }
+      } catch (err: unknown) {
+        const errorMessage = 
+          (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+          (err as { message?: string })?.message ||
+          'Đã xảy ra lỗi khi tải danh sách đề thi. Vui lòng thử lại sau.';
+        setError(errorMessage);
         setExamEntries([]);
         setTotalCount(0);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: unknown) {
-      const errorMessage = 
-        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        'Đã xảy ra lỗi khi tải danh sách đề thi. Vui lòng thử lại sau.';
-      setError(errorMessage);
-      setExamEntries([]);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
-    }
+    };
+    
+    void loadData();
   }, [
     params?.searchKeyword,
     params?.examType,

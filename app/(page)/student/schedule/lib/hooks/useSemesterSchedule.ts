@@ -45,7 +45,6 @@ export const useSemesterSchedule = () => {
     }
   }, [subjectsData])
 
-  // Fetch thời khóa biểu cá nhân
   const fetchPersonalSchedule = useCallback(async (semesterId: string) => {
     try {
       setIsLoading(true)
@@ -56,33 +55,14 @@ export const useSemesterSchedule = () => {
         setScheduleData(response.data)
       } else {
         setScheduleData([])
-        // Không hiển thị lỗi nếu chỉ là không có dữ liệu
-        if (response.message && (
-          response.message.includes("Không tìm thấy thời khóa biểu") ||
-          response.message.includes("không có dữ liệu") ||
-          response.message.includes("không có thời khóa biểu")
-        )) {
-          setError(null)
-        } else {
-          setError(response.message || "Không có dữ liệu thời khóa biểu")
-        }
+        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { success?: boolean; message?: string } } };
-      // Kiểm tra nếu là response từ server với success: false
+      const err = error as { response?: { data?: { success?: boolean; message?: string } } }
       if (err?.response?.data?.success === false) {
         const response = err.response.data
         setScheduleData([])
-        // Không hiển thị lỗi nếu chỉ là không có dữ liệu
-        if (response.message && (
-          response.message.includes("Không tìm thấy thời khóa biểu") ||
-          response.message.includes("không có dữ liệu") ||
-          response.message.includes("không có thời khóa biểu")
-        )) {
-          setError(null)
-        } else {
-          setError(response.message || "Không có dữ liệu thời khóa biểu")
-        }
+        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
       } else {
         setError("Lỗi khi tải thời khóa biểu cá nhân")
         setScheduleData([])
@@ -92,7 +72,6 @@ export const useSemesterSchedule = () => {
     }
   }, [])
 
-  // Fetch thời khóa biểu theo môn học
   const fetchSubjectSchedule = useCallback(async (subjectId: string, semesterId: string) => {
     try {
       setIsLoading(true)
@@ -103,33 +82,14 @@ export const useSemesterSchedule = () => {
         setScheduleData(response.data)
       } else {
         setScheduleData([])
-        // Không hiển thị lỗi nếu chỉ là không có dữ liệu
-        if (response.message && (
-          response.message.includes("Không tìm thấy thời khóa biểu") ||
-          response.message.includes("không có dữ liệu") ||
-          response.message.includes("không có thời khóa biểu")
-        )) {
-          setError(null)
-        } else {
-          setError(response.message || "Không có dữ liệu thời khóa biểu")
-        }
+        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { success?: boolean; message?: string } } };
-      // Kiểm tra nếu là response từ server với success: false
+      const err = error as { response?: { data?: { success?: boolean; message?: string } } }
       if (err?.response?.data?.success === false) {
         const response = err.response.data
         setScheduleData([])
-        // Không hiển thị lỗi nếu chỉ là không có dữ liệu
-        if (response.message && (
-          response.message.includes("Không tìm thấy thời khóa biểu") ||
-          response.message.includes("không có dữ liệu") ||
-          response.message.includes("không có thời khóa biểu")
-        )) {
-          setError(null)
-        } else {
-          setError(response.message || "Không có dữ liệu thời khóa biểu")
-        }
+        setError(response.message && !response.message.includes("Không tìm thấy thời khóa biểu") && !response.message.includes("không có dữ liệu") && !response.message.includes("không có thời khóa biểu") ? response.message : null)
       } else {
         setError("Lỗi khi tải thời khóa biểu môn học")
         setScheduleData([])

@@ -5,15 +5,15 @@ import { Button } from "@/app/components/ui/button"
 import { AlertTriangle } from "lucide-react"
 
 interface ConfirmDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title: string
-  description: string
-  confirmText?: string
-  cancelText?: string
-  variant?: 'danger' | 'warning' | 'info'
-  isLoading?: boolean
+  readonly isOpen: boolean
+  readonly onClose: () => void
+  readonly onConfirm: () => void
+  readonly title: string
+  readonly description: string
+  readonly confirmText?: string
+  readonly cancelText?: string
+  readonly variant?: 'danger' | 'warning' | 'info'
+  readonly isLoading?: boolean
 }
 
 const variantStyles = {

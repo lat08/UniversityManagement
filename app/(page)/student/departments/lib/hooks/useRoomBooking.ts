@@ -29,7 +29,7 @@ export const useRooms = (page: number = 1, pageSize: number = 10) => {
 
         // Add filters to params
         if (filters.capacity) {
-          params.minCapacity = parseInt(filters.capacity);
+          params.minCapacity = Number.parseInt(filters.capacity);
         }
         if (filters.buildingId) {
           params.buildingId = filters.buildingId;
@@ -63,6 +63,7 @@ export const useRooms = (page: number = 1, pageSize: number = 10) => {
         
         return { rooms: [], pagination: undefined };
       } catch (error) {
+        console.error('Error fetching rooms:', error);
         throw error;
       }
     },
@@ -123,6 +124,7 @@ export const useUserBookings = () => {
         
         return [];
       } catch (error) {
+        console.error('Error fetching user bookings:', error);
         throw error;
       }
     },

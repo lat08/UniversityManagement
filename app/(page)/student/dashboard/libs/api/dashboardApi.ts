@@ -27,6 +27,7 @@ export const dashboardApi = {
       const response = await api.get(`/v1/dashboard/semester/${semesterId}`);
       return response.data;
     } catch (err) {
+      console.error('Error fetching semester overall:', err);
       throw err;
     }
   },

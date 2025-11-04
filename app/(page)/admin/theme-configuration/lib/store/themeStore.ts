@@ -481,17 +481,17 @@ export const useThemeStore = create<ThemeState>()(
           // Merge: start with defaults, then existing, then new (skip null/undefined/empty)
           const mergedColors: Record<string, string> = { ...defaultColors };
           
-          Object.entries(existingColors).forEach(([key, value]) => {
+          for (const [key, value] of Object.entries(existingColors)) {
             if (value !== null && value !== undefined && value !== '') {
               mergedColors[key] = value;
             }
-          });
+          }
           
-          Object.entries(newColors).forEach(([key, value]) => {
+          for (const [key, value] of Object.entries(newColors)) {
             if (value !== null && value !== undefined && value !== '') {
               mergedColors[key] = value;
             }
-          });
+          }
           
           theme = {
             ...theme,
@@ -534,13 +534,13 @@ export const useThemeStore = create<ThemeState>()(
         const root = document.documentElement;
         const colors = currentTheme.colors as unknown as Record<string, string>;
         
-        Object.entries(colors).forEach(([key, value]) => {
+        for (const [key, value] of Object.entries(colors)) {
           // CRITICAL: Skip null, undefined, empty string values
           if (value && typeof value === 'string' && value.trim() !== '') {
             const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
             root.style.setProperty(cssVarName, value);
           }
-        });
+        }
       },
       
       loadThemes: (themes: ThemeConfig[]) => {

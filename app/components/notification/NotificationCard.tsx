@@ -7,9 +7,9 @@ import { formatDate } from "@/lib/utils/format"
 import { NotificationApiItem } from "@/lib/types/notification"
 
 export interface NotificationCardProps {
-  notification: NotificationApiItem
-  onNotificationClick?: (id: string) => void
-  initialExpanded?: boolean
+  readonly notification: NotificationApiItem
+  readonly onNotificationClick?: (id: string) => void
+  readonly initialExpanded?: boolean
 }
 
 const iconMap = {
@@ -66,7 +66,7 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
   return (
     <Card 
       className={`border-1 overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${
-        !notification.isRead ? "bg-[var(--primary-light)]" : "bg-[var(--card-bg)]"
+        notification.isRead ? "bg-[var(--card-bg)]" : "bg-[var(--primary-light)]"
       }`}
       style={{
         borderColor: 'var(--primary)'

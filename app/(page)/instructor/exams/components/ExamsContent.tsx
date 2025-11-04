@@ -54,14 +54,14 @@ export function ExamsContent() {
 
   const courseClassesOptions = useMemo(() => {
     const uniqueClasses = new Map<string, { id: string; name: string }>();
-    examEntries.forEach(exam => {
+    for (const exam of examEntries) {
       if (!uniqueClasses.has(exam.courseClassId)) {
         uniqueClasses.set(exam.courseClassId, {
           id: exam.courseClassId,
           name: `${exam.courseClassCode} - ${exam.subjectName}`
         });
       }
-    });
+    }
     return Array.from(uniqueClasses.values());
   }, [examEntries]);
 
@@ -135,7 +135,7 @@ export function ExamsContent() {
     setIsUploadModalOpen(true);
   };
 
-  if (loading && examEntries.length === 0) {
+  if (examEntries.length === 0 && loading) {
     return (
       <div className="space-y-6">
         <ExamsHeader onUploadClick={handleUpload} />

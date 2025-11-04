@@ -30,6 +30,7 @@ export const useInsuranceLogic = (
       await getInsuranceExcel();
       toast.success('Đang tải xuống danh sách bảo hiểm');
     } catch (error) {
+      console.error('Error exporting insurance:', error);
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
@@ -59,6 +60,7 @@ export const useInsuranceLogic = (
         toast.error(res.message || 'Thanh toán thất bại');
       }
     } catch (error) {
+      console.error('Error processing insurance payment:', error);
       toast.error('Không thể xử lý thanh toán bảo hiểm');
     } finally {
       setIsLoading(false);

@@ -3,7 +3,7 @@ import { Input } from './input';
 import { cn } from '@/lib/utils/utils';
 
 export interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  placeholder?: string;
+  readonly placeholder?: string;
 }
 
 export function SearchInput({ className, placeholder = 'Tìm kiếm...', ...props }: SearchInputProps) {

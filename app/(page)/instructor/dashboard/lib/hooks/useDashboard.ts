@@ -14,6 +14,7 @@ export const useDashboard = () => {
       const data = await getDashboardData();
       setDashboard(data);
     } catch (err: unknown) {
+      console.error("Error fetching dashboard:", err);
       setError("Không thể tải dữ liệu bảng điều khiển");
     } finally {
       setLoading(false);

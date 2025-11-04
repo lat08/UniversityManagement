@@ -5,6 +5,7 @@ import { Dropdown, DropdownSearch } from "@/app/components/ui"
 import { WeeklyScheduleGrid, ScheduleTooltip, ScheduleConflictsNotification, type CourseItem } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useScheduleData } from "../lib/hooks/useScheduleData"
+import { formatWeekDisplay, getColorByCourseType, generateWeekDates } from "@/lib/utils/scheduleHelpers"
 
 export default function WeeklySchedulePage() {
   usePageTitle('TKB theo tuần');
@@ -111,12 +112,6 @@ export default function WeeklySchedulePage() {
     handleExportPDF,
   } = useScheduleData()
 
-  const formatWeekDisplay = (week: { weekNumber: number; startDate: string; endDate: string } | null) => {
-    if (!week) return "Chọn tuần";
-    const start = new Date(week.startDate).toLocaleDateString('vi-VN');
-    const end = new Date(week.endDate).toLocaleDateString('vi-VN');
-    return `Tuần ${week.weekNumber} [từ ngày ${start} đến ngày ${end}]`;
-  }
 
   const semesterOptions = semesters.map(s => ({
     value: s.semesterId,
@@ -165,34 +160,10 @@ export default function WeeklySchedulePage() {
     weeks.findIndex(w => w.weekNumber === selectedWeek.weekNumber) < weeks.length - 1);
 
 
-  // Calculate dates for the current week
   const weekDates = useMemo(() => {
-    if (!selectedWeek) return [];
-    
-    const startDate = new Date(selectedWeek.startDate);
-    const dates = [];
-    
-    // Generate dates for Monday to Sunday (7 days)
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date);
-    }
-    
-    return dates;
-  }, [selectedWeek]);
-
-      const getColorByCourseType = (courseType?: string): string => {
-        if (!courseType) return 'blue';
-        const lowerType = courseType.toLowerCase();
-        if (lowerType.includes('lý thuyết') || lowerType.includes('ly thuyet')) {
-          return 'blue';
-        }
-        if (lowerType.includes('thực hành') || lowerType.includes('thuc hanh')) {
-          return 'red';
-        }
-    return 'blue';
-      };
+    if (!selectedWeek) return []
+    return generateWeekDates(selectedWeek.startDate)
+  }, [selectedWeek])
       
   const transformedSchedule: CourseItem[] = useMemo(() => {
     return scheduleData.map((item) => ({
@@ -330,7 +301,7 @@ export default function WeeklySchedulePage() {
                   options={weekOptions}
                   value={selectedWeek?.weekNumber.toString() || ''}
                   placeholder="Chọn tuần"
-                  onChange={(value) => handleWeekChange(parseInt(value))}
+                  onChange={(value) => handleWeekChange(Number.parseInt(value))}
                   disabled={isLoading || weeks.length === 0}
                 />
               </div>

@@ -49,9 +49,10 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
       <div className="flex items-center gap-2 lg:gap-4">
         <NotificationPopup />
 
-        <div 
-          className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        <button 
+          className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-0 p-0"
           onClick={handleProfileClick}
+          type="button"
         >
           <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
             <AvatarFallback className="bg-gray-200 text-gray-600 text-xs lg:text-sm">{initials}</AvatarFallback>
@@ -60,7 +61,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             <span className="text-sm font-medium">{displayName}</span>
             <span className="text-xs text-gray-500">{roleLabel}</span>
           </div>
-        </div>
+        </button>
       </div>
     </header>
   )

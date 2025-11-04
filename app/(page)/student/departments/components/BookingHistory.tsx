@@ -9,7 +9,7 @@ import { Calendar } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import toast from 'react-hot-toast';
-import type { BookingData, BookingStatus } from '../lib/types/room.types';
+import type { BookingData } from '../lib/types/room.types';
 import { BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
 import CancelBookingModal from './CancelBookingModal';
 

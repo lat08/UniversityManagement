@@ -151,11 +151,6 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
 
   const enrollmentStatusOptions = ENROLLMENT_STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }));
 
-  const selectedFaculty = faculties.find(f => f.facultyId === formValues.facultyId);
-  const selectedDepartment = departments.find(d => d.departmentId === formValues.departmentId);
-  const selectedClass = classes.find(c => c.classId === formValues.classId);
-  const selectedEnrollmentStatus = ENROLLMENT_STATUS_OPTIONS.find(s => s.value === formValues.enrollmentStatus);
-
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {

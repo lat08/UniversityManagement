@@ -53,6 +53,7 @@ export const useTuitionLogic = (
       await getTuitionExcel(tuitionData?.semesterId || null);
       toast.success('Đang tải xuống danh sách học phí');
     } catch (error) {
+      console.error('Error exporting tuition:', error);
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);

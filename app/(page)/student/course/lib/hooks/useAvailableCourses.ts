@@ -15,6 +15,7 @@ export const useAvailableCourses = () => {
       const data = await coursesApi.getAvailable();
       setCourses(data);
     } catch (err: unknown) {
+      console.error("Error fetching available courses:", err);
       setError("Không thể tải danh sách khóa học có sẵn");
       setCourses([]);
     } finally {

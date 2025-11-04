@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Upload, Download, CheckCircle2, XCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Button, Input } from '@/app/components/ui';
 import { toast } from 'react-hot-toast';
@@ -120,7 +120,7 @@ export default function ImportExcelModal({ isOpen, onClose, onSuccess }: ImportE
     try {
       const blob = await studentsApi.downloadExcelTemplate();
       const { downloadFile } = await import('@/lib/utils/fileDownload');
-      await downloadFile(URL.createObjectURL(blob), `student_template_${new Date().getTime()}.xlsx`);
+      await downloadFile(URL.createObjectURL(blob), `student_template_${Date.now()}.xlsx`);
       toast.success('Tải xuống template thành công');
     } catch (error: unknown) {
       console.error('Download template error:', error);

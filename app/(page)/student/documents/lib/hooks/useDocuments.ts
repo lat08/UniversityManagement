@@ -75,7 +75,7 @@ export const useDocuments = (params?: GetMaterialsParams): UseDocumentsReturn =>
   ]);
 
   useEffect(() => {
-    fetchDocuments();
+    void fetchDocuments();
   }, [fetchDocuments]);
 
   return {

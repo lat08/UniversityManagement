@@ -17,7 +17,7 @@ interface Conflict {
 }
 
 interface ScheduleConflictsNotificationProps {
-  conflicts: Conflict[]
+  readonly conflicts: Conflict[]
 }
 
 const DAY_LABELS: Record<number, string> = {
@@ -40,14 +40,14 @@ export function ScheduleConflictsNotification({ conflicts }: ScheduleConflictsNo
         <div className="flex-1">
           <h3 className="font-semibold text-red-900 mb-2">Cảnh báo xung đột lịch học</h3>
           <div className="space-y-3">
-            {conflicts.map((conflict, index) => (
-              <div key={index} className="text-sm text-red-800">
+            {conflicts.map((conflict) => (
+              <div key={`${conflict.dayOfWeek}-${conflict.period}`} className="text-sm text-red-800">
                 <div className="font-medium mb-1">
                   {DAY_LABELS[conflict.dayOfWeek] || `Thứ ${conflict.dayOfWeek}`} - Tiết {conflict.period}:
                 </div>
                 <ul className="list-disc list-inside ml-2 space-y-1">
-                  {conflict.courses.map((course, courseIndex) => (
-                    <li key={courseIndex}>
+                  {conflict.courses.map((course) => (
+                    <li key={`${course.code}-${course.room}`}>
                       {course.name} ({course.code}) - {course.room} - GV: {course.teacher}
                     </li>
                   ))}

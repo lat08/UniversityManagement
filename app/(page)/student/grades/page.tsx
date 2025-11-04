@@ -46,12 +46,14 @@ export default function ScoresPage() {
       }
     }
 
-    let classification = ""
-    if (statsData.averageGPA >= 3.8) classification = "Xuất sắc"
-    else if (statsData.averageGPA >= 3.2) classification = "Giỏi"
-    else if (statsData.averageGPA >= 2.5) classification = "Khá"
-    else if (statsData.averageGPA >= 2.0) classification = "Trung bình"
-    else if (statsData.averageGPA > 0) classification = "Yếu"
+    const classification = (() => {
+      if (statsData.averageGPA >= 3.8) return "Xuất sắc"
+      if (statsData.averageGPA >= 3.2) return "Giỏi"
+      if (statsData.averageGPA >= 2.5) return "Khá"
+      if (statsData.averageGPA >= 2.0) return "Trung bình"
+      if (statsData.averageGPA > 0) return "Yếu"
+      return ""
+    })();
 
     return {
       gpa4: statsData.averageGPA.toFixed(2),

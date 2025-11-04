@@ -226,7 +226,7 @@ export function UploadExamModal({
               type="number"
               min="1"
               value={formData.durationMinutes}
-              onChange={(e) => handleInputChange("durationMinutes", parseInt(e.target.value) || 0)}
+              onChange={(e) => handleInputChange("durationMinutes", Number.parseInt(e.target.value) || 0)}
               className="border-gray-300"
               placeholder="Thời lượng (phút)"
             />

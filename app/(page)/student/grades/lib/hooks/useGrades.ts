@@ -44,6 +44,7 @@ export const useGrades = (): UseGradesReturn => {
         setCommonSemesters(semestersResponse.data)
       }
     } catch (err) {
+      console.error('Error fetching grades:', err);
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
     } finally {
       setIsLoading(false)
@@ -56,7 +57,7 @@ export const useGrades = (): UseGradesReturn => {
       setError(null)
       
       const blob = await gradesApi.exportTranscriptPdf()
-      const fileName = `BangDiem_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.pdf`
+      const fileName = `BangDiem_${new Date().toISOString().split('T')[0].replaceAll('-', '')}.pdf`
       
       const { downloadFileBlob } = await import('@/lib/utils/fileDownload')
       downloadFileBlob(blob, fileName)

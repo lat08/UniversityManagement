@@ -39,7 +39,7 @@ export const useDocumentTypes = (): UseDocumentTypesReturn => {
   }, [])
 
   useEffect(() => {
-    fetchDocumentTypes()
+    void fetchDocumentTypes()
   }, [fetchDocumentTypes])
 
   return {

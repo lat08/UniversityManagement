@@ -195,16 +195,24 @@ export function MaterialsContent() {
       />
 
       <div className="space-y-4">
-        {isLoading ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600">Đang tải dữ liệu...</p>
-          </div>
-        ) : filteredDocuments.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600">Không tìm thấy tài liệu nào.</p>
-          </div>
-        ) : (
-          filteredDocuments.map((document) => (
+        {(() => {
+          if (isLoading) {
+            return (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                <p className="text-gray-600">Đang tải dữ liệu...</p>
+              </div>
+            );
+          }
+          
+          if (filteredDocuments.length === 0) {
+            return (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                <p className="text-gray-600">Không tìm thấy tài liệu nào.</p>
+              </div>
+            );
+          }
+          
+          return filteredDocuments.map((document) => (
             <DocumentCard
               key={document.id}
               document={document}
@@ -212,8 +220,8 @@ export function MaterialsContent() {
               onDownload={handleDownload}
               onDelete={handleDelete}
             />
-          ))
-        )}
+          ));
+        })()}
       </div>
 
       <UploadDocumentModal

@@ -24,7 +24,7 @@ export function NotificationPopup() {
         setUnreadCount(response.data.unreadCount)
       }
     } catch (err) {
-      // Error handled silently
+      console.error('Error fetching unread count:', err);
     }
   }
 
@@ -36,7 +36,7 @@ export function NotificationPopup() {
         setNotifications(response.data.notifications.data)
       }
     } catch (err) {
-      // Error handled silently
+      console.error('Error fetching notifications:', err);
     } finally {
       setLoading(false)
     }

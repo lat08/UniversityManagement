@@ -12,16 +12,16 @@ export interface TableColumn<T = unknown> {
 }
 
 interface TableProps<T = unknown> {
-  columns: TableColumn<T>[]
-  data: T[]
-  renderRow: (item: T, index: number) => ReactNode
-  isLoading?: boolean
-  loadingMessage?: string
-  emptyMessage?: string
-  className?: string
-  headerClassName?: string
-  rowClassName?: string | ((item: T, index: number) => string)
-  loadingComponent?: ReactNode
+  readonly columns: TableColumn<T>[]
+  readonly data: T[]
+  readonly renderRow: (item: T, index: number) => ReactNode
+  readonly isLoading?: boolean
+  readonly loadingMessage?: string
+  readonly emptyMessage?: string
+  readonly className?: string
+  readonly headerClassName?: string
+  readonly rowClassName?: string | ((item: T, index: number) => string)
+  readonly loadingComponent?: ReactNode
 }
 
 export function Table<T = unknown>({
@@ -80,24 +80,28 @@ export function Table<T = unknown>({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {isLoading ? (
-              loadingComponent || defaultLoadingComponent
-            ) : data.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
-                  {emptyMessage}
-                </td>
-              </tr>
-            ) : (
-              data.map((item, index) => {
-                const rowClass = typeof rowClassName === "function" ? rowClassName(item, index) : rowClassName
+            {(() => {
+              if (isLoading) {
+                return loadingComponent || defaultLoadingComponent;
+              }
+              if (data.length === 0) {
                 return (
-                  <tr key={index} className={cn("hover:bg-gray-50", rowClass)}>
+                  <tr>
+                    <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
+                      {emptyMessage}
+                    </td>
+                  </tr>
+                );
+              }
+              return data.map((item, index) => {
+                const rowClass = typeof rowClassName === "function" ? rowClassName(item, index) : rowClassName;
+                return (
+                  <tr key={`row-${index}`} className={cn("hover:bg-gray-50", rowClass)}>
                     {renderRow(item, index)}
                   </tr>
-                )
-              })
-            )}
+                );
+              });
+            })()}
           </tbody>
         </table>
       </div>
