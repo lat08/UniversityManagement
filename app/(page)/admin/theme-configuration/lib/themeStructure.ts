@@ -708,9 +708,45 @@ export const studentPagesTheme: PageThemeConfig[] = [
         description: 'Màu sắc cho thông báo loại Quan Trọng',
         colors: createNotificationColors('Important', 'Quan Trọng', '#fee2e2', '#7f1d1d', '#ef4444', '#f87171'),
       },
+      {
+        sectionId: 'notification-card',
+        sectionName: 'Notification Card',
+        description: 'Màu nền và border của thẻ thông báo',
+        colors: [
+          {
+            key: 'notificationCardUnreadBg',
+            label: 'Card Chưa Đọc - Background',
+            description: 'Màu nền thông báo chưa đọc',
+            cssVar: '--notification-card-unread-bg',
+            defaultLight: '#e3f2fd',
+            defaultDark: '#1e3a8a',
+            category: 'component',
+          },
+          {
+            key: 'notificationCardReadBg',
+            label: 'Card Đã Đọc - Background',
+            description: 'Màu nền thông báo đã đọc',
+            cssVar: '--notification-card-read-bg',
+            defaultLight: '#ffffff',
+            defaultDark: '#1e293b',
+            category: 'component',
+          },
+          {
+            key: 'notificationCardUnreadBorder',
+            label: 'Card Chưa Đọc - Border',
+            description: 'Màu viền thông báo chưa đọc',
+            cssVar: '--notification-card-unread-border',
+            defaultLight: '#4E8EE1',
+            defaultDark: '#4E8EE1',
+            category: 'component',
+          },
+        ],
+      },
     ],
   },
 ];
+
+
 
 // ============================================
 // GLOBAL/SHARED THEME CONFIGURATION

@@ -67,10 +67,10 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
   return (
     <Card 
       className={`border-1 overflow-hidden cursor-pointer transition-all duration-300 ease-out hover:shadow-md hover:scale-[1.01] animate-fade-up ${
-        notification.isRead ? "bg-[var(--card-bg)]" : "bg-[var(--primary-light)]"
+        notification.isRead ? "bg-[var(--notification-card-read-bg)]" : "bg-[var(--notification-card-unread-bg)]"
       }`}
       style={{
-        borderColor: 'var(--primary)',
+        borderColor: notification.isRead ? 'var(--border)' : 'var(--notification-card-unread-border)',
         animationDelay: `${animationDelay}ms`,
         animationFillMode: 'both'
       }}
@@ -84,32 +84,32 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className={`font-semibold text-base text-gray-900 ${notification.isRead === false ? 'font-bold' : ''}`}>
+              <h3 className={`font-semibold text-base text-[var(--text-primary)] ${notification.isRead === false ? 'font-bold' : ''}`}>
                 {notification.title}
               </h3>
               {notification.isRead === false && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]">
                   Mới
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[var(--text-secondary)]">
               {notification.timeAgo} · {formatDate(notification.createdAt)}
             </p>
           </div>
 
           <ChevronDown 
-            className={`h-5 w-5 text-gray-400 flex-shrink-0 transition-transform ${
+            className={`h-5 w-5 text-[var(--text-muted)] flex-shrink-0 transition-transform ${
               isExpanded ? "rotate-180" : ""
             }`}
           />
         </div>
 
         {isExpanded && (
-          <div className="mt-4 pt-4 border-t border-gray-200 text-sm">
+          <div className="mt-4 pt-4 border-t border-[var(--border)] text-sm">
             <div>
-              <span className="font-semibold text-gray-700">Nội dung: </span>
-              <span className="text-gray-600 whitespace-pre-wrap">{notification.content}</span>
+              <span className="font-semibold text-[var(--text-primary)]">Nội dung: </span>
+              <span className="text-[var(--text-secondary)] whitespace-pre-wrap">{notification.content}</span>
             </div>
           </div>
         )}

@@ -169,6 +169,11 @@ export function getCompleteThemeColors(isDarkMode: boolean = false): ThemeColors
     notificationImportantIcon: colors.notificationImportantIcon || '#ef4444',
     notificationImportantBorder: colors.notificationImportantBorder || '#ef4444',
     
+    // Notification Card Colors
+    notificationCardUnreadBg: colors.notificationCardUnreadBg || '#e3f2fd',
+    notificationCardReadBg: colors.notificationCardReadBg || '#ffffff',
+    notificationCardUnreadBorder: colors.notificationCardUnreadBorder || '#4E8EE1',
+    
     // Dashboard Event Card Colors
     eventBorder: colors.eventBorder || '#2563eb',
     eventDotBorder: colors.eventDotBorder || 'rgba(30, 58, 138, 0.9)',

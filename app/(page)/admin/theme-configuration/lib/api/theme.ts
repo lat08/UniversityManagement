@@ -104,6 +104,10 @@ export interface ThemeColors {
   notificationImportantBg: string;
   notificationImportantIcon: string;
   notificationImportantBorder: string;
+  // Notification Card Colors
+  notificationCardUnreadBg: string;
+  notificationCardReadBg: string;
+  notificationCardUnreadBorder: string;
   // Dashboard Event Card Colors
   eventBorder: string;
   eventDotBorder: string;
