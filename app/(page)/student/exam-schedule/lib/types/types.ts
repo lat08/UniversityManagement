@@ -30,8 +30,50 @@ export interface ExamStatCard {
 }
 
 export interface Note {
-  id: string;
+  noteId: string;
+  studentId: string;
   content: string;
-  completed: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface NotesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    notes: Note[];
+    totalRecords: number;
+    pageNumber: number;
+    pageSize: number;
+    totalPages: number;
+    sortOrder: string;
+  };
+  errors?: string[];
+}
+
+export interface CreateNoteRequest {
+  content: string;
+}
+
+export interface UpdateNoteRequest {
+  content: string;
+}
+
+export interface NoteResponse {
+  success: boolean;
+  message: string;
+  data: Note;
+  errors?: string[];
+}
+
+export interface DeleteNoteResponse {
+  success: boolean;
+  message: string;
+  data: {
+    noteId: string;
+    isDeleted: boolean;
+    deletedAt: string;
+  };
+  errors?: string[];
 }
 

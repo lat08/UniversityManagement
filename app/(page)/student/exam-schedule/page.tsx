@@ -8,10 +8,9 @@ import { Dropdown } from "@/app/components/ui/dropdown";
 import ExamStatCard from "./components/ExamStatCard";
 import ExamTimeline from "./components/ExamTimeline";
 import NotesSection from "./components/NotesSection";
-import { MOCK_NOTES } from "./lib/constants/constants";
-import { ExamStatCard as ExamStatCardType, Exam } from "./lib/types/types";
+import { ExamStatCard as ExamStatCardType, Exam, Note } from "./lib/types/types";
 import { Semester } from "@/lib/types";
-import { getExamSchedule } from "./lib/api/examScheduleApi";
+import { getExamSchedule, getNotes } from "./lib/api/examScheduleApi";
 import { sortExamsByStatus, transformExamData } from "./lib/utils/examUtils";
 
 export default function ExamSchedulePage() {
@@ -20,6 +19,7 @@ export default function ExamSchedulePage() {
   const { data: semesters } = useSemesters();
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
   const [exams, setExams] = useState<Exam[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +33,22 @@ export default function ExamSchedulePage() {
       setSelectedSemester(currentSemester || semesters[0]);
     }
   }, [semesters, selectedSemester]);
+
+  const fetchNotes = async () => {
+    try {
+      const response = await getNotes({ pageSize: 100, sortOrder: 'desc' });
+      if (response.success) {
+        setNotes(response.data.notes);
+      }
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+      setNotes([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -138,7 +154,7 @@ export default function ExamSchedulePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm min-h-[400px]">
+          <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm min-h-[600px]">
             <h2 className="text-base lg:text-lg font-bold text-gray-900 mb-4 lg:mb-6 flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -165,8 +181,8 @@ export default function ExamSchedulePage() {
 
         <div className="lg:col-span-4">
           <NotesSection 
-            notes={MOCK_NOTES} 
-            onToggleNote={() => {}}
+            notes={notes} 
+            onNotesChange={fetchNotes}
           />
         </div>
       </div>

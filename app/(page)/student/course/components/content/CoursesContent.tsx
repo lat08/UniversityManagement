@@ -3,8 +3,8 @@
 "use client"
 
 import { useState } from "react"
-import { BookOpen } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
+import { Tabs } from "@/app/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,11 @@ import toast from "react-hot-toast"
 import { coursesApi } from "../../lib/api/coursesApi"; 
 import { useAvailableCourses } from "../../lib/hooks/useAvailableCourses"
 import { useRegisteredCourses } from "../../lib/hooks/useRegisteredCourses"
+
+const tabs = [
+  { key: 'registered', label: 'Môn học đã đăng ký' },
+  { key: 'available', label: 'Đăng ký môn học' },
+] as const;
 
 // LOẠI BỎ import mock data cũ (nếu có): import { registeredCoursesData,availableCoursesData } from "../../lib/constants/courseConstants"
 
@@ -98,33 +103,12 @@ function CoursesContent() {
         <p className="text-gray-600 mt-1">Đăng ký và quản lý các môn học</p>
       </div>
 
-      {/* Tab Selector */}
-      <div className="flex gap-6 border-b">
-        <button
-          onClick={() => setActiveTab("registered")}
-          className={`pb-3 px-1 font-medium transition-colors relative cursor-pointer ${
-            activeTab === "registered" ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Môn học đã đăng ký
-          </div>
-          {activeTab === "registered" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-        </button>
-        <button
-          onClick={() => setActiveTab("available")}
-          className={`pb-3 px-1 font-medium transition-colors relative cursor-pointer ${
-            activeTab === "available" ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Đăng ký môn học
-          </div>
-          {activeTab === "available" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-        </button>
-      </div>
+      {/* Tabs */}
+      <Tabs
+        items={tabs.map(tab => ({ key: tab.key, label: tab.label }))}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      />
 
       {/* Tab Content */}
       {activeTab === "registered" ? (

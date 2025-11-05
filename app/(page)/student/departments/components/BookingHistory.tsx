@@ -155,7 +155,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
 
   const filteredBookings = useMemo(() => {
     return bookings.filter(booking => {
-      if (filters.buildingId && booking.building.buildingId !== filters.buildingId) {
+      if (filters.buildingCode && booking.building.buildingCode !== filters.buildingCode) {
         return false;
       }
       return true;
@@ -165,7 +165,7 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
   const buildingOptions = [
     { value: '', label: 'Tất cả' },
     ...buildings.map(b => ({ 
-      value: b.buildingId, 
+      value: b.buildingCode, 
       label: `${b.buildingName} (${b.buildingCode})` 
     }))
   ];
@@ -218,9 +218,9 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
           <label className="block text-sm font-medium text-[#0053AD] mb-2">Cơ sở</label>
           <Dropdown
             options={buildingOptions}
-            value={tempFilters.buildingId || ''}
+            value={tempFilters.buildingCode || ''}
             placeholder="Tất cả"
-            onChange={(value) => handleFilterChange('buildingId', value)}
+            onChange={(value) => handleFilterChange('buildingCode', value)}
           />
         </div>
 

@@ -16,11 +16,12 @@ export const DocumentCard = ({ courseGroup, onView, animationDelay = 0 }: Docume
 
   return (
     <div 
-      className="relative bg-white rounded-lg border border-gray-200 p-4 lg:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all duration-300 ease-out hover:scale-[1.01] hover:shadow-md animate-fade-up"
+      className="relative bg-white rounded-lg border border-gray-200 p-4 lg:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all duration-300 ease-out hover:scale-[1.01] hover:shadow-md animate-fade-up cursor-pointer"
       style={{
         animationDelay: `${animationDelay}ms`,
         animationFillMode: 'both'
       }}
+      onClick={() => onView(courseGroup)}
     >
       <div>
         <h3 className="text-base lg:text-lg font-semibold text-blue-700">
@@ -36,7 +37,10 @@ export const DocumentCard = ({ courseGroup, onView, animationDelay = 0 }: Docume
 
       <div className="flex items-center gap-2 lg:gap-3">
         <Button 
-          onClick={() => onView(courseGroup)} 
+          onClick={(e) => {
+            e.stopPropagation();
+            onView(courseGroup);
+          }} 
           variant="outline" 
           className="border-blue-600 text-blue-600 hover:bg-blue-50 text-sm"
           size="sm"
