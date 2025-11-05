@@ -53,6 +53,11 @@ function BookingHistoryFilters() {
           type="number"
           value={minStudentCount || ''}
           onChange={(e) => handleFilterChange('minStudentCount', e.target.value)}
+          onKeyDown={(e) => {
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
           placeholder="Nhập số lượng người"
           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors"
           min="1"

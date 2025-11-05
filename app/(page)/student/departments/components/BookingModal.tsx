@@ -387,6 +387,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 const value = Number.parseInt(e.target.value) || 1;
                 setStudentCount(Math.max(1, Math.min(value, selectedRoom?.capacity || 1000)));
               }}
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               min={1}
               max={selectedRoom?.capacity || 1000}
               className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1]"

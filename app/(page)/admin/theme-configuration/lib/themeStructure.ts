@@ -134,6 +134,8 @@ export const studentPagesTheme: PageThemeConfig[] = [
           createColorConfig('chartPrimary', 'Chart Primary (Màu Chính)', 'Màu chính cho column chart (bar) và phần đã hoàn thành trong donut chart', '--chart-primary', '#ec4899', '#f472b6', 'component'),
           createColorConfig('chartSecondary', 'Chart Secondary (Màu Phụ)', 'Màu phụ cho donut chart (phần còn lại)', '--chart-secondary', '#c4b5fd', '#c4b5fd', 'component'),
           createColorConfig('chartBackground', 'Chart Background (Màu Đằng Sau)', 'Màu background/đằng sau cho column chart', '--chart-background', '#c9c7c7', '#94a3b8', 'component'),
+          createColorConfig('chartTooltipBg', 'Chart Tooltip Background', 'Màu nền của tooltip khi hover vào biểu đồ', '--chart-tooltip-bg', '#ffffff', '#1e293b', 'component'),
+          createColorConfig('chartTooltipText', 'Chart Tooltip Text', 'Màu chữ trong tooltip khi hover vào biểu đồ', '--chart-tooltip-text', '#0f172a', '#f8fafc', 'text'),
         ],
       },
       {

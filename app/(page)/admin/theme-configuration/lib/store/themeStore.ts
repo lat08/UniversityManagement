@@ -70,6 +70,8 @@ export interface ThemeColors {
   chartPrimary: string;
   chartSecondary: string;
   chartBackground: string;
+  chartTooltipBg: string;
+  chartTooltipText: string;
   
   // Sidebar Colors
   sidebar: string;
@@ -310,6 +312,8 @@ const defaultThemeColors: ThemeColors = {
   chartPrimary: '#ec4899',
   chartSecondary: '#c4b5fd',
   chartBackground: '#c9c7c7',
+  chartTooltipBg: '#ffffff',
+  chartTooltipText: '#0f172a',
   
   // Sidebar Colors
   sidebar: 'oklch(0.985 0 0)',

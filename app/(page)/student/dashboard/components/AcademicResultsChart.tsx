@@ -20,11 +20,20 @@ import { useAvailableSemester } from "../libs/hooks/useAvailableSemester";
 import toast from "react-hot-toast";
 
 const getChartColors = () => {
-  if (typeof window === 'undefined') return { primary: '#ec4899', background: '#c9c7c7' };
+  if (typeof window === 'undefined') {
+    return { 
+      primary: '#ec4899', 
+      background: '#c9c7c7',
+      tooltipBg: '#ffffff',
+      tooltipText: '#0f172a',
+    };
+  }
   const root = getComputedStyle(document.documentElement);
   return {
     primary: root.getPropertyValue('--chart-primary').trim() || '#ec4899',
     background: root.getPropertyValue('--chart-background').trim() || '#c9c7c7',
+    tooltipBg: root.getPropertyValue('--chart-tooltip-bg').trim() || '#ffffff',
+    tooltipText: root.getPropertyValue('--chart-tooltip-text').trim() || '#0f172a',
   };
 };
 
@@ -42,6 +51,7 @@ export default function AcademicResultsChart({
     const [isChartReady, setIsChartReady] = useState(false);
     const animationRef = useRef<number | undefined>(undefined);
     const chartReadyTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    const tooltipRef = useRef<HTMLDivElement | null>(null);
 
     const { semester, loading, error, refetch} = useAvailableSemester(selectedSemesterId);
     
@@ -73,7 +83,13 @@ export default function AcademicResultsChart({
         attributeFilter: ['style']
       });
       
-      return () => observer.disconnect();
+      return () => {
+        observer.disconnect();
+        if (tooltipRef.current) {
+          document.body.removeChild(tooltipRef.current);
+          tooltipRef.current = null;
+        }
+      };
     }, []);
 
     useEffect(() => {
@@ -231,15 +247,89 @@ export default function AcademicResultsChart({
         display: false,
       },
       tooltip: {
-        backgroundColor: "var(--card-bg)",
-        padding: 12,
-        titleColor: "var(--card-foreground)",
-        bodyColor: "var(--card-foreground)",
-        displayColors: false,
-        callbacks: {
-          label: function (context: { parsed: { y: number | null } }) {
-            return `Điểm: ${context.parsed.y ?? 0}`;
-          },
+        enabled: false,
+        external: function (context) {
+          const tooltipModel = context.tooltip;
+          if (!tooltipModel || tooltipModel.opacity === 0) {
+            if (tooltipRef.current) {
+              tooltipRef.current.style.opacity = '0';
+            }
+            return;
+          }
+
+          const index = tooltipModel.dataPoints[0]?.dataIndex;
+          if (index === undefined || !semester?.courses) return;
+
+          const course = semester.courses[index];
+          const score = tooltipModel.dataPoints[0]?.parsed.y ?? 0;
+          const isPassed = score >= 5.0;
+          const status = isPassed ? 'Đạt' : 'Chưa đạt';
+
+          if (!tooltipRef.current) {
+            const tooltipEl = document.createElement('div');
+            tooltipEl.className = 'chart-tooltip';
+            tooltipEl.style.position = 'fixed';
+            tooltipEl.style.pointerEvents = 'none';
+            tooltipEl.style.opacity = '0';
+            tooltipEl.style.transition = 'opacity 0.3s';
+            tooltipEl.style.zIndex = '9999';
+            tooltipEl.style.maxWidth = '280px';
+            document.body.appendChild(tooltipEl);
+            tooltipRef.current = tooltipEl;
+          }
+
+          const tooltipEl = tooltipRef.current;
+          const canvasRect = (context.chart as any).canvas.getBoundingClientRect();
+          const chartX = canvasRect.left + tooltipModel.caretX;
+          const chartY = canvasRect.top + tooltipModel.caretY;
+
+          tooltipEl.innerHTML = `
+            <div style="
+              background: ${chartColors.tooltipBg};
+              color: ${chartColors.tooltipText};
+              padding: 12px;
+              border-radius: 6px;
+              font-size: 12px;
+              line-height: 1.6;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            ">
+              ${course?.subjectCode ? `<div><strong>Mã môn:</strong> ${course.subjectCode}</div>` : ''}
+              ${course?.subjectName ? `<div><strong>Tên môn:</strong> ${course.subjectName}</div>` : ''}
+              ${course?.credits ? `<div><strong>Số tín chỉ:</strong> ${course.credits}</div>` : ''}
+              <div><strong>Điểm TK:</strong> ${score.toFixed(1)}</div>
+              <div><strong>Đạt HP:</strong> ${status}</div>
+            </div>
+          `;
+
+          tooltipEl.style.opacity = '1';
+          
+          const tooltipRect = tooltipEl.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const padding = 12;
+          const offsetY = 4;
+
+          let left = chartX;
+          let top = chartY - tooltipRect.height - offsetY;
+          let transformX = 'translateX(-50%)';
+          let transformY = 'translateY(0)';
+
+          if (left - tooltipRect.width / 2 < padding) {
+            left = padding + tooltipRect.width / 2;
+          } else if (left + tooltipRect.width / 2 > viewportWidth - padding) {
+            left = viewportWidth - padding - tooltipRect.width / 2;
+          }
+
+          if (top < padding) {
+            top = chartY + offsetY;
+            transformY = 'translateY(0)';
+          } else if (top + tooltipRect.height > viewportHeight - padding) {
+            top = viewportHeight - padding - tooltipRect.height;
+          }
+
+          tooltipEl.style.left = `${left}px`;
+          tooltipEl.style.top = `${top}px`;
+          tooltipEl.style.transform = `${transformX} ${transformY}`;
         },
       },
     },

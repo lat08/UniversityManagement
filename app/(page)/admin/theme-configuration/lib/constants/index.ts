@@ -99,6 +99,8 @@ export function getCompleteThemeColors(isDarkMode: boolean = false): ThemeColors
     chartPrimary: colors.chartPrimary || colors.chart6 || '#ec4899',
     chartSecondary: colors.chartSecondary || colors.chart8 || '#c4b5fd',
     chartBackground: colors.chartBackground || '#c9c7c7',
+    chartTooltipBg: colors.chartTooltipBg || '#ffffff',
+    chartTooltipText: colors.chartTooltipText || '#0f172a',
     
     // Sidebar Colors
     sidebar: colors.sidebar || '#f8fafc',

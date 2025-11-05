@@ -52,6 +52,8 @@ export interface ThemeColors {
   chartPrimary: string;
   chartSecondary: string;
   chartBackground: string;
+  chartTooltipBg: string;
+  chartTooltipText: string;
   sidebar: string;
   sidebarForeground: string;
   sidebarPrimary: string;
