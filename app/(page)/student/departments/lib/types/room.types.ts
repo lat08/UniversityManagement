@@ -169,3 +169,49 @@ export interface CancelBookingResponse {
   message: string;
   data: unknown;
 }
+
+// Room Availability Types
+export interface TimeSlot {
+  startPeriod: number;
+  endPeriod: number;
+  startTime: string;
+  endTime: string;
+}
+
+export interface BusySlot {
+  startPeriod: number;
+  endPeriod: number;
+  startTime: string;
+  endTime: string;
+  type: 'class' | 'exam' | 'booking';
+  description?: string;
+}
+
+export interface RoomAvailability {
+  roomId: string;
+  roomName: string;
+  roomCode: string;
+  date: string;
+  availableSlots: TimeSlot[];
+  busySlots: BusySlot[];
+}
+
+export interface RoomAvailabilityResponse {
+  success: boolean;
+  message: string;
+  data: RoomAvailability;
+}
+
+// Busy Slot Type Labels
+export const BUSY_SLOT_TYPE_LABELS: Record<BusySlot['type'], string> = {
+  class: 'Lịch học',
+  exam: 'Lịch thi',
+  booking: 'Đã đặt',
+};
+
+// Busy Slot Type Colors
+export const BUSY_SLOT_TYPE_COLORS: Record<BusySlot['type'], string> = {
+  class: 'bg-blue-100 text-blue-700 border-blue-200',
+  exam: 'bg-red-100 text-red-700 border-red-200',
+  booking: 'bg-amber-100 text-amber-700 border-amber-200',
+};

@@ -50,6 +50,14 @@ export default function LoginPage() {
     mutationFn: loginApi,
     onSuccess: (response) => {
       if (response.success) {
+        const userRole = response.data.userInfo.roleName;
+        
+        // Chặn admin đăng nhập qua trang này
+        if (userRole === 'Admin' || userRole?.startsWith('Admin_')) {
+          toast.error('Tài khoản Admin vui lòng đăng nhập tại trang quản trị!');
+          return;
+        }
+
         setIsLoginSuccess(true);
         
         // Lưu token và user info vào Zustand store
@@ -61,7 +69,7 @@ export default function LoginPage() {
             id: response.data.userInfo.userId,
             email: response.data.userInfo.email,
             name: response.data.userInfo.fullName || response.data.userInfo.username,
-            role: response.data.userInfo.roleName || 'user'
+            role: userRole || 'user'
           }
         });
         
@@ -71,7 +79,6 @@ export default function LoginPage() {
         });
         
         // Điều hướng dựa trên role
-        const userRole = response.data.userInfo.roleName;
         navigateToDashboard(userRole);
       } else {
         toast.error('Đăng nhập thất bại. Vui lòng thử lại!');

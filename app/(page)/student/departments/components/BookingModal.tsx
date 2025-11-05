@@ -6,13 +6,20 @@ import { useCreateBooking } from '../lib/hooks/useRoomBooking';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
 import { Card, CardContent } from '@/app/components/ui/card';
-import { Users, MapPin, Monitor, X, Calendar, Clock } from 'lucide-react';
+import { Users, MapPin, X, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { Dropdown } from '@/app/components/ui';
 import { format, parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import toast from 'react-hot-toast';
-import { ROOM_STATUS_LABELS, ROOM_STATUS_COLORS } from '../lib/types/room.types';
+import { getRoomAvailability } from '../lib/api/rooms.api';
+import { 
+  ROOM_STATUS_LABELS, 
+  ROOM_STATUS_COLORS,
+  BUSY_SLOT_TYPE_LABELS,
+  BUSY_SLOT_TYPE_COLORS,
+  type RoomAvailability 
+} from '../lib/types/room.types';
 import 'react-day-picker/dist/style.css';
 
 interface BookingModalProps {
@@ -36,51 +43,8 @@ const CLASS_PERIODS = [
   { period: 13, startTime: '19:55', endTime: '20:45', label: 'Tiết 13' },
 ];
 
-const generateTimeOptions = (selectedDate?: Date) => {
-  if (!selectedDate) return [];
-  
-  const now = new Date();
-  const isToday = selectedDate.getDate() === now.getDate() &&
-    selectedDate.getMonth() === now.getMonth() &&
-    selectedDate.getFullYear() === now.getFullYear();
-  
-  if (isToday) {
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTimeInMinutes = currentHour * 60 + currentMinute;
-    
-    return CLASS_PERIODS
-      .filter(period => {
-        const [startHour, startMinute] = period.startTime.split(':').map(Number);
-        const periodStartInMinutes = startHour * 60 + startMinute;
-        return periodStartInMinutes > currentTimeInMinutes;
-      })
-      .map(period => ({
-        value: period.startTime,
-        label: `${period.label} (${period.startTime})`,
-        period: period.period
-      }));
-  }
-  
-  return CLASS_PERIODS.map(period => ({
-    value: period.startTime,
-    label: `${period.label} (${period.startTime})`,
-    period: period.period
-  }));
-};
-
-const generateEndTimeOptions = (startTime: string) => {
-  const startPeriod = CLASS_PERIODS.find(p => p.startTime === startTime);
-  if (!startPeriod) return [];
-  
-  return CLASS_PERIODS
-    .filter(p => p.period >= startPeriod.period)
-    .map(period => ({
-      value: period.endTime,
-      label: `${period.label} (${period.endTime})`,
-      period: period.period
-    }));
-};
+// Không còn dùng generateTimeOptions cũ nữa
+// Sẽ generate từ availability data
 
 export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const selectedRoom = useRoomBookingStore((state) => state.selectedRoom);
@@ -93,6 +57,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [endTime, setEndTime] = useState<string>('');
   const [purpose, setPurpose] = useState<string>('');
   const [studentCount, setStudentCount] = useState<number>(1);
+  const [availability, setAvailability] = useState<RoomAvailability | null>(null);
+  const [loadingAvailability, setLoadingAvailability] = useState<boolean>(false);
   
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -221,6 +187,28 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   };
 
 
+  // Load availability when date changes
+  useEffect(() => {
+    if (bookingDate && selectedRoom) {
+      const loadAvailability = async () => {
+        setLoadingAvailability(true);
+        try {
+          const dateStr = format(bookingDate, 'yyyy-MM-dd');
+          const response = await getRoomAvailability(selectedRoom.roomId, dateStr);
+          setAvailability(response.data);
+        } catch {
+          toast.error('Không thể tải thông tin phòng trống');
+          setAvailability(null);
+        } finally {
+          setLoadingAvailability(false);
+        }
+      };
+      loadAvailability();
+    } else {
+      setAvailability(null);
+    }
+  }, [bookingDate, selectedRoom]);
+
   const handleDateInputChange = (value: string) => {
     setDateInputValue(value);
     
@@ -247,6 +235,79 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   };
 
+  // Generate start time options from available slots
+  const getStartTimeOptions = () => {
+    if (!availability || !availability.availableSlots || availability.availableSlots.length === 0) {
+      return [];
+    }
+
+    const options: Array<{ value: string; label: string; period: number }> = [];
+    
+    for (const slot of availability.availableSlots) {
+      // Tìm period tương ứng
+      const startPeriod = CLASS_PERIODS.find(p => p.startTime === slot.startTime);
+      const endPeriod = CLASS_PERIODS.find(p => p.endTime === slot.endTime);
+      
+      if (startPeriod && endPeriod) {
+        // Thêm tất cả các tiết bắt đầu có thể trong slot này
+        for (let period = startPeriod.period; period <= endPeriod.period; period++) {
+          const classPeriod = CLASS_PERIODS.find(p => p.period === period);
+          if (classPeriod) {
+            options.push({
+              value: classPeriod.startTime,
+              label: `${classPeriod.label} (${classPeriod.startTime})`,
+              period: classPeriod.period
+            });
+          }
+        }
+      }
+    }
+
+    // Remove duplicates
+    const uniqueOptions = Array.from(
+      new Map(options.map(opt => [opt.value, opt])).values()
+    );
+
+    return uniqueOptions.sort((a, b) => a.period - b.period);
+  };
+
+  // Generate end time options based on selected start time and available slots
+  const getEndTimeOptions = () => {
+    if (!availability || !startTime) {
+      return [];
+    }
+
+    const startPeriod = CLASS_PERIODS.find(p => p.startTime === startTime);
+    if (!startPeriod) return [];
+
+    const options: Array<{ value: string; label: string; period: number }> = [];
+
+    // Tìm slot chứa start time
+    const containingSlot = availability.availableSlots.find(slot => {
+      const slotStartPeriod = CLASS_PERIODS.find(p => p.startTime === slot.startTime)?.period || 0;
+      const slotEndPeriod = CLASS_PERIODS.find(p => p.endTime === slot.endTime)?.period || 0;
+      return startPeriod.period >= slotStartPeriod && startPeriod.period <= slotEndPeriod;
+    });
+
+    if (!containingSlot) return [];
+
+    const slotEndPeriod = CLASS_PERIODS.find(p => p.endTime === containingSlot.endTime);
+    if (!slotEndPeriod) return [];
+
+    // Thêm các tiết kết thúc có thể từ start period đến cuối slot
+    for (let period = startPeriod.period; period <= slotEndPeriod.period; period++) {
+      const classPeriod = CLASS_PERIODS.find(p => p.period === period);
+      if (classPeriod) {
+        options.push({
+          value: classPeriod.endTime,
+          label: `${classPeriod.label} (${classPeriod.endTime})`,
+          period: classPeriod.period
+        });
+      }
+    }
+
+    return options.sort((a, b) => a.period - b.period);
+  };
 
   if (!isOpen || !selectedRoom) return null;
 
@@ -411,24 +472,26 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 Thời gian bắt đầu
               </h3>
               <Dropdown
-                options={bookingDate ? generateTimeOptions(bookingDate) : []}
+                options={getStartTimeOptions()}
                 value={startTime}
                 placeholder={
-                  bookingDate === null
-                    ? 'Vui lòng chọn ngày trước' 
-                    : generateTimeOptions(bookingDate).length === 0 
-                    ? 'Không có thời gian khả dụng cho hôm nay'
+                  !bookingDate
+                    ? 'Vui lòng chọn ngày trước'
+                    : loadingAvailability
+                    ? 'Đang tải...'
+                    : getStartTimeOptions().length === 0
+                    ? 'Không có khung giờ trống'
                     : 'Chọn thời gian bắt đầu'
                 }
                 onChange={(value) => {
                   setStartTime(value);
                   setEndTime('');
                 }}
-                disabled={!bookingDate || (bookingDate && generateTimeOptions(bookingDate).length === 0)}
+                disabled={!bookingDate || loadingAvailability || getStartTimeOptions().length === 0}
               />
-              {bookingDate && generateTimeOptions(bookingDate).length === 0 && (
+              {bookingDate && !loadingAvailability && getStartTimeOptions().length === 0 && (
                 <p className="text-sm text-amber-600 mt-2">
-                  ⚠️ Không còn khung giờ khả dụng cho hôm nay. Vui lòng chọn ngày khác.
+                  ⚠️ Không còn khung giờ trống. Vui lòng chọn ngày khác.
                 </p>
               )}
             </div>
@@ -440,7 +503,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 Thời gian kết thúc
               </h3>
               <Dropdown
-                options={startTime ? generateEndTimeOptions(startTime) : []}
+                options={getEndTimeOptions()}
                 value={endTime}
                 placeholder="Chọn thời gian kết thúc"
                 onChange={(value) => setEndTime(value)}
@@ -448,6 +511,34 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               />
             </div>
           </div>
+
+          {/* Busy Slots Info */}
+          {availability && availability.busySlots && availability.busySlots.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-semibold text-amber-900 mb-2">Các khung giờ đã bận:</h4>
+                  <div className="space-y-1.5">
+                    {availability.busySlots.map((slot, index) => (
+                      <div key={index} className="text-sm">
+                        <Badge className={BUSY_SLOT_TYPE_COLORS[slot.type] || 'bg-gray-100 text-gray-800'}>
+                          {BUSY_SLOT_TYPE_LABELS[slot.type] || slot.type}
+                        </Badge>
+                        <span className="text-amber-800 ml-2">
+                          {slot.startTime} - {slot.endTime}
+                        </span>
+                        {slot.description && (
+                          <span className="text-amber-700 ml-2">({slot.description})</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {/* Purpose */}
           <div>
