@@ -33,7 +33,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           setCurrentTheme(response);
           console.log('[ThemeProvider] Loaded active theme from backend:', response.themeName);
         }
-      } catch (error) {
+      } catch {
         console.warn('[ThemeProvider] Failed to load active theme from backend, using persisted theme');
       }
     };

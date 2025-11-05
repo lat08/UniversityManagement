@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
-import { getDashboardRoute, UserRole } from '@/lib/utils/navigation';
+import { getDashboardRoute } from '@/lib/utils/navigation';
 
 /**
  * Hook để quản lý navigation dựa trên role

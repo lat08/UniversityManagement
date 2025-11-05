@@ -76,12 +76,6 @@ export default function StudentProfilePage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Priority 2: Fetch students after dropdowns loaded
-  useEffect(() => {
-    fetchStudents();
-  }, [currentPage, selectedDepartmentId, selectedAcademicYearId, selectedStatus, searchKeyword]);
-
-
   const fetchDepartments = async () => {
     try {
       const response = await studentsApi.getDepartments({
@@ -107,7 +101,7 @@ export default function StudentProfilePage() {
     }
   };
 
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await studentsApi.getStudents({
@@ -132,8 +126,12 @@ export default function StudentProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
-  
+  }, [currentPage, selectedDepartmentId, selectedAcademicYearId, selectedStatus, searchKeyword, pageSize]);
+
+  // Priority 2: Fetch students after dropdowns loaded
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
 
   // Memoized stat cards values
   const statValues = useMemo(() => ({
@@ -167,7 +165,7 @@ export default function StudentProfilePage() {
   ];
 
   // Table row renderer
-  const renderStudentRow = useCallback((student: Student, index: number) => {
+  const renderStudentRow = useCallback((student: Student) => {
     const statusDisplay = getStatusDisplay(student.enrollmentStatus);
     return (
       <>

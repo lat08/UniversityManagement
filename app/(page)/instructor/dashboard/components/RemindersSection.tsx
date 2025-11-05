@@ -67,13 +67,17 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
 
       <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto">
         {reminders.length > 0 ? (
-          reminders.map((reminder) => (
+          reminders.map((reminder, index) => (
             <div
               key={reminder.notificationId}
               className={cn(
-                "flex flex-col gap-2 p-3 rounded-lg border transition-all hover:shadow-sm cursor-pointer",
+                "flex flex-col gap-2 p-3 rounded-lg border transition-all hover:shadow-sm cursor-pointer animate-fade-up",
                 getNotificationTypeColor(reminder.notificationType)
               )}
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: 'both'
+              }}
             >
               <div className="flex items-start gap-2">
                 <div className="flex-shrink-0 mt-0.5">

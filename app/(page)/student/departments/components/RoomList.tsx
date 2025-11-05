@@ -129,7 +129,7 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-        {rooms.map((room) => {
+        {rooms.map((room, index) => {
           const roomTypeBadge = getRoomTypeBadge(room.roomType);
           const roomStatusBadge = getRoomStatusBadge(room.roomStatus);
           const isDisabled = room.roomStatus === 'inactive' || room.roomStatus === 'maintenance';
@@ -137,7 +137,8 @@ export default function RoomList({ rooms, isLoading, pagination, currentPage, on
           return (
             <Card
               key={room.roomId}
-              className="overflow-hidden border border-gray-200 bg-white"
+              className="overflow-hidden border border-gray-200 bg-white animate-fade-up hover:shadow-lg transition-shadow duration-300"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Room Image */}
               <div className="relative w-full h-[230px] overflow-hidden">

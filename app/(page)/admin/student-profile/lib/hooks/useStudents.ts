@@ -41,14 +41,7 @@ export const useStudents = (params: GetStudentsParams = {}): UseStudentsReturn =
     } finally {
       setLoading(false);
     }
-  }, [
-    params.pageNumber,
-    params.pageSize,
-    params.searchKeyword,
-    params.departmentId,
-    params.academicYearId,
-    params.enrollmentStatus,
-  ]);
+  }, [params]);
 
   useEffect(() => {
     fetchStudents();

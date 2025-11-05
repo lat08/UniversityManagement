@@ -48,11 +48,18 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
       <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
 
       <div className="space-y-3 lg:space-y-4">
-        {schedules.map((schedule) => {
+        {schedules.map((schedule, index) => {
           const colors = getClassTypeColor(schedule.classType);
           
           return (
-            <div key={schedule.courseClassId} className="relative pl-8 lg:pl-10">
+            <div 
+              key={schedule.courseClassId} 
+              className="relative pl-8 lg:pl-10 animate-fade-up"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: 'both'
+              }}
+            >
               <div className={cn(
                 "absolute left-[0px] top-3 w-5 h-5 rounded-full border-4 border-white shadow-sm z-10",
                 colors.dot

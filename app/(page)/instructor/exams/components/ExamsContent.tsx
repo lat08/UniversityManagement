@@ -186,13 +186,15 @@ export function ExamsContent() {
             <p className="text-gray-600">Không tìm thấy đề thi nào.</p>
           </div>
         ) : (
-          examEntries.map((exam) => (
+          examEntries.map((exam, index) => (
             <ExamCard
               key={exam.examEntryId}
               exam={exam}
               onDownload={handleDownload}
               onResubmit={handleResubmit}
               onView={handleView}
+              animationDelay={index * 100}
+              onClick={() => handleView(exam.examEntryId)}
             />
           ))
         )}

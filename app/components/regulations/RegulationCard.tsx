@@ -9,11 +9,18 @@ interface RegulationCardProps {
   readonly isExpanded: boolean
   readonly onToggle: () => void
   readonly noticeText?: string
+  readonly animationDelay?: number
 }
 
-export function RegulationCard({ regulation, isExpanded, onToggle, noticeText }: RegulationCardProps) {
+export function RegulationCard({ regulation, isExpanded, onToggle, noticeText, animationDelay = 0 }: RegulationCardProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div 
+      className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden animate-fade-up transition-all duration-300 ease-out hover:scale-[1.01] hover:shadow-md cursor-pointer"
+      style={{
+        animationDelay: `${animationDelay}ms`,
+        animationFillMode: 'both'
+      }}
+    >
       <button
         onClick={onToggle}
         className="w-full px-6 py-4 flex items-center gap-4 hover:bg-blue-50 transition-colors cursor-pointer"

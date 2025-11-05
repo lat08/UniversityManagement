@@ -1,9 +1,7 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
-import { Badge } from "@/app/components/ui/badge"
-import { Printer, TrendingUp, BookOpen, Award, CheckCircle, XCircle, ChevronUp, ChevronDown, List, Loader2 } from "lucide-react"
+import { Printer, BookOpen, XCircle, List, Loader2, ChevronDown } from "lucide-react"
 import { useState, useEffect, useMemo, useRef } from "react"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useGrades } from "./lib/hooks/useGrades"
@@ -99,29 +97,6 @@ export default function ScoresPage() {
     window.addEventListener("keydown", handleEscKey)
     return () => window.removeEventListener("keydown", handleEscKey)
   }, [showDetailModal])
-
-  const getStatusIcon = (status: string) => {
-    if (status === "Đạt") return <CheckCircle className="h-4 w-4 text-green-600" />
-    if (status === "Không đạt") return <XCircle className="h-4 w-4 text-red-600" />
-    return <span className="text-xs text-gray-500">-</span>
-  }
-
-  const getClassificationColor = (classification: string) => {
-    switch (classification) {
-      case "Xuất sắc":
-        return "bg-gradient-to-r from-[#FF512F] to-[#DD2476] text-white hover:from-[#FF512F] hover:to-[#DD2476]"
-      case "Giỏi":
-        return "bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA] text-white hover:from-[#1FA2FF] hover:to-[#12D8FA]"
-      case "Khá":
-        return "bg-gradient-to-r from-[#56ab2f] to-[#a8e063] text-white hover:from-[#56ab2f] hover:to-[#a8e063]"
-      case "Trung bình":
-        return "bg-gradient-to-r from-[#F7971E] to-[#FFD200] text-white hover:from-[#F7971E] hover:to-[#FFD200]"
-      case "Yếu":
-        return "bg-gradient-to-r from-[#ED213A] to-[#93291E] text-white hover:from-[#ED213A] hover:to-[#93291E]"
-      default:
-        return "bg-gray-100 text-gray-500 hover:bg-gray-100"
-    }
-  }
 
   const filteredSemesters =
     selectedSemesters.length === 0 
@@ -260,7 +235,7 @@ export default function ScoresPage() {
               </div>
               
               <div className="max-h-52 overflow-y-auto">
-                {commonSemesters.map((semester, index) => {
+                {commonSemesters.map((semester) => {
                   const isSelected = selectedSemesters.includes(semester.semesterId);
                   return (
                     <button
@@ -316,7 +291,7 @@ export default function ScoresPage() {
       </div>
 
       <div className="space-y-4 sm:space-y-6">
-        {filteredSemesters.map((semester, index) => {
+        {filteredSemesters.map((semester) => {
           const stats = calculateSemesterStats(semester.id)
           if (!stats) return null
 

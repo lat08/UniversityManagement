@@ -1,28 +1,27 @@
 'use client';
 
-import { Download, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import type { CourseGroup } from '../lib/types/types';
 
 interface DocumentCardProps {
   courseGroup: CourseGroup;
   onView: (group: CourseGroup) => void;
-  onDownloadAll: (group: CourseGroup) => void;
+  onDownloadAll?: (group: CourseGroup) => void;
+  animationDelay?: number;
 }
 
-export const DocumentCard = ({ courseGroup, onView, onDownloadAll }: DocumentCardProps) => {
+export const DocumentCard = ({ courseGroup, onView, animationDelay = 0 }: DocumentCardProps) => {
   const documentCount = courseGroup.documents?.length || 0;
 
-  const handleDownloadAll = () => {
-    for (const doc of courseGroup.documents || []) {
-      if (doc.downloadUrl) {
-        window.open(doc.downloadUrl, '_blank');
-      }
-    }
-  };
-
   return (
-    <div className="relative bg-white rounded-lg border border-gray-200 p-4 lg:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div 
+      className="relative bg-white rounded-lg border border-gray-200 p-4 lg:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all duration-300 ease-out hover:scale-[1.01] hover:shadow-md animate-fade-up"
+      style={{
+        animationDelay: `${animationDelay}ms`,
+        animationFillMode: 'both'
+      }}
+    >
       <div>
         <h3 className="text-base lg:text-lg font-semibold text-blue-700">
           {courseGroup.courseName}
@@ -43,13 +42,6 @@ export const DocumentCard = ({ courseGroup, onView, onDownloadAll }: DocumentCar
           size="sm"
         >
           <Eye className="w-4 h-4 mr-1 lg:mr-2" /> Xem
-        </Button>
-        <Button 
-          onClick={handleDownloadAll}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
-          size="sm"
-        >
-          <Download className="w-4 h-4 mr-1 lg:mr-2" /> Tải
         </Button>
       </div>
     </div>

@@ -30,10 +30,10 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
 
   const buildingOptions = [
     { value: '', label: 'Tất cả' },
-    ...buildings.map(b => ({ 
+    ...(buildings?.map(b => ({ 
       value: b.buildingId, 
       label: `${b.buildingName} (${b.buildingCode})` 
-    }))
+    })) || [])
   ];
 
   const roomTypeOptions = createDropdownOptions(ROOM_TYPE_LABELS);

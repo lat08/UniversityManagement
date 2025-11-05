@@ -72,14 +72,6 @@ export default function DocumentsPage() {
     setSelectedGroup(null);
   };
 
-  const handleDownloadAll = (group: CourseGroup) => {
-    for (const doc of group.documents || []) {
-      if (doc.downloadUrl) {
-        window.open(doc.downloadUrl, '_blank');
-      }
-    }
-  };
-
   return (
     <>
       <div className="space-y-4 lg:space-y-6">
@@ -114,12 +106,12 @@ export default function DocumentsPage() {
               {safeCourseGroups.length === 0 ? (
                 <DocumentsEmpty hasFilters={hasFilters} />
               ) : (
-                safeCourseGroups.map((group) => (
+                safeCourseGroups.map((group, index) => (
                   <DocumentCard
                     key={group.courseClassId}
                     courseGroup={group}
                     onView={handleView}
-                    onDownloadAll={handleDownloadAll}
+                    animationDelay={index * 100}
                   />
                 ))
               )}

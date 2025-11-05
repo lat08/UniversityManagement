@@ -38,7 +38,9 @@ export function Dropdown<T = string>({
   renderValue,
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
+  const [shouldRender, setShouldRender] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const selectedOption = value ? options.find(opt => opt.value === value) : undefined
 
@@ -51,12 +53,20 @@ export function Dropdown<T = string>({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside)
+      setShouldRender(true)
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen && shouldRender) {
+      const timer = setTimeout(() => setShouldRender(false), 150)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, shouldRender])
 
   const handleSelect = (optionValue: T) => {
     onChange(optionValue)
@@ -82,13 +92,20 @@ export function Dropdown<T = string>({
         <span className="text-sm text-gray-900 truncate">
           {displayValue}
         </span>
-        <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
+        <ChevronDown className={cn(
+          "w-4 h-4 ml-2 text-gray-700 flex-shrink-0 transition-transform duration-200",
+          isOpen && "rotate-180"
+        )} />
       </button>
 
-      {isOpen && (
+      {shouldRender && (
         <div
+          ref={dropdownRef}
           className={cn(
-            "absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto",
+            "absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
+            isOpen 
+              ? "opacity-100 translate-y-0 scale-100 duration-200 ease-out" 
+              : "opacity-0 translate-y-1 scale-[0.98] duration-150 ease-in pointer-events-none",
             dropdownClassName
           )}
         >

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
+import { useAuthStore } from "@/lib/store/authStore";
 import StatCard from "../StatCard";
 import AcademicResultsChart from "../AcademicResultsChart";
 import LearningStatsCard from "../LearningStatsCard";
@@ -48,9 +49,8 @@ const getActiveSemesterId = (semesters: Semester[]): string => {
 };
 
 export default function DashboardContent() {
-
-  
-  const { dashboard, loading, error, refetch } = useDashboard();
+  const { user } = useAuthStore();
+  const { dashboard, loading, error } = useDashboard();
   const card = useDashboardStats();
 
   const activeSemesterId = useMemo(() => {
@@ -76,7 +76,9 @@ export default function DashboardContent() {
       {/* Welcome Section */}
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-[var(--text-primary)]">Bảng điều khiển</h1>
-        <p className="text-xs lg:text-sm text-[var(--text-secondary)] mt-1">Chào mừng trở lại, Name!</p>
+        <p className="text-xs lg:text-sm text-[var(--text-secondary)] mt-1">
+          Chào mừng trở lại, {user?.name || 'Sinh viên'}!
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">

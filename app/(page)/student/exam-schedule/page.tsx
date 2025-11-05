@@ -166,7 +166,7 @@ export default function ExamSchedulePage() {
         <div className="lg:col-span-4">
           <NotesSection 
             notes={MOCK_NOTES} 
-            onToggleNote={(id) => {}}
+            onToggleNote={() => {}}
           />
         </div>
       </div>

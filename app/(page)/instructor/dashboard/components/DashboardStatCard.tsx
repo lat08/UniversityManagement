@@ -3,12 +3,17 @@
 import { Card, CardContent } from "@/app/components/ui/card";
 import { BookOpen, FileText, Pencil } from "lucide-react";
 import { DashboardStatCard as DashboardStatCardType } from "../lib/types/types";
+import { useCountUp } from "@/lib/hooks/useCountUp";
 
 interface DashboardStatCardProps {
   data: DashboardStatCardType;
 }
 
 export default function DashboardStatCard({ data }: DashboardStatCardProps) {
+  const numericValue = typeof data.value === 'number' ? data.value : 0;
+  const countValue = useCountUp(numericValue, { duration: 1500 });
+  const displayValue = typeof data.value === 'number' ? countValue : data.value;
+
   const getIcon = () => {
     if (data.title.includes("Lớp")) return BookOpen;
     if (data.title.includes("Tài liệu")) return FileText;
@@ -31,7 +36,7 @@ export default function DashboardStatCard({ data }: DashboardStatCardProps) {
         </h3>
 
         <div className={`text-4xl lg:text-5xl font-bold ${data.textColor} mb-2`}>
-          {data.value}
+          {displayValue}
         </div>
 
         {data.subtitle && (

@@ -20,18 +20,16 @@ export default function EventCard({ events }: EventData) {
       <CardContent className="space-y-3 flex-1 relative max-h-[400px] overflow-y-auto">
         {upcomingEvents.length > 0 ? (
           <div className="relative pl-6">
-            {/* Vertical timeline line */}
             <div className="absolute left-2 top-1 bottom-0 w-[1.5px] bg-[var(--event-timeline)]" />
 
             {upcomingEvents.map((event, index) => (
               <div
                 key={event.notificationId}
-                className="shadow shadow-md relative flex items-start gap-3 mb-4"
+                className="shadow shadow-md relative flex items-start gap-3 mb-4 animate-fade-up"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                {/* Event dot */}
                 <div className="absolute -left-[23px] w-4 h-4 top-1 rounded-full border-4 border-[var(--event-dot-border)] bg-white z-10" />
 
-                {/* Event card */}
                 <div className="border border-[var(--event-border)] flex-1 p-3 rounded-sm hover:bg-[var(--bg-tertiary)] transition-colors">
                   <h4 className="text-sm lg:text-base font-bold text-[var(--event-title)] mb-1">
                     {event.title}

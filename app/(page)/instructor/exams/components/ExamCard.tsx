@@ -11,6 +11,8 @@ interface ExamCardProps {
   onDownload?: (id: string, fileType: 'question' | 'answer') => void;
   onResubmit?: (id: string) => void;
   onView?: (id: string) => void;
+  animationDelay?: number;
+  onClick?: () => void;
 }
 
 export function ExamCard({
@@ -18,13 +20,30 @@ export function ExamCard({
   onDownload,
   onResubmit,
   onView,
+  animationDelay = 0,
+  onClick,
 }: ExamCardProps) {
   const statusLabel = ENTRY_STATUS_LABELS[exam.entryStatus] || exam.entryStatus;
   const statusClassName = ENTRY_STATUS_COLORS[exam.entryStatus] || "bg-gray-100 text-gray-700";
   const examTypeLabel = EXAM_TYPE_LABELS[exam.examType] || exam.examType;
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) {
+      return;
+    }
+    onClick?.();
+  };
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow">
+    <div 
+      className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 transition-all duration-300 ease-out hover:shadow-md hover:scale-[1.01] cursor-pointer animate-fade-up"
+      style={{
+        animationDelay: `${animationDelay}ms`,
+        animationFillMode: 'both'
+      }}
+      onClick={handleCardClick}
+    >
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
           <FileText className="w-6 h-6 text-blue-600" />

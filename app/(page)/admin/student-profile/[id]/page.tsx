@@ -106,27 +106,6 @@ export default function StudentDetailPage() {
     return formatCurrencyUtil(amount);
   }, []);
 
-  const formatDateTime = useMemo(() => (dateString: string | null) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }, []);
-
-  const getPaymentMethodDisplay = useMemo(() => (method: string | null) => {
-    if (!method) return '-';
-    const methodMap: Record<string, string> = {
-      cash: 'Tiền mặt',
-      bank_transfer: 'Chuyển khoản',
-      credit_card: 'Thẻ tín dụng',
-      momo: 'Ví MoMo',
-      zalopay: 'ZaloPay',
-    };
-    return methodMap[method] || method;
-  }, []);
-
   // Export handlers
   const handleExportTuition = async () => {
     try {

@@ -413,7 +413,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                     <Button
                                       variant="ghost"
                                       className={cn(
-                                        "w-full justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer pl-6",
+                                        "w-[calc(100%-16px)] justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer pl-6 ml-4",
                                         isSubActive ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] font-semibold hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]" : "text-[var(--sidebar-item-text)] opacity-80"
                                       )}
                                       onClick={() => {

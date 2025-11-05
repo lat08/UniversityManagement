@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { learningStats } from "../libs/constants/dashboardConstant";
 import { KpiData } from "../libs/types/types";
+import { useCountUp } from "@/lib/hooks/useCountUp";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -22,6 +22,8 @@ export default function LearningStatsCard({
 Kpi
 } : KpiData) {
   const [chartColors, setChartColors] = useState(getChartColors());
+  const animatedGpa = useCountUp(Kpi?.gpa ?? 0, { duration: 1200 });
+  const animatedCredits = useCountUp(Kpi?.completedCredits ?? 0, { duration: 1000 });
 
   useEffect(() => {
     const updateColors = () => setChartColors(getChartColors());
@@ -80,7 +82,7 @@ Kpi
           </div>
           <div className="text-center">
             <span className="text-4xl font-bold text-[var(--primary)]">
-              {Kpi?.gpa}
+              {animatedGpa.toFixed(2)}
             </span>
             <span className="text-lg text-[var(--text-secondary)] ml-1">
               /4
@@ -101,7 +103,7 @@ Kpi
                 <Doughnut data={chartData} options={chartOptions} />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-2xl font-bold text-[var(--text-primary)]">
-                    {Kpi?.completedCredits}/{Kpi?.totalCredits}
+                    {animatedCredits}/{Kpi?.totalCredits}
                   </span>
                 </div>
               </div>

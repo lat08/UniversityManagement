@@ -48,7 +48,7 @@ export function useThemeSignalR() {
           try {
             if (themeData.themes) loadThemes(themeData.themes as never);
             if (themeData.theme) setCurrentTheme(themeData.theme as never);
-          } catch (error) {
+          } catch {
             // Silently handle errors
           }
         });
@@ -59,7 +59,7 @@ export function useThemeSignalR() {
 
         await connection.invoke('JoinThemeGroup');
         
-      } catch (error) {
+      } catch {
         if (!reconnectTimeout) {
           reconnectTimeout = setTimeout(() => {
             reconnectTimeout = null;
@@ -83,7 +83,7 @@ export function useThemeSignalR() {
             await connection.invoke('LeaveThemeGroup').catch(() => {});
           }
           await connection.stop().catch(() => {});
-        } catch (error) {
+        } catch {
           // Silently handle errors
         }
         connection = null;

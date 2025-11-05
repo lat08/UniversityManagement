@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
+import { useAuthStore } from "@/lib/store/authStore";
 import DashboardStatCard from "./components/DashboardStatCard";
 import WeeklyScheduleTimeline from "./components/WeeklyScheduleTimeline";
 import RemindersSection from "./components/RemindersSection";
@@ -12,6 +13,7 @@ import { useDashboard } from "./lib/hooks/useDashboard";
 export default function InstructorDashboardPage() {
   usePageTitle('Bảng điều khiển');
 
+  const { user } = useAuthStore();
   const { dashboard: dashboardData, loading } = useDashboard();
 
   const stats = useMemo((): DashboardStatCardType[] => {
@@ -85,7 +87,7 @@ export default function InstructorDashboardPage() {
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Bảng điều khiển</h1>
         <p className="text-xs lg:text-sm text-gray-500 mt-1">
-          Chào mừng trở lại, Name!
+          Chào mừng trở lại, {user?.name || 'Giảng viên'}!
         </p>
       </div>
 

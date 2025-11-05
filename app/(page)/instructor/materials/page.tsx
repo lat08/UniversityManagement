@@ -191,13 +191,15 @@ export default function MaterialsPage() {
                 <p className="text-gray-600">Không tìm thấy tài liệu nào.</p>
               </div>
             ) : (
-              allDocuments.map((document) => (
+              allDocuments.map((document, index) => (
                 <DocumentCard
                   key={document.id}
                   document={document}
                   onEdit={handleEdit}
                   onDownload={handleDownload}
                   onDelete={handleDelete}
+                  animationDelay={index * 100}
+                  onClick={() => handleEdit(document.id)}
                 />
               ))
             )}

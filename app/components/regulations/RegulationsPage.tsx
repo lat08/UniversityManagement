@@ -108,13 +108,14 @@ export function RegulationsPage({ pageTitle, description, noticeText }: Regulati
             <p className="text-gray-600">Không tìm thấy quy chế phù hợp với từ khóa &quot;{searchQuery}&quot;</p>
           </div>
         ) : (
-          filteredRegulations.map((regulation) => (
+          filteredRegulations.map((regulation, index) => (
             <RegulationCard
               key={regulation.id}
               regulation={regulation}
               isExpanded={expandedId === regulation.id}
               onToggle={() => toggleExpand(regulation.id)}
               noticeText={noticeText}
+              animationDelay={index * 100}
             />
           ))
         )}

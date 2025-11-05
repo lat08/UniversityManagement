@@ -3,12 +3,19 @@
 import { Card, CardContent } from "@/app/components/ui/card";
 import { Calendar, Clock, CheckCircle } from "lucide-react";
 import { ExamStatCard as ExamStatCardType } from "../lib/types/types";
+import { useCountUp } from "@/lib/hooks/useCountUp";
 
 interface ExamStatCardProps {
   data: ExamStatCardType;
 }
 
 export default function ExamStatCard({ data }: ExamStatCardProps) {
+  const numericValue = typeof data.value === 'number' ? data.value : 0;
+  const countValue = useCountUp(numericValue, { duration: 1500 });
+  const countProgress = useCountUp(data.progress ?? 0, { duration: 1000 });
+  
+  const displayValue = typeof data.value === 'number' ? countValue : data.value;
+
   const getIcon = () => {
     if (data.title.includes("Tổng")) return Calendar;
     if (data.title.includes("sắp tới")) return Clock;
@@ -31,18 +38,18 @@ export default function ExamStatCard({ data }: ExamStatCardProps) {
         </h3>
 
         <div className={`text-4xl lg:text-5xl font-bold ${data.textColor} mb-2`}>
-          {data.value}
+          {displayValue}
         </div>
         {data.progress !== undefined ? (
           <div className="mt-3">
             <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
               <span>Tiến độ</span>
-              <span className="font-bold">{data.progress}%</span>
+              <span className="font-bold">{Math.round(countProgress)}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
               <div
-                className={`h-1.5 rounded-full ${data.iconColor}`}
-                style={{ width: `${data.progress}%` }}
+                className={`h-1.5 rounded-full transition-all duration-1000 ease-out ${data.iconColor}`}
+                style={{ width: `${countProgress}%` }}
               />
             </div>
           </div>

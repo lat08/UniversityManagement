@@ -28,13 +28,17 @@ export default function NotesSection({ notes, onToggleNote }: NotesSectionProps)
 
       <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto">
         {notes.length > 0 ? (
-          notes.map((note) => (
+          notes.map((note, index) => (
             <div
               key={note.id}
               className={cn(
-                "flex items-center gap-3 p-3 bg-white rounded-lg border transition-all",
+                "flex items-center gap-3 p-3 bg-white rounded-lg border transition-all animate-fade-up",
                 note.completed ? "border-green-200 bg-green-50/50" : "border-blue-200"
               )}
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: 'both'
+              }}
             >
               <button
                 onClick={() => handleToggleNote(note.id)}

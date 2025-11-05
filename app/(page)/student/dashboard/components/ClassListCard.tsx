@@ -18,12 +18,12 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
       </CardHeader>
 
       <CardContent className="space-y-4 flex-1 max-h-[400px] overflow-y-auto">
-        {/* ✅ Nếu có lớp */}
         {hasClasses ? (
           currentSubjects.map((classInfo, index) => (
             <div
               key={`${classInfo.courseId}-${classInfo.subjectCode}-${index}`}
-              className="border border-[var(--classlist-border)] shadow shadow-md p-4 rounded-sm hover:border-[var(--primary)] hover:shadow-sm transition-all"
+              className="border border-[var(--classlist-border)] shadow shadow-md p-4 rounded-sm hover:border-[var(--primary)] hover:shadow-sm transition-all animate-fade-up"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-start justify-between mb-3">
                 <h4 className="text-sm lg:text-base font-bold text-[var(--classlist-title)] flex-1">
@@ -47,7 +47,6 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
             </div>
           ))
         ) : (
-          // ✅ Nếu không có lớp học
           <div className="p-4 text-center border border-dashed border-[var(--classlist-empty-border)] rounded-lg bg-[var(--classlist-empty-bg)]">
             <div className="flex flex-col items-center justify-center space-y-2 text-[var(--classlist-empty-text)]">
               <Info className="w-5 h-5 text-[var(--classlist-empty-icon)]" />

@@ -10,6 +10,7 @@ export interface NotificationCardProps {
   readonly notification: NotificationApiItem
   readonly onNotificationClick?: (id: string) => void
   readonly initialExpanded?: boolean
+  readonly animationDelay?: number
 }
 
 const iconMap = {
@@ -42,7 +43,7 @@ const notificationTypeConfig = {
   },
 }
 
-export function NotificationCard({ notification, onNotificationClick, initialExpanded = false }: NotificationCardProps) {
+export function NotificationCard({ notification, onNotificationClick, initialExpanded = false, animationDelay = 0 }: NotificationCardProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
   const typeConfig = notificationTypeConfig[notification.notificationType]
   const Icon = iconMap[notification.notificationType]
@@ -65,11 +66,13 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
 
   return (
     <Card 
-      className={`border-1 overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${
+      className={`border-1 overflow-hidden cursor-pointer transition-all duration-300 ease-out hover:shadow-md hover:scale-[1.01] animate-fade-up ${
         notification.isRead ? "bg-[var(--card-bg)]" : "bg-[var(--primary-light)]"
       }`}
       style={{
-        borderColor: 'var(--primary)'
+        borderColor: 'var(--primary)',
+        animationDelay: `${animationDelay}ms`,
+        animationFillMode: 'both'
       }}
       onClick={handleClick}
     >

@@ -84,7 +84,6 @@ export default function EditStudentPage() {
     if (selectedFacultyId) {
       fetchClasses(selectedFacultyId, selectedDepartmentId || undefined);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFacultyId, selectedDepartmentId]);
 
   const fetchFaculties = async () => {

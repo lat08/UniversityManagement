@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/ca
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { useTheme } from '@/app/providers/ThemeProvider';
-import { useThemeStore } from '@/app/(page)/admin/theme-configuration/lib/store/themeStore';
 import { themeApi, type ThemeConfig, type CreateThemeRequest } from './lib';
 import { getAllPages, getCompleteThemeColors, type PageThemeConfig } from './lib';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -17,7 +16,6 @@ type ViewMode = 'pages' | 'themes';
 export default function ThemeConfigurationPage() {
   const { 
     currentTheme, 
-    updateThemeColors, 
     toggleDarkMode,
     isDarkMode,
     setCurrentTheme
@@ -27,7 +25,6 @@ export default function ThemeConfigurationPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('pages');
   const [selectedPage, setSelectedPage] = useState<PageThemeConfig | null>(null);
   const [editingColors, setEditingColors] = useState<Record<string, string>>({});
-  const [isSaving, setIsSaving] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newThemeName, setNewThemeName] = useState('');
   const [newThemeDescription, setNewThemeDescription] = useState('');
