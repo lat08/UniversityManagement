@@ -6,12 +6,11 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useGrades } from "./lib/hooks/useGrades"
 import { transformSemestersToUI, createCourseDetailsLookup } from "./lib/utils/transformers"
-import { calculateGPA, getLetterGrade } from "./lib/utils/gradeUtils"
 import type { CourseDetail } from "./lib/types/types"
 
 export default function ScoresPage() {
   usePageTitle('Điểm số');
-  const { cumulativeData, statsData, commonSemesters, isLoading, error, exportPdf } = useGrades()
+  const { cumulativeData, commonSemesters, isLoading, error, exportPdf } = useGrades()
   const [selectedSemesters, setSelectedSemesters] = useState<string[]>([])
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
@@ -35,31 +34,20 @@ export default function ScoresPage() {
   }, [cumulativeData])
 
   const scoreOverview = useMemo(() => {
-    if (!statsData) {
+    if (!cumulativeData) {
       return {
         gpa4: "0.00",
         totalCredits: 0,
         completedCourses: 0,
-        classification: "",
       }
     }
 
-    const classification = (() => {
-      if (statsData.averageGPA >= 3.8) return "Xuất sắc"
-      if (statsData.averageGPA >= 3.2) return "Giỏi"
-      if (statsData.averageGPA >= 2.5) return "Khá"
-      if (statsData.averageGPA >= 2.0) return "Trung bình"
-      if (statsData.averageGPA > 0) return "Yếu"
-      return ""
-    })();
-
     return {
-      gpa4: statsData.averageGPA.toFixed(2),
-      totalCredits: statsData.totalCredits,
-      completedCourses: statsData.totalSubjects,
-      classification,
+      gpa4: cumulativeData.cumulativeGPA4.toFixed(2),
+      totalCredits: cumulativeData.totalCompletedCredits,
+      completedCourses: cumulativeData.totalSubjects,
     }
-  }, [statsData])
+  }, [cumulativeData])
 
   const handleShowDetail = (courseCode: string) => {
     if (courseDetails[courseCode]) {
@@ -317,48 +305,43 @@ export default function ScoresPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {semester.courses.map((course, idx) => {
-                      const gpa = course.score10 !== null ? calculateGPA(course.score10) : null
-                      const letterGrade = course.score10 !== null ? getLetterGrade(course.score10) : null
-
-                      return (
-                        <tr
-                          key={idx}
-                          className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-gray-900 whitespace-nowrap">{course.code}</td>
-                          <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-gray-900">{course.name}</td>
-                          <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900">{course.credits}</td>
-                          <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900">
-                            {course.score10 !== null ? course.score10.toFixed(1) : "-"}
-                          </td>
-                          <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900 font-medium">
-                            {course.score10 !== null ? course.score10.toFixed(1) : "-"}
-                          </td>
-                          <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900 font-medium">
-                            {gpa !== null ? gpa.toFixed(1) : "-"}
-                          </td>
-                          <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900 font-medium">
-                            {letterGrade || "-"}
-                          </td>
-                          <td className="py-2 px-2 sm:py-3.5 sm:px-3 text-center">
-                            <span className={`font-medium ${course.status === "Đạt" ? "text-[var(--grade-pass-text)]" : "text-[var(--grade-fail-text)]"}`}>
-                              {course.status}
-                            </span>
-                          </td>
-                          <td className="py-2 px-2 sm:py-3.5 sm:px-3 text-center">
-                            <button
-                              onClick={() => handleShowDetail(course.code)}
-                              disabled={!courseDetails[course.code]}
-                              className="p-1 sm:p-1.5 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                              title="Xem chi tiết"
-                            >
-                              <List className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    })}
+                    {semester.courses.map((course, idx) => (
+                      <tr
+                        key={idx}
+                        className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-gray-900 whitespace-nowrap">{course.code}</td>
+                        <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-gray-900">{course.name}</td>
+                        <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900">{course.credits}</td>
+                        <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900">
+                          {course.finalGrade !== null ? course.finalGrade.toFixed(2) : "-"}
+                        </td>
+                        <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900 font-medium">
+                          {course.finalGrade10 !== null ? course.finalGrade10.toFixed(2) : "-"}
+                        </td>
+                        <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900 font-medium">
+                          {course.finalGrade4 !== null ? course.finalGrade4.toFixed(1) : "-"}
+                        </td>
+                        <td className="py-2 px-1 sm:py-3.5 sm:px-3 text-center text-gray-900 font-medium">
+                          {course.gradeLetter || "-"}
+                        </td>
+                        <td className="py-2 px-2 sm:py-3.5 sm:px-3 text-center">
+                          <span className={`font-medium ${course.status === "Đạt" ? "text-[var(--grade-pass-text)]" : "text-[var(--grade-fail-text)]"}`}>
+                            {course.status}
+                          </span>
+                        </td>
+                        <td className="py-2 px-2 sm:py-3.5 sm:px-3 text-center">
+                          <button
+                            onClick={() => handleShowDetail(course.code)}
+                            disabled={!courseDetails[course.code]}
+                            className="p-1 sm:p-1.5 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            title="Xem chi tiết"
+                          >
+                            <List className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

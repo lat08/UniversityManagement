@@ -3,7 +3,6 @@ import { api } from '@/lib/api/client';
 import { useRoomBookingStore, type BookingSlot } from '../stores/roomBookingStore';
 import type { RoomApiResponse, BookingApiResponse, BookingData, CreateBookingRequest } from '../types/room.types';
 import { createRoomBooking, cancelRoomBooking } from '../api/rooms.api';
-import { useBuildings } from '@/lib/hooks/useCommonData';
 
 // Query keys
 export const roomBookingKeys = {
@@ -17,10 +16,9 @@ export const roomBookingKeys = {
 export const useRooms = (page: number = 1, pageSize: number = 10) => {
   const setRooms = useRoomBookingStore((state) => state.setRooms);
   const filters = useRoomBookingStore((state) => state.filters);
-  const { data: buildings } = useBuildings();
   
   return useQuery({
-    queryKey: [...roomBookingKeys.rooms(page, pageSize), filters, buildings],
+    queryKey: [...roomBookingKeys.rooms(page, pageSize), filters],
     queryFn: async () => {
       try {
         // Build params with filters
@@ -33,11 +31,8 @@ export const useRooms = (page: number = 1, pageSize: number = 10) => {
         if (filters.capacity) {
           params.minCapacity = Number.parseInt(filters.capacity);
         }
-        if (filters.buildingId && buildings) {
-          const selectedBuilding = buildings.find(b => b.buildingId === filters.buildingId);
-          if (selectedBuilding?.address) {
-            params.BuildingLocation = selectedBuilding.address;
-          }
+        if (filters.buildingCode) {
+          params.BuildingCode = filters.buildingCode;
         }
         if (filters.roomType) {
           params.roomType = filters.roomType;

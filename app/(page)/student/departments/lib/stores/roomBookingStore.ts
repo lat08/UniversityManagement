@@ -16,7 +16,7 @@ export type BookingSlot = {
 
 export type RoomFilters = {
 	capacity: string;
-	buildingId: string;
+	buildingCode: string;
 	roomType: string;
 	roomStatus: string;
 };
@@ -49,7 +49,7 @@ type RoomBookingActions = {
 
 const initialFilters: RoomFilters = {
 	capacity: '',
-	buildingId: '',
+	buildingCode: '',
 	roomType: '',
 	roomStatus: '',
 };

@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { gradesApi } from '../api/gradesApi'
-import { CumulativeGradesData, GradesStatsData } from '../types/types'
+import { CumulativeGradesData } from '../types/types'
 import { Semester } from '@/lib/types/common'
 
 interface UseGradesReturn {
   cumulativeData: CumulativeGradesData | null
-  statsData: GradesStatsData | null
   commonSemesters: Semester[]
   isLoading: boolean
   error: string | null
@@ -14,7 +13,6 @@ interface UseGradesReturn {
 
 export const useGrades = (): UseGradesReturn => {
   const [cumulativeData, setCumulativeData] = useState<CumulativeGradesData | null>(null)
-  const [statsData, setStatsData] = useState<GradesStatsData | null>(null)
   const [commonSemesters, setCommonSemesters] = useState<Semester[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -24,9 +22,8 @@ export const useGrades = (): UseGradesReturn => {
       setIsLoading(true)
       setError(null)
       
-      const [cumulativeResponse, statsResponse, semestersResponse] = await Promise.all([
+      const [cumulativeResponse, semestersResponse] = await Promise.all([
         gradesApi.getCumulativeGrades(),
-        gradesApi.getGradesStats(),
         gradesApi.getCommonSemesters()
       ])
       
@@ -36,15 +33,10 @@ export const useGrades = (): UseGradesReturn => {
         setError(cumulativeResponse.message || 'Không thể tải dữ liệu điểm')
       }
 
-      if (statsResponse.success) {
-        setStatsData(statsResponse.data)
-      }
-
       if (semestersResponse.success) {
         setCommonSemesters(semestersResponse.data)
       }
     } catch (err) {
-      console.error('Error fetching grades:', err);
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
     } finally {
       setIsLoading(false)
@@ -75,7 +67,6 @@ export const useGrades = (): UseGradesReturn => {
 
   return {
     cumulativeData,
-    statsData,
     commonSemesters,
     isLoading,
     error,

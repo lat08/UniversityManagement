@@ -27,6 +27,7 @@ export interface CumulativeGradesData {
   cumulativeGPA10: number
   cumulativeGPA4: number
   totalCompletedCredits: number
+  totalSubjects: number
   semesters: SemesterGrade[]
 }
 
@@ -68,7 +69,10 @@ export interface Course {
   code: string
   name: string
   credits: number
-  score10: number | null
+  finalGrade: number | null
+  finalGrade10: number | null
+  finalGrade4: number | null
+  gradeLetter: string | null
   status: string
 }
 

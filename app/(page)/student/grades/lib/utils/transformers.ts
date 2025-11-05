@@ -13,7 +13,10 @@ export const transformGradeItemToCourse = (gradeItem: GradeItem): Course => {
     code: gradeItem.subjectCode,
     name: gradeItem.subjectName,
     credits: gradeItem.credits,
-    score10: gradeItem.finalGrade10,
+    finalGrade: gradeItem.finalGrade,
+    finalGrade10: gradeItem.finalGrade10,
+    finalGrade4: gradeItem.finalGrade4,
+    gradeLetter: gradeItem.gradeLetter,
     status: gradeItem.status,
   }
 }

@@ -31,7 +31,7 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
   const buildingOptions = [
     { value: '', label: 'Tất cả' },
     ...(buildings?.map(b => ({ 
-      value: b.buildingId, 
+      value: b.buildingCode, 
       label: `${b.buildingName} (${b.buildingCode})` 
     })) || [])
   ];
@@ -59,9 +59,9 @@ export default function RoomFilters({ onSearch }: RoomFiltersProps) {
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Cơ sở</label>
         <Dropdown
           options={buildingOptions}
-          value={tempFilters.buildingId || ''}
+          value={tempFilters.buildingCode || ''}
           placeholder="Tất cả"
-          onChange={(value) => handleFilterChange('buildingId', value)}
+          onChange={(value) => handleFilterChange('buildingCode', value)}
         />
       </div>
 
