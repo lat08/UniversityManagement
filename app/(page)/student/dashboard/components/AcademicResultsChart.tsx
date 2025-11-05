@@ -59,7 +59,7 @@ export default function AcademicResultsChart({
       if (semesterId && semesterId !== selectedSemesterId) {
         setSelectedSemesterId(semesterId);
       }
-    }, [semesterId]);
+    }, [semesterId, selectedSemesterId]);
     
     useEffect(() => {
         if (selectedSemesterId) refetch();
@@ -279,7 +279,8 @@ export default function AcademicResultsChart({
           }
 
           const tooltipEl = tooltipRef.current;
-          const canvasRect = (context.chart as any).canvas.getBoundingClientRect();
+          const chart = context.chart as { canvas: HTMLCanvasElement };
+          const canvasRect = chart.canvas.getBoundingClientRect();
           const chartX = canvasRect.left + tooltipModel.caretX;
           const chartY = canvasRect.top + tooltipModel.caretY;
 
@@ -311,7 +312,7 @@ export default function AcademicResultsChart({
 
           let left = chartX;
           let top = chartY - tooltipRect.height - offsetY;
-          let transformX = 'translateX(-50%)';
+          const transformX = 'translateX(-50%)';
           let transformY = 'translateY(0)';
 
           if (left - tooltipRect.width / 2 < padding) {
