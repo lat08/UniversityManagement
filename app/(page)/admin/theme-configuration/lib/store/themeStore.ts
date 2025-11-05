@@ -529,18 +529,19 @@ export const useThemeStore = create<ThemeState>()(
       
       applyThemeToDocument: () => {
         const { currentTheme } = get();
-        if (!currentTheme || typeof document === 'undefined') return;
+        if (!currentTheme || !currentTheme.colors || typeof document === 'undefined') return;
         
         const root = document.documentElement;
         const colors = currentTheme.colors as unknown as Record<string, string>;
         
-        for (const [key, value] of Object.entries(colors)) {
-          // CRITICAL: Skip null, undefined, empty string values
+        if (!colors || typeof colors !== 'object') return;
+        
+        Object.entries(colors).forEach(([key, value]) => {
           if (value && typeof value === 'string' && value.trim() !== '') {
             const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
             root.style.setProperty(cssVarName, value);
           }
-        }
+        });
       },
       
       loadThemes: (themes: ThemeConfig[]) => {
