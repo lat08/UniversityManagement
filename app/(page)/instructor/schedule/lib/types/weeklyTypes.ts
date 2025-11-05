@@ -18,6 +18,7 @@ export interface InstructorWeeklyScheduleApiItem {
 
 // Transformed structure for component use
 export interface InstructorWeeklyScheduleItem {
+  courseClassId: string
   subjectId?: string
   subjectCode: string
   subjectName: string

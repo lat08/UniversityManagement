@@ -117,7 +117,13 @@ export interface CreateBookingRequest {
 export interface BookingApiResponse {
   success: boolean;
   message: string;
-  data: BookingData[];
+  data: {
+    items: BookingData[];
+    pageNumber: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  };
 }
 
 export interface BookingData {
@@ -126,6 +132,7 @@ export interface BookingData {
   roomId: string;
   roomName: string;
   roomCode: string;
+  roomType: RoomType;
   bookingDate: string;
   startTime: string;
   endTime: string;

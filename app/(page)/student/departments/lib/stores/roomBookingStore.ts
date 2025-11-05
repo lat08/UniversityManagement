@@ -19,6 +19,9 @@ export type RoomFilters = {
 	buildingCode: string;
 	roomType: string;
 	roomStatus: string;
+	bookingStatus: string;
+	minStudentCount: string;
+	maxStudentCount: string;
 };
 
 export type RoomBookingState = {
@@ -52,6 +55,9 @@ const initialFilters: RoomFilters = {
 	buildingCode: '',
 	roomType: '',
 	roomStatus: '',
+	bookingStatus: '',
+	minStudentCount: '',
+	maxStudentCount: '',
 };
 
 const initialState: RoomBookingState = {

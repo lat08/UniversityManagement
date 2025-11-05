@@ -108,27 +108,57 @@ export const useBookingSlots = (date?: string) => {
   });
 };
 
-export const useUserBookings = () => {
+export const useUserBookings = (page: number = 1, pageSize: number = 10) => {
+  const filters = useRoomBookingStore((state) => state.filters);
+  
   return useQuery({
-    queryKey: roomBookingKeys.userBookings(),
-    queryFn: async (): Promise<BookingData[]> => {
+    queryKey: [...roomBookingKeys.userBookings(), page, pageSize, filters],
+    queryFn: async () => {
       try {
-        const response = await api.get<BookingApiResponse>('/v1/function-rooms/my-bookings');
+        const params: Record<string, string | number> = {
+          pageNumber: page,
+          pageSize: pageSize,
+        };
+
+        if (filters.bookingStatus) {
+          params.bookingStatus = filters.bookingStatus;
+        }
+        if (filters.roomType) {
+          params.roomType = filters.roomType;
+        }
+        if (filters.buildingCode) {
+          params.buildingCode = filters.buildingCode;
+        }
+        if (filters.minStudentCount) {
+          params.minStudentCount = Number.parseInt(filters.minStudentCount);
+        }
+        if (filters.maxStudentCount) {
+          params.maxStudentCount = Number.parseInt(filters.maxStudentCount);
+        }
+
+        const response = await api.get<BookingApiResponse>('/v1/function-rooms/my-bookings', {
+          params,
+        });
         
         if (response.data.success && response.data.data) {
-          const bookings = response.data.data;
-          // Sort by created date, newest first
-          bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          return bookings;
+          return {
+            bookings: response.data.data.items,
+            pagination: {
+              currentPage: response.data.data.pageNumber,
+              totalPages: response.data.data.totalPages,
+              totalItems: response.data.data.totalCount,
+              pageSize: response.data.data.pageSize,
+            },
+          };
         }
         
-        return [];
+        return { bookings: [], pagination: undefined };
       } catch (error) {
         console.error('Error fetching user bookings:', error);
         throw error;
       }
     },
-    staleTime: 3 * 60 * 1000, // 3 minutes
+    staleTime: 3 * 60 * 1000,
   });
 };
 

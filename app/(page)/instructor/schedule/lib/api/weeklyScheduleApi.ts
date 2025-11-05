@@ -14,6 +14,7 @@ const convertDayOfWeekToNumber = (dayName: string): number => {
 // Helper function to transform API response to component format
 const transformScheduleData = (apiData: InstructorWeeklyScheduleApiItem[]): InstructorWeeklyScheduleItem[] => {
   return apiData.map(item => ({
+    courseClassId: item.courseClassId,
     subjectId: item.courseClassId,
     subjectCode: item.subjectCode,
     subjectName: item.subjectName,

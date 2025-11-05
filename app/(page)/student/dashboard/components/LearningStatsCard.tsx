@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import { KpiData } from "../libs/types/types";
 import { useCountUp } from "@/lib/hooks/useCountUp";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const getChartColors = () => {
   if (typeof window === 'undefined') return { primary: '#ec4899', secondary: '#c4b5fd' };
@@ -48,6 +49,9 @@ Kpi
         ],
         backgroundColor: [chartColors.primary, chartColors.secondary],
         borderWidth: 0,
+        datalabels: {
+          display: false,
+        },
       },
     ],
   };
@@ -62,6 +66,9 @@ Kpi
       },
       tooltip: {
         enabled: false,
+      },
+      datalabels: {
+        display: false,
       },
     },
   };

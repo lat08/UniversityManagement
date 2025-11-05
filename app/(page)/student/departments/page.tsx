@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import { Tabs } from '@/app/components/ui/tabs';
 import { useRooms, useUserBookings } from './lib/hooks/useRoomBooking';
-import { useRoomBookingStore } from './lib/stores/roomBookingStore';
 import RoomFilters from './components/RoomFilters';
 import RoomList from './components/RoomList';
 import BookingHistory from './components/BookingHistory';
+import BookingHistoryFilters from './components/BookingHistoryFilters';
 
 const tabs = [
   { key: 'rooms', label: 'Danh sách các phòng chức năng' },
@@ -17,22 +17,13 @@ const tabs = [
 export default function RoomBookingPage() {
   usePageTitle('Phòng chức năng');
   const [activeTab, setActiveTab] = useState<'rooms' | 'history'>('rooms');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(12);
-  const applyFilters = useRoomBookingStore((state) => state.applyFilters);
+  const [roomsPage, setRoomsPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [roomsPageSize] = useState(12);
+  const [historyPageSize] = useState(10);
   
-  const { data, isLoading: roomsLoading, refetch: refetchRooms } = useRooms(currentPage, pageSize);
-  const { data: userBookings, isLoading: bookingsLoading } = useUserBookings();
-  
-  const rooms = data?.rooms || [];
-  const pagination = data?.pagination;
-
-  const handleSearch = () => {
-    applyFilters();
-    if (activeTab === 'rooms') {
-      refetchRooms();
-    }
-  };
+  const { data: roomsData, isLoading: roomsLoading } = useRooms(roomsPage, roomsPageSize);
+  const { data: bookingsData, isLoading: bookingsLoading } = useUserBookings(historyPage, historyPageSize);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -53,19 +44,31 @@ export default function RoomBookingPage() {
       {activeTab === 'rooms' ? (
         <div className="space-y-4 lg:space-y-6">
           {/* Filters */}
-          <RoomFilters onSearch={handleSearch} />
+          <RoomFilters />
 
           {/* Room List */}
           <RoomList 
-            rooms={rooms} 
+            rooms={roomsData?.rooms || []} 
             isLoading={roomsLoading}
-            pagination={pagination}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
+            pagination={roomsData?.pagination}
+            currentPage={roomsPage}
+            onPageChange={setRoomsPage}
           />
         </div>
       ) : (
-        <BookingHistory bookings={userBookings || []} isLoading={bookingsLoading} />
+        <div className="space-y-4 lg:space-y-6">
+          {/* Filters */}
+          <BookingHistoryFilters />
+          
+          {/* Booking History */}
+          <BookingHistory 
+            bookings={bookingsData?.bookings || []} 
+            isLoading={bookingsLoading}
+            pagination={bookingsData?.pagination}
+            currentPage={historyPage}
+            onPageChange={setHistoryPage}
+          />
+        </div>
       )}
     </div>
   );

@@ -1,37 +1,31 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useCancelBooking } from '../lib/hooks/useRoomBooking';
-import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { Badge } from '@/app/components/ui/badge';
-import { Dropdown } from '@/app/components/ui/dropdown';
 import { Calendar } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import type { BookingData } from '../lib/types/room.types';
-import { BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS, ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
+import { BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS } from '../lib/types/room.types';
 import CancelBookingModal from './CancelBookingModal';
-import { useBuildings } from '@/lib/hooks/useCommonData';
-
-const createDropdownOptions = (labels: Record<string, string>) => [
-  { value: '', label: 'Tất cả' },
-  ...Object.entries(labels).map(([key, label]) => ({ value: key, label }))
-];
 
 interface BookingHistoryProps {
   bookings: BookingData[];
   isLoading: boolean;
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    pageSize: number;
+  };
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
-export default function BookingHistory({ bookings, isLoading }: BookingHistoryProps) {
+export default function BookingHistory({ bookings, isLoading, pagination, currentPage, onPageChange }: BookingHistoryProps) {
   const cancelBookingMutation = useCancelBooking();
-  const filters = useRoomBookingStore((state) => state.filters);
-  const tempFilters = useRoomBookingStore((state) => state.tempFilters);
-  const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
-  const applyFilters = useRoomBookingStore((state) => state.applyFilters);
-  const { data: buildings } = useBuildings();
-  
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
 
@@ -146,33 +140,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
     }
   };
 
-  const handleFilterChange = (key: string, value: string) => {
-    setTempFilters({ [key]: value });
-    setTimeout(() => {
-      applyFilters();
-    }, 0);
-  };
-
-  const filteredBookings = useMemo(() => {
-    return bookings.filter(booking => {
-      if (filters.buildingCode && booking.building.buildingCode !== filters.buildingCode) {
-        return false;
-      }
-      return true;
-    });
-  }, [bookings, filters]);
-
-  const buildingOptions = [
-    { value: '', label: 'Tất cả' },
-    ...buildings.map(b => ({ 
-      value: b.buildingCode, 
-      label: `${b.buildingName} (${b.buildingCode})` 
-    }))
-  ];
-
-  const roomTypeOptions = createDropdownOptions(ROOM_TYPE_LABELS);
-  const statusOptions = createDropdownOptions(ROOM_STATUS_LABELS);
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -197,68 +164,26 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
   }
 
   return (
-    <div className="space-y-6">
-      {/* Filter Section */}
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
-        {/* Sức chứa tối thiểu */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-[#0053AD] mb-2">Sức chứa tối thiểu</label>
-          <input
-            type="number"
-            value={tempFilters.capacity || ''}
-            onChange={(e) => handleFilterChange('capacity', e.target.value)}
-            placeholder="Nhập số lượng người"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors"
-            min="1"
-          />
-        </div>
-
-        {/* Vị trí (Tòa nhà) Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-[#0053AD] mb-2">Cơ sở</label>
-          <Dropdown
-            options={buildingOptions}
-            value={tempFilters.buildingCode || ''}
-            placeholder="Tất cả"
-            onChange={(value) => handleFilterChange('buildingCode', value)}
-          />
-        </div>
-
-        {/* Loại phòng Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-[#0053AD] mb-2">Loại phòng</label>
-          <Dropdown
-            options={roomTypeOptions}
-            value={tempFilters.roomType || ''}
-            placeholder="Tất cả"
-            onChange={(value) => handleFilterChange('roomType', value)}
-          />
-        </div>
-
-        {/* Trạng thái Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-[#0053AD] mb-2">Trạng thái</label>
-          <Dropdown
-            options={statusOptions}
-            value={tempFilters.roomStatus || ''}
-            placeholder="Tất cả"
-            onChange={(value) => handleFilterChange('roomStatus', value)}
-          />
-        </div>
-
-      </div>
-
+    <>
       {/* Booking List Section */}
       <div className="bg-[#E3F2FD] rounded-lg p-6">
-        <div className="mb-6 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-gray-700" />
-          <h2 className="text-lg font-semibold text-gray-900">
-            Lịch sử đăng ký phòng chức năng ({filteredBookings.length > 0 ? String(filteredBookings.length).padStart(2, '0') : '00'})
-        </h2>
-      </div>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-gray-700" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              Lịch sử đăng ký phòng chức năng
+            </h2>
+          </div>
+          {pagination && (
+            <p className="text-sm text-gray-600">
+              Tìm thấy <span className="font-semibold">{pagination.totalItems}</span> đăng ký
+              {` (Trang ${pagination.currentPage}/${pagination.totalPages})`}
+            </p>
+          )}
+        </div>
 
         <div className="space-y-4">
-          {filteredBookings.map((booking) => {
+          {bookings.map((booking) => {
           const canCancel = canCancelBooking(booking);
           
           return (
@@ -339,13 +264,75 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
         })}
       </div>
 
-        {filteredBookings.length === 0 && !isLoading && (
+        {bookings.length === 0 && !isLoading && (
           <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
             <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium">Chưa có lịch đăng ký nào</p>
         </div>
       )}
       </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg border transition-colors ${
+              currentPage === 1
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+            }`}
+          >
+            Trang trước
+          </button>
+          
+          <div className="flex items-center gap-2">
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => {
+              const showPage = 
+                page === 1 ||
+                page === pagination.totalPages ||
+                (page >= currentPage - 1 && page <= currentPage + 1);
+              
+              const showEllipsis = 
+                (page === currentPage - 2 && currentPage > 3) ||
+                (page === currentPage + 2 && currentPage < pagination.totalPages - 2);
+
+              if (showEllipsis) {
+                return <span key={page} className="px-2 text-gray-500">...</span>;
+              }
+
+              if (!showPage) return null;
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => onPageChange(page)}
+                  className={`px-4 py-2 rounded-lg border transition-colors ${
+                    currentPage === page
+                      ? 'bg-[#0B5FCC] text-white border-[#0B5FCC]'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === pagination.totalPages}
+            className={`px-4 py-2 rounded-lg border transition-colors ${
+              currentPage === pagination.totalPages
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+            }`}
+          >
+            Trang sau
+          </button>
+        </div>
+      )}
 
       {/* Cancel Booking Modal */}
       <CancelBookingModal
@@ -355,6 +342,6 @@ export default function BookingHistory({ bookings, isLoading }: BookingHistoryPr
         booking={selectedBooking}
         isLoading={cancelBookingMutation.isPending}
       />
-    </div>
+    </>
   );
 }

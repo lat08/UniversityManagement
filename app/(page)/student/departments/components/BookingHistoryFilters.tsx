@@ -3,7 +3,7 @@
 import { memo, useMemo } from 'react';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { Dropdown } from '@/app/components/ui/dropdown';
-import { ROOM_TYPE_LABELS, ROOM_STATUS_LABELS } from '../lib/types/room.types';
+import { ROOM_TYPE_LABELS, BOOKING_STATUS_LABELS } from '../lib/types/room.types';
 import { useBuildings } from '@/lib/hooks/useCommonData';
 
 const createDropdownOptions = (labels: Record<string, string>) => [
@@ -11,17 +11,17 @@ const createDropdownOptions = (labels: Record<string, string>) => [
   ...Object.entries(labels).map(([key, label]) => ({ value: key, label }))
 ];
 
-function RoomFilters() {
-  const capacity = useRoomBookingStore((state) => state.tempFilters.capacity);
+function BookingHistoryFilters() {
+  const minStudentCount = useRoomBookingStore((state) => state.tempFilters.minStudentCount);
   const buildingCode = useRoomBookingStore((state) => state.tempFilters.buildingCode);
   const roomType = useRoomBookingStore((state) => state.tempFilters.roomType);
-  const roomStatus = useRoomBookingStore((state) => state.tempFilters.roomStatus);
+  const bookingStatus = useRoomBookingStore((state) => state.tempFilters.bookingStatus);
   const setTempFilters = useRoomBookingStore((state) => state.setTempFilters);
   const applyFilters = useRoomBookingStore((state) => state.applyFilters);
   const { data: buildings } = useBuildings();
 
   const handleFilterChange = (key: string, value: string) => {
-    if (key === 'capacity' && value) {
+    if (key === 'minStudentCount' && value) {
       const numValue = Number.parseInt(value);
       if (numValue > 1000) {
         value = '1000';
@@ -42,7 +42,7 @@ function RoomFilters() {
   ], [buildings]);
 
   const roomTypeOptions = useMemo(() => createDropdownOptions(ROOM_TYPE_LABELS), []);
-  const statusOptions = useMemo(() => createDropdownOptions(ROOM_STATUS_LABELS), []);
+  const bookingStatusOptions = useMemo(() => createDropdownOptions(BOOKING_STATUS_LABELS), []);
 
   return (
     <div className="mb-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
@@ -51,8 +51,8 @@ function RoomFilters() {
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Sức chứa tối thiểu</label>
         <input
           type="number"
-          value={capacity || ''}
-          onChange={(e) => handleFilterChange('capacity', e.target.value)}
+          value={minStudentCount || ''}
+          onChange={(e) => handleFilterChange('minStudentCount', e.target.value)}
           placeholder="Nhập số lượng người"
           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors"
           min="1"
@@ -86,15 +86,14 @@ function RoomFilters() {
       <div>
         <label className="block text-sm font-medium text-[#0053AD] mb-2">Trạng thái</label>
         <Dropdown
-          options={statusOptions}
-          value={roomStatus || ''}
+          options={bookingStatusOptions}
+          value={bookingStatus || ''}
           placeholder="Tất cả"
-          onChange={(value) => handleFilterChange('roomStatus', value)}
+          onChange={(value) => handleFilterChange('bookingStatus', value)}
         />
       </div>
     </div>
   );
 }
 
-export default memo(RoomFilters);
-
+export default memo(BookingHistoryFilters);

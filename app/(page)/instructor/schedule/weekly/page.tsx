@@ -7,6 +7,8 @@ import { WeeklyScheduleGrid, ScheduleTooltip, type CourseItem } from "@/app/comp
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useInstructorWeeklySchedule } from "../lib/hooks/useInstructorWeeklySchedule"
 import { formatWeekDisplay, getColorByCourseType, generateWeekDates } from "@/lib/utils/scheduleHelpers"
+import { ScheduleChangeModal } from "./components/ScheduleChangeModal"
+import toast from "react-hot-toast"
 
 
 export default function InstructorWeeklySchedulePage() {
@@ -16,7 +18,11 @@ export default function InstructorWeeklySchedulePage() {
   const [isTooltipPinned, setIsTooltipPinned] = useState(false)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isScheduleChangeModalOpen, setIsScheduleChangeModalOpen] = useState(false)
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState("")
+  const [selectedCourseForChange, setSelectedCourseForChange] = useState<{
+    courseClassId: string;
+    subjectName: string;
+    subjectCode: string;
+  } | null>(null)
 
   const {
     semesters,
@@ -113,29 +119,31 @@ export default function InstructorWeeklySchedulePage() {
   }
 
   const handleScheduleChangeRequest = () => {
-    setIsScheduleChangeModalOpen(true)
-    setHoveredCourse(null) // Đóng tooltip
-    setIsTooltipPinned(false)
+    const course = transformedSchedule.find(c => c.id === hoveredCourse);
+    if (course) {
+      const scheduleItem = scheduleData.find(item => 
+        `${item.subjectCode}-${item.startPeriod}-${item.dayOfWeek}-${item.date}-${item.roomCode}` === course.id
+      );
+      
+      if (scheduleItem?.courseClassId) {
+        setSelectedCourseForChange({
+          courseClassId: scheduleItem.courseClassId,
+          subjectName: course.name,
+          subjectCode: course.code,
+        });
+        setIsScheduleChangeModalOpen(true);
+      } else {
+        toast.error('Không tìm thấy thông tin lớp học');
+      }
+    }
+    setHoveredCourse(null);
+    setIsTooltipPinned(false);
   }
 
   const handleCloseModal = () => {
     setIsScheduleChangeModalOpen(false)
-    setSelectedTimeSlot("")
+    setSelectedCourseForChange(null)
   }
-
-  const handleSubmitScheduleChange = () => {
-    handleCloseModal()
-  }
-
-  const availableTimeSlots = [
-    "Thứ 3, tiết 1 - tiết 5, phòng FLE123",
-    "Thứ 3, tiết 1 - tiết 5, phòng LEW123", 
-    "Thứ 4, tiết 1 - tiết 5, phòng LEW123",
-    "Thứ 6, tiết 1 - tiết 5, phòng DQA123"
-  ].map((slot, index) => ({
-    value: String(index),
-    label: slot,
-  }))
 
   // Navigation functions for week buttons
   const handlePreviousWeek = () => {
@@ -340,72 +348,16 @@ export default function InstructorWeeklySchedulePage() {
             )}
 
           {/* Schedule Change Modal */}
-          {isScheduleChangeModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center z-[100] backdrop-blur-[2px] bg-[var(--muted-foreground)]/25">
-              <div className="bg-white rounded-lg shadow-xl w-[500px] max-w-[90vw] max-h-[90vh] overflow-hidden">
-                {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Đề xuất đổi lịch dạy</h2>
-                  <button
-                    onClick={handleCloseModal}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Modal Content */}
-                <div className="p-6">
-                  <p className="text-sm text-gray-600 mb-6">
-                    Gửi yêu cầu thay đổi lịch dạy đến phòng đào tạo
-                  </p>
-
-                  {/* Phương án mong muốn */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phương án mong muốn
-                    </label>
-                    <Dropdown
-                      options={availableTimeSlots}
-                      value={selectedTimeSlot}
-                      placeholder="Chọn thời gian mong muốn"
-                      onChange={(value) => setSelectedTimeSlot(value)}
-                    />
-                  </div>
-
-                  {/* Lý do (optional) */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Lý do đổi lịch (tùy chọn)
-                    </label>
-                    <textarea
-                      placeholder="Nhập lý do muốn đổi lịch..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50">
-                  <button
-                    onClick={handleCloseModal}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    onClick={handleSubmitScheduleChange}
-                    disabled={!selectedTimeSlot}
-                    className="px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--button-primary)] hover:bg-[var(--button-primary-hover)] disabled:bg-[var(--muted)]"
-                  >
-                    Gửi
-                  </button>
-                </div>
-              </div>
-            </div>
+          {isScheduleChangeModalOpen && selectedCourseForChange && selectedWeek && (
+            <ScheduleChangeModal
+              isOpen={isScheduleChangeModalOpen}
+              onClose={handleCloseModal}
+              courseClassId={selectedCourseForChange.courseClassId}
+              currentWeek={selectedWeek.weekNumber}
+              subjectName={selectedCourseForChange.subjectName}
+              subjectCode={selectedCourseForChange.subjectCode}
+              weeks={weeks}
+            />
           )}
     </div>
   )
