@@ -40,8 +40,8 @@ export default function ThemeConfigurationPage() {
   // Create theme mutation
   const createMutation = useMutation({
     mutationFn: (data: CreateThemeRequest) => themeApi.create(data),
-    onSuccess: () => {
-      toast.success('Tạo theme thành công!');
+    onSuccess: (newTheme) => {
+      toast.success(`Tạo theme thành công! ${newTheme.themeName}`);
       queryClient.invalidateQueries({ queryKey: ['themes'] });
       setIsCreating(false);
       setNewThemeName('');
@@ -57,19 +57,34 @@ export default function ThemeConfigurationPage() {
   const applyMutation = useMutation({
     mutationFn: (themeConfigId: string) => 
       themeApi.apply({ themeConfigId, changeReason: 'Applied from admin panel' }),
-    onSuccess: () => {
+    onSuccess: (appliedTheme) => {
+      console.log('✅ Applied theme response:', appliedTheme);
+      console.log('✅ Applied theme colors:', appliedTheme?.colors);
+      
       toast.success('Áp dụng theme thành công! Theme đã được broadcast real-time.');
+      
+      // Update current theme in Zustand store
+      if (appliedTheme) {
+        setCurrentTheme(appliedTheme);
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['themes'] });
     },
     onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.error(err.response?.data?.message || 'Lỗi khi áp dụng theme');
+      console.error('❌ Apply theme error:', error);
+      const err = error as { response?: { data?: { message?: string; resultMessage?: string } } };
+      const errorMsg = err.response?.data?.resultMessage || err.response?.data?.message || 'Lỗi khi áp dụng theme';
+      toast.error(errorMsg);
     },
   });
 
   const pageUpdateMutation = useMutation({
     mutationFn: async (colors: Record<string, string>) => {
+      console.log('💾 Saving colors:', colors);
+      console.log('💾 Number of colors to save:', Object.keys(colors).length);
+      
       const activeTheme = await themeApi.getActive('global');
+      console.log('🎨 Active theme:', activeTheme);
       
       if (!activeTheme?.themeConfigId) {
         throw new Error('No active theme found');
@@ -77,6 +92,8 @@ export default function ThemeConfigurationPage() {
       
       // Update theme - backend will merge colors automatically
       const updatedTheme = await themeApi.update(activeTheme.themeConfigId, { colors });
+      console.log('✅ Updated theme response:', updatedTheme);
+      console.log('✅ Updated theme colors:', updatedTheme?.colors);
       
       // Apply theme to broadcast changes
       await themeApi.apply({ 
@@ -104,7 +121,7 @@ export default function ThemeConfigurationPage() {
     },
   });
 
-  const themes = themesData?.data || [];
+  const themes = Array.isArray(themesData?.data) ? themesData.data : [];
 
   const handleCreateTheme = () => {
     if (!newThemeName.trim()) {

@@ -31,10 +31,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         if (response && isMounted) {
           // Force update the theme from backend (overwrites persisted state)
           setCurrentTheme(response);
-          console.log('[ThemeProvider] Loaded active theme from backend:', response.themeName);
         }
       } catch {
-        console.warn('[ThemeProvider] Failed to load active theme from backend, using persisted theme');
+        // Failed to load - use persisted theme from localStorage
       }
     };
     

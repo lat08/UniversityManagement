@@ -473,23 +473,31 @@ export const useThemeStore = create<ThemeState>()(
         // This prevents null/undefined values from overwriting existing colors
         const { currentTheme: existingTheme } = get();
         
-        if (existingTheme && theme.colors) {
-          const existingColors = existingTheme.colors as unknown as Record<string, string>;
-          const newColors = theme.colors as unknown as Record<string, string>;
+        if (theme.colors) {
           const defaultColors = defaultThemeColors as unknown as Record<string, string>;
+          const newColors = theme.colors as unknown as Record<string, string>;
           
-          // Merge: start with defaults, then existing, then new (skip null/undefined/empty)
+          // Merge: start with defaults, then existing (if any), then new (skip null/undefined/empty)
           const mergedColors: Record<string, string> = { ...defaultColors };
           
-          for (const [key, value] of Object.entries(existingColors)) {
-            if (value !== null && value !== undefined && value !== '') {
-              mergedColors[key] = value;
+          // Merge existing colors if available
+          if (existingTheme?.colors) {
+            const existingColors = existingTheme.colors as unknown as Record<string, string>;
+            if (existingColors && typeof existingColors === 'object') {
+              for (const [key, value] of Object.entries(existingColors)) {
+                if (value !== null && value !== undefined && value !== '') {
+                  mergedColors[key] = value;
+                }
+              }
             }
           }
           
-          for (const [key, value] of Object.entries(newColors)) {
-            if (value !== null && value !== undefined && value !== '') {
-              mergedColors[key] = value;
+          // Merge new colors
+          if (newColors && typeof newColors === 'object') {
+            for (const [key, value] of Object.entries(newColors)) {
+              if (value !== null && value !== undefined && value !== '') {
+                mergedColors[key] = value;
+              }
             }
           }
           

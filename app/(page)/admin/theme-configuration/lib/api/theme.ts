@@ -214,9 +214,9 @@ export interface ThemeFilterParams {
   pageSize?: number;
 }
 
-const executeApiCall = async <T>(apiCall: () => Promise<{ data: T }>): Promise<T> => {
+const executeApiCall = async <T>(apiCall: () => Promise<{ data: { data: T } }>): Promise<T> => {
   const response = await apiCall();
-  return response.data;
+  return response.data.data;
 };
 
 export const themeApi = {
@@ -238,7 +238,7 @@ export const themeApi = {
   delete: (id: string): Promise<void> =>
     executeApiCall(() => apiClient.delete(`/v1/theme/${id}`)),
 
-  apply: (data: ApplyThemeRequest): Promise<void> =>
+  apply: (data: ApplyThemeRequest): Promise<ThemeConfig> =>
     executeApiCall(() => apiClient.post('/v1/theme/apply', data)),
 
   getHistory: (id: string, limit: number = 50): Promise<ThemeConfig[]> =>
