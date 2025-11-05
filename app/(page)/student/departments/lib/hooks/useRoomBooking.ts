@@ -32,7 +32,7 @@ export const useRooms = (page: number = 1, pageSize: number = 10) => {
           params.minCapacity = Number.parseInt(filters.capacity);
         }
         if (filters.buildingCode) {
-          params.BuildingCode = filters.buildingCode;
+          params.buildingCode = filters.buildingCode;
         }
         if (filters.roomType) {
           params.roomType = filters.roomType;
