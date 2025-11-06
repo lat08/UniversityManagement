@@ -66,11 +66,16 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
 
   return (
     <Card 
-      className={`border-1 overflow-hidden cursor-pointer transition-all duration-300 ease-out hover:shadow-md hover:scale-[1.01] animate-fade-up ${
-        notification.isRead ? "bg-[var(--notification-card-read-bg)]" : "bg-[var(--notification-card-unread-bg)]"
+      className={`overflow-hidden cursor-pointer transition-all duration-300 ease-out hover:shadow-md hover:scale-[1.01] animate-fade-up ${
+        notification.isRead ? "" : "border-2 shadow-sm"
       }`}
       style={{
-        borderColor: notification.isRead ? 'var(--border)' : 'var(--notification-card-unread-border)',
+        backgroundColor: notification.isRead 
+          ? 'var(--notification-card-read-bg)' 
+          : 'var(--notification-card-unread-bg)',
+        borderColor: notification.isRead 
+          ? 'var(--border)' 
+          : 'var(--notification-card-unread-border)',
         animationDelay: `${animationDelay}ms`,
         animationFillMode: 'both'
       }}
@@ -87,11 +92,6 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
               <h3 className={`font-semibold text-base text-[var(--text-primary)] ${notification.isRead === false ? 'font-bold' : ''}`}>
                 {notification.title}
               </h3>
-              {notification.isRead === false && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]">
-                  Mới
-                </span>
-              )}
             </div>
             <p className="text-sm text-[var(--text-secondary)]">
               {notification.timeAgo} · {formatDate(notification.createdAt)}

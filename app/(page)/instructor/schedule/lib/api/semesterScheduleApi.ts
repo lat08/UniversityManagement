@@ -64,5 +64,16 @@ export const instructorSemesterScheduleApi = {
     return processScheduleResponse(response.data)
   },
 
+  // Export TKB theo học kỳ ra PDF
+  exportSemesterPdf: async (semesterId: string, subjectId?: string): Promise<Blob> => {
+    const params = new URLSearchParams({ semesterId })
+    if (subjectId) {
+      params.append('subjectId', subjectId)
+    }
+    const response = await api.get(`/v1/instructor-schedule/export-semester-pdf?${params.toString()}`, {
+      responseType: 'blob'
+    })
+    return response.data
+  }
 }
 

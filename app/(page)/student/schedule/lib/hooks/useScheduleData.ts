@@ -22,6 +22,7 @@ export const useScheduleData = () => {
   const [scheduleData, setScheduleData] = useState<WeeklyScheduleItem[]>([])
   const [viewType, setViewType] = useState<"week" | "subject">("week")
   const [isLoading, setIsLoading] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export const useScheduleData = () => {
         setSelectedSemester(currentSemester || sortedSemesters[0])
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [semestersData])
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export const useScheduleData = () => {
         setSelectedSubject(subjectsData[0])
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectsData])
 
   const fetchWeeks = useCallback(async (semesterId: string) => {
@@ -127,19 +130,15 @@ export const useScheduleData = () => {
 
   // Load schedule when semester, week, or view type changes
   useEffect(() => {
-    if (selectedSemester && selectedWeek) {
-      if (viewType === "week") {
-        fetchWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
-      }
-    }
-  }, [selectedSemester, selectedWeek, viewType, fetchWeeklySchedule, fetchWeeks])
+    if (!selectedSemester || !selectedWeek) return
 
-  // Load subject schedule when subject changes
-  useEffect(() => {
-    if (viewType === "subject" && selectedSubject && selectedSemester && selectedWeek) {
+    if (viewType === "week") {
+      fetchWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
+    } else if (viewType === "subject" && selectedSubject) {
       fetchWeeklyScheduleBySubject(selectedSemester.semesterId, selectedWeek.weekNumber, selectedSubject.subjectId)
     }
-  }, [selectedSubject, selectedSemester, selectedWeek, viewType, fetchWeeklyScheduleBySubject])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSemester, selectedWeek, viewType, selectedSubject])
 
   // Handle semester change
   const handleSemesterChange = useCallback((semesterId: string) => {
@@ -161,10 +160,20 @@ export const useScheduleData = () => {
 
   // Handle view type change
   const handleViewTypeChange = useCallback((type: "week" | "subject") => {
+    const isTypeChanged = type !== viewType
     setViewType(type)
     setScheduleData([])
     setError(null)
-  }, [])
+    
+    // Force reload nếu chọn lại cùng option
+    if (!isTypeChanged && selectedSemester && selectedWeek) {
+      if (type === "week") {
+        fetchWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
+      } else if (type === "subject" && selectedSubject) {
+        fetchWeeklyScheduleBySubject(selectedSemester.semesterId, selectedWeek.weekNumber, selectedSubject.subjectId)
+      }
+    }
+  }, [viewType, selectedSemester, selectedWeek, selectedSubject, fetchWeeklySchedule, fetchWeeklyScheduleBySubject])
 
   // Handle subject change
   const handleSubjectChange = useCallback((subjectCode: string) => {
@@ -198,7 +207,7 @@ export const useScheduleData = () => {
     }
     
     try {
-      setIsLoading(true)
+      setIsExporting(true)
       if (viewType === 'week') {
         await weeklyScheduleApi.exportWeeklySchedulePDF(selectedSemester.semesterId, selectedWeek.weekNumber)
       } else if (viewType === 'subject' && selectedSubject) {
@@ -217,7 +226,7 @@ export const useScheduleData = () => {
       }
       // Không set error state để tránh hiển thị lỗi trên web
     } finally {
-      setIsLoading(false)
+      setIsExporting(false)
     }
   }, [selectedSemester, selectedWeek, viewType, selectedSubject, scheduleData])
 
@@ -231,6 +240,7 @@ export const useScheduleData = () => {
     scheduleData,
     viewType,
     isLoading: isLoading || semestersLoading || subjectsLoading,
+    isExporting,
     error,
     handleSemesterChange,
     handleWeekChange,

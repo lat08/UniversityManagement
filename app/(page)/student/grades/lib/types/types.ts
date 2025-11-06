@@ -9,17 +9,23 @@ export interface GradeItem {
   finalGrade: number | null
   attendanceGrade: number | null
   finalGrade10: number | null
-  finalGrade4: number
-  gradeLetter: string
-  status: string
+  finalGrade4: number | null
+  gradeLetter: string | null
+  status: string | null
 }
 
 export interface SemesterGrade {
   semesterId: string
   semesterName: string
+  // Điểm tổng kết học kỳ
   semesterGPA10: number
   semesterGPA4: number
-  semesterClassification: string
+  semesterCredits: number
+  // Điểm tích lũy đến học kỳ này
+  cumulativeGPA10: number
+  cumulativeGPA4: number
+  cumulativeCredits: number
+  cumulativeClassification: string
   grades: GradeItem[]
 }
 
@@ -41,14 +47,7 @@ export interface CumulativeGradesResponse {
 export interface SemesterGradeResponse {
   success: boolean
   message: string
-  data: {
-    semesterId: string
-    semesterName: string
-    semesterGPA10: number
-    semesterGPA4: number
-    semesterClassification: string
-    grades: GradeItem[]
-  }
+  data: SemesterGrade
   errors: null | unknown
 }
 
@@ -73,7 +72,7 @@ export interface Course {
   finalGrade10: number | null
   finalGrade4: number | null
   gradeLetter: string | null
-  status: string
+  status: string | null
 }
 
 export interface CourseComponent {

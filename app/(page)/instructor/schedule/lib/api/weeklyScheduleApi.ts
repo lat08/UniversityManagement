@@ -59,9 +59,16 @@ export const instructorWeeklyScheduleApi = {
     }
   },
 
-
   getWeeks: async (semesterId: string): Promise<WeekResponse> => {
     const response = await api.get(`/v1/enrollments/semesters/${semesterId}/weeks`)
+    return response.data
+  },
+
+  // Export TKB theo tuần ra PDF
+  exportWeeklyPdf: async (semesterId: string, weekNumber: number): Promise<Blob> => {
+    const response = await api.get(`/v1/instructor-schedule/export-pdf?semesterId=${semesterId}&weekNumber=${weekNumber}`, {
+      responseType: 'blob'
+    })
     return response.data
   }
 }

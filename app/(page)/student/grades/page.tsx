@@ -6,32 +6,22 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useGrades } from "./lib/hooks/useGrades"
 import { transformSemestersToUI, createCourseDetailsLookup } from "./lib/utils/transformers"
-import type { CourseDetail } from "./lib/types/types"
 
 export default function ScoresPage() {
   usePageTitle('Điểm số');
   const { cumulativeData, commonSemesters, isLoading, error, exportPdf } = useGrades()
   const [selectedSemesters, setSelectedSemesters] = useState<string[]>([])
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
+  const [selectedSemesterId, setSelectedSemesterId] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
   const semesterRef = useRef<HTMLDivElement>(null)
 
   const semesterData = useMemo(() => {
     if (!cumulativeData) return []
-    return transformSemestersToUI(cumulativeData.semesters)
-  }, [cumulativeData])
+    return transformSemestersToUI(cumulativeData.semesters, commonSemesters)
+  }, [cumulativeData, commonSemesters])
 
-  const courseDetails = useMemo<Record<string, CourseDetail>>(() => {
-    if (!cumulativeData) return {}
-    const details: Record<string, CourseDetail> = {}
-    cumulativeData.semesters.forEach(semester => {
-      semester.grades.forEach(grade => {
-        details[grade.subjectCode] = createCourseDetailsLookup(grade)
-      })
-    })
-    return details
-  }, [cumulativeData])
 
   const scoreOverview = useMemo(() => {
     if (!cumulativeData) {
@@ -49,16 +39,16 @@ export default function ScoresPage() {
     }
   }, [cumulativeData])
 
-  const handleShowDetail = (courseCode: string) => {
-    if (courseDetails[courseCode]) {
-      setSelectedCourse(courseCode)
-      setShowDetailModal(true)
-    }
+  const handleShowDetail = (courseCode: string, semesterId: string) => {
+    setSelectedCourse(courseCode)
+    setSelectedSemesterId(semesterId)
+    setShowDetailModal(true)
   }
 
   const handleCloseDetail = () => {
     setShowDetailModal(false)
     setSelectedCourse(null)
+    setSelectedSemesterId(null)
   }
 
   useEffect(() => {
@@ -100,10 +90,16 @@ export default function ScoresPage() {
     const totalCredits = completedCourses.reduce((sum, g) => sum + g.credits, 0)
 
     return {
+      // Điểm học kỳ
       semesterGPA10: semester.semesterGPA10.toFixed(2),
       semesterGPA4: semester.semesterGPA4.toFixed(2),
+      semesterCredits: semester.semesterCredits,
+      // Điểm tích lũy đến học kỳ này
+      cumulativeGPA10: semester.cumulativeGPA10.toFixed(2),
+      cumulativeGPA4: semester.cumulativeGPA4.toFixed(2),
+      cumulativeCredits: semester.cumulativeCredits,
+      cumulativeClassification: semester.cumulativeClassification,
       totalCredits,
-      classification: semester.semesterClassification,
     }
   }
 
@@ -332,9 +328,8 @@ export default function ScoresPage() {
                         </td>
                         <td className="py-2 px-2 sm:py-3.5 sm:px-3 text-center">
                           <button
-                            onClick={() => handleShowDetail(course.code)}
-                            disabled={!courseDetails[course.code]}
-                            className="p-1 sm:p-1.5 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            onClick={() => handleShowDetail(course.code, semester.id)}
+                            className="p-1 sm:p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                             title="Xem chi tiết"
                           >
                             <List className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
@@ -347,36 +342,80 @@ export default function ScoresPage() {
               </div>
 
               <div className="bg-[var(--grade-summary-bg)] px-3 sm:px-6 py-3 sm:py-5">
-                <div className="space-y-1.5 sm:space-y-2">
-                  <div className="flex items-center">
-                    <span className="text-xs sm:text-sm font-bold text-gray-900">
-                      Điểm trung bình tích lũy hệ 4: <span className="text-[var(--grade-summary-highlight)]">{stats.semesterGPA4}</span>
-                    </span>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+                  {/* Cột trái - Điểm học kỳ */}
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        - Điểm trung bình học kỳ hệ 4:
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[var(--grade-summary-highlight)] ml-2">
+                        {stats.semesterGPA4}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        - Điểm trung bình học kỳ hệ 10:
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[var(--grade-summary-highlight)] ml-2">
+                        {stats.semesterGPA10}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        - Số tín chỉ đạt học kỳ:
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-[var(--grade-summary-highlight)] ml-2">
+                        {stats.semesterCredits}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="text-xs sm:text-sm font-bold text-gray-900">
-                      Điểm trung bình tích lũy hệ 10: <span className="text-[var(--grade-summary-highlight)]">{stats.semesterGPA10}</span>
-                    </span>
+
+                  {/* Cột phải - Điểm tích lũy */}
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">
+                        - Điểm trung bình tích lũy hệ 4:
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--grade-summary-highlight)] ml-2">
+                        {stats.cumulativeGPA4}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">
+                        - Điểm trung bình tích lũy hệ 10:
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--grade-summary-highlight)] ml-2">
+                        {stats.cumulativeGPA10}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">
+                        - Số tín chỉ tích lũy:
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--grade-summary-highlight)] ml-2">
+                        {stats.cumulativeCredits}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="text-xs sm:text-sm font-bold text-gray-900">
-                      Số tín chỉ tích lũy: <span className="text-[var(--grade-summary-highlight)]">{stats.totalCredits}</span>
-                    </span>
-                  </div>
+                </div>
+                
+                {/* Xếp loại - full width ở dưới */}
+                <div className="mt-3 pt-3 border-t border-gray-300">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs sm:text-sm font-bold text-gray-900">Phân loại học lực học kỳ:</span>
-                    {stats.classification ? (
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">Xếp loại học lực tích lũy:</span>
+                    {stats.cumulativeClassification ? (
                       <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-white`} style={{
                         backgroundColor: (() => {
-                          if (stats.classification === "Xuất sắc") return "var(--grade-class-excellent-bg)";
-                          if (stats.classification === "Giỏi") return "var(--grade-class-good-bg)";
-                          if (stats.classification === "Khá") return "var(--grade-class-fair-bg)";
-                          if (stats.classification === "Trung bình") return "var(--grade-class-average-bg)";
-                          if (stats.classification === "Yếu") return "var(--grade-class-weak-bg)";
+                          if (stats.cumulativeClassification === "Xuất sắc") return "var(--grade-class-excellent-bg)";
+                          if (stats.cumulativeClassification === "Giỏi") return "var(--grade-class-good-bg)";
+                          if (stats.cumulativeClassification === "Khá") return "var(--grade-class-fair-bg)";
+                          if (stats.cumulativeClassification === "Trung bình") return "var(--grade-class-average-bg)";
+                          if (stats.cumulativeClassification === "Yếu") return "var(--grade-class-weak-bg)";
                           return "#9ca3af";
                         })()
                       }}>
-                        {stats.classification}
+                        {stats.cumulativeClassification}
                       </span>
                     ) : (
                       <span className="text-xs sm:text-sm text-gray-500">-</span>
@@ -389,69 +428,89 @@ export default function ScoresPage() {
         })}
       </div>
 
-      {showDetailModal && selectedCourse && courseDetails[selectedCourse] && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
-          onClick={handleCloseDetail}
-        >
+      {showDetailModal && selectedCourse && selectedSemesterId && cumulativeData && (() => {
+        const rawGrade = cumulativeData.semesters
+          .find(s => s.semesterId === selectedSemesterId)
+          ?.grades.find(g => g.subjectCode === selectedCourse)
+        
+        if (!rawGrade) return null
+        
+        const detail = createCourseDetailsLookup(rawGrade)
+        
+        return (
           <div 
-            className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+            onClick={handleCloseDetail}
           >
-            <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ background: 'var(--grade-modal-header-bg)' }}>
-              <div className="flex justify-between items-start gap-2">
-                <div>
-                  <h3 className="text-base sm:text-xl font-semibold text-white mb-1">{courseDetails[selectedCourse].name}</h3>
-                  <p className="text-xs sm:text-sm text-blue-100">Mã môn: {selectedCourse}</p>
+            <div 
+              className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ background: 'var(--grade-modal-header-bg)' }}>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h3 className="text-base sm:text-xl font-semibold text-white mb-1">{rawGrade.subjectName}</h3>
+                    <p className="text-xs sm:text-sm text-blue-100">Mã môn: {selectedCourse}</p>
+                  </div>
+                  <button
+                    onClick={handleCloseDetail}
+                    className="text-white hover:text-gray-200 transition-colors flex-shrink-0"
+                    title="Đóng"
+                  >
+                    <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
                 </div>
+              </div>
+              
+              <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <>
+                  {/* Debug info */}
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                    <strong>Debug - Raw API Data:</strong>
+                    <pre className="mt-2 overflow-auto">
+                      {JSON.stringify(rawGrade, null, 2)}
+                    </pre>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+                    <table className="w-full text-xs sm:text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">STT</th>
+                          <th className="text-left py-2 px-2 sm:py-3.5 sm:px-6 font-semibold text-gray-900 min-w-[120px] sm:min-w-0">Tên thành phần</th>
+                          <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">Trọng số %</th>
+                          <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">Điểm</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detail.components.map((component) => (
+                          <tr key={component.stt} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+                            <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center text-gray-900">{component.stt}</td>
+                            <td className="py-2 px-2 sm:py-3.5 sm:px-6 text-gray-900">{component.name}</td>
+                            <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center text-gray-900">{component.weight}%</td>
+                            <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center font-semibold text-gray-900">
+                              {component.score !== null && component.score !== undefined ? component.score.toFixed(2) : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              </div>
+              
+              <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex justify-end rounded-b-lg">
                 <button
                   onClick={handleCloseDetail}
-                  className="text-white hover:text-gray-200 transition-colors flex-shrink-0"
-                  title="Đóng"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-lg cursor-pointer transition-colors bg-[var(--grade-modal-close-btn)] hover:bg-[var(--grade-modal-close-btn-hover)]"
                 >
-                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                  Đóng
                 </button>
               </div>
             </div>
-            
-            <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-              <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
-                <table className="w-full text-xs sm:text-sm">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">STT</th>
-                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-6 font-semibold text-gray-900 min-w-[120px] sm:min-w-0">Tên thành phần</th>
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">Trọng số %</th>
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">Điểm</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {courseDetails[selectedCourse].components.map((component) => (
-                      <tr key={component.stt} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                        <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center text-gray-900">{component.stt}</td>
-                        <td className="py-2 px-2 sm:py-3.5 sm:px-6 text-gray-900">{component.name}</td>
-                        <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center text-gray-900">{component.weight}%</td>
-                        <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center font-semibold text-gray-900">
-                          {component.score > 0 ? component.score.toFixed(1) : "0.0"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex justify-end rounded-b-lg">
-              <button
-                onClick={handleCloseDetail}
-                className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-lg cursor-pointer transition-colors bg-[var(--grade-modal-close-btn)] hover:bg-[var(--grade-modal-close-btn-hover)]"
-              >
-                Đóng
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
       </div>
   )
 }

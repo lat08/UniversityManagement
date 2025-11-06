@@ -1,6 +1,5 @@
 import { api } from '@/lib/api/client'
 import { CumulativeGradesResponse, SemesterGradeResponse } from '../types/types'
-import { commonApi } from '@/lib/api'
 
 export const gradesApi = {
   /**
@@ -52,9 +51,5 @@ export const gradesApi = {
       }
       throw new Error('Không thể xuất file PDF')
     }
-  },
-
-  getCommonSemesters: async () => {
-    return commonApi.getSemesters()
   },
 }

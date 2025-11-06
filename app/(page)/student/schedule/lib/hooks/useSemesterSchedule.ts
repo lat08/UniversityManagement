@@ -16,6 +16,7 @@ export const useSemesterSchedule = () => {
   const [scheduleData, setScheduleData] = useState<SemesterScheduleItem[]>([])
   const [viewType, setViewType] = useState<"personal" | "subject">("personal")
   const [isLoading, setIsLoading] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -34,6 +35,7 @@ export const useSemesterSchedule = () => {
         setSelectedSemester(currentSemester || sortedSemesters[0])
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [semestersData])
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export const useSemesterSchedule = () => {
         setSelectedSubject(subjectsData[0])
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectsData])
 
   const fetchPersonalSchedule = useCallback(async (semesterId: string) => {
@@ -99,21 +102,17 @@ export const useSemesterSchedule = () => {
     }
   }, [])
 
-  // Load schedule when semester changes
+  // Load schedule when semester or view type changes
   useEffect(() => {
-    if (selectedSemester) {
-      if (viewType === "personal") {
-        fetchPersonalSchedule(selectedSemester.semesterId)
-      }
-    }
-  }, [selectedSemester, viewType, fetchPersonalSchedule])
+    if (!selectedSemester) return
 
-  // Load subject schedule when subject changes
-  useEffect(() => {
-    if (viewType === "subject" && selectedSubject && selectedSemester) {
+    if (viewType === "personal") {
+      fetchPersonalSchedule(selectedSemester.semesterId)
+    } else if (viewType === "subject" && selectedSubject) {
       fetchSubjectSchedule(selectedSubject.subjectId, selectedSemester.semesterId)
     }
-  }, [selectedSubject, selectedSemester, viewType, fetchSubjectSchedule])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSemester, viewType, selectedSubject])
 
   // Handle semester change
   const handleSemesterChange = useCallback((semesterId: string) => {
@@ -126,10 +125,20 @@ export const useSemesterSchedule = () => {
 
   // Handle view type change
   const handleViewTypeChange = useCallback((type: "personal" | "subject") => {
+    const isTypeChanged = type !== viewType
     setViewType(type)
     setScheduleData([])
     setError(null)
-  }, [])
+    
+    // Force reload nếu chọn lại cùng option
+    if (!isTypeChanged && selectedSemester) {
+      if (type === "personal") {
+        fetchPersonalSchedule(selectedSemester.semesterId)
+      } else if (type === "subject" && selectedSubject) {
+        fetchSubjectSchedule(selectedSubject.subjectId, selectedSemester.semesterId)
+      }
+    }
+  }, [viewType, selectedSemester, selectedSubject, fetchPersonalSchedule, fetchSubjectSchedule])
 
   // Handle subject change
   const handleSubjectChange = useCallback((subjectCode: string) => {
@@ -153,7 +162,7 @@ export const useSemesterSchedule = () => {
     }
     
     try {
-      setIsLoading(true)
+      setIsExporting(true)
       await semesterScheduleApi.exportPersonalSchedulePDF(selectedSemester.semesterId)
       toast.success('Tải file PDF thành công!')
     } catch (error: unknown) {
@@ -168,7 +177,7 @@ export const useSemesterSchedule = () => {
       }
       // Không set error state để tránh hiển thị lỗi trên web
     } finally {
-      setIsLoading(false)
+      setIsExporting(false)
     }
   }, [selectedSemester, scheduleData])
 
@@ -180,6 +189,7 @@ export const useSemesterSchedule = () => {
     scheduleData,
     viewType,
     isLoading: isLoading || semestersLoading || subjectsLoading,
+    isExporting,
     error,
     handleSemesterChange,
     handleViewTypeChange,

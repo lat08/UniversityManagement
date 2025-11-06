@@ -61,7 +61,7 @@ export function Tabs<T = string>({
                 {item.badge !== undefined && item.badge !== null && (
                   <span
                     className={cn(
-                      "flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all duration-300",
+                      "flex items-center justify-center min-w-[28px] h-5 px-2 rounded-full text-xs font-bold leading-none transition-all duration-300",
                       isActive
                         ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] scale-110 shadow-sm"
                         : "bg-[var(--badge-bg)] text-[var(--badge-text)] hover:scale-105 hover:shadow-sm"

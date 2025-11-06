@@ -29,7 +29,7 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
                 <h4 className="text-sm lg:text-base font-bold text-[var(--classlist-title)] flex-1">
                   {classInfo.subjectName}
                 </h4>
-                <span className="text-xs font-medium text-[var(--classlist-badge-text)] px-2 py-1 bg-[var(--classlist-badge-bg)] rounded">
+                <span className="inline-flex items-center justify-center text-xs font-medium text-[var(--classlist-badge-text)] px-2 py-1 bg-[var(--classlist-badge-bg)] rounded">
                   {classInfo.subjectCode}
                 </span>
               </div>

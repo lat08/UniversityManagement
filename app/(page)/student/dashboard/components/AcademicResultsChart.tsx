@@ -17,7 +17,6 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { SemesterChartData, } from "../libs/types/types";
 import { useAvailableSemester } from "../libs/hooks/useAvailableSemester";
-import toast from "react-hot-toast";
 
 const getChartColors = () => {
   if (typeof window === 'undefined') {
@@ -61,17 +60,9 @@ export default function AcademicResultsChart({
       }
     }, [semesterId, selectedSemesterId]);
     
-    useEffect(() => {
+      useEffect(() => {
         if (selectedSemesterId) refetch();
       }, [selectedSemesterId, refetch]);
-        
-      useEffect(() => {
-        if (!loading) {
-          if (!semester || !semester.courses || semester.courses.length === 0) {
-            toast.error("Không tìm thấy kết quả học tập cho học kỳ này.");
-          }
-        }
-      }, [semester, loading]);
 
     useEffect(() => {
       const updateColors = () => setChartColors(getChartColors());
@@ -390,17 +381,23 @@ export default function AcademicResultsChart({
         </div>
       </CardHeader>
       <CardContent className="flex-1">
-        <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
-          {loading ? (
+        {loading ? (
+          <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
             <span className="text-[var(--text-secondary)] text-sm">Đang tải dữ liệu...</span>
-          ) : error ? (
+          </div>
+        ) : error ? (
+          <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
             <span className="text-[var(--error)] text-sm">Lỗi khi tải dữ liệu: {error}</span>
-          ) : !semester?.courses?.length ? (
+          </div>
+        ) : !semester?.courses?.length ? (
+          <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
             <span className="text-[var(--text-secondary)] text-sm">Không có môn học trong học kỳ này.</span>
-          ) : (
+          </div>
+        ) : (
+          <div className="h-[300px] lg:h-[350px]">
             <Bar data={chartData} options={chartOptions} />
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

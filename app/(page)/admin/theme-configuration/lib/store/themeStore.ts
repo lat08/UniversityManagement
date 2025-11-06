@@ -136,6 +136,11 @@ export interface ThemeColors {
   notificationImportantIcon: string;
   notificationImportantBorder: string;
   
+  // Notification Card Colors
+  notificationCardUnreadBg: string;
+  notificationCardReadBg: string;
+  notificationCardUnreadBorder: string;
+  
   // Dashboard Event Card Colors
   eventBorder: string;
   eventDotBorder: string;
@@ -377,6 +382,11 @@ const defaultThemeColors: ThemeColors = {
   notificationImportantBg: '#fee2e2',
   notificationImportantIcon: '#ef4444',
   notificationImportantBorder: '#ef4444',
+  
+  // Notification Card Colors
+  notificationCardUnreadBg: '#e3f2fd',
+  notificationCardReadBg: '#ffffff',
+  notificationCardUnreadBorder: '#4E8EE1',
   
   // Dashboard Event Card Colors
   eventBorder: '#2563eb',

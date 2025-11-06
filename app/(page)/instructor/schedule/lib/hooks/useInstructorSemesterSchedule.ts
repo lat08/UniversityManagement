@@ -33,6 +33,7 @@ export const useInstructorSemesterSchedule = () => {
         setSelectedSemester(currentSemester || sortedSemesters[0])
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [semestersData])
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export const useInstructorSemesterSchedule = () => {
         setSelectedSubject(subjectsData[0])
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectsData])
 
   const fetchInstructorSchedule = useCallback(async (semesterId: string) => {
@@ -98,21 +100,17 @@ export const useInstructorSemesterSchedule = () => {
     }
   }, [])
 
-  // Load schedule when semester changes
+  // Load schedule when semester or view type changes
   useEffect(() => {
-    if (selectedSemester) {
-      if (viewType === "personal") {
-        fetchInstructorSchedule(selectedSemester.semesterId)
-      }
-    }
-  }, [selectedSemester, viewType, fetchInstructorSchedule])
+    if (!selectedSemester) return
 
-  // Load subject schedule when subject changes
-  useEffect(() => {
-    if (viewType === "subject" && selectedSubject && selectedSemester) {
+    if (viewType === "personal") {
+      fetchInstructorSchedule(selectedSemester.semesterId)
+    } else if (viewType === "subject" && selectedSubject) {
       fetchSubjectSchedule(selectedSemester.semesterId, selectedSubject.subjectId)
     }
-  }, [selectedSubject, selectedSemester, viewType, fetchSubjectSchedule])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSemester, viewType, selectedSubject])
 
   // Handle semester change
   const handleSemesterChange = useCallback((semesterId: string) => {
@@ -125,10 +123,20 @@ export const useInstructorSemesterSchedule = () => {
 
   // Handle view type change
   const handleViewTypeChange = useCallback((type: "personal" | "subject") => {
+    const isTypeChanged = type !== viewType
     setViewType(type)
     setScheduleData([])
     setError(null)
-  }, [])
+    
+    // Force reload nếu chọn lại cùng option
+    if (!isTypeChanged && selectedSemester) {
+      if (type === "personal") {
+        fetchInstructorSchedule(selectedSemester.semesterId)
+      } else if (type === "subject" && selectedSubject) {
+        fetchSubjectSchedule(selectedSemester.semesterId, selectedSubject.subjectId)
+      }
+    }
+  }, [viewType, selectedSemester, selectedSubject, fetchInstructorSchedule, fetchSubjectSchedule])
 
   // Handle subject change
   const handleSubjectChange = useCallback((subjectId: string) => {

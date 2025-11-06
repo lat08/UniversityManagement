@@ -42,16 +42,15 @@ export const useNotifications = (activeFilter: NotificationType) => {
     }
   }, []);
 
+  // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
-    fetchNotifications(activeFilter, 1);
-  }, [activeFilter, fetchNotifications]);
+  }, [activeFilter]);
 
+  // Fetch notifications when filter or page changes
   useEffect(() => {
-    if (currentPage > 1) {
-      fetchNotifications(activeFilter, currentPage);
-    }
-  }, [currentPage, activeFilter, fetchNotifications]);
+    fetchNotifications(activeFilter, currentPage);
+  }, [activeFilter, currentPage, fetchNotifications]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
