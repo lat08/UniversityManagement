@@ -119,7 +119,6 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
       label,
       labelFormatter,
       labelClassName,
-      formatter: _formatter,
       color,
       nameKey,
       labelKey,

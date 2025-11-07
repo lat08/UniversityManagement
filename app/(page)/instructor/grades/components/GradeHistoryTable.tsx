@@ -9,7 +9,7 @@ interface GradeHistoryTableProps {
 }
 
 export const GradeHistoryTable = ({ history }: GradeHistoryTableProps) => {
-  const columns: TableColumn<GradeChangeHistoryDto>[] = [
+  const columns: TableColumn[] = [
     { key: 'changeDate', label: 'Thời gian', align: 'left' },
     { key: 'action', label: 'Hành động', align: 'left' },
     { key: 'actorName', label: 'Người thực hiện', align: 'left' },
@@ -47,6 +47,7 @@ export const GradeHistoryTable = ({ history }: GradeHistoryTableProps) => {
     </div>
   );
 };
+
 
 
 

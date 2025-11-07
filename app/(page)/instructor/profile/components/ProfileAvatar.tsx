@@ -1,4 +1,5 @@
 import React, { useRef } from 'react'
+import Image from 'next/image'
 import { User } from 'lucide-react'
 
 interface ProfileAvatarProps {
@@ -50,9 +51,11 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       <div className="relative cursor-pointer" onClick={handleAvatarClick}>
         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-cyan-100 to-cyan-200 flex items-center justify-center overflow-hidden shadow-md">
           {profilePicture ? (
-            <img 
+            <Image 
               src={profilePicture} 
               alt={fullName}
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
             />
           ) : (

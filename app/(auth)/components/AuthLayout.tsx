@@ -1,13 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { AuthLayoutProps, AuthIllustrationProps } from '../lib/types/types';
 
 const AuthHeader = () => (
   <div className="absolute top-4 left-4 lg:top-8 lg:left-8 flex items-center gap-2 lg:gap-3 z-10 animate-fadeInDown max-w-[calc(100%-2rem)]">
     <div className="w-[35px] h-[35px] lg:w-[45px] lg:h-[45px] flex items-center justify-center flex-shrink-0">
-      <img
+      <Image
         src="/logo-siu.webp"
         alt="SIU Logo"
+        width={45}
+        height={45}
         className="w-full h-full object-contain"
       />
     </div>
@@ -33,9 +36,11 @@ const AuthIllustration = ({ src, alt }: AuthIllustrationProps) => (
         }}
       />
     </div>
-    <img
+    <Image
       src={src}
       alt={alt}
+      width={650}
+      height={650}
       className="relative z-10 w-full h-full object-contain animate-float"
     />
   </div>

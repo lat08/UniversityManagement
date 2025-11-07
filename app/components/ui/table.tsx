@@ -3,7 +3,7 @@
 import { ReactNode } from "react"
 import { cn } from "@/lib/utils/utils"
 
-export interface TableColumn<T = unknown> {
+export interface TableColumn {
   key: string
   label: string
   className?: string
@@ -12,7 +12,7 @@ export interface TableColumn<T = unknown> {
 }
 
 interface TableProps<T = unknown> {
-  readonly columns: TableColumn<T>[]
+  readonly columns: TableColumn[]
   readonly data: T[]
   readonly renderRow: (item: T, index: number) => ReactNode
   readonly isLoading?: boolean
@@ -67,13 +67,15 @@ export function Table<T = unknown>({
                   <th
                     key={column.key}
                     className={cn(
-                      "px-6 py-4 font-semibold",
+                      "px-6 py-4 font-semibold relative",
                       alignClass,
-                      index < columns.length - 1 && "border-r border-blue-400",
                       column.headerClassName
                     )}
                   >
                     {column.label}
+                    {index < columns.length - 1 && (
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                    )}
                   </th>
                 )
               })}

@@ -155,7 +155,7 @@ export default function ExamSchedulePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm min-h-[600px]">
+          <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm h-[600px] flex flex-col">
             <h2 className="text-base lg:text-lg font-bold text-gray-900 mb-4 lg:mb-6 flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -181,7 +181,7 @@ export default function ExamSchedulePage() {
         </div>
 
         <div className="lg:col-span-4">
-          <div className="max-h-[600px]">
+          <div className="h-[600px]">
             <NotesSection 
               notes={notes} 
               onNotesChange={fetchNotes}

@@ -49,6 +49,7 @@ export default function QrPaymentModal({ isOpen, qrUrl, onClose }: QrPaymentModa
           )}
 
           {qrUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={qrUrl}
               alt="QR Thanh toán"

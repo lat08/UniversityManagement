@@ -201,6 +201,8 @@ export interface Semester {
   semesterCode: string;
   startDate: string;
   endDate: string;
+  registrationStartDate?: string;
+  registrationEndDate?: string;
   academicYearId: string;
   yearRange: string;
 }

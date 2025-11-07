@@ -26,8 +26,9 @@ export const useSemesterSchedule = () => {
       )
       const currentDate = new Date()
       const currentSemester = sortedSemesters.find(semester => {
-        const startDate = new Date(semester.startDate)
-        const endDate = new Date(semester.endDate)
+        if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
+        const startDate = new Date(semester.registrationStartDate)
+        const endDate = new Date(semester.registrationEndDate)
         return currentDate >= startDate && currentDate <= endDate
       })
       setSemesters(sortedSemesters)

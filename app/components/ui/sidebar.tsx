@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "@/lib/store/authStore"
 import { logoutApi } from "@/lib/api/auth"
@@ -259,9 +260,11 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                 "lg:h-10 lg:w-10",
                 isCollapsed && "lg:h-12 lg:w-12"
               )}>
-                <img
+                <Image
                   src="/logo-siu.webp"
                   alt="Logo"
+                  width={48}
+                  height={48}
                   className="w-full h-full object-contain"
                 />
               </div>

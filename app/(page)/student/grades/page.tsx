@@ -179,7 +179,7 @@ export default function ScoresPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="relative w-full sm:w-auto" ref={semesterRef}>
           <label className="block text-xs sm:text-sm font-medium text-gray-900 mb-2">
-            Lọc theo học kỳ (Multi-select)
+            Lọc theo học kỳ
           </label>
           <button
             type="button"
@@ -289,15 +289,41 @@ export default function ScoresPage() {
                 <table className="w-full text-xs sm:text-sm">
                   <thead>
                     <tr className="bg-[var(--grade-table-header-bg)]">
-                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Mã MH</th>
-                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-[var(--grade-table-header-text)] min-w-[120px] sm:min-w-0">Tên môn học</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)]">TC</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Điểm thi</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">TK (10)</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">TK (4)</th>
-                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">TK (C)</th>
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Kết quả</th>
-                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Chi tiết</th>
+                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                        Mã MH
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-left py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-[var(--grade-table-header-text)] min-w-[120px] sm:min-w-0 relative">
+                        Tên môn học
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] relative">
+                        TC
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                        Điểm thi
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                        TK (10)
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                        TK (4)
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-1 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                        TK (C)
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                        Kết quả
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                      </th>
+                      <th className="text-center py-2 px-2 sm:py-3.5 sm:px-3 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">
+                        Chi tiết
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white">
@@ -470,10 +496,21 @@ export default function ScoresPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-[var(--grade-table-header-bg)]">
-                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">STT</th>
-                        <th className="text-left py-3.5 px-6 font-semibold text-[var(--grade-table-header-text)]">Tên thành phần</th>
-                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Trọng số (%)</th>
-                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Điểm</th>
+                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                          STT
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                        </th>
+                        <th className="text-left py-3.5 px-6 font-semibold text-[var(--grade-table-header-text)] relative">
+                          Tên thành phần
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                        </th>
+                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap relative">
+                          Trọng số (%)
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                        </th>
+                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">
+                          Điểm
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white">

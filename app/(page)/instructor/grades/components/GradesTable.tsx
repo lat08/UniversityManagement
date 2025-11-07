@@ -121,7 +121,7 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
     );
   };
 
-  const columns: TableColumn<InstructorGradeDto>[] = [
+  const columns: TableColumn[] = [
     { key: 'mssv', label: 'MSSV', align: 'left' },
     { key: 'fullName', label: 'Họ và tên', align: 'left' },
     { key: 'attendanceGrade', label: `Chuyên cần (${GRADE_WEIGHTS.ATTENDANCE * 100}%)`, align: 'center' },
@@ -175,6 +175,7 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
     </div>
   );
 };
+
 
 
 

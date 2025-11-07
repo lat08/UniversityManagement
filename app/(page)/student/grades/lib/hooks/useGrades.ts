@@ -18,17 +18,21 @@ export const useGrades = (): UseGradesReturn => {
   
   const { data: allSemesters, loading: semestersLoading } = useSemesters()
   
-  // Filter chỉ giữ lại các học kỳ có data điểm từ API
+  // Filter học kỳ: chỉ lấy các học kỳ có data điểm + theo startDate/endDate
   const commonSemesters = useMemo(() => {
     if (!cumulativeData || !cumulativeData.semesters) return []
     
+    const now = new Date()
     const semesterIdsWithGrades = new Set(
       cumulativeData.semesters.map(s => s.semesterId)
     )
     
-    return allSemesters.filter(semester => 
-      semesterIdsWithGrades.has(semester.semesterId)
-    )
+    // Lọc các semester: có điểm + startDate <= now
+    return allSemesters.filter(semester => {
+      const hasGrades = semesterIdsWithGrades.has(semester.semesterId)
+      const hasStarted = semester.startDate && new Date(semester.startDate) <= now
+      return hasGrades && hasStarted
+    })
   }, [cumulativeData, allSemesters])
 
   const fetchGrades = useCallback(async () => {

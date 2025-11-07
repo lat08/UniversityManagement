@@ -4,6 +4,8 @@ export interface Semester {
   semesterType: string;
   startDate: string;
   endDate: string;
+  registrationStartDate?: string;
+  registrationEndDate?: string;
   status: string;
 }
 

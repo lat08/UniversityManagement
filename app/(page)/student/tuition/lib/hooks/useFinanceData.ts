@@ -4,7 +4,6 @@ import { getTuitionFees, getInsurances, getPayments } from "../api/financeApi";
 import { TuitionFeeResponse, Insurance, Payment, Semester } from "../types/types";
 import { useToast } from "@/app/components/ui/toast";
 import { commonApi } from "@/lib/api/common";
-import { se } from "date-fns/locale";
 
 export type FinanceDataState = {
   isLoading: boolean;
@@ -70,7 +69,7 @@ export const useFinanceData = (): FinanceDataState => {
       if (response.success && response.data) {
         const now = new Date();
         const allSemesters = response.data
-          .filter(s => new Date(s.startDate) <= now)
+          .filter(s => s.registrationStartDate && new Date(s.registrationStartDate) <= now)
           .map(s => ({
             semesterId: s.semesterId,
             semesterName: s.semesterName
@@ -79,8 +78,9 @@ export const useFinanceData = (): FinanceDataState => {
 
         
         const activeSemester = response.data.find(semester => {
-          const startDate = new Date(semester.startDate);
-          const endDate = new Date(semester.endDate);
+          if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
+          const startDate = new Date(semester.registrationStartDate);
+          const endDate = new Date(semester.registrationEndDate);
           return now >= startDate && now <= endDate;
         });
         
@@ -96,10 +96,12 @@ export const useFinanceData = (): FinanceDataState => {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   const refreshData = useCallback((semesterId: string | null) => {
     loadData(semesterId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { isLoading, tuitionData, semesters, defaultSemesterId, insurances, payments, refreshData };
