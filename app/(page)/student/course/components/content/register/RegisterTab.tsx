@@ -17,7 +17,7 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   // Tự fetch data bên trong
   const { courses, loading, error } = useAvailableCourses(); 
   const [searchQuery, setSearchQuery] = useState("")
-  const [filterValue, setFilterValue] = useState("all")
+  const [searchType, setSearchType] = useState<"all" | "subject" | "course">("all")
 
   // Xử lý Loading State
   if (loading) {
@@ -31,35 +31,55 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   
   // Dùng courses (đã đảm bảo là Array hoặc [] sau khi fetch)
   const filteredCourses = courses.filter((course) => {
-    const matchesSearch =
-      course.subjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.subjectCode.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
+    const query = searchQuery.toLowerCase();
+    
+    if (searchType === "all") {
+      return (
+        course.subjectName.toLowerCase().includes(query) ||
+        course.subjectCode.toLowerCase().includes(query) ||
+        course.instructorName.toLowerCase().includes(query)
+      )
+    } else if (searchType === "subject") {
+      return (
+        course.subjectName.toLowerCase().includes(query) ||
+        course.subjectCode.toLowerCase().includes(query)
+      )
+    } else if (searchType === "course") {
+      return course.instructorName.toLowerCase().includes(query)
+    }
+    
+    return true
   })
 
   const totalCredits = filteredCourses.reduce((sum, course) => sum + course.credits, 0) // Dùng filteredCourses
 
   return (
     <div className="space-y-4">
-      {/* Search and filter */}
+      {/* Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Tìm kiếm theo tên, mã môn..."
+            placeholder={
+              searchType === "all" 
+                ? "Tìm kiếm theo tên môn, mã môn, hoặc giảng viên..." 
+                : searchType === "subject"
+                ? "Tìm kiếm theo tên môn hoặc mã môn..."
+                : "Tìm kiếm theo tên giảng viên..."
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 cursor-text"
           />
         </div>
-
-        <Select value={filterValue} onValueChange={setFilterValue}>
-          <SelectTrigger className="w-full sm:w-[320px] cursor-pointer">
-            <SelectValue />
+        <Select value={searchType} onValueChange={(value: "all" | "subject" | "course") => setSearchType(value)}>
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Lọc theo..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Môn học trong chương trình đào tạo kế hoạch</SelectItem>
-            <SelectItem value="23dpm">Môn học mở trong lớp 23DPM</SelectItem>
+            <SelectItem value="all">Tất cả</SelectItem>
+            <SelectItem value="subject">Môn học</SelectItem>
+            <SelectItem value="course">Khóa học (Giảng viên)</SelectItem>
           </SelectContent>
         </Select>
       </div>
