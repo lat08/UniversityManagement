@@ -25,7 +25,8 @@ export const useFinanceData = (): FinanceDataState => {
   const [semesters, setSemester] = useState<Semester[]>([]);
   const [defaultSemesterId, setDefaultSemesterId] = useState<string | null>(null);
 
-  const loadDataMemoized = useCallback(async (semesterId: string | null) => {
+  
+  const loadData = async (semesterId: string | null) => {
     setIsLoading(true);
     try {
       const [tuitionRes, insuranceRes, paymentRes] = await Promise.all([
@@ -61,7 +62,7 @@ export const useFinanceData = (): FinanceDataState => {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,21 +86,21 @@ export const useFinanceData = (): FinanceDataState => {
         
         if (activeSemester) {
           setDefaultSemesterId(activeSemester.semesterId);
-          loadDataMemoized(activeSemester.semesterId);
+          loadData(activeSemester.semesterId);
         } else {
           console.log('No active semester found, defaulting to first semester if available', allSemesters[0]);
           setDefaultSemesterId(allSemesters[0]?.semesterId);
-          loadDataMemoized(allSemesters[0]?.semesterId || null);
+          loadData(allSemesters[0]?.semesterId || null);
         }
       }
     };
 
     fetchData();
-  }, [loadDataMemoized]);
+  }, []);
   
   const refreshData = useCallback((semesterId: string | null) => {
-    loadDataMemoized(semesterId);
-  }, [loadDataMemoized]);
+    loadData(semesterId);
+  }, []);
 
   return { isLoading, tuitionData, semesters, defaultSemesterId, insurances, payments, refreshData };
 };
