@@ -4,6 +4,7 @@ import { getTuitionFees, getInsurances, getPayments } from "../api/financeApi";
 import { TuitionFeeResponse, Insurance, Payment, Semester } from "../types/types";
 import { useToast } from "@/app/components/ui/toast";
 import { commonApi } from "@/lib/api/common";
+import { se } from "date-fns/locale";
 
 export type FinanceDataState = {
   isLoading: boolean;
@@ -24,7 +25,8 @@ export const useFinanceData = (): FinanceDataState => {
   const [semesters, setSemester] = useState<Semester[]>([]);
   const [defaultSemesterId, setDefaultSemesterId] = useState<string | null>(null);
 
-  const loadDataMemoized = useCallback(async (semesterId: string | null) => {
+  
+  const loadData = async (semesterId: string | null) => {
     setIsLoading(true);
     try {
       const [tuitionRes, insuranceRes, paymentRes] = await Promise.all([
@@ -60,19 +62,22 @@ export const useFinanceData = (): FinanceDataState => {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await commonApi.getSemesters();
       if (response.success && response.data) {
-        const allSemesters = response.data.map(s => ({
-          semesterId: s.semesterId,
-          semesterName: s.semesterName
-        }));
+        const now = new Date();
+        const allSemesters = response.data
+          .filter(s => new Date(s.startDate) <= now)
+          .map(s => ({
+            semesterId: s.semesterId,
+            semesterName: s.semesterName
+          }));
         setSemester(allSemesters);
 
-        const now = new Date();
+        
         const activeSemester = response.data.find(semester => {
           const startDate = new Date(semester.startDate);
           const endDate = new Date(semester.endDate);
@@ -81,19 +86,21 @@ export const useFinanceData = (): FinanceDataState => {
         
         if (activeSemester) {
           setDefaultSemesterId(activeSemester.semesterId);
-          loadDataMemoized(activeSemester.semesterId);
+          loadData(activeSemester.semesterId);
         } else {
-          loadDataMemoized(null);
+          console.log('No active semester found, defaulting to first semester if available', allSemesters[0]);
+          setDefaultSemesterId(allSemesters[0]?.semesterId);
+          loadData(allSemesters[0]?.semesterId || null);
         }
       }
     };
 
     fetchData();
-  }, [loadDataMemoized]);
+  }, []);
   
   const refreshData = useCallback((semesterId: string | null) => {
-    loadDataMemoized(semesterId);
-  }, [loadDataMemoized]);
+    loadData(semesterId);
+  }, []);
 
   return { isLoading, tuitionData, semesters, defaultSemesterId, insurances, payments, refreshData };
 };
