@@ -3,10 +3,11 @@
 "use client"
 
 import { useState } from "react"
-import { Search } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card } from "@/app/components/ui/card"
 import { Input } from "@/app/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
+import { Button } from "@/app/components/ui/button"
 import { CourseCard } from "../../card/CourseCard"
 import { AvailableCoursesProps } from "../../../lib/type/courseType"
 import { useAvailableCourses } from "../../../lib/hooks/useAvailableCourses"; // <-- Hook đã sửa
@@ -15,7 +16,7 @@ import { useAvailableCourses } from "../../../lib/hooks/useAvailableCourses"; //
 
 export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   // Tự fetch data bên trong
-  const { courses, loading, error } = useAvailableCourses(); 
+  const { courses, loading, error, pagination, goToPage } = useAvailableCourses(); 
   const [searchQuery, setSearchQuery] = useState("")
   const [searchType, setSearchType] = useState<"all" | "subject" | "course">("all")
 
@@ -107,6 +108,63 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
             />
           ))}
         </div>
+
+        {/* Pagination Controls */}
+        {pagination.totalPages > 1 && (
+          <div className="mx-6 mt-6 flex items-center justify-between border-t pt-4">
+            <div className="text-sm text-gray-600">
+              Hiển thị {((pagination.pageNumber - 1) * pagination.pageSize) + 1} - {Math.min(pagination.pageNumber * pagination.pageSize, pagination.totalCount)} của {pagination.totalCount} môn học
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => goToPage(pagination.pageNumber - 1)}
+                disabled={!pagination.hasPrevious}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Trước
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.pageNumber <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.pageNumber >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = pagination.pageNumber - 2 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={pageNum === pagination.pageNumber ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => goToPage(pageNum)}
+                      className={pageNum === pagination.pageNumber ? "bg-[var(--primary)] text-white" : ""}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => goToPage(pagination.pageNumber + 1)}
+                disabled={!pagination.hasNext}
+              >
+                Sau
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   )

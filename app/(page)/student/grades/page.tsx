@@ -179,7 +179,7 @@ export default function ScoresPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="relative w-full sm:w-auto" ref={semesterRef}>
           <label className="block text-xs sm:text-sm font-medium text-gray-900 mb-2">
-            Lọc theo học kỳ (Multi-select)
+            Lọc theo học kỳ
           </label>
           <button
             type="button"
