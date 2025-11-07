@@ -4,6 +4,7 @@ import { getTuitionFees, getInsurances, getPayments } from "../api/financeApi";
 import { TuitionFeeResponse, Insurance, Payment, Semester } from "../types/types";
 import { useToast } from "@/app/components/ui/toast";
 import { commonApi } from "@/lib/api/common";
+import { se } from "date-fns/locale";
 
 export type FinanceDataState = {
   isLoading: boolean;
@@ -66,13 +67,16 @@ export const useFinanceData = (): FinanceDataState => {
     const fetchData = async () => {
       const response = await commonApi.getSemesters();
       if (response.success && response.data) {
-        const allSemesters = response.data.map(s => ({
-          semesterId: s.semesterId,
-          semesterName: s.semesterName
-        }));
+        const now = new Date();
+        const allSemesters = response.data
+          .filter(s => new Date(s.startDate) <= now)
+          .map(s => ({
+            semesterId: s.semesterId,
+            semesterName: s.semesterName
+          }));
         setSemester(allSemesters);
 
-        const now = new Date();
+        
         const activeSemester = response.data.find(semester => {
           const startDate = new Date(semester.startDate);
           const endDate = new Date(semester.endDate);
@@ -83,7 +87,9 @@ export const useFinanceData = (): FinanceDataState => {
           setDefaultSemesterId(activeSemester.semesterId);
           loadDataMemoized(activeSemester.semesterId);
         } else {
-          loadDataMemoized(null);
+          console.log('No active semester found, defaulting to first semester if available', allSemesters[0]);
+          setDefaultSemesterId(allSemesters[0]?.semesterId);
+          loadDataMemoized(allSemesters[0]?.semesterId || null);
         }
       }
     };
