@@ -19,12 +19,27 @@ export interface CourseDto {
   instructorCode: string;
   startDate: string;          // DateTime → string
   endDate: string;            // DateTime → string
-  registeredStudents: string;
-  maxStudents: string;
+  registeredStudents: number; // Số sinh viên đã đăng ký
+  maxStudents: number;        // Số sinh viên tối đa
   registrationStatus: string; // ví dụ: "42/45 sinh viên"
   isRegistered: boolean;
   courseStatus: string;
   weeklySchedules: WeeklyScheduleDto[];
+  isAvailableForThisStudent: boolean;
+  isFull: boolean;
+  hasScheduleConflict: boolean;
+  unavailabilityReason: string | null;
+}
+
+// Pagination response wrapper
+export interface PaginatedResponse<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 
 // Interface mới cho CourseCard

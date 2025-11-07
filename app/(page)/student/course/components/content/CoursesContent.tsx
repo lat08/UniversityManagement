@@ -37,10 +37,13 @@ function CoursesContent() {
   const { refetch: refetchAvailable } = useAvailableCourses();
 
   const { 
-      courses: registeredCourses, 
-      loading: registeredLoading, 
-      error: registeredError, 
-      refetch: refetchRegistered 
+    courses: registeredCourses, 
+    loading: registeredLoading, 
+    error: registeredError, 
+    refetch: refetchRegistered,
+    paginatedCourses,
+    pagination: registeredPagination,
+    goToPage: goToRegisteredPage,
   } = useRegisteredCourses();
 
   // 2. QUẢN LÝ DIALOG HỦY MÔN
@@ -120,9 +123,12 @@ function CoursesContent() {
         ) : (
             // Truyền dữ liệu và trạng thái loading (để component con có thể sử dụng nếu cần)
             <RegisteredCourses 
-              courses={registeredCourses || []} // Dùng [] cho an toàn để tránh lỗi reduce
-              loading={registeredLoading} 
-              onCancelClick={handleCancelClick} 
+              courses={registeredCourses || []}
+              paginatedCourses={paginatedCourses}
+              pagination={registeredPagination}
+              loading={registeredLoading}
+              onCancelClick={handleCancelClick}
+              goToPage={goToRegisteredPage}
             />
         )
       ) : (

@@ -1,14 +1,31 @@
 // Path: lib/api/coursesApi.ts
 import { api } from "@/lib/api/client" // Giả sử client.ts là file cấu hình Axios
-import { CourseDto } from "../type/courseType"
+import { CourseDto, PaginatedResponse } from "../type/courseType"
+
+export interface GetAvailableCoursesParams {
+    pageNumber?: number;
+    pageSize?: number;
+}
 
 export const coursesApi = {
-    // GET: /v1/enrollments/available
-    getAvailable: async (): Promise<CourseDto[]> => {
-        const response = await api.get(`/v1/enrollments/available`, {});
-        // Backend returns a wrapper: { success, message, data: [...] }
-        // We need to return the inner `data` array so consumers get CourseDto[]
-        return response.data?.data || []; // safe fallback to empty array
+    // GET: /v1/enrollments/available with pagination
+    getAvailable: async (params?: GetAvailableCoursesParams): Promise<PaginatedResponse<CourseDto>> => {
+        const response = await api.get(`/v1/enrollments/available`, {
+            params: {
+                pageNumber: params?.pageNumber ?? 1,
+                pageSize: params?.pageSize ?? 10,
+            }
+        });
+        // Backend returns a wrapper: { success, message, data: { items, totalCount, ... } }
+        return response.data?.data || {
+            items: [],
+            totalCount: 0,
+            pageNumber: 1,
+            pageSize: 10,
+            totalPages: 0,
+            hasPrevious: false,
+            hasNext: false,
+        };
     },
     // GET: /v1/enrollments/registered
     getRegistered: async (): Promise<CourseDto[]> => {
