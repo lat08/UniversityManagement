@@ -10,6 +10,10 @@ export const useMarkAllAsRead = () => {
       const response = await notificationApi.markAllAsRead();
       
       if (response.isSuccess) {
+        // Notify other parts of the app (e.g., header bell) to refresh unread count
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('notifications:updated', { detail: { source: 'markAllAsRead' } }))
+        }
         return true;
       }
       return false;
