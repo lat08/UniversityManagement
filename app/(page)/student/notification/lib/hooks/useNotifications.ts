@@ -60,6 +60,10 @@ export const useNotifications = (activeFilter: NotificationType) => {
         setNotifications(prev => 
           prev.map(n => n.scheduleId === id ? { ...n, isRead: true } : n)
         );
+        // Notify other parts of the app (e.g., header bell) to refresh unread count
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('notifications:updated', { detail: { source: 'markAsRead', id } }))
+        }
         return true;
       }
       return false;

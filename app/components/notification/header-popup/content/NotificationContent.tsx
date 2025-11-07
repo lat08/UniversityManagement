@@ -52,6 +52,18 @@ export function NotificationPopup() {
     }
   }, [user])
 
+  // Listen to global notification updates to refresh the unread badge immediately
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleUpdated: EventListener = () => {
+      void fetchUnreadCount()
+      // Optionally refresh the list if popover is open
+      if (isOpen) void fetchRecentNotifications()
+    }
+    window.addEventListener('notifications:updated', handleUpdated)
+    return () => window.removeEventListener('notifications:updated', handleUpdated)
+  }, [isOpen])
+
   useEffect(() => {
     if (isOpen && user) {
       void fetchRecentNotifications()
