@@ -61,15 +61,7 @@ export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesRet
     };
     
     void loadData();
-  }, [
-    params?.searchKeyword,
-    params?.examType,
-    params?.status,
-    params?.semesterId,
-    params?.subjectId,
-    params?.pageNumber,
-    params?.pageSize,
-  ]);
+  }, [params]);
 
   useEffect(() => {
     fetchExamEntries();

@@ -13,35 +13,10 @@ import { UpdateProfilePayload, ChangePasswordPayload } from "./lib/types/types"
 export default function InstructorProfilePage() {
   usePageTitle('Hồ sơ cá nhân')
   
-  const { profile, loading, error, updating, updateError, refetch, updateProfile, updateAvatar, changePassword } = useProfile()
-  const [isEditing, setIsEditing] = useState(false)
+  const { profile, loading, error, updating, updateError, refetch, updateProfile: _updateProfile, updateAvatar, changePassword } = useProfile()
+  const [isEditing] = useState(false)
   const [editedData, setEditedData] = useState<UpdateProfilePayload>({})
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')
-
-  const handleEdit = () => {
-    if (profile) {
-      setEditedData({
-        fullName: profile.fullName,
-        gender: profile.gender,
-        dateOfBirth: profile.dateOfBirth,
-        phoneNumber: profile.phoneNumber
-      })
-      setIsEditing(true)
-    }
-  }
-
-  const handleCancel = () => {
-    setIsEditing(false)
-    setEditedData({})
-  }
-
-  const handleSave = async () => {
-    const success = await updateProfile(editedData)
-    if (success) {
-      setIsEditing(false)
-      setEditedData({})
-    }
-  }
 
   const handleAvatarChange = async (file: File) => {
     await updateAvatar(file)

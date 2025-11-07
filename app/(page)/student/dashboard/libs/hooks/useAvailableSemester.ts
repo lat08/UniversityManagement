@@ -4,10 +4,17 @@ import { SemesterData } from "../types/types"
 
 export const useAvailableSemester = (semesterId : string) => {
     const [semester, setSemester] = useState<SemesterData | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const fetchSemester = useCallback(async () => {
+        if (!semesterId || semesterId.trim() === '') {
+          setSemester(null);
+          setLoading(false);
+          setError(null);
+          return;
+        }
+        
         setLoading(true);
         setError(null);
         try{
@@ -17,7 +24,7 @@ export const useAvailableSemester = (semesterId : string) => {
             console.error('Error fetching semester:', err);
             setSemester(null);
         }finally {
-          setLoading(false); // ✅ luôn tắt loading dù có lỗi hay không
+          setLoading(false);
         }
 
       },[semesterId]);

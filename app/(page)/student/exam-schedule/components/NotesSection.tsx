@@ -67,10 +67,6 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa ghi chú này?")) {
-      return;
-    }
-
     setIsLoading(true);
     try {
       await deleteNote(noteId);
@@ -84,7 +80,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
   };
 
   return (
-    <div className="bg-[#DBEDFF] rounded-lg p-4 lg:p-6 h-full flex flex-col border-2 border-[#4196F0]">
+    <div className="bg-[#DBEDFF] rounded-lg p-4 lg:p-6 h-full max-h-[600px] flex flex-col border-2 border-[#4196F0]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base lg:text-lg font-bold text-gray-900 flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +93,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
             onClick={() => setIsCreating(true)}
             disabled={isLoading}
             title="Tạo ghi chú mới"
-            className="flex items-center gap-1 px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -123,7 +119,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
               onClick={handleCreateNote}
               disabled={isLoading}
               title="Lưu ghi chú"
-              className="px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none"
+              className="px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
             >
               Lưu
             </button>
@@ -134,7 +130,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
               }}
               disabled={isLoading}
               title="Hủy tạo ghi chú"
-              className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none"
+              className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
             >
               Hủy
             </button>
@@ -167,7 +163,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                       onClick={() => handleUpdateNote(note.noteId)}
                       disabled={isLoading}
                       title="Lưu thay đổi"
-                      className="px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none"
+                      className="px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
                     >
                       Lưu
                     </button>
@@ -175,14 +171,14 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                       onClick={handleCancelEdit}
                       disabled={isLoading}
                       title="Hủy chỉnh sửa"
-                      className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none"
+                      className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
                     >
                       Hủy
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-start gap-3">
+                <div className="flex items-center gap-3">
                   <span className="flex-1 text-xs lg:text-sm text-gray-900 whitespace-pre-wrap break-words">
                     {note.content}
                   </span>
@@ -190,7 +186,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                     <button
                       onClick={() => handleStartEdit(note)}
                       disabled={isLoading}
-                      className="p-1.5 text-blue-600 hover:bg-blue-100 hover:scale-110 rounded transition-all disabled:opacity-50 disabled:hover:scale-100"
+                      className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       title="Sửa ghi chú"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,7 +196,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                     <button
                       onClick={() => handleDeleteNote(note.noteId)}
                       disabled={isLoading}
-                      className="p-1.5 text-red-600 hover:bg-red-100 hover:scale-110 rounded transition-all disabled:opacity-50 disabled:hover:scale-100"
+                      className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       title="Xóa ghi chú"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

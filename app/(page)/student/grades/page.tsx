@@ -439,73 +439,69 @@ export default function ScoresPage() {
         
         return (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
             onClick={handleCloseDetail}
           >
             <div 
-              className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200" style={{ background: 'var(--grade-modal-header-bg)' }}>
-                <div className="flex justify-between items-start gap-2">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-200" style={{ background: 'var(--grade-modal-header-bg)' }}>
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-base sm:text-xl font-semibold text-white mb-1">{rawGrade.subjectName}</h3>
-                    <p className="text-xs sm:text-sm text-blue-100">Mã môn: {selectedCourse}</p>
+                    <h2 className="text-2xl font-bold text-white mb-1">{rawGrade.subjectName}</h2>
+                    <p className="text-sm text-blue-100 mt-1">Mã môn: {selectedCourse} • Số tín chỉ: {rawGrade.credits}</p>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleCloseDetail}
-                    className="text-white hover:text-gray-200 transition-colors flex-shrink-0"
-                    title="Đóng"
+                    className="text-white hover:text-blue-100 hover:bg-white/10"
                   >
-                    <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
+                    <XCircle className="h-6 w-6" />
+                  </Button>
                 </div>
               </div>
               
-              <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-                <>
-                  {/* Debug info */}
-                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs">
-                    <strong>Debug - Raw API Data:</strong>
-                    <pre className="mt-2 overflow-auto">
-                      {JSON.stringify(rawGrade, null, 2)}
-                    </pre>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
-                    <table className="w-full text-xs sm:text-sm">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">STT</th>
-                          <th className="text-left py-2 px-2 sm:py-3.5 sm:px-6 font-semibold text-gray-900 min-w-[120px] sm:min-w-0">Tên thành phần</th>
-                          <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">Trọng số %</th>
-                          <th className="text-center py-2 px-2 sm:py-3.5 sm:px-4 font-semibold text-gray-900 whitespace-nowrap">Điểm</th>
+              {/* Content */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-[var(--grade-table-header-bg)]">
+                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">STT</th>
+                        <th className="text-left py-3.5 px-6 font-semibold text-[var(--grade-table-header-text)]">Tên thành phần</th>
+                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Trọng số (%)</th>
+                        <th className="text-center py-3.5 px-4 font-semibold text-[var(--grade-table-header-text)] whitespace-nowrap">Điểm</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white">
+                      {detail.components.map((component) => (
+                        <tr key={component.stt} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                          <td className="py-3.5 px-4 text-center text-gray-900">{component.stt}</td>
+                          <td className="py-3.5 px-6 text-gray-900">{component.name}</td>
+                          <td className="py-3.5 px-4 text-center text-gray-900">{component.weight}%</td>
+                          <td className="py-3.5 px-4 text-center font-semibold text-gray-900">
+                            {component.score !== null && component.score !== undefined ? component.score.toFixed(2) : "-"}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {detail.components.map((component) => (
-                          <tr key={component.stt} className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                            <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center text-gray-900">{component.stt}</td>
-                            <td className="py-2 px-2 sm:py-3.5 sm:px-6 text-gray-900">{component.name}</td>
-                            <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center text-gray-900">{component.weight}%</td>
-                            <td className="py-2 px-2 sm:py-3.5 sm:px-4 text-center font-semibold text-gray-900">
-                              {component.score !== null && component.score !== undefined ? component.score.toFixed(2) : "-"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
               
-              <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50 flex justify-end rounded-b-lg">
-                <button
-                  onClick={handleCloseDetail}
-                  className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-lg cursor-pointer transition-colors bg-[var(--grade-modal-close-btn)] hover:bg-[var(--grade-modal-close-btn-hover)]"
-                >
-                  Đóng
-                </button>
+              {/* Footer */}
+              <div className="p-6 border-t border-gray-200 bg-gray-50">
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleCloseDetail}
+                    className="px-6 py-2.5 bg-[var(--grade-modal-close-btn)] hover:bg-[var(--grade-modal-close-btn-hover)] text-white rounded-lg transition-colors cursor-pointer"
+                  >
+                    Đóng
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

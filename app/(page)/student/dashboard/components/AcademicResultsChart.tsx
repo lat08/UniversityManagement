@@ -43,7 +43,7 @@ export default function AcademicResultsChart({
   semesters,
   semesterId
 } : SemesterChartData) {
-    const [selectedSemesterId, setSelectedSemesterId] = useState<string>(semesterId);
+    const [selectedSemesterId, setSelectedSemesterId] = useState<string>(() => semesterId || "");
     const [chartColors, setChartColors] = useState(getChartColors());
     const [animatedData, setAnimatedData] = useState<number[]>([]);
     const [animatedBackgroundData, setAnimatedBackgroundData] = useState<number[]>([]);
@@ -51,14 +51,16 @@ export default function AcademicResultsChart({
     const animationRef = useRef<number | undefined>(undefined);
     const chartReadyTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
+    const initializedRef = useRef(false);
 
     const { semester, loading, error, refetch} = useAvailableSemester(selectedSemesterId);
     
     useEffect(() => {
-      if (semesterId && semesterId !== selectedSemesterId) {
+      if (!initializedRef.current && semesterId) {
         setSelectedSemesterId(semesterId);
+        initializedRef.current = true;
       }
-    }, [semesterId, selectedSemesterId]);
+    }, [semesterId]);
     
       useEffect(() => {
         if (selectedSemesterId) refetch();

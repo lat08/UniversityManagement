@@ -24,8 +24,7 @@ export const useFinanceData = (): FinanceDataState => {
   const [semesters, setSemester] = useState<Semester[]>([]);
   const [defaultSemesterId, setDefaultSemesterId] = useState<string | null>(null);
 
-  
-  const loadData = async (semesterId: string | null) => {
+  const loadDataMemoized = useCallback(async (semesterId: string | null) => {
     setIsLoading(true);
     try {
       const [tuitionRes, insuranceRes, paymentRes] = await Promise.all([
@@ -61,7 +60,7 @@ export const useFinanceData = (): FinanceDataState => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,19 +81,19 @@ export const useFinanceData = (): FinanceDataState => {
         
         if (activeSemester) {
           setDefaultSemesterId(activeSemester.semesterId);
-          loadData(activeSemester.semesterId);
+          loadDataMemoized(activeSemester.semesterId);
         } else {
-          loadData(null);
+          loadDataMemoized(null);
         }
       }
     };
 
     fetchData();
-  }, []);
+  }, [loadDataMemoized]);
   
   const refreshData = useCallback((semesterId: string | null) => {
-    loadData(semesterId);
-  }, []);
+    loadDataMemoized(semesterId);
+  }, [loadDataMemoized]);
 
   return { isLoading, tuitionData, semesters, defaultSemesterId, insurances, payments, refreshData };
 };

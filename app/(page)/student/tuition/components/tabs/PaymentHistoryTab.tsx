@@ -1,5 +1,5 @@
 // components/PaymentHistoryTab.tsx
-import { ChevronDown, Filter, FileDown } from "lucide-react";
+import { FileDown } from "lucide-react";
 import { Spinner } from "@/app/components/ui/spinner";
 import PaymentHistoryTable from "../PaymentHistoryTable";
 import { Payment } from "../../lib/types/types";

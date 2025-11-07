@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { gradesApi } from '../api/gradesApi'
 import { CumulativeGradesData } from '../types/types'
 import { useSemesters } from '@/lib/hooks/useCommonData'
@@ -16,7 +16,20 @@ export const useGrades = (): UseGradesReturn => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  const { data: commonSemesters, loading: semestersLoading } = useSemesters()
+  const { data: allSemesters, loading: semestersLoading } = useSemesters()
+  
+  // Filter chỉ giữ lại các học kỳ có data điểm từ API
+  const commonSemesters = useMemo(() => {
+    if (!cumulativeData || !cumulativeData.semesters) return []
+    
+    const semesterIdsWithGrades = new Set(
+      cumulativeData.semesters.map(s => s.semesterId)
+    )
+    
+    return allSemesters.filter(semester => 
+      semesterIdsWithGrades.has(semester.semesterId)
+    )
+  }, [cumulativeData, allSemesters])
 
   const fetchGrades = useCallback(async () => {
     try {

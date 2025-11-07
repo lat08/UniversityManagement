@@ -54,14 +54,7 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
     } finally {
       setLoading(false)
     }
-  }, [
-    params?.keyword,
-    params?.documentType,
-    params?.semesterId,
-    params?.subjectId,
-    params?.pageNumber,
-    params?.pageSize
-  ])
+  }, [params])
 
   const uploadMaterial = useCallback(async (data: UploadMaterialRequest) => {
     try {

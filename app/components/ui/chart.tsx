@@ -57,7 +57,7 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "ChartContainer"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(([_, c]) => c.theme || c.color)
+  const colorConfig = Object.entries(config).filter(([, c]) => c.theme || c.color)
   if (!colorConfig.length) return null
 
   return (
@@ -119,7 +119,7 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
       label,
       labelFormatter,
       labelClassName,
-      formatter,
+      formatter: _formatter,
       color,
       nameKey,
       labelKey,

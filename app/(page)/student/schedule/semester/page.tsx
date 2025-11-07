@@ -107,8 +107,8 @@ export default function SemesterSchedulePage() {
                 />
               </div>
 
-              {/* Subject Dropdown or Spacer */}
-              {viewType === "subject" ? (
+              {/* Subject Dropdown - Only show when viewType is 'subject' */}
+              {viewType === 'subject' ? (
                 <div className="flex-1">
                   <DropdownSearch
                     options={subjectOptions}
@@ -122,6 +122,9 @@ export default function SemesterSchedulePage() {
               ) : (
                 <div className="flex-1"></div>
               )}
+
+              {/* Spacer to match Print button width */}
+              <div className="w-[100px]"></div>
             </div>
 
             {/* Schedule Table */}

@@ -72,7 +72,7 @@ export default function ProfilePage() {
       } else {
         setPasswordError(result.message)
       }
-    } catch (err) {
+    } catch {
       setPasswordError("Đã xảy ra lỗi khi đổi mật khẩu")
     } finally {
       setIsChangingPassword(false)

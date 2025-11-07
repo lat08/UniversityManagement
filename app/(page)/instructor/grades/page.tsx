@@ -32,7 +32,7 @@ const InstructorGradesPage = () => {
   const submitForApprovalMutation = useSubmitForApproval(selectedCourseClassId);
   const exportGradesMutation = useExportGrades();
 
-  const courseClasses = courseClassesData?.data || [];
+  const courseClasses = useMemo(() => courseClassesData?.data || [], [courseClassesData?.data]);
   const gradesInfo = gradesData?.data;
   const history = historyData?.data || [];
 

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { useRoomBookingStore, type BookingSlot } from '../stores/roomBookingStore';
-import type { RoomApiResponse, BookingApiResponse, BookingData, CreateBookingRequest } from '../types/room.types';
+import type { RoomApiResponse, BookingApiResponse, CreateBookingRequest } from '../types/room.types';
 import { createRoomBooking, cancelRoomBooking } from '../api/rooms.api';
 
 // Query keys

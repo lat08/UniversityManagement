@@ -11,7 +11,6 @@ import toast from 'react-hot-toast';
 import { useCreateScheduleChange, useMakeupSlotSuggestions } from '../lib/hooks/useScheduleChange';
 import { useBuildings } from '@/lib/hooks/useCommonData';
 import { ROOM_TYPE_LABELS } from '@/app/(page)/student/departments/lib/types/room.types';
-import type { RoomType } from '@/app/(page)/student/departments/lib/types/room.types';
 import 'react-day-picker/dist/style.css';
 
 interface Week {
@@ -91,7 +90,7 @@ export const ScheduleChangeModal = ({
     suggestionsEnabled
   );
 
-  const suggestions = suggestionsData?.data?.suggestions || [];
+  const suggestions = useMemo(() => suggestionsData?.data?.suggestions || [], [suggestionsData?.data?.suggestions]);
 
   const buildingOptions = useMemo(() => [
     { value: '', label: 'Tất cả' },

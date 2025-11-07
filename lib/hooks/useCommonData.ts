@@ -160,7 +160,7 @@ export const useDepartments = (params?: { facultyId?: string }): UseCommonDataRe
     } finally {
       setLoading(false);
     }
-  }, [params?.facultyId]);
+  }, [params]);
 
   useEffect(() => {
     fetchData();
@@ -199,7 +199,7 @@ export const useClasses = (params?: { departmentId?: string; facultyId?: string 
     } finally {
       setLoading(false);
     }
-  }, [params?.departmentId, params?.facultyId]);
+  }, [params]);
 
   useEffect(() => {
     fetchData();
@@ -238,7 +238,7 @@ export const useAcademicYears = (params?: { count?: number }): UseCommonDataRetu
     } finally {
       setLoading(false);
     }
-  }, [params?.count]);
+  }, [params]);
 
   useEffect(() => {
     fetchData();

@@ -18,7 +18,7 @@ export default function TuitionPage() {
   // States cho QR Modal
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [isQrOpen, setIsQrOpen] = useState(false);
-  const [qrIframeLoading, setQrIframeLoading] = useState(true);
+  const [, setQrIframeLoading] = useState(true);
 
   // Sử dụng hook để tải dữ liệu ban đầu và quản lý loading state
   const { 

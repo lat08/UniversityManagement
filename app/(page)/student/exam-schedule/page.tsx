@@ -36,6 +36,7 @@ export default function ExamSchedulePage() {
 
   const fetchNotes = async () => {
     try {
+      // Backend sorts by CreatedAt desc (newest first)
       const response = await getNotes({ pageSize: 100, sortOrder: 'desc' });
       if (response.success) {
         setNotes(response.data.notes);
@@ -180,10 +181,12 @@ export default function ExamSchedulePage() {
         </div>
 
         <div className="lg:col-span-4">
-          <NotesSection 
-            notes={notes} 
-            onNotesChange={fetchNotes}
-          />
+          <div className="max-h-[600px]">
+            <NotesSection 
+              notes={notes} 
+              onNotesChange={fetchNotes}
+            />
+          </div>
         </div>
       </div>
     </div>

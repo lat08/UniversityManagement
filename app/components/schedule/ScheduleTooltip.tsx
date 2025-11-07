@@ -35,7 +35,7 @@ export function ScheduleTooltip({
   position,
   onMouseEnter,
   onMouseLeave,
-  onClick,
+  onClick: _onClick,
   showClass = true,
   showTeacher = true,
   actionButton,

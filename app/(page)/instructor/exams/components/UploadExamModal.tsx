@@ -38,7 +38,6 @@ export function UploadExamModal({
   onSubmit,
   isLoading = false,
   courseClasses = [],
-  examEntryId = null,
 }: UploadExamModalProps) {
   const [formData, setFormData] = useState<UploadExamFormData>({
     courseClassId: "",

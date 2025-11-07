@@ -1,11 +1,10 @@
 // components/InsuranceTab.tsx
-import { Filter, FileDown } from "lucide-react";
+import { FileDown } from "lucide-react";
 import { Spinner } from "@/app/components/ui/spinner";
 import InsuranceTable from "../insurance/InsuranceTable";
 import InsuranceSummary from "../insurance/InsuranceSummary";
 import { Insurance } from "../../lib/types/types";
 import { useInsuranceLogic } from "../../lib/hooks/useInsuranceLogic";
-import { useState } from "react";
 
 type InsuranceTabProps = {
   isLoading: boolean;
@@ -24,8 +23,6 @@ export default function InsuranceTab({
   setIsQrOpen,
   setQrIframeLoading,
 }: InsuranceTabProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-
   const {
     selectedInsuranceId,
     selectedInsuranceItems,
