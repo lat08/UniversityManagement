@@ -50,14 +50,15 @@ const getActiveSemesterId = (semesters: Semester[]): string => {
 
 export default function DashboardContent() {
   const { user } = useAuthStore();
-  const { dashboard, loading, error } = useDashboard();
+  const { dashboard, loading } = useDashboard();
   const card = useDashboardStats();
 
   const activeSemesterId = useMemo(() => {
-    return getActiveSemesterId(dashboard?.activeSemesters || []);
-  }, [dashboard?.activeSemesters]);
+    return getActiveSemesterId(dashboard.activeSemesters || []);
+  }, [dashboard.activeSemesters]);
 
   usePageTitle('Bảng điều khiển');
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -69,7 +70,6 @@ export default function DashboardContent() {
     )
   }
 
-  if (error) return <p className="text-[var(--error)]">Lỗi: {error}</p>;
   return (
     
     <div className="space-y-4 lg:space-y-6">
@@ -89,20 +89,20 @@ export default function DashboardContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
-          <AcademicResultsChart semesters={dashboard?.activeSemesters || []}
+          <AcademicResultsChart semesters={dashboard.activeSemesters || []}
             semesterId={activeSemesterId} />
         </div>
         <div className="lg:col-span-4 h-full">
-          <LearningStatsCard Kpi={dashboard?.kpi}/>
+          <LearningStatsCard Kpi={dashboard.kpi}/>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
-          <EventCard events={dashboard?.events || []} />
+          <EventCard events={dashboard.events || []} />
         </div>
         <div className="lg:col-span-4 h-full ">
-          <ClassListCard currentSubjects={dashboard?.currentSubjects || []} />
+          <ClassListCard currentSubjects={dashboard.currentSubjects || []} />
         </div>
       </div>
     </div>
