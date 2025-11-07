@@ -184,6 +184,30 @@ export default function AcademicResultsChart({
       };
     }, [isChartReady, semester?.courses, loading]);
 
+  // Helper function to wrap text into multiple lines
+  const wrapText = (text: string, maxCharsPerLine: number = 15): string[] => {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    words.forEach((word) => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (testLine.length > maxCharsPerLine && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    // Limit to 3 lines maximum
+    return lines.slice(0, 3);
+  };
+
   const chartData = useMemo(() => {
     const displayData = animatedData.length > 0 
       ? animatedData 
@@ -194,7 +218,7 @@ export default function AcademicResultsChart({
       : (semester?.courses || []).map(() => 0);
 
     return {
-      labels: semester?.courses.map((item) => item.subjectName),
+      labels: semester?.courses.map((item) => wrapText(item.subjectName)),
       datasets: [
         {
           data: displayData,
@@ -230,6 +254,7 @@ export default function AcademicResultsChart({
         anchor: "end",
         align: "top",
         offset: -4,
+        
         font: {
           size: 12,
           weight: "bold",
@@ -338,8 +363,10 @@ export default function AcademicResultsChart({
             size: 11,
           },
           color: "var(--text-secondary)",
-          maxRotation: 45,
-          minRotation: 45,
+          maxRotation: 0,
+          minRotation: 0,
+          autoSkip: false,
+          padding: 5,
         },
       },
       y: {
