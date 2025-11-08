@@ -15,12 +15,21 @@ export default function ScoresPage() {
   const [selectedSemesterId, setSelectedSemesterId] = useState<string | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [isSemesterOpen, setIsSemesterOpen] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const semesterRef = useRef<HTMLDivElement>(null)
 
   const semesterData = useMemo(() => {
     if (!cumulativeData) return []
     return transformSemestersToUI(cumulativeData.semesters, commonSemesters)
   }, [cumulativeData, commonSemesters])
+
+  // Mặc định chọn tất cả học kỳ khi có dữ liệu lần đầu
+  useEffect(() => {
+    if (commonSemesters.length > 0 && !isInitialized) {
+      setSelectedSemesters(commonSemesters.map(s => s.semesterId))
+      setIsInitialized(true)
+    }
+  }, [commonSemesters, isInitialized])
 
 
   const scoreOverview = useMemo(() => {
@@ -76,10 +85,7 @@ export default function ScoresPage() {
     return () => window.removeEventListener("keydown", handleEscKey)
   }, [showDetailModal])
 
-  const filteredSemesters =
-    selectedSemesters.length === 0 
-      ? semesterData 
-      : semesterData.filter((s) => selectedSemesters.includes(s.id))
+  const filteredSemesters = semesterData.filter((s) => selectedSemesters.includes(s.id))
 
   const calculateSemesterStats = (semesterId: string) => {
     if (!cumulativeData) return null
@@ -188,7 +194,7 @@ export default function ScoresPage() {
           >
             <span className="text-xs sm:text-sm text-gray-900 truncate">
               {selectedSemesters.length === 0 
-                ? "Tất cả học kỳ" 
+                ? "Chưa chọn học kỳ" 
                 : selectedSemesters.length === 1
                   ? commonSemesters.find(s => s.semesterId === selectedSemesters[0])?.semesterName
                   : `${selectedSemesters.length} học kỳ đã chọn`

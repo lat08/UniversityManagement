@@ -185,7 +185,7 @@ export default function AcademicResultsChart({
     }, [isChartReady, semester?.courses, loading]);
 
   // Helper function to wrap text into multiple lines
-  const wrapText = (text: string, maxCharsPerLine: number = 15): string[] => {
+  const wrapText = (text: string, maxCharsPerLine: number = 15): string => {
     const words = text.split(' ');
     const lines: string[] = [];
     let currentLine = '';
@@ -204,8 +204,7 @@ export default function AcademicResultsChart({
       lines.push(currentLine);
     }
 
-    // Limit to 3 lines maximum
-    return lines.slice(0, 3);
+    return lines.slice(0, 3).join('\n');
   };
 
   const chartData = useMemo(() => {
