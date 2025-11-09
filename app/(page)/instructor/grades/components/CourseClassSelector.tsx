@@ -37,11 +37,3 @@ export const CourseClassSelector = ({
   );
 };
 
-
-
-
-
-
-
-
-

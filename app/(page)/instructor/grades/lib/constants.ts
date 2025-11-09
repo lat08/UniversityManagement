@@ -30,11 +30,3 @@ export const GRADE_RANGE = {
   MAX: 10,
 } as const;
 
-
-
-
-
-
-
-
-

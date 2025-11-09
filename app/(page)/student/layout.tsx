@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/app/components/ui/sidebar";
 import { Header } from "@/app/components/header/header";
+import ChatBubble from "@/app/components/chat/chat-bubble";
 import RequireRoleAuth from "@/app/(auth)/components/RequireRoleAuth";
 import { cn } from "@/lib/utils/utils";
 
@@ -46,6 +47,9 @@ export default function StudentLayout({
           <main className="flex-1 overflow-auto p-4 lg:p-6">
             {children}
           </main>
+          
+          {/* Chat Bubble */}
+          <ChatBubble />
         </div>
       </div>
     </RequireRoleAuth>
