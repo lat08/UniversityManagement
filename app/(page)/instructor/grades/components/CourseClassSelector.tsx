@@ -36,13 +36,3 @@ export const CourseClassSelector = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-

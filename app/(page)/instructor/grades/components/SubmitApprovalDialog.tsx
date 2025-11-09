@@ -130,13 +130,3 @@ export const SubmitApprovalDialog = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
