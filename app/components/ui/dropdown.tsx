@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef, ReactNode } from "react"
+import { useState, useEffect, useRef, useCallback, ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 
@@ -39,27 +40,59 @@ export function Dropdown<T = string>({
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, openUpward: false })
   const containerRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const selectedOption = value ? options.find(opt => opt.value === value) : undefined
 
+  const updateDropdownPosition = useCallback(() => {
+    if (containerRef.current && typeof window !== 'undefined') {
+      const rect = containerRef.current.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const spaceBelow = viewportHeight - rect.bottom
+      const spaceAbove = rect.top
+      const estimatedDropdownHeight = Math.min(240, options.length * 40 + 16)
+      
+      const openUpward = spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow
+      
+      setDropdownPosition({
+        top: openUpward 
+          ? rect.top + window.scrollY - estimatedDropdownHeight - 8
+          : rect.bottom + window.scrollY + 8,
+        left: Math.max(8, Math.min(rect.left + window.scrollX, window.innerWidth + window.scrollX - rect.width - 8)),
+        width: rect.width,
+        openUpward,
+      })
+    }
+  }, [options.length])
+
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current && 
+        !containerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false)
       }
     }
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-      setShouldRender(true)
-    }
+    updateDropdownPosition()
+    document.addEventListener("mousedown", handleClickOutside)
+    window.addEventListener("resize", updateDropdownPosition)
+    window.addEventListener("scroll", updateDropdownPosition, true)
+    setShouldRender(true)
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
+      window.removeEventListener("resize", updateDropdownPosition)
+      window.removeEventListener("scroll", updateDropdownPosition, true)
     }
-  }, [isOpen])
+  }, [isOpen, updateDropdownPosition])
 
   useEffect(() => {
     if (!isOpen && shouldRender) {
@@ -98,16 +131,23 @@ export function Dropdown<T = string>({
         )} />
       </button>
 
-      {shouldRender && (
+      {shouldRender && typeof window !== 'undefined' && document.body && createPortal(
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
+            "fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
             isOpen 
               ? "opacity-100 translate-y-0 scale-100 duration-200 ease-out" 
+              : dropdownPosition.openUpward
+              ? "opacity-0 -translate-y-1 scale-[0.98] duration-150 ease-in pointer-events-none"
               : "opacity-0 translate-y-1 scale-[0.98] duration-150 ease-in pointer-events-none",
             dropdownClassName
           )}
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+          }}
         >
           {showEmptyOption && (
             <button
@@ -135,7 +175,8 @@ export function Dropdown<T = string>({
               {option.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

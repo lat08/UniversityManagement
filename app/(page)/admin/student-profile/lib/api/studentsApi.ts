@@ -341,5 +341,29 @@ export const studentsApi = {
     });
     return response.data;
   },
+
+  /**
+   * Cập nhật hàng loạt sinh viên
+   */
+  bulkUpdateStudents: async (payload: { studentIds: string[]; enrollmentStatus?: string; classId?: string }): Promise<ApiResponse<{ updatedCount: number; totalRequested: number; failedCount: number }>> => {
+    const response = await api.put<ApiResponse<{ updatedCount: number; totalRequested: number; failedCount: number }>>('/v1/admin/students/mass-edit', payload);
+    return response.data;
+  },
+
+  /**
+   * Xóa hàng loạt sinh viên (soft delete)
+   */
+  bulkDeleteStudents: async (studentIds: string[]): Promise<ApiResponse<{ deletedCount: number }>> => {
+    const deletePromises = studentIds.map(id => api.delete(`/v1/admin/students/${id}`));
+    const results = await Promise.allSettled(deletePromises);
+    
+    const deletedCount = results.filter(r => r.status === 'fulfilled').length;
+    
+    return {
+      success: true,
+      message: `Đã xóa ${deletedCount}/${studentIds.length} sinh viên`,
+      data: { deletedCount }
+    };
+  },
 };
 

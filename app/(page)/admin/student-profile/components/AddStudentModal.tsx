@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Dropdown, DropdownSearch, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Button, Input } from '@/app/components/ui';
+import { useState, useEffect, useCallback } from 'react';
+import { Dropdown, DropdownSearch, Button, Input } from '@/app/components/ui';
+import { X } from 'lucide-react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -141,6 +142,30 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
 
   const enrollmentStatusOptions = ENROLLMENT_STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }));
 
+  const handleClose = useCallback(() => {
+    if (!isSubmitting) {
+      reset();
+      setDobISO('');
+      onClose();
+    }
+  }, [isSubmitting, reset, onClose]);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isSubmitting) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, isSubmitting, handleClose]);
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
@@ -167,8 +192,9 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
           { duration: 4000, style: { minWidth: '300px' } }
         );
         reset();
+        setDobISO('');
         onSuccess?.();
-        onClose();
+        handleClose();
       } else {
         toast.error(response.message || 'Thêm sinh viên thất bại');
       }
@@ -182,16 +208,42 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Thêm sinh viên mới</DialogTitle>
-          <DialogDescription>Nhập thông tin sinh viên</DialogDescription>
-        </DialogHeader>
+  if (!isOpen) return null;
 
-        <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto flex-1 p-6">
-          <div className="grid grid-cols-2 gap-6">
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && !isSubmitting) {
+      handleClose();
+    }
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Thêm sinh viên mới</h2>
+              <p className="text-sm text-gray-600 mt-1">Nhập thông tin sinh viên</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="text-gray-400 hover:text-gray-600"
+              type="button"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+          <div className="overflow-y-auto flex-1 p-6">
+            <div className="grid grid-cols-2 gap-6">
             {/* Họ và tên */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -360,27 +412,29 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               />
               {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>}
             </div>
+            </div>
           </div>
 
-          <DialogFooter>
+          <div className="flex gap-3 p-6 border-t">
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
+              className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
               Hủy
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[#0053AD] hover:bg-[#003d82] text-white"
+              className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Đang lưu...' : 'Lưu'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

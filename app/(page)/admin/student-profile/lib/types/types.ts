@@ -2,11 +2,25 @@ export interface Student {
   studentId: string;
   studentCode: string;
   fullName: string;
+  email: string;
+  facultyName: string;
   departmentName: string;
   academicYear: string;
-  email: string;
   className: string;
+  classId: string;
   enrollmentStatus: string;
+  trainingSystemName: string;
+  averageGPA: number | null;
+  totalCreditsInCurriculum: number;
+  creditsEarnedInCurriculum: number;
+  creditsEarnedOutsideCurriculum: number;
+  totalPaidAmount: number;
+  totalOwedAmount: number;
+  unpaidEnrollmentsCount: number;
+  unpaidCreditsCount: number;
+  totalEnrollmentsCount: number;
+  completedEnrollmentsCount: number;
+  lastEnrollmentDate: string | null;
 }
 
 export interface Pagination {
@@ -22,13 +36,27 @@ export interface StudentsResponse {
   statistics?: {
     currentYear?: number;
     totalStudents: number;
+    currentlyActive: number;
     enrolledThisYear: number;
     enrolledLastYear?: number;
-    growthPercentage?: number; // vs last year
+    growthPercentage?: number;
     graduatingSoon: number;
     onLeave: number;
+    suspended: number;
+    droppedOut: number;
+    graduated: number;
   };
- }
+  appliedFilters?: {
+    searchKeyword?: string;
+    facultyId?: string;
+    departmentId?: string;
+    academicYearId?: string;
+    classId?: string;
+    trainingSystemId?: string;
+    enrollmentStatus?: string;
+    nearestYearsCount?: number;
+  };
+}
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -71,10 +99,13 @@ export interface GetStudentsParams {
   pageNumber?: number;
   pageSize?: number;
   searchKeyword?: string;
-  departmentId?: string;
   facultyId?: string;
+  departmentId?: string;
   academicYearId?: string;
+  classId?: string;
+  trainingSystemId?: string;
   enrollmentStatus?: string;
+  nearestYearsCount?: number;
 }
 
 export interface ExportStudentsParams {

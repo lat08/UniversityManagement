@@ -24,7 +24,6 @@ interface ScheduleTooltipProps {
   readonly position: { x: number; y: number }
   readonly onMouseEnter?: () => void
   readonly onMouseLeave?: () => void
-  readonly onClick?: (e: React.MouseEvent) => void
   readonly showClass?: boolean
   readonly showTeacher?: boolean
   readonly actionButton?: ReactNode
@@ -35,7 +34,6 @@ export function ScheduleTooltip({
   position,
   onMouseEnter,
   onMouseLeave,
-  onClick: _onClick,
   showClass = true,
   showTeacher = true,
   actionButton,
