@@ -14,6 +14,13 @@ import {
   Building2,
 } from "lucide-react"
 import Link from "next/link"
+import React from 'react';
+import { StatsCard } from '../statsCard';
+import { PendingTaskCard } from '../pendingTaskCard';
+import { RecentUpdateCard } from '../recentUpdateCard';
+import { QuickActionButton } from '../quickActionButton';
+import { mockDashboardStats, mockPendingTasks, mockRecentUpdates } from '../../lib/data/mockData';
+import { QuickAction } from '../../lib/types/types';
 
 export default function AdminDashboardContent() {
   usePageTitle('Bảng điều khiển - Admin')
@@ -90,67 +97,101 @@ export default function AdminDashboardContent() {
     }
   ]
 
+  // Quick actions
+  const quickActions: QuickAction[] = [
+    {
+      id: '1',
+      title: 'Thêm người dùng',
+      icon: '👤',
+      action: () => console.log('Thêm người dùng'),
+      color: 'primary',
+    },
+    {
+      id: '2',
+      title: 'Mở lớp học',
+      icon: '📚',
+      action: () => console.log('Mở lớp học'),
+      color: 'secondary',
+    },
+    {
+      id: '3',
+      title: 'Công bố thời khóa biểu',
+      icon: '📅',
+      action: () => console.log('Công bố TKB'),
+      color: 'success',
+    },
+    {
+      id: '4',
+      title: 'Gửi thông báo',
+      icon: '📧',
+      action: () => console.log('Gửi thông báo'),
+      color: 'warning',
+    },
+  ];
+
   return (
-    <div className="space-y-4 lg:space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h1 className="text-2xl font-bold text-gray-900">
           Bảng điều khiển Admin
         </h1>
-        <p className="text-xs lg:text-sm text-gray-500 mt-1">
-          Quản lý và cấu hình toàn bộ hệ thống
-        </p>
+        <p className="text-gray-600 mt-1">Chào mừng trở lại, Name!</p>
       </div>
 
-      {/* System Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <Card className="p-4 lg:p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs lg:text-sm text-gray-500">Tổng sinh viên</p>
-              <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">1,245</p>
-            </div>
-            <div className="h-10 w-10 lg:h-12 lg:w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
-            </div>
-          </div>
-        </Card>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {mockDashboardStats.map((stat) => (
+          <StatsCard key={stat.id} stat={stat} />
+        ))}
+      </div>
 
-        <Card className="p-4 lg:p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs lg:text-sm text-gray-500">Tổng giảng viên</p>
-              <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">89</p>
-            </div>
-            <div className="h-10 w-10 lg:h-12 lg:w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Pending Tasks - 2 columns */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Công việc cần xử lý
+            </h2>
+            <div className="space-y-3">
+              {mockPendingTasks.map((task) => (
+                <PendingTaskCard
+                  key={task.id}
+                  task={task}
+                  onClick={() => console.log('Navigate to', task.title)}
+                />
+              ))}
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 lg:p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs lg:text-sm text-gray-500">Tổng khóa học</p>
-              <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">156</p>
+        {/* Recent Updates - 1 column */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Cập nhật mới
+            </h2>
+            <div className="space-y-3">
+              {mockRecentUpdates.map((update) => (
+                <RecentUpdateCard key={update.id} update={update} />
+              ))}
             </div>
-            <div className="h-10 w-10 lg:h-12 lg:w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <BookOpen className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
-            </div>
+            <button className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              Xem tất cả
+            </button>
           </div>
-        </Card>
+        </div>
+      </div>
 
-        <Card className="p-4 lg:p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs lg:text-sm text-gray-500">Tổng khoa</p>
-              <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">12</p>
-            </div>
-            <div className="h-10 w-10 lg:h-12 lg:w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Building2 className="h-5 w-5 lg:h-6 lg:w-6 text-orange-600" />
-            </div>
-          </div>
-        </Card>
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Tạo nhanh</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {quickActions.map((action) => (
+            <QuickActionButton key={action.id} action={action} />
+          ))}
+        </div>
       </div>
 
       {/* System Settings Grid */}

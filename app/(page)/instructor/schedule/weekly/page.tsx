@@ -116,10 +116,6 @@ export default function InstructorWeeklySchedulePage() {
     }
   }
 
-  const handleTooltipClick = (e: React.MouseEvent) => {
-    // Prevent event bubbling to avoid closing tooltip
-    e.stopPropagation()
-  }
 
   const handleScheduleChangeRequest = () => {
     const course = transformedSchedule.find(c => c.id === hoveredCourse);
@@ -376,7 +372,6 @@ export default function InstructorWeeklySchedulePage() {
                 position={hoverPosition}
                 onMouseEnter={handleTooltipMouseEnter}
                 onMouseLeave={handleTooltipMouseLeave}
-                onClick={handleTooltipClick}
                 showClass={true}
                 showTeacher={false}
                 actionButton={

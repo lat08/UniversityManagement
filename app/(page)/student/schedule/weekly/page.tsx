@@ -61,10 +61,6 @@ export default function WeeklySchedulePage() {
     }
   }
 
-  const handleTooltipClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-  }
-
   // Close tooltip when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -388,7 +384,6 @@ export default function WeeklySchedulePage() {
                 position={hoverPosition}
                 onMouseEnter={handleTooltipMouseEnter}
                 onMouseLeave={handleTooltipMouseLeave}
-                onClick={handleTooltipClick}
                 showClass={false}
                 showTeacher={true}
               />
