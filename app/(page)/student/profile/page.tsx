@@ -289,8 +289,11 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center">
-              <div className="w-full max-w-xl space-y-6">
+            <div className="w-full max-w-xl ml-auto">
+              <div className="space-y-6">
+                <div className="mb-2">
+                  <h2 className="text-base font-medium">Đặt lại mật khẩu</h2>
+                </div>
                 {passwordError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -391,7 +394,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-end pt-4">
                   <Button
                     onClick={handleSavePassword}
                     disabled={isChangingPassword}
