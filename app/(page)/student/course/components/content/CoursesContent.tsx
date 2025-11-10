@@ -87,7 +87,19 @@ function CoursesContent() {
     setSelectedCourse(null);
   }
 
-  // 4. XỬ LÝ ĐĂNG KÝ (GỌI API ENROLL)
+  // 4. XỬ LÝ BULK HỦY
+  const handleBulkCancel = async (courseIds: string[]) => {
+    try {
+      await Promise.all(courseIds.map(id => coursesApi.cancelRegistration(id)));
+      refreshAllData();
+      toast.success(`Đã hủy ${courseIds.length} môn học thành công!`, { duration: 4000 });
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Hủy môn học thất bại. Vui lòng kiểm tra kết nối.");
+      toast.error(message);
+    }
+  }
+
+  // 5. XỬ LÝ ĐĂNG KÝ (GỌI API ENROLL)
   const handleRegisterClick = async (courseId: string) => { 
     try {
         await coursesApi.registerCourse(courseId);
@@ -99,19 +111,25 @@ function CoursesContent() {
     }
   }
 
+  const handleRegisterButtonClick = () => {
+    setActiveTab("available");
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Khóa học</h1>
-        <p className="text-gray-600 mt-1">Đăng ký và quản lý các môn học</p>
-      </div>
+    <div className="space-y-4 lg:space-y-6">
+      <header className="space-y-2">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Khóa học</h1>
+        <p className="text-sm text-gray-600">Đăng ký và quản lý các môn học</p>
+      </header>
 
       {/* Tabs */}
-      <Tabs
-        items={tabs.map(tab => ({ key: tab.key, label: tab.label }))}
-        activeKey={activeTab}
-        onChange={setActiveTab}
-      />
+      <div>
+        <Tabs
+          items={tabs.map(tab => ({ key: tab.key, label: tab.label }))}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
 
       {/* Tab Content */}
       {activeTab === "registered" ? (
@@ -129,6 +147,8 @@ function CoursesContent() {
               loading={registeredLoading}
               onCancelClick={handleCancelClick}
               goToPage={goToRegisteredPage}
+              onBulkCancel={handleBulkCancel}
+              onRegisterButtonClick={handleRegisterButtonClick}
             />
         )
       ) : (

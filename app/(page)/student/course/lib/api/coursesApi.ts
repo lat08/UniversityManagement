@@ -5,6 +5,10 @@ import { CourseDto, PaginatedResponse } from "../type/courseType"
 export interface GetAvailableCoursesParams {
     pageNumber?: number;
     pageSize?: number;
+    searchQuery?: string;
+    availableOnly?: boolean | null;
+    isGeneral?: boolean | null;
+    isInStudentCurriculum?: boolean | null;
 }
 
 export const coursesApi = {
@@ -13,7 +17,11 @@ export const coursesApi = {
         const response = await api.get(`/v1/enrollments/available`, {
             params: {
                 pageNumber: params?.pageNumber ?? 1,
-                pageSize: params?.pageSize ?? 10,
+                pageSize: params?.pageSize ?? 15,
+                searchQuery: params?.searchQuery,
+                availableOnly: params?.availableOnly,
+                isGeneral: params?.isGeneral,
+                isInStudentCurriculum: params?.isInStudentCurriculum,
             }
         });
         // Backend returns a wrapper: { success, message, data: { items, totalCount, ... } }
@@ -21,7 +29,7 @@ export const coursesApi = {
             items: [],
             totalCount: 0,
             pageNumber: 1,
-            pageSize: 10,
+            pageSize: 15,
             totalPages: 0,
             hasPrevious: false,
             hasNext: false,
