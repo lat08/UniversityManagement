@@ -5,5 +5,5 @@ import { NotificationsContent } from "./components/content/notificationContent"
 
 export default function NotificationsPage() {
   usePageTitle('Thông báo');
-  return <NotificationsContent />
+  return <NotificationsContent role="Student" />
 }

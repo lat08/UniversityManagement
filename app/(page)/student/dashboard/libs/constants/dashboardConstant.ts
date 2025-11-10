@@ -5,6 +5,7 @@ import {
   ClassInfo,
   
 }from "../types/types";
+import { Calendar, BookOpen } from "lucide-react";
 
 // Stat cards data
 export const statCards: StatCardData[] = [
@@ -15,6 +16,7 @@ export const statCards: StatCardData[] = [
     bgColor: "bg-[var(--info-light)]",
     iconColor: "text-[var(--info)]",
     textColor: "text-[var(--info)]",
+    icon: Calendar,
   },
   {
     title: "Lịch thi trong tuần",
@@ -23,6 +25,7 @@ export const statCards: StatCardData[] = [
     bgColor: "bg-[var(--error-light)]",
     iconColor: "text-[var(--error)]",
     textColor: "text-[var(--error)]",
+    icon: BookOpen,
   },
 ];
 

@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export interface StatCardData {
   title: string;
   value: number;
@@ -5,6 +7,7 @@ export interface StatCardData {
   bgColor: string;
   iconColor: string;
   textColor: string;
+  icon: LucideIcon;
 }
 
 

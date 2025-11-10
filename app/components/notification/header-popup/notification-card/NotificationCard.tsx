@@ -47,7 +47,7 @@ export function NotificationCard({ notifications, onClose }: NotificationCardPro
                 {notification.title}
               </p>
               <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                {notification.content}
+                {notification.content ?? ""}
               </p>
               <div className="flex items-center justify-between">
                 <p className="text-xs text-gray-400">{notification.timeAgo}</p>

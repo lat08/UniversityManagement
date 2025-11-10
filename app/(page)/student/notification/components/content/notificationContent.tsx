@@ -7,6 +7,8 @@ import { NotificationCard } from "@/app/components/notification/NotificationCard
 import { NotificationType, NotificationApiItem } from "@/lib/types/notification";
 import { notificationFilters } from "@/lib/constants/notification";
 import { Button } from "@/app/components/ui/button";
+import { Pagination } from "@/app/components/ui/pagination";
+import { SearchInput } from "@/app/components/ui/search-input";
 import { useNotificationParams } from "../../lib/hooks/useNotificationParams";
 import { useUnreadCounts } from "../../lib/hooks/useUnreadCounts";
 import { useMarkAllAsRead } from "../../lib/hooks/useMarkAllAsRead";
@@ -15,27 +17,44 @@ import { LoadingState } from "../LoadingState";
 import { ErrorState } from "../ErrorState";
 import { EmptyState } from "../EmptyState";
 
-export function NotificationsContent() {
+interface NotificationsContentProps {
+  role?: string;
+}
+
+export function NotificationsContent({ role = "Student" }: NotificationsContentProps) {
   const { expandedNotificationId, initialFilter, notificationIdFromParams } = useNotificationParams();
   const [activeFilter, setActiveFilter] = useState<NotificationType>(initialFilter);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   
-  const { unreadCounts, refetchUnreadCounts } = useUnreadCounts();
-  const { markingAllAsRead, markAllAsRead } = useMarkAllAsRead();
+  const { unreadCounts, refetchUnreadCounts } = useUnreadCounts(role);
+  const { markingAllAsRead, markAllAsRead } = useMarkAllAsRead(role);
   const { 
     notifications, 
     loading, 
     error, 
     currentPage, 
-    totalPages, 
+    totalPages,
+    totalCount,
+    pageSize,
     setCurrentPage, 
     refetch,
     markAsRead 
-  } = useNotifications(activeFilter);
+  } = useNotifications(activeFilter, { role, searchTerm: debouncedSearchTerm });
 
   // Handle initial filter from URL params
   useEffect(() => {
     setActiveFilter(initialFilter);
   }, [initialFilter]);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchQuery.trim());
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const handleNotificationClick = useCallback(async (id: string) => {
     const success = await markAsRead(id);
@@ -62,32 +81,42 @@ export function NotificationsContent() {
 
   return (
     <div className="space-y-6">
-      {unreadCounts.all > 0 && (
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-[var(--text-secondary)]">
-            {unreadCounts.all} thông báo chưa đọc
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleMarkAllAsRead}
-            disabled={markingAllAsRead}
-            className="gap-2"
-          >
-            {markingAllAsRead ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <CheckCheck className="h-4 w-4" />
-                Đánh dấu tất cả đã đọc
-              </>
-            )}
-          </Button>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="w-full md:max-w-md">
+          <SearchInput
+            value={searchQuery}
+            placeholder="Tìm kiếm thông báo..."
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
         </div>
-      )}
+
+        {unreadCounts.all > 0 && (
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-[var(--text-secondary)]">
+              {unreadCounts.all} thông báo chưa đọc
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              disabled={markingAllAsRead}
+              className="gap-2"
+            >
+              {markingAllAsRead ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <CheckCheck className="h-4 w-4" />
+                  Đánh dấu tất cả đã đọc
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
 
       <Tabs
         items={notificationFilters.map(filter => ({
@@ -120,37 +149,14 @@ export function NotificationsContent() {
           </div>
           
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-6">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev: number) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1 || loading}
-              >
-                Trang trước
-              </Button>
-              <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    disabled={loading}
-                    className="min-w-[40px]"
-                  >
-                    {page}
-                  </Button>
-                ))}
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev: number) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages || loading}
-              >
-                Trang sau
-              </Button>
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </>

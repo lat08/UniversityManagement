@@ -1,7 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/app/components/ui/card";
-import { Calendar, FileText } from "lucide-react";
 import { StatCardData } from "../libs/types/types";
 import { useCountUp } from "@/lib/hooks/useCountUp";
 
@@ -10,31 +8,21 @@ interface StatCardProps {
 }
 
 export default function StatCard({ data }: StatCardProps) {
-  const Icon = data.title.includes("học") ? Calendar : FileText;
+  const Icon = data.icon;
   const animatedValue = useCountUp(data.value, { duration: 800 });
 
   return (
-    <Card className={`${data.bgColor} border-none shadow-sm`}>
-      <CardContent className="p-6 relative">
-        <div className="absolute top-4 right-4">
-          <div className={`${data.iconColor} opacity-20`}>
-            <Icon className="w-10 h-10" />
-          </div>
+    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
+      {/* Quarter-circle decorative element with icon */}
+      <div className={`absolute top-0 right-0 w-20 h-20 ${data.bgColor} rounded-bl-[100%]`}>
+        <div className="absolute top-5 right-5">
+          <Icon className={`w-6 h-6 ${data.iconColor} flex-shrink-0`} strokeWidth={2} />
         </div>
-
-        <h3 className="text-sm text-[var(--text-secondary)] mb-4">
-          {data.title}
-        </h3>
-
-        <div className={`text-5xl font-bold ${data.textColor} mb-1`}>
-          {animatedValue}
-        </div>
-
-        <div className="text-sm text-[var(--text-secondary)]">
-          {data.unit}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">{data.title}</p>
+      <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">{animatedValue}</p>
+      <p className="text-xs sm:text-sm text-gray-600 relative z-10">{data.unit}</p>
+    </div>
   );
 }
 

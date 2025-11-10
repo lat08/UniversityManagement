@@ -9,7 +9,7 @@ interface UnreadCounts {
   important: number;
 }
 
-export const useUnreadCounts = () => {
+export const useUnreadCounts = (role?: string) => {
   const [unreadCounts, setUnreadCounts] = useState<UnreadCounts>({
     all: 0,
     event: 0,
@@ -20,7 +20,7 @@ export const useUnreadCounts = () => {
 
   const fetchUnreadCounts = useCallback(async () => {
     try {
-      const response = await notificationApi.getUnreadCountByCategory();
+      const response = await notificationApi.getUnreadCountByCategory(role);
       if (response.isSuccess) {
         setUnreadCounts({
           all: response.data.countByCategory.total,
@@ -33,7 +33,7 @@ export const useUnreadCounts = () => {
     } catch (err: unknown) {
       console.error('Error fetching unread counts:', err);
     }
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     fetchUnreadCounts();
