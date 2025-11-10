@@ -12,6 +12,7 @@ export interface WeeklyScheduleDto {
 
 export interface CourseDto {
   courseId: string;           // Guid (string trong JS)
+  enrollmentId?: string;      // ID enrollment (cho registered courses)
   subjectName: string;
   subjectCode: string;
   credits: number;
@@ -29,6 +30,7 @@ export interface CourseDto {
   isFull: boolean;
   hasScheduleConflict: boolean;
   unavailabilityReason: string | null;
+  isLocked?: boolean;         // Môn đã bị khóa không thể hủy
 }
 
 // Pagination response wrapper
