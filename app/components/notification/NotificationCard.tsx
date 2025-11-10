@@ -109,7 +109,7 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
           <div className="mt-4 pt-4 border-t border-[var(--border)] text-sm">
             <div>
               <span className="font-semibold text-[var(--text-primary)]">Nội dung: </span>
-              <span className="text-[var(--text-secondary)] whitespace-pre-wrap">{notification.content}</span>
+              <span className="text-[var(--text-secondary)] whitespace-pre-wrap">{notification.content ?? ""}</span>
             </div>
           </div>
         )}

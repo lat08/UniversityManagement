@@ -4,11 +4,11 @@ export interface NotificationApiItem {
   scheduleId: string
   notificationType: "event" | "tuition" | "schedule" | "important"
   title: string
-  content: string
+  content: string | null
   createdAt: string
   visibleFrom: string
   isRead: boolean
-  status: string
+  status: string | null
   timeAgo: string
 }
 
@@ -36,6 +36,7 @@ export type NotificationListResponse = BaseApiResponse<{
 export type NotificationDetailResponse = BaseApiResponse<NotificationApiItem>
 
 export type UnreadCountResponse = BaseApiResponse<{
+  role: string
   unreadCount: number
 }>
 
@@ -56,6 +57,7 @@ export type MarkAsReadResponse = BaseApiResponse<{
 }>
 
 export type MarkAllAsReadResponse = BaseApiResponse<{
+  role: string
   message: string
   count: number
 }>
@@ -66,5 +68,6 @@ export interface NotificationQueryParams {
   SearchTerm?: string
   PageIndex?: number
   PageSize?: number
+  Role?: string
 }
 

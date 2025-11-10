@@ -2,7 +2,7 @@
 
 import { BellOff, Bell, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/app/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 import { NotificationCard } from "@/app/components/notification/header-popup/notification-card/NotificationCard"
@@ -16,22 +16,25 @@ export function NotificationPopup() {
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { user } = useAuthStore()
+  const userRole = user?.role
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
+    if (!userRole) return
     try {
-      const response = await notificationApi.getUnreadCount()
+      const response = await notificationApi.getUnreadCount(userRole)
       if (response.isSuccess) {
         setUnreadCount(response.data.unreadCount)
       }
     } catch (err: unknown) {
       console.error('Error fetching unread count:', err);
     }
-  }
+  }, [userRole])
 
-  const fetchRecentNotifications = async () => {
+  const fetchRecentNotifications = useCallback(async () => {
+    if (!userRole) return
     try {
       setLoading(true)
-      const response = await notificationApi.getNotifications({ PageSize: 10 })
+      const response = await notificationApi.getNotifications({ PageSize: 10, Role: userRole })
       if (response.isSuccess) {
         setNotifications(response.data.notifications.data)
       }
@@ -40,17 +43,17 @@ export function NotificationPopup() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userRole])
 
   useEffect(() => {
-    if (user) {
+    if (userRole) {
       void fetchUnreadCount()
       const interval = setInterval(() => {
         void fetchUnreadCount()
       }, 30000)
       return () => clearInterval(interval)
     }
-  }, [user])
+  }, [userRole, fetchUnreadCount])
 
   // Listen to global notification updates to refresh the unread badge immediately
   useEffect(() => {
@@ -62,13 +65,13 @@ export function NotificationPopup() {
     }
     window.addEventListener('notifications:updated', handleUpdated)
     return () => window.removeEventListener('notifications:updated', handleUpdated)
-  }, [isOpen])
+  }, [isOpen, fetchRecentNotifications, fetchUnreadCount])
 
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen && userRole) {
       void fetchRecentNotifications()
     }
-  }, [isOpen, user])
+  }, [isOpen, userRole, fetchRecentNotifications])
 
   const getNotificationLink = () => {
     if (!user) return "/login"

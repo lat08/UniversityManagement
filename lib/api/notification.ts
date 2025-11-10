@@ -28,36 +28,43 @@ export const notificationApi = {
     if (params?.PageSize) {
       queryParams.append('PageSize', params.PageSize.toString())
     }
+    if (params?.Role) {
+      queryParams.append('role', params.Role)
+    }
 
     const queryString = queryParams.toString()
-    const url = `/v1/notifications${queryString ? `?${queryString}` : ''}`
+    const url = `/v1/notification${queryString ? `?${queryString}` : ''}`
     
     const response = await api.get<NotificationListResponse>(url)
     return response.data
   },
 
-  getNotificationById: async (id: string): Promise<NotificationDetailResponse> => {
-    const response = await api.get<NotificationDetailResponse>(`/v1/notifications/${id}`)
+  getNotificationById: async (id: string, role?: string): Promise<NotificationDetailResponse> => {
+    const queryString = role ? `?role=${encodeURIComponent(role)}` : ''
+    const response = await api.get<NotificationDetailResponse>(`/v1/notification/${id}${queryString}`)
     return response.data
   },
 
   markAsRead: async (id: string): Promise<MarkAsReadResponse> => {
-    const response = await api.put<MarkAsReadResponse>(`/v1/notifications/${id}/mark-as-read`)
+    const response = await api.put<MarkAsReadResponse>(`/v1/notification/${id}/mark-as-read`)
     return response.data
   },
 
-  markAllAsRead: async (): Promise<MarkAllAsReadResponse> => {
-    const response = await api.put<MarkAllAsReadResponse>('/v1/notifications/mark-all-as-read')
+  markAllAsRead: async (role?: string): Promise<MarkAllAsReadResponse> => {
+    const queryString = role ? `?role=${encodeURIComponent(role)}` : ''
+    const response = await api.put<MarkAllAsReadResponse>(`/v1/notification/mark-all-as-read${queryString}`)
     return response.data
   },
 
-  getUnreadCount: async (): Promise<UnreadCountResponse> => {
-    const response = await api.get<UnreadCountResponse>('/v1/notifications/unread-count')
+  getUnreadCount: async (role?: string): Promise<UnreadCountResponse> => {
+    const queryString = role ? `?role=${encodeURIComponent(role)}` : ''
+    const response = await api.get<UnreadCountResponse>(`/v1/notification/unread-count${queryString}`)
     return response.data
   },
 
-  getUnreadCountByCategory: async (): Promise<UnreadCountByCategoryResponse> => {
-    const response = await api.get<UnreadCountByCategoryResponse>('/v1/notifications/unread-count-by-category')
+  getUnreadCountByCategory: async (role?: string): Promise<UnreadCountByCategoryResponse> => {
+    const queryString = role ? `?role=${encodeURIComponent(role)}` : ''
+    const response = await api.get<UnreadCountByCategoryResponse>(`/v1/notification/unread-count-by-category${queryString}`)
     return response.data
   }
 }
