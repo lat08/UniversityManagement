@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/app/components/ui/button"
-import { Printer, BookOpen, XCircle, List, Loader2, ChevronDown } from "lucide-react"
+import { Printer, BookOpen, XCircle, List, Loader2, ChevronDown, Award, Book, CheckCircle } from "lucide-react"
 import { useState, useEffect, useMemo, useRef } from "react"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useGrades } from "./lib/hooks/useGrades"
@@ -157,28 +157,43 @@ export default function ScoresPage() {
         </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-gpa-bg)', borderColor: 'var(--grade-card-gpa-border)', borderWidth: '1px', borderStyle: 'solid' }}>
-          <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Điểm trung bình</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl sm:text-4xl font-bold text-gray-900">{scoreOverview.gpa4}</p>
-            <span className="text-xs sm:text-sm text-gray-600">GPA 4.0</span>
+        {/* Điểm trung bình */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
+          {/* Quarter-circle decorative element with icon - Orange/Peach */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[#FFDDAA] rounded-bl-[100%]">
+            <div className="absolute top-5 right-5">
+              <Award className="w-6 h-6 text-[#CC8800] flex-shrink-0" strokeWidth={2} />
+            </div>
           </div>
+          <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">Điểm trung bình</p>
+          <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">{scoreOverview.gpa4}</p>
+          <p className="text-xs sm:text-sm text-gray-600 relative z-10">GPA 4.0</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-credit-bg)', borderColor: 'var(--grade-card-credit-border)', borderWidth: '1px', borderStyle: 'solid' }}>
-          <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Tổng tín chỉ hoàn thành</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl sm:text-4xl font-bold text-gray-900">{scoreOverview.totalCredits}</p>
-            <span className="text-xs sm:text-sm text-gray-600">tín chỉ</span>
+        {/* Tổng tín chỉ hoàn thành */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
+          {/* Quarter-circle decorative element with icon - Red/Coral */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[#FFBBAA] rounded-bl-[100%]">
+            <div className="absolute top-5 right-5">
+              <Book className="w-6 h-6 text-[#CC4444] flex-shrink-0" strokeWidth={2} />
+            </div>
           </div>
+          <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">Tổng tín chỉ hoàn thành</p>
+          <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">{scoreOverview.totalCredits}</p>
+          <p className="text-xs sm:text-sm text-gray-600 relative z-10">/120 tín chỉ</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6" style={{ background: 'var(--grade-card-course-bg)', borderColor: 'var(--grade-card-course-border)', borderWidth: '1px', borderStyle: 'solid' }}>
-          <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">Môn đã hoàn thành</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl sm:text-4xl font-bold text-gray-900">{scoreOverview.completedCourses}</p>
-            <span className="text-xs sm:text-sm text-gray-600">môn học</span>
+        {/* Môn đã hoàn thành */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
+          {/* Quarter-circle decorative element with icon - Green/Mint */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[#CCEECC] rounded-bl-[100%]">
+            <div className="absolute top-5 right-5">
+              <CheckCircle className="w-6 h-6 text-[#44AA44] flex-shrink-0" strokeWidth={2} />
+            </div>
           </div>
+          <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">Môn đã hoàn thành</p>
+          <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">{scoreOverview.completedCourses}</p>
+          <p className="text-xs sm:text-sm text-gray-600 relative z-10">môn học</p>
         </div>
       </div>
 
