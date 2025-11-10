@@ -1,13 +1,18 @@
 'use client';
 
-import { Dropdown } from '@/app/components/ui';
+import { Dropdown, DropdownSearch } from '@/app/components/ui';
 import type { InstructorCourseClassDto } from '../lib/types';
+import type { Semester } from '@/lib/types/common';
 
 interface CourseClassSelectorProps {
   courseClasses: InstructorCourseClassDto[];
   selectedCourseClassId: string;
   onSelect: (courseClassId: string) => void;
   isLoading?: boolean;
+  semesters?: Semester[];
+  selectedSemesterId?: string;
+  onSemesterChange?: (semesterId: string) => void;
+  isSemestersLoading?: boolean;
 }
 
 export const CourseClassSelector = ({
@@ -15,24 +20,51 @@ export const CourseClassSelector = ({
   selectedCourseClassId,
   onSelect,
   isLoading,
+  semesters = [],
+  selectedSemesterId = '',
+  onSemesterChange,
+  isSemestersLoading,
 }: CourseClassSelectorProps) => {
-  const options = [
+  const courseClassOptions = [
     { value: '', label: 'Chọn lớp học phần' },
     ...courseClasses.map((cc) => ({
       value: cc.courseClassId,
-      label: `${cc.courseCode} - ${cc.courseName} - ${cc.className}`,
+      label: `${cc.courseCode} - ${cc.courseName}`,
+    })),
+  ];
+
+  const semesterOptions = [
+    { value: '', label: 'Tất cả học kỳ' },
+    ...semesters.map((s) => ({
+      value: s.semesterId,
+      label: s.semesterName,
     })),
   ];
 
   return (
-    <div className="w-full">
-      <Dropdown
-        options={options}
-        value={selectedCourseClassId}
-        placeholder="Chọn lớp học phần"
-        onChange={onSelect}
-        disabled={isLoading}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {onSemesterChange && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Học kỳ</label>
+          <Dropdown
+            options={semesterOptions}
+            value={selectedSemesterId}
+            placeholder="Chọn học kỳ"
+            onChange={onSemesterChange}
+            disabled={isSemestersLoading}
+          />
+        </div>
+      )}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Lớp học phần</label>
+        <DropdownSearch
+          options={courseClassOptions}
+          value={selectedCourseClassId}
+          placeholder="Chọn lớp học phần"
+          onChange={onSelect}
+          disabled={isLoading}
+        />
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client"
 
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import {
   Dialog,
@@ -18,14 +18,12 @@ interface ExamDetailModalProps {
   readonly examEntryId: string | null;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onEdit?: (examEntryId: string) => void;
 }
 
 export function ExamDetailModal({
   examEntryId,
   isOpen,
   onClose,
-  onEdit,
 }: ExamDetailModalProps) {
   const { examEntryDetail, loading, error } = useExamEntryDetail(
     isOpen ? examEntryId : null
@@ -41,14 +39,26 @@ export function ExamDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto [&>button[data-radix-dialog-close]:not(.custom-close)]:hidden">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-gray-900">
-            Chi tiết đề thi
-          </DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
-            Thông tin chi tiết về đề thi
-          </DialogDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Chi tiết đề thi
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 mt-1">
+                Thông tin chi tiết về đề thi và trạng thái
+              </DialogDescription>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Đóng"
+              className="custom-close p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
         </DialogHeader>
 
         {loading && (
@@ -66,131 +76,153 @@ export function ExamDetailModal({
         )}
 
         {examEntryDetail && !loading && (
-          <div className="space-y-4">
-            {/* Basic Info */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm font-bold text-gray-900">Môn học</div>
-                <p className="text-sm text-gray-900 mt-1">
-                  {examEntryDetail.subjectName} ({examEntryDetail.subjectCode})
+          <div className="space-y-6">
+            {/* TRẠNG THÁI HIỆN TẠI */}
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+              <div className="text-sm">
+                <p className="text-gray-500">TRẠNG THÁI HIỆN TẠI</p>
+                <p className="text-gray-900 mt-0.5">
+                  Mã môn: <span className="font-semibold">{examEntryDetail.courseClassCode}</span>
                 </p>
               </div>
-              <div>
-                <div className="text-sm font-bold text-gray-900">Lớp học phần</div>
-                <p className="text-sm text-gray-900 mt-1">
-                  {examEntryDetail.courseClassCode} - {examEntryDetail.courseClassName}
-                </p>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-gray-900">Học kỳ</div>
-                <p className="text-sm text-gray-900 mt-1">{examEntryDetail.semesterName}</p>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-gray-900">Loại đề thi</div>
-                <p className="text-sm text-gray-900 mt-1">
-                  {EXAM_TYPE_LABELS[examEntryDetail.examType] || examEntryDetail.examType}
-                </p>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-gray-900">Thời lượng</div>
-                <p className="text-sm text-gray-900 mt-1">{examEntryDetail.durationMinutes} phút</p>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-gray-900">Trạng thái</div>
-                <p className="mt-1">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    ENTRY_STATUS_COLORS[examEntryDetail.entryStatus] || "bg-gray-100 text-gray-700"
-                  }`}>
-                    {ENTRY_STATUS_LABELS[examEntryDetail.entryStatus] || examEntryDetail.entryStatus}
-                  </span>
-                </p>
-              </div>
-              {examEntryDetail.entryCode && (
-                <div>
-                  <div className="text-sm font-bold text-gray-900">Mã đề thi</div>
-                  <p className="text-sm text-gray-900 mt-1">{examEntryDetail.entryCode}</p>
-                </div>
-              )}
+              <span
+                className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  ENTRY_STATUS_COLORS[examEntryDetail.entryStatus] || 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {ENTRY_STATUS_LABELS[examEntryDetail.entryStatus] || examEntryDetail.entryStatus}
+              </span>
             </div>
 
-            {/* Description */}
-            {examEntryDetail.description && (
-              <div>
-                <div className="text-sm font-bold text-gray-900">Mô tả</div>
-                <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">
-                  {examEntryDetail.description}
-                </p>
+            {/* Mã môn - nếu có */}
+            {examEntryDetail.entryCode && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                <span className="text-sm text-gray-600">Mã môn: </span>
+                <span className="text-sm font-semibold text-gray-900">{examEntryDetail.entryCode}</span>
               </div>
             )}
 
-            {/* Files */}
-            <div className="space-y-3">
-              <div>
-                <label htmlFor="question-file-info" className="text-sm font-bold text-gray-900 mb-2 block">File đề thi</label>
-                <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <div className="flex-1 min-w-0" id="question-file-info">
-                    <p className="text-sm text-gray-900 truncate">
-                      {examEntryDetail.questionFilePath?.split('/').pop() || 'File đề thi'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {examEntryDetail.questionFilePath ? 'Đã tải lên' : 'Chưa có file'}
-                    </p>
+            {/* THÔNG TIN ĐỀ THI */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Thông tin đề thi
+              </h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Môn học</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${examEntryDetail.subjectName}`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Lớp học phần</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${examEntryDetail.courseClassCode} - ${examEntryDetail.courseClassName}`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Học kỳ</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={examEntryDetail.semesterName}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Loại đề thi</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={EXAM_TYPE_LABELS[examEntryDetail.examType] || examEntryDetail.examType}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Thời lượng</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${examEntryDetail.durationMinutes} phút`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Mã đề</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={examEntryDetail.entryCode || 'N/A'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* CÁC TỆP ĐỀ THI */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Các tệp đề thi
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-md">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                      <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {examEntryDetail.questionFilePath?.split('/').pop() || 'example.pdf'}
+                      </p>
+                      <p className="text-xs text-gray-500">Đã tải lên</p>
+                    </div>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleDownload('question')}
-                    className="ml-3 flex-shrink-0"
+                    className="flex items-center gap-2 cursor-pointer"
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-4 h-4" />
                     Tải xuống
                   </Button>
                 </div>
-              </div>
 
-              <div>
-                <label htmlFor="answer-file-info" className="text-sm font-bold text-gray-900 mb-2 block">File đáp án</label>
-                <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <div className="flex-1 min-w-0" id="answer-file-info">
-                    <p className="text-sm text-gray-900 truncate">
-                      {examEntryDetail.answerFilePath?.split('/').pop() || 'File đáp án'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {examEntryDetail.answerFilePath ? 'Đã tải lên' : 'Chưa có file'}
-                    </p>
+                {examEntryDetail.answerFilePath && (
+                  <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-md">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {examEntryDetail.answerFilePath?.split('/').pop() || 'answer.pdf'}
+                        </p>
+                        <p className="text-xs text-gray-500">Đã tải lên</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload('answer')}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      Tải xuống
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownload('answer')}
-                    className="ml-3 flex-shrink-0"
-                    disabled={!examEntryDetail.answerFilePath}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Tải xuống
-                  </Button>
-                </div>
+                )}
               </div>
-            </div>
-
-            {/* Dates */}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-              <div>
-                <div className="text-sm font-bold text-gray-900">Ngày tạo</div>
-                <p className="text-sm text-gray-900 mt-1">{examEntryDetail.createdAt ? formatDate(examEntryDetail.createdAt) : 'N/A'}</p>
-              </div>
-              {examEntryDetail.reviewedAt && (
-                <div>
-                  <div className="text-sm font-bold text-gray-900">Ngày duyệt</div>
-                  <p className="text-sm text-gray-900 mt-1">{examEntryDetail.reviewedAt ? formatDate(examEntryDetail.reviewedAt) : 'N/A'}</p>
-                </div>
-              )}
-              {examEntryDetail.reviewerName && (
-                <div>
-                  <div className="text-sm font-bold text-gray-900">Người duyệt</div>
-                  <p className="text-sm text-gray-900 mt-1">{examEntryDetail.reviewerName}</p>
-                </div>
-              )}
             </div>
 
             {/* Rejection Reason */}
@@ -201,29 +233,29 @@ export function ExamDetailModal({
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200"
-              >
-                Đóng
-              </Button>
-              {(examEntryDetail.entryStatus === "pending" || examEntryDetail.entryStatus === "rejected") && (
-                <Button
-                  onClick={() => {
-                    if (onEdit && examEntryId) {
-                      onEdit(examEntryId);
-                      onClose();
-                    }
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Chỉnh sửa
-                </Button>
-              )}
+            {/* Footer Info - 3 boxes */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="border border-gray-200 rounded-lg p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Ngày tạo</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {examEntryDetail.createdAt ? formatDate(examEntryDetail.createdAt) : 'N/A'}
+                </p>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Ngày duyệt</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {examEntryDetail.reviewedAt ? formatDate(examEntryDetail.reviewedAt) : 'N/A'}
+                </p>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Người duyệt</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {examEntryDetail.reviewerName || 'N/A'}
+                </p>
+              </div>
             </div>
+
+            {/* Actions */}
           </div>
         )}
       </DialogContent>

@@ -1,45 +1,64 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { FileDown, Send, Lock, AlertCircle, History } from 'lucide-react';
+import { FileDown, Send, Lock, AlertCircle, History, Unlock } from 'lucide-react';
 import { CourseClassSelector } from './components/CourseClassSelector';
 import { GradesTable } from './components/GradesTable';
 import { GradeHistoryTable } from './components/GradeHistoryTable';
 import { SubmitApprovalDialog } from './components/SubmitApprovalDialog';
+import { GradeVersionModal } from './components/GradeVersionModal';
 import {
   useInstructorCourseClasses,
   useCourseClassGrades,
   useUpdateDraftGrade,
   useSubmitForApproval,
   useGradeHistory,
+  useGradeVersion,
   useExportGrades,
+  useSemesters,
 } from './lib/hooks';
-import { GRADE_STATUS_LABELS, GRADE_STATUS_COLORS } from './lib/constants';
 import type { InstructorGradeDto } from './lib/types';
 
 const InstructorGradesPage = () => {
   const [selectedCourseClassId, setSelectedCourseClassId] = useState('');
+  const [selectedSemesterId, setSelectedSemesterId] = useState('');
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [selectedVersionNumber, setSelectedVersionNumber] = useState<number | null>(null);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
 
-  const { data: courseClassesData, isLoading: isLoadingCourseClasses } = useInstructorCourseClasses();
+  const { data: semestersData, isLoading: isLoadingSemesters } = useSemesters();
+  const { data: courseClassesData, isLoading: isLoadingCourseClasses } = useInstructorCourseClasses(
+    selectedSemesterId || undefined
+  );
   const { data: gradesData, isLoading: isLoadingGrades } = useCourseClassGrades(
     selectedCourseClassId,
     'draft'
   );
-  const { data: historyData } = useGradeHistory(selectedCourseClassId);
+  const { data: historyData } = useGradeHistory(selectedCourseClassId, showHistory);
+  const { data: versionData, isLoading: isLoadingVersion } = useGradeVersion(
+    selectedCourseClassId,
+    selectedVersionNumber || 0
+  );
   const updateGradeMutation = useUpdateDraftGrade(selectedCourseClassId);
   const submitForApprovalMutation = useSubmitForApproval(selectedCourseClassId);
   const exportGradesMutation = useExportGrades();
 
+  const semesters = useMemo(() => semestersData?.data || [], [semestersData?.data]);
   const courseClasses = useMemo(() => courseClassesData?.data || [], [courseClassesData?.data]);
   const gradesInfo = gradesData?.data;
   const history = historyData?.data || [];
+  const versionDetail = versionData?.data || null;
 
   const selectedCourseClass = useMemo(
     () => courseClasses.find((cc) => cc.courseClassId === selectedCourseClassId),
     [courseClasses, selectedCourseClassId]
   );
+
+  const handleSemesterChange = (semesterId: string) => {
+    setSelectedSemesterId(semesterId);
+    setSelectedCourseClassId('');
+  };
 
   const handleGradeChange = (enrollmentId: string, field: keyof InstructorGradeDto, value: number | null) => {
     if (!gradesInfo?.canEditGrades) return;
@@ -60,9 +79,23 @@ const InstructorGradesPage = () => {
     });
   };
 
-  const handleExport = () => {
+  const handleExport = (type: 'draft' | 'official') => {
     if (!selectedCourseClassId) return;
-    exportGradesMutation.mutate({ courseClassId: selectedCourseClassId, type: 'draft' });
+    exportGradesMutation.mutate({ 
+      courseClassId: selectedCourseClassId, 
+      type,
+      courseCode: gradesInfo?.courseCode || '',
+      className: gradesInfo?.className || ''
+    });
+    setShowExportDropdown(false);
+  };
+
+  const handleVersionClick = (versionNumber: number) => {
+    setSelectedVersionNumber(versionNumber);
+  };
+
+  const handleCloseVersionModal = () => {
+    setSelectedVersionNumber(null);
   };
 
   const studentsWithGrades = gradesInfo?.students.filter(
@@ -70,54 +103,60 @@ const InstructorGradesPage = () => {
   ).length || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex flex-col gap-6">
+        <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Quản lý điểm số</h1>
           <p className="text-gray-600">Nhập và quản lý điểm sinh viên</p>
         </div>
 
-        <div className="mb-6">
+        <div>
           <CourseClassSelector
             courseClasses={courseClasses}
             selectedCourseClassId={selectedCourseClassId}
             onSelect={setSelectedCourseClassId}
             isLoading={isLoadingCourseClasses}
+            semesters={semesters}
+            selectedSemesterId={selectedSemesterId}
+            onSemesterChange={handleSemesterChange}
+            isSemestersLoading={isLoadingSemesters}
           />
         </div>
 
         {selectedCourseClass && gradesInfo && (
           <>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                    {gradesInfo.courseCode} - {gradesInfo.courseName}
+                    {gradesInfo.courseName}
                   </h2>
                   <p className="text-sm text-gray-600">
-                    Lớp: {gradesInfo.className} | Học kỳ: {selectedCourseClass.semesterName}
+                    Mã lớp: {gradesInfo.courseCode} | Học kỳ: {selectedCourseClass.semesterName}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                      GRADE_STATUS_COLORS[gradesInfo.versionStatus] || 'bg-gray-100 text-gray-700'
+                      selectedCourseClass?.isDraftEditable
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-700'
                     }`}
                   >
-                    {gradesInfo.canEditGrades ? (
-                      <AlertCircle className="w-4 h-4" />
+                    {selectedCourseClass?.isDraftEditable ? (
+                      <Unlock className="w-4 h-4" />
                     ) : (
                       <Lock className="w-4 h-4" />
                     )}
                     <span className="text-sm font-medium">
-                      {GRADE_STATUS_LABELS[gradesInfo.versionStatus] || gradesInfo.versionStatus}
+                      {selectedCourseClass?.isDraftEditable ? 'Có thể chỉnh sửa' : 'Đã khoá'}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <p className="text-sm text-gray-600 mb-1">Tổng sinh viên</p>
                 <p className="text-2xl font-bold text-gray-900">{gradesInfo.totalStudents}</p>
@@ -134,7 +173,7 @@ const InstructorGradesPage = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 {gradesInfo.canEditGrades ? (
                   <>
@@ -151,26 +190,50 @@ const InstructorGradesPage = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <History className="w-4 h-4" />
                   {showHistory ? 'Ẩn lịch sử' : 'Xem lịch sử'}
                 </button>
-                <button
-                  onClick={handleExport}
-                  disabled={exportGradesMutation.isPending}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  <FileDown className="w-4 h-4" />
-                  Xuất Excel
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowExportDropdown(!showExportDropdown)}
+                    disabled={!selectedCourseClassId || exportGradesMutation.isPending}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    {exportGradesMutation.isPending ? 'Đang xuất...' : 'Xuất Excel'}
+                  </button>
+                  {showExportDropdown && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-10" 
+                        onClick={() => setShowExportDropdown(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                        <button
+                          onClick={() => handleExport('draft')}
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg transition-colors cursor-pointer"
+                        >
+                          Bản nháp
+                        </button>
+                        <button
+                          onClick={() => handleExport('official')}
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-b-lg transition-colors cursor-pointer"
+                        >
+                          Bản chính thức
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
                 <button
                   onClick={() => setIsSubmitDialogOpen(true)}
                   disabled={!gradesInfo.canEditGrades || submitForApprovalMutation.isPending}
                   className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors ${
                     !gradesInfo.canEditGrades || submitForApprovalMutation.isPending
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                   }`}
                 >
                   <Send className="w-4 h-4" />
@@ -193,7 +256,7 @@ const InstructorGradesPage = () => {
 
             {showHistory && (
               <div className="mt-6">
-                <GradeHistoryTable history={history} />
+                <GradeHistoryTable history={history} onVersionClick={handleVersionClick} />
               </div>
             )}
 
@@ -205,11 +268,18 @@ const InstructorGradesPage = () => {
               studentsWithGrades={studentsWithGrades}
               courseName={`${gradesInfo.courseCode} - ${gradesInfo.courseName}`}
             />
+
+            <GradeVersionModal
+              isOpen={selectedVersionNumber !== null}
+              onClose={handleCloseVersionModal}
+              versionDetail={versionDetail}
+              isLoading={isLoadingVersion}
+            />
           </>
         )}
 
         {!selectedCourseClassId && (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <p className="text-gray-600">Vui lòng chọn lớp học phần để xem bảng điểm</p>
           </div>
         )}

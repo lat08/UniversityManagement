@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, AlertCircle, CheckCircle, Send } from 'lucide-react';
 
 interface SubmitApprovalDialogProps {
@@ -22,26 +22,63 @@ export const SubmitApprovalDialog = ({
 }: SubmitApprovalDialogProps) => {
   const [note, setNote] = useState('');
 
-  if (!isOpen) return null;
-
   const isComplete = studentsWithGrades === totalStudents;
+
+  const handleClose = useCallback(() => {
+    setNote('');
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setNote('');
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, handleClose]);
+
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      handleClose();
+    }
+  };
 
   const handleConfirm = () => {
     onConfirm(note || undefined);
     setNote('');
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Xác nhận gửi duyệt bảng điểm</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            onClick={handleClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            type="button"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto">
           <div className="flex justify-center mb-4">
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center ${
@@ -113,14 +150,16 @@ export const SubmitApprovalDialog = ({
 
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
           <button
-            onClick={onClose}
-            className="px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            onClick={handleClose}
+            className="px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium cursor-pointer"
+            type="button"
           >
             Hủy
           </button>
           <button
             onClick={handleConfirm}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 cursor-pointer"
+            type="button"
           >
             <Send className="w-4 h-4" />
             Gửi duyệt

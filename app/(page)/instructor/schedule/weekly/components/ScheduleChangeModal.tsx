@@ -27,6 +27,14 @@ interface ScheduleChangeModalProps {
   subjectName: string;
   subjectCode: string;
   weeks: Week[];
+  currentScheduleInfo?: {
+    date: string;
+    dayOfWeek: number;
+    startPeriod: number;
+    endPeriod: number;
+    roomCode: string;
+    roomName: string;
+  };
 }
 
 const createRoomTypeOptions = (labels: Record<string, string>) => [
@@ -42,6 +50,7 @@ export const ScheduleChangeModal = ({
   subjectName,
   subjectCode,
   weeks,
+  currentScheduleInfo,
 }: ScheduleChangeModalProps) => {
   const createMutation = useCreateScheduleChange();
   const { data: buildings } = useBuildings();
@@ -55,6 +64,19 @@ export const ScheduleChangeModal = ({
   const [reason, setReason] = useState<string>('');
   
   const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Calculate minimum date from current schedule info
+  const minSelectableDate = useMemo(() => {
+    if (currentScheduleInfo?.date) {
+      const currentDate = new Date(currentScheduleInfo.date);
+      currentDate.setHours(0, 0, 0, 0);
+      return currentDate;
+    }
+    // Fallback to today if no current schedule info
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }, [currentScheduleInfo]);
 
   const makeupWeek = useMemo(() => {
     if (!makeupDate || weeks.length === 0) return undefined;
@@ -73,8 +95,7 @@ export const ScheduleChangeModal = ({
 
   const suggestionsEnabled = Boolean(
     makeupDate && 
-    makeupWeek && 
-    makeupWeek !== currentWeek
+    makeupWeek
   );
 
   const { data: suggestionsData, isLoading: isLoadingSuggestions } = useMakeupSlotSuggestions(
@@ -103,11 +124,14 @@ export const ScheduleChangeModal = ({
   const roomTypeOptions = useMemo(() => createRoomTypeOptions(ROOM_TYPE_LABELS), []);
 
   const slotOptions = useMemo(() => {
-    return suggestions.map((slot) => ({
-      value: slot.roomId,
-      label: `${slot.dayOfWeekText}, tiết ${slot.startPeriod} - ${slot.endPeriod}, phòng ${slot.roomCode} (${slot.buildingName})`,
-      data: slot,
-    }));
+    return suggestions.map((slot) => {
+      const uniqueKey = `${slot.roomId}-${slot.date}-${slot.dayOfWeek}-${slot.startPeriod}-${slot.endPeriod}`;
+      return {
+        value: uniqueKey,
+        label: `${slot.dayOfWeekText}, tiết ${slot.startPeriod} - ${slot.endPeriod}, phòng ${slot.roomCode} (${slot.buildingName})`,
+        data: slot,
+      };
+    });
   }, [suggestions]);
 
   const selectedSlotData = useMemo(() => {
@@ -155,6 +179,13 @@ export const ScheduleChangeModal = ({
       try {
         const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
         if (!isNaN(parsedDate.getTime())) {
+          // Check if date is before minimum selectable date
+          parsedDate.setHours(0, 0, 0, 0);
+          if (parsedDate < minSelectableDate) {
+            toast.error('Không thể chọn ngày trước ngày lịch dạy hiện tại');
+            setDateInputValue('');
+            return;
+          }
           setMakeupDate(parsedDate);
           setSelectedSlot('');
         }
@@ -263,7 +294,27 @@ export const ScheduleChangeModal = ({
         </div>
 
         <div className="p-6 space-y-6">
-          <div>
+          {/* Current Schedule Info */}
+          {currentScheduleInfo && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2">Thông tin lịch hiện tại</h3>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>
+                  <span className="font-medium">Ngày:</span>{' '}
+                  {format(new Date(currentScheduleInfo.date), 'EEEE, dd/MM/yyyy', { locale: vi })} (Tuần {currentWeek})
+                </p>
+                <p>
+                  <span className="font-medium">Tiết:</span> {currentScheduleInfo.startPeriod} - {currentScheduleInfo.endPeriod}
+                </p>
+                <p>
+                  <span className="font-medium">Phòng:</span> {currentScheduleInfo.roomName} ({currentScheduleInfo.roomCode})
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* New Date Selection */}
+          <div className="relative">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <span className="text-red-500">*</span>
               Chọn ngày mới
@@ -290,7 +341,6 @@ export const ScheduleChangeModal = ({
               >
                 <Calendar className="h-5 w-5" />
               </button>
-            </div>
             
             {showCalendar && (
               <div 
@@ -301,7 +351,7 @@ export const ScheduleChangeModal = ({
                   mode="single"
                   selected={makeupDate}
                   onSelect={handleCalendarSelect}
-                  disabled={{ before: new Date() }}
+                  disabled={{ before: minSelectableDate }}
                   locale={vi}
                   classNames={{
                     day_selected: 'bg-[#4E8EE1] text-white',
@@ -312,6 +362,7 @@ export const ScheduleChangeModal = ({
                 />
               </div>
             )}
+            </div>
             
             {makeupDate && makeupWeek && (
               <p className="text-sm text-gray-600 mt-2">

@@ -1,7 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { instructorGradesApi } from './api';
+import { commonApi } from '@/lib/api/common';
 import type { UpdateStudentGradeDto } from './types';
+
+export const useSemesters = () => {
+  return useQuery({
+    queryKey: ['semesters'],
+    queryFn: () => commonApi.getSemesters(),
+  });
+};
 
 export const useInstructorCourseClasses = (semesterId?: string) => {
   return useQuery({
@@ -67,11 +75,11 @@ export const useSubmitForApproval = (courseClassId: string) => {
   });
 };
 
-export const useGradeHistory = (courseClassId: string) => {
+export const useGradeHistory = (courseClassId: string, enabled = true) => {
   return useQuery({
     queryKey: ['grade-history', courseClassId],
     queryFn: () => instructorGradesApi.getGradeHistory(courseClassId),
-    enabled: !!courseClassId,
+    enabled: !!courseClassId && enabled,
   });
 };
 
@@ -85,13 +93,15 @@ export const useGradeVersion = (courseClassId: string, versionNumber: number) =>
 
 export const useExportGrades = () => {
   return useMutation({
-    mutationFn: ({ courseClassId, type }: { courseClassId: string; type?: 'draft' | 'official' }) =>
+    mutationFn: ({ courseClassId, type }: { courseClassId: string; type?: 'draft' | 'official'; courseCode?: string; className?: string }) =>
       instructorGradesApi.exportGrades(courseClassId, type),
     onSuccess: (blob, variables) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `grades_${variables.courseClassId}_${variables.type || 'draft'}.xlsx`;
+      const typeLabel = variables.type === 'official' ? 'chinh_thuc' : 'ban_nhap';
+      const classCode = variables.className || variables.courseClassId;
+      link.download = `bangdiem_${classCode}_${typeLabel}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

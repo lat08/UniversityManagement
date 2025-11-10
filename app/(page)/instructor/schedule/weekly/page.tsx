@@ -24,6 +24,12 @@ export default function InstructorWeeklySchedulePage() {
     courseClassId: string;
     subjectName: string;
     subjectCode: string;
+    date: string;
+    dayOfWeek: number;
+    startPeriod: number;
+    endPeriod: number;
+    roomCode: string;
+    roomName: string;
   } | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
@@ -129,6 +135,12 @@ export default function InstructorWeeklySchedulePage() {
           courseClassId: scheduleItem.courseClassId,
           subjectName: course.name,
           subjectCode: course.code,
+          date: scheduleItem.date,
+          dayOfWeek: scheduleItem.dayOfWeek,
+          startPeriod: scheduleItem.startPeriod,
+          endPeriod: scheduleItem.startPeriod + scheduleItem.numberOfPeriods - 1,
+          roomCode: scheduleItem.roomCode || '',
+          roomName: scheduleItem.roomName || '',
         });
         setIsScheduleChangeModalOpen(true);
       } else {
@@ -396,6 +408,14 @@ export default function InstructorWeeklySchedulePage() {
               subjectName={selectedCourseForChange.subjectName}
               subjectCode={selectedCourseForChange.subjectCode}
               weeks={weeks}
+              currentScheduleInfo={{
+                date: selectedCourseForChange.date,
+                dayOfWeek: selectedCourseForChange.dayOfWeek,
+                startPeriod: selectedCourseForChange.startPeriod,
+                endPeriod: selectedCourseForChange.endPeriod,
+                roomCode: selectedCourseForChange.roomCode,
+                roomName: selectedCourseForChange.roomName,
+              }}
             />
           )}
     </div>

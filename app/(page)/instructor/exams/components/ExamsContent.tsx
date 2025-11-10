@@ -130,11 +130,6 @@ export function ExamsContent() {
     setIsDetailModalOpen(true);
   };
 
-  const handleEdit = (examEntryId: string) => {
-    setSelectedExamId(examEntryId);
-    setIsUploadModalOpen(true);
-  };
-
   if (examEntries.length === 0 && loading) {
     return (
       <div className="space-y-6">
@@ -231,7 +226,6 @@ export function ExamsContent() {
           setIsDetailModalOpen(false);
           setSelectedExamId(null);
         }}
-        onEdit={handleEdit}
       />
     </div>
   );
