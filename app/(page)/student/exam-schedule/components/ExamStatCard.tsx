@@ -1,7 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/app/components/ui/card";
-import { Calendar, Clock, CheckCircle } from "lucide-react";
+import { Calendar, CalendarClock, CalendarCheck } from "lucide-react";
 import { ExamStatCard as ExamStatCardType } from "../lib/types/types";
 import { useCountUp } from "@/lib/hooks/useCountUp";
 
@@ -16,50 +15,82 @@ export default function ExamStatCard({ data }: ExamStatCardProps) {
   
   const displayValue = typeof data.value === 'number' ? countValue : data.value;
 
-  const getIcon = () => {
-    if (data.title.includes("Tổng")) return Calendar;
-    if (data.title.includes("sắp tới")) return Clock;
-    return CheckCircle;
+  const getIconAndColors = () => {
+    if (data.title.includes("Tổng")) {
+      return {
+        Icon: Calendar,
+        quarterCircleBg: 'bg-gray-200',
+        iconColor: 'text-gray-700'
+      };
+    }
+    if (data.title.includes("sắp tới")) {
+      return {
+        Icon: CalendarClock,
+        quarterCircleBg: 'bg-[#FFBBAA]',
+        iconColor: 'text-[#CC4444]'
+      };
+    }
+    return {
+      Icon: CalendarCheck,
+      quarterCircleBg: 'bg-[#CCEECC]',
+      iconColor: 'text-[#44AA44]'
+    };
   };
 
-  const Icon = getIcon();
+  const { Icon, quarterCircleBg, iconColor } = getIconAndColors();
+
+  // Determine text color for main value
+  const getMainValueColor = () => {
+    if (data.title.includes("sắp tới")) return 'text-red-600';
+    if (data.title.includes("đã thi")) return 'text-green-600';
+    return 'text-gray-900';
+  };
 
   return (
-    <Card className={`${data.bgColor} border-none shadow-sm`}>
-      <CardContent className="p-4 lg:p-5 relative">
-        <div className="absolute top-4 right-4">
-          <div className={`${data.iconColor} opacity-10`}>
-            <Icon className="w-10 h-10 lg:w-12 lg:h-12" />
-          </div>
+    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
+      {/* Quarter-circle decorative element with icon */}
+      <div className={`absolute top-0 right-0 w-20 h-20 ${quarterCircleBg} rounded-bl-[100%]`}>
+        <div className="absolute top-5 right-5">
+          <Icon className={`w-6 h-6 ${iconColor} flex-shrink-0`} strokeWidth={2} />
         </div>
+      </div>
 
-        <h3 className="text-xs lg:text-sm text-gray-700 mb-3 font-medium">
-          {data.title}
-        </h3>
+      <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">
+        {data.title}
+      </p>
 
-        <div className={`text-4xl lg:text-5xl font-bold ${data.textColor} mb-2`}>
-          {displayValue}
-        </div>
-        {data.progress !== undefined ? (
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-              <span>Tiến độ</span>
-              <span className="font-bold">{Math.round(countProgress)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+      <p className={`text-3xl sm:text-4xl font-bold mb-1 relative z-10 ${getMainValueColor()}`}>
+        {displayValue}
+      </p>
+
+      {data.progress !== undefined ? (
+        <div className="relative z-10">
+          <p className="text-xs sm:text-sm text-gray-600 mb-2">Tiến độ</p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-1.5 overflow-hidden">
               <div
-                className={`h-1.5 rounded-full transition-all duration-1000 ease-out ${data.iconColor}`}
+                className="h-1.5 rounded-full transition-all duration-1000 ease-out bg-green-600"
                 style={{ width: `${countProgress}%` }}
               />
             </div>
+            <span className="text-xs sm:text-sm text-gray-900 font-medium">{Math.round(countProgress)}%</span>
           </div>
-        ) : (
-          <div className="text-xs text-gray-600">
+        </div>
+      ) : data.title.includes("sắp tới") && data.subtitle ? (
+        <div className="relative z-10">
+          {!data.subtitle.includes("Không có") && (
+            <p className="text-xs sm:text-sm text-gray-600 mb-1">Môn thi sắp tới:</p>
+          )}
+          <p className={`text-xs sm:text-sm ${data.subtitle.includes("Không có") ? 'text-gray-600' : 'text-red-600'}`}>
             {data.subtitle}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </p>
+        </div>
+      ) : (
+        <p className="text-xs sm:text-sm text-gray-600 relative z-10">
+          {data.subtitle}
+        </p>
+      )}
+    </div>
   );
 }
 
