@@ -4,6 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/ca
 import { User, Clock, Info } from "lucide-react";
 import { ClassListData } from "../libs/types/types";
 
+const formatSchedule = (dayOfWeek: number, startPeriod: number, endPeriod: number): string => {
+  const daysOfWeek = [
+    "Chủ nhật",
+    "Thứ hai", 
+    "Thứ ba",
+    "Thứ tư",
+    "Thứ năm",
+    "Thứ sáu",
+    "Thứ bảy"
+  ];
+  
+  const dayName = daysOfWeek[dayOfWeek] || "Không xác định";
+  return `${dayName}, Tiết ${startPeriod} -> ${endPeriod}`;
+};
+
 export default function ClassListCard({ currentSubjects }: ClassListData) {
   const hasClasses = currentSubjects && currentSubjects.length > 0;
 
@@ -41,7 +56,7 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
                 </div>
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-[var(--classlist-text)]">
                   <Clock className="w-4 h-4 text-[var(--classlist-icon)]" />
-                  <span>{classInfo.scheduleSummary}</span>
+                  <span>{formatSchedule(classInfo.dayOfWeek, classInfo.startPeriod, classInfo.endPeriod)}</span>
                 </div>
               </div>
             </div>

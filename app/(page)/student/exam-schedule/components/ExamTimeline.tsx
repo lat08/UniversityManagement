@@ -1,6 +1,5 @@
 "use client";
 
-import { Eye } from "lucide-react";
 import { Exam } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
 import { useRef } from "react";
@@ -90,51 +89,43 @@ export default function ExamTimeline({ exams }: ExamTimelineProps) {
               "p-3 lg:p-4 rounded-lg border-2 transition-all hover:shadow-md",
               getCardBorderColor(exam.status)
             )}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className={cn(
-                    "text-xs lg:text-sm font-bold mb-1",
-                    getDateColor(exam.status)
-                  )}>
-                    {exam.examDate} - {exam.examTimeDuration}
-                  </div>
+              <div className="flex-1 min-w-0">
+                <div className={cn(
+                  "text-xs lg:text-sm font-bold mb-1",
+                  getDateColor(exam.status)
+                )}>
+                  {exam.examDate} - {exam.examTimeDuration}
+                </div>
 
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <div className="text-sm lg:text-base font-bold text-gray-900">
-                      {exam.subjectNameCode}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs lg:text-sm text-gray-600 flex-wrap">
-                    <div className="flex items-center gap-1">
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>{exam.roomCode}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      <span>{exam.studentCount} SV</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1">
-                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>{exam.examFormat}</span>
-                    </div>
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <div className="text-sm lg:text-base font-bold text-gray-900">
+                    {exam.subjectNameCode}
                   </div>
                 </div>
 
-                {(exam.status === 'Chưa tới' || exam.status === 'Sắp tới') && (
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
-                    <Eye className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" />
-                  </button>
-                )}
+                <div className="flex items-center gap-3 text-xs lg:text-sm text-gray-600 flex-wrap">
+                  <div className="flex items-center gap-1">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>{exam.roomCode}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>{exam.studentCount} SV</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>{exam.examFormat}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

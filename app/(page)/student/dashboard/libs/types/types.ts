@@ -79,7 +79,9 @@ export interface Subject {
   credits: number;
   instructorName: string;
   roomName: string;
-  scheduleSummary: string;
+  dayOfWeek: number;
+  startPeriod: number;
+  endPeriod: number;
 }
 
 export interface EventNotification {
