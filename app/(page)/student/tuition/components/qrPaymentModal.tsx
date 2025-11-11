@@ -1,18 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Copy, ExternalLink } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { Spinner } from "@/app/components/ui/spinner";
+import { usePaymentStatusPolling } from "../lib/hooks/usePaymentStatusPolling";
 
 interface QrPaymentModalProps {
   isOpen: boolean;
   qrUrl: string | null;
+  paymentId: string | null;
   onClose: () => void;
+  onPaymentSuccess?: () => void;
 }
 
-export default function QrPaymentModal({ isOpen, qrUrl, onClose }: QrPaymentModalProps) {
+export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPaymentSuccess }: QrPaymentModalProps) {
   const [qrLoading, setQrLoading] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | 'failed'>('pending');
+
+  const handleStatusChange = (status: 'pending' | 'completed' | 'failed') => {
+    setPaymentStatus(status);
+    
+    if (status === 'completed') {
+      toast.success('Thanh toán thành công!', {
+        position: 'top-right',
+        duration: 3000,
+      });
+      
+      // Đóng modal sau 1 giây và refetch data
+      setTimeout(() => {
+        onClose();
+        if (onPaymentSuccess) {
+          onPaymentSuccess();
+        }
+      }, 1000);
+    } else if (status === 'failed') {
+      toast.error('Thanh toán thất bại. Vui lòng thử lại.', {
+        position: 'top-right',
+        duration: 5000,
+      });
+    }
+  };
+
+  usePaymentStatusPolling({
+    paymentId,
+    isOpen,
+    onStatusChange: handleStatusChange,
+  });
+
+  useEffect(() => {
+    if (!isOpen) {
+      setPaymentStatus('pending');
+      setQrLoading(true);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -39,6 +80,25 @@ export default function QrPaymentModal({ isOpen, qrUrl, onClose }: QrPaymentModa
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Status Message */}
+        {paymentStatus === 'pending' && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 text-center">Đang chờ thanh toán...</p>
+          </div>
+        )}
+
+        {paymentStatus === 'completed' && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800 text-center font-semibold">Thanh toán thành công!</p>
+          </div>
+        )}
+
+        {paymentStatus === 'failed' && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800 text-center">Thanh toán thất bại. Vui lòng thử lại.</p>
+          </div>
+        )}
 
         {/* QR Display */}
         <div className="flex items-center justify-center h-[50vh] bg-gray-50 rounded-lg border">

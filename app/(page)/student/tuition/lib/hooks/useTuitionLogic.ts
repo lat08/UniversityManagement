@@ -3,11 +3,13 @@ import { useState, useMemo } from "react";
 import { payCourses, getTuitionExcel } from "../api/financeApi";
 import { useToast } from "@/app/components/ui/toast";
 import { TuitionFeeResponse } from "../types/types";
+import { extractPaymentIdFromQrUrl } from "../utils/paymentUtils";
 
 export const useTuitionLogic = (
   tuitionData: TuitionFeeResponse['data'] | null,
   setIsLoading: (loading: boolean) => void,
   setQrUrl: (url: string | null) => void,
+  setPaymentId: (id: string | null) => void,
   setIsQrOpen: (open: boolean) => void,
   setQrIframeLoading: (loading: boolean) => void,
 ) => {
@@ -67,7 +69,9 @@ export const useTuitionLogic = (
     }
     const res = await payCourses(selectedTuitionIds);
     if (res.success && res.data) {
+      const extractedPaymentId = extractPaymentIdFromQrUrl(res.data);
       setQrUrl(res.data);
+      setPaymentId(extractedPaymentId);
       setQrIframeLoading(true);
       setIsQrOpen(true);
       toast.success("Tạo QR thành công!");

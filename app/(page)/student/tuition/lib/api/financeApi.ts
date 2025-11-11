@@ -106,3 +106,21 @@ export const getInsuranceExcel = async (): Promise<void> => {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 };
+
+export interface PaymentStatusResponse {
+  success: boolean;
+  message: string;
+  data: {
+    paymentId: string;
+    paymentStatus: 'pending' | 'completed' | 'failed';
+    paymentType: 'enrollment' | 'insurance';
+    message: string;
+    amount?: number;
+    paymentDate?: string;
+  };
+}
+
+export const checkPaymentStatus = async (paymentId: string): Promise<PaymentStatusResponse> => {
+  const response = await api.get(`/v1/payment/status/${paymentId}`);
+  return response.data;
+};

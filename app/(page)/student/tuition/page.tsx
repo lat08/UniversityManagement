@@ -17,8 +17,10 @@ export default function TuitionPage() {
   
   // States cho QR Modal
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [, setQrIframeLoading] = useState(true);
+  const [currentSemesterId, setCurrentSemesterId] = useState<string | null>(null);
 
   // Sử dụng hook để tải dữ liệu ban đầu và quản lý loading state
   const { 
@@ -28,7 +30,7 @@ export default function TuitionPage() {
     defaultSemesterId,
     insurances, 
     payments,
-    refreshData // Thêm refreshData nếu cần
+    refreshData
   } = useFinanceData();
   
   // Tách biệt loading state cho các hành động (export, payment)
@@ -46,9 +48,15 @@ export default function TuitionPage() {
   const closeQrModal = () => {
     setIsQrOpen(false);
     setQrUrl(null);
+    setPaymentId(null);
     setQrIframeLoading(true);
-    refreshData(null);
-    // Có thể gọi refreshData() tại đây nếu cần tải lại dữ liệu sau khi thanh toán
+  };
+
+  const handlePaymentSuccess = () => {
+    // Refetch data với đúng semesterId hiện tại (cho học phí) hoặc null (cho bảo hiểm)
+    // loadData sẽ refetch cả tuition, insurance và payments
+    const semesterIdToRefresh = activeTab === 'tuition' ? currentSemesterId : null;
+    refreshData(semesterIdToRefresh);
   };
 
   return (
@@ -75,11 +83,13 @@ export default function TuitionPage() {
           tuitionData={tuitionData}
           setIsLoading={setIsActionLoading}
           setQrUrl={setQrUrl}
+          setPaymentId={setPaymentId}
           setIsQrOpen={setIsQrOpen}
           setQrIframeLoading={setQrIframeLoading}
           semesters={semesters}
           defaultSemesterId={defaultSemesterId}
           refreshData={refreshData}
+          setCurrentSemesterId={setCurrentSemesterId}
         />
       )}
 
@@ -89,6 +99,7 @@ export default function TuitionPage() {
           insurances={insurances}
           setIsLoading={setIsActionLoading}
           setQrUrl={setQrUrl}
+          setPaymentId={setPaymentId}
           setIsQrOpen={setIsQrOpen}
           setQrIframeLoading={setQrIframeLoading}
         />
@@ -111,7 +122,9 @@ export default function TuitionPage() {
       <QrPaymentModal
         isOpen={isQrOpen}
         qrUrl={qrUrl}
+        paymentId={paymentId}
         onClose={closeQrModal}
+        onPaymentSuccess={handlePaymentSuccess}
       />
     </div>
   );

@@ -15,9 +15,11 @@ type TuitionTabProps = {
   defaultSemesterId: string | null;
   setIsLoading: (loading: boolean) => void;
   setQrUrl: (url: string | null) => void;
+  setPaymentId: (id: string | null) => void;
   setIsQrOpen: (open: boolean) => void;
   setQrIframeLoading: (loading: boolean) => void;
   refreshData: (semesterId: string | null) => void;
+  setCurrentSemesterId: (id: string | null) => void;
 };
 
 export default function TuitionTab({
@@ -27,9 +29,11 @@ export default function TuitionTab({
   defaultSemesterId,
   setIsLoading,
   setQrUrl,
+  setPaymentId,
   setIsQrOpen,
   setQrIframeLoading,
   refreshData,
+  setCurrentSemesterId,
 }: TuitionTabProps) {
   const {
     selectedTuitionIds,
@@ -44,6 +48,7 @@ export default function TuitionTab({
     tuitionData,
     setIsLoading,
     setQrUrl,
+    setPaymentId,
     setIsQrOpen,
     setQrIframeLoading
     
@@ -58,8 +63,11 @@ export default function TuitionTab({
   }, [defaultSemesterId]);
 
   useEffect(() => {
-    if (selectedSemesterId) refreshData(selectedSemesterId);
-  }, [selectedSemesterId, refreshData]);
+    if (selectedSemesterId) {
+      setCurrentSemesterId(selectedSemesterId);
+      refreshData(selectedSemesterId);
+    }
+  }, [selectedSemesterId, refreshData, setCurrentSemesterId]);
 
   const semesterOptions = semesters.map(s => ({
     value: s.semesterId,

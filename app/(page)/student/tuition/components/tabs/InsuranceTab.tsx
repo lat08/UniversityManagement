@@ -11,6 +11,7 @@ type InsuranceTabProps = {
   insurances: Insurance[];
   setIsLoading: (loading: boolean) => void;
   setQrUrl: (url: string | null) => void;
+  setPaymentId: (id: string | null) => void;
   setIsQrOpen: (open: boolean) => void;
   setQrIframeLoading: (loading: boolean) => void;
 };
@@ -20,6 +21,7 @@ export default function InsuranceTab({
   insurances,
   setIsLoading,
   setQrUrl,
+  setPaymentId,
   setIsQrOpen,
   setQrIframeLoading,
 }: InsuranceTabProps) {
@@ -33,6 +35,7 @@ export default function InsuranceTab({
     insurances,
     setIsLoading,
     setQrUrl,
+    setPaymentId,
     setIsQrOpen,
     setQrIframeLoading
   );

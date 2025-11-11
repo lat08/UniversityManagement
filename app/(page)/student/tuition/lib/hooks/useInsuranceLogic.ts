@@ -3,11 +3,13 @@ import { useState, useMemo } from "react";
 import { payInsurance, getInsuranceExcel } from "../api/financeApi";
 import { useToast } from "@/app/components/ui/toast";
 import { Insurance } from "../types/types";
+import { extractPaymentIdFromQrUrl } from "../utils/paymentUtils";
 
 export const useInsuranceLogic = (
   insurances: Insurance[],
   setIsLoading: (loading: boolean) => void,
   setQrUrl: (url: string | null) => void,
+  setPaymentId: (id: string | null) => void,
   setIsQrOpen: (open: boolean) => void,
   setQrIframeLoading: (loading: boolean) => void,
 ) => {
@@ -49,7 +51,9 @@ export const useInsuranceLogic = (
       
       if (res.success) {
         if (res.data) {
+          const extractedPaymentId = extractPaymentIdFromQrUrl(res.data);
           setQrUrl(res.data);
+          setPaymentId(extractedPaymentId);
           setQrIframeLoading(true);
           setIsQrOpen(true);
           toast.success('Tạo QR thành công'); 
