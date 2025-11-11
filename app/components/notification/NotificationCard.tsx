@@ -2,7 +2,7 @@
 
 import { Card } from "@/app/components/ui/card"
 import { Calendar, AlertTriangle, ChevronDown, DollarSign, CalendarDays } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { formatDate } from "@/lib/utils/format"
 import { NotificationApiItem } from "@/lib/types/notification"
 
@@ -45,15 +45,34 @@ const notificationTypeConfig = {
 
 export function NotificationCard({ notification, onNotificationClick, initialExpanded = false, animationDelay = 0 }: NotificationCardProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
+  const [isHighlighted, setIsHighlighted] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
   const typeConfig = notificationTypeConfig[notification.notificationType]
   const Icon = iconMap[notification.notificationType]
 
   useEffect(() => {
     if (initialExpanded) {
       setIsExpanded(true)
+      setIsHighlighted(true)
+      
       if (onNotificationClick) {
         onNotificationClick(notification.scheduleId)
       }
+
+      setTimeout(() => {
+        if (cardRef.current) {
+          cardRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          })
+        }
+      }, 100)
+
+      const timer = setTimeout(() => {
+        setIsHighlighted(false)
+      }, 1500)
+
+      return () => clearTimeout(timer)
     }
   }, [initialExpanded, notification.scheduleId, onNotificationClick])
 
@@ -66,9 +85,10 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
 
   return (
     <Card 
+      ref={cardRef}
       className={`overflow-hidden cursor-pointer transition-all duration-300 ease-out hover:shadow-md hover:scale-[1.01] animate-fade-up ${
         notification.isRead ? "" : "border-2 shadow-sm"
-      }`}
+      } ${isHighlighted ? "ring-2 ring-blue-500/40" : ""}`}
       style={{
         backgroundColor: notification.isRead 
           ? 'var(--notification-card-read-bg)' 

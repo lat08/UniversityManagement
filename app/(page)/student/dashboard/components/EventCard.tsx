@@ -3,11 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Clock, MapPin } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { EventData, EventNotification } from "../libs/types/types";
 import { formatDate } from "@/lib/utils/format";
 
 export default function EventCard({ events }: EventData) {
   const [upcomingEvents] = useState<EventNotification[]>(events);
+  const router = useRouter();
+
+  const handleEventClick = (notificationId: string) => {
+    router.push(`/student/notification?type=event&id=${notificationId}`);
+  };
 
   return (
     <Card className="shadow-sm h-full flex flex-col">
@@ -25,8 +31,17 @@ export default function EventCard({ events }: EventData) {
             {upcomingEvents.map((event, index) => (
               <div
                 key={event.notificationId}
-                className="shadow shadow-md relative flex items-start gap-3 mb-4 animate-fade-up"
+                className="shadow shadow-md relative flex items-start gap-3 mb-4 animate-fade-up cursor-pointer"
                 style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => handleEventClick(event.notificationId)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleEventClick(event.notificationId);
+                  }
+                }}
               >
                 <div className="absolute -left-[23px] w-4 h-4 top-1 rounded-full border-4 border-[var(--event-dot-border)] bg-white z-10" />
 
