@@ -15,7 +15,12 @@ export const useRegisteredCourses = () => {
     setError(null);
     try {
       const data = await coursesApi.getRegistered();
-      setCourses(data);
+      setCourses(Array.isArray(data) ? data : []);
+      console.log('✅ useRegisteredCourses - data set:', {
+        dataType: typeof data,
+        isArray: Array.isArray(data),
+        count: Array.isArray(data) ? data.length : 0,
+      });
     } catch (err: unknown) {
       console.error("Error fetching registered courses:", err);
       setError("Không thể tải danh sách khóa học đã đăng ký");
@@ -30,12 +35,13 @@ export const useRegisteredCourses = () => {
   }, [fetchCourses]);
 
   // Derived pagination data computed client-side
-  const totalCount = courses.length;
+  const safeCoursesArray = useMemo(() => Array.isArray(courses) ? courses : [], [courses]);
+  const totalCount = safeCoursesArray.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const safePageNumber = Math.min(Math.max(1, pageNumber), totalPages);
   const startIdx = (safePageNumber - 1) * pageSize;
   const endIdx = startIdx + pageSize;
-  const paginatedCourses = useMemo(() => courses.slice(startIdx, endIdx), [courses, startIdx, endIdx]);
+  const paginatedCourses = useMemo(() => safeCoursesArray.slice(startIdx, endIdx), [safeCoursesArray, startIdx, endIdx]);
 
   const goToPage = useCallback((page: number) => {
     const next = Math.min(Math.max(1, page), totalPages);

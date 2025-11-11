@@ -2,6 +2,11 @@ import { api } from "@/lib/api/client";
 import { DashboardData, SemesterData, emptyDashboardData } from "../types/types";
 import { AxiosError } from "axios";
 
+const isValidGuid = (value: string): boolean => {
+  const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return guidRegex.test(value);
+};
+
 export const dashboardApi = {
   getDashBoard: async (): Promise<DashboardData> => {
     try {
@@ -20,12 +25,22 @@ export const dashboardApi = {
     }
   },
 
-  getSemesterOverallById: async (semesterId: string): Promise<SemesterData> => {
+  getSemesterOverallById: async (semesterId: string): Promise<SemesterData | null> => {
+    if (!semesterId || !isValidGuid(semesterId)) {
+      return null;
+    }
+
     try {
       const response = await api.get(`/v1/dashboard/semester/${semesterId}`);
       return response.data;
-    } catch (err) {
-      console.error('Error fetching semester overall:', err);
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      const status = axiosErr.response?.status;
+
+      if (status === 404) {
+        return null;
+      }
+
       throw err;
     }
   },

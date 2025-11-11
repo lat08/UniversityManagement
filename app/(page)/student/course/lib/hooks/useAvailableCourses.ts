@@ -33,7 +33,16 @@ export const useAvailableCourses = () => {
         isGeneral: filters.isGeneral,
         isInStudentCurriculum: filters.isInStudentCurriculum,
       });
-      setData(response);
+      setData({
+        ...response,
+        items: Array.isArray(response.items) ? response.items : [],
+      });
+      console.log('✅ useAvailableCourses - data set:', {
+        itemsCount: Array.isArray(response.items) ? response.items.length : 0,
+        totalCount: response.totalCount,
+        pageNumber: response.pageNumber,
+        totalPages: response.totalPages,
+      });
     } catch (err: unknown) {
       console.error("Error fetching available courses:", err);
       setError("Không thể tải danh sách khóa học có sẵn");
@@ -71,7 +80,7 @@ export const useAvailableCourses = () => {
   }, [data.pageNumber, data.pageSize, fetchCourses]);
 
   return { 
-    courses: data.items,
+    courses: Array.isArray(data.items) ? data.items : [],
     pagination: {
       totalCount: data.totalCount,
       pageNumber: data.pageNumber,

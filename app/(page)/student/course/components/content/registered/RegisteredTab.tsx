@@ -43,6 +43,16 @@ export function RegisteredCourses({
 
   const displayCourses = paginatedCourses ?? courses
 
+  console.log('📊 RegisteredTab render:', {
+    coursesType: typeof courses,
+    coursesIsArray: Array.isArray(courses),
+    coursesLength: Array.isArray(courses) ? courses.length : 'N/A',
+    paginatedCoursesLength: Array.isArray(paginatedCourses) ? paginatedCourses.length : 'N/A',
+    displayCoursesLength: Array.isArray(displayCourses) ? displayCourses.length : 'N/A',
+    loading,
+    pagination,
+  });
+
   const totalCredits = useMemo(() => 
     courses.reduce((sum, course) => sum + course.credits, 0), 
     [courses]

@@ -12,7 +12,20 @@ export default function StatCard({ data }: StatCardProps) {
   const animatedValue = useCountUp(data.value, { duration: 800 });
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
+    <div 
+      className={`bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden ${
+        data.onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''
+      }`}
+      onClick={data.onClick}
+      role={data.onClick ? 'button' : undefined}
+      tabIndex={data.onClick ? 0 : undefined}
+      onKeyDown={data.onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          data.onClick?.();
+        }
+      } : undefined}
+    >
       {/* Quarter-circle decorative element with icon */}
       <div className={`absolute top-0 right-0 w-20 h-20 ${data.bgColor} rounded-bl-[100%]`}>
         <div className="absolute top-5 right-5">

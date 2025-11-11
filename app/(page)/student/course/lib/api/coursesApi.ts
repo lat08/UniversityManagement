@@ -24,23 +24,47 @@ export const coursesApi = {
                 isInStudentCurriculum: params?.isInStudentCurriculum,
             }
         });
-        // Backend returns a wrapper: { success, message, data: { items, totalCount, ... } }
-        return response.data?.data || {
-            items: [],
-            totalCount: 0,
-            pageNumber: 1,
-            pageSize: 15,
-            totalPages: 0,
-            hasPrevious: false,
-            hasNext: false,
+        
+        // Backend: { success, message, data: { items: { courses: [...], semesterName: "..." }, totalCount, ... } }
+        const wrapper = response.data;
+        const paginatedData = wrapper?.data;
+
+        if (!paginatedData) {
+            return {
+                items: [],
+                totalCount: 0,
+                pageNumber: 1,
+                pageSize: 15,
+                totalPages: 0,
+                hasPrevious: false,
+                hasNext: false,
+            };
+        }
+
+        // items là object CourseEnrollmentResponseDto có property courses
+        const courses = Array.isArray(paginatedData.items?.courses) ? paginatedData.items.courses : [];
+
+        return {
+            items: courses,
+            totalCount: paginatedData.totalCount ?? 0,
+            pageNumber: paginatedData.pageNumber ?? 1,
+            pageSize: paginatedData.pageSize ?? 15,
+            totalPages: paginatedData.totalPages ?? 0,
+            hasPrevious: paginatedData.hasPrevious ?? false,
+            hasNext: paginatedData.hasNext ?? false,
         };
     },
     // GET: /v1/enrollments/registered
     getRegistered: async (): Promise<CourseDto[]> => {
         const response = await api.get(`/v1/enrollments/registered`, {});
-        // Backend returns a wrapper: { success, message, data: [...] }
-        // Return the inner `data` array (or empty array if missing)
-        return response.data?.data || [];
+        
+        // Backend: { success, message, data: { items: { courses: [...], semesterName: "..." }, totalCount, ... } }
+        const pagedData = response.data?.data;
+        
+        // items là object CourseEnrollmentResponseDto có property courses
+        const courses = Array.isArray(pagedData?.items?.courses) ? pagedData.items.courses : [];
+        
+        return courses;
     },
     // POST: /v1/enrollments/enroll (Truyền courseId qua body)
     registerCourse: async (courseId: string): Promise<void> => {

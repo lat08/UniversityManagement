@@ -21,8 +21,8 @@ export const useAvailableSemester = (semesterId : string) => {
             const data = await dashboardApi.getSemesterOverallById(semesterId);
             setSemester(data);
         } catch (err : unknown) {
-            console.error('Error fetching semester:', err);
             setSemester(null);
+            setError('Không thể tải dữ liệu học kỳ');
         }finally {
           setLoading(false);
         }

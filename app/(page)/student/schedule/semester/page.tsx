@@ -1,5 +1,6 @@
 "use client"
 
+import { useSearchParams } from "next/navigation"
 import { Dropdown, DropdownSearch } from "@/app/components/ui"
 import { SemesterScheduleTable } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
@@ -7,6 +8,10 @@ import { useSemesterSchedule } from "../lib/hooks/useSemesterSchedule"
 
 export default function SemesterSchedulePage() {
   usePageTitle('TKB theo học kỳ');
+  
+  const searchParams = useSearchParams()
+  const semesterIdFromUrl = searchParams.get('semesterId')
+  const highlightSubjectFromUrl = searchParams.get('highlightSubject')
 
   const {
     semesters,
@@ -22,7 +27,7 @@ export default function SemesterSchedulePage() {
     handleViewTypeChange,
     handleSubjectChange,
     handleExportPDF,
-  } = useSemesterSchedule()
+  } = useSemesterSchedule({ initialSemesterId: semesterIdFromUrl || undefined })
 
   const semesterOptions = semesters.map(s => ({
     value: s.semesterId,
@@ -134,6 +139,7 @@ export default function SemesterSchedulePage() {
               showCredits={true}
               showClass={true}
               showInstructor={true}
+              highlightSubjectCode={highlightSubjectFromUrl || undefined}
             />
     </div>
   )

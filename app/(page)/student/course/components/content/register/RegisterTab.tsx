@@ -21,6 +21,15 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   const clearSelectedCourseIds = useCourseFiltersStore((state) => state.clearSelectedCourseIds)
   const [isBulkRegistering, setIsBulkRegistering] = useState(false)
 
+  console.log('📊 RegisterTab render:', {
+    coursesType: typeof courses,
+    coursesIsArray: Array.isArray(courses),
+    coursesLength: Array.isArray(courses) ? courses.length : 'N/A',
+    loading,
+    error,
+    pagination,
+  });
+
   // Clear selections that are no longer valid when switching pages/filters
   useEffect(() => {
     // Không clear gì cả, giữ nguyên selections across pages

@@ -8,6 +8,7 @@ export interface StatCardData {
   iconColor: string;
   textColor: string;
   icon: LucideIcon;
+  onClick?: () => void;
 }
 
 
@@ -46,8 +47,8 @@ export const emptyDashboardData: DashboardData = {
   kpi: {
     gpa: 0,
     completedCredits: 0,
-    totalCredits : 0,
-    ranking : ""
+    totalCredits: 120,
+    ranking: "Yếu"
   },
   totalPeriodsThisWeek: 0,
   totalExamThisWeek: 0,
@@ -60,8 +61,8 @@ export const emptyDashboardData: DashboardData = {
 interface Kpi {
   gpa: number;
   completedCredits: number;
-  totalCredits : number;
-  ranking : string;
+  totalCredits: number;
+  ranking: string;
 }
 
 export interface KpiData {
@@ -82,6 +83,7 @@ export interface Subject {
   dayOfWeek: number;
   startPeriod: number;
   endPeriod: number;
+  semesterId?: string;
 }
 
 export interface EventNotification {

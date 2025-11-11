@@ -5,7 +5,11 @@ import { Semester, Subject } from "@/lib/types"
 import { useSemesters, useSubjects } from "@/lib/hooks"
 import toast from "react-hot-toast"
 
-export const useSemesterSchedule = () => {
+interface UseSemesterScheduleProps {
+  initialSemesterId?: string;
+}
+
+export const useSemesterSchedule = ({ initialSemesterId }: UseSemesterScheduleProps = {}) => {
   const { data: semestersData, loading: semestersLoading } = useSemesters()
   const { data: subjectsData, loading: subjectsLoading } = useSubjects()
   
@@ -24,20 +28,32 @@ export const useSemesterSchedule = () => {
       const sortedSemesters = [...semestersData].sort((a, b) => 
         new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       )
-      const currentDate = new Date()
-      const currentSemester = sortedSemesters.find(semester => {
-        if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
-        const startDate = new Date(semester.registrationStartDate)
-        const endDate = new Date(semester.registrationEndDate)
-        return currentDate >= startDate && currentDate <= endDate
-      })
+      
       setSemesters(sortedSemesters)
+      
       if (!selectedSemester) {
+        // Nếu có initialSemesterId từ URL, ưu tiên chọn học kỳ đó
+        if (initialSemesterId) {
+          const targetSemester = sortedSemesters.find(s => s.semesterId === initialSemesterId)
+          if (targetSemester) {
+            setSelectedSemester(targetSemester)
+            return
+          }
+        }
+        
+        // Nếu không có hoặc không tìm thấy, chọn học kỳ hiện tại
+        const currentDate = new Date()
+        const currentSemester = sortedSemesters.find(semester => {
+          if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
+          const startDate = new Date(semester.registrationStartDate)
+          const endDate = new Date(semester.registrationEndDate)
+          return currentDate >= startDate && currentDate <= endDate
+        })
         setSelectedSemester(currentSemester || sortedSemesters[0])
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [semestersData])
+  }, [semestersData, initialSemesterId])
 
   useEffect(() => {
     if (subjectsData.length > 0) {

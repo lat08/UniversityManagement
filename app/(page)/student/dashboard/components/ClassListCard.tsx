@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { User, Clock, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ClassListData } from "../libs/types/types";
 
 const formatSchedule = (dayOfWeek: number, startPeriod: number, endPeriod: number): string => {
@@ -20,7 +21,13 @@ const formatSchedule = (dayOfWeek: number, startPeriod: number, endPeriod: numbe
 };
 
 export default function ClassListCard({ currentSubjects }: ClassListData) {
+  const router = useRouter();
   const hasClasses = currentSubjects && currentSubjects.length > 0;
+
+  const handleClassClick = (subjectCode: string, semesterId?: string) => {
+    if (!semesterId) return;
+    router.push(`/student/schedule/semester?semesterId=${semesterId}&highlightSubject=${subjectCode}`);
+  };
 
   return (
     <Card className="shadow-sm h-full flex flex-col">
@@ -37,7 +44,16 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
           currentSubjects.map((classInfo, index) => (
             <div
               key={`${classInfo.courseId}-${classInfo.subjectCode}-${index}`}
-              className="border border-[var(--classlist-border)] shadow shadow-md p-4 rounded-sm hover:border-[var(--primary)] hover:shadow-sm transition-all animate-fade-up"
+              role="button"
+              tabIndex={0}
+              onClick={() => handleClassClick(classInfo.subjectCode, classInfo.semesterId)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleClassClick(classInfo.subjectCode, classInfo.semesterId);
+                }
+              }}
+              className="border border-[var(--classlist-border)] shadow shadow-md p-4 rounded-sm hover:border-[var(--primary)] hover:shadow-lg transition-all animate-fade-up cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-start justify-between mb-3">

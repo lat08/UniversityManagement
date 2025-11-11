@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils/utils"
 
 interface SemesterCourse {
@@ -24,6 +25,7 @@ interface SemesterScheduleTableProps {
   readonly showCredits?: boolean
   readonly showClass?: boolean
   readonly showInstructor?: boolean
+  readonly highlightSubjectCode?: string
 }
 
 export function SemesterScheduleTable({
@@ -32,7 +34,30 @@ export function SemesterScheduleTable({
   showCredits = true,
   showClass = true,
   showInstructor = true,
+  highlightSubjectCode,
 }: SemesterScheduleTableProps) {
+  const highlightedRowRef = useRef<HTMLTableRowElement>(null)
+  const [isHighlighting, setIsHighlighting] = useState(false)
+
+  useEffect(() => {
+    if (highlightSubjectCode && highlightedRowRef.current && scheduleData.length > 0) {
+      setIsHighlighting(true)
+      
+      setTimeout(() => {
+        highlightedRowRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        })
+      }, 300)
+
+      const timer = setTimeout(() => {
+        setIsHighlighting(false)
+      }, 2000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [highlightSubjectCode, scheduleData])
+
   const getColumns = () => {
     const baseColumns = [
       { key: 'subjectCode', label: showInstructor ? 'Mã MH' : 'Mã môn', className: '' },
@@ -111,6 +136,7 @@ export function SemesterScheduleTable({
                 );
               }
               return scheduleData.map((course, index) => {
+                const shouldHighlight = highlightSubjectCode === course.subjectCode && isHighlighting
                 const periodDisplay = (() => {
                   if (showInstructor) {
                     return String(course.startPeriod || '-');
@@ -138,9 +164,15 @@ export function SemesterScheduleTable({
                 return (
                   <tr
                     key={`${course.subjectId || course.subjectCode}-${course.startPeriod}-${course.dayOfWeek}-${index}`}
+                    ref={highlightSubjectCode === course.subjectCode ? highlightedRowRef : null}
+                    data-highlighted={shouldHighlight || undefined}
                     className={cn(
-                      "hover:bg-[var(--primary-light)] transition-colors border-b border-gray-200",
-                      index % 2 === 0 ? "bg-white" : "bg-[var(--bg-secondary)]"
+                      "hover:bg-[var(--primary-light)] transition-all duration-300 border-b border-gray-200",
+                      shouldHighlight 
+                        ? "bg-blue-50 border-l-4 border-l-blue-400 shadow-md" 
+                        : index % 2 === 0 
+                          ? "bg-white" 
+                          : "bg-[var(--bg-secondary)]"
                     )}
                   >
                     <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">

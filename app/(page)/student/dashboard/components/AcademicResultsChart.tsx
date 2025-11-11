@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
+  Plugin,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { SemesterChartData, } from "../libs/types/types";
@@ -25,6 +26,7 @@ const getChartColors = () => {
       background: '#c9c7c7',
       tooltipBg: '#ffffff',
       tooltipText: '#0f172a',
+      textSecondary: '#64748b',
     };
   }
   const root = getComputedStyle(document.documentElement);
@@ -33,6 +35,7 @@ const getChartColors = () => {
     background: root.getPropertyValue('--chart-background').trim() || '#c9c7c7',
     tooltipBg: root.getPropertyValue('--chart-tooltip-bg').trim() || '#ffffff',
     tooltipText: root.getPropertyValue('--chart-tooltip-text').trim() || '#0f172a',
+    textSecondary: root.getPropertyValue('--text-secondary').trim() || '#64748b',
   };
 };
 
@@ -207,6 +210,8 @@ export default function AcademicResultsChart({
     return lines.slice(0, 3).join('\n');
   };
 
+  const hasCourses = Boolean(semester?.courses?.length);
+
   const chartData = useMemo(() => {
     const displayData = animatedData.length > 0 
       ? animatedData 
@@ -242,9 +247,45 @@ export default function AcademicResultsChart({
       ],
     };
   }, [animatedData, animatedBackgroundData, semester?.courses, chartColors.primary, chartColors.background]);
-      
 
-  const chartOptions : ChartOptions<"bar"> = {
+  const emptyChartData = useMemo(() => ({
+    labels: [''],
+    datasets: [
+      {
+        data: [0],
+        backgroundColor: chartColors.background,
+        borderRadius: 0,
+        barThickness: 40,
+        borderSkipped: false,
+        datalabels: {
+          display: false,
+        },
+      },
+    ],
+  }), [chartColors.background]);
+
+  const emptyStatePlugin = useMemo<Plugin<"bar">>(() => ({
+    id: 'academic-results-empty-state',
+    afterDraw: (chart) => {
+      if (hasCourses) return;
+      const { ctx, chartArea, scales } = chart;
+      const xScale = scales.x;
+      const yScale = scales.y;
+      if (!xScale || !yScale) return;
+      const message = 'Chưa ghi nhận được điểm môn học nào.';
+      const x = (chartArea.left + chartArea.right) / 2;
+      const y = yScale.getPixelForValue(5);
+      ctx.save();
+      ctx.fillStyle = chartColors.textSecondary;
+      ctx.font = '500 14px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(message, x, y);
+      ctx.restore();
+    },
+  }), [chartColors.textSecondary, hasCourses]);
+
+  const chartOptions = useMemo<ChartOptions<"bar">>(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -253,7 +294,6 @@ export default function AcademicResultsChart({
         anchor: "end",
         align: "top",
         offset: -4,
-        
         font: {
           size: 12,
           weight: "bold",
@@ -384,9 +424,7 @@ export default function AcademicResultsChart({
         },
       },
     },
-  };
-
-
+  }), [chartColors.primary, chartColors.background, chartColors.tooltipBg, chartColors.tooltipText, semester?.courses]);
 
   return (
     <Card className="shadow-sm h-full flex flex-col">
@@ -418,8 +456,8 @@ export default function AcademicResultsChart({
             <span className="text-[var(--error)] text-sm">Lỗi khi tải dữ liệu: {error}</span>
           </div>
         ) : !semester?.courses?.length ? (
-          <div className="h-[300px] lg:h-[350px] flex items-center justify-center">
-            <span className="text-[var(--text-secondary)] text-sm">Không có môn học trong học kỳ này.</span>
+          <div className="h-[300px] lg:h-[350px]">
+            <Bar data={emptyChartData} options={chartOptions} plugins={[emptyStatePlugin]} />
           </div>
         ) : (
           <div className="h-[300px] lg:h-[350px]">
