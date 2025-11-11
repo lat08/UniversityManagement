@@ -121,7 +121,7 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <div className="mb-6">
-          <h2 className="text-base font-medium mb-2">Đặt lại mật khẩu</h2>
+          <h2 className="text-base font-bold mb-2">Đặt lại mật khẩu</h2>
         </div>
 
         <div className="space-y-5">

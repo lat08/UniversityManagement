@@ -66,10 +66,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 					user: payload.user ?? null,
 					isAuthenticated: true,
 				}),
-			logout: () =>
+			logout: () => {
+				// Xóa tokens từ localStorage
+				if (typeof window !== 'undefined') {
+					localStorage.removeItem('access_token');
+					localStorage.removeItem('refresh_token');
+				}
 				set({
 					...initialState,
-				}),
+				});
+			},
 			refreshTokenSuccess: (payload) =>
 				set({
 					accessToken: payload.accessToken,

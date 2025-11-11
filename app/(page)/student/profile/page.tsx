@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
 import { Input } from "@/app/components/ui/input"
@@ -10,9 +11,12 @@ import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { Eye, EyeOff, Loader2, XCircle, AlertCircle } from "lucide-react"
 import { useProfile } from "./lib/hooks/useProfile"
 import { formatDate, formatGender, formatEnrollmentStatus } from "@/lib/utils/format"
+import { useAuthStore } from "@/lib/store/authStore"
 
 export default function ProfilePage() {
   usePageTitle("Hồ sơ cá nhân")
+  const router = useRouter()
+  const logout = useAuthStore((state) => state.logout)
   const { profile, isLoading, error, handleChangePassword } = useProfile()
   const [activeTab, setActiveTab] = useState<"info" | "password">("info")
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -45,8 +49,8 @@ export default function ProfilePage() {
       return
     }
 
-    if (passwordData.newPassword.length < 6) {
-      setPasswordError("Mật khẩu mới phải có ít nhất 6 ký tự")
+    if (passwordData.newPassword.length < 8) {
+      setPasswordError("Mật khẩu mới phải có ít nhất 8 ký tự")
       return
     }
 
@@ -68,7 +72,17 @@ export default function ProfilePage() {
           newPassword: "",
           confirmPassword: ""
         })
-        setTimeout(() => setPasswordSuccess(null), 3000)
+        // Xóa tokens từ localStorage và logout sau 2 giây
+        setTimeout(() => {
+          // Xóa tokens từ localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+          }
+          // Logout và redirect về trang login
+          logout()
+          router.push("/login")
+        }, 2000)
       } else {
         setPasswordError(result.message)
       }
@@ -289,10 +303,10 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-xl ml-auto">
+            <div className="w-full max-w-xl mx-auto">
               <div className="space-y-6">
                 <div className="mb-2">
-                  <h2 className="text-base font-medium">Đặt lại mật khẩu</h2>
+                  <h2 className="text-base font-bold">Đặt lại mật khẩu</h2>
                 </div>
                 {passwordError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">

@@ -120,7 +120,7 @@ export default function ExamSchedulePage() {
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Lịch thi</h1>
         <p className="text-xs lg:text-sm text-gray-500 mt-1">
-          Hiển thị thời khóa biểu theo kỳ thi học sinh hoặc CCCD khi đi thi
+          Theo dõi lịch thi từng học kỳ và nắm thông tin chi tiết cho từng môn
         </p>
       </div>
 

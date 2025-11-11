@@ -37,8 +37,43 @@ export const profileApi = {
    * Thay đổi mật khẩu của giảng viên
    */
   changePassword: async (payload: ChangePasswordPayload): Promise<ApiResponse<null>> => {
-    const response = await api.post('/v1/instructors/me/change-password', payload)
-    return response.data
+    try {
+      const response = await api.post('/v1/instructors/me/change-password', payload)
+      return response.data
+    } catch (error: unknown) {
+      const axiosError = error as { 
+        response?: { 
+          status?: number
+          data?: { 
+            message?: string
+            errors?: Record<string, string[]>
+          } 
+        } 
+      }
+      
+      if (axiosError.response?.status === 401) {
+        throw new Error(axiosError.response?.data?.message || "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
+      }
+      
+      if (axiosError.response?.status === 400) {
+        // Xử lý validation errors từ API
+        const errorData = axiosError.response?.data
+        if (errorData?.errors) {
+          // Lấy tất cả các lỗi validation và nối lại
+          const validationErrors = Object.values(errorData.errors).flat()
+          if (validationErrors.length > 0) {
+            throw new Error(validationErrors.join('. '))
+          }
+        }
+        // Nếu có message thì dùng message
+        if (errorData?.message) {
+          throw new Error(errorData.message)
+        }
+        throw new Error("Mật khẩu không hợp lệ")
+      }
+      
+      throw new Error(axiosError.response?.data?.message || "Không thể đổi mật khẩu")
+    }
   }
 }
 
