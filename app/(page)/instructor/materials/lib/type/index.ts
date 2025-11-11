@@ -77,3 +77,16 @@ export interface GetMaterialsParams {
   pageSize?: number;
 }
 
+export interface InstructorCourseClassDto {
+  courseClassId: string;
+  subjectId: string;
+  courseCode: string;
+  courseName: string;
+  className: string;
+  semesterName: string;
+  totalStudents: number;
+  studentsWithGrades: number;
+  status: string;
+  isDraftEditable: boolean;
+}
+

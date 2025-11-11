@@ -6,7 +6,8 @@ import {
   GetMaterialsParams,
   UploadMaterialRequest,
   UploadMaterialResponse,
-  UpdateMaterialRequest
+  UpdateMaterialRequest,
+  InstructorCourseClassDto
 } from "../type"
 import { MATERIALS_API } from "../constants"
 
@@ -27,17 +28,38 @@ export const materialsApi = {
     if (params?.subjectId?.trim()) {
       queryParams.append('SubjectId', params.subjectId.trim())
     }
-    if (params?.pageNumber && params.pageNumber > 0) {
-      queryParams.append('PageNumber', params.pageNumber.toString())
+    if (params?.pageNumber !== undefined) {
+      queryParams.append('PageNumber', Math.max(1, params.pageNumber).toString())
     }
-    if (params?.pageSize && params.pageSize > 0) {
-      queryParams.append('PageSize', params.pageSize.toString())
+    if (params?.pageSize !== undefined) {
+      queryParams.append('PageSize', Math.max(1, Math.min(100, params.pageSize)).toString())
     }
 
     const queryString = queryParams.toString()
     const url = queryString ? `${MATERIALS_API.GET_MATERIALS}?${queryString}` : MATERIALS_API.GET_MATERIALS
     
-    const response = await api.get<ApiResponse<MaterialsData>>(url)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await api.get<any>(url)
+    
+    if (response.data.success && response.data.data) {
+      const pagedResult = response.data.data
+      const materialsData: MaterialsData = {
+        items: pagedResult.items || pagedResult.Items || [],
+        totalCount: pagedResult.totalCount || 0,
+        pageNumber: pagedResult.pageNumber || pagedResult.PageNumber || 1,
+        pageSize: pagedResult.pageSize || pagedResult.PageSize || 10,
+        totalPages: pagedResult.totalPages || pagedResult.TotalPages || 0,
+        hasPrevious: pagedResult.hasPrevious || pagedResult.HasPrevious || false,
+        hasNext: pagedResult.hasNext || pagedResult.HasNext || false,
+      }
+      return {
+        success: true,
+        message: response.data.message || '',
+        data: materialsData,
+        errors: null,
+      }
+    }
+    
     return response.data
   },
 
@@ -102,6 +124,13 @@ export const materialsApi = {
     const response = await api.delete<ApiResponse<null>>(
       `${MATERIALS_API.DELETE_MATERIAL}/${documentId}`
     )
+    return response.data
+  },
+
+  // Lấy danh sách lớp học phần của giảng viên
+  getInstructorCourseClasses: async (semesterId?: string): Promise<ApiResponse<InstructorCourseClassDto[]>> => {
+    const params = semesterId ? { semesterId } : {}
+    const response = await api.get<ApiResponse<InstructorCourseClassDto[]>>('/v1/instructor/course-classes', { params })
     return response.data
   }
 }

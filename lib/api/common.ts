@@ -10,6 +10,7 @@ import {
   GetClassesParams,
   GetDepartmentsParams,
   GetAcademicYearsParams,
+  GetSubjectsParams,
 } from '../types/common';
 
 export const commonApi = {
@@ -18,8 +19,12 @@ export const commonApi = {
     return response.data;
   },
 
-  getSubjects: async (): Promise<GetSubjectsResponse> => {
-    const response = await api.get<GetSubjectsResponse>('/v1/common/subjects');
+  getSubjects: async (params?: GetSubjectsParams): Promise<GetSubjectsResponse> => {
+    const response = await api.get<GetSubjectsResponse>('/v1/common/subjects', {
+      params: {
+        instructorId: params?.instructorId || undefined,
+      },
+    });
     return response.data;
   },
 

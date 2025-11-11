@@ -45,7 +45,7 @@ export const learningStats: LearningStats = {
   gpa: 3.45,
   maxGpa: 4.0,
   credits: 45,
-  totalCredits: 120,
+  totalCredits: 0,
   classification: "Giỏi",
 };
 

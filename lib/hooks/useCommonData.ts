@@ -56,16 +56,18 @@ export const useSemesters = (): UseCommonDataReturn<Semester> => {
   return { data, loading, error, refetch: handleRefetch };
 };
 
-export const useSubjects = (): UseCommonDataReturn<Subject> => {
+export const useSubjects = (params?: { instructorId?: string }): UseCommonDataReturn<Subject> => {
   const [data, setData] = useState<Subject[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const instructorId = params?.instructorId;
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await commonApi.getSubjects();
+      const response = await commonApi.getSubjects(instructorId ? { instructorId } : undefined);
       if (response.success && response.data) {
         setData(Array.isArray(response.data) ? response.data : []);
       } else {
@@ -82,7 +84,7 @@ export const useSubjects = (): UseCommonDataReturn<Subject> => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [instructorId]);
 
   useEffect(() => {
     void fetchData();
@@ -139,11 +141,13 @@ export const useDepartments = (params?: { facultyId?: string }): UseCommonDataRe
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const facultyId = params?.facultyId;
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await commonApi.getDepartments(params);
+      const response = await commonApi.getDepartments(facultyId ? { facultyId } : undefined);
       if (response.success && response.data) {
         setData(Array.isArray(response.data) ? response.data : []);
       } else {
@@ -160,7 +164,7 @@ export const useDepartments = (params?: { facultyId?: string }): UseCommonDataRe
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [facultyId]);
 
   useEffect(() => {
     fetchData();
@@ -178,11 +182,16 @@ export const useClasses = (params?: { departmentId?: string; facultyId?: string 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const departmentId = params?.departmentId;
+  const facultyId = params?.facultyId;
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await commonApi.getClasses(params);
+      const response = await commonApi.getClasses(
+        departmentId || facultyId ? { departmentId, facultyId } : undefined
+      );
       if (response.success && response.data) {
         setData(Array.isArray(response.data) ? response.data : []);
       } else {
@@ -199,7 +208,7 @@ export const useClasses = (params?: { departmentId?: string; facultyId?: string 
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [departmentId, facultyId]);
 
   useEffect(() => {
     fetchData();
@@ -217,11 +226,13 @@ export const useAcademicYears = (params?: { count?: number }): UseCommonDataRetu
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const count = params?.count;
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await commonApi.getAcademicYears(params);
+      const response = await commonApi.getAcademicYears(count ? { count } : undefined);
       if (response.success && response.data) {
         setData(Array.isArray(response.data) ? response.data : []);
       } else {
@@ -238,7 +249,7 @@ export const useAcademicYears = (params?: { count?: number }): UseCommonDataRetu
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [count]);
 
   useEffect(() => {
     fetchData();

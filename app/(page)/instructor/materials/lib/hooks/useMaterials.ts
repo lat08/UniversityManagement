@@ -15,6 +15,7 @@ interface UseMaterialsReturn {
   error: string | null
   refetch: () => void
   totalCount: number
+  totalPages: number
   uploadMaterial: (data: UploadMaterialRequest) => Promise<boolean>
   updateMaterial: (documentId: string, data: UpdateMaterialRequest) => Promise<boolean>
   deleteMaterial: (documentId: string) => Promise<boolean>
@@ -25,6 +26,7 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState<number>(0)
+  const [totalPages, setTotalPages] = useState<number>(0)
 
   const fetchMaterials = useCallback(async () => {
     try {
@@ -37,9 +39,12 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
         const items = response.data.items || []
         setMaterials(items)
         setTotalCount(response.data.totalCount || 0)
+        setTotalPages(response.data.totalPages || 0)
       } else {
         setError(response.message || "Không thể tải danh sách tài liệu")
         setMaterials([])
+        setTotalCount(0)
+        setTotalPages(0)
       }
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string; data?: { message?: string } }>
@@ -51,6 +56,8 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
         'Đã xảy ra lỗi khi tải tài liệu. Vui lòng thử lại sau.'
       setError(errorMessage)
       setMaterials([])
+      setTotalCount(0)
+      setTotalPages(0)
     } finally {
       setLoading(false)
     }
@@ -136,6 +143,7 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
     error,
     refetch: handleRefetch,
     totalCount,
+    totalPages,
     uploadMaterial,
     updateMaterial,
     deleteMaterial,

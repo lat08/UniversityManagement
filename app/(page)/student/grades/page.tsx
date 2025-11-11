@@ -180,7 +180,7 @@ export default function ScoresPage() {
           </div>
           <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">Tổng tín chỉ hoàn thành</p>
           <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">{scoreOverview.totalCredits}</p>
-          <p className="text-xs sm:text-sm text-gray-600 relative z-10">/120 tín chỉ</p>
+          <p className="text-xs sm:text-sm text-gray-600 relative z-10">/{cumulativeData?.totalRequiredCredits ?? 0} tín chỉ</p>
         </div>
 
         {/* Môn đã hoàn thành */}

@@ -86,3 +86,7 @@ export interface GetAcademicYearsParams {
   count?: number;
 }
 
+export interface GetSubjectsParams {
+  instructorId?: string;
+}
+

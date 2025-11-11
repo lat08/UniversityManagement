@@ -33,6 +33,7 @@ export interface CumulativeGradesData {
   cumulativeGPA10: number
   cumulativeGPA4: number
   totalCompletedCredits: number
+  totalRequiredCredits: number
   totalSubjects: number
   semesters: SemesterGrade[]
 }

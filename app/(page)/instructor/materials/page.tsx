@@ -3,8 +3,9 @@
 import { useState, useMemo, useEffect } from 'react'
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useDebounce } from '@/lib/hooks/useDebounce'
-import { useMaterials, useDocumentTypes } from './lib/hooks'
+import { useMaterials, useDocumentTypes, useInstructorCourseClasses } from './lib/hooks'
 import { useSemesters, useSubjects } from '@/lib/hooks'
+import { useProfile } from '../profile/lib/hooks/useProfile'
 import { Pagination } from '@/app/components/ui/pagination'
 import { MaterialsHeader } from './components/MaterialsHeader'
 import { MaterialsFilters } from './components/MaterialsFilters'
@@ -12,9 +13,10 @@ import { DocumentCard, type Document } from './components/DocumentCard'
 import { UploadDocumentModal, type UploadFormData } from './components/UploadDocumentModal'
 import { DeleteDocumentModal } from './components/DeleteDocumentModal'
 import { EditDocumentModal, type EditFormData } from './components/EditDocumentModal'
-import { transformMaterialsToDocuments, getCourseClassesOptions } from './lib/utils/transformers'
+import { transformMaterialsToDocuments } from './lib/utils/transformers'
 import { downloadFile } from '@/lib/utils/fileDownload'
 import { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, SEARCH_DEBOUNCE_MS } from './lib/constants'
+import type { GetMaterialsParams } from './lib/type'
 
 export default function MaterialsPage() {
   usePageTitle('Bài giảng & Giáo trình')
@@ -32,7 +34,7 @@ export default function MaterialsPage() {
   
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS)
   
-  const materialsParams = useMemo(() => ({
+  const materialsParams = useMemo<GetMaterialsParams>(() => ({
     keyword: debouncedQuery || undefined,
     documentType: selectedDocumentType || undefined,
     semesterId: selectedSemesterId || undefined,
@@ -43,22 +45,40 @@ export default function MaterialsPage() {
   
   const { documentTypes, loading: typesLoading } = useDocumentTypes()
   const { data: semesters, loading: semestersLoading } = useSemesters()
-  const { data: subjects, loading: subjectsLoading } = useSubjects()
-  const { materials, loading, error, refetch, totalCount, uploadMaterial, updateMaterial, deleteMaterial } = useMaterials(materialsParams)
+  const { profile } = useProfile()
+  const { data: subjects, loading: subjectsLoading } = useSubjects({ instructorId: profile?.instructorId })
+  const { materials, loading, error, refetch, totalCount, totalPages, uploadMaterial, updateMaterial, deleteMaterial } = useMaterials(materialsParams)
+  const { courseClasses: instructorCourseClasses } = useInstructorCourseClasses(selectedSemesterId)
+
+  // Reset về trang 1 khi thay đổi filter
+  useEffect(() => {
+    setCurrentPage(DEFAULT_PAGE_NUMBER)
+  }, [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId])
 
   const allDocuments = useMemo(() => {
     return transformMaterialsToDocuments(materials)
   }, [materials])
 
   const courseClasses = useMemo(() => {
-    return getCourseClassesOptions(materials)
-  }, [materials])
+    const uniqueCourses = new Map<string, { id: string; name: string }>()
+    instructorCourseClasses.forEach(cc => {
+      const key = cc.courseCode
+      if (!uniqueCourses.has(key)) {
+        uniqueCourses.set(key, {
+          id: cc.courseClassId,
+          name: `${cc.courseCode} - ${cc.courseName}`,
+        })
+      }
+    })
+    return Array.from(uniqueCourses.values())
+  }, [instructorCourseClasses])
 
-  const totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE)
-
-  useEffect(() => {
-    setCurrentPage(DEFAULT_PAGE_NUMBER)
-  }, [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId])
+  const subjectOptions = useMemo(() => 
+    subjects.map(s => ({
+      id: s.subjectId,
+      name: `${s.subjectCode} - ${s.subjectName}`,
+    }))
+  , [subjects])
 
   const handleUpload = () => {
     setIsUploadModalOpen(true)
@@ -75,6 +95,12 @@ export default function MaterialsPage() {
 
     if (success) {
       setIsUploadModalOpen(false)
+      // Reset filters để hiển thị tài liệu mới upload
+      setSelectedDocumentType('')
+      setSelectedSemesterId('')
+      setSelectedSubjectId('')
+      setQuery('')
+      setCurrentPage(DEFAULT_PAGE_NUMBER)
     }
   }
 
@@ -138,10 +164,6 @@ export default function MaterialsPage() {
     { id: '', name: 'Tất cả học kỳ' },
     ...semesters.map(s => ({ id: s.semesterId, name: s.semesterName }))
   ], [semesters])
-
-  const subjectOptions = useMemo(() => 
-    subjects.map(s => ({ id: s.subjectId, name: s.subjectName }))
-  , [subjects])
 
   return (
     <>

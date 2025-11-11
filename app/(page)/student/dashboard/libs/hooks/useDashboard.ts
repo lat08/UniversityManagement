@@ -24,7 +24,7 @@ export const useDashboard = () => {
         kpi: {
           gpa: gradesData.data.cumulativeGPA4,
           completedCredits: gradesData.data.totalCompletedCredits,
-          totalCredits: 120, // Hard-coded tổng tín chỉ yêu cầu - có thể lấy từ curriculum
+          totalCredits: gradesData.data.totalRequiredCredits,
           ranking: getGpaRanking(gradesData.data.cumulativeGPA4),
         },
       });

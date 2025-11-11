@@ -47,7 +47,7 @@ export const emptyDashboardData: DashboardData = {
   kpi: {
     gpa: 0,
     completedCredits: 0,
-    totalCredits: 120,
+    totalCredits: 0,
     ranking: "Yếu"
   },
   totalPeriodsThisWeek: 0,

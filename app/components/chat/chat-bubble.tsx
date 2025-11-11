@@ -32,6 +32,7 @@ export default function ChatBubble() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -328,35 +329,38 @@ export default function ChatBubble() {
       )}
 
       {/* Bubble Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 z-50 flex items-center justify-center group hover:scale-110 cursor-pointer"
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="fixed bottom-6 right-0 z-50"
       >
-        {isOpen ? (
-          <X className="w-7 h-7 transition-transform duration-200" />
-        ) : (
-          <div className="relative">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5 shadow-lg">
-              <Image 
-                src="/logo-siu.webp" 
-                alt="SIU Chatbot" 
-                width={32} 
-                height={32}
-                className="w-full h-full object-contain"
-              />
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-16 h-16 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center group cursor-pointer"
+          style={{
+            transform: isHovered || isOpen ? 'translateX(-1.5rem) scale(1.05)' : 'translateX(2.5rem)',
+            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease-in-out, box-shadow 0.3s ease'
+          }}
+        >
+          {isOpen ? (
+            <X className="w-7 h-7 transition-transform duration-200" />
+          ) : (
+            <div className="relative">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5 shadow-lg">
+                <Image 
+                  src="/logo-siu.webp" 
+                  alt="SIU Chatbot" 
+                  width={32} 
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {/* Active Badge */}
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm animate-pulse" />
             </div>
-            {/* Active Badge */}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm animate-pulse" />
-          </div>
-        )}
-      </button>
-
-      {/* Tooltip */}
-      {!isOpen && (
-        <div className="fixed bottom-6 right-24 bg-gray-900 dark:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-          SIU Chatbot - Cần hỗ trợ? 💬
-        </div>
-      )}
+          )}
+        </button>
+      </div>
     </>
   );
 }
