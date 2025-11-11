@@ -57,6 +57,7 @@ export interface UpdateMaterialRequest {
   documentType: string;
   title: string;
   description: string;
+  file?: File | null;
 }
 
 export interface UploadMaterialResponse {

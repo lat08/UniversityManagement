@@ -94,6 +94,7 @@ export default function MaterialsPage() {
       documentType: data.documentType,
       title: data.documentName,
       description: data.description,
+      file: data.file,
     })
 
     if (success) {

@@ -70,6 +70,26 @@ export const materialsApi = {
 
   // Cập nhật tài liệu
   updateMaterial: async (documentId: string, data: UpdateMaterialRequest): Promise<ApiResponse<null>> => {
+    if (data.file) {
+      const formData = new FormData()
+      formData.append('CourseClassId', data.courseClassId)
+      formData.append('DocumentType', data.documentType)
+      formData.append('Title', data.title)
+      formData.append('Description', data.description)
+      formData.append('File', data.file)
+
+      const response = await api.put<ApiResponse<null>>(
+        `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      )
+      return response.data
+    }
+
     const response = await api.put<ApiResponse<null>>(
       `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
       data

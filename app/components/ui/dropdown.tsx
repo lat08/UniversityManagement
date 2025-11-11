@@ -71,24 +71,27 @@ export function Dropdown<T = string>({
     if (!isOpen) return
 
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
       if (
         containerRef.current && 
-        !containerRef.current.contains(event.target as Node) &&
+        !containerRef.current.contains(target) &&
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(target)
       ) {
         setIsOpen(false)
       }
     }
 
     updateDropdownPosition()
-    document.addEventListener("mousedown", handleClickOutside)
+    setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside, true)
+    }, 0)
     window.addEventListener("resize", updateDropdownPosition)
     window.addEventListener("scroll", updateDropdownPosition, true)
     setShouldRender(true)
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside, true)
       window.removeEventListener("resize", updateDropdownPosition)
       window.removeEventListener("scroll", updateDropdownPosition, true)
     }
@@ -135,7 +138,7 @@ export function Dropdown<T = string>({
         <div
           ref={dropdownRef}
           className={cn(
-            "fixed z-[9999] bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
+            "fixed z-[10000] bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
             isOpen 
               ? "opacity-100 translate-y-0 scale-100 duration-200 ease-out" 
               : dropdownPosition.openUpward
@@ -147,12 +150,21 @@ export function Dropdown<T = string>({
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
             width: `${dropdownPosition.width}px`,
+            pointerEvents: isOpen ? 'auto' : 'none',
           }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           {showEmptyOption && (
             <button
               type="button"
-              onClick={() => handleSelect(undefined as T)}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (!disabled) {
+                  handleSelect(undefined as T)
+                }
+              }}
               className="w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg"
             >
               {emptyOptionLabel}
@@ -162,7 +174,13 @@ export function Dropdown<T = string>({
             <button
               key={String(option.value)}
               type="button"
-              onClick={() => !option.disabled && handleSelect(option.value)}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (!option.disabled && !disabled) {
+                  handleSelect(option.value)
+                }
+              }}
               disabled={option.disabled}
               className={cn(
                 "w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors",

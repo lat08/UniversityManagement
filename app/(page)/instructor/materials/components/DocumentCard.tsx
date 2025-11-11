@@ -2,6 +2,7 @@
 
 import { FileText, Edit, Download, Trash2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { DOCUMENT_TYPE_COLORS, DOCUMENT_TYPE_LABELS } from "../lib/constants";
 
 export interface Document {
   id: string;
@@ -27,18 +28,6 @@ interface DocumentCardProps {
   onClick?: () => void;
 }
 
-const typeColors = {
-  slide: "bg-blue-500 text-white",
-  document: "bg-yellow-400 text-gray-900",
-  exercise: "bg-red-500 text-white",
-};
-
-const typeLabels = {
-  slide: "Slide",
-  document: "Tài liệu",
-  exercise: "Bài tập",
-};
-
 export function DocumentCard({
   document,
   onEdit,
@@ -54,6 +43,10 @@ export function DocumentCard({
     }
     onClick?.();
   };
+
+  const documentType = document.documentType || '';
+  const tagColor = DOCUMENT_TYPE_COLORS[documentType] || 'bg-gray-500 text-white';
+  const tagLabel = DOCUMENT_TYPE_LABELS[documentType] || documentType || 'Tài liệu';
 
   return (
     <div 
@@ -75,9 +68,9 @@ export function DocumentCard({
               {document.title}
             </h3>
             <span
-              className={`px-2 py-1 rounded text-xs font-medium ${typeColors[document.type]}`}
+              className={`px-2 py-1 rounded text-xs font-medium ${tagColor}`}
             >
-              {typeLabels[document.type]}
+              {tagLabel}
             </span>
           </div>
           <p className="text-sm text-gray-600 mt-1">
