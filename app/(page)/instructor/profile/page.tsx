@@ -9,6 +9,7 @@ import { ProfileField } from "./components/ProfileField"
 import { ProfileAvatar } from "./components/ProfileAvatar"
 import { ChangePasswordForm } from "./components/ChangePasswordForm"
 import { UpdateProfilePayload, ChangePasswordPayload } from "./lib/types/types"
+import { formatDate } from "@/lib/utils/format"
 
 export default function InstructorProfilePage() {
   usePageTitle('Hồ sơ cá nhân')
@@ -166,10 +167,10 @@ export default function InstructorProfilePage() {
                   
                   <ProfileField
                     label="Ngày sinh"
-                    value={isEditing ? editedData.dateOfBirth || '' : profile.dateOfBirth}
+                    value={isEditing ? editedData.dateOfBirth || '' : formatDate(profile.dateOfBirth)}
                     placeholder="DD/MM/YYYY"
                     editable={isEditing}
-                    type="date"
+                    type={isEditing ? "date" : "text"}
                     onChange={(value) => setEditedData({ ...editedData, dateOfBirth: value })}
                   />
 

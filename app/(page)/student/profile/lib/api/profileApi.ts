@@ -19,13 +19,37 @@ export async function changePassword(data: ChangePasswordRequest): Promise<Chang
   try {
     return await changePasswordApi(data)
   } catch (error: unknown) {
-    const axiosError = error as { response?: { status?: number; data?: { message?: string } } }
+    const axiosError = error as { 
+      response?: { 
+        status?: number
+        data?: { 
+          message?: string
+          errors?: Record<string, string[]>
+        } 
+      } 
+    }
+    
     if (axiosError.response?.status === 401) {
-      throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
+      throw new Error(axiosError.response?.data?.message || "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
     }
+    
     if (axiosError.response?.status === 400) {
-      throw new Error(axiosError.response?.data?.message || "Mật khẩu không hợp lệ")
+      // Xử lý validation errors từ API
+      const errorData = axiosError.response?.data
+      if (errorData?.errors) {
+        // Lấy tất cả các lỗi validation và nối lại
+        const validationErrors = Object.values(errorData.errors).flat()
+        if (validationErrors.length > 0) {
+          throw new Error(validationErrors.join('. '))
+        }
+      }
+      // Nếu có message thì dùng message
+      if (errorData?.message) {
+        throw new Error(errorData.message)
+      }
+      throw new Error("Mật khẩu không hợp lệ")
     }
+    
     throw new Error(axiosError.response?.data?.message || "Không thể đổi mật khẩu")
   }
 }

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { profileApi } from '../api/profileApi'
 import { InstructorProfile, UpdateProfilePayload, ChangePasswordPayload } from '../types/types'
+import { useAuthStore } from '@/lib/store/authStore'
 import toast from 'react-hot-toast'
 
 interface UseProfileReturn {
@@ -16,6 +18,8 @@ interface UseProfileReturn {
 }
 
 export const useProfile = (): UseProfileReturn => {
+  const router = useRouter()
+  const logout = useAuthStore((state) => state.logout)
   const [profile, setProfile] = useState<InstructorProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -103,7 +107,18 @@ export const useProfile = (): UseProfileReturn => {
       const response = await profileApi.changePassword(payload)
       
       if (response.success) {
-        toast.success('Đổi mật khẩu thành công!')
+        toast.success(response.message || 'Đổi mật khẩu thành công!')
+        // Xóa tokens từ localStorage và logout sau 2 giây
+        setTimeout(() => {
+          // Xóa tokens từ localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+          }
+          // Logout và redirect về trang login
+          logout()
+          router.push("/login")
+        }, 2000)
         return true
       } else {
         // Extract validation errors from response
@@ -114,7 +129,7 @@ export const useProfile = (): UseProfileReturn => {
               errorMessages.push(...value)
             }
           })
-          const errorMsg = errorMessages.join(', ') || 'Không thể thay đổi mật khẩu'
+          const errorMsg = errorMessages.join('. ') || 'Không thể thay đổi mật khẩu'
           setUpdateError(errorMsg)
           toast.error(errorMsg)
         } else {
@@ -125,29 +140,10 @@ export const useProfile = (): UseProfileReturn => {
         return false
       }
     } catch (err: unknown) {
-      // Handle axios errors with validation messages
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { errors?: Record<string, string[]> | unknown } } }
-        if (axiosError.response?.data?.errors && typeof axiosError.response.data.errors === 'object') {
-          const errorMessages: string[] = []
-          Object.values(axiosError.response.data.errors as Record<string, string[]>).forEach((value) => {
-            if (Array.isArray(value)) {
-              errorMessages.push(...value)
-            }
-          })
-          const errorMsg = errorMessages.join(', ') || 'Dữ liệu không hợp lệ'
-          setUpdateError(errorMsg)
-          toast.error(errorMsg)
-        } else {
-          const errorMsg = 'Đã xảy ra lỗi không xác định'
-          setUpdateError(errorMsg)
-          toast.error(errorMsg)
-        }
-      } else {
-        const errorMsg = err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định'
-        setUpdateError(errorMsg)
-        toast.error(errorMsg)
-      }
+      // Handle errors from API (đã được xử lý trong profileApi.changePassword)
+      const errorMsg = err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định'
+      setUpdateError(errorMsg)
+      toast.error(errorMsg)
       return false
     } finally {
       setUpdating(false)

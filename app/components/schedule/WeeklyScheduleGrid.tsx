@@ -167,7 +167,7 @@ export function WeeklyScheduleGrid({
                           onMouseLeave={onCourseLeave}
                           onClick={(e) => onCourseHover?.(course.id, e)}
                         >
-                          <div className="text-xs font-semibold leading-tight mb-1.5 text-gray-900">
+                          <div className="text-sm font-bold uppercase leading-tight mb-1.5 text-gray-900">
                             {course.name}
                           </div>
                           <div className="space-y-0.5 text-[11px] text-gray-900">
