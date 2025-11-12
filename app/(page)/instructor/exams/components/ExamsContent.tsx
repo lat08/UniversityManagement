@@ -32,6 +32,7 @@ export const ExamsContent = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+  const [selectedExamForResubmit, setSelectedExamForResubmit] = useState<ExamEntry | null>(null); // Add this line
 
   const {
     searchQuery,
@@ -79,6 +80,16 @@ export const ExamsContent = () => {
     setIsUploadModalOpen(true);
   };
 
+  const handleResubmit = (examEntryId: string) => {
+    // Find the exam from the list
+    const exam = examEntries.find(e => e.examEntryId === examEntryId);
+    if (exam) {
+      setSelectedExamForResubmit(exam); // Store the full exam object
+      setSelectedExamId(examEntryId);
+      setIsUploadModalOpen(true);
+    }
+  };
+
   const handleUploadSubmit = async (data: UploadExamFormData) => {
     if (selectedExamId) {
       const updateData: Partial<UpdateExamRequest> = {};
@@ -86,8 +97,8 @@ export const ExamsContent = () => {
       if (data.description) updateData.description = data.description;
       if (data.questionFile) updateData.questionFile = data.questionFile;
       if (data.answerFile) updateData.answerFile = data.answerFile;
-      
       await updateExam(selectedExamId, updateData);
+      setSelectedExamForResubmit(null); // Reset after submit
       return;
     }
 
@@ -105,11 +116,6 @@ export const ExamsContent = () => {
 
   const handleDownload = async (examEntryId: string, fileType: 'question' | 'answer') => {
     await downloadExamFile(examEntryId, fileType);
-  };
-
-  const handleResubmit = (examEntryId: string) => {
-    setSelectedExamId(examEntryId);
-    setIsUploadModalOpen(true);
   };
 
   const handleView = (examEntryId: string) => {
@@ -188,17 +194,24 @@ export const ExamsContent = () => {
       )}
 
       {isUploadModalOpen && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div>Loading...</div>}>
           <UploadExamModal
             isOpen={isUploadModalOpen}
             onClose={() => {
               setIsUploadModalOpen(false);
               setSelectedExamId(null);
+              setSelectedExamForResubmit(null);
             }}
             onSubmit={handleUploadSubmit}
-            isLoading={isUploading || isUpdating}
+            isSubmitting={isUploading || isUpdating}
             courseClasses={courseClassesOptions}
-            examEntryId={selectedExamId}
+            mode={selectedExamForResubmit ? 'resubmit' : 'upload'}
+            existingExam={selectedExamForResubmit ? {
+              subjectName: selectedExamForResubmit.subjectName,
+              courseClassCode: selectedExamForResubmit.courseClassCode,
+              examType: selectedExamForResubmit.examType,
+              durationMinutes: selectedExamForResubmit.durationMinutes,
+            } : undefined}
           />
         </Suspense>
       )}
