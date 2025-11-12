@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { X, Download, Eye, ChevronDown, HardDrive, FileText, Book, User, BookText } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import type { CourseGroup, DocumentItem } from '../lib/types/types';
@@ -12,27 +12,27 @@ interface DocumentModalProps {
   onClose: () => void;
 }
 
-export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalProps) => {
+const DocumentModalComponent = ({ courseGroup, isOpen, onClose }: DocumentModalProps) => {
   const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
   
+  const handleDownload = useCallback((doc: DocumentItem) => {
+    window.open(doc.downloadUrl, '_blank');
+  }, []);
+
+  const handleViewOnline = useCallback((doc: DocumentItem) => {
+    window.open(doc.previewUrl, '_blank');
+  }, []);
+
+  const toggleDocExpand = useCallback((docId: string) => {
+    setExpandedDocId((prev) => (prev === docId ? null : docId));
+  }, []);
+
   if (!courseGroup || !isOpen) return null;
 
-  const handleDownload = (doc: DocumentItem) => {
-    window.open(doc.downloadUrl, '_blank');
-  };
-
-  const handleViewOnline = (doc: DocumentItem) => {
-    window.open(doc.previewUrl, '_blank');
-  };
-
-  const toggleDocExpand = (docId: string) => {
-    setExpandedDocId(expandedDocId === docId ? null : docId);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-sm shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="bg-blue-500 text-white px-6 py-4 rounded-t-sm">
+        <div className="bg-blue-500 text-white px-6 py-4 rounded-t-sm sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold">{courseGroup.courseName}</h2>
@@ -81,15 +81,16 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                   const isExpanded = expandedDocId === doc.documentId;
                   return (
                     <div key={doc.documentId} className="border border-gray-900 bg-gray-50 rounded-sm overflow-hidden">
-                      <div 
+                      <button
+                        type="button"
                         onClick={() => toggleDocExpand(doc.documentId)}
-                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                        className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex items-center space-x-4">
                           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                             <BookText className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"/>
                           </div>
-                          <div>
+                          <div className="text-left">
                             <h4 className="font-medium text-gray-900">{doc.fileTitle}</h4>
                             <p className="text-sm text-gray-500">
                               {formatDate(doc.created)}
@@ -101,7 +102,7 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
                             className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
                           />
                         </div>
-                      </div>
+                      </button>
                       
                       {isExpanded && (
                         <div className="px-4 pb-4 pt-1">
@@ -149,4 +150,6 @@ export const DocumentModal = ({ courseGroup, isOpen, onClose }: DocumentModalPro
     </div>
   );
 };
+
+export const DocumentModal = memo(DocumentModalComponent);
 

@@ -1,11 +1,13 @@
 'use client';
 
+import { memo } from 'react';
+
 interface DocumentsHeaderProps {
   title?: string;
   subtitle?: string;
 }
 
-export const DocumentsHeader = ({
+const DocumentsHeaderComponent = ({
   title = 'Tài liệu',
   subtitle = 'Tham khảo tài liệu cho sinh viên',
 }: DocumentsHeaderProps) => {
@@ -16,4 +18,6 @@ export const DocumentsHeader = ({
     </header>
   );
 };
+
+export const DocumentsHeader = memo(DocumentsHeaderComponent);
 

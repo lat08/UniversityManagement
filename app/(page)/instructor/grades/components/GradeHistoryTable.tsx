@@ -18,11 +18,11 @@ export const GradeHistoryTable = ({ history, onVersionClick }: GradeHistoryTable
     { key: 'note', label: 'Ghi chú', align: 'left' },
   ];
 
-  const getActionLabel = (action: string): string => {
+  const getActionLabel = (action: GradeChangeHistoryDto['action']): string => {
     return GRADE_ACTION_LABELS[action] || action;
   };
 
-  const getActionColor = (action: string): string => {
+  const getActionColor = (action: GradeChangeHistoryDto['action']): string => {
     return GRADE_ACTION_COLORS[action] || 'bg-gray-100 text-gray-700';
   };
 

@@ -1,19 +1,34 @@
 import { api } from "@/lib/api/client"
 import { 
   ApiResponse,
-  MaterialsData,
-  DocumentType,
+  PagedResult,
+  MaterialViewDto,
+  DocumentTypeDto,
   GetMaterialsParams,
   UploadMaterialRequest,
-  UploadMaterialResponse,
+  MaterialResponseDto,
   UpdateMaterialRequest,
   InstructorCourseClassDto
 } from "../type"
 import { MATERIALS_API } from "../constants"
 
+// Normalize backend response casing (PascalCase -> camelCase)
+const normalizePagedResult = <T>(data: PagedResult<T> | Record<string, unknown>): PagedResult<T> => {
+  const normalized = data as Record<string, unknown>
+  return {
+    items: (normalized.items || normalized.Items) as T,
+    totalCount: (normalized.totalCount || normalized.TotalCount || 0) as number,
+    totalDocumentsCount: (normalized.totalDocumentsCount || normalized.TotalDocumentsCount) as number | undefined,
+    pageNumber: (normalized.pageNumber || normalized.PageNumber || 1) as number,
+    pageSize: (normalized.pageSize || normalized.PageSize || 10) as number,
+    totalPages: (normalized.totalPages || normalized.TotalPages || 0) as number,
+    hasPrevious: (normalized.hasPrevious || normalized.HasPrevious || false) as boolean,
+    hasNext: (normalized.hasNext || normalized.HasNext || false) as boolean,
+  }
+}
+
 export const materialsApi = {
-  // Lấy danh sách tài liệu giảng dạy
-  getMaterials: async (params?: GetMaterialsParams): Promise<ApiResponse<MaterialsData>> => {
+  getMaterials: async (params?: GetMaterialsParams): Promise<ApiResponse<PagedResult<MaterialViewDto[]>>> => {
     const queryParams = new URLSearchParams()
     
     if (params?.keyword?.trim()) {
@@ -38,48 +53,50 @@ export const materialsApi = {
     const queryString = queryParams.toString()
     const url = queryString ? `${MATERIALS_API.GET_MATERIALS}?${queryString}` : MATERIALS_API.GET_MATERIALS
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await api.get<any>(url)
+    const response = await api.get<ApiResponse<Record<string, unknown>>>(url)
     
     if (response.data.success && response.data.data) {
-      const pagedResult = response.data.data
-      const materialsData: MaterialsData = {
-        items: pagedResult.items || pagedResult.Items || [],
-        totalCount: pagedResult.totalCount || 0,
-        totalDocumentsCount: pagedResult.totalDocumentsCount || pagedResult.TotalDocumentsCount || undefined,
-        pageNumber: pagedResult.pageNumber || pagedResult.PageNumber || 1,
-        pageSize: pagedResult.pageSize || pagedResult.PageSize || 10,
-        totalPages: pagedResult.totalPages || pagedResult.TotalPages || 0,
-        hasPrevious: pagedResult.hasPrevious || pagedResult.HasPrevious || false,
-        hasNext: pagedResult.hasNext || pagedResult.HasNext || false,
-      }
+      const normalizedData = normalizePagedResult<MaterialViewDto[]>(response.data.data)
       return {
         success: true,
         message: response.data.message || '',
-        data: materialsData,
+        data: normalizedData,
         errors: null,
       }
     }
     
+    return {
+      success: false,
+      message: response.data.message || 'Failed to fetch materials',
+      data: {
+        items: [],
+        totalCount: 0,
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 0,
+        hasPrevious: false,
+        hasNext: false,
+      },
+      errors: response.data.errors,
+    }
+  },
+
+  getDocumentTypes: async (): Promise<ApiResponse<DocumentTypeDto[]>> => {
+    const response = await api.get<ApiResponse<DocumentTypeDto[]>>('/v1/materials/student/document-types')
     return response.data
   },
 
-  // Lấy danh sách loại tài liệu
-  getDocumentTypes: async (): Promise<ApiResponse<DocumentType[]>> => {
-    const response = await api.get<ApiResponse<DocumentType[]>>('/v1/materials/student/document-types')
-    return response.data
-  },
-
-  // Upload tài liệu mới
-  uploadMaterial: async (data: UploadMaterialRequest): Promise<ApiResponse<UploadMaterialResponse>> => {
+  uploadMaterial: async (data: UploadMaterialRequest): Promise<ApiResponse<MaterialResponseDto>> => {
     const formData = new FormData()
     formData.append('CourseClassId', data.courseClassId)
     formData.append('DocumentType', data.documentType)
     formData.append('Title', data.title)
-    formData.append('Description', data.description)
+    if (data.description?.trim()) {
+      formData.append('Description', data.description.trim())
+    }
     formData.append('File', data.file)
 
-    const response = await api.post<ApiResponse<UploadMaterialResponse>>(
+    const response = await api.post<ApiResponse<MaterialResponseDto>>(
       MATERIALS_API.UPLOAD_MATERIAL,
       formData,
       {
@@ -91,8 +108,7 @@ export const materialsApi = {
     return response.data
   },
 
-  // Cập nhật tài liệu
-  updateMaterial: async (documentId: string, data: UpdateMaterialRequest): Promise<ApiResponse<null>> => {
+  updateMaterial: async (documentId: string, data: UpdateMaterialRequest): Promise<ApiResponse<string>> => {
     if (data.file) {
       const formData = new FormData()
       formData.append('CourseClassId', data.courseClassId)
@@ -101,7 +117,7 @@ export const materialsApi = {
       formData.append('Description', data.description)
       formData.append('File', data.file)
 
-      const response = await api.put<ApiResponse<null>>(
+      const response = await api.put<ApiResponse<string>>(
         `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
         formData,
         {
@@ -113,22 +129,20 @@ export const materialsApi = {
       return response.data
     }
 
-    const response = await api.put<ApiResponse<null>>(
+    const response = await api.put<ApiResponse<string>>(
       `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
       data
     )
     return response.data
   },
 
-  // Xóa tài liệu
-  deleteMaterial: async (documentId: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(
+  deleteMaterial: async (documentId: string): Promise<ApiResponse<string>> => {
+    const response = await api.delete<ApiResponse<string>>(
       `${MATERIALS_API.DELETE_MATERIAL}/${documentId}`
     )
     return response.data
   },
 
-  // Lấy danh sách lớp học phần của giảng viên
   getInstructorCourseClasses: async (semesterId?: string): Promise<ApiResponse<InstructorCourseClassDto[]>> => {
     const params = semesterId ? { semesterId } : {}
     const response = await api.get<ApiResponse<InstructorCourseClassDto[]>>('/v1/instructor/course-classes', { params })

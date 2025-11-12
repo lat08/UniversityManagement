@@ -1,54 +1,30 @@
-import { CourseClassMaterials, MaterialDocument } from "../type"
+import { MaterialViewDto, DocumentChildDto } from "../type"
 import { Document } from "../../components/DocumentCard"
 import { formatDate } from "@/lib/utils/format"
 
-/**
- * Transform API response to Document format for components
- */
-export const transformMaterialsToDocuments = (materials: CourseClassMaterials[]): Document[] => {
-  const documents: Document[] = []
+const TYPE_MAPPING: Record<string, "slide" | "document" | "exercise"> = {
+  'Slide': 'slide',
+  'Tài liệu': 'document',
+  'Bài tập': 'exercise',
+  'Bài LAB': 'exercise',
+} as const
 
-  for (const courseClass of materials) {
-    for (const doc of courseClass.documents) {
-      documents.push(transformMaterialDocumentToDocument(doc, courseClass))
-    }
-  }
-
-  return documents
+const extractClassCode = (courseName: string): string => {
+  const match = /\s-\s(\w+)$/.exec(courseName)
+  return match?.[1] || ''
 }
 
-/**
- * Transform single MaterialDocument to Document
- */
 export const transformMaterialDocumentToDocument = (
-  doc: MaterialDocument,
-  courseClass: CourseClassMaterials
+  doc: DocumentChildDto,
+  courseClass: MaterialViewDto
 ): Document => {
-  // Parse document type to match component format
-  const typeMapping: Record<string, "slide" | "document" | "exercise"> = {
-    'Slide': 'slide',
-    'Tài liệu': 'document',
-    'Bài tập': 'exercise',
-    'Bài LAB': 'exercise', // Map "Bài LAB" to exercise
-  }
-
-
-  // Extract class code from course name if possible
-  // Example: "Lập trình web - 230PM" -> "230PM"
-  const extractClassCode = (courseName: string): string => {
-    const regex = /\s-\s(\w+)$/
-    const match = regex.exec(courseName)
-    return match ? match[1] : ''
-  }
-
   return {
     id: doc.documentId,
     title: doc.fileTitle,
     subject: courseClass.courseName,
     date: formatDate(doc.created),
-    type: typeMapping[doc.documentType] || 'document',
+    type: TYPE_MAPPING[doc.documentType] || 'document',
     classCode: extractClassCode(courseClass.courseName),
-    // Store additional data for edit/delete operations
     courseClassId: courseClass.courseClassId,
     documentType: doc.documentType,
     description: doc.description,
@@ -57,10 +33,21 @@ export const transformMaterialDocumentToDocument = (
   }
 }
 
-/**
- * Get unique course classes from materials
- */
-export const getCourseClassesOptions = (materials: CourseClassMaterials[]) => {
+export const transformMaterialsToDocuments = (materials: MaterialViewDto[]): Document[] => {
+  const documents: Document[] = []
+
+  for (const courseClass of materials) {
+    if (!courseClass.documents || courseClass.documents.length === 0) continue
+    
+    for (const doc of courseClass.documents) {
+      documents.push(transformMaterialDocumentToDocument(doc, courseClass))
+    }
+  }
+
+  return documents
+}
+
+export const getCourseClassesOptions = (materials: MaterialViewDto[]) => {
   return materials.map((courseClass) => ({
     id: courseClass.courseClassId,
     name: courseClass.courseName,

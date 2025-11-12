@@ -7,13 +7,17 @@ import {
   WeekResponse 
 } from "../types/weeklyTypes"
 
-const convertDayOfWeekToNumber = (dayName: string): number => {
-  return DAY_NAME_TO_NUMBER[dayName] || 2
+const normalizeDayOfWeek = (day: string | number): number => {
+  if (typeof day === 'number') {
+    return day >= 2 && day <= 8 ? day : 2
+  }
+  return DAY_NAME_TO_NUMBER[day] || 2
 }
 
-// Helper function to transform API response to component format
-const transformScheduleData = (apiData: InstructorWeeklyScheduleApiItem[]): InstructorWeeklyScheduleItem[] => {
-  return apiData.map(item => ({
+const normalizeScheduleItem = (item: InstructorWeeklyScheduleApiItem): InstructorWeeklyScheduleItem => {
+  const numberOfPeriods = item.endPeriod - item.startPeriod + 1
+  
+  return {
     courseClassId: item.courseClassId,
     subjectId: item.courseClassId,
     subjectCode: item.subjectCode,
@@ -21,9 +25,9 @@ const transformScheduleData = (apiData: InstructorWeeklyScheduleApiItem[]): Inst
     courseGroup: null,
     credits: 0,
     classCode: item.classCode || item.className || null,
-    dayOfWeek: convertDayOfWeekToNumber(item.dayOfWeek),
+    dayOfWeek: normalizeDayOfWeek(item.dayOfWeek),
     startPeriod: item.startPeriod,
-    numberOfPeriods: item.endPeriod - item.startPeriod + 1,
+    numberOfPeriods,
     roomCode: item.roomCode,
     roomName: item.roomName,
     courseType: item.courseType,
@@ -31,40 +35,54 @@ const transformScheduleData = (apiData: InstructorWeeklyScheduleApiItem[]): Inst
     scheduleEndDate: item.date,
     note: item.note,
     date: item.date,
-  }))
+  }
 }
 
 export const instructorWeeklyScheduleApi = {
-  // Lấy thời khóa biểu giảng viên theo tuần
-  getWeeklySchedule: async (semesterId: string, weekNumber: number): Promise<{ success: boolean; data: InstructorWeeklyScheduleItem[]; message?: string }> => {
-    const response = await api.get(`/v1/instructor-schedule/week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}`)
-    const apiResponse: InstructorWeeklyScheduleResponse = response.data
+  getWeeklySchedule: async (
+    semesterId: string, 
+    weekNumber: number
+  ): Promise<{ success: boolean; data: InstructorWeeklyScheduleItem[]; message?: string }> => {
+    const response = await api.get<InstructorWeeklyScheduleResponse>(
+      `/v1/instructor-schedule/week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}`
+    )
     
-    return {
-      success: apiResponse.success,
-      data: transformScheduleData(apiResponse.data),
-      message: apiResponse.message
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return {
+        success: true,
+        data: response.data.data.map(normalizeScheduleItem),
+        message: response.data.message
+      }
     }
+    
+    return { success: false, data: [], message: response.data.message }
   },
 
-  // Lọc thời khóa biểu giảng viên theo môn học cụ thể
-  getWeeklyScheduleBySubject: async (semesterId: string, weekNumber: number, subjectId: string): Promise<{ success: boolean; data: InstructorWeeklyScheduleItem[]; message?: string }> => {
-    const response = await api.get(`/v1/instructor-schedule/subject-week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`)
-    const apiResponse: InstructorWeeklyScheduleResponse = response.data
+  getWeeklyScheduleBySubject: async (
+    semesterId: string, 
+    weekNumber: number, 
+    subjectId: string
+  ): Promise<{ success: boolean; data: InstructorWeeklyScheduleItem[]; message?: string }> => {
+    const response = await api.get<InstructorWeeklyScheduleResponse>(
+      `/v1/instructor-schedule/subject-week-schedule?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`
+    )
     
-    return {
-      success: apiResponse.success,
-      data: transformScheduleData(apiResponse.data),
-      message: apiResponse.message
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return {
+        success: true,
+        data: response.data.data.map(normalizeScheduleItem),
+        message: response.data.message
+      }
     }
+    
+    return { success: false, data: [], message: response.data.message }
   },
 
   getWeeks: async (semesterId: string): Promise<WeekResponse> => {
-    const response = await api.get(`/v1/enrollments/semesters/${semesterId}/weeks`)
+    const response = await api.get<WeekResponse>(`/v1/enrollments/semesters/${semesterId}/weeks`)
     return response.data
   },
 
-  // Export TKB theo tuần ra PDF
   exportWeeklyPdf: async (semesterId: string, weekNumber: number): Promise<Blob> => {
     const response = await api.get(`/v1/instructor-schedule/export-pdf?semesterId=${semesterId}&weekNumber=${weekNumber}`, {
       responseType: 'blob'

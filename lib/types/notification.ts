@@ -1,4 +1,5 @@
 export type NotificationType = "all" | "event" | "tuition" | "schedule" | "important"
+export type NotificationReadStatus = "all" | "unread" | "read"
 
 export interface NotificationApiItem {
   scheduleId: string

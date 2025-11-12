@@ -1,6 +1,7 @@
 export interface GradeItem {
   semesterId: string
   semesterName: string
+  semesterStartDate?: string
   subjectId: string
   subjectCode: string
   subjectName: string

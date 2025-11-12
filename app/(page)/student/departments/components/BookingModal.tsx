@@ -96,6 +96,19 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setBookingDate(undefined);
+      setDateInputValue('');
+      setStartTime('');
+      setEndTime('');
+      setPurpose('');
+      setStudentCount(1);
+      setAvailability(null);
+      setLoadingAvailability(false);
+    }
+  }, [isOpen]);
+
   const handleConfirmBooking = () => {
     if (!selectedRoom || !bookingDate || !startTime || !endTime || !purpose.trim() || !studentCount) {
       toast.error('Vui lòng điền đầy đủ thông tin');
@@ -171,34 +184,37 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       onSuccess: () => {
         toast.success('Đăng ký phòng thành công! Trạng thái: Chờ xác nhận');
         onClose();
-        setBookingDate(undefined);
-        setDateInputValue('');
-        setStartTime('');
-        setEndTime('');
-        setPurpose('');
-        setStudentCount(1);
       },
-      onError: (error: Error) => {
-        const apiError = error as { response?: { data?: { message?: string } } };
-        const errorMessage = apiError?.response?.data?.message || error.message || 'Đăng ký phòng thất bại!';
+      onError: (error: unknown) => {
+        const apiError = error as { response?: { data?: { message?: string } }; message?: string };
+        const errorMessage = apiError?.response?.data?.message || apiError?.message || 'Đăng ký phòng thất bại!';
         toast.error(errorMessage);
       }
     });
   };
 
 
-  // Load availability when date changes
   useEffect(() => {
     if (bookingDate && selectedRoom) {
       const loadAvailability = async () => {
         setLoadingAvailability(true);
+        setStartTime('');
+        setEndTime('');
         try {
           const dateStr = format(bookingDate, 'yyyy-MM-dd');
           const response = await getRoomAvailability(selectedRoom.roomId, dateStr);
-          setAvailability(response.data);
-        } catch {
-          toast.error('Không thể tải thông tin phòng trống');
+          
+          if (response.success && response.data) {
+            setAvailability(response.data);
+          } else {
+            setAvailability(null);
+            toast.error(response.message || 'Không thể tải thông tin phòng trống');
+          }
+        } catch (error) {
           setAvailability(null);
+          const apiError = error as { response?: { data?: { message?: string } } };
+          const errorMessage = apiError?.response?.data?.message || 'Không thể tải thông tin phòng trống';
+          toast.error(errorMessage);
         } finally {
           setLoadingAvailability(false);
         }

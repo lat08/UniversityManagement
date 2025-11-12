@@ -1,182 +1,165 @@
-import { useState, useEffect, useCallback } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMemo, useState, useCallback } from "react"
 import { weeklyScheduleApi } from "../api/weeklyScheduleApi"
-import { 
-  WeeklyScheduleItem, 
-  Week 
-} from "../types/weeklyTypes"
+import { WeeklyScheduleItem, Week } from "../types/weeklyTypes"
 import { Semester, Subject } from "@/lib/types"
 import { useSemesters, useSubjects } from "@/lib/hooks"
+import { queryKeys } from "@/lib/api/queryKeys"
 import toast from "react-hot-toast"
-import { getScheduleErrorMessage, handleScheduleError } from "@/lib/utils/scheduleErrorHandling"
 
 export const useScheduleData = () => {
-  const { data: semestersData, loading: semestersLoading } = useSemesters()
-  const { data: subjectsData, loading: subjectsLoading } = useSubjects()
-  
-  const [semesters, setSemesters] = useState<Semester[]>([])
+  const queryClient = useQueryClient()
+  const { data: semestersData = [], loading: semestersLoading } = useSemesters()
+  const { data: subjectsData = [], loading: subjectsLoading } = useSubjects()
+
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null)
-  const [weeks, setWeeks] = useState<Week[]>([])
   const [selectedWeek, setSelectedWeek] = useState<Week | null>(null)
-  const [subjects, setSubjects] = useState<Subject[]>([])
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
-  const [scheduleData, setScheduleData] = useState<WeeklyScheduleItem[]>([])
   const [viewType, setViewType] = useState<"week" | "subject">("week")
-  const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (semestersData.length > 0) {
-      const sortedSemesters = [...semestersData].sort((a, b) => 
-        new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-      )
+  const semesters = useMemo(() => {
+    const sorted = [...semestersData].sort(
+      (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    )
+    
+    if (!selectedSemester && sorted.length > 0) {
       const currentDate = new Date()
-      const currentSemester = sortedSemesters.find(semester => {
-        if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
-        const startDate = new Date(semester.registrationStartDate)
-        const endDate = new Date(semester.registrationEndDate)
-        return currentDate >= startDate && currentDate <= endDate
+      const current = sorted.find(s => {
+        if (!s.registrationStartDate || !s.registrationEndDate) return false
+        const start = new Date(s.registrationStartDate)
+        const end = new Date(s.registrationEndDate)
+        return currentDate >= start && currentDate <= end
       })
-      setSemesters(sortedSemesters)
-      if (!selectedSemester) {
-        setSelectedSemester(currentSemester || sortedSemesters[0])
-      }
+      setSelectedSemester(current || sorted[0])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [semestersData])
+    
+    return sorted
+  }, [semestersData, selectedSemester])
 
-  useEffect(() => {
-    if (subjectsData.length > 0) {
-      setSubjects(subjectsData)
-      if (!selectedSubject) {
-        setSelectedSubject(subjectsData[0])
-      }
+  const subjects = useMemo(() => {
+    if (!selectedSubject && subjectsData.length > 0) {
+      setSelectedSubject(subjectsData[0])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectsData])
+    return subjectsData
+  }, [subjectsData, selectedSubject])
 
-  const fetchWeeks = useCallback(async (semesterId: string) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const response = await weeklyScheduleApi.getWeeks(semesterId)
-      
-      if (response.success) {
-        const currentWeek = response.data.find((week: Week & { isCurrent?: boolean }) => week.isCurrent)
-        
-        setWeeks(response.data)
-        setSelectedWeek(currentWeek || response.data[0])
-      } else {
-        setWeeks([])
-        setSelectedWeek(null)
-      }
-    } catch {
-      setError("Lỗi khi tải danh sách tuần")
-      setWeeks([])
+  const { data: weeksData, isLoading: weeksLoading } = useQuery({
+    queryKey: queryKeys.schedule.weeks(selectedSemester?.semesterId || ''),
+    queryFn: async () => {
+      if (!selectedSemester) return { success: false, data: [], message: '' }
+      return weeklyScheduleApi.getWeeks(selectedSemester.semesterId)
+    },
+    enabled: !!selectedSemester,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  })
+
+  useMemo(() => {
+    if (weeksData?.success && weeksData.data.length > 0) {
+      const currentWeek = weeksData.data.find((w: Week & { isCurrent?: boolean }) => w.isCurrent)
+      setSelectedWeek(currentWeek || weeksData.data[0])
+    } else {
       setSelectedWeek(null)
-    } finally {
-      setIsLoading(false)
     }
-  }, [])
+  }, [weeksData])
 
-
-  const fetchWeeklySchedule = useCallback(async (semesterId: string, weekNumber: number) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await weeklyScheduleApi.getWeeklySchedule(semesterId, weekNumber)
-      
-      if (response.success) {
-        setScheduleData(response.data)
-      } else {
-        setScheduleData([])
-        setError(getScheduleErrorMessage(response))
-      }
-    } catch (error: unknown) {
-      setScheduleData([])
-      setError(handleScheduleError(error) || "Lỗi khi tải thời khóa biểu theo tuần")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const fetchWeeklyScheduleBySubject = useCallback(async (semesterId: string, weekNumber: number, subjectId: string) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await weeklyScheduleApi.getWeeklyScheduleBySubject(semesterId, weekNumber, subjectId)
-      
-      if (response.success) {
-        setScheduleData(response.data)
-      } else {
-        setScheduleData([])
-        setError(getScheduleErrorMessage(response))
-      }
-    } catch (error: unknown) {
-      setScheduleData([])
-      setError(handleScheduleError(error) || "Lỗi khi tải thời khóa biểu theo tuần và môn học")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-
-  // Load weeks when semester changes
-  useEffect(() => {
-    if (selectedSemester) {
-      fetchWeeks(selectedSemester.semesterId)
-    }
-  }, [selectedSemester, fetchWeeks])
-
-  // Load schedule when semester, week, or view type changes
-  useEffect(() => {
-    if (!selectedSemester || !selectedWeek) return
-
+  const scheduleQueryKey = useMemo(() => {
+    if (!selectedSemester || !selectedWeek) return null
+    
     if (viewType === "week") {
-      fetchWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
-    } else if (viewType === "subject" && selectedSubject) {
-      fetchWeeklyScheduleBySubject(selectedSemester.semesterId, selectedWeek.weekNumber, selectedSubject.subjectId)
+      return queryKeys.schedule.weekly(selectedSemester.semesterId, selectedWeek.weekNumber)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    if (viewType === "subject" && selectedSubject) {
+      return queryKeys.schedule.weeklyBySubject(
+        selectedSemester.semesterId,
+        selectedWeek.weekNumber,
+        selectedSubject.subjectId
+      )
+    }
+    
+    return null
   }, [selectedSemester, selectedWeek, viewType, selectedSubject])
 
-  // Handle semester change
+  const { data: scheduleResponse, isLoading: scheduleLoading, error: scheduleError } = useQuery({
+    queryKey: scheduleQueryKey || ['disabled'],
+    queryFn: async () => {
+      if (!selectedSemester || !selectedWeek) {
+        return { success: false, data: [], message: '' }
+      }
+      
+      if (viewType === "week") {
+        return weeklyScheduleApi.getWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
+      }
+      
+      if (viewType === "subject" && selectedSubject) {
+        return weeklyScheduleApi.getWeeklyScheduleBySubject(
+          selectedSemester.semesterId,
+          selectedWeek.weekNumber,
+          selectedSubject.subjectId
+        )
+      }
+      
+      return { success: false, data: [], message: '' }
+    },
+    enabled: !!scheduleQueryKey && !!selectedSemester && !!selectedWeek,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  })
+
+  const scheduleData: WeeklyScheduleItem[] = useMemo(
+    () => scheduleResponse?.data || [],
+    [scheduleResponse]
+  )
+
+  const error = useMemo(() => {
+    if (scheduleError) return "Lỗi khi tải thời khóa biểu"
+    if (scheduleResponse && !scheduleResponse.success && scheduleResponse.message) {
+      return scheduleResponse.message
+    }
+    return null
+  }, [scheduleError, scheduleResponse])
+
   const handleSemesterChange = useCallback((semesterId: string) => {
     const semester = semesters.find(s => s.semesterId === semesterId)
     if (semester) {
       setSelectedSemester(semester)
       setSelectedWeek(null)
       setSelectedSubject(null)
+      
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.schedule.weeks(semesterId),
+        queryFn: () => weeklyScheduleApi.getWeeks(semesterId),
+        staleTime: 30 * 60 * 1000,
+      })
     }
-  }, [semesters])
+  }, [semesters, queryClient])
 
-  // Handle week change
   const handleWeekChange = useCallback((weekNumber: number) => {
-    const week = weeks.find(w => w.weekNumber === weekNumber)
+    if (!weeksData?.data) return
+    const week = weeksData.data.find((w: Week) => w.weekNumber === weekNumber)
     if (week) {
       setSelectedWeek(week)
-    }
-  }, [weeks])
-
-  // Handle view type change
-  const handleViewTypeChange = useCallback((type: "week" | "subject") => {
-    const isTypeChanged = type !== viewType
-    setViewType(type)
-    setScheduleData([])
-    setError(null)
-    
-    // Force reload nếu chọn lại cùng option
-    if (!isTypeChanged && selectedSemester && selectedWeek) {
-      if (type === "week") {
-        fetchWeeklySchedule(selectedSemester.semesterId, selectedWeek.weekNumber)
-      } else if (type === "subject" && selectedSubject) {
-        fetchWeeklyScheduleBySubject(selectedSemester.semesterId, selectedWeek.weekNumber, selectedSubject.subjectId)
+      
+      if (selectedSemester) {
+        queryClient.prefetchQuery({
+          queryKey: queryKeys.schedule.weekly(selectedSemester.semesterId, weekNumber),
+          queryFn: () => weeklyScheduleApi.getWeeklySchedule(selectedSemester.semesterId, weekNumber),
+          staleTime: 5 * 60 * 1000,
+        })
       }
     }
-  }, [viewType, selectedSemester, selectedWeek, selectedSubject, fetchWeeklySchedule, fetchWeeklyScheduleBySubject])
+  }, [weeksData, selectedSemester, queryClient])
 
-  // Handle subject change
+  const handleViewTypeChange = useCallback((type: "week" | "subject") => {
+    setViewType(type)
+  }, [])
+
   const handleSubjectChange = useCallback((subjectCode: string) => {
     const subject = subjects.find(s => s.subjectCode === subjectCode)
     if (subject) {
@@ -184,7 +167,6 @@ export const useScheduleData = () => {
     }
   }, [subjects])
 
-  // Handle export PDF
   const handleExportPDF = useCallback(async () => {
     if (!selectedSemester) {
       toast.error('Vui lòng chọn học kỳ')
@@ -201,7 +183,6 @@ export const useScheduleData = () => {
       return
     }
     
-    // Kiểm tra xem có dữ liệu thời khóa biểu không
     if (!scheduleData || scheduleData.length === 0) {
       toast.error('Không có dữ liệu thời khóa biểu để xuất file PDF')
       return
@@ -212,20 +193,22 @@ export const useScheduleData = () => {
       if (viewType === 'week') {
         await weeklyScheduleApi.exportWeeklySchedulePDF(selectedSemester.semesterId, selectedWeek.weekNumber)
       } else if (viewType === 'subject' && selectedSubject) {
-        await weeklyScheduleApi.exportSubjectSchedulePDF(selectedSemester.semesterId, selectedWeek.weekNumber, selectedSubject.subjectId)
+        await weeklyScheduleApi.exportSubjectSchedulePDF(
+          selectedSemester.semesterId,
+          selectedWeek.weekNumber,
+          selectedSubject.subjectId
+        )
       }
       toast.success('Tải file PDF thành công!')
     } catch (error: unknown) {
       const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string }
       
-      // Xử lý lỗi 406 - thường là không có dữ liệu
       if (err?.response?.status === 406) {
         toast.error('Không có dữ liệu thời khóa biểu để xuất file PDF')
       } else {
         const errorMessage = err?.response?.data?.message || err?.message || 'Lỗi khi xuất file PDF'
         toast.error(errorMessage)
       }
-      // Không set error state để tránh hiển thị lỗi trên web
     } finally {
       setIsExporting(false)
     }
@@ -234,13 +217,13 @@ export const useScheduleData = () => {
   return {
     semesters,
     selectedSemester,
-    weeks,
+    weeks: weeksData?.data || [],
     selectedWeek,
     subjects,
     selectedSubject,
     scheduleData,
     viewType,
-    isLoading: isLoading || semestersLoading || subjectsLoading,
+    isLoading: semestersLoading || subjectsLoading || weeksLoading || scheduleLoading,
     isExporting,
     error,
     handleSemesterChange,

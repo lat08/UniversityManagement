@@ -2,7 +2,7 @@ export interface ExamEntry {
   examEntryId: string;
   examId: string;
   courseClassId: string;
-  examType: 'midterm' | 'final' | 'quiz';
+  examType: 'midterm' | 'final' | 'quiz' | 'makeup';
   subjectName: string;
   courseClassCode: string;
   displayName: string;
@@ -50,7 +50,7 @@ export interface GetExamEntryDetailResponse {
 
 export interface UploadExamRequest {
   courseClassId: string;
-  examType: 'midterm' | 'final' | 'quiz';
+  examType: 'midterm' | 'final' | 'quiz' | 'makeup';
   durationMinutes: number;
   description: string;
   questionFile: File;

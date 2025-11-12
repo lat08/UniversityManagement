@@ -1,24 +1,42 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { toast } from 'react-hot-toast'
+
 import { gradesApi } from '../api/gradesApi'
 import { CumulativeGradesData } from '../types/types'
 import { useSemesters } from '@/lib/hooks/useCommonData'
+import { queryKeys } from '@/lib/api/queryKeys'
 
 interface UseGradesReturn {
   cumulativeData: CumulativeGradesData | null
   commonSemesters: ReturnType<typeof useSemesters>['data']
   isLoading: boolean
   error: string | null
-  exportPdf: () => Promise<void>
+  exportPdf: () => void
+  isExporting: boolean
 }
 
 export const useGrades = (): UseGradesReturn => {
-  const [cumulativeData, setCumulativeData] = useState<CumulativeGradesData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  
   const { data: allSemesters, loading: semestersLoading } = useSemesters()
   
-  // Filter học kỳ: chỉ lấy các học kỳ có data điểm + theo startDate/endDate
+  const { 
+    data: cumulativeData = null, 
+    isLoading: gradesLoading,
+    error: gradesError,
+  } = useQuery({
+    queryKey: queryKeys.grades.cumulative(),
+    queryFn: async () => {
+      const response = await gradesApi.getCumulativeGrades()
+      if (response.success) {
+        return response.data
+      }
+      throw new Error(response.message || 'Không thể tải dữ liệu điểm')
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  })
+  
   const commonSemesters = useMemo(() => {
     if (!cumulativeData || !cumulativeData.semesters) return []
     
@@ -27,7 +45,6 @@ export const useGrades = (): UseGradesReturn => {
       cumulativeData.semesters.map(s => s.semesterId)
     )
     
-    // Lọc các semester: có điểm + startDate <= now
     return allSemesters.filter(semester => {
       const hasGrades = semesterIdsWithGrades.has(semester.semesterId)
       const hasStarted = semester.startDate && new Date(semester.startDate) <= now
@@ -35,54 +52,28 @@ export const useGrades = (): UseGradesReturn => {
     })
   }, [cumulativeData, allSemesters])
 
-  const fetchGrades = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const cumulativeResponse = await gradesApi.getCumulativeGrades()
-      
-      console.log('API Response - Cumulative Grades:', cumulativeResponse)
-      
-      if (cumulativeResponse.success) {
-        setCumulativeData(cumulativeResponse.data)
-      } else {
-        setError(cumulativeResponse.message || 'Không thể tải dữ liệu điểm')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const exportPdf = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
+  const { mutate: exportPdf, isPending: isExporting } = useMutation({
+    mutationFn: async () => {
       const blob = await gradesApi.exportTranscriptPdf()
       const fileName = `BangDiem_${new Date().toISOString().split('T')[0].replaceAll('-', '')}.pdf`
       
       const { downloadFileBlob } = await import('@/lib/utils/fileDownload')
       downloadFileBlob(blob, fileName)
-    } catch (err: unknown) {
-      console.error('Error exporting PDF:', err)
-      setError('Không thể xuất file PDF')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+    },
+    onError: () => {
+      toast.error('Không thể xuất file PDF')
+    },
+  })
 
-  useEffect(() => {
-    fetchGrades()
-  }, [fetchGrades])
+  const finalLoading = gradesLoading || semestersLoading
+  const finalData = finalLoading ? null : cumulativeData
 
   return {
-    cumulativeData,
+    cumulativeData: finalData,
     commonSemesters,
-    isLoading: isLoading || semestersLoading,
-    error,
+    isLoading: finalLoading,
+    error: gradesError?.message ?? null,
     exportPdf,
+    isExporting,
   }
 }

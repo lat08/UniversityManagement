@@ -1,3 +1,5 @@
+import type { GradeStatusType, GradeActionType } from './types';
+
 export const GRADE_STATUS = {
   DRAFT: 'Draft',
   PENDING_APPROVAL: 'PendingApproval',
@@ -5,14 +7,14 @@ export const GRADE_STATUS = {
   REJECTED: 'Rejected',
 } as const;
 
-export const GRADE_STATUS_LABELS: Record<string, string> = {
+export const GRADE_STATUS_LABELS: Record<GradeStatusType, string> = {
   Draft: 'Bản nháp',
   PendingApproval: 'Chờ duyệt',
   Approved: 'Đã duyệt',
   Rejected: 'Từ chối',
 };
 
-export const GRADE_STATUS_COLORS: Record<string, string> = {
+export const GRADE_STATUS_COLORS: Record<GradeStatusType, string> = {
   Draft: 'bg-gray-100 text-gray-700',
   PendingApproval: 'bg-yellow-100 text-yellow-700',
   Approved: 'bg-green-100 text-green-700',
@@ -30,7 +32,7 @@ export const GRADE_RANGE = {
   MAX: 10,
 } as const;
 
-export const GRADE_ACTION_LABELS: Record<string, string> = {
+export const GRADE_ACTION_LABELS: Record<GradeActionType, string> = {
   Submitted: 'Gửi duyệt',
   Approved: 'Đã duyệt',
   Rejected: 'Từ chối',
@@ -40,7 +42,7 @@ export const GRADE_ACTION_LABELS: Record<string, string> = {
   Edited: 'Chỉnh sửa',
 };
 
-export const GRADE_ACTION_COLORS: Record<string, string> = {
+export const GRADE_ACTION_COLORS: Record<GradeActionType, string> = {
   Submitted: 'bg-blue-100 text-blue-700',
   Approved: 'bg-green-100 text-green-700',
   Rejected: 'bg-red-100 text-red-700',

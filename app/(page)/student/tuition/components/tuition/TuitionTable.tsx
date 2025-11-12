@@ -17,14 +17,21 @@ interface TuitionTableProps {
 }
 
 export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectItem, isLoading, canSelectAll }: TuitionTableProps) {
-  if (isLoading) {
+  // Thêm giao diện khi không có dữ liệu
+  if (!data || data.length === 0) {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center p-8 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <Spinner />
+        </div>
+      );
+    }
     return (
-      <div className="flex items-center justify-center p-4">
-        <Spinner />
+      <div className="flex items-center justify-center p-8 bg-white border border-gray-200 rounded-lg shadow-sm">
+        <p className="text-gray-500 text-lg">Không có dữ liệu học phí.</p>
       </div>
     );
   }
-
 
   // Lọc ra các mục có thể chọn (trạng thái không phải 'completed')
   const selectableData = data.filter(item => item.status.toLowerCase() !== 'completed');
@@ -32,15 +39,6 @@ export default function TuitionTable({ data, selectedIds, onSelectAll, onSelectI
   // Tính toán trạng thái chọn dựa trên selectableData
   const someSelected = selectedIds.length > 0 && selectedIds.length < selectableData.length;
   const isAllSelected = selectedIds.length > 0 && selectedIds.length === selectableData.length;
-
-  // Thêm giao diện khi không có dữ liệu
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-8 bg-white border border-gray-200 rounded-lg shadow-sm">
-        <p className="text-gray-500 text-lg">Không có dữ liệu học phí.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="overflow-x-auto">

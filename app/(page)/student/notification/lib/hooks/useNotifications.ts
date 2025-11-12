@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { notificationApi } from "@/lib/api/notification";
-import { NotificationApiItem, NotificationQueryParams, NotificationType } from "@/lib/types/notification";
+import { NotificationApiItem, NotificationQueryParams, NotificationReadStatus, NotificationType } from "@/lib/types/notification";
 
 const PAGE_SIZE = 10;
 
-type UseNotificationsOptions = {
+interface UseNotificationsOptions {
+  notificationType: NotificationType;
+  readStatus: NotificationReadStatus;
   role?: string;
   searchTerm?: string;
-};
+}
 
-export const useNotifications = (activeFilter: NotificationType, options: UseNotificationsOptions = {}) => {
-  const { role, searchTerm } = options;
+export const useNotifications = (options: UseNotificationsOptions) => {
+  const { notificationType, readStatus, role, searchTerm } = options;
   const [notifications, setNotifications] = useState<NotificationApiItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export const useNotifications = (activeFilter: NotificationType, options: UseNot
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchNotifications = useCallback(async (filterType: NotificationType, page: number = 1) => {
+  const fetchNotifications = useCallback(async (page: number = 1) => {
     try {
       setLoading(true);
       setError(null);
@@ -29,12 +31,16 @@ export const useNotifications = (activeFilter: NotificationType, options: UseNot
         Role: role,
       };
       
-      if (filterType && filterType !== "all") {
-        params.NotificationType = filterType;
+      if (notificationType && notificationType !== "all") {
+        params.NotificationType = notificationType;
       }
 
       if (searchTerm) {
         params.SearchTerm = searchTerm;
+      }
+
+      if (readStatus !== "all") {
+        params.IsRead = readStatus === "read";
       }
 
       const response = await notificationApi.getNotifications(params);
@@ -47,32 +53,36 @@ export const useNotifications = (activeFilter: NotificationType, options: UseNot
       } else {
         setError(response.resultMessage || "Không thể tải thông báo");
       }
-    } catch (err: unknown) {
-      console.error('Error fetching notifications:', err);
+    } catch {
       setError("Đã xảy ra lỗi khi tải thông báo");
     } finally {
       setLoading(false);
     }
-  }, [role, searchTerm]);
+  }, [notificationType, readStatus, role, searchTerm]);
 
   // Reset to page 1 when filter/search/role changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeFilter, role, searchTerm]);
+  }, [notificationType, readStatus, role, searchTerm]);
 
   // Fetch notifications when dependencies change
   useEffect(() => {
-    fetchNotifications(activeFilter, currentPage);
-  }, [activeFilter, currentPage, fetchNotifications]);
+    void fetchNotifications(currentPage);
+  }, [currentPage, fetchNotifications]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
       const response = await notificationApi.markAsRead(id);
       
       if (response.isSuccess) {
-        setNotifications(prev => 
-          prev.map(n => n.scheduleId === id ? { ...n, isRead: true } : n)
-        );
+        setNotifications(prev => {
+          if (readStatus === "unread") {
+            return prev.filter(notification => notification.scheduleId !== id);
+          }
+          return prev.map(notification => 
+            notification.scheduleId === id ? { ...notification, isRead: true } : notification
+          );
+        });
         // Notify other parts of the app (e.g., header bell) to refresh unread count
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('notifications:updated', { detail: { source: 'markAsRead', id } }))
@@ -80,11 +90,10 @@ export const useNotifications = (activeFilter: NotificationType, options: UseNot
         return true;
       }
       return false;
-    } catch (err: unknown) {
-      console.error('Error marking notification as read:', err);
+    } catch {
       return false;
     }
-  }, []);
+  }, [readStatus]);
 
   return {
     notifications,
@@ -95,7 +104,7 @@ export const useNotifications = (activeFilter: NotificationType, options: UseNot
     totalCount,
     pageSize: PAGE_SIZE,
     setCurrentPage,
-    refetch: () => fetchNotifications(activeFilter, currentPage),
+    refetch: () => fetchNotifications(currentPage),
     markAsRead
   };
 };

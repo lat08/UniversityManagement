@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react";
-import { Upload, Trash2, Paperclip } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
+import { useState, useRef, useEffect } from "react"
+import { Upload, Trash2, Paperclip } from "lucide-react"
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -11,28 +11,30 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/app/components/ui/dialog";
-import { DropdownSearch, Dropdown } from "@/app/components/ui";
-import type { Document } from "./DocumentCard";
-import { handleFileClick, handleFileDrop, handleDragOver, handleFileInputChange } from "../lib/utils/modalHandlers";
+} from "@/app/components/ui/dialog"
+import { DropdownSearch, Dropdown } from "@/app/components/ui"
+import type { Document } from "./DocumentCard"
+import { handleFileClick, handleFileDrop, handleDragOver, handleFileInputChange } from "../lib/utils/modalHandlers"
 
 interface EditDocumentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit?: (data: EditFormData) => void;
-  document: Document | null;
-  courseClasses?: { id: string; name: string }[];
-  documentTypes?: { id: string; name: string }[];
+  isOpen: boolean
+  onClose: () => void
+  onSubmit?: (data: EditFormData) => Promise<void>
+  document: Document | null
+  courseClasses?: { id: string; name: string }[]
+  documentTypes?: { id: string; name: string }[]
+  isUpdating?: boolean
+  isLoadingCourseClasses?: boolean
 }
 
 export interface EditFormData {
-  subjectClass: string;
-  documentType: string;
-  documentName: string;
-  description: string;
-  file: File | null;
-  existingFileName?: string;
-  shouldDeleteFile?: boolean;
+  subjectClass: string
+  documentType: string
+  documentName: string
+  description: string
+  file: File | null
+  existingFileName?: string
+  shouldDeleteFile?: boolean
 }
 
 export function EditDocumentModal({
@@ -42,6 +44,8 @@ export function EditDocumentModal({
   document,
   courseClasses = [],
   documentTypes = [],
+  isUpdating = false,
+  isLoadingCourseClasses = false,
 }: EditDocumentModalProps) {
   const [formData, setFormData] = useState<EditFormData>({
     subjectClass: "",
@@ -119,15 +123,16 @@ export function EditDocumentModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      onSubmit?.(formData);
-      handleClose();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validateForm() && onSubmit) {
+      await onSubmit(formData)
     }
-  };
+  }
 
   const handleClose = () => {
+    if (isUpdating) return
+    
     setFormData({
       subjectClass: "",
       documentType: "",
@@ -136,13 +141,13 @@ export function EditDocumentModal({
       file: null,
       existingFileName: undefined,
       shouldDeleteFile: false,
-    });
-    setErrors({});
+    })
+    setErrors({})
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = ""
     }
-    onClose();
-  };
+    onClose()
+  }
 
   const hasExistingFile = formData.existingFileName && !formData.shouldDeleteFile;
   const hasNewFile = formData.file !== null;
@@ -166,16 +171,23 @@ export function EditDocumentModal({
               Môn học - lớp
               <span className="text-red-500">*</span>
             </label>
-            <DropdownSearch
-              options={courseClasses.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              value={formData.subjectClass}
-              onChange={(value) => handleInputChange("subjectClass", value)}
-              placeholder="Chọn phương án"
-              buttonClassName="border-gray-300"
-            />
+            {isLoadingCourseClasses ? (
+              <div className="h-10 w-full rounded-md border border-gray-300 bg-gray-50 flex items-center justify-center">
+                <span className="text-sm text-gray-500">Đang tải danh sách lớp...</span>
+              </div>
+            ) : (
+              <DropdownSearch
+                options={courseClasses.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                }))}
+                value={formData.subjectClass}
+                onChange={(value) => handleInputChange("subjectClass", value)}
+                placeholder="Chọn phương án"
+                buttonClassName="border-gray-300"
+                disabled={isUpdating}
+              />
+            )}
             {errors.subjectClass && (
               <p className="text-sm text-red-500">{errors.subjectClass}</p>
             )}
@@ -196,6 +208,7 @@ export function EditDocumentModal({
               onChange={(value) => handleInputChange("documentType", value)}
               placeholder="Chọn loại"
               buttonClassName="border-gray-300"
+              disabled={isUpdating}
             />
             {errors.documentType && (
               <p className="text-sm text-red-500">{errors.documentType}</p>
@@ -214,6 +227,7 @@ export function EditDocumentModal({
               value={formData.documentName}
               onChange={(e) => handleInputChange("documentName", e.target.value)}
               className="border-gray-300"
+              disabled={isUpdating}
             />
             {errors.documentName && (
               <p className="text-sm text-red-500">{errors.documentName}</p>
@@ -231,6 +245,7 @@ export function EditDocumentModal({
               onChange={(e) => handleInputChange("description", e.target.value)}
               className="flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
               rows={3}
+              disabled={isUpdating}
             />
           </div>
 
@@ -242,12 +257,17 @@ export function EditDocumentModal({
               onChange={handleFileChange}
               className="hidden"
               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+              disabled={isUpdating}
             />
             <div
-              onClick={onFileClick}
-              onDrop={onFileDrop}
-              onDragOver={onDragOver}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+              onClick={isUpdating ? undefined : onFileClick}
+              onDrop={isUpdating ? undefined : onFileDrop}
+              onDragOver={isUpdating ? undefined : onDragOver}
+              className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
+                isUpdating
+                  ? 'cursor-not-allowed opacity-50'
+                  : 'cursor-pointer hover:border-blue-500 hover:bg-blue-50'
+              }`}
             >
               <div className="flex flex-col items-center gap-3">
                 <Upload className="w-8 h-8 text-gray-400" />
@@ -292,19 +312,21 @@ export function EditDocumentModal({
               variant="outline"
               onClick={handleClose}
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+              disabled={isUpdating}
             >
               Hủy
             </Button>
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isUpdating}
             >
-              Cập nhật
+              {isUpdating ? "Đang cập nhật..." : "Cập nhật"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 

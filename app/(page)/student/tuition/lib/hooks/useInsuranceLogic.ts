@@ -1,8 +1,7 @@
-// lib/hooks/useInsuranceLogic.ts
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { payInsurance, getInsuranceExcel } from "../api/financeApi";
 import { useToast } from "@/app/components/ui/toast";
-import { Insurance } from "../types/types";
+import type { Insurance } from "../types/types";
 import { extractPaymentIdFromQrUrl } from "../utils/paymentUtils";
 
 export const useInsuranceLogic = (
@@ -16,30 +15,28 @@ export const useInsuranceLogic = (
   const toast = useToast();
   const [selectedInsuranceId, setSelectedInsuranceId] = useState<string | null>(null);
 
-  const selectedInsuranceItems = useMemo(() => {
-    return selectedInsuranceId 
-      ? insurances.filter(insurance => insurance.studentHealthInsuranceId === selectedInsuranceId)
-      : [];
-  }, [insurances, selectedInsuranceId]);
+  const selectedInsuranceItems = useMemo(
+    () => selectedInsuranceId ? insurances.filter(insurance => insurance.studentHealthInsuranceId === selectedInsuranceId) : [],
+    [insurances, selectedInsuranceId]
+  );
 
-  const handleSelectInsurance = (id: string) => {
-    setSelectedInsuranceId(selectedInsuranceId === id ? null : id);
-  };
+  const handleSelectInsurance = useCallback((id: string) => {
+    setSelectedInsuranceId(prev => prev === id ? null : id);
+  }, []);
 
-  const handleExportInsurance = async () => {
+  const handleExportInsurance = useCallback(async () => {
     try {
       setIsLoading(true);
       await getInsuranceExcel();
       toast.success('Đang tải xuống danh sách bảo hiểm');
-    } catch (error) {
-      console.error('Error exporting insurance:', error);
+    } catch {
       toast.error('Không thể tải xuống file. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setIsLoading, toast]);
 
-  const handleInsurancePayment = async () => {
+  const handleInsurancePayment = useCallback(async () => {
     if (!selectedInsuranceId) {
       toast.error('Vui lòng chọn bảo hiểm để thanh toán');
       return;
@@ -63,13 +60,12 @@ export const useInsuranceLogic = (
       } else {
         toast.error(res.message || 'Thanh toán thất bại');
       }
-    } catch (error) {
-      console.error('Error processing insurance payment:', error);
+    } catch {
       toast.error('Không thể xử lý thanh toán bảo hiểm');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedInsuranceId, setIsLoading, setQrUrl, setPaymentId, setQrIframeLoading, setIsQrOpen, toast]);
 
   return {
     selectedInsuranceId,

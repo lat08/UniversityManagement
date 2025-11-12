@@ -1,8 +1,22 @@
 "use client"
 
+import { memo, useMemo, useCallback } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "@/lib/constants/schedule"
+
+const HIGHLIGHT_KEYFRAMES = `
+@keyframes highlight-blink {
+  0%, 100% { 
+    background-color: inherit;
+    box-shadow: none;
+  }
+  50% { 
+    background-color: rgb(254 249 195);
+    box-shadow: 0 0 0 3px rgb(253 224 71 / 0.5);
+  }
+}
+`
 
 export interface CourseItem {
   id: string
@@ -26,6 +40,7 @@ interface WeeklyScheduleGridProps {
   readonly onCourseHover?: (courseId: string, event: React.MouseEvent) => void
   readonly onCourseLeave?: () => void
   readonly hoveredCourseId?: string | null
+  readonly highlightedCourseId?: string | null
   readonly onPreviousWeek?: () => void
   readonly onNextWeek?: () => void
   readonly canGoPrevious?: boolean
@@ -35,12 +50,41 @@ interface WeeklyScheduleGridProps {
   readonly showCode?: boolean
 }
 
-export function WeeklyScheduleGrid({
+const COLOR_CLASSES: Record<string, { bg: string; hover: string; border: string }> = {
+  blue: {
+    bg: "bg-[var(--schedule-theory-bg)]",
+    hover: "bg-[var(--schedule-theory-bg-hover)]",
+    border: "border-[var(--schedule-theory-border)]",
+  },
+  red: {
+    bg: "bg-[var(--schedule-practice-bg)]",
+    hover: "bg-[var(--schedule-practice-bg-hover)]",
+    border: "border-[var(--schedule-practice-border)]",
+  },
+  green: {
+    bg: "bg-[var(--chart-2)]",
+    hover: "bg-[var(--success)]",
+    border: "border-[var(--success)]",
+  },
+  yellow: {
+    bg: "bg-[var(--chart-3)]",
+    hover: "bg-[var(--warning)]",
+    border: "border-[var(--warning)]",
+  },
+}
+
+const getColorClasses = (color: string, isHovered: boolean): string => {
+  const colorClass = COLOR_CLASSES[color] || COLOR_CLASSES.blue
+  return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--schedule-cell-text)]`
+}
+
+export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
   scheduleData,
   weekDates,
   onCourseHover,
   onCourseLeave,
   hoveredCourseId,
+  highlightedCourseId,
   onPreviousWeek,
   onNextWeek,
   canGoPrevious = false,
@@ -48,41 +92,31 @@ export function WeeklyScheduleGrid({
   showClass = false,
   showTeacher = true,
   showCode = false,
-}: WeeklyScheduleGridProps) {
-  const getColorClasses = (color: string, isHovered: boolean) => {
-    const colors: Record<string, { bg: string; hover: string; border: string }> = {
-      blue: {
-        bg: "bg-[var(--schedule-theory-bg)]",
-        hover: "bg-[var(--schedule-theory-bg-hover)]",
-        border: "border-[var(--schedule-theory-border)]",
-      },
-      red: {
-        bg: "bg-[var(--schedule-practice-bg)]",
-        hover: "bg-[var(--schedule-practice-bg-hover)]",
-        border: "border-[var(--schedule-practice-border)]",
-      },
-      green: {
-        bg: "bg-[var(--chart-2)]",
-        hover: "bg-[var(--success)]",
-        border: "border-[var(--success)]",
-      },
-      yellow: {
-        bg: "bg-[var(--chart-3)]",
-        hover: "bg-[var(--warning)]",
-        border: "border-[var(--warning)]",
-      },
-    }
+}) => {
+  const formattedDates = useMemo(() => 
+    weekDates.map(date => 
+      date ? `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}` : ''
+    ),
+    [weekDates]
+  )
 
-    const colorClass = colors[color] || colors.blue
-    return `${isHovered ? colorClass.hover : colorClass.bg} ${colorClass.border} border-2 text-[var(--schedule-cell-text)]`
-  }
+  const findCourse = useCallback((dayValue: number, period: number) => 
+    scheduleData.find(c => c.dayOfWeek === dayValue && c.startPeriod === period),
+    [scheduleData]
+  )
+
+  const handleCourseClick = useCallback((courseId: string, event: React.MouseEvent) => {
+    onCourseHover?.(courseId, event)
+  }, [onCourseHover])
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden p-3">
-      <div>
-        <div className="inline-block min-w-full align-middle">
-          {/* Header Row */}
-          <div className="flex gap-2 mb-2">
+    <>
+      <style dangerouslySetInnerHTML={{ __html: HIGHLIGHT_KEYFRAMES }} />
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden p-3">
+        <div>
+          <div className="inline-block min-w-full align-middle">
+            {/* Header Row */}
+            <div className="flex gap-2 mb-2">
             {/* Top left corner button - Previous Week */}
             <div className="w-[90px] flex-shrink-0">
               <button 
@@ -101,9 +135,7 @@ export function WeeklyScheduleGrid({
 
             {/* Days of week */}
             {DAYS_OF_WEEK.map((day: { value: number; label: string; subLabel: string }, index: number) => {
-              const dayDate = weekDates[index];
-              const formattedDate = dayDate ? 
-                `${dayDate.getDate().toString().padStart(2, '0')}/${(dayDate.getMonth() + 1).toString().padStart(2, '0')}` : '';
+              const formattedDate = formattedDates[index]
               
               return (
                 <div
@@ -113,7 +145,7 @@ export function WeeklyScheduleGrid({
                   <div className="font-semibold text-sm">{day.label}</div>
                   <div className="text-xs mt-1">{formattedDate || day.subLabel}</div>
                 </div>
-              );
+              )
             })}
 
             {/* Top right corner button - Next Week */}
@@ -144,9 +176,7 @@ export function WeeklyScheduleGrid({
 
                 {/* Day Cells */}
                 {DAYS_OF_WEEK.map((day: { value: number; label: string }) => {
-                  const course = scheduleData.find(
-                    (c) => c.dayOfWeek === day.value && c.startPeriod === period
-                  )
+                  const course = findCourse(day.value, period)
 
                   return (
                     <div
@@ -156,16 +186,20 @@ export function WeeklyScheduleGrid({
                       {course && (
                         <button
                           type="button"
+                          data-course-id={course.id}
                           className={cn(
                             "absolute inset-0 rounded-lg p-2.5 cursor-pointer transition-all duration-200 z-10 course-cell text-left",
                             getColorClasses(course.color, hoveredCourseId === course.id)
                           )}
                           style={{
                             height: `${course.periodsCount * 52 + (course.periodsCount - 1) * 8}px`,
+                            ...(highlightedCourseId === course.id && {
+                              animation: 'highlight-blink 0.8s ease-in-out 2'
+                            })
                           }}
                           onMouseEnter={(e) => onCourseHover?.(course.id, e)}
                           onMouseLeave={onCourseLeave}
-                          onClick={(e) => onCourseHover?.(course.id, e)}
+                          onClick={(e) => handleCourseClick(course.id, e)}
                         >
                           <div className="text-sm font-bold uppercase leading-tight mb-1.5 text-gray-900">
                             {course.name}
@@ -178,7 +212,13 @@ export function WeeklyScheduleGrid({
                             )}
                             {showClass && course.class && (
                               <div>
-                                <strong>Lớp:</strong> {course.class}
+                                <strong>Lớp:</strong> {(() => {
+                                  const classes = course.class.split(/[,;\s]+/).filter(c => c.trim());
+                                  if (classes.length > 5) {
+                                    return classes.slice(0, 3).join(', ') + '...';
+                                  }
+                                  return course.class;
+                                })()}
                               </div>
                             )}
                             <div>
@@ -205,7 +245,10 @@ export function WeeklyScheduleGrid({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
-}
+})
+
+WeeklyScheduleGrid.displayName = 'WeeklyScheduleGrid'
 

@@ -1,38 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { Note } from "../lib/types/types";
-import { createNote, updateNote, deleteNote } from "../lib/api/examScheduleApi";
+import { Note, CreateNoteRequest } from "../lib/types/types";
 
 interface NotesSectionProps {
   notes: Note[];
-  onNotesChange: () => void;
+  onCreateNote: (data: CreateNoteRequest) => Promise<unknown>;
+  onUpdateNote: (params: { noteId: string; content: string }) => Promise<unknown>;
+  onDeleteNote: (noteId: string) => Promise<unknown>;
+  loading?: boolean;
+  isBusy?: boolean;
 }
 
-export default function NotesSection({ notes, onNotesChange }: NotesSectionProps) {
+export default function NotesSection({ 
+  notes, 
+  onCreateNote, 
+  onUpdateNote, 
+  onDeleteNote, 
+  loading = false,
+  isBusy = false,
+}: NotesSectionProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState("");
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateNote = async () => {
-    if (!newNoteContent.trim()) {
-      alert("Nội dung ghi chú không được để trống");
-      return;
-    }
+    if (!newNoteContent.trim()) return;
 
-    setIsLoading(true);
     try {
-      await createNote({ content: newNoteContent.trim() });
+      await onCreateNote({ content: newNoteContent.trim() });
       setNewNoteContent("");
       setIsCreating(false);
-      onNotesChange();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Tạo ghi chú thất bại";
-      alert(message);
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // Error handled by mutation
     }
   };
 
@@ -47,35 +48,22 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
   };
 
   const handleUpdateNote = async (noteId: string) => {
-    if (!editingContent.trim()) {
-      alert("Nội dung ghi chú không được để trống");
-      return;
-    }
+    if (!editingContent.trim()) return;
 
-    setIsLoading(true);
     try {
-      await updateNote(noteId, { content: editingContent.trim() });
+      await onUpdateNote({ noteId, content: editingContent.trim() });
       setEditingNoteId(null);
       setEditingContent("");
-      onNotesChange();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Cập nhật ghi chú thất bại";
-      alert(message);
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // Error handled by mutation
     }
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    setIsLoading(true);
     try {
-      await deleteNote(noteId);
-      onNotesChange();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Xóa ghi chú thất bại";
-      alert(message);
-    } finally {
-      setIsLoading(false);
+      await onDeleteNote(noteId);
+    } catch {
+      // Error handled by mutation
     }
   };
 
@@ -88,10 +76,10 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
           </svg>
           Ghi chú
         </h3>
-        {!isCreating && (
+        {!loading && !isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            disabled={isLoading}
+            disabled={isBusy}
             title="Tạo ghi chú mới"
             className="flex items-center gap-1 px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
           >
@@ -103,7 +91,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
         )}
       </div>
 
-      {isCreating && (
+      {isCreating && !loading && (
         <div className="mb-3 p-3 bg-white rounded-lg border-2 border-[#4196F0]">
           <textarea
             value={newNoteContent}
@@ -112,12 +100,12 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
             className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4196F0] resize-none"
             rows={3}
             autoFocus
-            disabled={isLoading}
+            disabled={isBusy}
           />
           <div className="flex gap-2 mt-2">
             <button
               onClick={handleCreateNote}
-              disabled={isLoading}
+              disabled={isBusy || !newNoteContent.trim()}
               title="Lưu ghi chú"
               className="px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
             >
@@ -128,7 +116,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                 setIsCreating(false);
                 setNewNoteContent("");
               }}
-              disabled={isLoading}
+              disabled={isBusy}
               title="Hủy tạo ghi chú"
               className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
             >
@@ -139,7 +127,21 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
       )}
 
       <div className="space-y-2 lg:space-y-3 flex-1 overflow-y-auto">
-        {notes.length > 0 ? (
+        {loading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="animate-pulse rounded-lg border border-blue-200 bg-white p-3"
+            >
+              <div className="h-4 w-full rounded bg-gray-200" />
+              <div className="mt-2 h-4 w-3/4 rounded bg-gray-200" />
+              <div className="mt-4 flex gap-2">
+                <div className="h-8 w-16 rounded bg-gray-200" />
+                <div className="h-8 w-16 rounded bg-gray-200" />
+              </div>
+            </div>
+          ))
+        ) : notes.length > 0 ? (
           notes.map((note, index) => (
             <div
               key={note.noteId}
@@ -156,12 +158,12 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                     onChange={(e) => setEditingContent(e.target.value)}
                     className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4196F0] resize-none"
                     rows={3}
-                    disabled={isLoading}
+                    disabled={isBusy}
                   />
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => handleUpdateNote(note.noteId)}
-                      disabled={isLoading}
+                      disabled={isBusy || !editingContent.trim()}
                       title="Lưu thay đổi"
                       className="px-3 py-1.5 bg-[#4196F0] text-white text-sm rounded-md hover:bg-[#3182ce] hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
                     >
@@ -169,7 +171,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                     </button>
                     <button
                       onClick={handleCancelEdit}
-                      disabled={isLoading}
+                      disabled={isBusy}
                       title="Hủy chỉnh sửa"
                       className="px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 hover:shadow-md transition-all disabled:opacity-50 disabled:hover:shadow-none cursor-pointer disabled:cursor-not-allowed"
                     >
@@ -185,7 +187,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                   <div className="flex gap-1 flex-shrink-0">
                     <button
                       onClick={() => handleStartEdit(note)}
-                      disabled={isLoading}
+                      disabled={isBusy}
                       className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       title="Sửa ghi chú"
                     >
@@ -195,7 +197,7 @@ export default function NotesSection({ notes, onNotesChange }: NotesSectionProps
                     </button>
                     <button
                       onClick={() => handleDeleteNote(note.noteId)}
-                      disabled={isLoading}
+                      disabled={isBusy}
                       className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       title="Xóa ghi chú"
                     >

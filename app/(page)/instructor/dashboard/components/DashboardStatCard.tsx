@@ -1,26 +1,32 @@
 "use client";
 
+import { memo, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { BookOpen, FileText, Pencil } from "lucide-react";
-import { DashboardStatCard as DashboardStatCardType } from "../lib/types/types";
 import { useCountUp } from "@/lib/hooks/useCountUp";
+import { DashboardStatCard as DashboardStatCardType } from "../lib/types/types";
 
 interface DashboardStatCardProps {
   data: DashboardStatCardType;
 }
 
-export default function DashboardStatCard({ data }: DashboardStatCardProps) {
+const DashboardStatCard = ({ data }: DashboardStatCardProps) => {
   const numericValue = typeof data.value === 'number' ? data.value : 0;
   const countValue = useCountUp(numericValue, { duration: 1500 });
   const displayValue = typeof data.value === 'number' ? countValue : data.value;
 
-  const getIcon = () => {
+  const Icon = useMemo(() => {
     if (data.title.includes("Lớp")) return BookOpen;
     if (data.title.includes("Tài liệu")) return FileText;
     return Pencil;
-  };
+  }, [data.title]);
 
-  const Icon = getIcon();
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (data.onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      data.onClick();
+    }
+  }, [data]);
 
   return (
     <Card 
@@ -28,12 +34,7 @@ export default function DashboardStatCard({ data }: DashboardStatCardProps) {
       onClick={data.onClick}
       role={data.onClick ? 'button' : undefined}
       tabIndex={data.onClick ? 0 : undefined}
-      onKeyDown={data.onClick ? (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          data.onClick?.();
-        }
-      } : undefined}
+      onKeyDown={data.onClick ? handleKeyDown : undefined}
     >
       <CardContent className="p-4 lg:p-5 relative">
         <div className="absolute top-4 right-4">
@@ -61,5 +62,7 @@ export default function DashboardStatCard({ data }: DashboardStatCardProps) {
       </CardContent>
     </Card>
   );
-}
+};
+
+export default memo(DashboardStatCard);
 

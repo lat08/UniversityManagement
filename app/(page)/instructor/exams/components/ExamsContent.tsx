@@ -1,60 +1,65 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { ExamsHeader } from "./ExamsHeader";
 import { ExamsFilters } from "./ExamsFilters";
 import { ExamCard } from "./ExamCard";
-import { UploadExamModal, type UploadExamFormData } from "./UploadExamModal";
-import { ExamDetailModal } from "./ExamDetailModal";
+import { ExamsSkeleton } from "./ExamsSkeleton";
 import { useExamEntries } from "../lib/hooks/useExamEntries";
-import { useSemesters, useSubjects } from "@/lib/hooks";
-import { useProfile } from "../../profile/lib/hooks/useProfile";
-import { UpdateExamRequest } from "../lib/types";
 import { useExamActions } from "../lib/hooks/useExamActions";
-import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useExamFilters } from "../lib/hooks/useExamFilters";
+import { UpdateExamRequest } from "../lib/types";
 import { Pagination } from "@/app/components/ui/pagination";
-import { SEARCH_DEBOUNCE_MS, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER } from "../lib/constants";
-import type { GetExamEntriesParams } from "../lib/types";
+import { DEFAULT_PAGE_SIZE } from "../lib/constants";
 
-export function ExamsContent() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("all");
-  const [selectedSubject, setSelectedSubject] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedExamType, setSelectedExamType] = useState("all");
-  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE_NUMBER);
+const UploadExamModal = lazy(() => 
+  import("./UploadExamModal").then(m => ({ default: m.UploadExamModal }))
+);
+const ExamDetailModal = lazy(() => 
+  import("./ExamDetailModal").then(m => ({ default: m.ExamDetailModal }))
+);
+
+export interface UploadExamFormData {
+  courseClassId: string;
+  examType: string;
+  durationMinutes: number;
+  description: string;
+  questionFile: File | null;
+  answerFile: File | null;
+}
+
+export const ExamsContent = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
 
-  const { data: semesters, loading: semestersLoading } = useSemesters();
-  const { profile } = useProfile();
-  const { data: subjects, loading: subjectsLoading } = useSubjects({ 
-    instructorId: profile?.instructorId,
-    semesterId: selectedSemester === "all" ? undefined : selectedSemester
-  });
+  const {
+    searchQuery,
+    setSearchQuery,
+    selectedSemester,
+    setSelectedSemester,
+    selectedSubject,
+    setSelectedSubject,
+    selectedStatus,
+    setSelectedStatus,
+    selectedExamType,
+    setSelectedExamType,
+    currentPage,
+    setCurrentPage,
+    filterParams,
+    semesterOptions,
+    subjectOptions,
+    statuses,
+    examTypes,
+    semestersLoading,
+    subjectsLoading,
+  } = useExamFilters();
 
-  const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
-
-  const filterParams = useMemo<GetExamEntriesParams>(() => ({
-    searchKeyword: debouncedSearchQuery || undefined,
-    semesterId: selectedSemester === "all" ? undefined : selectedSemester,
-    subjectId: selectedSubject === "all" ? undefined : selectedSubject,
-    status: selectedStatus === "all" ? undefined : selectedStatus,
-    examType: selectedExamType === "all" ? undefined : selectedExamType,
-    pageNumber: currentPage,
-    pageSize: DEFAULT_PAGE_SIZE,
-  }), [debouncedSearchQuery, selectedSemester, selectedSubject, selectedStatus, selectedExamType, currentPage]);
-
-  const { examEntries, totalCount, totalPages, loading, error, refetch } = useExamEntries(filterParams);
-
-  useEffect(() => {
-    setCurrentPage(DEFAULT_PAGE_NUMBER);
-  }, [debouncedSearchQuery, selectedSemester, selectedSubject, selectedStatus, selectedExamType]);
+  const { examEntries, totalCount, totalPages, loading, error } = useExamEntries(filterParams);
 
   const { uploadExam, updateExam, downloadExamFile, isUploading, isUpdating } = useExamActions(() => {
-    refetch();
     setIsUploadModalOpen(false);
+    setSelectedExamId(null);
   });
 
   const courseClassesOptions = useMemo(() => {
@@ -69,29 +74,6 @@ export function ExamsContent() {
     }
     return Array.from(uniqueClasses.values());
   }, [examEntries]);
-
-  const semesterOptions = useMemo(() => [
-    { id: "all", name: "Tất cả học kỳ" },
-    ...semesters.map(s => ({ id: s.semesterId, name: s.semesterName }))
-  ], [semesters]);
-
-  const subjectOptions = useMemo(() => 
-    subjects.map(s => ({ id: s.subjectId, name: `${s.subjectCode} - ${s.subjectName}` }))
-  , [subjects]);
-
-  const statuses = useMemo(() => [
-    { id: "all", name: "Tất cả trạng thái" },
-    { id: "approved", name: "Đã duyệt" },
-    { id: "pending", name: "Chờ duyệt" },
-    { id: "rejected", name: "Từ chối" },
-  ], []);
-
-  const examTypes = useMemo(() => [
-    { id: "all", name: "Tất cả loại" },
-    { id: "midterm", name: "Giữa kỳ" },
-    { id: "final", name: "Cuối kỳ" },
-    { id: "quiz", name: "15 phút" },
-  ], []);
 
   const handleUpload = () => {
     setIsUploadModalOpen(true);
@@ -111,7 +93,7 @@ export function ExamsContent() {
 
     const uploadData = {
       courseClassId: data.courseClassId,
-      examType: data.examType as 'midterm' | 'final' | 'quiz',
+      examType: data.examType as 'midterm' | 'final' | 'quiz' | 'makeup',
       durationMinutes: data.durationMinutes,
       description: data.description || '',
       questionFile: data.questionFile!,
@@ -136,14 +118,7 @@ export function ExamsContent() {
   };
 
   if (examEntries.length === 0 && loading) {
-    return (
-      <div className="space-y-6">
-        <ExamsHeader onUploadClick={handleUpload} />
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <p className="text-gray-600">Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    );
+    return <ExamsSkeleton />;
   }
 
   if (error) {
@@ -212,27 +187,34 @@ export function ExamsContent() {
         </div>
       )}
 
-      <UploadExamModal
-        isOpen={isUploadModalOpen}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          setSelectedExamId(null);
-        }}
-        onSubmit={handleUploadSubmit}
-        isLoading={isUploading || isUpdating}
-        courseClasses={courseClassesOptions}
-        examEntryId={selectedExamId}
-      />
+      {isUploadModalOpen && (
+        <Suspense fallback={null}>
+          <UploadExamModal
+            isOpen={isUploadModalOpen}
+            onClose={() => {
+              setIsUploadModalOpen(false);
+              setSelectedExamId(null);
+            }}
+            onSubmit={handleUploadSubmit}
+            isLoading={isUploading || isUpdating}
+            courseClasses={courseClassesOptions}
+            examEntryId={selectedExamId}
+          />
+        </Suspense>
+      )}
 
-      <ExamDetailModal
-        examEntryId={selectedExamId}
-        isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedExamId(null);
-        }}
-      />
+      {isDetailModalOpen && (
+        <Suspense fallback={null}>
+          <ExamDetailModal
+            examEntryId={selectedExamId}
+            isOpen={isDetailModalOpen}
+            onClose={() => {
+              setIsDetailModalOpen(false);
+              setSelectedExamId(null);
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
-}
-
+};

@@ -1,22 +1,26 @@
 "use client";
 
-import { useMemo } from "react";
+import { Suspense, lazy, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import { useAuthStore } from "@/lib/store/authStore";
 import DashboardStatCard from "./components/DashboardStatCard";
-import WeeklyScheduleTimeline from "./components/WeeklyScheduleTimeline";
-import RemindersSection from "./components/RemindersSection";
+import { DashboardSkeleton } from "./components/dashboard-skeleton";
 import { DashboardStatCard as DashboardStatCardType } from "./lib/types/types";
 import { useDashboard } from "./lib/hooks/useDashboard";
+import { useDashboardRealtime } from "./lib/hooks/useDashboardRealtime";
+
+const WeeklyScheduleTimeline = lazy(() => import("./components/WeeklyScheduleTimeline"));
+const RemindersSection = lazy(() => import("./components/RemindersSection"));
 
 export default function InstructorDashboardPage() {
   usePageTitle('Bảng điều khiển');
+  useDashboardRealtime({ enabled: true });
 
   const router = useRouter();
   const { user } = useAuthStore();
-  const { dashboard: dashboardData, loading } = useDashboard();
+  const { data: dashboardData, isLoading } = useDashboard();
 
   const stats = useMemo((): DashboardStatCardType[] => {
     if (!dashboardData) {
@@ -84,6 +88,10 @@ export default function InstructorDashboardPage() {
     ];
   }, [dashboardData, router]);
 
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="space-y-4 lg:space-y-6">
       <div>
@@ -116,13 +124,15 @@ export default function InstructorDashboardPage() {
                 TKB học kỳ
               </Link>
             </div>
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <p className="text-gray-500 text-sm">Đang tải lịch dạy...</p>
-              </div>
-            ) : dashboardData && dashboardData.weeklySchedule.length > 0 ? (
-              <WeeklyScheduleTimeline schedules={dashboardData.weeklySchedule} />
+            {dashboardData && dashboardData.weeklySchedule.length > 0 ? (
+              <Suspense fallback={
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                  <p className="text-gray-500 text-sm">Đang tải lịch dạy...</p>
+                </div>
+              }>
+                <WeeklyScheduleTimeline schedules={dashboardData.weeklySchedule} />
+              </Suspense>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,11 +145,27 @@ export default function InstructorDashboardPage() {
         </div>
 
         <div className="lg:col-span-4">
-          {dashboardData ? (
-            <RemindersSection reminders={dashboardData.reminders} />
-          ) : (
-            <RemindersSection reminders={[]} />
-          )}
+          <Suspense fallback={
+            <div className="bg-[#DBEDFF] rounded-lg p-4 lg:p-6 min-h-[400px] border-2 border-[#4196F0]">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-3">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="p-3 rounded-lg bg-white/50">
+                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="h-3 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          }>
+            {dashboardData ? (
+              <RemindersSection reminders={dashboardData.reminders} />
+            ) : (
+              <RemindersSection reminders={[]} />
+            )}
+          </Suspense>
         </div>
       </div>
     </div>

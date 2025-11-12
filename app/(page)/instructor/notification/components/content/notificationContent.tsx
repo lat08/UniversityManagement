@@ -1,6 +1,10 @@
-import { NotificationsContent as StudentNotificationsContent } from "@/app/(page)/student/notification/components/content/notificationContent";
+import { NotificationsContent as SharedNotificationsContent } from "@/app/(page)/student/notification/components/content/notificationContent";
 
-export function NotificationsContent() {
-  return <StudentNotificationsContent role="Instructor" />;
+interface NotificationsContentProps {
+  role?: string;
+}
+
+export function NotificationsContent({ role = "Instructor" }: NotificationsContentProps) {
+  return <SharedNotificationsContent role={role} />;
 }
 

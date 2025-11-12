@@ -3,12 +3,14 @@
 import { Calendar, CalendarClock, CalendarCheck } from "lucide-react";
 import { ExamStatCard as ExamStatCardType } from "../lib/types/types";
 import { useCountUp } from "@/lib/hooks/useCountUp";
+import { memo } from "react";
 
 interface ExamStatCardProps {
   data: ExamStatCardType;
+  loading?: boolean;
 }
 
-export default function ExamStatCard({ data }: ExamStatCardProps) {
+const ExamStatCard = memo(function ExamStatCard({ data, loading = false }: ExamStatCardProps) {
   const numericValue = typeof data.value === 'number' ? data.value : 0;
   const countValue = useCountUp(numericValue, { duration: 1500 });
   const countProgress = useCountUp(data.progress ?? 0, { duration: 1000 });
@@ -39,16 +41,32 @@ export default function ExamStatCard({ data }: ExamStatCardProps) {
 
   const { Icon, quarterCircleBg, iconColor } = getIconAndColors();
 
-  // Determine text color for main value
   const getMainValueColor = () => {
     if (data.title.includes("sắp tới")) return 'text-red-600';
     if (data.title.includes("đã thi")) return 'text-green-600';
     return 'text-gray-900';
   };
 
+  if (loading) {
+    return (
+      <div className="relative overflow-hidden rounded-lg bg-white p-4 shadow-sm sm:p-6">
+        <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[100%] bg-gray-200" />
+        <div className="space-y-3">
+          <div className="h-3 w-28 animate-pulse rounded bg-gray-200" />
+          <div className="h-8 w-20 animate-pulse rounded bg-gray-200" />
+          <div className="h-3 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-2 w-full animate-pulse rounded bg-gray-200" />
+          <div className="flex items-center gap-2">
+            <div className="h-3 flex-1 animate-pulse rounded bg-gray-200" />
+            <div className="h-3 w-12 animate-pulse rounded bg-gray-200" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
-      {/* Quarter-circle decorative element with icon */}
       <div className={`absolute top-0 right-0 w-20 h-20 ${quarterCircleBg} rounded-bl-[100%]`}>
         <div className="absolute top-5 right-5">
           <Icon className={`w-6 h-6 ${iconColor} flex-shrink-0`} strokeWidth={2} />
@@ -92,5 +110,7 @@ export default function ExamStatCard({ data }: ExamStatCardProps) {
       )}
     </div>
   );
-}
+});
+
+export default ExamStatCard;
 

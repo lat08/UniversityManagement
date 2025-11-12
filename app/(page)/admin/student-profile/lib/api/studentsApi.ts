@@ -56,7 +56,7 @@ export const studentsApi = {
     }
 
     // Xóa Content-Type để axios tự động set multipart/form-data với boundary
-    const response = await api.post<ApiResponse<CreateStudentResponse>>('/v1/students', formData, {
+    const response = await api.post<ApiResponse<CreateStudentResponse>>('/v1/admin/students', formData, {
       headers: {
         'Content-Type': undefined,
       },
@@ -227,7 +227,7 @@ export const studentsApi = {
     }
 
     // Xóa Content-Type để axios tự động set multipart/form-data với boundary
-    const response = await api.put<ApiResponse<CreateStudentResponse>>(`/v1/students/${studentId}`, formData, {
+    const response = await api.put<ApiResponse<CreateStudentResponse>>(`/v1/admin/students/${studentId}`, formData, {
       headers: {
         'Content-Type': undefined,
       },

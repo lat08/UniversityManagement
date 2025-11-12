@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, memo } from "react"
 import { cn } from "@/lib/utils/utils"
 
 interface SemesterCourse {
@@ -28,14 +28,14 @@ interface SemesterScheduleTableProps {
   readonly highlightSubjectCode?: string
 }
 
-export function SemesterScheduleTable({
+export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
   scheduleData,
   isLoading,
   showCredits = true,
   showClass = true,
   showInstructor = true,
   highlightSubjectCode,
-}: SemesterScheduleTableProps) {
+}) => {
   const highlightedRowRef = useRef<HTMLTableRowElement>(null)
   const [isHighlighting, setIsHighlighting] = useState(false)
 
@@ -243,5 +243,7 @@ export function SemesterScheduleTable({
       </div>
     </div>
   )
-}
+})
+
+SemesterScheduleTable.displayName = 'SemesterScheduleTable'
 

@@ -1,16 +1,11 @@
 import { api } from "@/lib/api/client";
-import { 
+import type { 
   GetMaterialsResponse, 
   GetDocumentTypesResponse, 
   GetMaterialsParams,
 } from "../types/types";
 
 export const documentsApi = {
-  /**
-   * Get materials/documents for current user with optional filters
-   * @param params - Search and filter parameters
-   * @returns Promise with materials response
-   */
   getMaterials: async (params?: GetMaterialsParams): Promise<GetMaterialsResponse> => {
     const queryParams = new URLSearchParams();
     
@@ -37,23 +32,9 @@ export const documentsApi = {
     const url = queryString ? `/v1/materials/GetMaterials?${queryString}` : '/v1/materials/GetMaterials';
     
     const response = await api.get<GetMaterialsResponse>(url);
-    const apiResponse = response.data;
-    
-    if (!apiResponse) {
-      throw new Error('Invalid API response: missing response');
-    }
-    
-    if (apiResponse.data && !Array.isArray(apiResponse.data.items)) {
-      apiResponse.data.items = [];
-    }
-    
-    return apiResponse;
+    return response.data;
   },
 
-  /**
-   * Get distinct document types available for the student
-   * @returns Promise with document types response
-   */
   getDocumentTypes: async (): Promise<GetDocumentTypesResponse> => {
     const response = await api.get<GetDocumentTypesResponse>('/v1/materials/student/document-types');
     return response.data;

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { X, Copy, ExternalLink } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { Spinner } from "@/app/components/ui/spinner";
 import { usePaymentStatusPolling } from "../lib/hooks/usePaymentStatusPolling";
+import type { PaymentStatus } from "../lib/types/types";
 
 interface QrPaymentModalProps {
   isOpen: boolean;
@@ -16,9 +18,9 @@ interface QrPaymentModalProps {
 
 export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPaymentSuccess }: QrPaymentModalProps) {
   const [qrLoading, setQrLoading] = useState(true);
-  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | 'failed'>('pending');
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('pending');
 
-  const handleStatusChange = (status: 'pending' | 'completed' | 'failed') => {
+  const handleStatusChange = useCallback((status: PaymentStatus) => {
     setPaymentStatus(status);
     
     if (status === 'completed') {
@@ -27,12 +29,9 @@ export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPa
         duration: 3000,
       });
       
-      // Đóng modal sau 1 giây và refetch data
       setTimeout(() => {
         onClose();
-        if (onPaymentSuccess) {
-          onPaymentSuccess();
-        }
+        onPaymentSuccess?.();
       }, 1000);
     } else if (status === 'failed') {
       toast.error('Thanh toán thất bại. Vui lòng thử lại.', {
@@ -40,7 +39,7 @@ export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPa
         duration: 5000,
       });
     }
-  };
+  }, [onClose, onPaymentSuccess]);
 
   usePaymentStatusPolling({
     paymentId,
@@ -55,33 +54,32 @@ export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPa
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     if (!qrUrl) return;
     navigator.clipboard.writeText(qrUrl);
     toast.success("Đã sao chép link QR!");
-  };
+  }, [qrUrl]);
 
-  const handleOpenNewTab = () => {
+  const handleOpenNewTab = useCallback(() => {
     if (qrUrl) window.open(qrUrl, "_blank");
-  };
+  }, [qrUrl]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-xl w-[95%] max-w-lg p-4 animate-in fade-in-50">
-        {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-4">
           <h2 className="text-lg font-semibold text-gray-800">QR Thanh toán</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
+            aria-label="Đóng"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Status Message */}
         {paymentStatus === 'pending' && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800 text-center">Đang chờ thanh toán...</p>
@@ -100,8 +98,7 @@ export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPa
           </div>
         )}
 
-        {/* QR Display */}
-        <div className="flex items-center justify-center h-[50vh] bg-gray-50 rounded-lg border">
+        <div className="flex items-center justify-center h-[50vh] bg-gray-50 rounded-lg border relative">
           {qrLoading && (
             <div className="flex items-center justify-center h-full">
               <Spinner />
@@ -109,24 +106,24 @@ export default function QrPaymentModal({ isOpen, qrUrl, paymentId, onClose, onPa
           )}
 
           {qrUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={qrUrl}
               alt="QR Thanh toán"
-              title="QR Thanh toán"
+              width={256}
+              height={256}
               className={`object-contain transition-opacity duration-300 ${
                 qrLoading ? "opacity-0" : "opacity-100"
-              } w-56 h-56 md:w-64 md:h-64`}
+              }`}
               onLoad={() => setQrLoading(false)}
               onError={() => {
                 setQrLoading(false);
                 toast.error("Không thể tải QR. Vui lòng thử lại!");
               }}
+              unoptimized
             />
           )}
         </div>
 
-        {/* Actions */}
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={handleCopy}

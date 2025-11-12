@@ -19,6 +19,14 @@ export interface ScheduleChangeResponse {
     subjectName: string;
     subjectCode: string;
     cancelledWeek: number;
+    cancelledDate: string | null;
+    cancelledDateText: string | null;
+    cancelledRoomCode: string | null;
+    cancelledRoomName: string | null;
+    cancelledDayOfWeek: number | null;
+    cancelledDayOfWeekText: string | null;
+    cancelledStartPeriod: number | null;
+    cancelledEndPeriod: number | null;
     makeupWeek: number | null;
     makeupDate: string | null;
     makeupRoomCode: string | null;
@@ -69,6 +77,7 @@ export interface MakeupSlotSuggestionsRequest {
   courseClassId: string;
   cancelledWeek: number;
   makeupWeek: number;
+  makeupDate?: string;
   preferredRoomType?: string;
   preferredBuildingId?: string;
 }
@@ -87,5 +96,68 @@ export interface MakeupSlotSuggestionsResponse {
     suggestions: MakeupSlotSuggestion[];
     occupiedSlots: OccupiedSlot[];
   };
+}
+
+export interface AdminScheduleChangeRequestDto {
+  scheduleChangeRequestId: string;
+  courseClassId: string;
+  subjectName: string;
+  subjectCode: string;
+  instructorName: string;
+  cancelledWeek: number;
+  cancelledDate: string | null;
+  cancelledDateText: string | null;
+  cancelledRoomCode: string | null;
+  cancelledRoomName: string | null;
+  cancelledDayOfWeek: number | null;
+  cancelledDayOfWeekText: string | null;
+  cancelledStartPeriod: number | null;
+  cancelledEndPeriod: number | null;
+  makeupWeek: number | null;
+  makeupDate: string | null;
+  makeupRoomCode: string | null;
+  makeupRoomName: string | null;
+  dayOfWeek: number;
+  dayOfWeekText: string;
+  startPeriod: number;
+  endPeriod: number;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  reviewedAt: string | null;
+  reviewNote: string | null;
+}
+
+export interface ScheduleChangeHistoryDto {
+  scheduleChangeId: string;
+  courseClassId: string;
+  subjectName: string;
+  subjectCode: string;
+  cancelledWeek: number;
+  cancelledDate: string | null;
+  cancelledDateText: string | null;
+  cancelledRoomCode: string | null;
+  cancelledRoomName: string | null;
+  cancelledDayOfWeek: number | null;
+  cancelledDayOfWeekText: string | null;
+  cancelledStartPeriod: number | null;
+  cancelledEndPeriod: number | null;
+  makeupWeek: number | null;
+  makeupDate: string | null;
+  makeupRoomCode: string | null;
+  makeupRoomName: string | null;
+  dayOfWeek: number;
+  dayOfWeekText: string;
+  startPeriod: number;
+  endPeriod: number;
+  reason: string;
+  createdAt: string;
+  reportFileUrl: string | null;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 

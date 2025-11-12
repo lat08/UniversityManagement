@@ -3,7 +3,9 @@
 import { X, CheckCircle, Clock, XCircle, FileText } from 'lucide-react';
 import { Table, type TableColumn } from '@/app/components/ui/table';
 import { formatDateTime } from '@/lib/utils/format';
-import { GRADE_WEIGHTS, GRADE_STATUS_LABELS, GRADE_STATUS_COLORS } from '../lib/constants';
+import { calculateAverage } from '@/lib/utils/grade-calculator';
+import { formatGrade } from '@/lib/utils/grade-calculator';
+import { GRADE_STATUS_LABELS, GRADE_STATUS_COLORS, GRADE_WEIGHTS } from '../lib/constants';
 import type { GradeVersionDetailDto, InstructorGradeDto } from '../lib/types';
 
 interface GradeVersionModalProps {
@@ -34,20 +36,6 @@ export const GradeVersionModal = ({
     }
   };
 
-  const calculateAverage = (student: InstructorGradeDto): number | null => {
-    const { attendanceGrade, midtermGrade, finalGrade } = student;
-    if (attendanceGrade === null || midtermGrade === null || finalGrade === null) {
-      return null;
-    }
-    return parseFloat(
-      (
-        attendanceGrade * GRADE_WEIGHTS.ATTENDANCE +
-        midtermGrade * GRADE_WEIGHTS.MIDTERM +
-        finalGrade * GRADE_WEIGHTS.FINAL
-      ).toFixed(1)
-    );
-  };
-
   const columns: TableColumn[] = [
     { key: 'mssv', label: 'MSSV', align: 'left' },
     { key: 'fullName', label: 'Họ và tên', align: 'left' },
@@ -64,13 +52,13 @@ export const GradeVersionModal = ({
         <td className="px-6 py-4 text-sm text-gray-900">{student.mssv}</td>
         <td className="px-6 py-4 text-sm text-gray-900">{student.fullName}</td>
         <td className="px-6 py-4 text-sm text-center text-gray-900">
-          {student.attendanceGrade !== null ? student.attendanceGrade.toFixed(1) : '-'}
+          {formatGrade(student.attendanceGrade)}
         </td>
         <td className="px-6 py-4 text-sm text-center text-gray-900">
-          {student.midtermGrade !== null ? student.midtermGrade.toFixed(1) : '-'}
+          {formatGrade(student.midtermGrade)}
         </td>
         <td className="px-6 py-4 text-sm text-center text-gray-900">
-          {student.finalGrade !== null ? student.finalGrade.toFixed(1) : '-'}
+          {formatGrade(student.finalGrade)}
         </td>
         <td className="px-6 py-4 text-sm text-center">
           <span
@@ -82,7 +70,7 @@ export const GradeVersionModal = ({
                   : 'text-gray-400'
             }`}
           >
-            {average !== null ? average.toFixed(1) : '-'}
+            {formatGrade(average)}
           </span>
         </td>
       </>

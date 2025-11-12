@@ -26,7 +26,7 @@ export const CourseClassSelector = ({
   isSemestersLoading,
 }: CourseClassSelectorProps) => {
   const courseClassOptions = [
-    { value: '', label: 'Chọn lớp học phần' },
+    { value: '', label: isLoading ? 'Đang tải lớp học phần...' : 'Chọn lớp học phần' },
     ...courseClasses.map((cc) => ({
       value: cc.courseClassId,
       label: `${cc.courseCode} - ${cc.courseName}`,
@@ -34,7 +34,7 @@ export const CourseClassSelector = ({
   ];
 
   const semesterOptions = [
-    { value: '', label: 'Tất cả học kỳ' },
+    { value: '', label: isSemestersLoading ? 'Đang tải học kỳ...' : 'Tất cả học kỳ' },
     ...semesters.map((s) => ({
       value: s.semesterId,
       label: s.semesterName,
@@ -49,7 +49,7 @@ export const CourseClassSelector = ({
           <Dropdown
             options={semesterOptions}
             value={selectedSemesterId}
-            placeholder="Chọn học kỳ"
+            placeholder={isSemestersLoading ? 'Đang tải học kỳ...' : 'Chọn học kỳ'}
             onChange={onSemesterChange}
             disabled={isSemestersLoading}
           />
@@ -60,7 +60,7 @@ export const CourseClassSelector = ({
         <DropdownSearch
           options={courseClassOptions}
           value={selectedCourseClassId}
-          placeholder="Chọn lớp học phần"
+          placeholder={isLoading ? 'Đang tải danh sách lớp học phần...' : 'Chọn lớp học phần'}
           onChange={onSelect}
           disabled={isLoading}
         />

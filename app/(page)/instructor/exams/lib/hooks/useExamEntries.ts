@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { examsApi } from '../api/examsApi';
-import { ExamEntry, ExamEntryDetail, GetExamEntriesParams } from '../types';
+import { GetExamEntriesParams, ExamEntry, ExamEntryDetail } from '../types';
+import { queryKeys } from '@/lib/api/queryKeys';
+import { useMemo } from 'react';
 
 interface UseExamEntriesReturn {
   examEntries: ExamEntry[];
@@ -15,73 +17,44 @@ interface UseExamEntriesReturn {
   refetch: () => void;
 }
 
+const normalizeParams = (params?: GetExamEntriesParams): GetExamEntriesParams => {
+  if (!params) return {};
+  
+  return Object.fromEntries(
+    Object.entries(params)
+      .filter(([, value]) => value !== undefined && value !== null && value !== '')
+      .sort(([a], [b]) => a.localeCompare(b))
+  ) as GetExamEntriesParams;
+};
+
 export const useExamEntries = (params?: GetExamEntriesParams): UseExamEntriesReturn => {
-  const [examEntries, setExamEntries] = useState<ExamEntry[]>([]);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [hasPreviousPage, setHasPreviousPage] = useState<boolean>(false);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const normalizedParams = useMemo(() => normalizeParams(params), [params]);
 
-  const fetchExamEntries = useCallback(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await examsApi.getExamEntries(params);
-        
-        if (response.success && response.data) {
-          setExamEntries(response.data.items);
-          setTotalCount(response.data.totalCount);
-          setPageNumber(response.data.pageNumber);
-          setPageSize(response.data.pageSize);
-          setTotalPages(response.data.totalPages);
-          setHasPreviousPage(response.data.hasPreviousPage);
-          setHasNextPage(response.data.hasNextPage);
-        } else {
-          setError(response.message || 'Không thể tải danh sách đề thi');
-          setExamEntries([]);
-          setTotalCount(0);
-        }
-      } catch (err: unknown) {
-        const errorMessage = 
-          (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
-          (err as { message?: string })?.message ||
-          'Đã xảy ra lỗi khi tải danh sách đề thi. Vui lòng thử lại sau.';
-        setError(errorMessage);
-        setExamEntries([]);
-        setTotalCount(0);
-      } finally {
-        setLoading(false);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.exams.list(normalizedParams),
+    queryFn: async () => {
+      const response = await examsApi.getExamEntries(normalizedParams);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Không thể tải danh sách đề thi');
       }
-    };
-    
-    void loadData();
-  }, [params]);
-
-  useEffect(() => {
-    fetchExamEntries();
-  }, [fetchExamEntries]);
-
-  const handleRefetch = useCallback(() => {
-    fetchExamEntries();
-  }, [fetchExamEntries]);
+      return response.data;
+    },
+    staleTime: 30000,
+    gcTime: 300000,
+    refetchOnWindowFocus: false,
+  });
 
   return {
-    examEntries,
-    totalCount,
-    pageNumber,
-    pageSize,
-    totalPages,
-    hasPreviousPage,
-    hasNextPage,
-    loading,
-    error,
-    refetch: handleRefetch,
+    examEntries: data?.items ?? [],
+    totalCount: data?.totalCount ?? 0,
+    pageNumber: data?.pageNumber ?? 1,
+    pageSize: data?.pageSize ?? 10,
+    totalPages: data?.totalPages ?? 0,
+    hasPreviousPage: data?.hasPreviousPage ?? false,
+    hasNextPage: data?.hasNextPage ?? false,
+    loading: isLoading,
+    error: error ? (error as Error).message : null,
+    refetch: () => void refetch(),
   };
 };
 
@@ -92,56 +65,29 @@ interface UseExamEntryDetailReturn {
   refetch: () => void;
 }
 
-export const useExamEntryDetail = (
-  examEntryId: string | null
-): UseExamEntryDetailReturn => {
-  const [examEntryDetail, setExamEntryDetail] = useState<ExamEntryDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchExamEntryDetail = useCallback(async () => {
-    if (!examEntryId) {
-      setExamEntryDetail(null);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await examsApi.getExamEntryDetail(examEntryId);
-      
-      if (response.success && response.data) {
-        setExamEntryDetail(response.data);
-      } else {
-        setError(response.message || 'Không thể tải chi tiết đề thi');
-        setExamEntryDetail(null);
+export const useExamEntryDetail = (examEntryId: string | null): UseExamEntryDetailReturn => {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.exams.detail(examEntryId ?? ''),
+    queryFn: async () => {
+      if (!examEntryId) {
+        throw new Error('Exam entry ID is required');
       }
-    } catch (err: unknown) {
-      const errorMessage = 
-        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        'Đã xảy ra lỗi khi tải chi tiết đề thi. Vui lòng thử lại sau.';
-      setError(errorMessage);
-      setExamEntryDetail(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [examEntryId]);
-
-  useEffect(() => {
-    void fetchExamEntryDetail();
-  }, [fetchExamEntryDetail]);
-
-  const handleRefetch = useCallback(() => {
-    void fetchExamEntryDetail();
-  }, [fetchExamEntryDetail]);
+      const response = await examsApi.getExamEntryDetail(examEntryId);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Không thể tải chi tiết đề thi');
+      }
+      return response.data;
+    },
+    enabled: !!examEntryId,
+    staleTime: 60000,
+    gcTime: 300000,
+  });
 
   return {
-    examEntryDetail,
-    loading,
-    error,
-    refetch: handleRefetch,
+    examEntryDetail: data ?? null,
+    loading: isLoading,
+    error: error ? (error as Error).message : null,
+    refetch: () => void refetch(),
   };
 };
 

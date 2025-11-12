@@ -1,30 +1,17 @@
-import { useEffect, useState, useCallback } from "react";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/api/queryKeys";
 import { getDashboardData } from "../api/dashboardApi";
-import { DashboardResponse } from "../types/types";
 
 export const useDashboard = () => {
-  const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchDashboard = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getDashboardData();
-      setDashboard(data);
-    } catch (err: unknown) {
-      console.error("Error fetching dashboard:", err);
-      setError("Không thể tải dữ liệu bảng điều khiển");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
-
-  return { dashboard, loading, error, refetch: fetchDashboard };
+  return useQuery({
+    queryKey: queryKeys.dashboard.instructor(),
+    queryFn: getDashboardData,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: false,
+  });
 };
 

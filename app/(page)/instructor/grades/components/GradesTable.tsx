@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
 import { Table, type TableColumn } from '@/app/components/ui/table';
+import { validateGrade, formatGrade } from '@/lib/utils/grade-calculator';
 import type { InstructorGradeDto } from '../lib/types';
 import { GRADE_WEIGHTS, GRADE_RANGE } from '../lib/constants';
 
@@ -10,32 +11,33 @@ interface GradesTableProps {
   students: InstructorGradeDto[];
   canEdit: boolean;
   onGradeChange: (enrollmentId: string, field: keyof InstructorGradeDto, value: number | null) => void;
+  isPending?: boolean;
 }
 
-export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTableProps) => {
+export const GradesTable = ({ students, canEdit, onGradeChange, isPending = false }: GradesTableProps) => {
   const [editingCell, setEditingCell] = useState<{ enrollmentId: string; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
 
-  const handleEdit = (enrollmentId: string, field: string, currentValue: number | null) => {
+  const handleEdit = useCallback((enrollmentId: string, field: string, currentValue: number | null) => {
     if (!canEdit) return;
     setEditingCell({ enrollmentId, field });
     setEditValue(currentValue?.toString() ?? '');
-  };
+  }, [canEdit]);
 
-  const handleSave = (enrollmentId: string, field: keyof InstructorGradeDto) => {
+  const handleSave = useCallback((enrollmentId: string, field: keyof InstructorGradeDto) => {
     const numValue = editValue === '' ? null : parseFloat(editValue);
-    if (numValue !== null && (numValue < GRADE_RANGE.MIN || numValue > GRADE_RANGE.MAX)) {
+    if (!validateGrade(numValue)) {
       alert(`Điểm phải nằm trong khoảng ${GRADE_RANGE.MIN}-${GRADE_RANGE.MAX}`);
       return;
     }
     onGradeChange(enrollmentId, field, numValue);
     setEditingCell(null);
-  };
+  }, [editValue, onGradeChange]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditingCell(null);
     setEditValue('');
-  };
+  }, []);
 
   const calculateAverage = (student: InstructorGradeDto): number | null => {
     const { attendanceGrade, midtermGrade, finalGrade } = student;
@@ -51,7 +53,7 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
     );
   };
 
-  const renderEditableCell = (
+  const renderEditableCell = useCallback((
     student: InstructorGradeDto,
     field: 'attendanceGrade' | 'midtermGrade' | 'finalGrade',
     value: number | null,
@@ -75,11 +77,13 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
             }}
             className="w-16 px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
+            disabled={isPending}
           />
           <button
             onClick={() => handleSave(student.enrollmentId, field)}
             className="p-1 text-green-600 hover:bg-green-50 rounded"
             title="Lưu"
+            disabled={isPending}
           >
             <Save className="w-4 h-4" />
           </button>
@@ -87,6 +91,7 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
             onClick={handleCancel}
             className="p-1 text-red-600 hover:bg-red-50 rounded"
             title="Hủy"
+            disabled={isPending}
           >
             <X className="w-4 h-4" />
           </button>
@@ -100,15 +105,15 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
       <div className="flex items-center justify-center gap-2 group">
         <div className="flex flex-col items-center">
           <span className={value === null ? 'text-gray-400' : hasChanged ? 'text-blue-600 font-medium' : ''}>
-            {value !== null ? value.toFixed(1) : '-'}
+            {formatGrade(value)}
           </span>
           {hasChanged && previousValue !== null && (
             <span className="text-xs text-gray-400 line-through">
-              {previousValue.toFixed(1)}
+              {formatGrade(previousValue)}
             </span>
           )}
         </div>
-        {canEdit && (
+        {canEdit && !isPending && (
           <button
             onClick={() => handleEdit(student.enrollmentId, field, value)}
             className="opacity-0 group-hover:opacity-100 p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
@@ -119,7 +124,7 @@ export const GradesTable = ({ students, canEdit, onGradeChange }: GradesTablePro
         )}
       </div>
     );
-  };
+  }, [editingCell, editValue, canEdit, isPending, handleEdit, handleSave, handleCancel]);
 
   const columns: TableColumn[] = [
     { key: 'mssv', label: 'MSSV', align: 'left' },

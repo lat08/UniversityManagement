@@ -11,11 +11,26 @@ export default function AppProviders({ children }: { children: React.ReactNode }
   const [client] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60_000,
-        retry: 1,
-        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
+        gcTime: 10 * 60 * 1000, // 10 minutes cache (renamed from cacheTime)
+        retry: (failureCount, error) => {
+          // Don't retry on 4xx errors
+          if (error instanceof Error && 'status' in error) {
+            const status = (error as { status?: number }).status;
+            if (status && status >= 400 && status < 500) return false;
+          }
+          return failureCount < 2;
+        },
+        refetchOnWindowFocus: true, // Enable for real-time feel
+        refetchOnReconnect: true,
+        refetchInterval: false, // Disable polling by default
       },
-      mutations: { retry: 0 },
+      mutations: { 
+        retry: 0,
+        onError: () => {
+          // Global mutation error handler - can add logging service here
+        },
+      },
     },
   }));
 

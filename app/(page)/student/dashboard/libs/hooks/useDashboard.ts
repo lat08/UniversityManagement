@@ -1,53 +1,44 @@
-import { useEffect, useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../api/dashboardApi";
 import { gradesApi } from "@/app/(page)/student/grades/lib/api/gradesApi";
-import { DashboardData, emptyDashboardData } from "../types/types";
+import type { DashboardData } from "../types/types";
 
-export const useDashboard = () => {
-  const [dashboard, setDashboard] = useState<DashboardData>(emptyDashboardData);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const DASHBOARD_QUERY_KEY = ["student-dashboard"] as const;
+const DASHBOARD_STALE_TIME = 5 * 60 * 1000;
+const DASHBOARD_GC_TIME = 15 * 60 * 1000;
 
-  const fetchDashboard = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Fetch dashboard data và cumulative grades song song
-      const [dashboardData, gradesData] = await Promise.all([
-        dashboardApi.getDashBoard(),
-        gradesApi.getCumulativeGrades(),
-      ]);
-
-      // Merge data: Lấy KPI từ cumulative grades, phần còn lại từ dashboard
-      setDashboard({
-        ...dashboardData,
-        kpi: {
-          gpa: gradesData.data.cumulativeGPA4,
-          completedCredits: gradesData.data.totalCompletedCredits,
-          totalCredits: gradesData.data.totalRequiredCredits,
-          ranking: getGpaRanking(gradesData.data.cumulativeGPA4),
-        },
-      });
-    } catch (err: unknown) {
-      console.error("Error fetching dashboard:", err);
-      setError("Không thể tải dữ liệu dashboard");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
-
-  return { dashboard, loading, error, refetch: fetchDashboard };
-};
-
-// Helper function to get ranking from GPA
 const getGpaRanking = (gpa: number): string => {
   if (gpa >= 3.6) return "Xuất sắc";
   if (gpa >= 3.2) return "Giỏi";
   if (gpa >= 2.5) return "Khá";
   if (gpa >= 2.0) return "Trung bình";
   return "Yếu";
+};
+
+const fetchDashboard = async (): Promise<DashboardData> => {
+  const [dashboardData, gradesData] = await Promise.all([
+    dashboardApi.getDashBoard(),
+    gradesApi.getCumulativeGrades(),
+  ]);
+
+  return {
+    ...dashboardData,
+    kpi: {
+      gpa: gradesData.data.cumulativeGPA4,
+      completedCredits: gradesData.data.totalCompletedCredits,
+      totalCredits: gradesData.data.totalRequiredCredits,
+      ranking: getGpaRanking(gradesData.data.cumulativeGPA4),
+    },
+  };
+};
+
+export const useDashboard = () => {
+  return useQuery({
+    queryKey: DASHBOARD_QUERY_KEY,
+    queryFn: fetchDashboard,
+    staleTime: DASHBOARD_STALE_TIME,
+    gcTime: DASHBOARD_GC_TIME,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
 };

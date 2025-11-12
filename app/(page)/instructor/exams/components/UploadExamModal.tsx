@@ -32,6 +32,27 @@ export interface UploadExamFormData {
   answerFile: File | null;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
+const validateFile = (file: File | null): string | null => {
+  if (!file) return null;
+  
+  if (file.size > MAX_FILE_SIZE) {
+    return 'Kích thước file không được vượt quá 10MB';
+  }
+  
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    return 'Chỉ hỗ trợ file PDF, DOC, DOCX';
+  }
+  
+  return null;
+};
+
 export function UploadExamModal({
   isOpen,
   onClose,
@@ -56,6 +77,7 @@ export function UploadExamModal({
     { id: "midterm", name: "Giữa kỳ" },
     { id: "final", name: "Cuối kỳ" },
     { id: "quiz", name: "15 phút" },
+    { id: "makeup", name: "Thi lại" },
   ];
 
   const handleInputChange = (field: keyof UploadExamFormData, value: string | number) => {
@@ -67,6 +89,13 @@ export function UploadExamModal({
 
   const handleQuestionFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    const validationError = validateFile(file);
+    
+    if (validationError) {
+      setErrors((prev) => ({ ...prev, questionFile: validationError }));
+      return;
+    }
+    
     setFormData((prev) => ({ ...prev, questionFile: file }));
     if (errors.questionFile) {
       setErrors((prev) => ({ ...prev, questionFile: undefined }));
@@ -75,6 +104,13 @@ export function UploadExamModal({
 
   const handleAnswerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    const validationError = validateFile(file);
+    
+    if (validationError) {
+      setErrors((prev) => ({ ...prev, answerFile: validationError }));
+      return;
+    }
+    
     setFormData((prev) => ({ ...prev, answerFile: file }));
     if (errors.answerFile) {
       setErrors((prev) => ({ ...prev, answerFile: undefined }));
@@ -92,6 +128,13 @@ export function UploadExamModal({
   const handleQuestionFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0] || null;
+    const validationError = validateFile(file);
+    
+    if (validationError) {
+      setErrors((prev) => ({ ...prev, questionFile: validationError }));
+      return;
+    }
+    
     if (file) {
       setFormData((prev) => ({ ...prev, questionFile: file }));
       if (errors.questionFile) {
@@ -103,6 +146,13 @@ export function UploadExamModal({
   const handleAnswerFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0] || null;
+    const validationError = validateFile(file);
+    
+    if (validationError) {
+      setErrors((prev) => ({ ...prev, answerFile: validationError }));
+      return;
+    }
+    
     if (file) {
       setFormData((prev) => ({ ...prev, answerFile: file }));
       if (errors.answerFile) {

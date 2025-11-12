@@ -34,7 +34,7 @@ export interface CourseClassGradesDto {
   canEditGrades: boolean;
   noOfficialGradeYet: boolean;
   versionNumber: number;
-  versionStatus: string;
+  versionStatus: GradeStatusType;
   approvedAt: string | null;
 }
 
@@ -45,9 +45,18 @@ export interface UpdateStudentGradeDto {
   finalGrade: number | null;
 }
 
+export type GradeActionType = 
+  | 'Submitted' 
+  | 'Approved' 
+  | 'Rejected' 
+  | 'Updated' 
+  | 'Created' 
+  | 'BulkUpdated' 
+  | 'Edited';
+
 export interface GradeChangeHistoryDto {
   changeId: string;
-  action: string;
+  action: GradeActionType;
   actorName: string;
   changeDate: string;
   note: string | null;
@@ -56,7 +65,7 @@ export interface GradeChangeHistoryDto {
 export interface GradeVersionDetailDto {
   gradeVersionId: string;
   versionNumber: number;
-  versionStatus: string;
+  versionStatus: GradeStatusType;
   submittedBy: string | null;
   submittedAt: string | null;
   submissionNote: string | null;
@@ -70,6 +79,11 @@ export interface GradeVersionDetailDto {
   totalStudents: number;
   students: InstructorGradeDto[];
 }
+
+export type GradeStatusType = 'Draft' | 'PendingApproval' | 'Approved' | 'Rejected';
+
+export type CourseClassIdGuid = string & { __brand: 'CourseClassIdGuid' };
+export type EnrollmentIdGuid = string & { __brand: 'EnrollmentIdGuid' };
 
 export interface ApiResponse<T> {
   success: boolean;

@@ -1,38 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
-import { dashboardApi } from "../api/dashboardApi"
-import { SemesterData } from "../types/types"
+import { useQuery } from "@tanstack/react-query";
+import { dashboardApi } from "../api/dashboardApi";
 
-export const useAvailableSemester = (semesterId : string) => {
-    const [semester, setSemester] = useState<SemesterData | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+const SEMESTER_QUERY_KEY = ["student-dashboard-semester"] as const;
 
-    const fetchSemester = useCallback(async () => {
-        if (!semesterId || semesterId.trim() === '') {
-          setSemester(null);
-          setLoading(false);
-          setError(null);
-          return;
-        }
-        
-        setLoading(true);
-        setError(null);
-        try{
-            const data = await dashboardApi.getSemesterOverallById(semesterId);
-            setSemester(data);
-        } catch {
-            setSemester(null);
-            setError('Không thể tải dữ liệu học kỳ');
-        }finally {
-          setLoading(false);
-        }
-
-      },[semesterId]);
-
-
-      useEffect(() => {
-    fetchSemester();
-  }, [fetchSemester]);
-
-  return { semester, loading, error, refetch: fetchSemester };
+export const useAvailableSemester = (semesterId: string) => {
+  return useQuery({
+    queryKey: [...SEMESTER_QUERY_KEY, semesterId],
+    queryFn: () => dashboardApi.getSemesterOverallById(semesterId),
+    enabled: Boolean(semesterId && semesterId.trim() !== ""),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
 };

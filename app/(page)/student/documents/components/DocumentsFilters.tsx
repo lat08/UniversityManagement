@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import { Search, X } from 'lucide-react';
 import { Dropdown } from '@/app/components/ui/dropdown';
 import { DropdownSearch } from '@/app/components/ui/dropdown-search';
@@ -23,7 +24,7 @@ interface DocumentsFiltersProps {
   subjectsLoading: boolean;
 }
 
-export const DocumentsFilters = ({
+const DocumentsFiltersComponent = ({
   searchQuery,
   onSearchChange,
   selectedDocumentType,
@@ -39,17 +40,26 @@ export const DocumentsFilters = ({
   semestersLoading,
   subjectsLoading,
 }: DocumentsFiltersProps) => {
-  const semesterOptions = [
-    { value: '', label: 'Tất cả học kỳ' },
-    ...semesters.map(s => ({ value: s.semesterId, label: s.semesterName }))
-  ];
+  const semesterOptions = useMemo(
+    () => [
+      { value: '', label: 'Tất cả học kỳ' },
+      ...semesters.map((s) => ({ value: s.semesterId, label: s.semesterName })),
+    ],
+    [semesters]
+  );
 
-  const subjectOptions = subjects.map(s => ({ value: s.subjectId, label: s.subjectName }));
+  const subjectOptions = useMemo(
+    () => subjects.map((s) => ({ value: s.subjectId, label: s.subjectName })),
+    [subjects]
+  );
 
-  const documentTypeOptions = [
-    { value: '', label: 'Tất cả loại tài liệu' },
-    ...documentTypes.map(dt => ({ value: dt.documentType, label: dt.documentType }))
-  ];
+  const documentTypeOptions = useMemo(
+    () => [
+      { value: '', label: 'Tất cả loại tài liệu' },
+      ...documentTypes.map((dt) => ({ value: dt.documentType, label: dt.documentType })),
+    ],
+    [documentTypes]
+  );
 
   return (
     <div className="flex gap-4 items-stretch w-full">
@@ -109,4 +119,6 @@ export const DocumentsFilters = ({
     </div>
   );
 };
+
+export const DocumentsFilters = memo(DocumentsFiltersComponent);
 

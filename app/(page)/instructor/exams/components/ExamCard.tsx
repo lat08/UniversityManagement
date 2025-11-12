@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react";
 import { FileText, Download, Upload as UploadIcon, Eye } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import type { ExamEntry } from "../lib/types";
@@ -15,14 +16,14 @@ interface ExamCardProps {
   onClick?: () => void;
 }
 
-export function ExamCard({
+const ExamCardComponent = ({
   exam,
   onDownload,
   onResubmit,
   onView,
   animationDelay = 0,
   onClick,
-}: ExamCardProps) {
+}: ExamCardProps) => {
   const statusLabel = ENTRY_STATUS_LABELS[exam.entryStatus] || exam.entryStatus;
   const statusClassName = ENTRY_STATUS_COLORS[exam.entryStatus] || "bg-gray-100 text-gray-700";
   const examTypeLabel = EXAM_TYPE_LABELS[exam.examType] || exam.examType;
@@ -135,6 +136,8 @@ export function ExamCard({
       )}
     </div>
   );
-}
+};
+
+export const ExamCard = memo(ExamCardComponent);
 
 

@@ -1,5 +1,7 @@
 export type TabType = 'tuition' | 'insurance' | 'history';
 
+export type PaymentStatus = 'pending' | 'completed' | 'failed';
+
 export interface TuitionFee {
   courseId: string;
   courseCode: string;
@@ -7,6 +9,7 @@ export interface TuitionFee {
   credits: number;
   courseFee: number;
   status: string;
+  paidDate?: string;
 }
 
 export interface Insurance {
@@ -14,6 +17,7 @@ export interface Insurance {
   studentHealthInsuranceId: string;
   healthInsuranceFee: number;
   status: string;
+  paidDate?: string;
 }
 
 export interface Payment {
@@ -32,48 +36,52 @@ export interface TuitionFeeResponse {
     semesterName: string;
     courses: TuitionFee[];
   };
-  errors: string[];
+  errors?: string[];
 }
 
 export interface InsuranceResponse {
   success: boolean;
   message: string;
   data: Insurance[];
-  errors: string[];
+  errors?: string[];
 }
 
 export interface PaymentHistoryResponse {
   success: boolean;
   message: string;
   data: Payment[];
-  errors: string[];
+  errors?: string[];
 }
 
 export interface PaymentResponse {
   success: boolean;
   message: string;
   data: string;
-  errors: string[];
+  errors?: string[];
 }
 
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
-  errors: string[];
+  errors?: string[];
 }
 
-export interface PaymentHistory {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  method: string;
-  status: 'completed' | 'pending' | 'failed';
+export interface PaymentStatusData {
+  paymentId: string;
+  paymentStatus: PaymentStatus;
+  paymentType: 'enrollment' | 'insurance';
+  message: string;
+  amount?: number;
+  paymentDate?: string;
+}
+
+export interface PaymentStatusResponse {
+  success: boolean;
+  message: string;
+  data: PaymentStatusData;
 }
 
 import { Semester as CommonSemester } from "@/lib/types";
 
-export type Semester = Pick<CommonSemester, 'semesterId' | 'semesterName'> & {
-  courses?: TuitionFee[];
-};
+export type Semester = Pick<CommonSemester, 'semesterId' | 'semesterName'>;

@@ -48,8 +48,6 @@ export const transformSemestersToUI = (
     return dateB - dateA
   })
   
-  console.log('Sorted semesters:', sorted.map(s => s.semesterName))
-  
   return sorted.map(transformSemesterGradeToUI)
 }
 
@@ -77,15 +75,6 @@ export const createCourseDetailsLookup = (gradeItem: GradeItem) => {
       },
     ],
   }
-  
-  console.log('createCourseDetailsLookup for', gradeItem.subjectCode, ':', {
-    input: {
-      attendance: gradeItem.attendanceGrade,
-      midterm: gradeItem.midtermGrade,
-      final: gradeItem.finalGrade,
-    },
-    output: result.components.map(c => ({ name: c.name, score: c.score }))
-  })
   
   return result
 }

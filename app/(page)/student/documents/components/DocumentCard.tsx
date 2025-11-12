@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Eye } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import type { CourseGroup } from '../lib/types/types';
@@ -7,12 +8,11 @@ import type { CourseGroup } from '../lib/types/types';
 interface DocumentCardProps {
   courseGroup: CourseGroup;
   onView: (group: CourseGroup) => void;
-  onDownloadAll?: (group: CourseGroup) => void;
   animationDelay?: number;
 }
 
-export const DocumentCard = ({ courseGroup, onView, animationDelay = 0 }: DocumentCardProps) => {
-  const documentCount = courseGroup.documents?.length || 0;
+const DocumentCardComponent = ({ courseGroup, onView, animationDelay = 0 }: DocumentCardProps) => {
+  const documentCount = courseGroup.documents?.length ?? 0;
 
   return (
     <div 
@@ -51,4 +51,6 @@ export const DocumentCard = ({ courseGroup, onView, animationDelay = 0 }: Docume
     </div>
   );
 };
+
+export const DocumentCard = memo(DocumentCardComponent);
 

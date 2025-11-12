@@ -1,54 +1,63 @@
-import { useState, useEffect, useCallback } from 'react'
-import { regulationsApi, type Regulation } from '../api/regulationsApi'
-
-interface UseRegulationsParams {
-  pageIndex?: number
-  pageSize?: number
-  orderBy?: number
-}
+import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/api/queryKeys';
+import { regulationsApi, type Regulation, type RegulationQueryParams } from '../api/regulationsApi';
 
 interface UseRegulationsReturn {
-  regulations: Regulation[]
-  loading: boolean
-  error: string | null
-  refetch: () => Promise<void>
+  readonly data: Regulation[] | undefined;
+  readonly isPending: boolean;
+  readonly error: string | null;
+  readonly refetch: () => Promise<void>;
+  readonly isRefetching: boolean;
 }
 
-export const useRegulations = (params: UseRegulationsParams = {}): UseRegulationsReturn => {
-  const [regulations, setRegulations] = useState<Regulation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+const REGULATIONS_STALE_TIME = 5 * 60 * 1000;
+const REGULATIONS_GC_TIME = 10 * 60 * 1000;
 
-  const { pageIndex, pageSize, orderBy } = params
+const fetchRegulations = async (params: RegulationQueryParams): Promise<Regulation[]> => {
+  const response = await regulationsApi.getRegulations(params);
 
-  const fetchRegulations = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await regulationsApi.getRegulations({ pageIndex, pageSize, orderBy })
-      
-      if (response.isSuccess) {
-        setRegulations(response.data.data)
-      } else {
-        setError('Không thể tải dữ liệu quy chế')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
-    } finally {
-      setLoading(false)
-    }
-  }, [pageIndex, pageSize, orderBy])
+  if (!response.isSuccess) {
+    throw new Error('Không thể tải dữ liệu quy chế');
+  }
 
-  useEffect(() => {
-    fetchRegulations()
-  }, [fetchRegulations])
+  return response.data.data;
+};
+
+export const useRegulations = (params: RegulationQueryParams = {}): UseRegulationsReturn => {
+  const queryKey = queryKeys.regulations.list(params);
+
+  const { 
+    data, 
+    isPending, 
+    error, 
+    refetch: queryRefetch,
+    isRefetching,
+  } = useQuery({
+    queryKey,
+    queryFn: () => fetchRegulations(params),
+    staleTime: REGULATIONS_STALE_TIME,
+    gcTime: REGULATIONS_GC_TIME,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const normalizedError = error
+    ? error instanceof Error
+      ? error.message
+      : 'Đã xảy ra lỗi không xác định'
+    : null;
+
+  const refetch = useCallback(async () => {
+    await queryRefetch();
+  }, [queryRefetch]);
 
   return {
-    regulations,
-    loading,
-    error,
-    refetch: fetchRegulations
-  }
-}
+    data,
+    isPending,
+    error: normalizedError,
+    refetch,
+    isRefetching,
+  };
+};
 

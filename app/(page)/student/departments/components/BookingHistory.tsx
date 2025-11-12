@@ -38,15 +38,17 @@ export default function BookingHistory({ bookings, isLoading, pagination, curren
     if (!selectedBooking) return;
 
     cancelBookingMutation.mutate(selectedBooking.bookingId, {
-        onSuccess: () => {
-          toast.success('Hủy đăng ký thành công!');
+      onSuccess: () => {
+        toast.success('Hủy đăng ký thành công!');
         setIsCancelModalOpen(false);
         setSelectedBooking(null);
-        },
-        onError: (error: Error) => {
-          toast.error(error.message || 'Hủy đăng ký thất bại!');
-        }
-      });
+      },
+      onError: (error: unknown) => {
+        const apiError = error as { response?: { data?: { message?: string } }; message?: string };
+        const errorMessage = apiError?.response?.data?.message || apiError?.message || 'Hủy đăng ký thất bại!';
+        toast.error(errorMessage);
+      }
+    });
   };
 
   const handleCloseModal = () => {
@@ -91,8 +93,15 @@ export default function BookingHistory({ bookings, isLoading, pagination, curren
       
       bookingDateTime.setHours(startHour, startMinute, 0, 0);
       
-      if (now > bookingDateTime) {
+      if (now >= bookingDateTime) {
         return false;
+      }
+      
+      if (booking.bookingStatus === 'confirmed') {
+        const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+        if (hoursUntilBooking < 3) {
+          return false;
+        }
       }
       
       return true;
@@ -130,8 +139,15 @@ export default function BookingHistory({ bookings, isLoading, pagination, curren
       
       bookingDateTime.setHours(startHour, startMinute, 0, 0);
       
-      if (now > bookingDateTime) {
+      if (now >= bookingDateTime) {
         return 'Đã qua thời gian sử dụng';
+      }
+      
+      if (booking.bookingStatus === 'confirmed') {
+        const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+        if (hoursUntilBooking < 3) {
+          return 'Đăng ký đã được duyệt và còn dưới 3 tiếng. Vui lòng liên hệ quản trị viên để hủy';
+        }
       }
       
       return null;

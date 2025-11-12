@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { profileApi } from '../api/profileApi'
 import { InstructorProfile, UpdateProfilePayload, ChangePasswordPayload } from '../types/types'
 import { useAuthStore } from '@/lib/store/authStore'
+import { queryKeys } from '@/lib/api/queryKeys'
 import toast from 'react-hot-toast'
 
 interface UseProfileReturn {
@@ -20,150 +21,168 @@ interface UseProfileReturn {
 export const useProfile = (): UseProfileReturn => {
   const router = useRouter()
   const logout = useAuthStore((state) => state.logout)
-  const [profile, setProfile] = useState<InstructorProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [updating, setUpdating] = useState(false)
-  const [updateError, setUpdateError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const profileKey = queryKeys.profile.instructor()
 
-  const fetchProfile = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
+  const {
+    data: profile = null,
+    isLoading: loading,
+    error: queryError,
+    refetch: refetchQuery,
+  } = useQuery({
+    queryKey: profileKey,
+    queryFn: async () => {
       const response = await profileApi.getProfile()
-      
-      if (response.success) {
-        setProfile(response.data)
-      } else {
-        setError('Không thể tải thông tin hồ sơ')
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể tải thông tin hồ sơ')
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định')
-    } finally {
-      setLoading(false)
-    }
-  }
+      return response.data
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: (failureCount, error) => {
+      if (error instanceof Error && 'status' in error) {
+        const status = (error as { status?: number }).status
+        if (status && status >= 400 && status < 500) return false
+      }
+      return failureCount < 2
+    },
+  })
 
-  const updateProfileData = async (payload: UpdateProfilePayload): Promise<boolean> => {
-    try {
-      setUpdating(true)
-      setUpdateError(null)
-      
+  const updateProfileMutation = useMutation({
+    mutationFn: async (payload: UpdateProfilePayload) => {
       const response = await profileApi.updateProfile(payload)
-      
-      if (response.success) {
-        setProfile(response.data)
-        toast.success('Cập nhật hồ sơ thành công!')
-        return true
-      } else {
-        const errorMsg = 'Không thể cập nhật hồ sơ'
-        setUpdateError(errorMsg)
-        toast.error(errorMsg)
-        return false
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể cập nhật hồ sơ')
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định'
-      setUpdateError(errorMsg)
-      toast.error(errorMsg)
-      return false
-    } finally {
-      setUpdating(false)
-    }
-  }
+      return response.data
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(profileKey, data)
+      queryClient.invalidateQueries({ queryKey: profileKey })
+      toast.success('Cập nhật hồ sơ thành công!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Không thể cập nhật hồ sơ')
+    },
+  })
 
-  const updateAvatarData = async (file: File): Promise<boolean> => {
-    try {
-      setUpdating(true)
-      setUpdateError(null)
-      
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (file: File) => {
       const response = await profileApi.updateAvatar(file)
-      
-      if (response.success && profile) {
-        setProfile({ ...profile, profilePicture: response.data.profilePicture })
-        toast.success('Cập nhật ảnh đại diện thành công!')
-        return true
-      } else {
-        const errorMsg = 'Không thể cập nhật ảnh đại diện'
-        setUpdateError(errorMsg)
-        toast.error(errorMsg)
-        return false
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể cập nhật ảnh đại diện')
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định'
-      setUpdateError(errorMsg)
-      toast.error(errorMsg)
-      return false
-    } finally {
-      setUpdating(false)
-    }
-  }
+      return response.data.profilePicture
+    },
+    onMutate: async (file) => {
+      await queryClient.cancelQueries({ queryKey: profileKey })
+      const previousProfile = queryClient.getQueryData<InstructorProfile>(profileKey)
+      const temporaryUrl = URL.createObjectURL(file)
 
-  const changePasswordData = async (payload: ChangePasswordPayload): Promise<boolean> => {
-    try {
-      setUpdating(true)
-      setUpdateError(null)
-      
+      if (previousProfile) {
+        queryClient.setQueryData<InstructorProfile>(profileKey, {
+          ...previousProfile,
+          profilePicture: temporaryUrl,
+        })
+      }
+
+      return { previousProfile, temporaryUrl }
+    },
+    onSuccess: (profilePicture, _variables, context) => {
+      queryClient.setQueryData<InstructorProfile | undefined>(profileKey, (old) => {
+        if (!old) return old
+        return { ...old, profilePicture }
+      })
+      if (context?.temporaryUrl) {
+        URL.revokeObjectURL(context.temporaryUrl)
+      }
+      toast.success('Cập nhật ảnh đại diện thành công!')
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousProfile) {
+        queryClient.setQueryData(profileKey, context.previousProfile)
+      }
+      if (context?.temporaryUrl) {
+        URL.revokeObjectURL(context.temporaryUrl)
+      }
+      toast.error(error.message || 'Không thể cập nhật ảnh đại diện')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: profileKey })
+    },
+  })
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (payload: ChangePasswordPayload) => {
       const response = await profileApi.changePassword(payload)
-      
-      if (response.success) {
-        toast.success(response.message || 'Đổi mật khẩu thành công!')
-        // Xóa tokens từ localStorage và logout sau 2 giây
-        setTimeout(() => {
-          // Xóa tokens từ localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-          }
-          // Logout và redirect về trang login
-          logout()
-          router.push("/login")
-        }, 2000)
-        return true
-      } else {
-        // Extract validation errors from response
-        if (response.errors) {
-          const errorMessages: string[] = []
-          Object.values(response.errors).forEach((value) => {
-            if (Array.isArray(value)) {
-              errorMessages.push(...value)
-            }
-          })
-          const errorMsg = errorMessages.join('. ') || 'Không thể thay đổi mật khẩu'
-          setUpdateError(errorMsg)
-          toast.error(errorMsg)
-        } else {
-          const errorMsg = response.message || 'Không thể thay đổi mật khẩu'
-          setUpdateError(errorMsg)
-          toast.error(errorMsg)
-        }
-        return false
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể thay đổi mật khẩu')
       }
-    } catch (err: unknown) {
-      // Handle errors from API (đã được xử lý trong profileApi.changePassword)
-      const errorMsg = err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định'
-      setUpdateError(errorMsg)
-      toast.error(errorMsg)
+      return response
+    },
+    onSuccess: () => {
+      toast.success('Đổi mật khẩu thành công!')
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+        }
+        logout()
+        router.push('/login')
+      }, 2000)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Không thể thay đổi mật khẩu')
+    },
+  })
+
+  const refetch = async () => {
+    await refetchQuery()
+  }
+
+  const updateProfile = async (payload: UpdateProfilePayload): Promise<boolean> => {
+    try {
+      await updateProfileMutation.mutateAsync(payload)
+      return true
+    } catch {
       return false
-    } finally {
-      setUpdating(false)
     }
   }
 
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  const updateAvatar = async (file: File): Promise<boolean> => {
+    try {
+      await updateAvatarMutation.mutateAsync(file)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const changePassword = async (payload: ChangePasswordPayload): Promise<boolean> => {
+    try {
+      await changePasswordMutation.mutateAsync(payload)
+      return true
+    } catch {
+      return false
+    }
+  }
 
   return {
     profile,
     loading,
-    error,
-    updating,
-    updateError,
-    refetch: fetchProfile,
-    updateProfile: updateProfileData,
-    updateAvatar: updateAvatarData,
-    changePassword: changePasswordData
+    error: queryError instanceof Error ? queryError.message : null,
+    updating: updateProfileMutation.isPending || updateAvatarMutation.isPending || changePasswordMutation.isPending,
+    updateError: updateProfileMutation.error instanceof Error 
+      ? updateProfileMutation.error.message 
+      : updateAvatarMutation.error instanceof Error
+      ? updateAvatarMutation.error.message
+      : changePasswordMutation.error instanceof Error
+      ? changePasswordMutation.error.message
+      : null,
+    refetch,
+    updateProfile,
+    updateAvatar,
+    changePassword,
   }
 }
-

@@ -1,28 +1,22 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { User, Clock, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ClassListData } from "../libs/types/types";
+import type { ClassListData } from "../libs/types/types";
+
+const DAYS_OF_WEEK = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
 
 const formatSchedule = (dayOfWeek: number, startPeriod: number, endPeriod: number): string => {
-  const daysOfWeek = [
-    "Chủ nhật",
-    "Thứ hai", 
-    "Thứ ba",
-    "Thứ tư",
-    "Thứ năm",
-    "Thứ sáu",
-    "Thứ bảy"
-  ];
-  
-  const dayName = daysOfWeek[dayOfWeek] || "Không xác định";
+  const dayName = DAYS_OF_WEEK[dayOfWeek] || "Không xác định";
   return `${dayName}, Tiết ${startPeriod} -> ${endPeriod}`;
 };
 
-export default function ClassListCard({ currentSubjects }: ClassListData) {
+const ClassListCard = memo(({ currentSubjects }: ClassListData) => {
   const router = useRouter();
   const hasClasses = currentSubjects && currentSubjects.length > 0;
+  const isLoading = !currentSubjects;
 
   const handleClassClick = (subjectCode: string, semesterId?: string) => {
     if (!semesterId) return;
@@ -33,14 +27,27 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
     <Card className="shadow-sm h-full flex flex-col">
       <CardHeader className="pb-4 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm lg:text-base font-semibold">
-            Lớp đang theo học
-          </CardTitle>
+          <CardTitle className="text-sm lg:text-base font-semibold">Lớp đang theo học</CardTitle>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4 flex-1 max-h-[400px] overflow-y-auto">
-        {hasClasses ? (
+        {isLoading ? (
+          <div className="space-y-4 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="border border-gray-200 p-4 rounded-sm">
+                <div className="flex justify-between mb-3">
+                  <div className="h-5 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-6 bg-gray-200 rounded w-16"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : hasClasses ? (
           currentSubjects.map((classInfo, index) => (
             <div
               key={`${classInfo.courseId}-${classInfo.subjectCode}-${index}`}
@@ -48,7 +55,7 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
               tabIndex={0}
               onClick={() => handleClassClick(classInfo.subjectCode, classInfo.semesterId)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   handleClassClick(classInfo.subjectCode, classInfo.semesterId);
                 }
@@ -88,4 +95,7 @@ export default function ClassListCard({ currentSubjects }: ClassListData) {
       </CardContent>
     </Card>
   );
-}
+});
+ClassListCard.displayName = "ClassListCard";
+
+export default ClassListCard;

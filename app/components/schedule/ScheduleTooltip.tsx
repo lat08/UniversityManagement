@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode } from "react"
+import { ReactNode, memo } from "react"
 import { DAYS_OF_WEEK } from "@/lib/constants/schedule"
 
 interface CourseItem {
@@ -29,7 +29,7 @@ interface ScheduleTooltipProps {
   readonly actionButton?: ReactNode
 }
 
-export function ScheduleTooltip({
+export const ScheduleTooltip = memo<ScheduleTooltipProps>(({
   course,
   position,
   onMouseEnter,
@@ -37,7 +37,7 @@ export function ScheduleTooltip({
   showClass = true,
   showTeacher = true,
   actionButton,
-}: ScheduleTooltipProps) {
+}) => {
   const dayName = DAYS_OF_WEEK.find((d: { value: number; label: string }) => d.value === course.dayOfWeek)?.label || ""
   const courseDate = new Date(course.date).toLocaleDateString('vi-VN')
 
@@ -112,5 +112,7 @@ export function ScheduleTooltip({
       </div>
     </div>
   )
-}
+})
+
+ScheduleTooltip.displayName = 'ScheduleTooltip'
 

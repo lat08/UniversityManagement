@@ -24,7 +24,7 @@ export const gradesApi = {
    */
   getSemesterGrades: async (semesterId: string): Promise<SemesterGradeResponse> => {
     try {
-      const response = await api.get<SemesterGradeResponse>(`/v1/students/me/semesters/${semesterId}/grades`)
+      const response = await api.get<SemesterGradeResponse>(`/v1/students/semesters/${semesterId}/grades`)
       return response.data
     } catch (error: unknown) {
       const axiosError = error as { response?: { status?: number; data?: { message?: string } } }

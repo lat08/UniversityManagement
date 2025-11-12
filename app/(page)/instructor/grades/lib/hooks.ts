@@ -2,27 +2,37 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { instructorGradesApi } from './api';
 import { commonApi } from '@/lib/api/common';
-import type { UpdateStudentGradeDto } from './types';
+import { queryKeys } from '@/lib/api/queryKeys';
+import type { UpdateStudentGradeDto, CourseClassGradesDto } from './types';
 
 export const useSemesters = () => {
   return useQuery({
     queryKey: ['semesters'],
     queryFn: () => commonApi.getSemesters(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
 export const useInstructorCourseClasses = (semesterId?: string) => {
   return useQuery({
-    queryKey: ['instructor-course-classes', semesterId],
+    queryKey: queryKeys.instructorGrades.courseClasses(semesterId),
     queryFn: () => instructorGradesApi.getCourseClasses(semesterId),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
 export const useCourseClassGrades = (courseClassId: string, type?: 'draft' | 'official') => {
+  const isDraft = type === 'draft' || !type;
+  
   return useQuery({
-    queryKey: ['course-class-grades', courseClassId, type],
+    queryKey: queryKeys.instructorGrades.grades(courseClassId, type),
     queryFn: () => instructorGradesApi.getCourseClassGrades(courseClassId, type),
     enabled: !!courseClassId,
+    staleTime: isDraft ? 30 * 1000 : 10 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: isDraft,
   });
 };
 
@@ -32,12 +42,57 @@ export const useUpdateDraftGrade = (courseClassId: string) => {
   return useMutation({
     mutationFn: (gradeData: UpdateStudentGradeDto) =>
       instructorGradesApi.updateDraftGrade(courseClassId, gradeData),
+    onMutate: async (updatedGrade) => {
+      await queryClient.cancelQueries({ 
+        queryKey: queryKeys.instructorGrades.grades(courseClassId, 'draft') 
+      });
+
+      const previousGrades = queryClient.getQueryData(
+        queryKeys.instructorGrades.grades(courseClassId, 'draft')
+      );
+
+      queryClient.setQueryData(
+        queryKeys.instructorGrades.grades(courseClassId, 'draft'),
+        (old: { data: CourseClassGradesDto } | undefined) => {
+          if (!old) return old;
+          
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              students: old.data.students.map((student) =>
+                student.enrollmentId === updatedGrade.enrollmentId
+                  ? {
+                      ...student,
+                      attendanceGrade: updatedGrade.attendanceGrade ?? student.attendanceGrade,
+                      midtermGrade: updatedGrade.midtermGrade ?? student.midtermGrade,
+                      finalGrade: updatedGrade.finalGrade ?? student.finalGrade,
+                    }
+                  : student
+              ),
+            },
+          };
+        }
+      );
+
+      return { previousGrades };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousGrades) {
+        queryClient.setQueryData(
+          queryKeys.instructorGrades.grades(courseClassId, 'draft'),
+          context.previousGrades
+        );
+      }
+      toast.error('Cập nhật điểm thất bại');
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-class-grades', courseClassId] });
       toast.success('Cập nhật điểm thành công');
     },
-    onError: () => {
-      toast.error('Cập nhật điểm thất bại');
+    onSettled: () => {
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.instructorGrades.grades(courseClassId, 'draft') 
+      });
     },
   });
 };
@@ -49,7 +104,9 @@ export const useUpdateDraftGradesBulk = (courseClassId: string) => {
     mutationFn: (grades: UpdateStudentGradeDto[]) =>
       instructorGradesApi.updateDraftGradesBulk(courseClassId, grades),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-class-grades', courseClassId] });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.instructorGrades.grades(courseClassId, 'draft') 
+      });
       toast.success('Cập nhật điểm hàng loạt thành công');
     },
     onError: () => {
@@ -65,8 +122,15 @@ export const useSubmitForApproval = (courseClassId: string) => {
     mutationFn: (submissionNote?: string) =>
       instructorGradesApi.submitForApproval(courseClassId, submissionNote),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['course-class-grades', courseClassId] });
-      queryClient.invalidateQueries({ queryKey: ['instructor-course-classes'] });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.instructorGrades.grades(courseClassId) 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.instructorGrades.courseClasses() 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.instructorGrades.history(courseClassId) 
+      });
       toast.success('Gửi duyệt bảng điểm thành công');
     },
     onError: () => {
@@ -77,31 +141,34 @@ export const useSubmitForApproval = (courseClassId: string) => {
 
 export const useGradeHistory = (courseClassId: string, enabled = true) => {
   return useQuery({
-    queryKey: ['grade-history', courseClassId],
+    queryKey: queryKeys.instructorGrades.history(courseClassId),
     queryFn: () => instructorGradesApi.getGradeHistory(courseClassId),
     enabled: !!courseClassId && enabled,
+    staleTime: 1 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
 export const useGradeVersion = (courseClassId: string, versionNumber: number) => {
   return useQuery({
-    queryKey: ['grade-version', courseClassId, versionNumber],
+    queryKey: queryKeys.instructorGrades.version(courseClassId, versionNumber),
     queryFn: () => instructorGradesApi.getGradeVersion(courseClassId, versionNumber),
     enabled: !!courseClassId && versionNumber > 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
 export const useExportGrades = () => {
   return useMutation({
-    mutationFn: ({ courseClassId, type }: { courseClassId: string; type?: 'draft' | 'official'; courseCode?: string; className?: string }) =>
+    mutationFn: ({ courseClassId, type }: { courseClassId: string; type?: 'draft' | 'official' }) =>
       instructorGradesApi.exportGrades(courseClassId, type),
     onSuccess: (blob, variables) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       const typeLabel = variables.type === 'official' ? 'chinh_thuc' : 'ban_nhap';
-      const classCode = variables.className || variables.courseClassId;
-      link.download = `bangdiem_${classCode}_${typeLabel}.xlsx`;
+      link.download = `bangdiem_${variables.courseClassId}_${typeLabel}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

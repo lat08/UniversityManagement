@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { useCreateScheduleChange, useMakeupSlotSuggestions } from '../lib/hooks/useScheduleChange';
 import { useBuildings } from '@/lib/hooks/useCommonData';
 import { ROOM_TYPE_LABELS } from '@/app/(page)/student/departments/lib/types/room.types';
+import type { ScheduleChangeRequest } from '../lib/types/scheduleChange.types';
 import 'react-day-picker/dist/style.css';
 
 interface Week {
@@ -78,19 +79,63 @@ export const ScheduleChangeModal = ({
     return today;
   }, [currentScheduleInfo]);
 
+  // Calculate maximum date from semester end (last week end date)
+  const maxSelectableDate = useMemo(() => {
+    if (weeks.length === 0) return undefined;
+    const lastWeek = weeks[weeks.length - 1];
+    if (!lastWeek?.endDate) return undefined;
+    const semesterEndDate = new Date(lastWeek.endDate);
+    semesterEndDate.setHours(23, 59, 59, 999);
+    return semesterEndDate;
+  }, [weeks]);
+
   const makeupWeek = useMemo(() => {
     if (!makeupDate || weeks.length === 0) return undefined;
     
     const selectedDateStr = format(makeupDate, 'yyyy-MM-dd');
-    const selectedDateTime = new Date(selectedDateStr).getTime();
+    const selectedDateOnly = new Date(selectedDateStr);
+    selectedDateOnly.setHours(0, 0, 0, 0);
+    const selectedTime = selectedDateOnly.getTime();
+    
+    // Check if date is within semester range
+    const firstWeek = weeks[0];
+    const lastWeek = weeks[weeks.length - 1];
+    if (!firstWeek || !lastWeek) return undefined;
+    
+    const semesterStartDate = new Date(firstWeek.startDate);
+    semesterStartDate.setHours(0, 0, 0, 0);
+    const semesterStartTime = semesterStartDate.getTime();
+    
+    const semesterEndDate = new Date(lastWeek.endDate);
+    semesterEndDate.setHours(23, 59, 59, 999);
+    const semesterEndTime = semesterEndDate.getTime();
+    
+    // If date is outside semester range, return undefined
+    if (selectedTime < semesterStartTime || selectedTime > semesterEndTime) {
+      return undefined;
+    }
     
     const matchingWeek = weeks.find(week => {
-      const weekStart = new Date(week.startDate).getTime();
-      const weekEnd = new Date(week.endDate).getTime();
-      return selectedDateTime >= weekStart && selectedDateTime <= weekEnd;
+      const weekStartDate = new Date(week.startDate);
+      weekStartDate.setHours(0, 0, 0, 0);
+      const weekStart = weekStartDate.getTime();
+      
+      const weekEndDate = new Date(week.endDate);
+      weekEndDate.setHours(23, 59, 59, 999);
+      const weekEnd = weekEndDate.getTime();
+      
+      return selectedTime >= weekStart && selectedTime <= weekEnd;
     });
     
-    return matchingWeek?.weekNumber;
+    if (matchingWeek) {
+      return matchingWeek.weekNumber;
+    }
+    
+    // Calculate week number from semester start
+    const daysDiff = Math.floor((selectedTime - semesterStartTime) / (1000 * 60 * 60 * 24));
+    const calculatedWeek = Math.floor(daysDiff / 7) + 1;
+    
+    return calculatedWeek > 0 ? calculatedWeek : undefined;
   }, [makeupDate, weeks]);
 
   const suggestionsEnabled = Boolean(
@@ -104,6 +149,7 @@ export const ScheduleChangeModal = ({
           courseClassId,
           cancelledWeek: currentWeek,
           makeupWeek: makeupWeek!,
+          makeupDate: makeupDate ? format(makeupDate, "yyyy-MM-dd'T'HH:mm:ss") : undefined,
           preferredBuildingId: selectedBuilding || undefined,
           preferredRoomType: selectedRoomType || undefined,
         }
@@ -172,6 +218,18 @@ export const ScheduleChangeModal = ({
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setMakeupDate(undefined);
+      setDateInputValue('');
+      setSelectedBuilding('');
+      setSelectedRoomType('');
+      setSelectedSlot('');
+      setReason('');
+      setShowCalendar(false);
+    }
+  }, [isOpen]);
+
   const handleDateInputChange = (value: string) => {
     setDateInputValue(value);
     
@@ -179,13 +237,22 @@ export const ScheduleChangeModal = ({
       try {
         const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
         if (!isNaN(parsedDate.getTime())) {
-          // Check if date is before minimum selectable date
           parsedDate.setHours(0, 0, 0, 0);
+          
+          // Check if date is before minimum selectable date
           if (parsedDate < minSelectableDate) {
             toast.error('Không thể chọn ngày trước ngày lịch dạy hiện tại');
             setDateInputValue('');
             return;
           }
+          
+          // Check if date is after semester end date
+          if (maxSelectableDate && parsedDate > maxSelectableDate) {
+            toast.error('Không thể chọn ngày sau ngày kết thúc học kỳ');
+            setDateInputValue('');
+            return;
+          }
+          
           setMakeupDate(parsedDate);
           setSelectedSlot('');
         }
@@ -229,11 +296,28 @@ export const ScheduleChangeModal = ({
       return;
     }
 
-    const payload = {
+    const slotDate = new Date(selectedSlotData.date);
+    const slotDateStr = format(slotDate, 'yyyy-MM-dd');
+    const selectedDateStr = format(makeupDate, 'yyyy-MM-dd');
+    
+    if (slotDateStr !== selectedDateStr) {
+      toast.error('Ngày của slot đã chọn không khớp với ngày đã chọn');
+      return;
+    }
+
+    if (!makeupWeek) {
+      toast.error('Không thể xác định tuần học bù');
+      return;
+    }
+
+    const makeupDateObj = new Date(selectedSlotData.date);
+    const makeupDateFormatted = format(makeupDateObj, "yyyy-MM-dd'T'HH:mm:ss");
+
+    const payload: ScheduleChangeRequest = {
       courseClassId,
       cancelledWeek: currentWeek,
       makeupWeek,
-      makeupDate: selectedSlotData.date,
+      makeupDate: makeupDateFormatted,
       makeupRoomId: selectedSlotData.roomId,
       dayOfWeek: selectedSlotData.dayOfWeek,
       startPeriod: selectedSlotData.startPeriod,
@@ -351,7 +435,10 @@ export const ScheduleChangeModal = ({
                   mode="single"
                   selected={makeupDate}
                   onSelect={handleCalendarSelect}
-                  disabled={{ before: minSelectableDate }}
+                  disabled={{ 
+                    before: minSelectableDate,
+                    after: maxSelectableDate 
+                  }}
                   locale={vi}
                   classNames={{
                     day_selected: 'bg-[#4E8EE1] text-white',

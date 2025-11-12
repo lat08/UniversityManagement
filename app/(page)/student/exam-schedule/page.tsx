@@ -1,26 +1,23 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense, lazy } from "react";
 import { Printer } from "lucide-react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import { useSemesters } from "@/lib/hooks";
 import { Dropdown } from "@/app/components/ui/dropdown";
 import ExamStatCard from "./components/ExamStatCard";
-import ExamTimeline from "./components/ExamTimeline";
-import NotesSection from "./components/NotesSection";
-import { ExamStatCard as ExamStatCardType, Exam, Note } from "./lib/types/types";
+import { ExamStatCard as ExamStatCardType } from "./lib/types/types";
 import { Semester } from "@/lib/types";
-import { getExamSchedule, getNotes } from "./lib/api/examScheduleApi";
-import { sortExamsByStatus, transformExamData } from "./lib/utils/examUtils";
+import { useExamSchedule, useNotes } from "./lib/hooks";
+
+const ExamTimeline = lazy(() => import("./components/ExamTimeline"));
+const NotesSection = lazy(() => import("./components/NotesSection"));
 
 export default function ExamSchedulePage() {
   usePageTitle('Lịch thi');
   
-  const { data: semesters } = useSemesters();
+  const { data: semesters, loading: semestersLoading } = useSemesters();
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
-  const [exams, setExams] = useState<Exam[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (semesters.length > 0 && !selectedSemester) {
@@ -34,42 +31,10 @@ export default function ExamSchedulePage() {
     }
   }, [semesters, selectedSemester]);
 
-  const fetchNotes = async () => {
-    try {
-      // Backend sorts by CreatedAt desc (newest first)
-      const response = await getNotes({ pageSize: 100, sortOrder: 'desc' });
-      if (response.success) {
-        setNotes(response.data.notes);
-      }
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-      setNotes([]);
-    }
-  };
+  const { data: exams = [], isLoading: examsLoading } = useExamSchedule(selectedSemester?.semesterId ?? null);
+  const { notes, isLoading: notesLoading, createNote, updateNote, deleteNote, isCreating, isUpdating, isDeleting } = useNotes();
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
-  useEffect(() => {
-    const fetchExams = async () => {
-      if (!selectedSemester) return;
-      
-      setLoading(true);
-      try {
-        const data = await getExamSchedule(selectedSemester.semesterId);
-        const transformedData = transformExamData(data);
-        const sortedExams = sortExamsByStatus(transformedData);
-        setExams(sortedExams);
-      } catch (error: unknown) {
-        console.error('Error fetching exam schedule:', error);
-        setExams([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchExams();
-  }, [selectedSemester]);
+  const isInitialLoading = semestersLoading || !selectedSemester || examsLoading;
 
   const stats = useMemo((): ExamStatCardType[] => {
     const totalExams = exams.length;
@@ -106,7 +71,7 @@ export default function ExamSchedulePage() {
         bgColor: 'bg-green-50',
         iconColor: 'bg-green-600',
         textColor: 'text-green-600',
-        progress: progress,
+        progress,
       },
     ];
   }, [exams, selectedSemester]);
@@ -114,6 +79,8 @@ export default function ExamSchedulePage() {
   const handlePrint = () => {
     window.print();
   };
+
+  const isBusy = isCreating || isUpdating || isDeleting;
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -149,7 +116,7 @@ export default function ExamSchedulePage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
         {stats.map((stat, index) => (
-          <ExamStatCard key={index} data={stat} />
+          <ExamStatCard key={index} data={stat} loading={isInitialLoading} />
         ))}
       </div>
 
@@ -162,34 +129,64 @@ export default function ExamSchedulePage() {
               </svg>
               Lịch thi các môn
             </h2>
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <p className="text-gray-500 text-sm">Đang tải lịch thi...</p>
-              </div>
-            ) : exams.length > 0 ? (
-              <ExamTimeline exams={exams} />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="text-gray-500 text-sm">Chưa có lịch thi nào</p>
-              </div>
-            )}
+            <Suspense fallback={<TimelineSkeleton />}>
+              <ExamTimeline exams={exams} loading={isInitialLoading} />
+            </Suspense>
           </div>
         </div>
 
         <div className="lg:col-span-4">
           <div className="h-[600px]">
-            <NotesSection 
-              notes={notes} 
-              onNotesChange={fetchNotes}
-            />
+            <Suspense fallback={<NotesSkeleton />}>
+              <NotesSection 
+                notes={notes}
+                onCreateNote={createNote}
+                onUpdateNote={updateNote}
+                onDeleteNote={deleteNote}
+                loading={notesLoading}
+                isBusy={isBusy}
+              />
+            </Suspense>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+const TimelineSkeleton = () => (
+  <div className="relative max-h-[600px] overflow-hidden pr-2">
+    <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
+    <div className="space-y-3 lg:space-y-4 pt-1">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="relative animate-pulse pl-8 lg:pl-10">
+          <div className="absolute left-[0px] top-3 z-10 h-5 w-5 rounded-full border-4 border-white bg-gray-300 shadow-sm" />
+          <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
+            <div className="mb-2 h-4 w-48 rounded bg-gray-200" />
+            <div className="mb-3 h-5 w-40 rounded bg-gray-200" />
+            <div className="space-y-2">
+              <div className="h-4 w-56 rounded bg-gray-200" />
+              <div className="h-4 w-40 rounded bg-gray-200" />
+              <div className="h-4 w-32 rounded bg-gray-200" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const NotesSkeleton = () => (
+  <div className="bg-[#DBEDFF] rounded-lg p-4 lg:p-6 h-full border-2 border-[#4196F0]">
+    <div className="h-6 w-32 rounded bg-gray-200 mb-4 animate-pulse" />
+    <div className="space-y-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="animate-pulse rounded-lg border border-blue-200 bg-white p-3">
+          <div className="h-4 w-full rounded bg-gray-200" />
+          <div className="mt-2 h-4 w-3/4 rounded bg-gray-200" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
 

@@ -15,17 +15,15 @@ interface InsuranceTableProps {
 }
 
 export default function InsuranceTable({ data, selectedId, onSelectItem, isLoading }: InsuranceTableProps) {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <Spinner />
-      </div>
-    );
-  }
-
-
   // Thêm giao diện khi không có dữ liệu
   if (!data || data.length === 0) {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center p-8 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <Spinner />
+        </div>
+      );
+    }
     return (
       <div className="flex items-center justify-center p-8 bg-white border border-gray-200 rounded-lg shadow-sm">
         <p className="text-gray-500 text-lg">Không có dữ liệu bảo hiểm y tế.</p>

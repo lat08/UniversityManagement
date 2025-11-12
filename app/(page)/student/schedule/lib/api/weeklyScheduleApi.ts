@@ -2,122 +2,98 @@ import { api } from "@/lib/api/client"
 import { DAY_NAME_TO_NUMBER } from "@/lib/constants/schedule"
 import { 
   WeeklyScheduleResponse,
-  WeekResponse
+  WeekResponse,
+  WeeklyScheduleItem
 } from "../types/weeklyTypes"
 
-const mapDayOfWeekToNumber = (dayString: string): number => {
-  return DAY_NAME_TO_NUMBER[dayString] || 2
+interface ApiWeeklyScheduleItem {
+  subjectId?: string
+  subjectCode: string
+  subjectName: string
+  courseGroup?: string | null
+  credits?: number
+  classCode?: string | null
+  dayOfWeek: string | number
+  startPeriod: number
+  endPeriod?: number
+  numberOfPeriods?: number
+  roomCode: string
+  roomName?: string
+  instructorName: string
+  courseType: string
+  scheduleStartDate?: string
+  scheduleEndDate?: string
+  note?: string
+  date?: string
+}
+
+const normalizeDayOfWeek = (day: string | number): number => {
+  if (typeof day === 'number') {
+    return day >= 2 && day <= 8 ? day : 2
+  }
+  return DAY_NAME_TO_NUMBER[day] || 2
+}
+
+const normalizeScheduleItem = (item: ApiWeeklyScheduleItem): WeeklyScheduleItem => {
+  const numberOfPeriods = item.numberOfPeriods || 
+    (item.endPeriod ? item.endPeriod - item.startPeriod + 1 : 1)
+  
+  return {
+    subjectId: item.subjectId,
+    subjectCode: item.subjectCode,
+    subjectName: item.subjectName,
+    courseGroup: item.courseGroup ?? null,
+    credits: item.credits ?? 0,
+    classCode: item.classCode ?? null,
+    dayOfWeek: normalizeDayOfWeek(item.dayOfWeek),
+    startPeriod: item.startPeriod,
+    numberOfPeriods,
+    roomCode: item.roomCode,
+    roomName: item.roomName,
+    instructorName: item.instructorName,
+    courseType: item.courseType ?? '',
+    scheduleStartDate: item.scheduleStartDate ?? item.date ?? '',
+    scheduleEndDate: item.scheduleEndDate ?? item.date ?? '',
+    note: item.note,
+    date: item.date ?? ''
+  }
 }
 
 export const weeklyScheduleApi = {
-  // Lấy thời khóa biểu theo tuần
   getWeeklySchedule: async (semesterId: string, weekNumber: number): Promise<WeeklyScheduleResponse> => {
-    const response = await api.get(`/v1/student-schedule/weekly?semesterId=${semesterId}&weekNumber=${weekNumber}`)
+    const response = await api.get<{ success: boolean; data: ApiWeeklyScheduleItem[]; message?: string }>(
+      `/v1/student-schedule/weekly?semesterId=${semesterId}&weekNumber=${weekNumber}`
+    )
     
-    // Transform the API response to match expected format
-    if (response.data.success && response.data.data) {
-      const transformedData = response.data.data.map((item: {
-        subjectId?: string
-        subjectCode: string
-        subjectName: string
-        courseGroup?: string | null
-        credits?: number
-        classCode?: string | null
-        dayOfWeek: string | number
-        startPeriod: number
-        endPeriod?: number
-        numberOfPeriods?: number
-        roomCode: string
-        roomName?: string
-        instructorName: string
-        courseType: string
-        scheduleStartDate?: string
-        scheduleEndDate?: string
-        note?: string
-        date?: string
-      }) => ({
-        subjectId: item.subjectId,
-        subjectCode: item.subjectCode,
-        subjectName: item.subjectName,
-        courseGroup: item.courseGroup || null,
-        credits: item.credits || 0,
-        classCode: item.classCode || null,
-        dayOfWeek: typeof item.dayOfWeek === 'string' ? mapDayOfWeekToNumber(item.dayOfWeek) : item.dayOfWeek,
-        startPeriod: item.startPeriod,
-        numberOfPeriods: item.endPeriod ? (item.endPeriod - item.startPeriod + 1) : (item.numberOfPeriods || 1),
-        roomCode: item.roomCode,
-        roomName: item.roomName,
-        instructorName: item.instructorName,
-        courseType: item.courseType,
-        scheduleStartDate: item.scheduleStartDate || item.date,
-        scheduleEndDate: item.scheduleEndDate || item.date,
-        note: item.note,
-        date: item.date
-      }))
-      
+    if (response.data.success && Array.isArray(response.data.data)) {
       return {
         success: true,
-        data: transformedData,
+        data: response.data.data.map(normalizeScheduleItem),
         message: response.data.message
       }
     }
     
-    return response.data
+    return { success: false, data: [], message: response.data.message }
   },
 
-  // Lấy thời khóa biểu theo tuần và môn học
-  getWeeklyScheduleBySubject: async (semesterId: string, weekNumber: number, subjectId: string): Promise<WeeklyScheduleResponse> => {
-    const response = await api.get(`/v1/student-schedule/weekly/subject?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`)
+  getWeeklyScheduleBySubject: async (
+    semesterId: string, 
+    weekNumber: number, 
+    subjectId: string
+  ): Promise<WeeklyScheduleResponse> => {
+    const response = await api.get<{ success: boolean; data: ApiWeeklyScheduleItem[]; message?: string }>(
+      `/v1/student-schedule/weekly/subject?semesterId=${semesterId}&weekNumber=${weekNumber}&subjectId=${subjectId}`
+    )
     
-    // Transform the API response to match expected format
-    if (response.data.success && response.data.data) {
-      const transformedData = response.data.data.map((item: {
-        subjectId?: string
-        subjectCode: string
-        subjectName: string
-        courseGroup?: string | null
-        credits?: number
-        classCode?: string | null
-        dayOfWeek: string | number
-        startPeriod: number
-        endPeriod?: number
-        numberOfPeriods?: number
-        roomCode: string
-        roomName?: string
-        instructorName: string
-        courseType: string
-        scheduleStartDate?: string
-        scheduleEndDate?: string
-        note?: string
-        date?: string
-      }) => ({
-        subjectId: item.subjectId,
-        subjectCode: item.subjectCode,
-        subjectName: item.subjectName,
-        courseGroup: item.courseGroup || null,
-        credits: item.credits || 0,
-        classCode: item.classCode || null,
-        dayOfWeek: typeof item.dayOfWeek === 'string' ? mapDayOfWeekToNumber(item.dayOfWeek) : item.dayOfWeek,
-        startPeriod: item.startPeriod,
-        numberOfPeriods: item.endPeriod ? (item.endPeriod - item.startPeriod + 1) : (item.numberOfPeriods || 1),
-        roomCode: item.roomCode,
-        roomName: item.roomName,
-        instructorName: item.instructorName,
-        courseType: item.courseType,
-        scheduleStartDate: item.scheduleStartDate || item.date,
-        scheduleEndDate: item.scheduleEndDate || item.date,
-        note: item.note,
-        date: item.date
-      }))
-      
+    if (response.data.success && Array.isArray(response.data.data)) {
       return {
         success: true,
-        data: transformedData,
+        data: response.data.data.map(normalizeScheduleItem),
         message: response.data.message
       }
     }
     
-    return response.data
+    return { success: false, data: [], message: response.data.message }
   },
 
 
@@ -194,7 +170,7 @@ export const weeklyScheduleApi = {
   },
 
   getWeeks: async (semesterId: string): Promise<WeekResponse> => {
-    const response = await api.get(`/v1/enrollments/semesters/${semesterId}/weeks`)
+    const response = await api.get<WeekResponse>(`/v1/enrollments/semesters/${semesterId}/weeks`)
     return response.data
   }
 }

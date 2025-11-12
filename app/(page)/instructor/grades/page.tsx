@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { FileDown, Send, Lock, AlertCircle, History, Unlock } from 'lucide-react';
+import { useState, useMemo, lazy, Suspense } from 'react';
+import { Lock, AlertCircle, Unlock } from 'lucide-react';
 import { CourseClassSelector } from './components/CourseClassSelector';
 import { GradesTable } from './components/GradesTable';
-import { GradeHistoryTable } from './components/GradeHistoryTable';
 import { SubmitApprovalDialog } from './components/SubmitApprovalDialog';
-import { GradeVersionModal } from './components/GradeVersionModal';
+import { StatsCards } from './components/StatsCards';
+import { ActionButtons } from './components/ActionButtons';
+import { GradesTableSkeleton } from './components/GradesTableSkeleton';
+import { StatsSkeleton } from './components/StatsSkeleton';
+import { isGradeComplete } from '@/lib/utils/grade-calculator';
 import {
   useInstructorCourseClasses,
   useCourseClassGrades,
@@ -18,6 +21,14 @@ import {
   useSemesters,
 } from './lib/hooks';
 import type { InstructorGradeDto } from './lib/types';
+
+const GradeHistoryTable = lazy(() =>
+  import('./components/GradeHistoryTable').then((mod) => ({ default: mod.GradeHistoryTable }))
+);
+
+const GradeVersionModal = lazy(() =>
+  import('./components/GradeVersionModal').then((mod) => ({ default: mod.GradeVersionModal }))
+);
 
 const InstructorGradesPage = () => {
   const [selectedCourseClassId, setSelectedCourseClassId] = useState('');
@@ -83,9 +94,7 @@ const InstructorGradesPage = () => {
     if (!selectedCourseClassId) return;
     exportGradesMutation.mutate({ 
       courseClassId: selectedCourseClassId, 
-      type,
-      courseCode: gradesInfo?.courseCode || '',
-      className: gradesInfo?.className || ''
+      type
     });
     setShowExportDropdown(false);
   };
@@ -98,9 +107,9 @@ const InstructorGradesPage = () => {
     setSelectedVersionNumber(null);
   };
 
-  const studentsWithGrades = gradesInfo?.students.filter(
-    (s) => s.attendanceGrade !== null && s.midtermGrade !== null && s.finalGrade !== null
-  ).length || 0;
+  const studentsWithGrades = useMemo(() => {
+    return gradesInfo?.students.filter((s) => isGradeComplete(s)).length || 0;
+  }, [gradesInfo?.students]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,22 +165,12 @@ const InstructorGradesPage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <p className="text-sm text-gray-600 mb-1">Tổng sinh viên</p>
-                <p className="text-2xl font-bold text-gray-900">{gradesInfo.totalStudents}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <p className="text-sm text-gray-600 mb-1">Đã nhập điểm</p>
-                <p className="text-2xl font-bold text-blue-600">{studentsWithGrades}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <p className="text-sm text-gray-600 mb-1">Chưa nhập</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {gradesInfo.totalStudents - studentsWithGrades}
-                </p>
-              </div>
-            </div>
+            {isLoadingGrades ? <StatsSkeleton /> : (
+              <StatsCards
+                totalStudents={gradesInfo.totalStudents}
+                studentsWithGrades={studentsWithGrades}
+              />
+            )}
 
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -187,77 +186,35 @@ const InstructorGradesPage = () => {
                   </>
                 )}
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <History className="w-4 h-4" />
-                  {showHistory ? 'Ẩn lịch sử' : 'Xem lịch sử'}
-                </button>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowExportDropdown(!showExportDropdown)}
-                    disabled={!selectedCourseClassId || exportGradesMutation.isPending}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <FileDown className="w-4 h-4" />
-                    {exportGradesMutation.isPending ? 'Đang xuất...' : 'Xuất Excel'}
-                  </button>
-                  {showExportDropdown && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-10" 
-                        onClick={() => setShowExportDropdown(false)}
-                      />
-                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-                        <button
-                          onClick={() => handleExport('draft')}
-                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg transition-colors cursor-pointer"
-                        >
-                          Bản nháp
-                        </button>
-                        <button
-                          onClick={() => handleExport('official')}
-                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-b-lg transition-colors cursor-pointer"
-                        >
-                          Bản chính thức
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <button
-                  onClick={() => setIsSubmitDialogOpen(true)}
-                  disabled={!gradesInfo.canEditGrades || submitForApprovalMutation.isPending}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors ${
-                    !gradesInfo.canEditGrades || submitForApprovalMutation.isPending
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                  }`}
-                >
-                  <Send className="w-4 h-4" />
-                  Gửi duyệt
-                </button>
-              </div>
+              <ActionButtons
+                showHistory={showHistory}
+                onToggleHistory={() => setShowHistory(!showHistory)}
+                showExportDropdown={showExportDropdown}
+                onToggleExportDropdown={() => setShowExportDropdown(!showExportDropdown)}
+                onExport={handleExport}
+                onSubmitForApproval={() => setIsSubmitDialogOpen(true)}
+                canEditGrades={gradesInfo.canEditGrades}
+                isExporting={exportGradesMutation.isPending}
+                isSubmitting={submitForApprovalMutation.isPending}
+                hasSelectedClass={!!selectedCourseClassId}
+              />
             </div>
 
-            {isLoadingGrades ? (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <p className="text-gray-600">Đang tải dữ liệu...</p>
-              </div>
-            ) : (
+            {isLoadingGrades ? <GradesTableSkeleton /> : (
               <GradesTable
                 students={gradesInfo.students}
                 canEdit={gradesInfo.canEditGrades}
                 onGradeChange={handleGradeChange}
+                isPending={updateGradeMutation.isPending}
               />
             )}
 
             {showHistory && (
-              <div className="mt-6">
-                <GradeHistoryTable history={history} onVersionClick={handleVersionClick} />
-              </div>
+              <Suspense fallback={<div className="bg-white rounded-lg shadow-sm p-8 text-center">Đang tải...</div>}>
+                <div className="mt-6">
+                  <GradeHistoryTable history={history} onVersionClick={handleVersionClick} />
+                </div>
+              </Suspense>
             )}
 
             <SubmitApprovalDialog
@@ -269,12 +226,14 @@ const InstructorGradesPage = () => {
               courseName={`${gradesInfo.courseCode} - ${gradesInfo.courseName}`}
             />
 
-            <GradeVersionModal
-              isOpen={selectedVersionNumber !== null}
-              onClose={handleCloseVersionModal}
-              versionDetail={versionDetail}
-              isLoading={isLoadingVersion}
-            />
+            <Suspense fallback={<div />}>
+              <GradeVersionModal
+                isOpen={selectedVersionNumber !== null}
+                onClose={handleCloseVersionModal}
+                versionDetail={versionDetail}
+                isLoading={isLoadingVersion}
+              />
+            </Suspense>
           </>
         )}
 

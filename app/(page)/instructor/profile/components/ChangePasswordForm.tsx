@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { memo, useState } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 interface ChangePasswordFormProps {
@@ -6,7 +6,7 @@ interface ChangePasswordFormProps {
   loading?: boolean
 }
 
-export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
+export const ChangePasswordForm = memo<ChangePasswordFormProps>(({
   onSubmit,
   loading = false
 }) => {
@@ -263,4 +263,5 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
       </div>
     </form>
   )
-}
+})
+ChangePasswordForm.displayName = 'ChangePasswordForm'

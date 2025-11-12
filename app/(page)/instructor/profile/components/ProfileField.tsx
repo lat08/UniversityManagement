@@ -1,4 +1,4 @@
-import React from 'react'
+import { memo } from 'react'
 import { Dropdown } from '@/app/components/ui'
 
 interface ProfileFieldProps {
@@ -11,7 +11,7 @@ interface ProfileFieldProps {
   options?: { value: string; label: string }[]
 }
 
-export const ProfileField: React.FC<ProfileFieldProps> = ({
+export const ProfileField = memo<ProfileFieldProps>(({
   label,
   value,
   placeholder = '',
@@ -56,5 +56,6 @@ export const ProfileField: React.FC<ProfileFieldProps> = ({
       )}
     </div>
   )
-}
+})
+ProfileField.displayName = 'ProfileField'
 

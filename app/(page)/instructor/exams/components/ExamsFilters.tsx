@@ -1,27 +1,28 @@
 "use client"
 
+import { memo, useCallback } from "react";
 import { Dropdown, DropdownSearch, SearchInput } from "@/app/components/ui";
 
 interface ExamsFiltersProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  selectedSemester: string;
-  onSemesterChange: (value: string) => void;
-  selectedSubject: string;
-  onSubjectChange: (value: string) => void;
-  selectedStatus: string;
-  onStatusChange: (value: string) => void;
-  selectedExamType: string;
-  onExamTypeChange: (value: string) => void;
-  semesters: { id: string; name: string }[];
-  subjects: { id: string; name: string }[];
-  statuses: { id: string; name: string }[];
-  examTypes: { id: string; name: string }[];
-  semestersLoading?: boolean;
-  subjectsLoading?: boolean;
+  readonly searchQuery: string;
+  readonly onSearchChange: (value: string) => void;
+  readonly selectedSemester: string;
+  readonly onSemesterChange: (value: string) => void;
+  readonly selectedSubject: string;
+  readonly onSubjectChange: (value: string) => void;
+  readonly selectedStatus: string;
+  readonly onStatusChange: (value: string) => void;
+  readonly selectedExamType: string;
+  readonly onExamTypeChange: (value: string) => void;
+  readonly semesters: { id: string; name: string }[];
+  readonly subjects: { id: string; name: string }[];
+  readonly statuses: { id: string; name: string }[];
+  readonly examTypes: { id: string; name: string }[];
+  readonly semestersLoading?: boolean;
+  readonly subjectsLoading?: boolean;
 }
 
-export function ExamsFilters({
+const ExamsFiltersComponent = ({
   searchQuery,
   onSearchChange,
   selectedSemester,
@@ -38,13 +39,21 @@ export function ExamsFilters({
   examTypes,
   semestersLoading = false,
   subjectsLoading = false,
-}: ExamsFiltersProps) {
+}: ExamsFiltersProps) => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
+  }, [onSearchChange]);
+
+  const handleSubjectChange = useCallback((value: string | undefined) => {
+    onSubjectChange(value || "all");
+  }, [onSubjectChange]);
+
   return (
     <div className="flex gap-4 items-stretch w-full">
         <div className="flex-1">
           <SearchInput
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Tìm kiếm theo tên môn học, giảng viên..."
             aria-label="Tìm kiếm theo tên môn học hoặc giảng viên"
             className="h-full py-2.5 border-gray-300 rounded-lg hover:border-gray-600 focus-visible:border-gray-600 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -65,7 +74,7 @@ export function ExamsFilters({
           options={subjects.map(s => ({ value: s.id, label: s.name }))}
           value={selectedSubject === "all" ? undefined : selectedSubject}
           placeholder="Tất cả môn học"
-          onChange={(value) => onSubjectChange(value || "all")}
+          onChange={handleSubjectChange}
           disabled={subjectsLoading}
           className="flex-1"
           showEmptyOption
@@ -91,5 +100,7 @@ export function ExamsFilters({
         />
     </div>
   );
-}
+};
+
+export const ExamsFilters = memo(ExamsFiltersComponent);
 

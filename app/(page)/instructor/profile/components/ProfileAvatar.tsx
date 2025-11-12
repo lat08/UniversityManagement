@@ -1,16 +1,17 @@
-import React, { useMemo, useRef } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar'
+import toast from 'react-hot-toast'
 
 interface ProfileAvatarProps {
   profilePicture?: string
   fullName: string
   role: string
   editable?: boolean
-  onAvatarChange?: (file: File) => void
+  onAvatarChange?: (file: File) => void | Promise<void>
   loading?: boolean
 }
 
-export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
+export const ProfileAvatar = memo<ProfileAvatarProps>(({
   profilePicture,
   fullName,
   role,
@@ -37,22 +38,22 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     }
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file && onAvatarChange) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Vui lòng chọn file ảnh')
+        toast.error('Vui lòng chọn file ảnh')
         return
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('Kích thước ảnh không được vượt quá 5MB')
+        toast.error('Kích thước ảnh không được vượt quá 5MB')
         return
       }
       
-      onAvatarChange(file)
+      await onAvatarChange(file)
     }
   }
 
@@ -88,5 +89,6 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       </div>
     </div>
   )
-}
+})
+ProfileAvatar.displayName = 'ProfileAvatar'
 

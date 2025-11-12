@@ -66,6 +66,32 @@ export const notificationApi = {
     const queryString = role ? `?role=${encodeURIComponent(role)}` : ''
     const response = await api.get<UnreadCountByCategoryResponse>(`/v1/notification/unread-count-by-category${queryString}`)
     return response.data
+  },
+
+  getPageNumber: async (id: string, params: NotificationQueryParams): Promise<{ isSuccess: boolean; data: { notificationId: string; pageNumber: number; pageSize: number } }> => {
+    const queryParams = new URLSearchParams()
+    
+    if (params.NotificationType) {
+      queryParams.append('NotificationType', params.NotificationType)
+    }
+    if (params.IsRead !== undefined) {
+      queryParams.append('IsRead', params.IsRead.toString())
+    }
+    if (params.SearchTerm) {
+      queryParams.append('SearchTerm', params.SearchTerm)
+    }
+    if (params.PageSize) {
+      queryParams.append('PageSize', params.PageSize.toString())
+    }
+    if (params.Role) {
+      queryParams.append('role', params.Role)
+    }
+
+    const queryString = queryParams.toString()
+    const url = `/v1/notification/${id}/page-number${queryString ? `?${queryString}` : ''}`
+    
+    const response = await api.get<{ isSuccess: boolean; data: { notificationId: string; pageNumber: number; pageSize: number } }>(url)
+    return response.data
   }
 }
 

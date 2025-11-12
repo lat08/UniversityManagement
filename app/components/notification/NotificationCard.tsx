@@ -41,46 +41,88 @@ const notificationTypeConfig = {
     iconColor: "text-[var(--notification-important-icon)]",
     iconBorder: "border-2 border-[var(--notification-important-border)]",
   },
+} as const
+
+const defaultTypeConfig = {
+  iconBg: "bg-[var(--notification-important-bg)]",
+  iconColor: "text-[var(--notification-important-icon)]",
+  iconBorder: "border-2 border-[var(--notification-important-border)]",
 }
 
 export function NotificationCard({ notification, onNotificationClick, initialExpanded = false, animationDelay = 0 }: NotificationCardProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
-  const [isHighlighted, setIsHighlighted] = useState(false)
+  const [isHighlighted, setIsHighlighted] = useState(initialExpanded)
   const cardRef = useRef<HTMLDivElement>(null)
-  const typeConfig = notificationTypeConfig[notification.notificationType]
-  const Icon = iconMap[notification.notificationType]
+  const scrolledRef = useRef(false)
+  const typeConfig = notificationTypeConfig[notification.notificationType as keyof typeof notificationTypeConfig] ?? defaultTypeConfig
+  const Icon = iconMap[notification.notificationType as keyof typeof iconMap] ?? AlertTriangle
 
   useEffect(() => {
     if (initialExpanded) {
       setIsExpanded(true)
       setIsHighlighted(true)
-      
-      if (onNotificationClick) {
-        onNotificationClick(notification.scheduleId)
-      }
-
-      setTimeout(() => {
-        if (cardRef.current) {
-          cardRef.current.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          })
-        }
-      }, 100)
-
-      const timer = setTimeout(() => {
-        setIsHighlighted(false)
-      }, 1500)
-
-      return () => clearTimeout(timer)
     }
-  }, [initialExpanded, notification.scheduleId, onNotificationClick])
+  }, [initialExpanded])
 
-  const handleClick = () => {
-    if (!isExpanded && onNotificationClick) {
+  useEffect(() => {
+    if (!initialExpanded || !isExpanded) return
+
+    if (!notification.isRead && onNotificationClick) {
       onNotificationClick(notification.scheduleId)
     }
+
+    const scrollToCard = () => {
+      if (cardRef.current) {
+        cardRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        })
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            observer.disconnect()
+            setTimeout(scrollToCard, 100)
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+
+    const timeoutId = setTimeout(() => {
+      if (cardRef.current) {
+        observer.observe(cardRef.current)
+        scrollToCard()
+      }
+    }, 100)
+
+    const scrollTimeout = setTimeout(() => {
+      scrollToCard()
+    }, 500)
+
+    const highlightTimer = setTimeout(() => {
+      setIsHighlighted(false)
+    }, 2500)
+
+    return () => {
+      clearTimeout(timeoutId)
+      clearTimeout(scrollTimeout)
+      clearTimeout(highlightTimer)
+      observer.disconnect()
+    }
+  }, [initialExpanded, isExpanded, notification.scheduleId, notification.isRead, onNotificationClick])
+
+  const handleClick = () => {
+    const wasExpanded = isExpanded
     setIsExpanded(!isExpanded)
+    
+    if (!wasExpanded && !notification.isRead && onNotificationClick) {
+      onNotificationClick(notification.scheduleId)
+    }
   }
 
   return (
@@ -112,6 +154,9 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
               <h3 className={`font-semibold text-base text-[var(--text-primary)] ${notification.isRead === false ? 'font-bold' : ''}`}>
                 {notification.title}
               </h3>
+              {!notification.isRead && (
+                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500" />
+              )}
             </div>
             <p className="text-sm text-[var(--text-secondary)]">
               {notification.timeAgo} · {formatDate(notification.createdAt)}

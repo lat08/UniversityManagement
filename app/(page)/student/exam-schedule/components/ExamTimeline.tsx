@@ -2,27 +2,14 @@
 
 import { Exam } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
-import { useRef } from "react";
+import { memo } from "react";
 
 interface ExamTimelineProps {
   exams: Exam[];
+  loading?: boolean;
 }
 
-export default function ExamTimeline({ exams }: ExamTimelineProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    const element = scrollRef.current;
-    if (!element) return;
-
-    const isScrollingDown = e.deltaY > 0;
-    const isAtTop = element.scrollTop === 0;
-    const isAtBottom = element.scrollHeight - element.scrollTop === element.clientHeight;
-
-    if ((isAtTop && !isScrollingDown) || (isAtBottom && isScrollingDown)) {
-      e.preventDefault();
-    }
-  };
+const ExamTimeline = memo(function ExamTimeline({ exams, loading = false }: ExamTimelineProps) {
   const getStatusColor = (status: Exam['status']) => {
     switch (status) {
       case 'Đã thi':
@@ -62,24 +49,48 @@ export default function ExamTimeline({ exams }: ExamTimelineProps) {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="relative max-h-[600px] overflow-hidden pr-2">
+        <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
+        <div className="space-y-3 lg:space-y-4 pt-1">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="relative animate-pulse pl-8 lg:pl-10">
+              <div className="absolute left-[0px] top-3 z-10 h-5 w-5 rounded-full border-4 border-white bg-gray-300 shadow-sm" />
+              <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
+                <div className="mb-2 h-4 w-48 rounded bg-gray-200" />
+                <div className="mb-3 h-5 w-40 rounded bg-gray-200" />
+                <div className="space-y-2">
+                  <div className="h-4 w-56 rounded bg-gray-200" />
+                  <div className="h-4 w-40 rounded bg-gray-200" />
+                  <div className="h-4 w-32 rounded bg-gray-200" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (exams.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <svg className="mb-4 h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p className="text-sm text-gray-500">Chưa có lịch thi nào</p>
+      </div>
+    );
+  }
+
   return (
-    <div 
-      ref={scrollRef}
-      onWheel={handleWheel}
-      className="relative max-h-[600px] overflow-y-auto pr-2 overscroll-contain"
-    >
+    <div className="relative max-h-[500px] overflow-y-auto pr-2 overscroll-contain">
       <div className="absolute left-[10px] top-0 bottom-0 w-0.5 bg-gray-200" />
 
       <div className="space-y-3 lg:space-y-4">
-        {exams.map((exam, index) => (
-          <div 
-            key={exam.id} 
-            className="relative pl-8 lg:pl-10 animate-fade-up"
-            style={{
-              animationDelay: `${index * 100}ms`,
-              animationFillMode: 'both'
-            }}
-          >
+        {exams.map((exam) => (
+          <div key={exam.id} className="relative pl-8 lg:pl-10">
             <div className={cn(
               "absolute left-[0px] top-3 w-5 h-5 rounded-full border-4 border-white shadow-sm z-10",
               getStatusColor(exam.status)
@@ -133,5 +144,7 @@ export default function ExamTimeline({ exams }: ExamTimelineProps) {
       </div>
     </div>
   );
-}
+});
+
+export default ExamTimeline;
 

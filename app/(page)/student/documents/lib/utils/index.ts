@@ -1,2 +1,2 @@
-export { formatFileSize, formatDate, groupDocumentsByCourse } from './documentUtils';
+export { formatFileSize, formatDate } from './documentUtils';
 

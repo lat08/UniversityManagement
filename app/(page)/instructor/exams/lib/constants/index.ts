@@ -11,6 +11,7 @@ export const EXAM_TYPE_LABELS: Record<string, string> = {
   midterm: 'Giữa kỳ',
   final: 'Cuối kỳ',
   quiz: '15 phút',
+  makeup: 'Thi lại',
 };
 
 export const ENTRY_STATUS_LABELS: Record<string, string> = {

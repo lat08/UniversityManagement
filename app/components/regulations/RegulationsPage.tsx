@@ -1,111 +1,135 @@
-"use client"
+'use client';
 
-import { useState, useMemo } from "react"
-import { Loader2, Search, AlertTriangle } from "lucide-react"
-import { useRegulations } from "./lib/hooks/useRegulations"
-import { RegulationCard } from "./RegulationCard"
+import { useCallback, useMemo, useState, useTransition } from 'react';
+import { AlertTriangle, Search } from 'lucide-react';
+import { useRegulations } from './lib/hooks/useRegulations';
+import { RegulationCard } from './RegulationCard';
+import { RegulationsSkeleton } from './RegulationsSkeleton';
+import { RegulationsRefetchIndicator } from './RegulationsRefetchIndicator';
 
 interface RegulationsPageProps {
-  readonly pageTitle: string
-  readonly description: string
-  readonly noticeText?: string
+  readonly pageTitle: string;
+  readonly description: string;
+  readonly noticeText?: string;
 }
 
-export function RegulationsPage({ pageTitle, description, noticeText }: RegulationsPageProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const { regulations, loading, error, refetch } = useRegulations()
+export const RegulationsPage = ({ pageTitle, description, noticeText }: RegulationsPageProps) => {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [, startTransition] = useTransition();
+  
+  const { data, isPending: isLoading, error, refetch, isRefetching } = useRegulations({
+    pageSize: 50,
+    orderBy: 1,
+    isActive: true,
+  });
 
-  const toggleExpand = (id: string) => {
-    setExpandedId(expandedId === id ? null : id)
-  }
+  const isInitialLoading = !data && isLoading;
+  const regulations = useMemo(() => data ?? [], [data]);
+
+  const toggleExpand = useCallback(
+    (id: string) => {
+      setExpandedId((current) => (current === id ? null : id));
+    },
+    [],
+  );
+
+  const handleSearchChange = useCallback((value: string) => {
+    startTransition(() => {
+      setSearchQuery(value);
+    });
+  }, []);
 
   const filteredRegulations = useMemo(() => {
-    if (!searchQuery.trim()) return regulations
-    
-    const query = searchQuery.toLowerCase()
-    return regulations.filter(reg => 
-      (reg.title || '').toLowerCase().includes(query) ||
-      (reg.description || '').toLowerCase().includes(query) ||
-      (reg.category || '').toLowerCase().includes(query)
-    )
-  }, [regulations, searchQuery])
+    if (!searchQuery.trim()) {
+      return regulations;
+    }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-2 text-gray-600">
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Đang tải dữ liệu...</span>
-        </div>
-      </div>
-    )
+    const query = searchQuery.toLowerCase();
+
+    return regulations.filter((regulation) => {
+      const { title = '', description: desc = '', target = '' } = regulation;
+      return (
+        title.toLowerCase().includes(query) ||
+        desc.toLowerCase().includes(query) ||
+        target.toLowerCase().includes(query)
+      );
+    });
+  }, [regulations, searchQuery]);
+
+  if (isInitialLoading) {
+    return <RegulationsSkeleton />;
   }
 
   if (error) {
     return (
       <div className="space-y-4 lg:space-y-6">
         <header className="space-y-2">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{pageTitle}</h1>
+          <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">{pageTitle}</h1>
           <p className="text-sm text-gray-600">{description}</p>
         </header>
-        
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 lg:p-6">
+
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 lg:p-6">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
-            <div>
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-600" />
+            <div className="flex-1">
               <h3 className="font-semibold text-red-900">Không thể tải dữ liệu</h3>
-              <p className="text-red-700 mt-1">{error}</p>
-              <button 
+              <p className="mt-1 text-sm text-red-700">{error}</p>
+              <button
                 onClick={refetch}
-                className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
+                disabled={isRefetching}
+                className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
               >
-                Thử lại
+                {isRefetching ? 'Đang tải...' : 'Thử lại'}
               </button>
             </div>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  if (!regulations.length) {
+  if (regulations.length === 0) {
     return (
       <div className="space-y-4 lg:space-y-6">
         <header className="space-y-2">
-          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{pageTitle}</h1>
+          <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">{pageTitle}</h1>
           <p className="text-sm text-gray-600">{description}</p>
         </header>
-        
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 lg:p-6 text-center">
+
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center lg:p-6">
           <p className="text-gray-600">Chưa có quy chế nào được công bố.</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-4 lg:space-y-6">
+      {isRefetching && <RegulationsRefetchIndicator />}
+      
       <header className="space-y-2">
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{pageTitle}</h1>
+        <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">{pageTitle}</h1>
         <p className="text-sm text-gray-600">{description}</p>
       </header>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Tìm kiếm..."
+          placeholder="Tìm kiếm theo tiêu đề, mô tả hoặc đối tượng..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          onChange={(event) => handleSearchChange(event.target.value)}
+          className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {filteredRegulations.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-            <p className="text-gray-600">Không tìm thấy quy chế phù hợp với từ khóa &quot;{searchQuery}&quot;</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
+            <p className="text-gray-600">
+              Không tìm thấy quy chế phù hợp với từ khóa &quot;{searchQuery}&quot;
+            </p>
           </div>
         ) : (
           filteredRegulations.map((regulation, index) => (
@@ -115,12 +139,12 @@ export function RegulationsPage({ pageTitle, description, noticeText }: Regulati
               isExpanded={expandedId === regulation.id}
               onToggle={() => toggleExpand(regulation.id)}
               noticeText={noticeText}
-              animationDelay={index * 100}
+              animationDelay={Math.min(index * 50, 300)}
             />
           ))
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 

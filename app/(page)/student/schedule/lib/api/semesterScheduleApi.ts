@@ -1,116 +1,89 @@
 import { api } from "@/lib/api/client"
 import { DAY_NAME_TO_NUMBER } from "@/lib/constants/schedule"
-import { SemesterScheduleResponse } from "../types/semesterTypes"
+import { SemesterScheduleResponse, SemesterScheduleItem } from "../types/semesterTypes"
 
-const mapDayOfWeekToNumber = (dayString: string): number => {
-  return DAY_NAME_TO_NUMBER[dayString] || 2
+interface ApiSemesterScheduleItem {
+  subjectId?: string
+  subjectCode: string
+  subjectName: string
+  courseGroup?: string | null
+  credits?: number
+  classCode?: string | null
+  dayOfWeek: string | number
+  startPeriod: number
+  endPeriod?: number
+  numberOfPeriods?: number
+  roomCode: string
+  roomName?: string
+  instructorName: string
+  courseType?: string
+  scheduleStartDate: string
+  scheduleEndDate: string
+  note?: string
+}
+
+const normalizeDayOfWeek = (day: string | number): number => {
+  if (typeof day === 'number') {
+    return day >= 2 && day <= 8 ? day : 2
+  }
+  return DAY_NAME_TO_NUMBER[day] || 2
+}
+
+const normalizeScheduleItem = (item: ApiSemesterScheduleItem): SemesterScheduleItem => {
+  const numberOfPeriods = item.numberOfPeriods || 
+    (item.endPeriod ? item.endPeriod - item.startPeriod + 1 : 1)
+  
+  return {
+    subjectId: item.subjectId,
+    subjectCode: item.subjectCode,
+    subjectName: item.subjectName,
+    courseGroup: item.courseGroup ?? null,
+    credits: item.credits ?? 0,
+    classCode: item.classCode ?? null,
+    dayOfWeek: normalizeDayOfWeek(item.dayOfWeek),
+    startPeriod: item.startPeriod,
+    numberOfPeriods,
+    roomCode: item.roomCode,
+    roomName: item.roomName,
+    instructorName: item.instructorName,
+    courseType: item.courseType,
+    scheduleStartDate: item.scheduleStartDate,
+    scheduleEndDate: item.scheduleEndDate,
+    note: item.note
+  }
 }
 
 export const semesterScheduleApi = {
-  // Lấy thời khóa biểu cá nhân của sinh viên
   getPersonalSchedule: async (semesterId: string): Promise<SemesterScheduleResponse> => {
-    const response = await api.get(`/v1/student-schedule/semester?semesterId=${semesterId}`)
+    const response = await api.get<{ success: boolean; data: ApiSemesterScheduleItem[]; message?: string }>(
+      `/v1/student-schedule/semester?semesterId=${semesterId}`
+    )
     
-    // Transform the API response to ensure consistent format
-    if (response.data.success && response.data.data) {
-      const transformedData = response.data.data.map((item: {
-        subjectId?: string
-        subjectCode: string
-        subjectName: string
-        courseGroup?: string | null
-        credits?: number
-        classCode?: string | null
-        dayOfWeek: string | number
-        startPeriod: number
-        endPeriod?: number
-        numberOfPeriods?: number
-        roomCode: string
-        roomName?: string
-        instructorName: string
-        courseType: string
-        scheduleStartDate: string
-        scheduleEndDate: string
-        note?: string
-      }) => ({
-        subjectId: item.subjectId,
-        subjectCode: item.subjectCode,
-        subjectName: item.subjectName,
-        courseGroup: item.courseGroup || null,
-        credits: item.credits || 0,
-        classCode: item.classCode || null,
-        dayOfWeek: typeof item.dayOfWeek === 'string' ? mapDayOfWeekToNumber(item.dayOfWeek) : item.dayOfWeek,
-        startPeriod: item.startPeriod,
-        numberOfPeriods: item.numberOfPeriods || 1,
-        roomCode: item.roomCode,
-        roomName: item.roomName,
-        instructorName: item.instructorName,
-        courseType: item.courseType,
-        scheduleStartDate: item.scheduleStartDate,
-        scheduleEndDate: item.scheduleEndDate,
-        note: item.note
-      }))
-      
+    if (response.data.success && Array.isArray(response.data.data)) {
       return {
         success: true,
-        data: transformedData,
+        data: response.data.data.map(normalizeScheduleItem),
         message: response.data.message
       }
     }
     
-    return response.data
+    return { success: false, data: [], message: response.data.message }
   },
 
-  // Lấy thời khóa biểu theo môn học
   getScheduleBySubject: async (subjectId: string, semesterId: string): Promise<SemesterScheduleResponse> => {
-    const response = await api.get(`/v1/student-schedule/semester/subjects/${subjectId}?semesterId=${semesterId}`)
+    const response = await api.get<{ success: boolean; data: ApiSemesterScheduleItem[]; message?: string }>(
+      `/v1/student-schedule/semester/subjects/${subjectId}?semesterId=${semesterId}`
+    )
     
-    // Transform the API response to ensure consistent format
-    if (response.data.success && response.data.data) {
-      const transformedData = response.data.data.map((item: {
-        subjectId?: string
-        subjectCode: string
-        subjectName: string
-        courseGroup?: string | null
-        credits?: number
-        classCode?: string | null
-        dayOfWeek: string | number
-        startPeriod: number
-        endPeriod?: number
-        numberOfPeriods?: number
-        roomCode: string
-        roomName?: string
-        instructorName: string
-        courseType: string
-        scheduleStartDate: string
-        scheduleEndDate: string
-        note?: string
-      }) => ({
-        subjectId: item.subjectId,
-        subjectCode: item.subjectCode,
-        subjectName: item.subjectName,
-        courseGroup: item.courseGroup || null,
-        credits: item.credits || 0,
-        classCode: item.classCode || null,
-        dayOfWeek: typeof item.dayOfWeek === 'string' ? mapDayOfWeekToNumber(item.dayOfWeek) : item.dayOfWeek,
-        startPeriod: item.startPeriod,
-        numberOfPeriods: item.numberOfPeriods || 1,
-        roomCode: item.roomCode,
-        roomName: item.roomName,
-        instructorName: item.instructorName,
-        courseType: item.courseType,
-        scheduleStartDate: item.scheduleStartDate,
-        scheduleEndDate: item.scheduleEndDate,
-        note: item.note
-      }))
-      
+    if (response.data.success && Array.isArray(response.data.data)) {
       return {
         success: true,
-        data: transformedData,
+        data: response.data.data.map(normalizeScheduleItem),
         message: response.data.message
       }
     }
     
-    return response.data
+    return { success: false, data: [], message: response.data.message }
   },
 
 

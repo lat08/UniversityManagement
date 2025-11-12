@@ -1,110 +1,113 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, memo, lazy, Suspense } from "react";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import { useAuthStore } from "@/lib/store/authStore";
 import StatCard from "../StatCard";
-import AcademicResultsChart from "../AcademicResultsChart";
-import LearningStatsCard from "../LearningStatsCard";
-import EventCard from "../EventCard";
-import ClassListCard from "../ClassListCard";
+import { DashboardSkeleton } from "../dashboard-skeleton";
 import { useDashboard } from "../../libs/hooks/useDashboard";
-import { useDashboardStats } from "../../libs/hooks/useStatCard"
-import { Loader2 } from "lucide-react";
-import { Semester } from "../../libs/types/types";
+import { useDashboardStats } from "../../libs/hooks/useStatCard";
+import type { Semester } from "../../libs/types/types";
+
+const AcademicResultsChart = lazy(() => import("../AcademicResultsChart"));
+const LearningStatsCard = lazy(() => import("../LearningStatsCard"));
+const EventCard = lazy(() => import("../EventCard"));
+const ClassListCard = lazy(() => import("../ClassListCard"));
 
 const getActiveSemesterId = (semesters: Semester[]): string => {
   if (!semesters || semesters.length === 0) return "";
-  
+
   const now = new Date();
-  
-  const activeSemester = semesters.find(semester => {
-    if (!semester.startDate || !semester.endDate) return false;
-    const startDate = new Date(semester.startDate);
-    const endDate = new Date(semester.endDate);
+
+  const activeSemester = semesters.find((semester) => {
+    const startDate = new Date(semester.semesterName);
+    const endDate = new Date(semester.semesterName);
     return now >= startDate && now <= endDate;
   });
-  
+
   if (activeSemester) return activeSemester.semesterId;
-  
+
   const upcomingSemester = semesters
-    .filter(semester => semester.startDate && new Date(semester.startDate) > now)
-    .sort((a, b) => {
-      const aStart = a.startDate ? new Date(a.startDate).getTime() : 0;
-      const bStart = b.startDate ? new Date(b.startDate).getTime() : 0;
-      return aStart - bStart;
-    })[0];
-  
+    .filter((semester) => new Date(semester.semesterName) > now)
+    .sort((a, b) => new Date(a.semesterName).getTime() - new Date(b.semesterName).getTime())[0];
+
   if (upcomingSemester) return upcomingSemester.semesterId;
-  
+
   const pastSemester = semesters
-    .filter(semester => semester.endDate && new Date(semester.endDate) < now)
-    .sort((a, b) => {
-      const aEnd = a.endDate ? new Date(a.endDate).getTime() : 0;
-      const bEnd = b.endDate ? new Date(b.endDate).getTime() : 0;
-      return bEnd - aEnd;
-    })[0];
-  
+    .filter((semester) => new Date(semester.semesterName) < now)
+    .sort((a, b) => new Date(b.semesterName).getTime() - new Date(a.semesterName).getTime())[0];
+
   return pastSemester?.semesterId || semesters[0]?.semesterId || "";
 };
 
-export default function DashboardContent() {
+const WelcomeSection = memo(({ userName }: { userName: string }) => (
+  <div>
+    <h1 className="text-xl lg:text-2xl font-bold text-[var(--text-primary)]">Bảng điều khiển</h1>
+    <p className="text-xs lg:text-sm text-[var(--text-secondary)] mt-1">Chào mừng trở lại, {userName}!</p>
+  </div>
+));
+WelcomeSection.displayName = "WelcomeSection";
+
+const ChartSkeleton = () => (
+  <div className="h-[300px] lg:h-[350px] flex items-center justify-center bg-white rounded-lg shadow-sm">
+    <span className="text-[var(--text-secondary)] text-sm">Đang tải...</span>
+  </div>
+);
+
+const DashboardContent = memo(() => {
   const { user } = useAuthStore();
-  const { dashboard, loading } = useDashboard();
-  const card = useDashboardStats();
+  const { data: dashboard, isPending } = useDashboard();
+  const cards = useDashboardStats(dashboard);
+  const isInitialLoading = !dashboard && isPending;
 
   const activeSemesterId = useMemo(() => {
-    return getActiveSemesterId(dashboard.activeSemesters || []);
-  }, [dashboard.activeSemesters]);
+    return getActiveSemesterId(dashboard?.activeSemesters || []);
+  }, [dashboard?.activeSemesters]);
 
-  usePageTitle('Bảng điều khiển');
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Đang tải dữ liệu...</span>
-        </div>
-      </div>
-    )
+  usePageTitle("Bảng điều khiển");
+
+  if (isInitialLoading) {
+    return <DashboardSkeleton />;
   }
 
   return (
-    
     <div className="space-y-4 lg:space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text-primary)]">Bảng điều khiển</h1>
-        <p className="text-xs lg:text-sm text-[var(--text-secondary)] mt-1">
-          Chào mừng trở lại, {user?.name || 'Sinh viên'}!
-        </p>
-      </div>
+      <WelcomeSection userName={user?.name || "Sinh viên"} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        {card.map((card, index) => (
-          <StatCard key={index} data={card} />
+        {cards.map((cardItem, index) => (
+          <StatCard key={`stat-${index}`} data={cardItem} loading={isInitialLoading} />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
-          <AcademicResultsChart semesters={dashboard.activeSemesters || []}
-            semesterId={activeSemesterId} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <AcademicResultsChart semesters={dashboard?.activeSemesters || []} semesterId={activeSemesterId} />
+          </Suspense>
         </div>
         <div className="lg:col-span-4 h-full">
-          <LearningStatsCard Kpi={dashboard.kpi}/>
+          <Suspense fallback={<ChartSkeleton />}>
+            <LearningStatsCard Kpi={isInitialLoading ? undefined : dashboard?.kpi} />
+          </Suspense>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
         <div className="lg:col-span-8 h-full">
-          <EventCard events={dashboard.events || []} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <EventCard events={isInitialLoading ? undefined : dashboard?.events} />
+          </Suspense>
         </div>
-        <div className="lg:col-span-4 h-full ">
-          <ClassListCard currentSubjects={dashboard.currentSubjects || []} />
+        <div className="lg:col-span-4 h-full">
+          <Suspense fallback={<ChartSkeleton />}>
+            <ClassListCard currentSubjects={isInitialLoading ? undefined : dashboard?.currentSubjects} />
+          </Suspense>
         </div>
       </div>
     </div>
   );
-}
+});
+DashboardContent.displayName = "DashboardContent";
+
+export default DashboardContent;

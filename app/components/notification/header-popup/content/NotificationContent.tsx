@@ -3,6 +3,7 @@
 import { BellOff, Bell, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 import { NotificationCard } from "@/app/components/notification/header-popup/notification-card/NotificationCard"
@@ -17,6 +18,7 @@ export function NotificationPopup() {
   const [isOpen, setIsOpen] = useState(false)
   const { user } = useAuthStore()
   const userRole = user?.role
+  const router = useRouter()
 
   const fetchUnreadCount = useCallback(async () => {
     if (!userRole) return
@@ -73,20 +75,36 @@ export function NotificationPopup() {
     }
   }, [isOpen, userRole, fetchRecentNotifications])
 
-  const getNotificationLink = () => {
+  const getNotificationLink = (readStatus?: string) => {
     if (!user) return "/login"
-    if (user.role === "Student") return "/student/notification"
-    if (user.role === "Instructor") return "/instructor/notification"
-    return "/admin/notification"
+    const basePath = user.role === "Student" 
+      ? "/student/notification" 
+      : user.role === "Instructor" 
+      ? "/instructor/notification" 
+      : "/admin/notification"
+    return readStatus ? `${basePath}?readStatus=${readStatus}` : basePath
+  }
+
+  const handleUnreadNavigate = () => {
+    router.push(getNotificationLink("unread"))
+    setIsOpen(false)
   }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative border border-gray-300">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative border border-gray-300"
+          type="button"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white border border-white">
+            <span
+              className="absolute -top-1.5 -right-1.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-red-500 px-0.5 text-[9px] font-semibold text-white"
+              title={`${unreadCount} thông báo chưa đọc`}
+            >
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -99,9 +117,13 @@ export function NotificationPopup() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Thông báo</h3>
               {unreadCount > 0 && (
-                <span className="text-xs text-gray-500">
+                <button
+                  type="button"
+                  onClick={handleUnreadNavigate}
+                  className="text-xs font-medium text-blue-600 underline-offset-2 hover:text-blue-700 hover:underline cursor-pointer"
+                >
                   {unreadCount} chưa đọc
-                </span>
+                </button>
               )}
             </div>
           </div>

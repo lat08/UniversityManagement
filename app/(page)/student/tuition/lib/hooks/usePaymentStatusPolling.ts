@@ -1,42 +1,47 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { checkPaymentStatus } from '../api/financeApi';
+import type { PaymentStatus } from '../types/types';
 
 interface UsePaymentStatusPollingProps {
   paymentId: string | null;
   isOpen: boolean;
-  onStatusChange: (status: 'pending' | 'completed' | 'failed') => void;
+  onStatusChange: (status: PaymentStatus) => void;
 }
 
-export function usePaymentStatusPolling({
+const POLLING_INTERVAL = 2000;
+const POLLING_TIMEOUT = 5 * 60 * 1000;
+
+export const usePaymentStatusPolling = ({
   paymentId,
   isOpen,
   onStatusChange,
-}: UsePaymentStatusPollingProps) {
+}: UsePaymentStatusPollingProps): void => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastStatusRef = useRef<PaymentStatus | null>(null);
+  
+  const cleanup = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    lastStatusRef.current = null;
+  }, []);
   
   useEffect(() => {
     if (!paymentId || !isOpen) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
+      cleanup();
       return;
     }
     
-    // Timeout sau 5 phút để tự động dừng polling
     timeoutRef.current = setTimeout(() => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }, 5 * 60 * 1000);
+      cleanup();
+    }, POLLING_TIMEOUT);
     
-    // Polling mỗi 2 giây
     intervalRef.current = setInterval(async () => {
       try {
         const result = await checkPaymentStatus(paymentId);
@@ -44,37 +49,21 @@ export function usePaymentStatusPolling({
         if (result.success && result.data) {
           const status = result.data.paymentStatus;
           
-          // Gọi callback khi status thay đổi
-          onStatusChange(status);
+          if (status !== lastStatusRef.current) {
+            lastStatusRef.current = status;
+            onStatusChange(status);
+          }
           
-          // Dừng polling nếu thanh toán thành công hoặc thất bại
           if (status === 'completed' || status === 'failed') {
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-              timeoutRef.current = null;
-            }
+            cleanup();
           }
         }
-      } catch (error) {
-        console.error('Error checking payment status:', error);
+      } catch {
+        return;
       }
-    }, 2000);
+    }, POLLING_INTERVAL);
     
-    // Cleanup khi component unmount hoặc dependencies thay đổi
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
-  }, [paymentId, isOpen, onStatusChange]);
-}
+    return cleanup;
+  }, [paymentId, isOpen, onStatusChange, cleanup]);
+};
 
