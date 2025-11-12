@@ -3,6 +3,7 @@
 import { WeeklySchedule } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 interface WeeklyScheduleTimelineProps {
   schedules: WeeklySchedule[];
@@ -10,6 +11,11 @@ interface WeeklyScheduleTimelineProps {
 
 export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTimelineProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  const handleScheduleClick = (subjectCode: string) => {
+    router.push(`/instructor/schedule/semester?highlightSubject=${subjectCode}`);
+  };
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const element = scrollRef.current;
@@ -65,10 +71,21 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                 colors.dot
               )} />
 
-              <div className={cn(
-                "p-3 lg:p-4 rounded-lg border-2 transition-all hover:shadow-md",
-                colors.card
-              )}>
+              <div 
+                className={cn(
+                  "p-3 lg:p-4 rounded-lg border-2 transition-all hover:shadow-md hover:scale-[1.02] cursor-pointer",
+                  colors.card
+                )}
+                onClick={() => handleScheduleClick(schedule.subjectCode)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleScheduleClick(schedule.subjectCode);
+                  }
+                }}
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className={cn(

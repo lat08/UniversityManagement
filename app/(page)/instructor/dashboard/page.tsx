@@ -108,10 +108,10 @@ export default function InstructorDashboardPage() {
                 Lịch dạy trong tuần
               </h2>
               <Link 
-                href="/instructor/schedule/weekly"
+                href="/instructor/schedule/semester"
                 className="text-xs lg:text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
               >
-                Xem tuần
+                TKB học kỳ
               </Link>
             </div>
             {loading ? (

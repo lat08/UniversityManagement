@@ -3,12 +3,18 @@
 import { Reminder } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
 import { formatDate } from "@/lib/utils/format";
+import { useRouter } from "next/navigation";
 
 interface RemindersSectionProps {
   reminders: Reminder[];
 }
 
 export default function RemindersSection({ reminders }: RemindersSectionProps) {
+  const router = useRouter();
+
+  const handleReminderClick = (notificationId: string, notificationType: Reminder['notificationType']) => {
+    router.push(`/instructor/notification?type=${notificationType}&id=${notificationId}`);
+  };
   const getNotificationTypeColor = (type: Reminder['notificationType']) => {
     switch (type) {
       case 'tuition':
@@ -71,12 +77,21 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
             <div
               key={reminder.notificationId}
               className={cn(
-                "flex flex-col gap-2 p-3 rounded-lg border transition-all hover:shadow-sm cursor-pointer animate-fade-up",
+                "flex flex-col gap-2 p-3 rounded-lg border transition-all hover:shadow-md hover:scale-[1.02] cursor-pointer animate-fade-up",
                 getNotificationTypeColor(reminder.notificationType)
               )}
               style={{
                 animationDelay: `${index * 100}ms`,
                 animationFillMode: 'both'
+              }}
+              onClick={() => handleReminderClick(reminder.notificationId, reminder.notificationType)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleReminderClick(reminder.notificationId, reminder.notificationType);
+                }
               }}
             >
               <div className="flex items-start gap-2">
