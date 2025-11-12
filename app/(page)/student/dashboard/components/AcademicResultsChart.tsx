@@ -424,7 +424,7 @@ export default function AcademicResultsChart({
         },
       },
     },
-  }), [chartColors.primary, chartColors.background, chartColors.tooltipBg, chartColors.tooltipText, semester?.courses]);
+  }), [chartColors.primary, chartColors.tooltipBg, chartColors.tooltipText, semester?.courses]);
 
   return (
     <Card className="shadow-sm h-full flex flex-col">

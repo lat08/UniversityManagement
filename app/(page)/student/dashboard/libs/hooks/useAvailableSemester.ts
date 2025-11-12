@@ -20,7 +20,7 @@ export const useAvailableSemester = (semesterId : string) => {
         try{
             const data = await dashboardApi.getSemesterOverallById(semesterId);
             setSemester(data);
-        } catch (err : unknown) {
+        } catch {
             setSemester(null);
             setError('Không thể tải dữ liệu học kỳ');
         }finally {

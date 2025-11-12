@@ -8,6 +8,7 @@ import { UploadExamModal, type UploadExamFormData } from "./UploadExamModal";
 import { ExamDetailModal } from "./ExamDetailModal";
 import { useExamEntries } from "../lib/hooks/useExamEntries";
 import { useSemesters, useSubjects } from "@/lib/hooks";
+import { useProfile } from "../../profile/lib/hooks/useProfile";
 import { UpdateExamRequest } from "../lib/types";
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { useDebounce } from "@/lib/hooks/useDebounce";
@@ -27,7 +28,11 @@ export function ExamsContent() {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
 
   const { data: semesters, loading: semestersLoading } = useSemesters();
-  const { data: subjects, loading: subjectsLoading } = useSubjects();
+  const { profile } = useProfile();
+  const { data: subjects, loading: subjectsLoading } = useSubjects({ 
+    instructorId: profile?.instructorId,
+    semesterId: selectedSemester === "all" ? undefined : selectedSemester
+  });
 
   const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
 
@@ -71,7 +76,7 @@ export function ExamsContent() {
   ], [semesters]);
 
   const subjectOptions = useMemo(() => 
-    subjects.map(s => ({ id: s.subjectId, name: s.subjectName }))
+    subjects.map(s => ({ id: s.subjectId, name: `${s.subjectCode} - ${s.subjectName}` }))
   , [subjects]);
 
   const statuses = useMemo(() => [

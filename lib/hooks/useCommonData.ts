@@ -56,18 +56,23 @@ export const useSemesters = (): UseCommonDataReturn<Semester> => {
   return { data, loading, error, refetch: handleRefetch };
 };
 
-export const useSubjects = (params?: { instructorId?: string }): UseCommonDataReturn<Subject> => {
+export const useSubjects = (params?: { instructorId?: string; semesterId?: string }): UseCommonDataReturn<Subject> => {
   const [data, setData] = useState<Subject[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const instructorId = params?.instructorId;
+  const semesterId = params?.semesterId;
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await commonApi.getSubjects(instructorId ? { instructorId } : undefined);
+      const response = await commonApi.getSubjects(
+        instructorId || semesterId 
+          ? { instructorId, semesterId } 
+          : undefined
+      );
       if (response.success && response.data) {
         setData(Array.isArray(response.data) ? response.data : []);
       } else {
@@ -84,7 +89,7 @@ export const useSubjects = (params?: { instructorId?: string }): UseCommonDataRe
     } finally {
       setLoading(false);
     }
-  }, [instructorId]);
+  }, [instructorId, semesterId]);
 
   useEffect(() => {
     void fetchData();

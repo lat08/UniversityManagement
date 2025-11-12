@@ -23,6 +23,7 @@ export const commonApi = {
     const response = await api.get<GetSubjectsResponse>('/v1/common/subjects', {
       params: {
         instructorId: params?.instructorId || undefined,
+        semesterId: params?.semesterId || undefined,
       },
     });
     return response.data;

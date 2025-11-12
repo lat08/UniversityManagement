@@ -22,6 +22,7 @@ export interface WeeklySchedule {
   classType: string;
   dayOfWeek: string;
   timeRange: string;
+  semesterId?: string;
 }
 
 export interface Reminder {
@@ -39,5 +40,6 @@ export interface DashboardStatCard {
   bgColor: string;
   iconColor: string;
   textColor: string;
+  onClick?: () => void;
 }
 

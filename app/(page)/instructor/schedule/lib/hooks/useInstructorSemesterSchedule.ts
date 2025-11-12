@@ -4,7 +4,11 @@ import { InstructorSemesterScheduleItem } from "../types/semesterTypes"
 import { Semester, Subject } from "@/lib/types"
 import { useSemesters, useSubjects } from "@/lib/hooks"
 
-export const useInstructorSemesterSchedule = () => {
+interface UseInstructorSemesterScheduleParams {
+  initialSemesterId?: string;
+}
+
+export const useInstructorSemesterSchedule = (params?: UseInstructorSemesterScheduleParams) => {
   const { data: semestersData, loading: semestersLoading } = useSemesters()
   const { data: subjectsData, loading: subjectsLoading } = useSubjects()
   
@@ -22,16 +26,27 @@ export const useInstructorSemesterSchedule = () => {
       const sortedSemesters = [...semestersData].sort((a, b) => 
         new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       )
-      const currentDate = new Date()
-      const currentSemester = sortedSemesters.find(semester => {
-        if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
-        const startDate = new Date(semester.registrationStartDate)
-        const endDate = new Date(semester.registrationEndDate)
-        return currentDate >= startDate && currentDate <= endDate
-      })
+      
+      let semesterToSelect: Semester | null = null;
+      
+      if (params?.initialSemesterId) {
+        semesterToSelect = sortedSemesters.find(s => s.semesterId === params.initialSemesterId) || null;
+      }
+      
+      if (!semesterToSelect) {
+        const currentDate = new Date()
+        const currentSemester = sortedSemesters.find(semester => {
+          if (!semester.registrationStartDate || !semester.registrationEndDate) return false;
+          const startDate = new Date(semester.registrationStartDate)
+          const endDate = new Date(semester.registrationEndDate)
+          return currentDate >= startDate && currentDate <= endDate
+        })
+        semesterToSelect = currentSemester || sortedSemesters[0];
+      }
+      
       setSemesters(sortedSemesters)
       if (!selectedSemester) {
-        setSelectedSemester(currentSemester || sortedSemesters[0])
+        setSelectedSemester(semesterToSelect)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

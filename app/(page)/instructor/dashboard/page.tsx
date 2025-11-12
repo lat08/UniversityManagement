@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePageTitle } from "@/lib/hooks/usePageTitle";
 import { useAuthStore } from "@/lib/store/authStore";
 import DashboardStatCard from "./components/DashboardStatCard";
@@ -13,6 +14,7 @@ import { useDashboard } from "./lib/hooks/useDashboard";
 export default function InstructorDashboardPage() {
   usePageTitle('Bảng điều khiển');
 
+  const router = useRouter();
   const { user } = useAuthStore();
   const { dashboard: dashboardData, loading } = useDashboard();
 
@@ -26,11 +28,12 @@ export default function InstructorDashboardPage() {
           bgColor: 'bg-blue-50',
           iconColor: 'text-blue-600',
           textColor: 'text-blue-600',
+          onClick: () => router.push('/instructor/schedule/semester'),
         },
         {
           title: 'Tài liệu tuần này',
           value: 0,
-          subtitle: '0 tài liệu mới',
+          subtitle: 'Tổng: 0 tài liệu',
           bgColor: 'bg-pink-50',
           iconColor: 'text-pink-600',
           textColor: 'text-pink-600',
@@ -46,9 +49,7 @@ export default function InstructorDashboardPage() {
       ];
     }
 
-    const documentsSubtitle = dashboardData.documents.newDocumentsThisWeek > 0
-      ? `${dashboardData.documents.newDocumentsThisWeek} tài liệu mới`
-      : '0 tài liệu mới';
+    const documentsSubtitle = `Tổng: ${dashboardData.documents.totalDocuments} tài liệu`;
 
     const requestsSubtitle = dashboardData.requests.newRequestsToday > 0
       ? `${dashboardData.requests.newRequestsToday} yêu cầu mới`
@@ -62,10 +63,11 @@ export default function InstructorDashboardPage() {
         bgColor: 'bg-blue-50',
         iconColor: 'text-blue-600',
         textColor: 'text-blue-600',
+        onClick: () => router.push('/instructor/schedule/semester'),
       },
       {
         title: 'Tài liệu tuần này',
-        value: dashboardData.documents.totalDocuments,
+        value: dashboardData.documents.newDocumentsThisWeek,
         subtitle: documentsSubtitle,
         bgColor: 'bg-pink-50',
         iconColor: 'text-pink-600',
@@ -80,7 +82,7 @@ export default function InstructorDashboardPage() {
         textColor: 'text-orange-600',
       },
     ];
-  }, [dashboardData]);
+  }, [dashboardData, router]);
 
   return (
     <div className="space-y-4 lg:space-y-6">

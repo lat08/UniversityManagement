@@ -1,9 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Reminder } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
 import { formatDate } from "@/lib/utils/format";
-import { useRouter } from "next/navigation";
 
 interface RemindersSectionProps {
   reminders: Reminder[];
@@ -12,9 +12,10 @@ interface RemindersSectionProps {
 export default function RemindersSection({ reminders }: RemindersSectionProps) {
   const router = useRouter();
 
-  const handleReminderClick = (notificationId: string, notificationType: Reminder['notificationType']) => {
-    router.push(`/instructor/notification?type=${notificationType}&id=${notificationId}`);
+  const handleReminderClick = (reminder: Reminder) => {
+    router.push(`/instructor/notification?type=${reminder.notificationType}&id=${reminder.notificationId}`);
   };
+
   const getNotificationTypeColor = (type: Reminder['notificationType']) => {
     switch (type) {
       case 'tuition':
@@ -84,13 +85,13 @@ export default function RemindersSection({ reminders }: RemindersSectionProps) {
                 animationDelay: `${index * 100}ms`,
                 animationFillMode: 'both'
               }}
-              onClick={() => handleReminderClick(reminder.notificationId, reminder.notificationType)}
+              onClick={() => handleReminderClick(reminder)}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  handleReminderClick(reminder.notificationId, reminder.notificationType);
+                  handleReminderClick(reminder);
                 }
               }}
             >

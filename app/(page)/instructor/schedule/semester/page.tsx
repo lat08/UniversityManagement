@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Dropdown, DropdownSearch } from "@/app/components/ui"
 import { SemesterScheduleTable } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
@@ -13,6 +14,10 @@ import toast from "react-hot-toast"
 export default function InstructorSemesterSchedulePage() {
   usePageTitle('TKB theo học kỳ');
   const [isExporting, setIsExporting] = useState(false)
+  
+  const searchParams = useSearchParams()
+  const semesterIdFromUrl = searchParams.get('semesterId')
+  const highlightSubjectFromUrl = searchParams.get('highlightSubject')
 
   const {
     semesters,
@@ -26,7 +31,9 @@ export default function InstructorSemesterSchedulePage() {
     handleSemesterChange,
     handleViewTypeChange,
     handleSubjectChange,
-  } = useInstructorSemesterSchedule()
+  } = useInstructorSemesterSchedule({ 
+    initialSemesterId: semesterIdFromUrl || undefined 
+  })
 
   const semesterOptions = semesters.map(s => ({
     value: s.semesterId,
@@ -165,6 +172,7 @@ export default function InstructorSemesterSchedulePage() {
               showCredits={false}
               showClass={false}
               showInstructor={false}
+              highlightSubjectCode={highlightSubjectFromUrl || undefined}
             />
     </div>
   )

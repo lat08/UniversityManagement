@@ -46,6 +46,7 @@ export const materialsApi = {
       const materialsData: MaterialsData = {
         items: pagedResult.items || pagedResult.Items || [],
         totalCount: pagedResult.totalCount || 0,
+        totalDocumentsCount: pagedResult.totalDocumentsCount || pagedResult.TotalDocumentsCount || undefined,
         pageNumber: pagedResult.pageNumber || pagedResult.PageNumber || 1,
         pageSize: pagedResult.pageSize || pagedResult.PageSize || 10,
         totalPages: pagedResult.totalPages || pagedResult.TotalPages || 0,

@@ -1,20 +1,24 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { WeeklySchedule } from "../lib/types/types";
 import { cn } from "@/lib/utils/utils";
 import { useRef } from "react";
-import { useRouter } from "next/navigation";
 
 interface WeeklyScheduleTimelineProps {
   schedules: WeeklySchedule[];
 }
 
 export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTimelineProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScheduleClick = (subjectCode: string) => {
-    router.push(`/instructor/schedule/semester?highlightSubject=${subjectCode}`);
+  const handleScheduleClick = (schedule: WeeklySchedule) => {
+    if (!schedule.semesterId) {
+      router.push(`/instructor/schedule/semester?highlightSubject=${schedule.subjectCode}`);
+    } else {
+      router.push(`/instructor/schedule/semester?semesterId=${schedule.semesterId}&highlightSubject=${schedule.subjectCode}`);
+    }
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -76,13 +80,13 @@ export default function WeeklyScheduleTimeline({ schedules }: WeeklyScheduleTime
                   "p-3 lg:p-4 rounded-lg border-2 transition-all hover:shadow-md hover:scale-[1.02] cursor-pointer",
                   colors.card
                 )}
-                onClick={() => handleScheduleClick(schedule.subjectCode)}
+                onClick={() => handleScheduleClick(schedule)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    handleScheduleClick(schedule.subjectCode);
+                    handleScheduleClick(schedule);
                   }
                 }}
               >

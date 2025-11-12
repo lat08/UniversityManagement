@@ -32,6 +32,7 @@ export interface CourseClassMaterials {
 export interface MaterialsData {
   items: CourseClassMaterials[];
   totalCount: number;
+  totalDocumentsCount?: number;
   pageNumber: number;
   pageSize: number;
   totalPages: number;

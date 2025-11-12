@@ -46,9 +46,12 @@ export default function MaterialsPage() {
   const { documentTypes, loading: typesLoading } = useDocumentTypes()
   const { data: semesters, loading: semestersLoading } = useSemesters()
   const { profile } = useProfile()
-  const { data: subjects, loading: subjectsLoading } = useSubjects({ instructorId: profile?.instructorId })
+  const { data: subjects, loading: subjectsLoading } = useSubjects({ 
+    instructorId: profile?.instructorId,
+    semesterId: selectedSemesterId || undefined
+  })
   const { materials, loading, error, refetch, totalCount, totalPages, uploadMaterial, updateMaterial, deleteMaterial } = useMaterials(materialsParams)
-  const { courseClasses: instructorCourseClasses } = useInstructorCourseClasses(selectedSemesterId)
+  const { courseClasses: allCourseClasses } = useInstructorCourseClasses(undefined)
 
   // Reset về trang 1 khi thay đổi filter
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function MaterialsPage() {
 
   const courseClasses = useMemo(() => {
     const uniqueCourses = new Map<string, { id: string; name: string }>()
-    instructorCourseClasses.forEach(cc => {
+    allCourseClasses.forEach(cc => {
       const key = cc.courseCode
       if (!uniqueCourses.has(key)) {
         uniqueCourses.set(key, {
@@ -71,7 +74,7 @@ export default function MaterialsPage() {
       }
     })
     return Array.from(uniqueCourses.values())
-  }, [instructorCourseClasses])
+  }, [allCourseClasses])
 
   const subjectOptions = useMemo(() => 
     subjects.map(s => ({

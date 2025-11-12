@@ -23,7 +23,18 @@ export default function DashboardStatCard({ data }: DashboardStatCardProps) {
   const Icon = getIcon();
 
   return (
-      <Card className={`${data.bgColor} border-none shadow-sm`}>
+    <Card 
+      className={`${data.bgColor} border-none shadow-sm ${data.onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+      onClick={data.onClick}
+      role={data.onClick ? 'button' : undefined}
+      tabIndex={data.onClick ? 0 : undefined}
+      onKeyDown={data.onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          data.onClick?.();
+        }
+      } : undefined}
+    >
       <CardContent className="p-4 lg:p-5 relative">
         <div className="absolute top-4 right-4">
           <div className={`${data.iconColor} opacity-10`}>

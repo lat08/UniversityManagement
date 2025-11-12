@@ -37,9 +37,17 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
       
       if (response.success && response.data) {
         const items = response.data.items || []
+        const pageSize = response.data.pageSize || 10
+        
+        // Use totalDocumentsCount from backend if available, otherwise calculate from current items
+        const totalDocuments = response.data.totalDocumentsCount ?? 
+          items.reduce((sum, courseClass) => 
+            sum + (courseClass.documents?.length || 0), 0
+          )
+        
         setMaterials(items)
-        setTotalCount(response.data.totalCount || 0)
-        setTotalPages(response.data.totalPages || 0)
+        setTotalCount(totalDocuments)
+        setTotalPages(Math.ceil(totalDocuments / pageSize))
       } else {
         setError(response.message || "Không thể tải danh sách tài liệu")
         setMaterials([])
@@ -48,7 +56,6 @@ export const useMaterials = (params?: GetMaterialsParams): UseMaterialsReturn =>
       }
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string; data?: { message?: string } }>
-      console.error('Error fetching materials:', axiosErr)
       const errorMessage = 
         axiosErr.response?.data?.message || 
         axiosErr.response?.data?.data?.message ||

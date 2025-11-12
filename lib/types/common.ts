@@ -88,5 +88,6 @@ export interface GetAcademicYearsParams {
 
 export interface GetSubjectsParams {
   instructorId?: string;
+  semesterId?: string;
 }
 
