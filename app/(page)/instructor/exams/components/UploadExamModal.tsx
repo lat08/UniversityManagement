@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
@@ -17,10 +17,16 @@ import { Dropdown } from "@/app/components/ui";
 interface UploadExamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: UploadExamFormData) => void;
-  isLoading?: boolean;
-  courseClasses?: { id: string; name: string }[];
-  examEntryId?: string | null;
+  onSubmit: (data: UploadExamFormData) => void;
+  isSubmitting: boolean;
+  courseClasses: { id: string; name: string }[];
+  mode?: 'upload' | 'resubmit';
+  existingExam?: {
+    subjectName: string;
+    courseClassCode: string;
+    examType: 'midterm' | 'final' | 'quiz' | 'makeup';
+    durationMinutes: number;
+  };
 }
 
 export interface UploadExamFormData {
@@ -36,8 +42,10 @@ export function UploadExamModal({
   isOpen,
   onClose,
   onSubmit,
-  isLoading = false,
-  courseClasses = [],
+  isSubmitting,
+  courseClasses,
+  mode = 'upload',
+  existingExam,
 }: UploadExamModalProps) {
   const [formData, setFormData] = useState<UploadExamFormData>({
     courseClassId: "",
@@ -118,15 +126,21 @@ export function UploadExamModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UploadExamFormData, string>> = {};
 
-    if (!formData.courseClassId) {
-      newErrors.courseClassId = "Vui lòng chọn lớp học phần";
+    // Chỉ validate courseClassId và examType khi không phải resubmit mode
+    if (!isResubmitMode) {
+      if (!formData.courseClassId) {
+        newErrors.courseClassId = "Vui lòng chọn lớp học phần";
+      }
+
+      if (!formData.examType) {
+        newErrors.examType = "Vui lòng chọn loại đề thi";
+      }
     }
-    if (!formData.examType) {
-      newErrors.examType = "Vui lòng chọn loại đề thi";
-    }
+
     if (!formData.questionFile) {
       newErrors.questionFile = "Vui lòng chọn file đề thi";
     }
+
     if (!formData.answerFile) {
       newErrors.answerFile = "Vui lòng chọn file đáp án";
     }
@@ -161,12 +175,32 @@ export function UploadExamModal({
     onClose();
   };
 
+  const isResubmitMode = mode === 'resubmit';
+
+  // Auto-fill when in resubmit mode
+  useEffect(() => {
+    if (isResubmitMode && existingExam && isOpen) {
+      // Don't change the form values, just display the info
+      // The fields will be disabled anyway
+    } else if (!isResubmitMode && isOpen) {
+      // Reset form for upload mode
+      setFormData({
+        courseClassId: "",
+        examType: "",
+        durationMinutes: 120,
+        description: "",
+        questionFile: null,
+        answerFile: null,
+      });
+    }
+  }, [isResubmitMode, existingExam, isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            Tải lên đề thi
+            {isResubmitMode ? 'Gửi lại đề thi' : 'Tải lên đề thi mới'}
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
             Tải lên đề thi hoặc kiểm tra cho môn học
@@ -180,17 +214,23 @@ export function UploadExamModal({
               Môn học
               <span className="text-red-500">*</span>
             </label>
-            <Dropdown
-              options={courseClasses.map(c => ({ value: c.id, label: c.name }))}
-              value={formData.courseClassId}
-              placeholder={
-                courseClasses.length === 0 
-                  ? "Đang tải danh sách lớp học phần..." 
-                  : "Chọn lớp học phần"
-              }
-              onChange={(value) => handleInputChange("courseClassId", value)}
-              disabled={courseClasses.length === 0}
-            />
+            {isResubmitMode && existingExam ? (
+              <div className="px-3 py-2 bg-gray-100 rounded-md text-gray-700">
+                {existingExam.subjectName} - {existingExam.courseClassCode}
+              </div>
+            ) : (
+              <Dropdown
+                options={courseClasses.map(c => ({ value: c.id, label: c.name }))}
+                value={formData.courseClassId}
+                placeholder={
+                  courseClasses.length === 0 
+                    ? "Đang tải danh sách lớp học phần..." 
+                    : "Chọn lớp học phần"
+                }
+                onChange={(value) => handleInputChange("courseClassId", value)}
+                disabled={courseClasses.length === 0}
+              />
+            )}
             {errors.courseClassId && (
               <p className="text-sm text-red-500">{errors.courseClassId}</p>
             )}
@@ -205,12 +245,18 @@ export function UploadExamModal({
               Loại đề thi
               <span className="text-red-500">*</span>
             </label>
-            <Dropdown
-              options={examTypes.map(t => ({ value: t.id, label: t.name }))}
-              value={formData.examType}
-              placeholder="Chọn loại"
-              onChange={(value) => handleInputChange("examType", value)}
-            />
+            {isResubmitMode && existingExam ? (
+              <div className="px-3 py-2 bg-gray-100 rounded-md text-gray-700">
+                {existingExam.examType}
+              </div>
+            ) : (
+              <Dropdown
+                options={examTypes.map(t => ({ value: t.id, label: t.name }))}
+                value={formData.examType}
+                placeholder="Chọn loại"
+                onChange={(value) => handleInputChange("examType", value)}
+              />
+            )}
             {errors.examType && (
               <p className="text-sm text-red-500">{errors.examType}</p>
             )}
@@ -221,14 +267,20 @@ export function UploadExamModal({
             <label className="text-sm font-medium text-gray-900">
               Thời lượng
             </label>
-            <Input
-              type="number"
-              min="1"
-              value={formData.durationMinutes}
-              onChange={(e) => handleInputChange("durationMinutes", Number.parseInt(e.target.value) || 0)}
-              className="border-gray-300"
-              placeholder="Thời lượng (phút)"
-            />
+            {isResubmitMode && existingExam ? (
+              <div className="px-3 py-2 bg-gray-100 rounded-md text-gray-700">
+                {existingExam.durationMinutes} phút
+              </div>
+            ) : (
+              <Input
+                type="number"
+                min="1"
+                value={formData.durationMinutes}
+                onChange={(e) => handleInputChange("durationMinutes", Number.parseInt(e.target.value) || 0)}
+                className="border-gray-300"
+                placeholder="Thời lượng (phút)"
+              />
+            )}
           </div>
 
           {/* Mô tả */}
@@ -328,9 +380,9 @@ export function UploadExamModal({
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? "Đang tải lên..." : "Tải lên"}
+              {isSubmitting ? "Đang tải lên..." : "Tải lên"}
             </Button>
           </DialogFooter>
         </form>
