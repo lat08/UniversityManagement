@@ -1,93 +1,141 @@
 // Path: lib/hooks/useAvailableCourses.ts
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { coursesApi } from "../api/coursesApi";
 import { CourseDto, PaginatedResponse } from "../type/courseType";
 import { useCourseFiltersStore } from "../stores/courseFiltersStore";
 
 export const useAvailableCourses = () => {
   const filters = useCourseFiltersStore((state) => state.filters);
-  const [data, setData] = useState<PaginatedResponse<CourseDto>>({
-    items: [],
+  const [allCourses, setAllCourses] = useState<CourseDto[]>([]);
+  const [serverPagination, setServerPagination] = useState({
     totalCount: 0,
     pageNumber: 1,
     pageSize: 15,
     totalPages: 0,
-    hasPrevious: false,
-    hasNext: false,
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCourses = useCallback(async (
-    page: number, 
-    size: number
-  ) => {
+  // Check if any client-side filter is active
+  const hasClientFilters = filters.availableOnly !== null || 
+                          filters.isGeneral !== null || 
+                          filters.isInStudentCurriculum !== null;
+
+  // Fetch data - use large page size if client-side filters are active
+  const fetchCourses = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const pageSize = hasClientFilters ? 1000 : 15; // Fetch more data when filtering client-side
       const response = await coursesApi.getAvailable({ 
-        pageNumber: page, 
-        pageSize: size,
+        pageNumber: 1, 
+        pageSize: pageSize,
         searchQuery: filters.searchQuery || undefined,
-        availableOnly: filters.availableOnly,
-        isGeneral: filters.isGeneral,
-        isInStudentCurriculum: filters.isInStudentCurriculum,
+        // Không gửi các filter client-side lên server
+        availableOnly: undefined,
+        isGeneral: undefined,
+        isInStudentCurriculum: undefined,
       });
-      setData({
-        ...response,
-        items: Array.isArray(response.items) ? response.items : [],
+      setAllCourses(Array.isArray(response.items) ? response.items : []);
+      setServerPagination({
+        totalCount: response.totalCount,
+        pageNumber: response.pageNumber,
+        pageSize: response.pageSize,
+        totalPages: response.totalPages,
       });
+      setCurrentPage(1);
       console.log('✅ useAvailableCourses - data set:', {
         itemsCount: Array.isArray(response.items) ? response.items.length : 0,
         totalCount: response.totalCount,
-        pageNumber: response.pageNumber,
-        totalPages: response.totalPages,
       });
     } catch (err: unknown) {
       console.error("Error fetching available courses:", err);
       setError("Không thể tải danh sách khóa học có sẵn");
-      setData({
-        items: [],
+      setAllCourses([]);
+      setServerPagination({
         totalCount: 0,
-        pageNumber: page,
-        pageSize: size,
+        pageNumber: 1,
+        pageSize: 15,
         totalPages: 0,
-        hasPrevious: false,
-        hasNext: false,
       });
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters.searchQuery, hasClientFilters]);
 
   useEffect(() => {
-    fetchCourses(1, 15);
+    fetchCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters.searchQuery, hasClientFilters]);
+
+  // Client-side filtering
+  const filteredCourses = useMemo(() => {
+    return allCourses.filter((course) => {
+      // Filter 1: availableOnly
+      if (filters.availableOnly !== null) {
+        if (filters.availableOnly && !course.isAvailableForThisStudent) {
+          return false;
+        }
+        if (!filters.availableOnly && course.isAvailableForThisStudent) {
+          return false;
+        }
+      }
+
+      // Filter 2: isGeneral
+      if (filters.isGeneral !== null && course.isGeneral !== filters.isGeneral) {
+        return false;
+      }
+
+      // Filter 3: isInStudentCurriculum
+      if (filters.isInStudentCurriculum !== null && 
+          course.isInStudentCurriculum !== filters.isInStudentCurriculum) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [allCourses, filters.availableOnly, filters.isGeneral, filters.isInStudentCurriculum]);
+
+  // Client-side pagination
+  const pageSize = 15;
+  const totalFiltered = filteredCourses.length;
+  const totalPages = Math.ceil(totalFiltered / pageSize) || 1;
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedCourses = useMemo(() => {
+    return filteredCourses.slice(startIndex, endIndex);
+  }, [filteredCourses, startIndex, endIndex]);
 
   const goToPage = useCallback((page: number) => {
-    if (page >= 1 && page <= data.totalPages) {
-      fetchCourses(page, data.pageSize);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
-  }, [data.totalPages, data.pageSize, fetchCourses]);
+  }, [totalPages]);
 
   const changePageSize = useCallback((size: number) => {
-    fetchCourses(1, size);
-  }, [fetchCourses]);
+    setCurrentPage(1);
+    // Note: pageSize is fixed at 15 for client-side pagination
+  }, []);
 
   const refetch = useCallback(() => {
-    fetchCourses(data.pageNumber, data.pageSize);
-  }, [data.pageNumber, data.pageSize, fetchCourses]);
+    fetchCourses();
+  }, [fetchCourses]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.availableOnly, filters.isGeneral, filters.isInStudentCurriculum]);
 
   return { 
-    courses: Array.isArray(data.items) ? data.items : [],
+    courses: paginatedCourses,
     pagination: {
-      totalCount: data.totalCount,
-      pageNumber: data.pageNumber,
-      pageSize: data.pageSize,
-      totalPages: data.totalPages,
-      hasPrevious: data.hasPrevious,
-      hasNext: data.hasNext,
+      totalCount: totalFiltered,
+      pageNumber: currentPage,
+      pageSize: pageSize,
+      totalPages: totalPages,
+      hasPrevious: currentPage > 1,
+      hasNext: currentPage < totalPages,
     },
     loading, 
     error, 
