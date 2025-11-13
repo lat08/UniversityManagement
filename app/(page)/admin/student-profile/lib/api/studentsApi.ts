@@ -16,6 +16,7 @@ import {
   TuitionFee,
   Insurance,
   SemesterGrades,
+  CumulativeGradesData,
 } from '../types/types';
 
 export const studentsApi = {
@@ -345,8 +346,8 @@ export const studentsApi = {
   /**
    * Lấy điểm tích lũy toàn khóa của sinh viên (cho Admin)
    */
-  getCumulativeGrades: async (studentId: string): Promise<ApiResponse<any>> => {
-    const response = await api.get<ApiResponse<any>>(`/v1/admin/students/${studentId}/grades/cumulative`);
+  getCumulativeGrades: async (studentId: string): Promise<ApiResponse<CumulativeGradesData>> => {
+    const response = await api.get<ApiResponse<CumulativeGradesData>>(`/v1/admin/students/${studentId}/grades/cumulative`);
     return response.data;
   },
 

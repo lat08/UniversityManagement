@@ -14,11 +14,10 @@ import { useStudentDetail } from '../lib/hooks/useStudentDetail';
 import { useSemesters } from '../lib/hooks/useSemesters';
 import { useTuitionFees } from '../lib/hooks/useTuitionFees';
 import { useInsurances } from '../lib/hooks/useInsurances';
-import { useGrades } from '../lib/hooks/useGrades';
 import { useCumulativeGrades } from '../lib/hooks/useCumulativeGrades';
 import { DetailPageSkeleton } from '../components/LoadingSkeleton';
 import { GradeDetailModal } from '../components/GradeDetailModal';
-import { Grade, GradeItem, Semester } from '../lib/types/types';
+import { Grade, GradeItem } from '../lib/types/types';
 import { AdminGradeSemesterTable } from '../components/AdminGradeSemesterTable';
 import { AdminGradeDetailModal } from '../components/AdminGradeDetailModal';
 
@@ -30,7 +29,6 @@ export default function StudentDetailPage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [selectedTuitionSemester, setSelectedTuitionSemester] = useState<string>('');
   const [selectedInsuranceSemester, setSelectedInsuranceSemester] = useState<string>('');
-  const [selectedAcademicSemester, setSelectedAcademicSemester] = useState<string>('');
   const [exportingTuition, setExportingTuition] = useState(false);
   const [exportingInsurance, setExportingInsurance] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
@@ -46,7 +44,6 @@ export default function StudentDetailPage() {
   const { semesters, getCurrentSemester } = useSemesters();
   const { tuitionFees, loading: loadingTuition, fetchTuitionFees } = useTuitionFees(studentId);
   const { insurances, loading: loadingInsurance, fetchInsurances } = useInsurances(studentId);
-  const { grades, loading: loadingGrades, fetchGrades } = useGrades(studentId);
   const { cumulativeData, loading: loadingCumulative, error: cumulativeError } = useCumulativeGrades(studentId);
 
   // Initialize semester selection when semesters are loaded
@@ -56,7 +53,6 @@ export default function StudentDetailPage() {
       const defaultSemester = currentSemester ? currentSemester.semesterId : semesters[0].semesterId;
       setSelectedTuitionSemester(defaultSemester);
       setSelectedInsuranceSemester(defaultSemester);
-      setSelectedAcademicSemester(defaultSemester);
     }
   }, [semesters, selectedTuitionSemester, getCurrentSemester]);
 
@@ -73,13 +69,6 @@ export default function StudentDetailPage() {
       fetchInsurances(selectedInsuranceSemester);
     }
   }, [selectedInsuranceSemester, activeTab, fetchInsurances]);
-
-  // Lazy load grades only when academic tab is active
-  useEffect(() => {
-    if (activeTab === 'academic' && selectedAcademicSemester) {
-      fetchGrades(selectedAcademicSemester);
-    }
-  }, [selectedAcademicSemester, activeTab, fetchGrades]);
 
   // Initialize selected semesters when cumulative data is loaded
   useEffect(() => {
@@ -570,7 +559,7 @@ export default function StudentDetailPage() {
                       <AdminGradeSemesterTable
                         key={semester.semesterId}
                         semester={semester}
-                        onShowDetail={(courseCode, semesterId) => {
+                        onShowDetail={(courseCode) => {
                           const grade = semester.grades.find(g => g.subjectCode === courseCode);
                           if (grade) {
                             setSelectedGradeItem(grade);

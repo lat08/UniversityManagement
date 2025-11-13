@@ -19,7 +19,6 @@ interface PendingChanges {
 interface GradesTableProps {
   students: InstructorGradeDto[];
   canEdit: boolean;
-  onGradeChange: (enrollmentId: string, field: keyof InstructorGradeDto, value: number | null) => void;
   onNoteChange?: (enrollmentId: string, note: string | null) => void;
   onBulkSave?: (changes: PendingChanges) => void;
   onBulkSaveSuccess?: () => void;
@@ -27,7 +26,7 @@ interface GradesTableProps {
   isLoading?: boolean;
 }
 
-export const GradesTable = ({ students, canEdit, onGradeChange, onNoteChange, onBulkSave, onBulkSaveSuccess, isPending = false, isLoading = false }: GradesTableProps) => {
+export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBulkSaveSuccess, isPending = false, isLoading = false }: GradesTableProps) => {
   const [editingCell, setEditingCell] = useState<{ enrollmentId: string; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [editingNote, setEditingNote] = useState<{ enrollmentId: string } | null>(null);
@@ -291,13 +290,12 @@ export const GradesTable = ({ students, canEdit, onGradeChange, onNoteChange, on
         )}
       </div>
     );
-  }, [editingCell, editValue, canEdit, isPending, handleEdit, handleSave, handleCancel, getDisplayValue, pendingChanges]);
+  }, [editingCell, editValue, canEdit, isPending, handleEdit, handleSave, handleCancel, getDisplayValue, pendingChanges, handleInputChange, handleKeyPress, handlePaste]);
 
   const renderNoteCell = useCallback((student: InstructorGradeDto) => {
     const isEditing = editingNote?.enrollmentId === student.enrollmentId;
     const displayNote = getDisplayValue(student, 'note') as string | null;
     const hasPendingChange = pendingChanges[student.enrollmentId]?.note !== undefined;
-    const originalNote = student.note;
 
     if (isEditing) {
       return (

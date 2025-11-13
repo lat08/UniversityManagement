@@ -13,7 +13,6 @@ import { isGradeComplete } from '@/lib/utils/grade-calculator';
 import {
   useInstructorCourseClasses,
   useCourseClassGrades,
-  useUpdateDraftGrade,
   useUpdateDraftGradesBulk,
   useSubmitForApproval,
   useGradeHistory,
@@ -22,7 +21,6 @@ import {
   useSemesters,
   useUpdateGradeNote,
 } from './lib/hooks';
-import type { InstructorGradeDto } from './lib/types';
 
 const GradeHistoryTable = lazy(() =>
   import('./components/GradeHistoryTable').then((mod) => ({ default: mod.GradeHistoryTable }))
@@ -58,7 +56,6 @@ const InstructorGradesPage = () => {
     selectedCourseClassId,
     selectedVersionNumber || 0
   );
-  const updateGradeMutation = useUpdateDraftGrade(selectedCourseClassId);
   const updateNoteMutation = useUpdateGradeNote(selectedCourseClassId);
   const bulkUpdateMutation = useUpdateDraftGradesBulk(selectedCourseClassId);
   const submitForApprovalMutation = useSubmitForApproval(selectedCourseClassId);
@@ -78,17 +75,6 @@ const InstructorGradesPage = () => {
   const handleSemesterChange = (semesterId: string) => {
     setSelectedSemesterId(semesterId);
     setSelectedCourseClassId('');
-  };
-
-  const handleGradeChange = (enrollmentId: string, field: keyof InstructorGradeDto, value: number | null) => {
-    if (!gradesInfo?.canEditGrades) return;
-
-    updateGradeMutation.mutate({
-      enrollmentId,
-      attendanceGrade: field === 'attendanceGrade' ? value : null,
-      midtermGrade: field === 'midtermGrade' ? value : null,
-      finalGrade: field === 'finalGrade' ? value : null,
-    });
   };
 
   const handleNoteChange = (enrollmentId: string, note: string | null) => {
@@ -256,7 +242,6 @@ const InstructorGradesPage = () => {
                   <GradesTable
                     students={gradesInfo.students}
                     canEdit={gradesInfo.canEditGrades}
-                    onGradeChange={handleGradeChange}
                     onNoteChange={handleNoteChange}
                     onBulkSave={handleBulkSave}
                     isPending={bulkUpdateMutation.isPending}

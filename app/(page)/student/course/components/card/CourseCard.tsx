@@ -27,7 +27,6 @@ export function CourseCard({
   isAvailableForThisStudent,
   isFull,
   hasScheduleConflict,
-  unavailabilityReason,
 }: CourseCardProps) {
   // Format dates from ISO string to dd/MM/yyyy
   const formattedStartDate = format(new Date(startDate), 'dd/MM/yyyy', { locale: vi });
