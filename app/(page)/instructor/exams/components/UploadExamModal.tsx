@@ -412,6 +412,9 @@ export function UploadExamModal({
                 </div>
               </div>
             </div>
+            {errors.answerFile && (
+              <p className="text-sm text-red-500">{errors.answerFile}</p>
+            )}
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
