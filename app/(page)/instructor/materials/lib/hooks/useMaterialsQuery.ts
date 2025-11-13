@@ -1,7 +1,7 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import { materialsApi } from '../api/materialsApi'
 import { queryKeys } from '@/lib/api/queryKeys'
-import { ApiResponse, PagedResult, MaterialViewDto, DocumentTypeDto, InstructorCourseClassDto, GetMaterialsParams } from '../type'
+import { ApiResponse, PagedResult, MaterialViewDto, InstructorDocumentDto, DocumentTypeDto, InstructorCourseClassDto, GetMaterialsParams } from '../type'
 
 export const useMaterialsQuery = (
   params?: GetMaterialsParams
@@ -9,6 +9,19 @@ export const useMaterialsQuery = (
   return useQuery({
     queryKey: queryKeys.materials.list(params || {}),
     queryFn: () => materialsApi.getMaterials(params),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
+  })
+}
+
+export const useDocumentsQuery = (
+  params?: GetMaterialsParams
+): UseQueryResult<ApiResponse<PagedResult<InstructorDocumentDto[]>>, Error> => {
+  return useQuery({
+    queryKey: queryKeys.materials.documents(params || {}),
+    queryFn: () => materialsApi.getDocuments(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,

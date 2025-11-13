@@ -31,6 +31,7 @@ export interface CourseDto {
   hasScheduleConflict: boolean;
   unavailabilityReason: string | null;
   isLocked?: boolean;         // Môn đã bị khóa không thể hủy
+  enrollmentDate?: string | null; // Ngày đăng ký môn học (DateTime → string)
 }
 
 // Pagination response wrapper

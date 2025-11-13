@@ -148,6 +148,14 @@ export const queryKeys = {
       pageNumber?: number;
       pageSize?: number;
     }) => [...queryKeys.materials.lists(), params] as const,
+    documents: (params: {
+      keyword?: string;
+      semesterId?: string;
+      subjectId?: string;
+      documentType?: string;
+      pageNumber?: number;
+      pageSize?: number;
+    }) => [...queryKeys.materials.all, 'documents', params] as const,
     documentTypes: () => [...queryKeys.materials.all, 'documentTypes'] as const,
     courseClasses: (semesterId?: string) => 
       [...queryKeys.materials.all, 'courseClasses', semesterId] as const,

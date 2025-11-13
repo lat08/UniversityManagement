@@ -153,7 +153,7 @@ export function CourseDetailModal({ isOpen, onClose, course }: CourseDetailModal
               </label>
               <input
                 type="text"
-                value={formatDate(course.startDate)}
+                value={course.enrollmentDate ? formatDate(course.enrollmentDate) : '-'}
                 readOnly
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900"
               />

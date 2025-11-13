@@ -19,6 +19,7 @@ import { MaterialsHeader } from './components/MaterialsHeader'
 import { MaterialsFilters } from './components/MaterialsFilters'
 import { DocumentCard, type Document } from './components/DocumentCard'
 import { MaterialsSkeleton } from './components/MaterialsSkeleton'
+import { MaterialsEmpty } from './components/MaterialsEmpty'
 import type { UploadFormData } from './components/UploadDocumentModal'
 import type { EditFormData } from './components/EditDocumentModal'
 import { transformMaterialsToDocuments } from './lib/utils/transformers'
@@ -51,6 +52,7 @@ export default function MaterialsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null)
   const [documentToEdit, setDocumentToEdit] = useState<Document | null>(null)
+  const [isFilterChanging, setIsFilterChanging] = useState(false)
   
   const debouncedQuery = useDebounce(query, SEARCH_DEBOUNCE_MS)
   
@@ -63,7 +65,7 @@ export default function MaterialsPage() {
     pageSize: DEFAULT_PAGE_SIZE,
   }), [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId, currentPage])
   
-  const { data: materialsResponse, isLoading: materialsLoading, error: materialsError } = useMaterialsQuery(materialsParams)
+  const { data: documentsResponse, isLoading: documentsLoading, isFetching, error: documentsError, refetch } = useMaterialsQuery(materialsParams)
   const { data: documentTypesResponse, isLoading: typesLoading } = useDocumentTypesQuery()
   const { data: semesters, loading: semestersLoading } = useSemesters()
   const { profile } = useProfile()
@@ -80,6 +82,9 @@ export default function MaterialsPage() {
 
   useEffect(() => {
     setCurrentPage(DEFAULT_PAGE_NUMBER)
+    setIsFilterChanging(true)
+    const timer = setTimeout(() => setIsFilterChanging(false), 150)
+    return () => clearTimeout(timer)
   }, [debouncedQuery, selectedDocumentType, selectedSemesterId, selectedSubjectId])
 
   useEffect(() => {
@@ -89,13 +94,22 @@ export default function MaterialsPage() {
     }
   }, [shouldRefetchAfterUpload, selectedDocumentType, selectedSemesterId, selectedSubjectId, query, queryClient])
 
-  const materials = useMemo(() => materialsResponse?.data?.items || [], [materialsResponse])
-  const totalCount = useMemo(() => materialsResponse?.data?.totalDocumentsCount || 0, [materialsResponse])
-  const totalPages = useMemo(() => materialsResponse?.data?.totalPages || 0, [materialsResponse])
+  const documents = useMemo(() => documentsResponse?.data?.items || [], [documentsResponse])
+  const totalCount = useMemo(() => documentsResponse?.data?.totalCount || 0, [documentsResponse])
+  const totalPages = useMemo(() => documentsResponse?.data?.totalPages || 0, [documentsResponse])
   const documentTypes = useMemo(() => documentTypesResponse?.data || [], [documentTypesResponse])
   const allCourseClasses = useMemo(() => courseClassesResponse?.data || [], [courseClassesResponse])
 
-  const allDocuments = useMemo(() => transformMaterialsToDocuments(materials), [materials])
+  const allDocuments = useMemo(() => transformMaterialsToDocuments(documents), [documents])
+
+  const showLoading = documentsLoading || isFilterChanging || (isFetching && allDocuments.length === 0)
+
+  const hasFilters = Boolean(
+    debouncedQuery || 
+    selectedDocumentType || 
+    selectedSemesterId || 
+    selectedSubjectId
+  )
 
   const courseClasses = useMemo(() => {
     if (!allCourseClasses || allCourseClasses.length === 0) return []
@@ -214,7 +228,7 @@ export default function MaterialsPage() {
     })
   }
 
-  const error = materialsError?.message || null
+  const error = documentsError?.message || null
 
   return (
     <>
@@ -244,30 +258,38 @@ export default function MaterialsPage() {
         {error ? (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
             <p className="text-red-600">{error}</p>
+            <button
+              onClick={() => refetch()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Thử lại
+            </button>
           </div>
-        ) : materialsLoading ? (
+        ) : showLoading ? (
           <MaterialsSkeleton />
-        ) : allDocuments.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600">Không tìm thấy tài liệu nào.</p>
-          </div>
         ) : (
           <div className="space-y-4">
-            {allDocuments.map((document, index) => (
-              <DocumentCard
-                key={document.id}
-                document={document}
-                onEdit={handleEdit}
-                onDownload={handleDownload}
-                onDelete={handleDelete}
-                animationDelay={index * 100}
-                onClick={() => handleEdit(document.id)}
-              />
-            ))}
+            {allDocuments.length === 0 ? (
+              <MaterialsEmpty hasFilters={hasFilters} />
+            ) : (
+              <div className={`space-y-4 transition-opacity duration-200 ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
+                {allDocuments.map((document, index) => (
+                  <DocumentCard
+                    key={document.id}
+                    document={document}
+                    onEdit={handleEdit}
+                    onDownload={handleDownload}
+                    onDelete={handleDelete}
+                    animationDelay={index * 100}
+                    onClick={() => handleEdit(document.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {!materialsLoading && !error && totalCount > 0 && (
+        {!showLoading && !error && totalCount > 0 && (
           <div className="pt-4">
             <Pagination
               currentPage={currentPage}

@@ -43,6 +43,7 @@ export interface UpdateStudentGradeDto {
   attendanceGrade: number | null;
   midtermGrade: number | null;
   finalGrade: number | null;
+  note?: string | null;
 }
 
 export type GradeActionType = 

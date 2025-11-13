@@ -49,6 +49,24 @@ export const instructorGradesApi = {
     return response.data;
   },
 
+  updateGradeNote: async (
+    courseClassId: string,
+    enrollmentId: string,
+    note: string | null
+  ): Promise<ApiResponse<boolean>> => {
+    const formData = new FormData();
+    // Always send note parameter - empty string to clear, or the actual note value
+    formData.append('note', note || '');
+    const response = await api.put(
+      `/v1/instructor/course-classes/${courseClassId}/grades/draft/${enrollmentId}/note`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
+    return response.data;
+  },
+
   updateDraftGradesBulk: async (
     courseClassId: string,
     grades: UpdateStudentGradeDto[]

@@ -1,4 +1,4 @@
-import { MaterialViewDto, DocumentChildDto } from "../type"
+import { MaterialViewDto, DocumentChildDto, InstructorDocumentDto } from "../type"
 import { Document } from "../../components/DocumentCard"
 import { formatDate } from "@/lib/utils/format"
 
@@ -52,5 +52,26 @@ export const getCourseClassesOptions = (materials: MaterialViewDto[]) => {
     id: courseClass.courseClassId,
     name: courseClass.courseName,
   }))
+}
+
+// Transform InstructorDocumentDto to Document (flat list)
+export const transformDocumentDtoToDocument = (doc: InstructorDocumentDto): Document => {
+  return {
+    id: doc.documentId,
+    title: doc.fileTitle,
+    subject: doc.courseName,
+    date: formatDate(doc.created),
+    type: TYPE_MAPPING[doc.documentType] || 'document',
+    classCode: extractClassCode(doc.courseName),
+    courseClassId: doc.courseClassId,
+    documentType: doc.documentType,
+    description: doc.description,
+    downloadUrl: doc.downloadUrl,
+    previewUrl: doc.previewUrl,
+  }
+}
+
+export const transformDocumentsToDocuments = (documents: InstructorDocumentDto[]): Document[] => {
+  return documents.map(transformDocumentDtoToDocument)
 }
 

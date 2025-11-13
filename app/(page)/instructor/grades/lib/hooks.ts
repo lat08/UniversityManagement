@@ -67,6 +67,7 @@ export const useUpdateDraftGrade = (courseClassId: string) => {
                       attendanceGrade: updatedGrade.attendanceGrade ?? student.attendanceGrade,
                       midtermGrade: updatedGrade.midtermGrade ?? student.midtermGrade,
                       finalGrade: updatedGrade.finalGrade ?? student.finalGrade,
+                      note: updatedGrade.note !== undefined ? updatedGrade.note : student.note,
                     }
                   : student
               ),
@@ -177,6 +178,62 @@ export const useExportGrades = () => {
     },
     onError: () => {
       toast.error('Xuất file Excel thất bại');
+    },
+  });
+};
+
+export const useUpdateGradeNote = (courseClassId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ enrollmentId, note }: { enrollmentId: string; note: string | null }) =>
+      instructorGradesApi.updateGradeNote(courseClassId, enrollmentId, note),
+    onMutate: async ({ enrollmentId, note }) => {
+      await queryClient.cancelQueries({ 
+        queryKey: queryKeys.instructorGrades.grades(courseClassId, 'draft') 
+      });
+
+      const previousGrades = queryClient.getQueryData(
+        queryKeys.instructorGrades.grades(courseClassId, 'draft')
+      );
+
+      queryClient.setQueryData(
+        queryKeys.instructorGrades.grades(courseClassId, 'draft'),
+        (old: { data: CourseClassGradesDto } | undefined) => {
+          if (!old) return old;
+          
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              students: old.data.students.map((student) =>
+                student.enrollmentId === enrollmentId
+                  ? { ...student, note }
+                  : student
+              ),
+            },
+          };
+        }
+      );
+
+      return { previousGrades };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousGrades) {
+        queryClient.setQueryData(
+          queryKeys.instructorGrades.grades(courseClassId, 'draft'),
+          context.previousGrades
+        );
+      }
+      toast.error('Cập nhật ghi chú thất bại');
+    },
+    onSuccess: () => {
+      toast.success('Cập nhật ghi chú thành công');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.instructorGrades.grades(courseClassId, 'draft') 
+      });
     },
   });
 };

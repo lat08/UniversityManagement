@@ -200,7 +200,7 @@ export function RegisteredCourses({
           {course.credits}
         </td>
         <td className={`px-6 py-4 text-sm ${isLocked ? 'text-gray-400' : 'text-gray-600'} text-center`}>
-          {formatDate(course.startDate)}
+          {course.enrollmentDate ? formatDate(course.enrollmentDate) : '-'}
         </td>
         <td className="px-6 py-4">
           <div className="flex justify-center">

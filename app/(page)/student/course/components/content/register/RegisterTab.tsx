@@ -62,11 +62,14 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
 
   const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
-      // Chọn tuần tự từng môn, bỏ qua môn bị conflict
+      // Chọn tuần tự từng môn, bỏ qua môn bị conflict và môn không cho phép đăng ký
       const newSelected = new Set<string>()
       const newCache = new Map(selectedCoursesCache)
       
       for (const course of courses) {
+        // Bỏ qua môn không cho phép đăng ký
+        if (!course.isAvailableForThisStudent) continue
+        
         // Kiểm tra xem môn này có conflict với các môn đã chọn không
         const selectedCoursesTemp = Array.from(newCache.values())
         const hasConflict = selectedCoursesTemp.some(selectedCourse => 
@@ -97,6 +100,11 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   }, [courses, hasScheduleConflict, selectedCourseIds, selectedCoursesCache, setSelectedCourseIds])
 
   const handleSelectCourse = useCallback((course: CourseDto, checked: boolean) => {
+    // Chặn chọn môn không cho phép đăng ký
+    if (checked && !course.isAvailableForThisStudent) {
+      return
+    }
+    
     if (checked) {
       addSelectedCourse(course)
     } else {
@@ -148,13 +156,18 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
     )
   }, [selectedCourses, selectedCourseIds, hasScheduleConflict])
 
+  // Kiểm tra xem môn có thể chọn được không (không conflict và cho phép đăng ký)
+  const isSelectable = useCallback((course: CourseDto) => {
+    return course.isAvailableForThisStudent && !isConflictWithSelected(course)
+  }, [isConflictWithSelected])
+
   const isAllSelected = useMemo(() => {
     if (courses.length === 0) return false
-    // Chỉ check các môn ở trang hiện tại (không bị conflict)
-    const selectableCoursesOnPage = courses.filter(course => !isConflictWithSelected(course))
+    // Chỉ check các môn ở trang hiện tại (có thể chọn được - không conflict và cho phép đăng ký)
+    const selectableCoursesOnPage = courses.filter(course => isSelectable(course))
     if (selectableCoursesOnPage.length === 0) return false
     return selectableCoursesOnPage.every(c => selectedCourseIds.has(c.courseId))
-  }, [courses, selectedCourseIds, isConflictWithSelected])
+  }, [courses, selectedCourseIds, isSelectable])
   
   const isIndeterminate = useMemo(() => {
     const selectedOnPage = courses.filter(c => selectedCourseIds.has(c.courseId))
@@ -176,6 +189,8 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
     const isSelected = selectedCourseIds.has(course.courseId)
     const remaining = getRemainingSlots(course)
     const isConflict = isConflictWithSelected(course)
+    const isNotAvailable = !course.isAvailableForThisStudent
+    const isDisabled = isConflict || isNotAvailable
 
     return (
       <>
@@ -185,33 +200,39 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
               type="checkbox"
               checked={isSelected}
               onChange={(e) => handleSelectCourse(course, e.target.checked)}
-              disabled={isConflict}
+              disabled={isDisabled}
               className={`w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] ${
-                isConflict ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
               }`}
-              title={isConflict ? 'Môn học này bị trùng lịch với môn đã chọn' : ''}
+              title={
+                isNotAvailable 
+                  ? course.unavailabilityReason || 'Môn học này không cho phép đăng ký'
+                  : isConflict 
+                    ? 'Môn học này bị trùng lịch với môn đã chọn' 
+                    : ''
+              }
             />
           </div>
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-900'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {course.subjectCode}
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-900'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {course.subjectName}
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-600'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
           {course.instructorName}
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {course.credits}
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {course.maxStudents}
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {remaining}
         </td>
-        <td className={`px-6 py-4 text-sm ${isConflict ? 'text-gray-400' : 'text-gray-600'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
           {formatSchedule(course)}
           {isConflict && (
             <span className="block text-xs text-red-500 mt-1">⚠️ Trùng lịch</span>
@@ -359,17 +380,26 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
                     courses.map((course, index) => {
                       const itemKey = course.courseId || `row-${index}`
                       const isConflict = isConflictWithSelected(course)
+                      const isNotAvailable = !course.isAvailableForThisStudent
+                      const isDisabled = isConflict || isNotAvailable
                       return (
                         <tr 
                           key={itemKey} 
                           className={`${
-                            isConflict 
-                              ? 'bg-gray-50 opacity-60' 
-                              : 'hover:bg-gray-50'
+                            isDisabled 
+                              ? 'bg-gray-50 opacity-60 cursor-not-allowed' 
+                              : 'hover:bg-gray-50 cursor-pointer'
                           } transition-colors duration-150 animate-fade-in`}
                           style={{ 
                             animationDelay: `${index * 30}ms`,
                             animationFillMode: 'both'
+                          }}
+                          onClick={(e) => {
+                            // Chặn click vào row nếu môn không cho phép đăng ký
+                            if (isNotAvailable) {
+                              e.preventDefault()
+                              e.stopPropagation()
+                            }
                           }}
                         >
                           {renderCourseRow(course)}

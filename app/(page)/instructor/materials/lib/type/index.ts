@@ -29,6 +29,14 @@ export interface MaterialViewDto {
   documents: DocumentChildDto[]
 }
 
+// Flat document DTO (not grouped by course class)
+export interface InstructorDocumentDto extends DocumentChildDto {
+  courseClassId: string
+  courseName: string
+  uploadedById: string
+  uploadedByName: string
+}
+
 export interface PagedResult<T> {
   items: T
   totalCount: number

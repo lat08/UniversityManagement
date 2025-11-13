@@ -163,7 +163,8 @@ export const useProfile = (): UseProfileReturn => {
     try {
       await changePasswordMutation.mutateAsync(payload)
       return true
-    } catch {
+    } catch (error) {
+      // Error đã được xử lý trong onError của mutation (toast + updateError state)
       return false
     }
   }

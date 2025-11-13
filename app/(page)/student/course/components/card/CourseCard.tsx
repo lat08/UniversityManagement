@@ -4,7 +4,7 @@
 
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { Calendar, Clock, MapPin, User, Trash2, AlertCircle } from "lucide-react"
+import { Calendar, Clock, MapPin, User, Trash2 } from "lucide-react"
 import { Card } from "@/app/components/ui/card"
 import { Button } from "@/app/components/ui/button"
 import { Badge } from "@/app/components/ui/badge"
@@ -104,13 +104,6 @@ export function CourseCard({
               <span>{registrationStatus}</span>
             </div>
 
-            {/* Display unavailability reason if exists */}
-            {unavailabilityReason && (
-              <div className="flex items-center gap-2 text-orange-600">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span className="font-medium">{unavailabilityReason}</span>
-              </div>
-            )}
             
           </div>
         </div>

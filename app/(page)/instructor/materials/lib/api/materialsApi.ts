@@ -3,6 +3,7 @@ import {
   ApiResponse,
   PagedResult,
   MaterialViewDto,
+  InstructorDocumentDto,
   DocumentTypeDto,
   GetMaterialsParams,
   UploadMaterialRequest,
@@ -31,6 +32,13 @@ export const materialsApi = {
   getMaterials: async (params?: GetMaterialsParams): Promise<ApiResponse<PagedResult<MaterialViewDto[]>>> => {
     const queryParams = new URLSearchParams()
     
+    // Always include pagination params with defaults
+    const pageNumber = params?.pageNumber && params.pageNumber > 0 ? params.pageNumber : 1
+    const pageSize = params?.pageSize && params.pageSize > 0 ? Math.min(100, params.pageSize) : 10
+    
+    queryParams.append('PageNumber', pageNumber.toString())
+    queryParams.append('PageSize', pageSize.toString())
+    
     if (params?.keyword?.trim()) {
       queryParams.append('Keyword', params.keyword.trim())
     }
@@ -43,41 +51,133 @@ export const materialsApi = {
     if (params?.subjectId?.trim()) {
       queryParams.append('SubjectId', params.subjectId.trim())
     }
-    if (params?.pageNumber !== undefined) {
-      queryParams.append('PageNumber', Math.max(1, params.pageNumber).toString())
-    }
-    if (params?.pageSize !== undefined) {
-      queryParams.append('PageSize', Math.max(1, Math.min(100, params.pageSize)).toString())
-    }
 
     const queryString = queryParams.toString()
-    const url = queryString ? `${MATERIALS_API.GET_MATERIALS}?${queryString}` : MATERIALS_API.GET_MATERIALS
+    const url = `${MATERIALS_API.GET_MATERIALS}?${queryString}`
     
-    const response = await api.get<ApiResponse<Record<string, unknown>>>(url)
-    
-    if (response.data.success && response.data.data) {
-      const normalizedData = normalizePagedResult<MaterialViewDto[]>(response.data.data)
+    try {
+      const response = await api.get<ApiResponse<Record<string, unknown>>>(url)
+      
+      // Debug logging
+      console.log('[getMaterials] Request URL:', url)
+      console.log('[getMaterials] Response:', response.data)
+      console.log('[getMaterials] Response data:', response.data.data)
+      
+      if (response.data.success && response.data.data) {
+        const normalizedData = normalizePagedResult<MaterialViewDto[]>(response.data.data)
+        console.log('[getMaterials] Normalized data:', normalizedData)
+        return {
+          success: true,
+          message: response.data.message || '',
+          data: normalizedData,
+          errors: null,
+        }
+      }
+      
+      console.warn('[getMaterials] Response not successful:', response.data)
       return {
-        success: true,
-        message: response.data.message || '',
-        data: normalizedData,
+        success: false,
+        message: response.data.message || 'Failed to fetch materials',
+        data: {
+          items: [],
+          totalCount: 0,
+          totalDocumentsCount: 0,
+          pageNumber,
+          pageSize,
+          totalPages: 0,
+          hasPrevious: false,
+          hasNext: false,
+        },
+        errors: response.data.errors,
+      }
+    } catch (error) {
+      console.error('[getMaterials] Error:', error)
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to fetch materials',
+        data: {
+          items: [],
+          totalCount: 0,
+          totalDocumentsCount: 0,
+          pageNumber,
+          pageSize,
+          totalPages: 0,
+          hasPrevious: false,
+          hasNext: false,
+        },
         errors: null,
       }
     }
+  },
+
+  getDocuments: async (params?: GetMaterialsParams): Promise<ApiResponse<PagedResult<InstructorDocumentDto[]>>> => {
+    const queryParams = new URLSearchParams()
     
-    return {
-      success: false,
-      message: response.data.message || 'Failed to fetch materials',
-      data: {
-        items: [],
-        totalCount: 0,
-        pageNumber: 1,
-        pageSize: 10,
-        totalPages: 0,
-        hasPrevious: false,
-        hasNext: false,
-      },
-      errors: response.data.errors,
+    // Always include pagination params with defaults
+    const pageNumber = params?.pageNumber && params.pageNumber > 0 ? params.pageNumber : 1
+    const pageSize = params?.pageSize && params.pageSize > 0 ? Math.min(100, params.pageSize) : 10
+    
+    queryParams.append('PageNumber', pageNumber.toString())
+    queryParams.append('PageSize', pageSize.toString())
+    
+    if (params?.keyword?.trim()) {
+      queryParams.append('Keyword', params.keyword.trim())
+    }
+    if (params?.documentType?.trim()) {
+      queryParams.append('DocumentType', params.documentType.trim())
+    }
+    if (params?.semesterId?.trim()) {
+      queryParams.append('SemesterId', params.semesterId.trim())
+    }
+    if (params?.subjectId?.trim()) {
+      queryParams.append('SubjectId', params.subjectId.trim())
+    }
+
+    const queryString = queryParams.toString()
+    const url = `${MATERIALS_API.GET_DOCUMENTS}?${queryString}`
+    
+    try {
+      const response = await api.get<ApiResponse<Record<string, unknown>>>(url)
+      
+      if (response.data.success && response.data.data) {
+        const normalizedData = normalizePagedResult<InstructorDocumentDto[]>(response.data.data)
+        return {
+          success: true,
+          message: response.data.message || '',
+          data: normalizedData,
+          errors: null,
+        }
+      }
+      
+      return {
+        success: false,
+        message: response.data.message || 'Failed to fetch documents',
+        data: {
+          items: [],
+          totalCount: 0,
+          pageNumber,
+          pageSize,
+          totalPages: 0,
+          hasPrevious: false,
+          hasNext: false,
+        },
+        errors: response.data.errors,
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to fetch documents',
+        data: {
+          items: [],
+          totalCount: 0,
+          pageNumber,
+          pageSize,
+          totalPages: 0,
+          hasPrevious: false,
+          hasNext: false,
+        },
+        errors: null,
+      }
     }
   },
 

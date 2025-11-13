@@ -41,6 +41,7 @@ export default function InstructorDashboardPage() {
           bgColor: 'bg-pink-50',
           iconColor: 'text-pink-600',
           textColor: 'text-pink-600',
+          onClick: () => router.push('/instructor/materials'),
         },
         {
           title: 'Yêu cầu chờ duyệt',
@@ -49,6 +50,7 @@ export default function InstructorDashboardPage() {
           bgColor: 'bg-orange-50',
           iconColor: 'text-orange-600',
           textColor: 'text-orange-600',
+          onClick: () => router.push('/instructor/grades'),
         },
       ];
     }
@@ -76,6 +78,7 @@ export default function InstructorDashboardPage() {
         bgColor: 'bg-pink-50',
         iconColor: 'text-pink-600',
         textColor: 'text-pink-600',
+        onClick: () => router.push('/instructor/materials'),
       },
       {
         title: 'Yêu cầu chờ duyệt',
@@ -84,6 +87,7 @@ export default function InstructorDashboardPage() {
         bgColor: 'bg-orange-50',
         iconColor: 'text-orange-600',
         textColor: 'text-orange-600',
+        onClick: () => router.push('/instructor/grades'),
       },
     ];
   }, [dashboardData, router]);

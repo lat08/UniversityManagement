@@ -35,10 +35,18 @@ export const profileApi = {
 
   /**
    * Thay đổi mật khẩu của giảng viên
+   * Sử dụng endpoint chung /v1/users/me/password giống như student
    */
   changePassword: async (payload: ChangePasswordPayload): Promise<ApiResponse<null>> => {
     try {
-      const response = await api.post('/v1/instructors/me/change-password', payload)
+      // Map currentPassword to oldPassword để match với backend
+      const requestPayload = {
+        oldPassword: payload.currentPassword,
+        newPassword: payload.newPassword,
+        confirmPassword: payload.confirmPassword
+      }
+      // Dùng endpoint chung cho cả student và instructor
+      const response = await api.put('/v1/users/me/password', requestPayload)
       return response.data
     } catch (error: unknown) {
       const axiosError = error as { 

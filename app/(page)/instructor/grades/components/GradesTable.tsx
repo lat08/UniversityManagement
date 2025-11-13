@@ -1,22 +1,38 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
 import { Table, type TableColumn } from '@/app/components/ui/table';
 import { validateGrade, formatGrade } from '@/lib/utils/grade-calculator';
 import type { InstructorGradeDto } from '../lib/types';
 import { GRADE_WEIGHTS, GRADE_RANGE } from '../lib/constants';
 
+interface PendingChanges {
+  [enrollmentId: string]: {
+    attendanceGrade?: number | null;
+    midtermGrade?: number | null;
+    finalGrade?: number | null;
+    note?: string | null;
+  };
+}
+
 interface GradesTableProps {
   students: InstructorGradeDto[];
   canEdit: boolean;
   onGradeChange: (enrollmentId: string, field: keyof InstructorGradeDto, value: number | null) => void;
+  onNoteChange?: (enrollmentId: string, note: string | null) => void;
+  onBulkSave?: (changes: PendingChanges) => void;
+  onBulkSaveSuccess?: () => void;
   isPending?: boolean;
+  isLoading?: boolean;
 }
 
-export const GradesTable = ({ students, canEdit, onGradeChange, isPending = false }: GradesTableProps) => {
+export const GradesTable = ({ students, canEdit, onGradeChange, onNoteChange, onBulkSave, onBulkSaveSuccess, isPending = false, isLoading = false }: GradesTableProps) => {
   const [editingCell, setEditingCell] = useState<{ enrollmentId: string; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
+  const [editingNote, setEditingNote] = useState<{ enrollmentId: string } | null>(null);
+  const [editNoteValue, setEditNoteValue] = useState<string>('');
+  const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
 
   const handleEdit = useCallback((enrollmentId: string, field: string, currentValue: number | null) => {
     if (!canEdit) return;
@@ -24,23 +40,159 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
     setEditValue(currentValue?.toString() ?? '');
   }, [canEdit]);
 
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Cho phép xóa hết
+    if (value === '') {
+      setEditValue('');
+      return;
+    }
+    
+    // Loại bỏ các ký tự không hợp lệ, chỉ giữ số và dấu chấm
+    const cleanedValue = value.replace(/[^0-9.]/g, '');
+    
+    // Chỉ cho phép một dấu chấm
+    const parts = cleanedValue.split('.');
+    const sanitizedValue = parts.length > 2 
+      ? parts[0] + '.' + parts.slice(1).join('')
+      : cleanedValue;
+    
+    // Kiểm tra format: chỉ số và một dấu chấm
+    const regex = /^\d*\.?\d*$/;
+    if (regex.test(sanitizedValue)) {
+      setEditValue(sanitizedValue);
+    }
+  }, []);
+
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Chặn các ký tự không phải số, dấu chấm và các phím điều khiển
+    const char = e.key;
+    const isNumber = /[0-9]/.test(char);
+    const isDot = char === '.';
+    const isControlKey = ['Backspace', 'Delete', 'Tab', 'Enter', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(char);
+    
+    // Cho phép Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    const isPaste = (e.ctrlKey || e.metaKey) && (char === 'v' || char === 'V');
+    const isCopy = (e.ctrlKey || e.metaKey) && (char === 'c' || char === 'C');
+    const isCut = (e.ctrlKey || e.metaKey) && (char === 'x' || char === 'X');
+    const isSelectAll = (e.ctrlKey || e.metaKey) && (char === 'a' || char === 'A');
+    
+    if (!isNumber && !isDot && !isControlKey && !isPaste && !isCopy && !isCut && !isSelectAll) {
+      e.preventDefault();
+    }
+    
+    // Chỉ cho phép một dấu chấm
+    if (isDot && editValue.includes('.')) {
+      e.preventDefault();
+    }
+  }, [editValue]);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    // Chỉ lấy số và dấu chấm từ text paste
+    const cleanedText = pastedText.replace(/[^0-9.]/g, '');
+    const parts = cleanedText.split('.');
+    const sanitizedText = parts.length > 2 
+      ? parts[0] + '.' + parts.slice(1).join('')
+      : cleanedText;
+    
+    if (/^\d*\.?\d*$/.test(sanitizedText)) {
+      setEditValue(sanitizedText);
+    }
+  }, []);
+
   const handleSave = useCallback((enrollmentId: string, field: keyof InstructorGradeDto) => {
     const numValue = editValue === '' ? null : parseFloat(editValue);
-    if (!validateGrade(numValue)) {
+    if (editValue !== '' && !validateGrade(numValue)) {
       alert(`Điểm phải nằm trong khoảng ${GRADE_RANGE.MIN}-${GRADE_RANGE.MAX}`);
       return;
     }
-    onGradeChange(enrollmentId, field, numValue);
+    
+    // Lưu vào pending changes thay vì gọi API ngay
+    setPendingChanges(prev => ({
+      ...prev,
+      [enrollmentId]: {
+        ...prev[enrollmentId],
+        [field]: numValue,
+      }
+    }));
+    
     setEditingCell(null);
-  }, [editValue, onGradeChange]);
+  }, [editValue]);
 
   const handleCancel = useCallback(() => {
     setEditingCell(null);
     setEditValue('');
   }, []);
 
+  const handleEditNote = useCallback((enrollmentId: string, currentNote: string | null) => {
+    if (!canEdit || !onNoteChange) return;
+    setEditingNote({ enrollmentId });
+    setEditNoteValue(currentNote || '');
+  }, [canEdit, onNoteChange]);
+
+  const handleSaveNote = useCallback((enrollmentId: string) => {
+    const noteValue = editNoteValue.trim() || null;
+    
+    // Lưu vào pending changes thay vì gọi API ngay
+    setPendingChanges(prev => ({
+      ...prev,
+      [enrollmentId]: {
+        ...prev[enrollmentId],
+        note: noteValue,
+      }
+    }));
+    
+    setEditingNote(null);
+    setEditNoteValue('');
+  }, [editNoteValue]);
+
+  const handleCancelNote = useCallback(() => {
+    setEditingNote(null);
+    setEditNoteValue('');
+  }, []);
+
+  const handleBulkSave = useCallback(() => {
+    if (onBulkSave && Object.keys(pendingChanges).length > 0) {
+      onBulkSave(pendingChanges);
+      // Không clear pendingChanges ở đây, sẽ clear sau khi API thành công
+    }
+  }, [pendingChanges, onBulkSave]);
+
+  // Track previous isPending state để detect khi save thành công
+  const prevIsPendingRef = useRef(isPending);
+  
+  // Clear pending changes khi save thành công
+  useEffect(() => {
+    // Nếu isPending chuyển từ true sang false và có pendingChanges, nghĩa là save thành công
+    if (prevIsPendingRef.current && !isPending && Object.keys(pendingChanges).length > 0) {
+      const timer = setTimeout(() => {
+        setPendingChanges({});
+        if (onBulkSaveSuccess) {
+          onBulkSaveSuccess();
+        }
+      }, 300); // Đợi một chút để data được refetch
+      return () => clearTimeout(timer);
+    }
+    prevIsPendingRef.current = isPending;
+  }, [isPending, pendingChanges, onBulkSaveSuccess]);
+
+  const getDisplayValue = useCallback((student: InstructorGradeDto, field: 'attendanceGrade' | 'midtermGrade' | 'finalGrade' | 'note') => {
+    const pending = pendingChanges[student.enrollmentId];
+    if (pending && field in pending) {
+      return pending[field as keyof typeof pending];
+    }
+    return student[field];
+  }, [pendingChanges]);
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+
   const calculateAverage = (student: InstructorGradeDto): number | null => {
-    const { attendanceGrade, midtermGrade, finalGrade } = student;
+    const attendanceGrade = getDisplayValue(student, 'attendanceGrade') as number | null;
+    const midtermGrade = getDisplayValue(student, 'midtermGrade') as number | null;
+    const finalGrade = getDisplayValue(student, 'finalGrade') as number | null;
+    
     if (attendanceGrade === null || midtermGrade === null || finalGrade === null) {
       return null;
     }
@@ -56,25 +208,29 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
   const renderEditableCell = useCallback((
     student: InstructorGradeDto,
     field: 'attendanceGrade' | 'midtermGrade' | 'finalGrade',
-    value: number | null,
+    originalValue: number | null,
     previousValue: number | null
   ) => {
     const isEditing = editingCell?.enrollmentId === student.enrollmentId && editingCell?.field === field;
+    const displayValue = getDisplayValue(student, field) as number | null;
+    const hasPendingChange = pendingChanges[student.enrollmentId]?.[field] !== undefined;
+    const hasChanged = previousValue !== null && originalValue !== previousValue;
 
     if (isEditing) {
       return (
         <div className="flex items-center gap-1">
           <input
-            type="number"
-            step="0.1"
-            min={GRADE_RANGE.MIN}
-            max={GRADE_RANGE.MAX}
+            type="text"
+            inputMode="decimal"
             value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            onPaste={handlePaste}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSave(student.enrollmentId, field);
               if (e.key === 'Escape') handleCancel();
             }}
+            placeholder="0-10"
             className="w-16 px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
             disabled={isPending}
@@ -82,7 +238,7 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
           <button
             onClick={() => handleSave(student.enrollmentId, field)}
             className="p-1 text-green-600 hover:bg-green-50 rounded"
-            title="Lưu"
+            title="Lưu vào danh sách thay đổi"
             disabled={isPending}
           >
             <Save className="w-4 h-4" />
@@ -99,23 +255,34 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
       );
     }
 
-    const hasChanged = previousValue !== null && value !== previousValue;
-
     return (
       <div className="flex items-center justify-center gap-2 group">
         <div className="flex flex-col items-center">
-          <span className={value === null ? 'text-gray-400' : hasChanged ? 'text-blue-600 font-medium' : ''}>
-            {formatGrade(value)}
+          <span className={`${
+            displayValue === null 
+              ? 'text-gray-400' 
+              : hasPendingChange 
+                ? 'text-orange-600 font-medium' 
+                : hasChanged 
+                  ? 'text-blue-600 font-medium' 
+                  : ''
+          }`}>
+            {formatGrade(displayValue)}
           </span>
-          {hasChanged && previousValue !== null && (
+          {hasChanged && previousValue !== null && !hasPendingChange && (
             <span className="text-xs text-gray-400 line-through">
               {formatGrade(previousValue)}
+            </span>
+          )}
+          {hasPendingChange && originalValue !== null && displayValue !== originalValue && (
+            <span className="text-xs text-gray-400 line-through">
+              {formatGrade(originalValue)}
             </span>
           )}
         </div>
         {canEdit && !isPending && (
           <button
-            onClick={() => handleEdit(student.enrollmentId, field, value)}
+            onClick={() => handleEdit(student.enrollmentId, field, displayValue)}
             className="opacity-0 group-hover:opacity-100 p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
             title="Chỉnh sửa"
           >
@@ -124,7 +291,67 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
         )}
       </div>
     );
-  }, [editingCell, editValue, canEdit, isPending, handleEdit, handleSave, handleCancel]);
+  }, [editingCell, editValue, canEdit, isPending, handleEdit, handleSave, handleCancel, getDisplayValue, pendingChanges]);
+
+  const renderNoteCell = useCallback((student: InstructorGradeDto) => {
+    const isEditing = editingNote?.enrollmentId === student.enrollmentId;
+    const displayNote = getDisplayValue(student, 'note') as string | null;
+    const hasPendingChange = pendingChanges[student.enrollmentId]?.note !== undefined;
+    const originalNote = student.note;
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center gap-1">
+          <input
+            type="text"
+            value={editNoteValue}
+            onChange={(e) => setEditNoteValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSaveNote(student.enrollmentId);
+              if (e.key === 'Escape') handleCancelNote();
+            }}
+            className="flex-1 px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Nhập ghi chú..."
+            autoFocus
+            disabled={isPending}
+          />
+          <button
+            onClick={() => handleSaveNote(student.enrollmentId)}
+            className="p-1 text-green-600 hover:bg-green-50 rounded"
+            title="Lưu vào danh sách thay đổi"
+            disabled={isPending}
+          >
+            <Save className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleCancelNote}
+            className="p-1 text-red-600 hover:bg-red-50 rounded"
+            title="Hủy"
+            disabled={isPending}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2 group">
+        <span className={`flex-1 ${hasPendingChange ? 'text-orange-600 font-medium' : 'text-gray-500'}`}>
+          {displayNote || '-'}
+        </span>
+        {canEdit && !isPending && (
+          <button
+            onClick={() => handleEditNote(student.enrollmentId, displayNote)}
+            className="opacity-0 group-hover:opacity-100 p-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+            title="Chỉnh sửa ghi chú"
+          >
+            <Edit2 className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    );
+  }, [editingNote, editNoteValue, canEdit, isPending, handleEditNote, handleSaveNote, handleCancelNote, getDisplayValue, pendingChanges]);
 
   const columns: TableColumn[] = [
     { key: 'mssv', label: 'MSSV', align: 'left' },
@@ -138,6 +365,10 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
 
   const renderRow = (student: InstructorGradeDto) => {
     const average = calculateAverage(student);
+    const originalAttendanceGrade = student.attendanceGrade;
+    const originalMidtermGrade = student.midtermGrade;
+    const originalFinalGrade = student.finalGrade;
+    
     return (
       <>
         <td className="px-6 py-4 text-sm text-gray-900">{student.mssv}</td>
@@ -146,15 +377,15 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
           {renderEditableCell(
             student,
             'attendanceGrade',
-            student.attendanceGrade,
+            originalAttendanceGrade,
             student.previousAttendanceGrade
           )}
         </td>
         <td className="px-6 py-4 text-sm text-center text-gray-900">
-          {renderEditableCell(student, 'midtermGrade', student.midtermGrade, student.previousMidtermGrade)}
+          {renderEditableCell(student, 'midtermGrade', originalMidtermGrade, student.previousMidtermGrade)}
         </td>
         <td className="px-6 py-4 text-sm text-center text-gray-900">
-          {renderEditableCell(student, 'finalGrade', student.finalGrade, student.previousFinalGrade)}
+          {renderEditableCell(student, 'finalGrade', originalFinalGrade, student.previousFinalGrade)}
         </td>
         <td className="px-6 py-4 text-sm text-center">
           <span
@@ -169,14 +400,55 @@ export const GradesTable = ({ students, canEdit, onGradeChange, isPending = fals
             {average !== null ? average.toFixed(1) : '-'}
           </span>
         </td>
-        <td className="px-6 py-4 text-sm text-gray-500">{student.note || '-'}</td>
+        <td className="px-6 py-4 text-sm">
+          {renderNoteCell(student)}
+        </td>
       </>
     );
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
-      <Table columns={columns} data={students} renderRow={renderRow} emptyMessage="Không có sinh viên nào" />
+    <div className="bg-white rounded-lg shadow-sm relative">
+      {/* Save button for pending changes */}
+      {hasPendingChanges && onBulkSave && (
+        <div className="p-4 border-b border-gray-200 bg-orange-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-orange-700 font-medium">
+                Có {Object.keys(pendingChanges).length} thay đổi chưa lưu
+              </span>
+            </div>
+            <button
+              onClick={handleBulkSave}
+              disabled={isPending}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+            >
+              <Save className="w-4 h-4" />
+              Lưu tất cả thay đổi
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Show overlay spinner when saving or refetching */}
+      {(isPending || (isLoading && students.length > 0)) && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="text-sm text-gray-600 font-medium">
+              {isPending ? 'Đang lưu thay đổi...' : 'Đang tải dữ liệu...'}
+            </p>
+          </div>
+        </div>
+      )}
+      <Table 
+        columns={columns} 
+        data={students} 
+        renderRow={renderRow} 
+        emptyMessage="Không có sinh viên nào"
+        isLoading={isLoading && students.length === 0}
+        loadingMessage="Đang tải bảng điểm..."
+      />
     </div>
   );
 };
