@@ -150,7 +150,7 @@ ErrorDisplay.displayName = 'ErrorDisplay'
 export default function InstructorProfilePage() {
   usePageTitle('Hồ sơ cá nhân')
 
-  const { profile, loading, error, refetch, updating, updateError, updateAvatar, changePassword } = useProfile()
+  const { profile, loading, error, refetch, updating, updateError, changePassword } = useProfile()
   const handleRetry = async () => {
     await refetch()
   }

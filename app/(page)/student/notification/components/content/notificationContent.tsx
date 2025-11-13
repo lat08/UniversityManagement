@@ -223,10 +223,10 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="w-full sm:max-w-sm">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex w-full flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center">
+          <div className="w-full sm:flex-1 sm:max-w-sm">
             <SearchInput
               value={searchQuery}
               placeholder="Tìm kiếm thông báo..."
@@ -245,8 +245,8 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
         </div>
 
         {unreadCounts.all > 0 && (
-          <div className="flex items-center gap-3 whitespace-nowrap">
-            <div className="text-sm text-[var(--text-secondary)] whitespace-nowrap">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+            <div className="text-xs sm:text-sm text-[var(--text-secondary)]">
               {unreadCounts.all} thông báo chưa đọc
             </div>
             <Button
@@ -254,17 +254,17 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
               size="sm"
               onClick={handleMarkAllAsRead}
               disabled={isMarkingAllAsRead}
-              className="gap-2 whitespace-nowrap"
+              className="gap-2 w-full sm:w-auto text-xs sm:text-sm"
             >
               {isMarkingAllAsRead ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Đang xử lý...
+                  <Loader2 className="h-3 sm:h-4 w-3 sm:w-4 animate-spin" />
+                  <span className="truncate">Đang xử lý...</span>
                 </>
               ) : (
                 <>
-                  <CheckCheck className="h-4 w-4" />
-                  Đánh dấu tất cả đã đọc
+                  <CheckCheck className="h-3 sm:h-4 w-3 sm:w-4" />
+                  <span className="truncate">Đánh dấu tất cả đã đọc</span>
                 </>
               )}
             </Button>

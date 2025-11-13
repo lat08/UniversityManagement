@@ -1,18 +1,12 @@
 // Path: lib/hooks/useAvailableCourses.ts
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { coursesApi } from "../api/coursesApi";
-import { CourseDto, PaginatedResponse } from "../type/courseType";
+import { CourseDto } from "../type/courseType";
 import { useCourseFiltersStore } from "../stores/courseFiltersStore";
 
 export const useAvailableCourses = () => {
   const filters = useCourseFiltersStore((state) => state.filters);
   const [allCourses, setAllCourses] = useState<CourseDto[]>([]);
-  const [serverPagination, setServerPagination] = useState({
-    totalCount: 0,
-    pageNumber: 1,
-    pageSize: 15,
-    totalPages: 0,
-  });
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,12 +32,6 @@ export const useAvailableCourses = () => {
         isInStudentCurriculum: undefined,
       });
       setAllCourses(Array.isArray(response.items) ? response.items : []);
-      setServerPagination({
-        totalCount: response.totalCount,
-        pageNumber: response.pageNumber,
-        pageSize: response.pageSize,
-        totalPages: response.totalPages,
-      });
       setCurrentPage(1);
       console.log('✅ useAvailableCourses - data set:', {
         itemsCount: Array.isArray(response.items) ? response.items.length : 0,
@@ -53,12 +41,6 @@ export const useAvailableCourses = () => {
       console.error("Error fetching available courses:", err);
       setError("Không thể tải danh sách khóa học có sẵn");
       setAllCourses([]);
-      setServerPagination({
-        totalCount: 0,
-        pageNumber: 1,
-        pageSize: 15,
-        totalPages: 0,
-      });
     } finally {
       setLoading(false);
     }
@@ -113,7 +95,7 @@ export const useAvailableCourses = () => {
     }
   }, [totalPages]);
 
-  const changePageSize = useCallback((size: number) => {
+  const changePageSize = useCallback(() => {
     setCurrentPage(1);
     // Note: pageSize is fixed at 15 for client-side pagination
   }, []);

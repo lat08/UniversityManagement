@@ -49,8 +49,8 @@ const ExamsFiltersComponent = ({
   }, [onSubjectChange]);
 
   return (
-    <div className="flex gap-4 items-stretch w-full">
-        <div className="flex-1">
+    <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch w-full">
+        <div className="w-full lg:flex-1">
           <SearchInput
             value={searchQuery}
             onChange={handleSearchChange}
@@ -60,44 +60,47 @@ const ExamsFiltersComponent = ({
           />
         </div>
 
-        <Dropdown
-          options={semesters.map(s => ({ value: s.id, label: s.name }))}
-          value={selectedSemester}
-          placeholder="Tất cả học kỳ"
-          onChange={onSemesterChange}
-          disabled={semestersLoading}
-          className="flex-1"
-          buttonClassName={selectedSemester === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}
-        />
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex gap-2 sm:gap-3 lg:gap-4 w-full lg:flex-[3]">
+          <Dropdown
+            options={semesters.map(s => ({ value: s.id, label: s.name }))}
+            value={selectedSemester}
+            placeholder="Tất cả học kỳ"
+            onChange={onSemesterChange}
+            disabled={semestersLoading}
+            className="w-full"
+            buttonClassName={`w-full text-xs sm:text-sm ${selectedSemester === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}`}
+          />
 
-        <DropdownSearch
-          options={subjects.map(s => ({ value: s.id, label: s.name }))}
-          value={selectedSubject === "all" ? undefined : selectedSubject}
-          placeholder="Tất cả môn học"
-          onChange={handleSubjectChange}
-          disabled={subjectsLoading}
-          className="flex-1"
-          showEmptyOption
-          emptyOptionLabel="Tất cả môn học"
-        />
+          <DropdownSearch
+            options={subjects.map(s => ({ value: s.id, label: s.name }))}
+            value={selectedSubject === "all" ? undefined : selectedSubject}
+            placeholder="Tất cả môn học"
+            onChange={handleSubjectChange}
+            disabled={subjectsLoading}
+            className="w-full"
+            showEmptyOption
+            emptyOptionLabel="Tất cả môn học"
+            buttonClassName="w-full text-xs sm:text-sm"
+          />
 
-        <Dropdown
-          options={statuses.map(s => ({ value: s.id, label: s.name }))}
-          value={selectedStatus}
-          placeholder="Tất cả trạng thái"
-          onChange={onStatusChange}
-          className="flex-1"
-          buttonClassName={selectedStatus === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}
-        />
+          <Dropdown
+            options={statuses.map(s => ({ value: s.id, label: s.name }))}
+            value={selectedStatus}
+            placeholder="Tất cả trạng thái"
+            onChange={onStatusChange}
+            className="w-full"
+            buttonClassName={`w-full text-xs sm:text-sm ${selectedStatus === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}`}
+          />
 
-        <Dropdown
-          options={examTypes.map(t => ({ value: t.id, label: t.name }))}
-          value={selectedExamType}
-          placeholder="Tất cả loại"
-          onChange={onExamTypeChange}
-          className="flex-1"
-          buttonClassName={selectedExamType === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}
-        />
+          <Dropdown
+            options={examTypes.map(t => ({ value: t.id, label: t.name }))}
+            value={selectedExamType}
+            placeholder="Tất cả loại"
+            onChange={onExamTypeChange}
+            className="w-full"
+            buttonClassName={`w-full text-xs sm:text-sm ${selectedExamType === "all" ? '' : 'border-blue-500 ring-1 ring-blue-500'}`}
+          />
+        </div>
     </div>
   );
 };

@@ -41,7 +41,7 @@ const getChartColors = () => {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ChartDataLabels, Title, Tooltip, Legend);
 
-const wrapText = (text: string, maxCharsPerLine: number = 12): string[] => {
+const wrapText = (text: string, maxCharsPerLine: number, maxLines: number): string[] => {
   const words = text.split(" ");
   const lines: string[] = [];
   let currentLine = "";
@@ -60,7 +60,7 @@ const wrapText = (text: string, maxCharsPerLine: number = 12): string[] => {
     lines.push(currentLine);
   }
 
-  return lines.slice(0, 2);
+  return lines.slice(0, maxLines);
 };
 
 const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData) => {
@@ -68,6 +68,7 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
   const [chartColors, setChartColors] = useState(getChartColors());
   const [animatedData, setAnimatedData] = useState<number[]>([]);
   const [animatedBackgroundData, setAnimatedBackgroundData] = useState<number[]>([]);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
   const animationRef = useRef<number | undefined>(undefined);
   const chartReadyTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -94,8 +95,15 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
       attributeFilter: ["style"],
     });
 
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
       observer.disconnect();
+      window.removeEventListener('resize', handleResize);
       if (tooltipRef.current) {
         document.body.removeChild(tooltipRef.current);
         tooltipRef.current = null;
@@ -219,14 +227,18 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
     const displayBackgroundData =
       animatedBackgroundData.length > 0 ? animatedBackgroundData : (semester?.courses || []).map(() => 0);
 
+    const barThickness = isMobile ? 28 : 40;
+    const maxCharsPerLine = isMobile ? 8 : 12;
+    const maxLines = isMobile ? 3 : 2;
+
     return {
-      labels: semester?.courses.map((item) => wrapText(item.subjectName)),
+      labels: semester?.courses.map((item) => wrapText(item.subjectName, maxCharsPerLine, maxLines)),
       datasets: [
         {
           data: displayData,
           backgroundColor: chartColors.primary,
           borderRadius: 0,
-          barThickness: 40,
+          barThickness: barThickness,
           borderSkipped: false,
           datalabels: {
             display: true,
@@ -236,7 +248,7 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
           data: displayBackgroundData,
           backgroundColor: chartColors.background,
           borderRadius: 0,
-          barThickness: 40,
+          barThickness: barThickness,
           borderSkipped: false,
           datalabels: {
             display: false,
@@ -244,25 +256,29 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
         },
       ],
     };
-  }, [animatedData, animatedBackgroundData, semester?.courses, chartColors.primary, chartColors.background]);
+  }, [animatedData, animatedBackgroundData, semester?.courses, chartColors.primary, chartColors.background, isMobile]);
 
   const emptyChartData = useMemo(
-    () => ({
-      labels: [""],
-      datasets: [
-        {
-          data: [0],
-          backgroundColor: chartColors.background,
-          borderRadius: 0,
-          barThickness: 40,
-          borderSkipped: false,
-          datalabels: {
-            display: false,
+    () => {
+      const barThickness = isMobile ? 28 : 40;
+      
+      return {
+        labels: [""],
+        datasets: [
+          {
+            data: [0],
+            backgroundColor: chartColors.background,
+            borderRadius: 0,
+            barThickness: barThickness,
+            borderSkipped: false,
+            datalabels: {
+              display: false,
+            },
           },
-        },
-      ],
-    }),
-    [chartColors.background],
+        ],
+      };
+    },
+    [chartColors.background, isMobile],
   );
 
   const emptyStatePlugin = useMemo<Plugin<"bar">>(
@@ -300,7 +316,7 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
           align: "top",
           offset: -4,
           font: {
-            size: 12,
+            size: isMobile ? 10 : 12,
             weight: "bold",
           },
           formatter: (value: number) => value.toFixed(1),
@@ -413,13 +429,13 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
           },
           ticks: {
             font: {
-              size: 12,
+              size: isMobile ? 9 : 12,
             },
             color: "var(--text-secondary)",
             maxRotation: 0,
             minRotation: 0,
             autoSkip: false,
-            padding: 8,
+            padding: isMobile ? 4 : 8,
             callback: function (value, index) {
               const label = this.getLabelForValue(index);
               return typeof label === "string" ? label.split("\n") : label;
@@ -436,14 +452,14 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
           ticks: {
             stepSize: 2,
             font: {
-              size: 11,
+              size: isMobile ? 9 : 11,
             },
             color: "var(--text-secondary)",
           },
         },
       },
     }),
-    [chartColors.primary, chartColors.tooltipBg, chartColors.tooltipText, semester?.courses],
+    [chartColors.primary, chartColors.tooltipBg, chartColors.tooltipText, semester?.courses, isMobile],
   );
 
   return (
