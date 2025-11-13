@@ -59,25 +59,89 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
     return false
   }, [])
 
+  // Lấy danh sách các môn đã chọn từ cache (bao gồm cả môn ở trang khác)
+  const selectedCourses = useMemo(() => {
+    return Array.from(selectedCoursesCache.values())
+  }, [selectedCoursesCache])
+
+  // Kiểm tra xem 1 môn có bị conflict với bất kỳ môn đã chọn nào không
+  const isConflictWithSelected = useCallback((course: CourseDto) => {
+    if (selectedCourseIds.has(course.courseId)) return false // Môn đang được chọn thì không conflict
+    
+    return selectedCourses.some(selectedCourse => 
+      hasScheduleConflict(course, selectedCourse)
+    )
+  }, [selectedCourses, selectedCourseIds, hasScheduleConflict])
+
+  // Kiểm tra tất cả các trường hợp cần disable checkbox
+  const getCheckboxDisabledState = useCallback((course: CourseDto) => {
+    // 1. Môn đã đăng ký rồi
+    if (course.isRegistered) {
+      return {
+        disabled: true,
+        reason: 'Môn học đã được đăng ký'
+      }
+    }
+
+    // 2. Môn không thể đăng ký (có lý do cụ thể)
+    if (!course.isAvailableForThisStudent) {
+      const reason = course.unavailabilityReason || 'Môn học không thể đăng ký'
+      return {
+        disabled: true,
+        reason: reason
+      }
+    }
+
+    // 3. Môn đã đầy
+    if (course.isFull) {
+      return {
+        disabled: true,
+        reason: 'Môn học đã đầy'
+      }
+    }
+
+    // 4. Môn có conflict với lịch hiện tại của sinh viên
+    if (course.hasScheduleConflict) {
+      return {
+        disabled: true,
+        reason: 'Môn học trùng lịch với lịch học hiện tại'
+      }
+    }
+
+    // 5. Môn trùng lịch với môn đã chọn
+    if (isConflictWithSelected(course)) {
+      return {
+        disabled: true,
+        reason: 'Môn học trùng lịch với môn đã chọn'
+      }
+    }
+
+    return {
+      disabled: false,
+      reason: ''
+    }
+  }, [isConflictWithSelected])
+
   const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
-      // Chọn tuần tự từng môn, bỏ qua môn bị conflict và môn không cho phép đăng ký
+      // Chọn tuần tự từng môn, bỏ qua môn bị disable
       const newSelected = new Set<string>()
       const newCache = new Map(selectedCoursesCache)
       
       for (const course of courses) {
-        // Bỏ qua môn không cho phép đăng ký
-        if (!course.isAvailableForThisStudent) continue
-        
-        // Kiểm tra xem môn này có conflict với các môn đã chọn không
-        const selectedCoursesTemp = Array.from(newCache.values())
-        const hasConflict = selectedCoursesTemp.some(selectedCourse => 
-          hasScheduleConflict(course, selectedCourse)
-        )
-        
-        if (!hasConflict) {
-          newSelected.add(course.courseId)
-          newCache.set(course.courseId, course)
+        const checkboxState = getCheckboxDisabledState(course)
+        // Chỉ chọn môn không bị disable
+        if (!checkboxState.disabled) {
+          // Kiểm tra xem môn này có conflict với các môn đã chọn không
+          const selectedCoursesTemp = Array.from(newCache.values())
+          const hasConflict = selectedCoursesTemp.some(selectedCourse => 
+            hasScheduleConflict(course, selectedCourse)
+          )
+          
+          if (!hasConflict) {
+            newSelected.add(course.courseId)
+            newCache.set(course.courseId, course)
+          }
         }
       }
       
@@ -96,7 +160,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
       setSelectedCourseIds(newSelected)
       useCourseFiltersStore.setState({ selectedCoursesCache: newCache })
     }
-  }, [courses, hasScheduleConflict, selectedCourseIds, selectedCoursesCache, setSelectedCourseIds])
+  }, [courses, hasScheduleConflict, selectedCourseIds, selectedCoursesCache, setSelectedCourseIds, getCheckboxDisabledState])
 
   const handleSelectCourse = useCallback((course: CourseDto, checked: boolean) => {
     // Chặn chọn môn không cho phép đăng ký
@@ -105,11 +169,16 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
     }
     
     if (checked) {
+      // Kiểm tra xem môn có thể chọn không
+      const checkboxState = getCheckboxDisabledState(course)
+      if (checkboxState.disabled) {
+        return // Không cho phép chọn môn đã bị disable
+      }
       addSelectedCourse(course)
     } else {
       removeSelectedCourseId(course.courseId)
     }
-  }, [addSelectedCourse, removeSelectedCourseId])
+  }, [addSelectedCourse, removeSelectedCourseId, getCheckboxDisabledState])
 
   const handleDeselectAll = useCallback(() => {
     clearSelectedCourseIds()
@@ -148,32 +217,16 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
     return Math.max(0, course.maxStudents - course.registeredStudents)
   }, [])
 
-  // Lấy danh sách các môn đã chọn từ cache (bao gồm cả môn ở trang khác)
-  const selectedCourses = useMemo(() => {
-    return Array.from(selectedCoursesCache.values())
-  }, [selectedCoursesCache])
-
-  // Kiểm tra xem 1 môn có bị conflict với bất kỳ môn đã chọn nào không
-  const isConflictWithSelected = useCallback((course: CourseDto) => {
-    if (selectedCourseIds.has(course.courseId)) return false // Môn đang được chọn thì không conflict
-    
-    return selectedCourses.some(selectedCourse => 
-      hasScheduleConflict(course, selectedCourse)
-    )
-  }, [selectedCourses, selectedCourseIds, hasScheduleConflict])
-
-  // Kiểm tra xem môn có thể chọn được không (không conflict và cho phép đăng ký)
-  const isSelectable = useCallback((course: CourseDto) => {
-    return course.isAvailableForThisStudent && !isConflictWithSelected(course)
-  }, [isConflictWithSelected])
-
   const isAllSelected = useMemo(() => {
     if (courses.length === 0) return false
-    // Chỉ check các môn ở trang hiện tại (có thể chọn được - không conflict và cho phép đăng ký)
-    const selectableCoursesOnPage = courses.filter(course => isSelectable(course))
+    // Chỉ check các môn ở trang hiện tại (không bị disable)
+    const selectableCoursesOnPage = courses.filter(course => {
+      const checkboxState = getCheckboxDisabledState(course)
+      return !checkboxState.disabled
+    })
     if (selectableCoursesOnPage.length === 0) return false
     return selectableCoursesOnPage.every(c => selectedCourseIds.has(c.courseId))
-  }, [courses, selectedCourseIds, isSelectable])
+  }, [courses, selectedCourseIds, getCheckboxDisabledState])
   
   const isIndeterminate = useMemo(() => {
     const selectedOnPage = courses.filter(c => selectedCourseIds.has(c.courseId))
@@ -194,9 +247,8 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
   const renderCourseRow = useCallback((course: CourseDto) => {
     const isSelected = selectedCourseIds.has(course.courseId)
     const remaining = getRemainingSlots(course)
-    const isConflict = isConflictWithSelected(course)
-    const isNotAvailable = !course.isAvailableForThisStudent
-    const isDisabled = isConflict || isNotAvailable
+    const checkboxState = getCheckboxDisabledState(course)
+    const isDisabled = checkboxState.disabled
 
     return (
       <>
@@ -207,48 +259,49 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
               checked={isSelected}
               onChange={(e) => handleSelectCourse(course, e.target.checked)}
               disabled={isDisabled}
+              disabled={isDisabled}
               className={`w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] ${
                 isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
               }`}
-              title={
-                isNotAvailable 
-                  ? course.unavailabilityReason || 'Môn học này không cho phép đăng ký'
-                  : isConflict 
-                    ? 'Môn học này bị trùng lịch với môn đã chọn' 
-                    : ''
-              }
+              title={checkboxState.reason || ''}
             />
           </div>
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {course.subjectCode}
         </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {course.subjectName}
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
           {course.instructorName}
         </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {course.credits}
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {course.maxStudents}
         </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {remaining}
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
           {formatSchedule(course)}
-          {isConflict && (
-            <span className="block text-xs text-red-500 mt-1">⚠️ Trùng lịch</span>
+          {isDisabled && checkboxState.reason && (
+            <span className="block text-xs text-red-500 mt-1">⚠️ {checkboxState.reason}</span>
           )}
         </td>
       </>
     )
-  }, [selectedCourseIds, handleSelectCourse, formatSchedule, getRemainingSlots, isConflictWithSelected])
-
-  const isRegisteringAny = isRegistering || isBulkRegistering
+  }, [selectedCourseIds, handleSelectCourse, formatSchedule, getRemainingSlots, getCheckboxDisabledState])
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative">
@@ -345,7 +398,8 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
                                   if (input) input.indeterminate = isIndeterminate
                                 }}
                                 onChange={(e) => handleSelectAll(e.target.checked)}
-                                className="w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] cursor-pointer"
+                                disabled={courses.length === 0 || courses.every(c => getCheckboxDisabledState(c).disabled)}
+                                className="w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                               />
                             </div>
                           ) : (
@@ -407,16 +461,15 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
                   ) : (
                     courses.map((course, index) => {
                       const itemKey = course.courseId || `row-${index}`
-                      const isConflict = isConflictWithSelected(course)
-                      const isNotAvailable = !course.isAvailableForThisStudent
-                      const isDisabled = isConflict || isNotAvailable
+                      const checkboxState = getCheckboxDisabledState(course)
+                      const isDisabled = checkboxState.disabled
                       return (
                         <tr 
                           key={itemKey} 
                           className={`${
                             isDisabled 
-                              ? 'bg-gray-50 opacity-60 cursor-not-allowed' 
-                              : 'hover:bg-gray-50 cursor-pointer'
+                              ? 'bg-gray-50 opacity-60' 
+                              : 'hover:bg-gray-50'
                           } transition-colors duration-150 animate-fade-in`}
                           style={{ 
                             animationDelay: `${index * 30}ms`,
