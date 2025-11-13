@@ -343,6 +343,14 @@ export const studentsApi = {
   },
 
   /**
+   * Lấy điểm tích lũy toàn khóa của sinh viên (cho Admin)
+   */
+  getCumulativeGrades: async (studentId: string): Promise<ApiResponse<any>> => {
+    const response = await api.get<ApiResponse<any>>(`/v1/admin/students/${studentId}/grades/cumulative`);
+    return response.data;
+  },
+
+  /**
    * Cập nhật hàng loạt sinh viên
    */
   bulkUpdateStudents: async (payload: { studentIds: string[]; enrollmentStatus?: string; classId?: string }): Promise<ApiResponse<{ updatedCount: number; totalRequested: number; failedCount: number }>> => {

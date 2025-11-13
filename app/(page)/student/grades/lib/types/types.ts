@@ -22,6 +22,9 @@ export interface SemesterGrade {
   semesterGPA10: number
   semesterGPA4: number
   semesterCredits: number
+  // Tín chỉ trong/ngoài CTDT học kỳ
+  semesterCreditsInCurriculum?: number
+  semesterCreditsOutOfCurriculum?: number
   // Điểm tích lũy đến học kỳ này
   cumulativeGPA10: number
   cumulativeGPA4: number

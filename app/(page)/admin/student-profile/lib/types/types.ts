@@ -10,7 +10,8 @@ export interface Student {
   classId: string;
   enrollmentStatus: string;
   trainingSystemName: string;
-  averageGPA: number | null;
+  cumulativeGPA10: number | null; // GPA hệ 10
+  averageGPA: number | null; // GPA hệ 4
   totalCreditsInCurriculum: number;
   creditsEarnedInCurriculum: number;
   creditsEarnedOutsideCurriculum: number;
@@ -182,7 +183,8 @@ export interface StudentDetail {
   startAcademicYear?: string;
   endAcademicYear?: string;
   trainingSystemName?: string;
-  averageGPA?: number | null;
+  cumulativeGPA10?: number | null; // GPA hệ 10
+  averageGPA?: number | null; // GPA hệ 4
   earnedCredits?: number;
   totalCreditsRequired?: number;
   totalCreditsInCurriculum?: number;
@@ -284,4 +286,50 @@ export interface SemesterGrades {
   semesterClassification: string;
   grades: Grade[];
 }
+
+// Cumulative Grades Types (for full academic record)
+export interface GradeItem {
+  semesterId: string;
+  semesterName: string;
+  semesterStartDate?: string;
+  subjectId: string;
+  subjectCode: string;
+  subjectName: string;
+  credits: number;
+  midtermGrade: number | null;
+  finalGrade: number | null;
+  attendanceGrade: number | null;
+  finalGrade10: number | null;
+  finalGrade4: number | null;
+  gradeLetter: string | null;
+  status: string | null;
+}
+
+export interface SemesterResult {
+  semesterId: string;
+  semesterName: string;
+  // Điểm tổng kết học kỳ
+  semesterGPA10: number;
+  semesterGPA4: number;
+  semesterCredits: number;
+  // Tín chỉ trong/ngoài CTDT học kỳ
+  semesterCreditsInCurriculum?: number;
+  semesterCreditsOutOfCurriculum?: number;
+  // Điểm tích lũy đến học kỳ này
+  cumulativeGPA10: number;
+  cumulativeGPA4: number;
+  cumulativeCredits: number;
+  cumulativeClassification: string;
+  grades: GradeItem[];
+}
+
+export interface CumulativeGradesData {
+  cumulativeGPA10: number;
+  cumulativeGPA4: number;
+  totalCompletedCredits: number;
+  totalRequiredCredits: number;
+  totalSubjects: number;
+  semesters: SemesterResult[];
+}
+
 

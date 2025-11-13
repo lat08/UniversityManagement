@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { MapPin, Mail, Phone, Calendar, School, ArrowLeft, Edit } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -15,9 +15,12 @@ import { useSemesters } from '../lib/hooks/useSemesters';
 import { useTuitionFees } from '../lib/hooks/useTuitionFees';
 import { useInsurances } from '../lib/hooks/useInsurances';
 import { useGrades } from '../lib/hooks/useGrades';
+import { useCumulativeGrades } from '../lib/hooks/useCumulativeGrades';
 import { DetailPageSkeleton } from '../components/LoadingSkeleton';
 import { GradeDetailModal } from '../components/GradeDetailModal';
-import { Grade } from '../lib/types/types';
+import { Grade, GradeItem, Semester } from '../lib/types/types';
+import { AdminGradeSemesterTable } from '../components/AdminGradeSemesterTable';
+import { AdminGradeDetailModal } from '../components/AdminGradeDetailModal';
 
 export default function StudentDetailPage() {
   const router = useRouter();
@@ -32,6 +35,11 @@ export default function StudentDetailPage() {
   const [exportingInsurance, setExportingInsurance] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
+  const [selectedGradeItem, setSelectedGradeItem] = useState<GradeItem | null>(null);
+  const [isGradeDetailModalOpen, setIsGradeDetailModalOpen] = useState(false);
+  const [selectedSemesters, setSelectedSemesters] = useState<string[]>([]);
+  const [isSemesterOpen, setIsSemesterOpen] = useState(false);
+  const semesterRef = useRef<HTMLDivElement>(null);
 
   // Custom hooks for data fetching
   const { studentData, loading: loadingStudent } = useStudentDetail(studentId);
@@ -39,6 +47,7 @@ export default function StudentDetailPage() {
   const { tuitionFees, loading: loadingTuition, fetchTuitionFees } = useTuitionFees(studentId);
   const { insurances, loading: loadingInsurance, fetchInsurances } = useInsurances(studentId);
   const { grades, loading: loadingGrades, fetchGrades } = useGrades(studentId);
+  const { cumulativeData, loading: loadingCumulative, error: cumulativeError } = useCumulativeGrades(studentId);
 
   // Initialize semester selection when semesters are loaded
   useEffect(() => {
@@ -71,6 +80,28 @@ export default function StudentDetailPage() {
       fetchGrades(selectedAcademicSemester);
     }
   }, [selectedAcademicSemester, activeTab, fetchGrades]);
+
+  // Initialize selected semesters when cumulative data is loaded
+  useEffect(() => {
+    if (cumulativeData && cumulativeData.semesters.length > 0 && selectedSemesters.length === 0) {
+      setSelectedSemesters(cumulativeData.semesters.map(s => s.semesterId));
+    }
+  }, [cumulativeData, selectedSemesters.length]);
+
+  // Handle click outside to close semester dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (isSemesterOpen && semesterRef.current && !semesterRef.current.contains(target)) {
+        setIsSemesterOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSemesterOpen]);
 
   const tabs = useMemo(() => [
     { id: 'basic', label: 'Thông tin cơ bản' },
@@ -277,18 +308,33 @@ export default function StudentDetailPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-green-50 rounded-lg p-6 border border-gray-200 relative">
           <div className="absolute top-4 right-4 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
             <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600 mb-2">GPA</p>
+          <p className="text-sm text-gray-600 mb-2">GPA hệ 4</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
             {studentData.averageGPA === null || studentData.averageGPA === undefined 
               ? '-' 
               : studentData.averageGPA.toFixed(2)}
+          </p>
+          <p className="text-xs text-gray-500">/4.0</p>
+        </div>
+
+        <div className="bg-purple-50 rounded-lg p-6 border border-gray-200 relative">
+          <div className="absolute top-4 right-4 w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <p className="text-sm text-gray-600 mb-2">GPA hệ 10</p>
+          <p className="text-4xl font-bold text-gray-900 mb-1">
+            {studentData.cumulativeGPA10 === null || studentData.cumulativeGPA10 === undefined 
+              ? '-' 
+              : studentData.cumulativeGPA10.toFixed(2)}
           </p>
           <p className="text-xs text-gray-500">/10.0</p>
         </div>
@@ -413,140 +459,140 @@ export default function StudentDetailPage() {
 
         {/* Academic Results Tab */}
         {activeTab === 'academic' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-6">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">Kết quả học tập</h2>
-                <p className="text-sm text-gray-600">Bảng điểm và kết quả học tập theo học kỳ</p>
+          <div className="space-y-6">
+            {loadingCumulative ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0053AD]"></div>
               </div>
-
-              {/* Semester Selector */}
-              <div className="mb-6">
-                <div className="w-80">
-                  <Dropdown
-                    options={semesters.map(s => ({
-                      value: s.semesterId,
-                      label: s.yearRange ? `${s.semesterName} - ${s.yearRange}` : s.semesterName,
-                    }))}
-                    value={selectedAcademicSemester}
-                    placeholder="Chọn học kì"
-                    onChange={(value) => setSelectedAcademicSemester(value)}
-                    disabled={loadingGrades || semesters.length === 0}
-                  />
+            ) : cumulativeError ? (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="text-center text-red-600">{cumulativeError}</div>
+              </div>
+            ) : !cumulativeData ? (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="text-center text-gray-600">Không có dữ liệu điểm</div>
+              </div>
+            ) : (
+              <>
+                {/* Semester Filter - Match Student Grades Style */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                  <div className="relative w-full" ref={semesterRef}>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Lọc theo học kỳ
+                    </label>
+                    <button
+                      type="button"
+                      className="w-full sm:w-80 flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none cursor-pointer transition-colors text-left"
+                      onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+                    >
+                      <span className="text-sm text-gray-900 truncate">
+                        {selectedSemesters.length === 0 
+                          ? "Chưa chọn học kỳ" 
+                          : selectedSemesters.length === 1
+                            ? cumulativeData.semesters.find(s => s.semesterId === selectedSemesters[0])?.semesterName
+                            : `${selectedSemesters.length} học kỳ đã chọn`
+                        }
+                      </span>
+                      <svg className={`w-4 h-4 text-gray-700 flex-shrink-0 ml-2 transition-transform ${isSemesterOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isSemesterOpen && (
+                      <div className="absolute z-50 mt-2 w-full sm:w-80 bg-white border border-gray-300 rounded-lg shadow-lg max-h-72 overflow-hidden">
+                        <div className="flex gap-2 p-2 border-b border-gray-200">
+                          <button
+                            type="button"
+                            className="flex-1 px-3 py-1.5 text-xs font-medium text-white rounded cursor-pointer transition-colors bg-[#0053AD] hover:bg-[#003d82]"
+                            onClick={() => {
+                              setSelectedSemesters(cumulativeData.semesters.map(s => s.semesterId));
+                            }}
+                          >
+                            Chọn tất cả
+                          </button>
+                          <button
+                            type="button"
+                            className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300 cursor-pointer transition-colors"
+                            onClick={() => setSelectedSemesters([])}
+                          >
+                            Bỏ chọn
+                          </button>
+                        </div>
+                        
+                        <div className="max-h-52 overflow-y-auto">
+                          {cumulativeData.semesters.map((semester) => {
+                            const isSelected = selectedSemesters.includes(semester.semesterId);
+                            return (
+                              <button
+                                key={semester.semesterId}
+                                type="button"
+                                className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-3 ${
+                                  isSelected
+                                    ? 'bg-blue-50 text-[#0053AD] font-medium'
+                                    : 'text-gray-900 hover:bg-gray-50'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedSemesters(prev => {
+                                    if (prev.includes(semester.semesterId)) {
+                                      return prev.filter(id => id !== semester.semesterId);
+                                    } else {
+                                      return [...prev, semester.semesterId];
+                                    }
+                                  });
+                                }}
+                              >
+                                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                                  isSelected 
+                                    ? 'bg-[#0053AD] border-[#0053AD]' 
+                                    : 'border-gray-300'
+                                }`}>
+                                  {isSelected && (
+                                    <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                  )}
+                                </div>
+                                <span>{semester.semesterName}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Grades Table */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <Table
-                  columns={[
-                    { key: 'subjectCode', label: 'Mã MH', align: 'left' },
-                    { key: 'subjectName', label: 'Tên môn học', align: 'left' },
-                    { key: 'credits', label: 'TC', align: 'center' },
-                    { key: 'finalGrade', label: 'Điểm thi', align: 'center' },
-                    { key: 'finalGrade10', label: 'TK (10)', align: 'center' },
-                    { key: 'finalGrade4', label: 'TK (4)', align: 'center' },
-                    { key: 'gradeLetter', label: 'TK (C)', align: 'center' },
-                    { key: 'status', label: 'Kết quả', align: 'center' },
-                    { key: 'details', label: 'Chi tiết', align: 'center' },
-                  ]}
-                  data={grades?.grades || []}
-                  isLoading={loadingGrades}
-                  emptyMessage="Không có dữ liệu điểm"
-                  className="border-0 rounded-none"
-                  renderRow={(grade) => (
-                    <>
-                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{grade.subjectCode}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{grade.subjectName}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">{grade.credits}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                        {grade.finalGrade === null ? '-' : grade.finalGrade.toFixed(1)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
-                        {grade.finalGrade10 === null ? '-' : grade.finalGrade10.toFixed(1)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
-                        {grade.finalGrade4.toFixed(1)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 text-center font-medium">
-                        {grade.gradeLetter || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`font-medium ${
-                          grade.status === 'Đạt' 
-                            ? 'text-green-600' 
-                            : 'text-red-600'
-                        }`}>
-                          {grade.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() => {
-                            setSelectedGrade(grade);
-                            setIsGradeModalOpen(true);
-                          }}
-                          className="p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                          title="Xem chi tiết"
-                        >
-                          <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </>
-                  )}
-                />
-
-                {/* Summary Section */}
-                {grades && (
-                  <div className="bg-gray-50 px-6 py-5 border-t border-gray-200">
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <span className="text-sm font-bold text-gray-900">
-                          Điểm trung bình tích lũy hệ 4: <span className="text-[#0053AD]">{grades.semesterGPA4.toFixed(2)}</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm font-bold text-gray-900">
-                          Điểm trung bình tích lũy hệ 10: <span className="text-[#0053AD]">{grades.semesterGPA10.toFixed(2)}</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm font-bold text-gray-900">
-                          Số tín chỉ tích lũy: <span className="text-[#0053AD]">
-                            {grades.grades.filter(g => g.status === 'Đạt').reduce((sum, g) => sum + g.credits, 0)}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-gray-900">Phân loại học lực học kỳ:</span>
-                        {(() => {
-                          if (!grades.semesterClassification) {
-                            return <span className="text-sm text-gray-500">-</span>;
+                {/* Semester Tables */}
+                <div className="space-y-6">
+                  {cumulativeData.semesters
+                    .filter(semester => selectedSemesters.includes(semester.semesterId))
+                    .map((semester) => (
+                      <AdminGradeSemesterTable
+                        key={semester.semesterId}
+                        semester={semester}
+                        onShowDetail={(courseCode, semesterId) => {
+                          const grade = semester.grades.find(g => g.subjectCode === courseCode);
+                          if (grade) {
+                            setSelectedGradeItem(grade);
+                            setIsGradeDetailModalOpen(true);
                           }
-                          
-                          const classificationMap: Record<string, string> = {
-                            'Xuất sắc': 'bg-gradient-to-r from-[#FF512F] to-[#DD2476]',
-                            'Giỏi': 'bg-gradient-to-r from-[#1FA2FF] to-[#12D8FA]',
-                            'Khá': 'bg-gradient-to-r from-[#56ab2f] to-[#a8e063]',
-                            'Trung bình': 'bg-gradient-to-r from-[#F7971E] to-[#FFD200]',
-                          };
-                          
-                          const bgClass = classificationMap[grades.semesterClassification] || 'bg-gradient-to-r from-[#ED213A] to-[#93291E]';
-                          
-                          return (
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${bgClass}`}>
-                              {grades.semesterClassification}
-                            </span>
-                          );
-                        })()}
-                      </div>
+                        }}
+                      />
+                    ))}
+                </div>
+
+                {selectedSemesters.length === 0 && (
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                    <div className="text-center text-gray-500">
+                      <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <p className="text-sm">Vui lòng chọn ít nhất một học kỳ để xem điểm</p>
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
 
@@ -723,6 +769,16 @@ export default function StudentDetailPage() {
           setSelectedGrade(null);
         }}
         grade={selectedGrade}
+      />
+
+      {/* Admin Grade Detail Modal */}
+      <AdminGradeDetailModal
+        isOpen={isGradeDetailModalOpen}
+        onClose={() => {
+          setIsGradeDetailModalOpen(false);
+          setSelectedGradeItem(null);
+        }}
+        grade={selectedGradeItem}
       />
     </div>
   );

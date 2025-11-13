@@ -146,6 +146,32 @@ export const GradeSemesterTable = ({
                 {stats.semesterCredits}
               </span>
             </div>
+            {(semesterInfo.semesterCreditsInCurriculum !== undefined || semesterInfo.semesterCreditsOutOfCurriculum !== undefined) && (
+              <div className="ml-4 space-y-1 mt-1">
+                {semesterInfo.semesterCreditsInCurriculum !== undefined && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] sm:text-xs text-gray-600 flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-gray-600 flex-shrink-0" />
+                      Trong CTDT:
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-700 ml-2">
+                      {semesterInfo.semesterCreditsInCurriculum}
+                    </span>
+                  </div>
+                )}
+                {semesterInfo.semesterCreditsOutOfCurriculum !== undefined && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] sm:text-xs text-gray-600 flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-gray-600 flex-shrink-0" />
+                      Ngoài CTDT:
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-700 ml-2">
+                      {semesterInfo.semesterCreditsOutOfCurriculum}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5 sm:space-y-2">

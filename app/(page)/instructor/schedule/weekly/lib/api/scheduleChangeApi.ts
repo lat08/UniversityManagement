@@ -97,7 +97,21 @@ export const checkScheduleChangeReportFile = async (scheduleChangeId: string): P
 };
 
 export const deleteScheduleChangeRequest = async (requestId: string): Promise<boolean> => {
-  await api.delete(`/v1/instructor-schedule/schedule-change-requests/${requestId}`);
-  return true;
+  try {
+    const response = await api.delete<ApiResponse<boolean>>(`/v1/instructor-schedule/schedule-change-requests/${requestId}`);
+    return response.data.data ?? true;
+  } catch (error: unknown) {
+    const apiError = error as { response?: { data?: { message?: string }; status?: number } };
+    if (apiError?.response?.data?.message) {
+      throw new Error(apiError.response.data.message);
+    }
+    if (apiError?.response?.status === 404) {
+      throw new Error('Không tìm thấy yêu cầu hoặc bạn không có quyền xóa.');
+    }
+    if (apiError?.response?.status === 400) {
+      throw new Error('Không thể xóa yêu cầu này. Yêu cầu có thể đã được duyệt hoặc từ chối.');
+    }
+    throw error;
+  }
 };
 

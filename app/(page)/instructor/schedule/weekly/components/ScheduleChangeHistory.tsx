@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { Trash2, Eye, Clock, CheckCircle, XCircle } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { vi } from "date-fns/locale"
-import { Dropdown, SearchInput } from "@/app/components/ui"
+import { Dropdown, SearchInput, ConfirmDialog } from "@/app/components/ui"
 import { Table, TableColumn } from "@/app/components/ui/table"
 import { useScheduleChangeRequests, useDeleteScheduleChangeRequest } from "../lib/hooks/useScheduleChange"
 import { ScheduleChangeDetailModal } from "./ScheduleChangeDetailModal"
@@ -55,6 +55,8 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [viewingItem, setViewingItem] = useState<AdminScheduleChangeRequestDto | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState<AdminScheduleChangeRequestDto | null>(null)
 
   // Fetch requests based on filterStatus (backend doesn't support semesterId filter)
   const { data: scheduleChangeRequests = [], isLoading, error, refetch } = useScheduleChangeRequests(filterStatus)
@@ -95,20 +97,33 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
     setViewingItem(null)
   }
 
-  const handleDelete = async (requestId: string) => {
-    const confirmed = window.confirm('Bạn có chắc muốn xóa yêu cầu đổi lịch này?')
-    if (!confirmed) return
+  const handleDeleteClick = (change: AdminScheduleChangeRequestDto) => {
+    setDeleteConfirmId(change.scheduleChangeRequestId)
+    setDeleteConfirmItem(change)
+  }
 
-    setDeletingId(requestId)
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return
+
+    setDeletingId(deleteConfirmId)
     try {
-      await deleteRequest.mutateAsync(requestId)
+      await deleteRequest.mutateAsync(deleteConfirmId)
       toast.success('Xóa yêu cầu thành công')
-      refetch()
-    } catch {
-      toast.error('Xóa yêu cầu thất bại')
+      await refetch()
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } }; message?: string }
+      const errorMessage = apiError?.response?.data?.message || apiError?.message || 'Xóa yêu cầu thất bại'
+      toast.error(errorMessage)
     } finally {
       setDeletingId(null)
+      setDeleteConfirmId(null)
+      setDeleteConfirmItem(null)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmId(null)
+    setDeleteConfirmItem(null)
   }
 
   const renderStatusBadge = (status: string) => {
@@ -167,7 +182,7 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
           
           {change.status === 'pending' && (
             <button
-              onClick={() => handleDelete(change.scheduleChangeRequestId)}
+              onClick={() => handleDeleteClick(change)}
               disabled={deletingId === change.scheduleChangeRequestId}
               className="p-2 rounded-md cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Xóa yêu cầu"
@@ -249,6 +264,22 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
         isOpen={isDetailModalOpen}
         onClose={handleCloseDetailModal}
         data={viewingItem}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Xác nhận xóa yêu cầu đổi lịch"
+        description={
+          deleteConfirmItem
+            ? `Bạn có chắc muốn xóa yêu cầu đổi lịch cho môn "${deleteConfirmItem.subjectName}" (${deleteConfirmItem.subjectCode})? Hành động này không thể hoàn tác.`
+            : 'Bạn có chắc muốn xóa yêu cầu đổi lịch này?'
+        }
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="danger"
+        isLoading={deletingId === deleteConfirmId}
       />
     </div>
   )
