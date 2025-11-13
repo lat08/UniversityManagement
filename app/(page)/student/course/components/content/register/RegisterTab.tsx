@@ -259,9 +259,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
               checked={isSelected}
               onChange={(e) => handleSelectCourse(course, e.target.checked)}
               disabled={isDisabled}
-              disabled={isDisabled}
               className={`w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] ${
-                isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                 isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
               }`}
               title={checkboxState.reason || ''}
@@ -269,30 +267,23 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
           </div>
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {course.subjectCode}
         </td>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {course.subjectName}
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
           {course.instructorName}
         </td>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {course.credits}
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {course.maxStudents}
         </td>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
           {remaining}
         </td>
-        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
         <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
           {formatSchedule(course)}
           {isDisabled && checkboxState.reason && (
@@ -306,7 +297,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative">
       {/* Loading overlay khi đang đăng ký */}
-      {isRegisteringAny && (
+      {(isRegistering || isBulkRegistering) && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-lg">
           <div className="flex flex-col items-center gap-3">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
@@ -477,7 +468,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
                           }}
                           onClick={(e) => {
                             // Chặn click vào row nếu môn không cho phép đăng ký
-                            if (isNotAvailable) {
+                            if (isDisabled) {
                               e.preventDefault()
                               e.stopPropagation()
                             }

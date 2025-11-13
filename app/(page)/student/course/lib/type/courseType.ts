@@ -13,6 +13,7 @@ export interface WeeklyScheduleDto {
 export interface CourseDto {
   courseId: string;           // Guid (string trong JS)
   enrollmentId?: string;      // ID enrollment (cho registered courses)
+  enrollmentDate?: string;    // Ngày đăng ký (cho registered courses)
   subjectName: string;
   subjectCode: string;
   credits: number;
