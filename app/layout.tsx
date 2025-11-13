@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body className="font-sans">
+      <body className="font-sans" suppressHydrationWarning>
         <AppProviders>
           <Suspense fallback={null}>
             {children}

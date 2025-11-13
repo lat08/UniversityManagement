@@ -362,7 +362,7 @@ export const ScheduleChangeModal = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Đề xuất đổi lịch dạy</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 mt-1 line-clamp-2 overflow-hidden max-w-[400px]" title={`Môn: ${subjectName} (${subjectCode})`}>
                 Môn: {subjectName} ({subjectCode})
               </p>
             </div>

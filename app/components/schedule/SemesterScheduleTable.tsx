@@ -178,8 +178,10 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
                     <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
                       {course.subjectCode}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200">
+                    <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 max-w-[200px]">
+                      <div className="line-clamp-2 overflow-hidden" title={course.subjectName}>
                       {course.subjectName}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-center text-gray-900 border-r border-gray-200">
                       {course.courseGroup || '-'}

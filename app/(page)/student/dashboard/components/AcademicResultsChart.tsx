@@ -319,6 +319,15 @@ const AcademicResultsChart = memo(({ semesters, semesterId }: SemesterChartData)
               return;
             }
 
+            // Chỉ hiển thị tooltip cho cột chính (dataset index 0)
+            const datasetIndex = tooltipModel.dataPoints[0]?.datasetIndex;
+            if (datasetIndex !== 0) {
+              if (tooltipRef.current) {
+                tooltipRef.current.style.opacity = "0";
+              }
+              return;
+            }
+
             const index = tooltipModel.dataPoints[0]?.dataIndex;
             if (index === undefined || !semester?.courses) return;
 

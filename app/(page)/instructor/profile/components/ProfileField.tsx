@@ -47,10 +47,11 @@ export const ProfileField = memo<ProfileFieldProps>(({
           onChange={handleChange}
           placeholder={placeholder}
           disabled={!editable}
+          readOnly={!editable}
           className={`w-full px-4 py-3 text-sm rounded-lg transition-all
             ${editable 
               ? 'text-gray-700 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent' 
-              : 'text-gray-700 bg-gray-50 border border-gray-200 cursor-not-allowed'
+              : 'text-gray-700 bg-gray-50 border border-gray-200 cursor-not-allowed opacity-75'
             }`}
         />
       )}

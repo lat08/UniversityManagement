@@ -57,9 +57,9 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
           <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
             <AvatarFallback className="bg-gray-200 text-gray-600 text-xs lg:text-sm">{initials}</AvatarFallback>
           </Avatar>
-          <div className="hidden sm:flex flex-col">
-            <span className="text-sm font-medium">{displayName}</span>
-            <span className="text-xs text-gray-500">{roleLabel}</span>
+          <div className="hidden sm:flex flex-col min-w-0 max-w-[150px]">
+            <span className="text-sm font-medium truncate" title={displayName}>{displayName}</span>
+            <span className="text-xs text-gray-500 truncate" title={roleLabel}>{roleLabel}</span>
           </div>
         </button>
       </div>

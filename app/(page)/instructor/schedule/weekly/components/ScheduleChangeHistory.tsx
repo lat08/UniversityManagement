@@ -160,8 +160,8 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
       <td className="px-6 py-4">
         <div className="font-medium text-gray-900">{change.subjectCode}</div>
       </td>
-      <td className="px-6 py-4">
-        <div className="text-sm text-gray-900">{change.subjectName}</div>
+      <td className="px-6 py-4 max-w-[250px]">
+        <div className="text-sm text-gray-900 line-clamp-2 overflow-hidden" title={change.subjectName}>{change.subjectName}</div>
       </td>
       <td className="px-6 py-4 text-center">
         <span className="font-medium text-gray-900">Tuần {change.cancelledWeek}</span>

@@ -55,7 +55,6 @@ export default function EditStudentPage() {
   const genders = [
     { value: 'male', label: 'Nam' },
     { value: 'female', label: 'Nữ' },
-    { value: 'other', label: 'Khác' },
   ];
 
   const tabs = [
@@ -268,11 +267,66 @@ export default function EditStudentPage() {
     fileInputRef.current?.click();
   };
 
+  const handleFullNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Giới hạn 40 ký tự, chỉ cho nhập chữ cái và khoảng trắng
+    const onlyLettersAndSpaces = value.replace(/[^a-zA-ZÀ-ỿ\s]/g, '');
+    if (onlyLettersAndSpaces.length <= 40) {
+      setFormData({ ...formData, fullName: onlyLettersAndSpaces });
+    }
+  };
+
+  const handleCitizenIdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Chỉ cho nhập số, tối đa 12 ký tự
+    const onlyNumbers = value.replace(/[^0-9]/g, '');
+    if (onlyNumbers.length <= 12) {
+      setFormData({ ...formData, citizenId: onlyNumbers });
+    }
+  };
+
+  const handlePhoneNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Chỉ cho nhập số, tối đa 11 ký tự
+    const onlyNumbers = value.replace(/[^0-9]/g, '');
+    if (onlyNumbers.length <= 11) {
+      setFormData({ ...formData, phoneNumber: onlyNumbers });
+    }
+  };
+
+  const handleAddressChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    // Giới hạn 255 ký tự
+    if (value.length <= 255) {
+      setFormData({ ...formData, address: value });
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.fullName.trim()) {
       toast.error('Vui lòng nhập họ và tên');
+      return;
+    }
+
+    if (formData.fullName.trim().length > 40) {
+      toast.error('Họ và tên không được vượt quá 40 ký tự');
+      return;
+    }
+
+    if (formData.citizenId && (formData.citizenId.length < 9 || formData.citizenId.length > 12)) {
+      toast.error('CMND/CCCD phải từ 9-12 số');
+      return;
+    }
+
+    if (formData.phoneNumber && (formData.phoneNumber.length < 10 || formData.phoneNumber.length > 11)) {
+      toast.error('Số điện thoại phải từ 10-11 số');
+      return;
+    }
+
+    if (formData.address && formData.address.trim().length < 5) {
+      toast.error('Địa chỉ phải trên 5 ký tự');
       return;
     }
 
@@ -451,12 +505,18 @@ export default function EditStudentPage() {
                       <label className="block text-sm font-medium text-gray-900 mb-2">
                         Họ và tên <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.fullName}
+                          onChange={handleFullNameChange}
+                          maxLength={40}
+                          className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                        />
+                        <div className="absolute right-3 top-2.5 text-xs text-gray-500">
+                          {formData.fullName.length}/40
+                        </div>
+                      </div>
                     </div>
 
                     {/* Ngày sinh */}
@@ -531,12 +591,20 @@ export default function EditStudentPage() {
                       <label className="block text-sm font-medium text-gray-900 mb-2">
                         CMND / CCCD
                       </label>
-                      <input
-                        type="text"
-                        value={formData.citizenId}
-                        onChange={(e) => setFormData({ ...formData, citizenId: e.target.value })}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.citizenId}
+                          onChange={handleCitizenIdChange}
+                          maxLength={12}
+                          placeholder="9-12 số"
+                          className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                        />
+                        <div className="absolute right-3 top-2.5 text-xs text-gray-500">
+                          {formData.citizenId.length}/12
+                        </div>
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">Chỉ nhập số, từ 9-12 ký tự</p>
                     </div>
                   </div>
                 </div>
@@ -571,12 +639,20 @@ export default function EditStudentPage() {
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Số điện thoại
                     </label>
-                    <input
-                      type="tel"
-                      value={formData.phoneNumber}
-                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formData.phoneNumber}
+                        onChange={handlePhoneNumberChange}
+                        maxLength={11}
+                        placeholder="10-11 số"
+                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
+                      />
+                      <div className="absolute right-3 top-2.5 text-xs text-gray-500">
+                        {formData.phoneNumber.length}/11
+                      </div>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Chỉ nhập số, từ 10-11 ký tự</p>
                   </div>
 
                   {/* Địa chỉ - Full width */}
@@ -584,13 +660,20 @@ export default function EditStudentPage() {
                     <label className="block text-sm font-medium text-gray-900 mb-2">
                       Địa chỉ
                     </label>
-                    <textarea
-                      rows={3}
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Nhập địa chỉ đầy đủ"
-                      className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent resize-none"
-                    />
+                    <div className="relative">
+                      <textarea
+                        rows={3}
+                        value={formData.address}
+                        onChange={handleAddressChange}
+                        maxLength={255}
+                        placeholder="Nhập địa chỉ đầy đủ (tối thiểu 5 ký tự)"
+                        className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent resize-none"
+                      />
+                      <div className="absolute right-3 bottom-2 text-xs text-gray-500">
+                        {formData.address.length}/255
+                      </div>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Tối thiểu 5 ký tự, tối đa 255 ký tự</p>
                   </div>
                 </div>
               </div>

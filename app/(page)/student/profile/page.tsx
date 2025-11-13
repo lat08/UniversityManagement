@@ -43,47 +43,47 @@ const ProfileInfo = memo(({ profile }: { profile: StudentProfile }) => {
               <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên</label>
-            <Input value={profile.fullName} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.fullName} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mã số sinh viên</label>
-            <Input value={profile.studentCode} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.studentCode} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
-            <Input value={formatGender(profile.gender)} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={formatGender(profile.gender)} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
-            <Input value={formatDate(profile.dateOfBirth)} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={formatDate(profile.dateOfBirth)} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <Input value={profile.email} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.email} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">CMND / CCCD</label>
-            <Input value={profile.citizenId || '-'} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.citizenId || '-'} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Ngành học</label>
-            <Input value={profile.departmentName} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.departmentName} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Chuyên ngành</label>
-            <Input value={profile.facultyName} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.facultyName} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Lớp</label>
-            <Input value={profile.className} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.className} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
@@ -91,18 +91,19 @@ const ProfileInfo = memo(({ profile }: { profile: StudentProfile }) => {
             <Input
               value={formatEnrollmentStatus(profile.enrollmentStatus)}
               readOnly
-              className="bg-gray-50 border-gray-200 text-gray-700"
+              disabled
+              className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Bậc hệ đào tạo</label>
-            <Input value={profile.educationLevel} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.educationLevel} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Niên khóa</label>
-            <Input value={profile.academicYear} readOnly className="bg-gray-50 border-gray-200 text-gray-700" />
+            <Input value={profile.academicYear} readOnly disabled className="bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed opacity-75" />
                   </div>
               </div>
             </div>
@@ -114,8 +115,9 @@ const ProfileInfo = memo(({ profile }: { profile: StudentProfile }) => {
           <textarea
             value={profile.address || 'Chưa cập nhật'}
             readOnly
+            disabled
             rows={3}
-            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm resize-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 cursor-text"
+            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm resize-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 cursor-not-allowed opacity-75"
           />
             </div>
           </div>

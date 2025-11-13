@@ -19,11 +19,10 @@ interface ProfileContentProps {
   profile: InstructorProfile
   updating: boolean
   updateError: string | null
-  onAvatarChange: (file: File) => Promise<boolean>
   onChangePassword: (payload: ChangePasswordPayload) => Promise<boolean>
 }
 
-const ProfileContent = memo(({ profile, updating, updateError, onAvatarChange, onChangePassword }: ProfileContentProps) => {
+const ProfileContent = memo(({ profile, updating, updateError, onChangePassword }: ProfileContentProps) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')
 
   const genderDisplay = useMemo(() => {
@@ -73,11 +72,6 @@ const ProfileContent = memo(({ profile, updating, updateError, onAvatarChange, o
                   profilePicture={profile.profilePicture}
                   fullName={profile.fullName}
                   role={profile.role}
-                  editable
-                  onAvatarChange={async (file) => {
-                    await onAvatarChange(file)
-                  }}
-                  loading={updating}
                 />
               </div>
 
@@ -187,7 +181,6 @@ export default function InstructorProfilePage() {
       profile={profile}
       updating={updating}
       updateError={updateError}
-      onAvatarChange={updateAvatar}
       onChangePassword={changePassword}
     />
   )

@@ -201,7 +201,7 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
                           onMouseLeave={onCourseLeave}
                           onClick={(e) => handleCourseClick(course.id, e)}
                         >
-                          <div className="text-sm font-bold uppercase leading-tight mb-1.5 text-gray-900">
+                          <div className="text-sm font-bold uppercase leading-tight mb-1.5 text-gray-900 line-clamp-2 overflow-hidden" title={course.name}>
                             {course.name}
                           </div>
                           <div className="space-y-0.5 text-[11px] text-gray-900">
