@@ -212,6 +212,29 @@ EOF
                 }
             }
         }
+        stage('Deploy to Load Balancing') {
+            steps {
+                sh '''#!/usr/bin/env bash
+                    set -euxo pipefail
+
+                    INSTANCE_HOST="um@34.142.130.206"
+                    INSTANCE_DEPLOY_DIR="/data/um/UniversityManagement/frontend"
+
+                    echo "--- Create deploy dir on instance (if not exists) ---"
+                    ssh "$INSTANCE_HOST" "mkdir -p '$INSTANCE_DEPLOY_DIR'"
+
+                    echo "--- Rsync from github-server DEPLOY_DIR to instance ---"
+                    rsync -az --delete "$DEPLOY_DIR"/ "$INSTANCE_HOST":"$INSTANCE_DEPLOY_DIR"/
+
+                    echo "--- Restart um-frontend.service on instance ---"
+                    ssh "$INSTANCE_HOST" "sudo systemctl daemon-reload || true"
+                    ssh "$INSTANCE_HOST" "sudo systemctl restart um-frontend.service"
+
+                    echo "--- Instance service status ---"
+                    ssh "$INSTANCE_HOST" "sudo systemctl --no-pager -l status um-frontend.service || true"
+                '''
+            }
+        }
     }
 }
 

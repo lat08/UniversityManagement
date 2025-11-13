@@ -53,7 +53,6 @@ export function NotificationCard({ notification, onNotificationClick, initialExp
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
   const [isHighlighted, setIsHighlighted] = useState(initialExpanded)
   const cardRef = useRef<HTMLDivElement>(null)
-  const scrolledRef = useRef(false)
   const typeConfig = notificationTypeConfig[notification.notificationType as keyof typeof notificationTypeConfig] ?? defaultTypeConfig
   const Icon = iconMap[notification.notificationType as keyof typeof iconMap] ?? AlertTriangle
 
