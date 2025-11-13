@@ -54,11 +54,38 @@ export interface CourseCardProps extends CourseDto {
 
 export interface AvailableCoursesProps {
   // Bỏ courses: CourseDto[] vì component AvailableCourses tự fetch
-  onRegisterClick: (courseId: string) => void // Callback cho hành động Đăng ký
+  onRegisterClick: (courseId: string) => void // Callback cho hành động Đăng ký đơn lẻ
+  onBulkRegisterClick?: (courseIds: string[]) => Promise<void> // Callback cho hành động Đăng ký nhiều môn
+  isRegistering?: boolean // Trạng thái đang đăng ký đơn lẻ
+  isBulkRegistering?: boolean // Trạng thái đang đăng ký nhiều môn
 }
 
 export interface RegisteredCoursesProps {
   courses: CourseDto[]
   loading: boolean // <-- THÊM: prop loading
   onCancelClick: (courseId: string, courseName: string) => void // Callback cho hành động Hủy
+}
+
+// Types for bulk enrollment result
+export interface EnrollmentErrorDto {
+  courseId: string;
+  errorMessage: string;
+}
+
+export interface EnrollmentResultDto {
+  enrollmentId: string;
+  studentId: string;
+  courseId: string;
+  subjectName: string;
+  subjectCode: string;
+  credits: number;
+  enrollmentDate: string;
+  status: string;
+}
+
+export interface BulkEnrollmentResult {
+  successCount: number;
+  failedCount: number;
+  successResults: EnrollmentResultDto[];
+  failedResults: EnrollmentErrorDto[];
 }

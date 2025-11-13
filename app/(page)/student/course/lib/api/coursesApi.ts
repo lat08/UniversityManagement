@@ -1,6 +1,6 @@
 // Path: lib/api/coursesApi.ts
 import { api } from "@/lib/api/client" // Giả sử client.ts là file cấu hình Axios
-import { CourseDto, PaginatedResponse } from "../type/courseType"
+import { CourseDto, PaginatedResponse, BulkEnrollmentResult } from "../type/courseType"
 
 export interface GetAvailableCoursesParams {
     pageNumber?: number;
@@ -73,5 +73,16 @@ export const coursesApi = {
     // POST: /v1/enrollments/unenroll (Truyền courseId qua body)
     cancelRegistration: async (courseId: string): Promise<void> => {
         await api.post(`/v1/enrollments/unenroll`, { courseId: courseId });
+    },
+    // POST: /v1/enrollments/enroll/bulk (Đăng ký nhiều môn cùng lúc)
+    registerCoursesBulk: async (courseIds: string[]): Promise<BulkEnrollmentResult> => {
+        const response = await api.post(`/v1/enrollments/enroll/bulk`, { courseIds });
+        const data = response.data?.data;
+        return {
+            successCount: data?.successCount ?? 0,
+            failedCount: data?.failureCount ?? 0, // Backend dùng FailureCount (chữ F hoa)
+            successResults: data?.successResults ?? [],
+            failedResults: data?.failureResults ?? []
+        };
     },
 }

@@ -13,6 +13,8 @@ import { vi } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import toast from 'react-hot-toast';
 import { getRoomAvailability } from '../lib/api/rooms.api';
+import { commonApi } from '@/lib/api/common';
+import type { Semester } from '@/lib/types/common';
 import { 
   ROOM_STATUS_LABELS, 
   ROOM_STATUS_COLORS,
@@ -59,6 +61,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [studentCount, setStudentCount] = useState<number>(1);
   const [availability, setAvailability] = useState<RoomAvailability | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState<boolean>(false);
+  const [currentSemester, setCurrentSemester] = useState<Semester | null>(null);
+  const [loadingSemester, setLoadingSemester] = useState<boolean>(true);
   
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +99,43 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
+
+  // Load current semester on mount
+  useEffect(() => {
+    const loadCurrentSemester = async () => {
+      setLoadingSemester(true);
+      try {
+        const response = await commonApi.getSemesters();
+        if (response.success && response.data) {
+          const now = new Date();
+          // Tìm học kỳ hiện tại (ngày hiện tại nằm trong khoảng startDate và endDate)
+          const activeSemester = response.data.find(semester => {
+            if (!semester.startDate || !semester.endDate) return false;
+            const startDate = new Date(semester.startDate);
+            const endDate = new Date(semester.endDate);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            return now >= startDate && now <= endDate;
+          });
+          
+          if (activeSemester) {
+            setCurrentSemester(activeSemester);
+          } else {
+            toast.error('Không tìm thấy học kỳ hiện tại. Vui lòng liên hệ quản trị viên.');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading semester:', error);
+        toast.error('Không thể tải thông tin học kỳ');
+      } finally {
+        setLoadingSemester(false);
+      }
+    };
+
+    if (isOpen) {
+      loadCurrentSemester();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -137,6 +178,22 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     
     if (selectedDate < today) {
       toast.error('Ngày đặt phòng không được trong quá khứ');
+      return;
+    }
+
+    // Kiểm tra ngày đặt phòng phải trong khoảng thời gian học kỳ hiện tại
+    if (currentSemester) {
+      const semesterStartDate = new Date(currentSemester.startDate);
+      const semesterEndDate = new Date(currentSemester.endDate);
+      semesterStartDate.setHours(0, 0, 0, 0);
+      semesterEndDate.setHours(23, 59, 59, 999);
+      
+      if (selectedDate < semesterStartDate || selectedDate > semesterEndDate) {
+        toast.error(`Ngày đặt phòng phải trong khoảng thời gian học kỳ hiện tại (${format(semesterStartDate, 'dd/MM/yyyy')} - ${format(semesterEndDate, 'dd/MM/yyyy')})`);
+        return;
+      }
+    } else if (!loadingSemester) {
+      toast.error('Không thể xác định học kỳ hiện tại. Vui lòng thử lại sau.');
       return;
     }
 
@@ -395,19 +452,42 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
           {/* Booking Date */}
           <div className="relative">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Ngày sử dụng
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Ngày sử dụng
+              </h3>
+              {currentSemester && (
+                <span className="text-xs text-gray-500">
+                  Học kỳ: {currentSemester.semesterName}
+                </span>
+              )}
+            </div>
+            {loadingSemester && (
+              <p className="text-sm text-amber-600 mb-2">
+                Đang tải thông tin học kỳ...
+              </p>
+            )}
+            {!loadingSemester && !currentSemester && (
+              <p className="text-sm text-red-600 mb-2">
+                ⚠️ Không tìm thấy học kỳ hiện tại. Vui lòng liên hệ quản trị viên.
+              </p>
+            )}
+            {currentSemester && (
+              <p className="text-sm text-gray-600 mb-2">
+                Chỉ có thể đặt phòng trong khoảng: {format(new Date(currentSemester.startDate), 'dd/MM/yyyy')} - {format(new Date(currentSemester.endDate), 'dd/MM/yyyy')}
+              </p>
+            )}
             <div className="relative">
               <input
                 type="text"
                 value={dateInputValue}
                 onChange={(e) => handleDateInputChange(e.target.value)}
                 onFocus={() => setShowCalendar(true)}
-                placeholder="dd/mm/yyyy"
+                placeholder={loadingSemester ? "Đang tải..." : !currentSemester ? "Không có học kỳ" : "dd/mm/yyyy"}
                 maxLength={10}
-                className="w-full p-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white"
+                disabled={loadingSemester || !currentSemester}
+                className="w-full p-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
                 onKeyDown={(e) => {
                   if (!/[0-9/]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
                     e.preventDefault();
@@ -432,7 +512,10 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   mode="single"
                   selected={bookingDate}
                   onSelect={handleCalendarSelect}
-                  disabled={{ before: new Date() }}
+                  disabled={{
+                    before: new Date(),
+                    after: currentSemester ? new Date(currentSemester.endDate) : undefined,
+                  }}
                   locale={vi}
                   classNames={{
                     day_selected: 'bg-[#4E8EE1] text-white',

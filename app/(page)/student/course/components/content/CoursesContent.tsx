@@ -32,6 +32,8 @@ const tabs = [
 
 function CoursesContent() {
   const [activeTab, setActiveTab] = useState<"registered" | "available">("registered")
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [isBulkRegistering, setIsBulkRegistering] = useState(false)
   
   // 1. SỬ DỤNG HOOKS ĐỂ FETCH DỮ LIỆU THỰC TỪ BE
   const { refetch: refetchAvailable } = useAvailableCourses();
@@ -101,13 +103,56 @@ function CoursesContent() {
 
   // 5. XỬ LÝ ĐĂNG KÝ (GỌI API ENROLL)
   const handleRegisterClick = async (courseId: string) => { 
+    setIsRegistering(true)
     try {
         await coursesApi.registerCourse(courseId);
         refreshAllData();
         toast.success("Đăng ký môn học thành công!", { duration: 4000 });
     } catch (error: unknown) {
         const message = getErrorMessage(error, "Đăng ký môn học thất bại. Vui lòng kiểm tra kết nối.");
-        toast.error(message);
+        toast.error(message, { duration: 5000 });
+    } finally {
+        setIsRegistering(false)
+    }
+  }
+
+  // 6. XỬ LÝ BULK ĐĂNG KÝ (GỌI API BULK ENROLL)
+  const handleBulkRegisterClick = async (courseIds: string[]) => {
+    if (courseIds.length === 0) return;
+    
+    setIsBulkRegistering(true)
+    try {
+      const result = await coursesApi.registerCoursesBulk(courseIds);
+      refreshAllData();
+      
+      // Hiển thị toast tổng hợp với thông báo lỗi chi tiết
+      if (result.successCount > 0 && result.failedCount === 0) {
+        toast.success(`Đã đăng ký thành công ${result.successCount} môn học!`, { duration: 4000 });
+      } else if (result.successCount > 0 && result.failedCount > 0) {
+        // Hiển thị lỗi chi tiết cho từng môn thất bại
+        const errorMessages = result.failedResults
+          .map((err) => err.errorMessage || 'Lỗi không xác định')
+          .join(', ');
+        
+        toast.success(
+          `Đã đăng ký thành công ${result.successCount} môn học. ${result.failedCount} môn học đăng ký thất bại: ${errorMessages}`, 
+          { duration: 6000 }
+        );
+      } else {
+        // Tất cả đều thất bại - hiển thị tất cả lỗi
+        const errorMessages = result.failedResults
+          .map((err) => err.errorMessage || 'Lỗi không xác định')
+          .join(', ');
+        toast.error(
+          `Đăng ký thất bại. Chi tiết lỗi: ${errorMessages}`, 
+          { duration: 6000 }
+        );
+      }
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Đăng ký môn học thất bại. Vui lòng kiểm tra kết nối.");
+      toast.error(message, { duration: 5000 });
+    } finally {
+      setIsBulkRegistering(false)
     }
   }
 
@@ -154,7 +199,12 @@ function CoursesContent() {
       ) : (
         // Hiển thị Môn học có sẵn để đăng ký
         // Component AvailableCourses tự fetch loading/error bên trong
-        <AvailableCourses onRegisterClick={handleRegisterClick} />
+        <AvailableCourses 
+          onRegisterClick={handleRegisterClick} 
+          onBulkRegisterClick={handleBulkRegisterClick}
+          isRegistering={isRegistering}
+          isBulkRegistering={isBulkRegistering}
+        />
       )}
 
       {/* Dialog Xác nhận Hủy */}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useMemo, useCallback, useEffect } from "react"
 import { Plus, X } from "lucide-react"
 import { Pagination } from "@/app/components/ui/pagination"
 import { Button } from "@/app/components/ui"
@@ -11,7 +11,7 @@ import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import CourseFilters from "./CourseFilters"
 
-export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
+export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegistering = false, isBulkRegistering = false }: AvailableCoursesProps) {
   const { courses, loading, error, pagination, goToPage } = useAvailableCourses()
   const selectedCourseIds = useCourseFiltersStore((state) => state.selectedCourseIds)
   const selectedCoursesCache = useCourseFiltersStore((state) => state.selectedCoursesCache)
@@ -19,7 +19,6 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   const addSelectedCourse = useCourseFiltersStore((state) => state.addSelectedCourse)
   const removeSelectedCourseId = useCourseFiltersStore((state) => state.removeSelectedCourseId)
   const clearSelectedCourseIds = useCourseFiltersStore((state) => state.clearSelectedCourseIds)
-  const [isBulkRegistering, setIsBulkRegistering] = useState(false)
 
   console.log('📊 RegisterTab render:', {
     coursesType: typeof courses,
@@ -119,14 +118,21 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
   const handleBulkRegister = useCallback(async () => {
     if (selectedCourseIds.size === 0) return
     
-    setIsBulkRegistering(true)
     try {
-      await Promise.all(Array.from(selectedCourseIds).map(id => onRegisterClick(id)))
-      clearSelectedCourseIds()
-    } finally {
-      setIsBulkRegistering(false)
+      // Nếu có onBulkRegisterClick, dùng API bulk để tránh spam toast
+      if (onBulkRegisterClick) {
+        await onBulkRegisterClick(Array.from(selectedCourseIds))
+        clearSelectedCourseIds()
+      } else {
+        // Fallback: gọi từng API riêng lẻ (sẽ có nhiều toast)
+        await Promise.all(Array.from(selectedCourseIds).map(id => onRegisterClick(id)))
+        clearSelectedCourseIds()
+      }
+    } catch (error) {
+      // Error đã được xử lý trong onBulkRegisterClick hoặc onRegisterClick
+      console.error('Error in bulk register:', error)
     }
-  }, [selectedCourseIds, onRegisterClick, clearSelectedCourseIds])
+  }, [selectedCourseIds, onRegisterClick, onBulkRegisterClick, clearSelectedCourseIds])
 
   const formatSchedule = useCallback((course: CourseDto) => {
     if (!course.weeklySchedules || course.weeklySchedules.length === 0) {
@@ -242,8 +248,21 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
     )
   }, [selectedCourseIds, handleSelectCourse, formatSchedule, getRemainingSlots, isConflictWithSelected])
 
+  const isRegisteringAny = isRegistering || isBulkRegistering
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative">
+      {/* Loading overlay khi đang đăng ký */}
+      {isRegisteringAny && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="text-sm text-gray-600 font-medium">
+              {isBulkRegistering ? 'Đang đăng ký nhiều môn học...' : 'Đang đăng ký môn học...'}
+            </p>
+          </div>
+        </div>
+      )}
       <div className="px-6 py-4 border-b border-gray-200">
         {/* Filters Component */}
         <CourseFilters />
@@ -258,12 +277,21 @@ export function AvailableCourses({ onRegisterClick }: AvailableCoursesProps) {
             <div className="flex items-center gap-2">
               <Button
                 onClick={handleBulkRegister}
-                disabled={isBulkRegistering}
-                className="bg-[#0053AD] hover:bg-[#003d82] text-white"
+                disabled={isBulkRegistering || isRegistering}
+                className="bg-[#0053AD] hover:bg-[#003d82] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 size="sm"
               >
-                <Plus className="w-4 h-4" />
-                Đăng ký
+                {isBulkRegistering ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    Đang đăng ký...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Đăng ký
+                  </>
+                )}
               </Button>
               <Button
                 variant="outline"
