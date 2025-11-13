@@ -127,7 +127,6 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
   const genders = [
     { value: 'male', label: 'Nam' },
     { value: 'female', label: 'Nữ' },
-    { value: 'other', label: 'Khác' },
   ];
 
   const genderOptions = genders.map(g => ({ value: g.value, label: g.label }));
