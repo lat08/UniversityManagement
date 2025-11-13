@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, memo } from 'react';
+import Image from 'next/image';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
@@ -28,7 +29,18 @@ const RoomImage = memo(({ src, alt }: { src: string | null; alt: string }) => {
     }
   };
 
-  if (!src || !isValidUrl(src) || imageError) {
+  const getImageSrc = (url: string | null): string => {
+    if (!url) return '';
+    if (isValidUrl(url)) {
+      return url;
+    }
+    if (url.startsWith('/')) {
+      return url;
+    }
+    return `/${url}`;
+  };
+
+  if (!src || imageError) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-50">
         <Monitor className="h-20 w-20 text-blue-200" />
@@ -36,13 +48,17 @@ const RoomImage = memo(({ src, alt }: { src: string | null; alt: string }) => {
     );
   }
 
+  const imageSrc = getImageSrc(src);
+
   return (
-    <img
-      src={src}
+    <Image
+      src={imageSrc}
       alt={alt}
-      className="w-full h-full object-cover"
+      fill
+      className="object-cover"
       onError={() => setImageError(true)}
-      loading="lazy"
+      unoptimized={isValidUrl(src)}
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
     />
   );
 });

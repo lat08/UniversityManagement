@@ -8,7 +8,7 @@ import { ExamsSkeleton } from "./ExamsSkeleton";
 import { useExamEntries } from "../lib/hooks/useExamEntries";
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { useExamFilters } from "../lib/hooks/useExamFilters";
-import { UpdateExamRequest } from "../lib/types";
+import { UpdateExamRequest, ExamEntry } from "../lib/types";
 import { Pagination } from "@/app/components/ui/pagination";
 import { DEFAULT_PAGE_SIZE } from "../lib/constants";
 
