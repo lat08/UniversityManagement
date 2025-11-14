@@ -2,9 +2,6 @@ export interface DashboardStats {
   id: string;
   title: string;
   value: number;
-  icon: string;
-  change?: string;
-  changeType?: 'increase' | 'decrease';
   description?: string;
   color: 'green' | 'blue' | 'red' | 'orange';
 }
@@ -13,9 +10,7 @@ export interface PendingTask {
   id: string;
   title: string;
   description: string;
-  icon: string;
-  count?: number;
-  priority?: 'low' | 'medium' | 'high';
+  link?: string;
 }
 
 export interface RecentUpdate {
@@ -23,7 +18,7 @@ export interface RecentUpdate {
   title: string;
   description: string;
   timestamp: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  link?: string;
 }
 
 export interface QuickAction {

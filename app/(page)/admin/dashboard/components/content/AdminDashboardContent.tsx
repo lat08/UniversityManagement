@@ -102,28 +102,28 @@ export default function AdminDashboardContent() {
     {
       id: '1',
       title: 'Thêm người dùng',
-      icon: '👤',
+      icon: 'user-plus',
       action: () => console.log('Thêm người dùng'),
       color: 'primary',
     },
     {
       id: '2',
       title: 'Mở lớp học',
-      icon: '📚',
+      icon: 'book-open',
       action: () => console.log('Mở lớp học'),
       color: 'secondary',
     },
     {
       id: '3',
       title: 'Công bố thời khóa biểu',
-      icon: '📅',
+      icon: 'calendar',
       action: () => console.log('Công bố TKB'),
       color: 'success',
     },
     {
       id: '4',
       title: 'Gửi thông báo',
-      icon: '📧',
+      icon: 'bell',
       action: () => console.log('Gửi thông báo'),
       color: 'warning',
     },
@@ -159,7 +159,6 @@ export default function AdminDashboardContent() {
                 <PendingTaskCard
                   key={task.id}
                   task={task}
-                  onClick={() => console.log('Navigate to', task.title)}
                 />
               ))}
             </div>
