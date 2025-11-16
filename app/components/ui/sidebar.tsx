@@ -64,7 +64,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
       {
         title: "QUẢN LÝ ĐÀO TẠO",
         items: [
-          { icon: GraduationCap, label: "Quản lý ngành học", href: "/admin/majors" },
+          { icon: GraduationCap, label: "Quản lý chuyên ngành", href: "/admin/major-management" },
           { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
           { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule" },
           { icon: Building2, label: "Lớp học & Phân công", href: "/admin/classes" },

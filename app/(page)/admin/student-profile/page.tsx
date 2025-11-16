@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, Plus, Edit, Trash2, X } from 'lucide-react';
-import { Dropdown, StatCard, SearchInput, Button } from '@/app/components/ui';
+import { Download, Plus, Edit, Trash2, X, Users, GraduationCap, BookOpen, School } from 'lucide-react';
+import { Dropdown, SearchInput, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import AddStudentModal from './components/AddStudentModal';
 import ImportExcelModal from './components/ImportExcelModal';
@@ -20,10 +20,38 @@ import { Student, AcademicYear, Department, STATUS_OPTIONS, getStatusDisplay } f
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
 
 const STAT_CARDS = [
-  { key: 'total', label: 'Tổng sinh viên', color: 'bg-orange-50', icon: '📋', subtitle: 'Đang học' },
-  { key: 'enrolled', label: 'Tân sinh viên', color: 'bg-teal-50', icon: '🎓', subtitle: '' },
-  { key: 'graduating', label: 'Sắp tốt nghiệp', color: 'bg-blue-50', icon: '🎯', subtitle: 'Dự kiến' },
-  { key: 'onLeave', label: 'Bảo lưu', color: 'bg-red-50', icon: '📌', subtitle: 'Tạm nghỉ' },
+  { 
+    key: 'total', 
+    label: 'Tổng sinh viên', 
+    bgColor: 'bg-[#FFDDAA]', 
+    iconColor: 'text-[#CC8800]',
+    Icon: Users,
+    subtitle: 'Đang học' 
+  },
+  { 
+    key: 'enrolled', 
+    label: 'Tân sinh viên', 
+    bgColor: 'bg-[#CCEECC]', 
+    iconColor: 'text-[#44AA44]',
+    Icon: GraduationCap,
+    subtitle: '' 
+  },
+  { 
+    key: 'graduating', 
+    label: 'Sắp tốt nghiệp', 
+    bgColor: 'bg-[#AACCFF]', 
+    iconColor: 'text-[#3366CC]',
+    Icon: BookOpen,
+    subtitle: 'Dự kiến' 
+  },
+  { 
+    key: 'onLeave', 
+    label: 'Bảo lưu', 
+    bgColor: 'bg-[#FFBBAA]', 
+    iconColor: 'text-[#CC4444]',
+    Icon: School,
+    subtitle: 'Tạm nghỉ' 
+  },
 ] as const;
 
 export default function StudentProfilePage() {
@@ -433,19 +461,39 @@ export default function StudentProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {STAT_CARDS.map((card, index) => {
             const value = statValues[card.key];
+            const { Icon, bgColor, iconColor } = card;
             return (
-              <StatCard
-                key={index}
-                label={card.label}
-                value={value}
-                subtitle={card.subtitle || undefined}
-                icon={card.icon}
-                color={card.color}
-                growth={card.key === 'enrolled' && typeof stats.growthPercentage === 'number' ? {
-                  percentage: stats.growthPercentage,
-                  label: 'so với năm trước'
-                } : undefined}
-              />
+              <div key={index} className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden border border-gray-200">
+                <div className={`absolute top-0 right-0 w-20 h-20 ${bgColor} rounded-bl-[100%]`}>
+                  <div className="absolute top-5 right-5">
+                    <Icon className={`w-6 h-6 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+                  </div>
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">
+                  {card.label}
+                </p>
+                <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
+                  {typeof value === 'number' ? value.toLocaleString('vi-VN') : value}
+                </p>
+                {card.subtitle && (
+                  <p className="text-xs sm:text-sm text-gray-600 relative z-10">
+                    {card.subtitle}
+                  </p>
+                )}
+                {card.key === 'enrolled' && typeof stats.growthPercentage === 'number' && (
+                  <div className="mt-1 flex items-center gap-2 relative z-10">
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${stats.growthPercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {stats.growthPercentage < 0 ? (
+                        <span className="text-xs">↓</span>
+                      ) : (
+                        <span className="text-xs">↑</span>
+                      )}
+                      {`${stats.growthPercentage > 0 ? '+' : ''}${stats.growthPercentage.toFixed(1)}%`}
+                    </span>
+                    <span className="text-xs text-gray-500">so với năm trước</span>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
