@@ -23,6 +23,7 @@ import {
   HelpCircle,
   LogOut,
   X,
+  School,
 } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 import { Button } from "@/app/components/ui/button"
@@ -64,6 +65,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
       {
         title: "QUẢN LÝ ĐÀO TẠO",
         items: [
+          { icon: School, label: "Quản lý khoa", href: "/admin/faculty-management" },
           { icon: GraduationCap, label: "Quản lý chuyên ngành", href: "/admin/major-management" },
           { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
           { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule" },

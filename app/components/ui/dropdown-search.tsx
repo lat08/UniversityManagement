@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 
@@ -45,7 +46,9 @@ export function DropdownSearch<T = string>({
 }: DropdownSearchProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const selectedOption = value ? options.find(opt => opt.value === value) : undefined
@@ -53,12 +56,44 @@ export function DropdownSearch<T = string>({
   const filteredOptions = filterOptions
     ? filterOptions(options, searchQuery)
     : options.filter(opt =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+        opt.label && typeof opt.label === 'string' && opt.label.toLowerCase().includes(searchQuery.toLowerCase())
       )
+
+  // Calculate dropdown position when opening and update on scroll/resize
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const updatePosition = () => {
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect()
+          setDropdownPosition({
+            top: rect.bottom + window.scrollY + 8,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+          })
+        }
+      }
+
+      updatePosition()
+      setTimeout(() => searchInputRef.current?.focus(), 100)
+
+      window.addEventListener('scroll', updatePosition, true)
+      window.addEventListener('resize', updatePosition)
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true)
+        window.removeEventListener('resize', updatePosition)
+      }
+    }
+  }, [isOpen])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current && 
+        !containerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false)
         setSearchQuery("")
       }
@@ -66,7 +101,6 @@ export function DropdownSearch<T = string>({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside)
-      setTimeout(() => searchInputRef.current?.focus(), 100)
     }
 
     return () => {
@@ -112,12 +146,18 @@ export function DropdownSearch<T = string>({
         <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
       </button>
 
-      {isOpen && (
+      {isOpen && typeof window !== 'undefined' && createPortal(
         <div
+          ref={dropdownRef}
           className={cn(
-            "absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 flex flex-col",
+            "fixed z-[100] bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 flex flex-col",
             dropdownClassName
           )}
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+          }}
         >
           <div className="p-2 border-b border-gray-200">
             <div className="relative">
@@ -177,7 +217,8 @@ export function DropdownSearch<T = string>({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
