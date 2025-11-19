@@ -66,6 +66,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
         items: [
           { icon: GraduationCap, label: "Quản lý ngành học", href: "/admin/faculty-management" },
           { icon: GraduationCap, label: "Quản lý chuyên ngành", href: "/admin/major-management" },
+          { icon: Building2, label: "Quản lý tòa nhà", href: "/admin/building-management" },
           { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
           { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule" },
           { icon: Building2, label: "Lớp học & Phân công", href: "/admin/classes" },
