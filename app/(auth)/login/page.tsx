@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +14,7 @@ import { AuthInput } from '../components/AuthInput';
 import { AuthButton } from '../components/AuthButton';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';
 import toast from 'react-hot-toast';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 // Zod schema cho login form
 const loginSchema = z.object({
@@ -34,6 +35,9 @@ export default function LoginPage() {
   const loginSuccess = useAuthStore((state) => state.loginSuccess);
   const { navigateToDashboard } = useRoleNavigation();
   const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showRecaptcha, setShowRecaptcha] = useState(false);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   
   const {
     register,
@@ -90,14 +94,30 @@ export default function LoginPage() {
                            error?.response?.data?.errors?.join(', ') ||
                            error?.message || 
                            'Đăng nhập thất bại. Vui lòng thử lại!';
-      toast.error(serverMessage, {
-        duration: 4000,
-      });
+      
+      // Reset Recaptcha if it's already shown
+      if (showRecaptcha && recaptchaRef.current) {
+        recaptchaRef.current.reset();
+        setCaptchaToken(null);
+      }
+
+      if (serverMessage.includes('CAPTCHA_REQUIRED')) {
+        setShowRecaptcha(true);
+        toast.error(serverMessage.replace('CAPTCHA_REQUIRED:', ''));
+      } else {
+        toast.error(serverMessage, {
+          duration: 4000,
+        });
+      }
     },
   });
 
   const onSubmit = (data: LoginFormData) => {
-    login(data);
+    if (showRecaptcha && !captchaToken) {
+      toast.error('Vui lòng xác nhận bạn không phải là người máy!');
+      return;
+    }
+    login({ ...data, recaptchaToken: captchaToken || undefined });
   };
 
   return (
@@ -136,6 +156,16 @@ export default function LoginPage() {
             Quên mật khẩu ?
           </Link>
         </div>
+
+        {showRecaptcha && (
+          <div className="flex justify-center">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+              onChange={setCaptchaToken}
+            />
+          </div>
+        )}
 
         <AuthButton
           type="submit"
