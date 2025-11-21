@@ -3,6 +3,7 @@ import { api } from './client';
 export type LoginDto = { 
   email: string; 
   password: string; 
+  recaptchaToken?: string;
 };
 
 export type UserInfo = {
