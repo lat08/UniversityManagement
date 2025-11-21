@@ -23,20 +23,23 @@ export const useBuildings = () => {
         // PagedResult<Building[]> có Items là Building[]
         // ASP.NET Core có thể serialize PascalCase thành camelCase
         const pagedData = response.data;
-        let items: Building[] = [];
-        
-        // Thử cả Items (PascalCase) và items (camelCase)
-        if (Array.isArray(pagedData.Items)) {
-          items = pagedData.Items;
-        } else if (Array.isArray((pagedData as PagedResult<Building[]>).Items)) {
-          items = (pagedData as PagedResult<Building[]>).Items;
-        }
+        const camelCaseData = pagedData as {
+          items?: Building[];
+          totalCount?: number;
+          totalPages?: number;
+          pageNumber?: number;
+        };
+
+        const items = Array.isArray(pagedData.Items)
+          ? pagedData.Items
+          : Array.isArray(camelCaseData.items)
+            ? camelCaseData.items ?? []
+            : [];
         
         setBuildings(items);
-        const camelCaseData = pagedData as unknown as { totalCount?: number; totalPages?: number; pageNumber?: number };
-        setTotalCount(pagedData.TotalCount || camelCaseData.totalCount || 0);
-        setTotalPages(pagedData.TotalPages || camelCaseData.totalPages || 0);
-        setCurrentPage(pagedData.PageNumber || camelCaseData.pageNumber || 1);
+        setTotalCount(pagedData.TotalCount ?? camelCaseData.totalCount ?? 0);
+        setTotalPages(pagedData.TotalPages ?? camelCaseData.totalPages ?? 0);
+        setCurrentPage(pagedData.PageNumber ?? camelCaseData.pageNumber ?? 1);
         
         // Calculate stats from current page data
         // Note: Stats chỉ tính từ trang hiện tại, không phải toàn bộ dữ liệu

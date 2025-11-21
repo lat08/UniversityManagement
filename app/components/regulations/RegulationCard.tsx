@@ -1,10 +1,17 @@
 "use client";
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Download, ExternalLink, AlertTriangle, ChevronDown, FileText } from "lucide-react";
 import { downloadFile } from "@/lib/utils/fileDownload";
 import { formatDate } from "@/lib/utils/format";
 import { Regulation } from "./lib/api/regulationsApi";
+import toast from 'react-hot-toast';
+
+interface ExtendedRegulation extends Regulation {
+  category?: string;
+  issueDate?: string;
+  effectiveDate?: string;
+}
 
 interface RegulationCardProps {
   readonly regulation: Regulation;
@@ -21,9 +28,26 @@ const RegulationCardComponent = ({
   noticeText, 
   animationDelay = 0 
 }: RegulationCardProps) => {
-  const handleDownload = useCallback(() => {
-    downloadFile(regulation.fileUrl, regulation.fileName);
-  }, [regulation.fileUrl, regulation.fileName]);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = useCallback(async () => {
+    // Block spam download
+    if (isDownloading) {
+      return;
+    }
+
+    setIsDownloading(true);
+    const loadingToast = toast.loading('Đang tải xuống tệp...');
+
+    try {
+      await downloadFile(regulation.fileUrl, regulation.fileName);
+      toast.success('Đã tải xuống tệp thành công', { id: loadingToast });
+    } catch {
+      toast.error('Không thể tải xuống tệp. Vui lòng thử lại.', { id: loadingToast });
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [regulation.fileUrl, regulation.fileName, isDownloading]);
 
   const formattedDate = formatDate(regulation.updatedAt || regulation.createdAt);
 
@@ -37,7 +61,7 @@ const RegulationCardComponent = ({
     >
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-4 px-6 py-4 transition-colors hover:bg-blue-50"
+        className="flex w-full cursor-pointer items-center gap-4 px-6 py-4 transition-colors hover:bg-blue-50"
         type="button"
         aria-expanded={isExpanded}
       >
@@ -46,7 +70,31 @@ const RegulationCardComponent = ({
         </div>
         
         <div className="flex-1 text-left">
-          <h3 className="mb-1 font-semibold text-gray-900">{regulation.title}</h3>
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold text-gray-900">{regulation.title}</h3>
+            {(() => {
+              const extendedReg = regulation as ExtendedRegulation;
+              const categoryMap: Record<string, string> = {
+                admission: 'Tuyển sinh',
+                academic: 'Học vụ',
+                finance: 'Tài chính',
+                student_affairs: 'Công tác sinh viên',
+                general: 'Chung',
+              };
+              const categoryColors: Record<string, string> = {
+                admission: 'bg-blue-100 text-blue-700 ring-blue-200',
+                academic: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
+                finance: 'bg-amber-100 text-amber-700 ring-amber-200',
+                student_affairs: 'bg-purple-100 text-purple-700 ring-purple-200',
+                general: 'bg-gray-100 text-gray-700 ring-gray-200',
+              };
+              return extendedReg.category ? (
+                <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${categoryColors[extendedReg.category] || 'bg-gray-100 text-gray-700 ring-gray-200'}`}>
+                  {categoryMap[extendedReg.category] || extendedReg.category}
+                </span>
+              ) : null;
+            })()}
+          </div>
           <p className="text-sm text-gray-500">Cập nhật: {formattedDate}</p>
         </div>
 
@@ -64,6 +112,30 @@ const RegulationCardComponent = ({
         }`}
       >
         <div className="space-y-4 border-t border-gray-100 px-6 pb-6 pt-2">
+          {/* Thông tin bổ sung */}
+          {(() => {
+            const extendedReg = regulation as ExtendedRegulation;
+            if (extendedReg.issueDate || extendedReg.effectiveDate) {
+              return (
+                <div className="grid gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm sm:grid-cols-2">
+                  {extendedReg.issueDate && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase text-gray-500">Ngày ban hành</p>
+                      <p className="mt-1 font-medium text-gray-900">{formatDate(extendedReg.issueDate)}</p>
+                    </div>
+                  )}
+                  {extendedReg.effectiveDate && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase text-gray-500">Ngày hiệu lực</p>
+                      <p className="mt-1 font-medium text-gray-900">{formatDate(extendedReg.effectiveDate)}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           <div>
             <p className="mb-2 text-sm font-semibold text-gray-900">Nội dung:</p>
             <p className="text-sm leading-relaxed text-gray-700">{regulation.description}</p>
@@ -75,11 +147,12 @@ const RegulationCardComponent = ({
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 onClick={handleDownload}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                disabled={isDownloading}
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
               >
                 <Download className="h-4 w-4" />
-                Tải file PDF
+                {isDownloading ? 'Đang tải...' : 'Tải file'}
               </button>
 
               <a

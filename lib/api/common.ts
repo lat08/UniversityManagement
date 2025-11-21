@@ -1,16 +1,20 @@
 import { api } from './client';
 import {
-  GetSemestersResponse,
-  GetSubjectsResponse,
-  GetFacultiesResponse,
-  GetDepartmentsResponse,
-  GetClassesResponse,
+  GetAcademicYearsParams,
   GetAcademicYearsResponse,
   GetBuildingsResponse,
   GetClassesParams,
+  GetClassesResponse,
+  GetCourseClassesParams,
+  GetCourseClassesResponse,
   GetDepartmentsParams,
-  GetAcademicYearsParams,
+  GetDepartmentsResponse,
+  GetFacultiesResponse,
+  GetInstructorsParams,
+  GetInstructorsResponse,
+  GetSemestersResponse,
   GetSubjectsParams,
+  GetSubjectsResponse,
 } from '../types/common';
 
 export const commonApi = {
@@ -64,6 +68,25 @@ export const commonApi = {
 
   getBuildings: async (): Promise<GetBuildingsResponse> => {
     const response = await api.get<GetBuildingsResponse>('/v1/common/buildings');
+    return response.data;
+  },
+
+  getCourseClasses: async (params: GetCourseClassesParams): Promise<GetCourseClassesResponse> => {
+    const response = await api.get<GetCourseClassesResponse>('/v1/common/course-classes', {
+      params: {
+        subjectId: params.subjectId,
+        semesterId: params.semesterId || undefined,
+      },
+    });
+    return response.data;
+  },
+
+  getInstructors: async (params?: GetInstructorsParams): Promise<GetInstructorsResponse> => {
+    const response = await api.get<GetInstructorsResponse>('/v1/common/instructors', {
+      params: {
+        searchString: params?.searchString || undefined,
+      },
+    });
     return response.data;
   },
 };

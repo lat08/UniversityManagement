@@ -1,10 +1,23 @@
+let downloading = false;
+
 export async function downloadFile(fileUrl: string, fileName: string): Promise<void> {
+  // Block spam download
+  if (downloading) {
+    return;
+  }
+
+  downloading = true;
   try {
     const response = await fetch(fileUrl)
     const blob = await response.blob()
     downloadFileBlob(blob, fileName)
   } catch {
     globalThis.open(fileUrl, '_blank')
+  } finally {
+    // Reset after a short delay to allow download to complete
+    setTimeout(() => {
+      downloading = false;
+    }, 1000);
   }
 }
 

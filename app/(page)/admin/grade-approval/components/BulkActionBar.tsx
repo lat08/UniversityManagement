@@ -8,6 +8,7 @@ interface BulkActionBarProps {
   onApprove: () => void;
   onReject: () => void;
   onClear: () => void;
+  isProcessing?: boolean;
 }
 
 export function BulkActionBar({
@@ -15,6 +16,7 @@ export function BulkActionBar({
   onApprove,
   onReject,
   onClear,
+  isProcessing,
 }: BulkActionBarProps) {
   if (selectedCount === 0) return null;
 
@@ -31,7 +33,8 @@ export function BulkActionBar({
           variant="outline"
           size="sm"
           onClick={onApprove}
-          className="border-green-600 text-green-600 hover:bg-green-50"
+          disabled={isProcessing}
+          className="border-green-600 text-green-600 hover:bg-green-50 disabled:opacity-50"
         >
           <CheckCircle className="w-4 h-4" />
           Duyệt toàn bộ
@@ -40,7 +43,8 @@ export function BulkActionBar({
           variant="outline"
           size="sm"
           onClick={onReject}
-          className="border-red-600 text-red-600 hover:bg-red-50"
+          disabled={isProcessing}
+          className="border-red-600 text-red-600 hover:bg-red-50 disabled:opacity-50"
         >
           <XCircle className="w-4 h-4" />
           Từ chối toàn bộ
@@ -48,6 +52,7 @@ export function BulkActionBar({
         <Button
           size="sm"
           onClick={onClear}
+          disabled={isProcessing}
           className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
         >
           <X className="w-4 h-4" />

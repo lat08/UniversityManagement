@@ -11,6 +11,9 @@ interface FilterDropdownProps {
 
 const FILTER_OPTIONS = [
   { value: 'status', label: 'Trạng thái', required: false },
+  { value: 'semester', label: 'Học kỳ', required: false },
+  { value: 'subject', label: 'Môn học', required: false },
+  { value: 'courseClass', label: 'Lớp học phần', required: false },
   { value: 'faculty', label: 'Khoa', required: false },
   { value: 'department', label: 'Bộ môn', required: false },
   { value: 'instructor', label: 'Giảng viên', required: false },
