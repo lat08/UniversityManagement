@@ -70,7 +70,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
           { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
           { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule" },
           { icon: Building2, label: "Lớp học & Phân công", href: "/admin/classes" },
-          { icon: BookOpen, label: "Đăng ký học phần", href: "/admin/course-registration" },
+          { icon: BookOpen, label: "Chương trình đào tạo", href: "/admin/curriculum-management" },
           { icon: Building2, label: "Yêu cầu phòng học", href: "/admin/room-requests" },
         ],
       },
