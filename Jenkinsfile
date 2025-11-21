@@ -45,7 +45,8 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'SONAR_TOKEN_FE', variable: 'SONAR_TOKEN_LOGIN'),
-                    string(credentialsId: 'SUPABASE-ANON-KEY', variable: 'SUPABASE_KEY_SECRET')
+                    string(credentialsId: 'SUPABASE-ANON-KEY', variable: 'SUPABASE_KEY_SECRET'),
+                    string(credentialsId: 'RECAPTCHA-SITE-KEY', variable: 'RECAPTCHA_SITE_KEY_SECRET')
                 ]) {
                     sh '''#!/usr/bin/env bash
                         set -euxo pipefail
@@ -94,6 +95,7 @@ pipeline {
                         
                         export NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
                         export NEXT_PUBLIC_SUPABASE_ANON_KEY="$SUPABASE_KEY_SECRET"
+                        export NEXT_PUBLIC_RECAPTCHA_SITE_KEY="$RECAPTCHA_SITE_KEY_SECRET"
                         
                         echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
                         echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL"
@@ -113,7 +115,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'SUPABASE-ANON-KEY', variable: 'SUPABASE_KEY_SECRET')
+                    string(credentialsId: 'SUPABASE-ANON-KEY', variable: 'SUPABASE_KEY_SECRET'),
+                    string(credentialsId: 'RECAPTCHA-SITE-KEY', variable: 'RECAPTCHA_SITE_KEY_SECRET')
                 ]) {
                     sh '''#!/usr/bin/env bash
                         set -euxo pipefail
@@ -171,6 +174,7 @@ Environment=NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 Environment=BACKEND_PORT=$BACKEND_PORT
 Environment=NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 Environment=NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_KEY_SECRET
+Environment=NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$RECAPTCHA_SITE_KEY_SECRET
 
 Environment="PATH=${NODE_BIN_DIR}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 User=jenkins
