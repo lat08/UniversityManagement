@@ -84,7 +84,7 @@ export const buildingsApi = {
         message: `Đã xóa ${ids.length} tòa nhà`,
         data: null,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Xóa hàng loạt thất bại',
@@ -127,7 +127,7 @@ export const buildingsApi = {
         message: `Đã cập nhật ${payload.buildingIds.length} tòa nhà`,
         data: null,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Cập nhật hàng loạt thất bại',

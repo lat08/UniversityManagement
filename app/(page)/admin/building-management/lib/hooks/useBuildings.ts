@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { buildingsApi } from '../api/buildingsApi';
-import type { Building, GetBuildingsParams } from '../types/types';
+import type { Building, GetBuildingsParams, PagedResult } from '../types/types';
 
 export const useBuildings = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -28,14 +28,15 @@ export const useBuildings = () => {
         // Thử cả Items (PascalCase) và items (camelCase)
         if (Array.isArray(pagedData.Items)) {
           items = pagedData.Items;
-        } else if (Array.isArray((pagedData as any).items)) {
-          items = (pagedData as any).items;
+        } else if (Array.isArray((pagedData as PagedResult<Building[]>).Items)) {
+          items = (pagedData as PagedResult<Building[]>).Items;
         }
         
         setBuildings(items);
-        setTotalCount(pagedData.TotalCount || (pagedData as any).totalCount || 0);
-        setTotalPages(pagedData.TotalPages || (pagedData as any).totalPages || 0);
-        setCurrentPage(pagedData.PageNumber || (pagedData as any).pageNumber || 1);
+        const camelCaseData = pagedData as unknown as { totalCount?: number; totalPages?: number; pageNumber?: number };
+        setTotalCount(pagedData.TotalCount || camelCaseData.totalCount || 0);
+        setTotalPages(pagedData.TotalPages || camelCaseData.totalPages || 0);
+        setCurrentPage(pagedData.PageNumber || camelCaseData.pageNumber || 1);
         
         // Calculate stats from current page data
         // Note: Stats chỉ tính từ trang hiện tại, không phải toàn bộ dữ liệu
@@ -57,7 +58,7 @@ export const useBuildings = () => {
           inactiveBuildings: 0,
         });
       }
-    } catch (error) {
+    } catch {
       setBuildings([]);
       setTotalCount(0);
       setTotalPages(0);

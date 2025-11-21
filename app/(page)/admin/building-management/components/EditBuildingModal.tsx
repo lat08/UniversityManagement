@@ -28,7 +28,7 @@ const validationSchema = yup.object({
 type FormData = InferType<typeof validationSchema>;
 
 export const EditBuildingModal = ({ isOpen, onClose, onSuccess, building }: EditBuildingModalProps) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch, reset, clearErrors } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
       buildingName: '',
