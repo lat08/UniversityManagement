@@ -1,4 +1,3 @@
-// API Response Types
 export interface ApiResponse<T> {
   success: boolean
   message: string
@@ -16,7 +15,6 @@ export interface PaginatedResponse<T> {
   hasNextPage: boolean
 }
 
-// Faculty Types
 export interface Faculty {
   facultyId: string
   facultyName: string
@@ -66,14 +64,12 @@ export interface FacultyStats {
   inactive: number
 }
 
-// Division Types (for dropdowns)
 export interface Division {
   divisionId: string
   divisionName: string
   divisionCode: string
 }
 
-// Dean Types (for dropdowns)
 export interface Dean {
   instructorId: string
   fullName: string
