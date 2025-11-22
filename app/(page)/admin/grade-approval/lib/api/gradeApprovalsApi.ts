@@ -135,6 +135,24 @@ const exportGradeApprovals = async (params: ExportGradeApprovalsParams): Promise
   return response.data as Blob;
 };
 
+/**
+ * @api POST /v1/admin/grade-approvals/export-by-ids
+ * @description Export selected grade versions with detailed grade sheets into an Excel file.
+ * @param {string[]} gradeVersionIds - List of grade version IDs to export.
+ * @returns {Promise<Blob>} Excel file blob for download with summary and detail sheets.
+ * @auth Required (Role: Admin)
+ */
+const exportGradeApprovalsByIds = async (gradeVersionIds: string[]): Promise<Blob> => {
+  const response = await api.post(
+    '/v1/admin/grade-approvals/export-by-ids',
+    { gradeVersionIds },
+    {
+      responseType: 'blob',
+    },
+  );
+  return response.data as Blob;
+};
+
 export const gradeApprovalsApi = {
   getGradeApprovals,
   getGradeApprovalDetail,
@@ -142,4 +160,5 @@ export const gradeApprovalsApi = {
   bulkApproveGrades,
   bulkRejectGrades,
   exportGradeApprovals,
+  exportGradeApprovalsByIds,
 };

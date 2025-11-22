@@ -48,6 +48,7 @@ export interface AdminGradeApprovalListItem {
   approvalNote?: string | null;
   totalStudents: number;
   studentsWithGrades: number;
+  facultyName?: string | null;
 }
 
 export interface AdminGradeApprovalList {

@@ -49,10 +49,9 @@ export default function ColumnSelector({ columns, onColumnsChange }: ColumnSelec
     <div className="relative h-full" ref={dropdownRef}>
       <Button
         variant="outline"
-        size="sm"
         onClick={() => setIsOpen(!isOpen)}
         title={`Cột hiển thị (${visibleCount}/${columns.length})`}
-        className="h-full flex items-center justify-center px-3"
+        className="h-full w-full flex items-center justify-center px-3"
       >
         <Settings2 className="w-4 h-4" />
       </Button>

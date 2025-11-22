@@ -4,14 +4,13 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Button, SearchInput, Dropdown } from '@/app/components/ui';
+import { Button, SearchInput, Dropdown, DropdownSearch } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
-import FilterDropdown from './components/FilterDropdown';
 import { BulkActionBar } from './components/BulkActionBar';
 import GradeApprovalActionsMenu from './components/GradeApprovalActionsMenu';
-import ExportGradeApprovalModal from './components/ExportGradeApprovalModal';
+import ColumnSelector, { ColumnConfig } from './components/ColumnSelector';
 import { GradeApprovalDetailModal } from './components/GradeApprovalDetailModal';
 import { gradeApprovalsApi } from './lib/api/gradeApprovalsApi';
 import { commonApi } from '@/lib/api/common';
@@ -51,10 +50,8 @@ export default function GradeApprovalPage() {
   const [isStatsAnimationActive, setIsStatsAnimationActive] = useState(true);
   const [searchInput, setSearchInput] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [detailModalId, setDetailModalId] = useState<string | null>(null);
   const [filters, setFilters] = useState<GradeApprovalFilterState>({});
-  const [selectedFilterTypes, setSelectedFilterTypes] = useState<string[]>(['status', 'semester']);
   const [selectedGradeVersionIds, setSelectedGradeVersionIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
@@ -85,46 +82,6 @@ export default function GradeApprovalPage() {
     setCurrentPage(1);
   }, []);
 
-  const handleFilterTypesChange = useCallback((types: string[]) => {
-    setSelectedFilterTypes(types);
-    setFilters((prev) => {
-      const next = { ...prev };
-      if (!types.includes('status')) next.versionStatus = undefined;
-      if (!types.includes('semester')) {
-        next.semesterId = undefined;
-        next.subjectId = undefined;
-        next.courseClassId = undefined;
-      }
-      if (!types.includes('subject')) {
-        next.subjectId = undefined;
-        next.courseClassId = undefined;
-      }
-      if (!types.includes('courseClass')) {
-        next.courseClassId = undefined;
-      }
-      if (!types.includes('faculty')) {
-        next.facultyId = undefined;
-        next.departmentId = undefined;
-      }
-      if (!types.includes('department')) {
-        next.departmentId = undefined;
-      }
-      if (!types.includes('instructor')) {
-        next.instructorId = undefined;
-      }
-      return next;
-    });
-  }, []);
-
-  const { data: semesters = [] } = useQuery({
-    queryKey: queryKeys.common.semesters(),
-    queryFn: async () => {
-      const response = await commonApi.getSemesters();
-      return response.data ?? [];
-    },
-    staleTime: 300_000,
-  });
-
   const { data: faculties = [] } = useQuery({
     queryKey: queryKeys.common.faculties(),
     queryFn: async () => {
@@ -134,50 +91,12 @@ export default function GradeApprovalPage() {
     staleTime: 300_000,
   });
 
-  const { data: departments = [] } = useQuery({
-    queryKey: queryKeys.common.departments(filters.facultyId),
-    queryFn: async () => {
-      const response = await commonApi.getDepartments(
-        filters.facultyId ? { facultyId: filters.facultyId } : undefined,
-      );
-      return response.data ?? [];
-    },
-    enabled: selectedFilterTypes.includes('department') || Boolean(filters.departmentId),
-    staleTime: 300_000,
-  });
-
-  const { data: subjects = [] } = useQuery({
-    queryKey: queryKeys.common.subjects(filters.semesterId),
-    queryFn: async () => {
-      if (!filters.semesterId) return [];
-      const response = await commonApi.getSubjects({ semesterId: filters.semesterId });
-      return response.data ?? [];
-    },
-    enabled: Boolean(filters.semesterId),
-    staleTime: 300_000,
-  });
-
-  const { data: courseClasses = [] } = useQuery({
-    queryKey: queryKeys.common.courseClasses(filters.subjectId, filters.semesterId),
-    queryFn: async () => {
-      if (!filters.subjectId) return [];
-      const response = await commonApi.getCourseClasses({
-        subjectId: filters.subjectId,
-        semesterId: filters.semesterId,
-      });
-      return response.data ?? [];
-    },
-    enabled: Boolean(filters.subjectId),
-    staleTime: 300_000,
-  });
-
   const { data: instructors = [] } = useQuery({
     queryKey: queryKeys.common.instructors('all'),
     queryFn: async () => {
       const response = await commonApi.getInstructors();
       return response.data ?? [];
     },
-    enabled: selectedFilterTypes.includes('instructor'),
     staleTime: 300_000,
   });
 
@@ -236,12 +155,27 @@ export default function GradeApprovalPage() {
     { key: 'courseCode', label: 'Mã môn', width: 120, minWidth: 90, align: 'left', visible: true },
     { key: 'courseName', label: 'Môn học', width: 220, minWidth: 180, align: 'left', visible: true },
     { key: 'className', label: 'Lớp', width: 110, minWidth: 90, align: 'left', visible: true },
+    { key: 'facultyName', label: 'Khoa', width: 160, minWidth: 120, align: 'left', visible: true },
     { key: 'instructorName', label: 'Giảng viên', width: 160, minWidth: 120, align: 'left', visible: true },
     { key: 'semester', label: 'Học kỳ', width: 150, minWidth: 120, align: 'left', visible: true },
     { key: 'studentCount', label: 'Số SV', width: 90, minWidth: 70, align: 'center', visible: true },
     { key: 'submittedDate', label: 'Ngày nộp', width: 140, minWidth: 110, align: 'center', visible: true },
     { key: 'approvalStatus', label: 'Trạng thái', width: 140, minWidth: 110, align: 'center', visible: true },
     { key: 'actions', label: 'Thao tác', width: 180, minWidth: 100, align: 'center', visible: true },
+  ]);
+
+  const [columnConfigs, setColumnConfigs] = useState<ColumnConfig[]>([
+    { key: 'checkbox', label: '', visible: true, required: true },
+    { key: 'courseCode', label: 'Mã môn', visible: true },
+    { key: 'courseName', label: 'Môn học', visible: true },
+    { key: 'className', label: 'Lớp', visible: true },
+    { key: 'facultyName', label: 'Khoa', visible: true },
+    { key: 'instructorName', label: 'Giảng viên', visible: true },
+    { key: 'semester', label: 'Học kỳ', visible: true },
+    { key: 'studentCount', label: 'Số SV', visible: true },
+    { key: 'submittedDate', label: 'Ngày nộp', visible: true },
+    { key: 'approvalStatus', label: 'Trạng thái', visible: true },
+    { key: 'actions', label: 'Thao tác', visible: true, required: true },
   ]);
 
   const handleSelectAll = useCallback(() => {
@@ -272,6 +206,10 @@ export default function GradeApprovalPage() {
     mutationFn: gradeApprovalsApi.bulkRejectGrades,
   });
 
+  const exportMutation = useMutation({
+    mutationFn: gradeApprovalsApi.exportGradeApprovalsByIds,
+  });
+
   const invalidateGradeData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.adminGradeApprovals.all }),
@@ -285,9 +223,18 @@ export default function GradeApprovalPage() {
       try {
         const mutation = action === 'approve' ? bulkApproveMutation : bulkRejectMutation;
         const result = await mutation.mutateAsync({ gradeVersionIds: ids });
-        toast.success(
-          `${action === 'approve' ? 'Duyệt' : 'Từ chối'} thành công ${result.successCount}/${ids.length} bảng điểm`,
-        );
+        if (result.successCount > 0) {
+          toast.success(
+            `${action === 'approve' ? 'Duyệt' : 'Từ chối'} thành công ${result.successCount}/${ids.length} bảng điểm`,
+          );
+        }
+        if (result.failureCount > 0 && result.errorMessages.length > 0) {
+          const errorMessage =
+            result.errorMessages.length > 3
+              ? `${result.errorMessages.slice(0, 3).join('; ')} và ${result.errorMessages.length - 3} lỗi khác.`
+              : result.errorMessages.join('; ');
+          toast.error(`Không thể ${action === 'approve' ? 'duyệt' : 'từ chối'} ${result.failureCount} bảng điểm: ${errorMessage}`);
+        }
         setSelectedGradeVersionIds(new Set());
         await invalidateGradeData();
       } catch (error) {
@@ -306,29 +253,63 @@ export default function GradeApprovalPage() {
   const handleBulkReject = () =>
     handleBulkAction('reject', Array.from(selectedGradeVersionIds));
 
+  const handleBulkExport = useCallback(async () => {
+    const ids = Array.from(selectedGradeVersionIds);
+    if (ids.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một bảng điểm để xuất');
+      return;
+    }
+
+    try {
+      const blob = await exportMutation.mutateAsync(ids);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.download = `Bang_diem_duyet_${dateStr}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success(`Xuất thành công ${ids.length} bảng điểm`);
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (error as { message?: string })?.message ||
+        'Đã xảy ra lỗi khi xuất file. Vui lòng thử lại.';
+      toast.error(message);
+    }
+  }, [selectedGradeVersionIds, exportMutation]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     setSelectedGradeVersionIds(new Set());
   };
 
+  const handleColumnsChange = useCallback((newColumns: ColumnConfig[]) => {
+    setColumnConfigs(newColumns);
+    // Sync với resizable columns
+    setResizableColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        visible: newColumns.find((c) => c.key === col.key)?.visible ?? col.visible,
+      })),
+    );
+  }, []);
+
   const dropdownContext: GradeApprovalDropdownContext = useMemo(
     () => ({
-      semesters,
-      subjects,
-      courseClasses,
+      semesters: [],
+      subjects: [],
+      courseClasses: [],
       faculties,
-      departments,
+      departments: [],
       instructors,
     }),
-    [semesters, subjects, courseClasses, faculties, departments, instructors],
+    [faculties, instructors],
   );
 
-  const exportFilters: ExportGradeApprovalsParams = {
-    ...filters,
-    searchKey: searchKeyword || undefined,
-  };
-
-  const isAnyMutationPending = bulkApproveMutation.isPending || bulkRejectMutation.isPending;
+  const isAnyMutationPending = bulkApproveMutation.isPending || bulkRejectMutation.isPending || exportMutation.isPending;
 
   const renderGradeApprovalRow = useCallback(
     (
@@ -402,6 +383,16 @@ export default function GradeApprovalPage() {
                     {approval.className}
                   </td>
                 );
+              case 'facultyName':
+                return (
+                  <td
+                    key="facultyName"
+                    className="text-gray-600"
+                    style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {approval.facultyName || '—'}
+                  </td>
+                );
               case 'instructorName':
                 return (
                   <td
@@ -460,6 +451,7 @@ export default function GradeApprovalPage() {
                   <td key="actions" style={{ ...cellPaddingStyle, paddingLeft: '8px', paddingRight: '8px' }}>
                     <GradeApprovalActionsMenu
                       gradeApprovalId={approval.gradeVersionId}
+                      versionStatus={approval.versionStatus}
                       onView={() => setDetailModalId(approval.gradeVersionId)}
                       onApprove={() => handleBulkAction('approve', [approval.gradeVersionId])}
                       onReject={() => handleBulkAction('reject', [approval.gradeVersionId])}
@@ -542,33 +534,8 @@ export default function GradeApprovalPage() {
   );
 
   const dropdownOptions = {
-    semesters: [
-      { value: '', label: 'Tất cả học kỳ' },
-      ...semesters.map((semester) => ({ value: semester.semesterId, label: semester.semesterName })),
-    ],
-    subjects: [
-      { value: '', label: filters.semesterId ? 'Tất cả môn học' : 'Chọn học kỳ trước' },
-      ...subjects.map((subject) => ({ value: subject.subjectId, label: subject.subjectName })),
-    ],
-    courseClasses: [
-      { value: '', label: filters.subjectId ? 'Tất cả lớp học phần' : 'Chọn môn học trước' },
-      ...courseClasses.map((courseClass) => ({
-        value: courseClass.courseClassId,
-        label: `${courseClass.courseClassCode} · ${courseClass.subjectName}`,
-      })),
-    ],
-    faculties: [
-      { value: '', label: 'Tất cả khoa' },
-      ...faculties.map((faculty) => ({ value: faculty.facultyId, label: faculty.facultyName })),
-    ],
-    departments: [
-      { value: '', label: filters.facultyId ? 'Tất cả bộ môn' : 'Chọn khoa trước' },
-      ...departments.map((department) => ({ value: department.departmentId, label: department.departmentName })),
-    ],
-    instructors: [
-      { value: '', label: 'Tất cả giảng viên' },
-      ...instructors.map((instructor) => ({ value: instructor.instructorId, label: instructor.fullName })),
-    ],
+    faculties: faculties.map((faculty) => ({ value: faculty.facultyId, label: faculty.facultyName })),
+    instructors: instructors.map((instructor) => ({ value: instructor.instructorId, label: instructor.fullName })),
   };
 
   return (
@@ -605,12 +572,6 @@ export default function GradeApprovalPage() {
                 Duyệt từng bảng điểm, xem chi tiết yêu cầu
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 lg:gap-3">
-              <Button variant="outline" onClick={() => setIsExportModalOpen(true)}>
-                <Download className="w-4 h-4" />
-                Xuất Excel
-              </Button>
-            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
@@ -622,88 +583,41 @@ export default function GradeApprovalPage() {
               />
             </div>
 
-            {selectedFilterTypes.includes('status') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={APPROVAL_STATUS_OPTIONS}
-                  value={filters.versionStatus || ''}
-                  placeholder="Trạng thái"
-                  onChange={(value) => handleFilterChange('versionStatus', value || undefined)}
-                />
-              </div>
-            )}
+            <div className="w-full sm:w-48">
+              <Dropdown
+                options={APPROVAL_STATUS_OPTIONS}
+                value={filters.versionStatus || ''}
+                placeholder="Trạng thái"
+                onChange={(value) => handleFilterChange('versionStatus', value || undefined)}
+              />
+            </div>
 
-            {selectedFilterTypes.includes('semester') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={dropdownOptions.semesters}
-                  value={filters.semesterId || ''}
-                  placeholder="Học kỳ"
-                  onChange={(value) => handleFilterChange('semesterId', value || undefined)}
-                />
-              </div>
-            )}
+            <div className="w-full sm:w-48">
+              <DropdownSearch
+                options={dropdownOptions.faculties}
+                value={filters.facultyId || ''}
+                placeholder="Tất cả khoa"
+                searchPlaceholder="Tìm kiếm khoa..."
+                showEmptyOption
+                emptyOptionLabel="Tất cả khoa"
+                onChange={(value) => handleFilterChange('facultyId', value || undefined)}
+              />
+            </div>
 
-            {selectedFilterTypes.includes('subject') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={dropdownOptions.subjects}
-                  disabled={!filters.semesterId}
-                  value={filters.subjectId || ''}
-                  placeholder="Môn học"
-                  onChange={(value) => handleFilterChange('subjectId', value || undefined)}
-                />
-              </div>
-            )}
+            <div className="w-full sm:w-48">
+              <DropdownSearch
+                options={dropdownOptions.instructors}
+                value={filters.instructorId || ''}
+                placeholder="Tất cả giảng viên"
+                searchPlaceholder="Tìm kiếm giảng viên..."
+                showEmptyOption
+                emptyOptionLabel="Tất cả giảng viên"
+                onChange={(value) => handleFilterChange('instructorId', value || undefined)}
+              />
+            </div>
 
-            {selectedFilterTypes.includes('courseClass') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={dropdownOptions.courseClasses}
-                  disabled={!filters.subjectId}
-                  value={filters.courseClassId || ''}
-                  placeholder="Lớp học phần"
-                  onChange={(value) => handleFilterChange('courseClassId', value || undefined)}
-                />
-              </div>
-            )}
-
-            {selectedFilterTypes.includes('faculty') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={dropdownOptions.faculties}
-                  value={filters.facultyId || ''}
-                  placeholder="Khoa"
-                  onChange={(value) => handleFilterChange('facultyId', value || undefined)}
-                />
-              </div>
-            )}
-
-            {selectedFilterTypes.includes('department') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={dropdownOptions.departments}
-                  disabled={!filters.facultyId}
-                  value={filters.departmentId || ''}
-                  placeholder="Bộ môn"
-                  onChange={(value) => handleFilterChange('departmentId', value || undefined)}
-                />
-              </div>
-            )}
-
-            {selectedFilterTypes.includes('instructor') && (
-              <div className="w-full sm:w-48">
-                <Dropdown
-                  options={dropdownOptions.instructors}
-                  value={filters.instructorId || ''}
-                  placeholder="Giảng viên"
-                  onChange={(value) => handleFilterChange('instructorId', value || undefined)}
-                />
-              </div>
-            )}
-
-            <div className="w-full sm:w-auto">
-              <FilterDropdown selectedTypes={selectedFilterTypes} onTypesChange={handleFilterTypesChange} />
+            <div className="w-full sm:w-auto h-10">
+              <ColumnSelector columns={columnConfigs} onColumnsChange={handleColumnsChange} />
             </div>
           </div>
 
@@ -711,6 +625,7 @@ export default function GradeApprovalPage() {
             selectedCount={selectedGradeVersionIds.size}
             onApprove={handleBulkApprove}
             onReject={handleBulkReject}
+            onExport={handleBulkExport}
             onClear={() => setSelectedGradeVersionIds(new Set())}
             isProcessing={isAnyMutationPending}
           />
@@ -756,13 +671,6 @@ export default function GradeApprovalPage() {
           />
         </div>
       </div>
-
-      <ExportGradeApprovalModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        filters={exportFilters}
-        dropdowns={dropdownContext}
-      />
 
       <GradeApprovalDetailModal
         gradeVersionId={detailModalId}

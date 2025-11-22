@@ -312,23 +312,32 @@ export const GradeApprovalDetailModal = ({
               ? `Cập nhật lần cuối: ${formatDateTime(data.approvedAt ?? data.submittedAt)}`
               : 'Đang tải dữ liệu...'}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              variant="outline"
-              onClick={() => gradeVersionId && onReject(gradeVersionId)}
-              disabled={!gradeVersionId || isProcessing}
-              className="border-red-600 text-red-600 hover:bg-red-50"
-            >
-              Từ chối
-            </Button>
-            <Button
-              onClick={() => gradeVersionId && onApprove(gradeVersionId)}
-              disabled={!gradeVersionId || isProcessing}
-              className="bg-[#0053AD] hover:bg-[#003d82] text-white disabled:opacity-50"
-            >
-              Duyệt
-            </Button>
-          </div>
+          {data?.versionStatus === 'pending' && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={() => gradeVersionId && onReject(gradeVersionId)}
+                disabled={!gradeVersionId || isProcessing}
+                className="border-red-600 text-red-600 hover:bg-red-50"
+              >
+                Từ chối
+              </Button>
+              <Button
+                onClick={() => gradeVersionId && onApprove(gradeVersionId)}
+                disabled={!gradeVersionId || isProcessing}
+                className="bg-[#0053AD] hover:bg-[#003d82] text-white disabled:opacity-50"
+              >
+                Duyệt
+              </Button>
+            </div>
+          )}
+          {data?.versionStatus !== 'pending' && (
+            <p className="text-sm text-gray-500 italic">
+              {data?.versionStatus === 'approved'
+                ? 'Bảng điểm này đã được duyệt và không thể thay đổi trạng thái.'
+                : 'Bảng điểm này đã bị từ chối và không thể thay đổi trạng thái.'}
+            </p>
+          )}
         </div>
       </div>
     </div>

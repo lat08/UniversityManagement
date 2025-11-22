@@ -93,10 +93,32 @@ export interface Specialization {
   specializationCode?: string;
 }
 
+export interface Semester {
+  semesterId: string;
+  semesterName: string;
+  semesterType?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
+
+export interface Room {
+  roomId: string;
+  roomCode: string;
+  roomName: string;
+  buildingId?: string;
+  buildingName?: string;
+  roomType?: string;
+  capacity?: number;
+  status?: string;
+}
+
 export interface GetCoursesParams {
   pageNumber?: number;
   pageSize?: number;
   searchKeyword?: string;
+  subjectId?: string;
+  instructorId?: string;
   batchId?: string;
   majorId?: string;
   specializationId?: string;
@@ -117,7 +139,11 @@ export interface GetAssignmentsParams {
 export interface CreateCoursePayload {
   courseCode: string;
   subjectId: string;
+  semesterId: string;
+  roomId: string;
+  startDate: string;
   maxEnrollment: number;
+  periodRange: 'morning' | 'afternoon' | 'evening';
 }
 
 export interface UpdateCoursePayload {

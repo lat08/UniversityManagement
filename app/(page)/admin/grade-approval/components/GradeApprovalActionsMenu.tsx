@@ -3,9 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/app/components/ui';
+import { ApprovalStatus } from '../lib/types/types';
 
 interface GradeApprovalActionsMenuProps {
   gradeApprovalId: string;
+  versionStatus: ApprovalStatus;
   onView: () => void;
   onApprove: () => void;
   onReject: () => void;
@@ -14,12 +16,14 @@ interface GradeApprovalActionsMenuProps {
 }
 
 export default function GradeApprovalActionsMenu({
+  versionStatus,
   onView,
   onApprove,
   onReject,
   compact = false,
   disabled = false,
 }: GradeApprovalActionsMenuProps) {
+  const canApproveOrReject = versionStatus === 'pending';
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -77,28 +81,32 @@ export default function GradeApprovalActionsMenu({
                 <Eye className="w-4 h-4 text-blue-600" />
                 Xem chi tiết
               </button>
-              <button
-                onClick={() => {
-                  onApprove();
-                  setIsOpen(false);
-                }}
-                disabled={disabled}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                Duyệt
-              </button>
-              <button
-                onClick={() => {
-                  onReject();
-                  setIsOpen(false);
-                }}
-                disabled={disabled}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                <XCircle className="w-4 h-4 text-red-600" />
-                Từ chối
-              </button>
+              {canApproveOrReject && (
+                <>
+                  <button
+                    onClick={() => {
+                      onApprove();
+                      setIsOpen(false);
+                    }}
+                    disabled={disabled}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Duyệt
+                  </button>
+                  <button
+                    onClick={() => {
+                      onReject();
+                      setIsOpen(false);
+                    }}
+                    disabled={disabled}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <XCircle className="w-4 h-4 text-red-600" />
+                    Từ chối
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -118,26 +126,30 @@ export default function GradeApprovalActionsMenu({
       >
         <Eye className="w-4 h-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onApprove}
-        disabled={disabled}
-        className="text-gray-600 hover:text-green-600 hover:bg-green-50 disabled:text-gray-400 disabled:hover:bg-transparent"
-        title="Duyệt"
-      >
-        <CheckCircle className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onReject}
-        disabled={disabled}
-        className="text-gray-600 hover:text-red-600 hover:bg-red-50 disabled:text-gray-400 disabled:hover:bg-transparent"
-        title="Từ chối"
-      >
-        <XCircle className="w-4 h-4" />
-      </Button>
+      {canApproveOrReject && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onApprove}
+            disabled={disabled}
+            className="text-gray-600 hover:text-green-600 hover:bg-green-50 disabled:text-gray-400 disabled:hover:bg-transparent"
+            title="Duyệt"
+          >
+            <CheckCircle className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onReject}
+            disabled={disabled}
+            className="text-gray-600 hover:text-red-600 hover:bg-red-50 disabled:text-gray-400 disabled:hover:bg-transparent"
+            title="Từ chối"
+          >
+            <XCircle className="w-4 h-4" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }

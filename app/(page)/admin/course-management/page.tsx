@@ -45,6 +45,7 @@ export default function CourseManagementPage() {
   const [courseBatches, setCourseBatches] = useState<Batch[]>([]);
   const [courseMajors, setCourseMajors] = useState<Major[]>([]);
   const [courseSpecializations, setCourseSpecializations] = useState<Specialization[]>([]);
+  const [selectedCourseMajorIdForSpecialization, setSelectedCourseMajorIdForSpecialization] = useState<string>('');
 
   // Assignment List state
   const [assignmentSearchQuery, setAssignmentSearchQuery] = useState('');
@@ -65,6 +66,7 @@ export default function CourseManagementPage() {
   const [assignmentBatches, setAssignmentBatches] = useState<Batch[]>([]);
   const [assignmentMajors, setAssignmentMajors] = useState<Major[]>([]);
   const [assignmentSpecializations, setAssignmentSpecializations] = useState<Specialization[]>([]);
+  const [selectedAssignmentMajorIdForSpecialization, setSelectedAssignmentMajorIdForSpecialization] = useState<string>('');
 
   const { courses, loading: coursesLoading, currentPage: coursesCurrentPage, totalCount: coursesTotalCount, totalPages: coursesTotalPages, fetchCourses, setCurrentPage: setCoursesCurrentPage } = useCourses();
   const { assignments, loading: assignmentsLoading, currentPage: assignmentsCurrentPage, totalCount: assignmentsTotalCount, totalPages: assignmentsTotalPages, fetchAssignments, setCurrentPage: setAssignmentsCurrentPage } = useFacultyAssignments();
@@ -106,6 +108,7 @@ export default function CourseManagementPage() {
         setAssignmentMajors(res.data);
       }
     });
+    // Load specializations without filter initially
     coursesApi.getSpecializations().then((res) => {
       if (res.success) {
         setCourseSpecializations(res.data);
@@ -119,6 +122,48 @@ export default function CourseManagementPage() {
       if (res.success) setAssignmentInstructors(res.data);
     });
   }, []);
+
+  // Load specializations when major is selected (Course List)
+  useEffect(() => {
+    if (selectedCourseMajorIdForSpecialization) {
+      coursesApi.getSpecializations(selectedCourseMajorIdForSpecialization).then((res) => {
+        if (res.success) {
+          setCourseSpecializations(res.data);
+          // Reset specialization selection when major changes
+          setSelectedCourseSpecializationId('');
+        }
+      });
+    } else {
+      // Load all specializations when no major is selected (Tất cả ngành)
+      coursesApi.getSpecializations().then((res) => {
+        if (res.success) {
+          setCourseSpecializations(res.data);
+          // Don't reset specialization when switching to "Tất cả ngành" - keep user's selection
+        }
+      });
+    }
+  }, [selectedCourseMajorIdForSpecialization]);
+
+  // Load specializations when major is selected (Assignment List)
+  useEffect(() => {
+    if (selectedAssignmentMajorIdForSpecialization) {
+      coursesApi.getSpecializations(selectedAssignmentMajorIdForSpecialization).then((res) => {
+        if (res.success) {
+          setAssignmentSpecializations(res.data);
+          // Reset specialization selection when major changes
+          setSelectedAssignmentSpecializationId('');
+        }
+      });
+    } else {
+      // Load all specializations when no major is selected (Tất cả ngành)
+      coursesApi.getSpecializations().then((res) => {
+        if (res.success) {
+          setAssignmentSpecializations(res.data);
+          // Don't reset specialization when switching to "Tất cả ngành" - keep user's selection
+        }
+      });
+    }
+  }, [selectedAssignmentMajorIdForSpecialization]);
 
   // Course List search debounce
   useEffect(() => {
@@ -429,7 +474,7 @@ export default function CourseManagementPage() {
 
   // Filter options
   const courseBatchOptions = [
-    { value: '', label: 'Tất cả Khoá/Lớp' },
+    { value: '', label: 'Tất cả lớp' },
     ...courseBatches.map((b) => ({ value: b.batchId, label: b.batchName })),
   ];
 
@@ -454,7 +499,7 @@ export default function CourseManagementPage() {
   ];
 
   const assignmentBatchOptions = [
-    { value: '', label: 'Tất cả Khoá/Lớp' },
+    { value: '', label: 'Tất cả lớp' },
     ...assignmentBatches.map((b) => ({ value: b.batchId, label: b.batchName })),
   ];
 
@@ -526,7 +571,7 @@ export default function CourseManagementPage() {
               <Dropdown
                 options={courseBatchOptions}
                 value={selectedCourseBatchId || ''}
-                placeholder="Tất cả Khoá/Lớp"
+                placeholder="Tất cả lớp"
                 onChange={(value) => {
                   setSelectedCourseBatchId(value);
                   setCoursesCurrentPage(1);
@@ -540,6 +585,7 @@ export default function CourseManagementPage() {
                 placeholder="Tất cả Ngành"
                 onChange={(value) => {
                   setSelectedCourseMajorId(value);
+                  setSelectedCourseMajorIdForSpecialization(value);
                   setCoursesCurrentPage(1);
                 }}
               />
@@ -660,7 +706,7 @@ export default function CourseManagementPage() {
               <Dropdown
                 options={assignmentBatchOptions}
                 value={selectedAssignmentBatchId || ''}
-                placeholder="Tất cả Khoá/Lớp"
+                placeholder="Tất cả lớp"
                 onChange={(value) => {
                   setSelectedAssignmentBatchId(value);
                   setAssignmentsCurrentPage(1);
@@ -674,6 +720,7 @@ export default function CourseManagementPage() {
                 placeholder="Tất cả Ngành"
                 onChange={(value) => {
                   setSelectedAssignmentMajorId(value);
+                  setSelectedAssignmentMajorIdForSpecialization(value);
                   setAssignmentsCurrentPage(1);
                 }}
               />

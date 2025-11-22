@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef, ReactNode } from "react"
+import { useState, useEffect, useRef, ReactNode, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
 
@@ -44,8 +45,11 @@ export function DropdownSearch<T = string>({
   filterOptions,
 }: DropdownSearchProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
+  const [shouldRender, setShouldRender] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const selectedOption = value ? options.find(opt => opt.value === value) : undefined
@@ -56,23 +60,59 @@ export function DropdownSearch<T = string>({
         opt.label.toLowerCase().includes(searchQuery.toLowerCase())
       )
 
+  const updateDropdownPosition = useCallback(() => {
+    if (containerRef.current && typeof window !== 'undefined') {
+      const rect = containerRef.current.getBoundingClientRect()
+      
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.max(8, Math.min(rect.left + window.scrollX, window.innerWidth + window.scrollX - rect.width - 8)),
+        width: rect.width,
+      })
+    }
+  }, [])
+
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (
+        containerRef.current && 
+        !containerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
         setIsOpen(false)
         setSearchQuery("")
       }
     }
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-      setTimeout(() => searchInputRef.current?.focus(), 100)
-    }
+    updateDropdownPosition()
+    setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside, true)
+      searchInputRef.current?.focus()
+    }, 0)
+    window.addEventListener("resize", updateDropdownPosition)
+    window.addEventListener("scroll", updateDropdownPosition, true)
+    setShouldRender(true)
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside, true)
+      window.removeEventListener("resize", updateDropdownPosition)
+      window.removeEventListener("scroll", updateDropdownPosition, true)
     }
-  }, [isOpen])
+  }, [isOpen, updateDropdownPosition])
+
+  useEffect(() => {
+    if (!isOpen && shouldRender) {
+      const timer = setTimeout(() => {
+        setShouldRender(false)
+        setSearchQuery("")
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, shouldRender])
 
   useEffect(() => {
     if (onSearch) {
@@ -112,12 +152,24 @@ export function DropdownSearch<T = string>({
         <ChevronDown className="w-4 h-4 ml-2 text-gray-700 flex-shrink-0" />
       </button>
 
-      {isOpen && (
+      {shouldRender && typeof window !== 'undefined' && document.body && createPortal(
         <div
+          ref={dropdownRef}
           className={cn(
-            "absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 flex flex-col",
+            "fixed z-[10000] bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 flex flex-col transition-all",
+            isOpen 
+              ? "opacity-100 translate-y-0 scale-100 duration-200 ease-out" 
+              : "opacity-0 translate-y-1 scale-[0.98] duration-150 ease-in pointer-events-none",
             dropdownClassName
           )}
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            pointerEvents: isOpen ? 'auto' : 'none',
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="p-2 border-b border-gray-200">
             <div className="relative">
@@ -129,12 +181,14 @@ export function DropdownSearch<T = string>({
                 onChange={handleSearchChange}
                 placeholder={searchPlaceholder}
                 className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-600 text-sm"
+                onMouseDown={(e) => e.stopPropagation()}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onMouseDown={(e) => e.stopPropagation()}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -146,9 +200,15 @@ export function DropdownSearch<T = string>({
             {showEmptyOption && (
               <button
                 type="button"
-                onClick={() => handleSelect(undefined as T)}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  if (!disabled) {
+                    handleSelect(undefined as T)
+                  }
+                }}
                 className={cn(
-                  "w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors",
+                  "w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors first:rounded-t-lg",
                   value === undefined && "bg-blue-50 text-blue-700 font-medium"
                 )}
               >
@@ -160,14 +220,22 @@ export function DropdownSearch<T = string>({
                 Không tìm thấy
               </div>
             ) : (
-              filteredOptions.map((option) => (
+              filteredOptions.map((option, index) => (
                 <button
                   key={String(option.value)}
                   type="button"
-                  onClick={() => !option.disabled && handleSelect(option.value)}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (!option.disabled && !disabled) {
+                      handleSelect(option.value)
+                    }
+                  }}
                   disabled={option.disabled}
                   className={cn(
                     "w-full text-left px-4 py-2.5 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors",
+                    !showEmptyOption && index === 0 && "first:rounded-t-lg",
+                    index === filteredOptions.length - 1 && "last:rounded-b-lg",
                     option.disabled && "opacity-50 cursor-not-allowed",
                     value === option.value && "bg-blue-50 text-blue-700 font-medium"
                   )}
@@ -177,7 +245,8 @@ export function DropdownSearch<T = string>({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
