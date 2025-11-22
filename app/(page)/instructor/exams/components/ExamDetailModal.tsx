@@ -13,6 +13,7 @@ import { useExamEntryDetail } from "../lib/hooks/useExamEntries";
 import { useExamActions } from "../lib/hooks/useExamActions";
 import { EXAM_TYPE_LABELS, ENTRY_STATUS_LABELS, ENTRY_STATUS_COLORS } from "../lib/constants";
 import { formatDate } from "@/lib/utils/format";
+import toast from 'react-hot-toast';
 
 interface ExamDetailModalProps {
   readonly examEntryId: string | null;
@@ -32,9 +33,12 @@ export function ExamDetailModal({
 
   if (!isOpen || !examEntryId) return null;
 
-  const handleDownload = async (fileType: 'question' | 'answer') => {
-    if (!examEntryId) return;
-    await downloadExamFile(examEntryId, fileType);
+  const handleDownload = (fileUrl: string, fileName?: string) => {
+    if (!fileUrl) {
+      toast.error('Không tìm thấy đường dẫn file');
+      return;
+    }
+    downloadExamFile(fileUrl, fileName);
   };
 
   return (
@@ -185,15 +189,20 @@ export function ExamDetailModal({
                       <p className="text-xs text-gray-500">Đã tải lên</p>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownload('question')}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    Tải xuống
-                  </Button>
+                  {examEntryDetail.questionFilePath && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(
+                        examEntryDetail.questionFilePath!,
+                        examEntryDetail.questionFilePath?.split('/').pop() || 'de_thi.pdf'
+                      )}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      Tải xuống
+                    </Button>
+                  )}
                 </div>
 
                 {examEntryDetail.answerFilePath && (
@@ -211,15 +220,20 @@ export function ExamDetailModal({
                         <p className="text-xs text-gray-500">Đã tải lên</p>
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload('answer')}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <Download className="w-4 h-4" />
-                      Tải xuống
-                    </Button>
+                    {examEntryDetail.answerFilePath && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(
+                          examEntryDetail.answerFilePath!,
+                          examEntryDetail.answerFilePath?.split('/').pop() || 'dap_an.pdf'
+                        )}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Download className="w-4 h-4" />
+                        Tải xuống
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/utils/format";
 
 interface ExamCardProps {
   exam: ExamEntry;
-  onDownload?: (id: string, fileType: 'question' | 'answer') => void;
+  onDownload?: (fileUrl: string, fileName?: string) => void;
   onResubmit?: (id: string) => void;
   onView?: (id: string) => void;
   animationDelay?: number;
@@ -82,24 +82,28 @@ const ExamCardComponent = ({
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full sm:w-auto sm:flex-shrink-0">
           {exam.entryStatus === "approved" && (
             <>
-              <Button
-                variant="outline"
-                onClick={() => onDownload?.(exam.examEntryId, 'question')}
-                className="flex items-center gap-1.5 sm:gap-2 border-gray-300 flex-1 sm:flex-none text-xs sm:text-sm"
-                size="sm"
-              >
-                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="truncate">Tải đề</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => onDownload?.(exam.examEntryId, 'answer')}
-                className="flex items-center gap-1.5 sm:gap-2 border-gray-300 flex-1 sm:flex-none text-xs sm:text-sm"
-                size="sm"
-              >
-                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="truncate">Tải đáp án</span>
-              </Button>
+              {exam.questionFilePath && (
+                <Button
+                  variant="outline"
+                  onClick={() => onDownload?.(exam.questionFilePath!, `de_thi_${exam.examEntryId}.pdf`)}
+                  className="flex items-center gap-1.5 sm:gap-2 border-gray-300 flex-1 sm:flex-none text-xs sm:text-sm"
+                  size="sm"
+                >
+                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">Tải đề</span>
+                </Button>
+              )}
+              {exam.answerFilePath && (
+                <Button
+                  variant="outline"
+                  onClick={() => onDownload?.(exam.answerFilePath!, `dap_an_${exam.examEntryId}.pdf`)}
+                  className="flex items-center gap-1.5 sm:gap-2 border-gray-300 flex-1 sm:flex-none text-xs sm:text-sm"
+                  size="sm"
+                >
+                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">Tải đáp án</span>
+                </Button>
+              )}
             </>
           )}
           {exam.entryStatus === "rejected" && (

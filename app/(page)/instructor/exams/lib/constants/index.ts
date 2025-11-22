@@ -3,8 +3,6 @@ export const EXAMS_API = {
   GET_EXAM_ENTRY_DETAIL: (examEntryId: string) => `/v1/instructor/exam-entries/${examEntryId}`,
   UPLOAD_EXAM_ENTRY: '/v1/instructor/exam-entries',
   UPDATE_EXAM_ENTRY: (examEntryId: string) => `/v1/instructor/exam-entries/${examEntryId}`,
-  DOWNLOAD_EXAM_FILE: (examEntryId: string, fileType: 'question' | 'answer') => 
-    `/v1/instructor/exam-entries/${examEntryId}/download?fileType=${fileType}`,
 } as const;
 
 export const EXAM_TYPE_LABELS: Record<string, string> = {
