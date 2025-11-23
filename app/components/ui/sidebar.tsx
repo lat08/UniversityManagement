@@ -57,7 +57,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
         title: "TỔNG QUAN",
         items: [
           { icon: Home, label: "Bảng điều khiển", href: "/admin/dashboard" },
-          { icon: Bell, label: "Thông báo", href: "/admin/notifications" },
+          { icon: Bell, label: "Quản lý thông báo", href: "/admin/notification-management" },
           { icon: BarChart3, label: "Báo cáo thống kê", href: "/admin/reports" },
         ],
       },

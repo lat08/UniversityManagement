@@ -9,4 +9,5 @@ export { SearchInput, type SearchInputProps } from "./search-input"
 export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./dialog"
 export { Button, buttonVariants } from "./button"
 export { Input } from "./input"
+export { Textarea } from "./textarea"
 
