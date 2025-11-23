@@ -1,0 +1,140 @@
+import { api } from '@/lib/api/client';
+import type {
+  Notification,
+  CreateNotificationDto,
+  UpdateNotificationDto,
+  NotificationHistoryFilterDto,
+  ApiResponse,
+  PagedResult,
+  NotificationHistoryResponse,
+} from '../types/types';
+
+export const notificationsApi = {
+  // POST /v1/admin/notifications/save - Lưu nháp thông báo
+  save: async (dto: CreateNotificationDto): Promise<ApiResponse<Notification>> => {
+    try {
+      const response = await api.post<any>('/v1/admin/notifications/save', dto);
+      const responseData = response.data;
+      
+      // Transform response to match expected format
+      if (responseData.isSuccess !== undefined && responseData.success === undefined) {
+        return {
+          ...responseData,
+          success: responseData.isSuccess,
+          message: responseData.resultMessage || responseData.message || '',
+        };
+      }
+      
+      return responseData;
+    } catch (error: any) {
+      // Re-throw with better error message
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        const errorMessage = errorData.message || errorData.resultMessage || errorData.error || 'Lưu nháp thông báo thất bại';
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
+  },
+
+  // POST /v1/admin/notifications/{scheduleId}/send - Gửi thông báo
+  send: async (scheduleId: string): Promise<ApiResponse<Notification>> => {
+    const response = await api.post<ApiResponse<Notification>>(`/v1/admin/notifications/${scheduleId}/send`);
+    return response.data;
+  },
+
+  // PUT /v1/admin/notifications/{scheduleId} - Cập nhật thông báo
+  update: async (scheduleId: string, dto: UpdateNotificationDto): Promise<ApiResponse<Notification>> => {
+    try {
+      const response = await api.put<any>(`/v1/admin/notifications/${scheduleId}`, dto);
+      const responseData = response.data;
+      
+      // Transform response to match expected format
+      if (responseData.isSuccess !== undefined && responseData.success === undefined) {
+        return {
+          ...responseData,
+          success: responseData.isSuccess,
+          message: responseData.resultMessage || responseData.message || '',
+        };
+      }
+      
+      return responseData;
+    } catch (error: any) {
+      // Re-throw with better error message
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        const errorMessage = errorData.message || errorData.resultMessage || errorData.error || 'Cập nhật thông báo thất bại';
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
+  },
+
+  // POST /v1/admin/notifications/{scheduleId}/archive - Lưu trữ thông báo
+  archive: async (scheduleId: string): Promise<ApiResponse<Notification>> => {
+    const response = await api.post<ApiResponse<Notification>>(`/v1/admin/notifications/${scheduleId}/archive`);
+    return response.data;
+  },
+
+  // POST /v1/admin/notifications/{scheduleId}/cancel - Hủy thông báo
+  cancel: async (scheduleId: string): Promise<ApiResponse<Notification>> => {
+    const response = await api.post<ApiResponse<Notification>>(`/v1/admin/notifications/${scheduleId}/cancel`);
+    return response.data;
+  },
+
+  // GET /v1/admin/notifications - Lấy lịch sử thông báo
+  getHistory: async (filter: NotificationHistoryFilterDto = {}): Promise<ApiResponse<NotificationHistoryResponse>> => {
+    const queryParams: Record<string, string> = {};
+    
+    if (filter.searchTerm) {
+      queryParams.searchTerm = filter.searchTerm;
+    }
+    if (filter.targetType) {
+      queryParams.targetType = filter.targetType;
+    }
+    if (filter.status) {
+      queryParams.status = filter.status;
+    }
+    if (filter.pageIndex) {
+      queryParams.pageIndex = filter.pageIndex.toString();
+    }
+    if (filter.pageSize) {
+      queryParams.pageSize = filter.pageSize.toString();
+    }
+
+    const response = await api.get<ApiResponse<NotificationHistoryResponse>>('/v1/admin/notifications', {
+      params: queryParams,
+    });
+    
+    // Transform response to match expected format if needed
+    const responseData = response.data;
+    if (responseData.isSuccess !== undefined && responseData.success === undefined) {
+      // Transform isSuccess format to success format for consistency
+      return {
+        ...responseData,
+        success: responseData.isSuccess,
+        message: responseData.resultMessage || responseData.message || '',
+      };
+    }
+    
+    return responseData;
+  },
+
+  // GET /v1/admin/notifications/{scheduleId} - Lấy chi tiết thông báo
+  getDetail: async (scheduleId: string): Promise<ApiResponse<Notification>> => {
+    const response = await api.get<ApiResponse<Notification>>(`/v1/admin/notifications/${scheduleId}`);
+    
+    // Transform response to match expected format if needed
+    const responseData = response.data;
+    if (responseData.isSuccess !== undefined && responseData.success === undefined) {
+      return {
+        ...responseData,
+        success: responseData.isSuccess,
+        message: responseData.resultMessage || responseData.message || '',
+      };
+    }
+    
+    return responseData;
+  },
+};
+

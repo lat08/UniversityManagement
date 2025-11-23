@@ -7,17 +7,17 @@ import {
   GetInstructorsResponse,
   GetClassesParams,
   GetClassesResponse,
-  GetCourseClassesParams,
   GetCourseClassesResponse,
   GetDepartmentsParams,
   GetDepartmentsResponse,
   GetFacultiesResponse,
   GetInstructorsParams,
-  GetInstructorsResponse,
   GetSemestersResponse,
   GetSubjectsParams,
+  GetSubjectsResponse,
   GetCourseClassesBySubjectParams,
-  GetInstructorsParams,
+  GetStudentsParams,
+  GetStudentsResponse,
 } from '../types/common';
 
 export const commonApi = {
@@ -92,6 +92,104 @@ export const commonApi = {
       },
     });
     return response.data;
+  },
+
+  getStudents: async (params?: GetStudentsParams): Promise<GetStudentsResponse> => {
+    try {
+      // Use searchKeyword if provided, otherwise fall back to searchTerm for backward compatibility
+      const searchKeyword = params?.searchKeyword || params?.searchTerm;
+      
+      const response = await api.get<any>('/v1/admin/students', {
+        params: {
+          searchKeyword: searchKeyword || undefined,
+          facultyId: params?.facultyId || undefined,
+          departmentId: params?.departmentId || undefined,
+          academicYearId: params?.academicYearId || undefined,
+          classId: params?.classId || undefined,
+          trainingSystemId: params?.trainingSystemId || undefined,
+          enrollmentStatus: params?.enrollmentStatus || undefined,
+          nearestYearsCount: params?.nearestYearsCount || undefined,
+          pageNumber: params?.pageNumber || 1,
+          pageSize: params?.pageSize || 100, // Get more results for dropdown
+        },
+      });
+      
+      // Transform response to match expected format
+      // Response structure: { success: true, data: { students: { items: [...], totalCount: ..., ... }, ... } }
+      if (response.data?.success && response.data?.data) {
+        const responseData = response.data.data;
+        
+        // Check for students.items (actual structure from API)
+        let studentsArray: any[] | null = null;
+        
+        if (responseData.students?.items && Array.isArray(responseData.students.items)) {
+          // Actual structure: data.students.items
+          studentsArray = responseData.students.items;
+        } else if (responseData.Students?.items && Array.isArray(responseData.Students.items)) {
+          // Fallback for capital S
+          studentsArray = responseData.Students.items;
+        } else if (responseData.Students && Array.isArray(responseData.Students)) {
+          // Fallback: direct Students array
+          studentsArray = responseData.Students;
+        } else if (responseData.students && Array.isArray(responseData.students)) {
+          // Fallback: direct students array
+          studentsArray = responseData.students;
+        } else if (Array.isArray(responseData)) {
+          // Fallback: if data is directly an array (for backward compatibility)
+          studentsArray = responseData;
+        }
+        
+        if (studentsArray && studentsArray.length > 0) {
+          const mappedStudents = studentsArray.map((s: any) => {
+            return {
+              studentId: s.studentId || s.id || s.userId || s.StudentId,
+              studentCode: s.studentCode || s.code || s.StudentCode || s.Code,
+              fullName: s.fullName || s.name || s.FullName || s.Name,
+              name: s.name || s.fullName || s.Name || s.FullName,
+              id: s.studentId || s.id || s.userId || s.StudentId,
+              userId: s.userId || s.studentId || s.UserId || s.StudentId,
+              className: s.className || s.class?.className || s.ClassName || s.Class?.ClassName || s.ClassCode,
+              departmentName: s.departmentName || s.department?.departmentName || s.DepartmentName || s.Department?.DepartmentName,
+              facultyName: s.facultyName || s.faculty?.facultyName || s.FacultyName || s.Faculty?.FacultyName,
+            };
+          });
+          
+          return {
+            success: response.data.success,
+            message: response.data.message || 'Lấy danh sách sinh viên thành công',
+            data: mappedStudents,
+          };
+        }
+      }
+      
+      // Log error if we reach here
+      console.warn('No students found in response:', {
+        hasData: !!response.data?.data,
+        dataKeys: response.data?.data ? Object.keys(response.data.data) : [],
+        hasStudents: !!response.data?.data?.students,
+        studentsKeys: response.data?.data?.students ? Object.keys(response.data.data.students) : [],
+        hasItems: !!response.data?.data?.students?.items,
+        itemsCount: response.data?.data?.students?.items?.length || 0,
+      });
+      
+      // Fallback: return empty array if structure doesn't match
+      return {
+        success: false,
+        message: 'Không thể lấy danh sách sinh viên - cấu trúc response không đúng',
+        data: [],
+      };
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as any;
+        console.error('Error response:', err.response?.data);
+      }
+      return {
+        success: false,
+        message: 'Lỗi khi lấy danh sách sinh viên',
+        data: [],
+      };
+    }
   },
 };
 
