@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/app/components/ui';
 import { X } from 'lucide-react';
 import { examSchedulesApi } from '../lib/api/examSchedulesApi';
-import { getStatusDisplay, getExamFormatLabel } from '../lib/types/types';
+import { getStatusDisplay, getExamFormatLabel, type ExamScheduleDetail } from '../lib/types/types';
 import { toast } from 'react-hot-toast';
 
 interface ViewExamScheduleDetailModalProps {
@@ -19,7 +19,7 @@ export const ViewExamScheduleDetailModal = ({
   onClose,
 }: ViewExamScheduleDetailModalProps) => {
   const [loading, setLoading] = useState(false);
-  const [detail, setDetail] = useState<any>(null);
+  const [detail, setDetail] = useState<ExamScheduleDetail | null>(null);
 
   useEffect(() => {
     if (isOpen && examScheduleId) {
@@ -27,6 +27,7 @@ export const ViewExamScheduleDetailModal = ({
     } else {
       setDetail(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, examScheduleId]);
 
   const loadDetail = async () => {
@@ -35,8 +36,9 @@ export const ViewExamScheduleDetailModal = ({
     try {
       const data = await examSchedulesApi.getById(examScheduleId);
       setDetail(data);
-    } catch (error: any) {
-      toast.error(error.message || 'Không thể tải chi tiết lịch thi');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Không thể tải chi tiết lịch thi';
+      toast.error(errorMessage);
       onClose();
     } finally {
       setLoading(false);
@@ -74,7 +76,7 @@ export const ViewExamScheduleDetailModal = ({
     }
   };
 
-  const statusDisplay = detail ? getStatusDisplay(detail.status) : null;
+  const statusDisplay = detail && detail.status ? getStatusDisplay(detail.status) : null;
 
   return (
     <div
@@ -160,7 +162,7 @@ export const ViewExamScheduleDetailModal = ({
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">Hình thức thi</label>
                 <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
-                  {getExamFormatLabel(detail.examFormat)}
+                  {getExamFormatLabel(detail.examFormat || '')}
                 </div>
               </div>
 

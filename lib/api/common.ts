@@ -72,11 +72,11 @@ export const commonApi = {
     return response.data;
   },
 
-  getCourseClassesBySubject: async (params: GetCourseClassesBySubjectParams): Promise<GetCourseClassesBySubjectResponse> => {
+  getCourseClassesBySubject: async (params?: GetCourseClassesBySubjectParams): Promise<GetCourseClassesBySubjectResponse> => {
     const response = await api.get<GetCourseClassesBySubjectResponse>('/v1/common/course-classes', {
       params: {
-        subjectId: params.subjectId,
-        semesterId: params.semesterId || undefined,
+        subjectId: params?.subjectId || undefined,
+        semesterId: params?.semesterId || undefined,
       },
     });
     return response.data;

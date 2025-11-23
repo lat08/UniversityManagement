@@ -68,6 +68,7 @@ export interface CourseClass {
 export interface Instructor {
   instructorId: string;
   instructorCode?: string;
+  code?: string; // Alternative field name
   instructorName?: string;
   fullName?: string;
   name?: string;
@@ -112,7 +113,7 @@ export interface GetSubjectsParams {
 }
 
 export interface GetCourseClassesBySubjectParams {
-  subjectId: string;
+  subjectId?: string;
   semesterId?: string;
 }
 

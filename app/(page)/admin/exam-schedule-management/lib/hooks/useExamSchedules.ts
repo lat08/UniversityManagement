@@ -26,9 +26,12 @@ export const useExamSchedules = () => {
         setTotalCount(0);
         setTotalPages(0);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching exam schedules:', error);
-      console.error('Error details:', error?.response?.data || error?.message);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const apiError = error as { response?: { data?: unknown }; message?: string };
+        console.error('Error details:', apiError.response?.data || apiError.message);
+      }
       setExamSchedules([]);
       setTotalCount(0);
       setTotalPages(0);

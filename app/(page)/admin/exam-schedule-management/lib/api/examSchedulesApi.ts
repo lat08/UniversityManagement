@@ -1,6 +1,5 @@
 import { api } from '@/lib/api/client';
 import type {
-  ExamSchedule,
   ExamScheduleDetail,
   ApiResponse,
   GetExamSchedulesParams,
@@ -11,6 +10,21 @@ import type {
   BulkCancelDto,
   BulkActionResultDto,
 } from '../types/types';
+
+interface ApiResponseData {
+  Success?: boolean;
+  success?: boolean;
+  Message?: string;
+  message?: string;
+  Data?: unknown;
+  data?: unknown;
+  TotalCount?: number;
+  totalCount?: number;
+  PageNumber?: number;
+  pageNumber?: number;
+  PageSize?: number;
+  pageSize?: number;
+}
 
 export const examSchedulesApi = {
   // GET /v1/admin/exam-schedules - Lấy danh sách lịch thi
@@ -35,7 +49,7 @@ export const examSchedulesApi = {
     if (status) queryParams.status = status;
     if (searchTerm) queryParams.searchTerm = searchTerm;
 
-    const response = await api.get<any>('/v1/admin/exam-schedules', {
+    const response = await api.get<ApiResponseData>('/v1/admin/exam-schedules', {
       params: queryParams,
     });
 
@@ -68,7 +82,7 @@ export const examSchedulesApi = {
 
   // GET /v1/admin/exam-schedules/{id} - Lấy chi tiết lịch thi
   getById: async (id: string): Promise<ExamScheduleDetail> => {
-    const response = await api.get<any>(`/v1/admin/exam-schedules/${id}`);
+    const response = await api.get<ApiResponseData>(`/v1/admin/exam-schedules/${id}`);
     
     // Backend returns ApiResponse<AdminExamScheduleDetailDto> with PascalCase
     const responseData = response.data;
@@ -76,8 +90,8 @@ export const examSchedulesApi = {
     const message = responseData.Message ?? responseData.message ?? '';
     const data = responseData.Data ?? responseData.data;
     
-    if (success && data) {
-      return data;
+    if (success && data && typeof data === 'object') {
+      return data as ExamScheduleDetail;
     }
     throw new Error(message || 'Không tìm thấy lịch thi');
   },
@@ -103,22 +117,26 @@ export const examSchedulesApi = {
         notes: payload.notes || undefined,
       };
 
-      const response = await api.post<any>('/v1/admin/exam-schedules', backendPayload);
+      const response = await api.post<ApiResponseData>('/v1/admin/exam-schedules', backendPayload);
       
       // Backend returns ApiResponse<Guid> with PascalCase
       const responseData = response.data;
+      const dataValue = responseData.Data ?? responseData.data;
       return {
         success: responseData.Success ?? responseData.success ?? false,
         message: responseData.Message ?? responseData.message ?? '',
-        data: responseData.Data ?? responseData.data ?? '',
+        data: typeof dataValue === 'string' ? dataValue : '',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Log error details in development
       if (process.env.NODE_ENV === 'development') {
         console.error('Error creating exam schedule:', error);
-        if (error.response) {
-          console.error('Response status:', error.response.status);
-          console.error('Response data:', error.response.data);
+        if (error && typeof error === 'object' && 'response' in error) {
+          const apiError = error as { response?: { status?: number; data?: unknown } };
+          if (apiError.response) {
+            console.error('Response status:', apiError.response.status);
+            console.error('Response data:', apiError.response.data);
+          }
         }
       }
       throw error;
@@ -128,7 +146,7 @@ export const examSchedulesApi = {
   // PUT /v1/admin/exam-schedules/{id} - Cập nhật lịch thi
   update: async (id: string, payload: UpdateExamSchedulePayload): Promise<ApiResponse<null>> => {
     // ASP.NET Core uses camelCase for JSON by default
-    const backendPayload: any = {};
+    const backendPayload: Record<string, unknown> = {};
     if (payload.roomId !== undefined) backendPayload.roomId = payload.roomId;
     if (payload.examDate !== undefined) backendPayload.examDate = payload.examDate;
     if (payload.examTime !== undefined) backendPayload.examTime = payload.examTime;
@@ -137,14 +155,14 @@ export const examSchedulesApi = {
     if (payload.proctorIds !== undefined) backendPayload.proctorIds = payload.proctorIds;
     if (payload.notes !== undefined) backendPayload.notes = payload.notes || undefined;
 
-    const response = await api.put<any>(`/v1/admin/exam-schedules/${id}`, backendPayload);
+    const response = await api.put<ApiResponseData>(`/v1/admin/exam-schedules/${id}`, backendPayload);
     
     // Backend returns ApiResponse<object> with PascalCase
     const responseData = response.data;
     return {
       success: responseData.Success ?? responseData.success ?? false,
       message: responseData.Message ?? responseData.message ?? '',
-      data: responseData.Data ?? responseData.data ?? null,
+      data: null,
     };
   },
 
@@ -155,13 +173,17 @@ export const examSchedulesApi = {
       ids: payload.ids,
     };
     
-    const response = await api.post<any>('/v1/admin/exam-schedules/publish', backendPayload);
+    const response = await api.post<ApiResponseData>('/v1/admin/exam-schedules/publish', backendPayload);
     
     const responseData = response.data;
+    const dataValue = responseData.Data ?? responseData.data;
+    const defaultResult: BulkActionResultDto = { successCount: 0, failureCount: 0, errorMessages: [] };
     return {
       success: responseData.Success ?? responseData.success ?? false,
       message: responseData.Message ?? responseData.message ?? '',
-      data: responseData.Data ?? responseData.data ?? { successCount: 0, failureCount: 0, errorMessages: [] },
+      data: (dataValue && typeof dataValue === 'object' && 'successCount' in dataValue) 
+        ? (dataValue as BulkActionResultDto) 
+        : defaultResult,
     };
   },
 
@@ -173,13 +195,17 @@ export const examSchedulesApi = {
       reason: payload.reason,
     };
     
-    const response = await api.post<any>('/v1/admin/exam-schedules/cancel', backendPayload);
+    const response = await api.post<ApiResponseData>('/v1/admin/exam-schedules/cancel', backendPayload);
     
     const responseData = response.data;
+    const dataValue = responseData.Data ?? responseData.data;
+    const defaultResult: BulkActionResultDto = { successCount: 0, failureCount: 0, errorMessages: [] };
     return {
       success: responseData.Success ?? responseData.success ?? false,
       message: responseData.Message ?? responseData.message ?? '',
-      data: responseData.Data ?? responseData.data ?? { successCount: 0, failureCount: 0, errorMessages: [] },
+      data: (dataValue && typeof dataValue === 'object' && 'successCount' in dataValue) 
+        ? (dataValue as BulkActionResultDto) 
+        : defaultResult,
     };
   },
 
@@ -190,15 +216,19 @@ export const examSchedulesApi = {
       ids: payload.ids,
     };
     
-    const response = await api.delete<any>('/v1/admin/exam-schedules', {
+    const response = await api.delete<ApiResponseData>('/v1/admin/exam-schedules', {
       data: backendPayload,
     });
     
     const responseData = response.data;
+    const dataValue = responseData.Data ?? responseData.data;
+    const defaultResult: BulkActionResultDto = { successCount: 0, failureCount: 0, errorMessages: [] };
     return {
       success: responseData.Success ?? responseData.success ?? false,
       message: responseData.Message ?? responseData.message ?? '',
-      data: responseData.Data ?? responseData.data ?? { successCount: 0, failureCount: 0, errorMessages: [] },
+      data: (dataValue && typeof dataValue === 'object' && 'successCount' in dataValue) 
+        ? (dataValue as BulkActionResultDto) 
+        : defaultResult,
     };
   },
 };

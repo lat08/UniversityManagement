@@ -12,7 +12,8 @@ import { examSchedulesApi } from '../lib/api/examSchedulesApi';
 import { commonApi } from '@/lib/api/common';
 import { api } from '@/lib/api/client';
 import { EXAM_FORMAT_OPTIONS, EXAM_TIME_OPTIONS } from '../lib/types/types';
-import type { Subject, Semester } from '@/lib/types/common';
+import type { Subject, Instructor } from '@/lib/types/common';
+import type { Room, CourseClass } from '../lib/types/types';
 
 interface AddExamScheduleModalProps {
   isOpen: boolean;
@@ -52,10 +53,9 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [courseClasses, setCourseClasses] = useState<any[]>([]);
-  const [rooms, setRooms] = useState<any[]>([]);
-  const [instructors, setInstructors] = useState<any[]>([]);
+  const [courseClasses, setCourseClasses] = useState<CourseClass[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [selectedProctors, setSelectedProctors] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingCourseClasses, setLoadingCourseClasses] = useState(false);
@@ -83,14 +83,12 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
   const loadInitialData = async () => {
     setLoadingData(true);
     try {
-      const [subjectsRes, semestersRes, instructorsRes] = await Promise.all([
+      const [subjectsRes, instructorsRes] = await Promise.all([
         commonApi.getSubjects(),
-        commonApi.getSemesters(),
         commonApi.getInstructors().catch(() => ({ success: false, data: [] })),
       ]);
 
       if (subjectsRes.success) setSubjects(Array.isArray(subjectsRes.data) ? subjectsRes.data : []);
-      if (semestersRes.success) setSemesters(Array.isArray(semestersRes.data) ? semestersRes.data : []);
       
       // Handle instructors response
       if (instructorsRes.success) {
@@ -129,7 +127,7 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       // Merge all rooms and remove duplicates by roomId
       const allRooms = allRoomsArrays.flat();
       const uniqueRooms = Array.from(
-        new Map(allRooms.map((room: any) => [room.roomId || room.id, room])).values()
+        new Map(allRooms.map((room: Room) => [room.roomId || room.id || '', room])).values()
       );
       setRooms(uniqueRooms);
     } catch (error) {
@@ -137,7 +135,6 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       toast.error('Không thể tải dữ liệu');
       // Ensure arrays are set to empty on error
       setSubjects([]);
-      setSemesters([]);
       setInstructors([]);
       setRooms([]);
     } finally {
@@ -302,17 +299,20 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       } else {
         toast.error(response.message || 'Thêm lịch thi thất bại');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating exam schedule:', error);
       
       // Debug: Log full error response
       console.log('=== Add Exam Schedule - Error Details ===');
-      if (error?.response) {
-        console.log('Status:', error.response.status);
-        console.log('Status Text:', error.response.statusText);
-        console.log('Response Data:', JSON.stringify(error.response.data, null, 2));
-        if (error.response.data?.errors) {
-          console.log('Validation Errors:', JSON.stringify(error.response.data.errors, null, 2));
+      if (error && typeof error === 'object' && 'response' in error) {
+        const apiError = error as { response?: { status?: number; statusText?: string; data?: { errors?: unknown } } };
+        if (apiError.response) {
+          console.log('Status:', apiError.response.status);
+          console.log('Status Text:', apiError.response.statusText);
+          console.log('Response Data:', JSON.stringify(apiError.response.data, null, 2));
+          if (apiError.response.data?.errors) {
+            console.log('Validation Errors:', JSON.stringify(apiError.response.data.errors, null, 2));
+          }
         }
       }
       console.log('==========================================');
@@ -320,16 +320,19 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       // Handle different error response formats
       let errorMessage = 'Đã xảy ra lỗi khi thêm lịch thi';
       
-      if (error?.response?.data) {
-        const errorData = error.response.data;
+      if (error && typeof error === 'object' && 'response' in error) {
+        const apiError = error as { response?: { status?: number; data?: { errors?: Record<string, string | string[]>; message?: string; title?: string; detail?: string } } };
+        const errorData = apiError.response?.data;
         
+        if (errorData) {
         // Handle ASP.NET Core validation errors (ModelState)
-        if (errorData.errors) {
-          console.log('Parsing validation errors:', errorData.errors);
+          const errors = errorData.errors;
+          if (errors) {
+            console.log('Parsing validation errors:', errors);
           // errors object structure: { "FieldName": ["Error message 1", "Error message 2"] }
           const errorMessages: string[] = [];
-          Object.keys(errorData.errors).forEach((field) => {
-            const fieldErrors = errorData.errors[field];
+            Object.keys(errors).forEach((field) => {
+              const fieldErrors = errors[field];
             if (Array.isArray(fieldErrors)) {
               fieldErrors.forEach((msg: string) => {
                 errorMessages.push(`${field}: ${msg}`);
@@ -344,7 +347,7 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
             console.log('Formatted error messages:', errorMessages);
           } else {
             // Fallback: try to extract all error messages
-            const validationErrors = Object.values(errorData.errors)
+              const validationErrors = Object.values(errors)
               .flat()
               .filter((msg): msg is string => typeof msg === 'string');
             if (validationErrors.length > 0) {
@@ -364,10 +367,11 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
           }
         }
         // Handle 500 Internal Server Error - show backend message if available
-        else if (error.response.status === 500 && errorData.message) {
+          else if (apiError.response?.status === 500 && errorData.message) {
           errorMessage = errorData.message || 'Lỗi máy chủ. Vui lòng thử lại sau.';
+          }
         }
-      } else if (error?.message) {
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       
@@ -397,7 +401,10 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
     label: `${s.subjectCode} - ${s.subjectName}`,
   })) : [];
 
-  const courseClassOptions = Array.isArray(courseClasses) ? courseClasses.map((cc) => {
+  const courseClassOptions = Array.isArray(courseClasses) ? courseClasses
+    .map((cc) => {
+      const id = cc.courseClassId || cc.id;
+      if (!id) return null;
     const code = cc.courseClassCode || cc.code || '';
     const semesterName = cc.semesterName || '';
     
@@ -407,22 +414,34 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       : code;
     
     return {
-      value: cc.courseClassId || cc.id,
+        value: id,
       label: label,
     };
-  }) : [];
+    })
+    .filter((opt): opt is { value: string; label: string } => opt !== null) : [];
 
   const roomOptions = Array.isArray(rooms) ? rooms
     .filter((r) => r.roomStatus !== 'deleted' && r.roomStatus !== 'inactive') // Filter available rooms
-    .map((r) => ({
-      value: r.roomId || r.id,
+    .map((r) => {
+      const id = r.roomId || r.id;
+      if (!id) return null;
+      return {
+        value: id,
       label: `${r.roomCode || r.code || ''} - ${r.roomName || r.name || ''}${r.capacity ? ` (${r.capacity} chỗ)` : ''}`.trim(),
-    })) : [];
+      };
+    })
+    .filter((opt): opt is { value: string; label: string } => opt !== null) : [];
 
-  const instructorOptions = Array.isArray(instructors) ? instructors.map((i) => ({
-    value: i.instructorId || i.id || i.userId,
+  const instructorOptions = Array.isArray(instructors) ? instructors
+    .map((i) => {
+      const id = i.instructorId || i.id || i.userId;
+      if (!id) return null;
+      return {
+        value: id,
     label: `${i.instructorCode || i.code || ''} - ${i.instructorName || i.fullName || i.name || ''}`.trim(),
-  })) : [];
+      };
+    })
+    .filter((opt): opt is { value: string; label: string } => opt !== null) : [];
 
   const handleProctorToggle = (instructorId: string) => {
     const newProctors = selectedProctors.includes(instructorId)
@@ -601,7 +620,7 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
                     value={formValues.roomId || ''}
                     placeholder="Chọn phòng thi"
                     searchPlaceholder="Tìm kiếm phòng thi..."
-                    onChange={(value) => setValue('roomId', value)}
+                    onChange={(value) => setValue('roomId', value || '')}
                   />
                   {errors.roomId && (
                     <p className="mt-1 text-xs text-red-500">{errors.roomId.message}</p>

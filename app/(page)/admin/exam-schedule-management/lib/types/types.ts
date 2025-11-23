@@ -173,3 +173,36 @@ export const getStatusDisplay = (status: string) => {
   return statusMap[statusLower] || { label: status || 'Không xác định', color: 'bg-slate-100 text-slate-700 border border-slate-300' };
 };
 
+// Room type for API responses
+export interface Room {
+  roomId: string;
+  id?: string; // Alternative field name
+  roomCode: string;
+  code?: string; // Alternative field name
+  roomName: string;
+  name?: string; // Alternative field name
+  capacity?: number;
+  roomType?: string;
+  roomStatus?: string;
+  building?: {
+    buildingId: string;
+    buildingName: string;
+    buildingCode: string;
+  };
+}
+
+// CourseClass type for API responses
+export interface CourseClass {
+  courseClassId: string;
+  id?: string; // Alternative field name
+  courseClassCode: string;
+  code?: string; // Alternative field name
+  subjectId?: string;
+  subjectCode?: string;
+  subjectName?: string;
+  semesterId?: string;
+  semesterName?: string; // Semester name for display
+  instructorId?: string;
+  instructorName?: string;
+}
+

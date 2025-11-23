@@ -36,7 +36,7 @@ export const ExportExcelModal = ({ isOpen, onClose }: ExportExcelModalProps) => 
           setSelectedSemesterId(currentSemester.semesterId);
         }
       }
-    } catch (error) {
+    } catch {
       toast.error('Không thể tải danh sách học kỳ');
     } finally {
       setLoading(false);
@@ -86,8 +86,9 @@ export const ExportExcelModal = ({ isOpen, onClose }: ExportExcelModalProps) => 
       // For now, just show a success message
       toast.success('Xuất file Excel thành công!');
       handleClose();
-    } catch (error: any) {
-      toast.error(error?.message || 'Xuất file thất bại');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Xuất file thất bại';
+      toast.error(errorMessage);
     } finally {
       setIsExporting(false);
     }

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, FileDown, Edit2, Trash2, X, CircleCheck } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, FileDown, Trash2, X, CircleCheck } from 'lucide-react';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { AddExamScheduleModal } from './components/AddExamScheduleModal';
@@ -22,8 +22,8 @@ import { useExamSchedules } from './lib/hooks/useExamSchedules';
 import { examSchedulesApi } from './lib/api/examSchedulesApi';
 import { commonApi } from '@/lib/api/common';
 import { getStatusDisplay, STATUS_OPTIONS, getExamFormatLabel } from './lib/types/types';
-import type { ExamSchedule, ExamScheduleDetail } from './lib/types/types';
-import type { Semester, Class as ClassType } from '@/lib/types/common';
+import type { ExamSchedule, ExamScheduleDetail, CourseClass } from './lib/types/types';
+import type { Semester } from '@/lib/types/common';
 
 export default function ExamScheduleManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +51,7 @@ export default function ExamScheduleManagementPage() {
   const [deletingExamSchedule, setDeletingExamSchedule] = useState<ExamSchedule | null>(null);
   const [selectedExamScheduleIds, setSelectedExamScheduleIds] = useState<Set<string>>(new Set());
   const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [classes, setClasses] = useState<ClassType[]>([]);
+  const [courseClasses, setCourseClasses] = useState<CourseClass[]>([]);
 
   const { examSchedules, loading, currentPage, totalCount, totalPages, fetchExamSchedules, setCurrentPage } = useExamSchedules();
 
@@ -75,13 +75,13 @@ export default function ExamScheduleManagementPage() {
 
   const loadCommonData = async () => {
     try {
-      const [semestersRes, classesRes] = await Promise.all([
+      const [semestersRes, courseClassesRes] = await Promise.all([
         commonApi.getSemesters(),
-        commonApi.getClasses(),
+        commonApi.getCourseClassesBySubject(), // Get all course classes without subjectId filter
       ]);
       if (semestersRes.success) setSemesters(semestersRes.data || []);
-      if (classesRes.success) setClasses(classesRes.data || []);
-    } catch (error) {
+      if (courseClassesRes.success) setCourseClasses(courseClassesRes.data || []);
+    } catch {
       // Silent fail
     }
   };
@@ -110,7 +110,7 @@ export default function ExamScheduleManagementPage() {
       searchTerm: searchKeyword || undefined,
       semesterId: selectedSemester || undefined,
       courseClassId: selectedClass || undefined,
-      status: selectedStatus as any || undefined,
+      status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
     });
   }, [currentPage, searchKeyword, selectedSemester, selectedClass, selectedStatus, fetchExamSchedules]);
 
@@ -158,7 +158,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: selectedStatus as any || undefined,
+        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Công bố lịch thi thất bại');
@@ -176,7 +176,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: selectedStatus as any || undefined,
+        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Hủy lịch thi thất bại');
@@ -194,7 +194,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: selectedStatus as any || undefined,
+        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Xóa lịch thi thất bại');
@@ -234,7 +234,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: selectedStatus as any || undefined,
+        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Công bố hàng loạt thất bại');
@@ -254,7 +254,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: selectedStatus as any || undefined,
+        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Hủy hàng loạt thất bại');
@@ -274,7 +274,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: selectedStatus as any || undefined,
+        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Xóa hàng loạt thất bại');
@@ -403,10 +403,19 @@ export default function ExamScheduleManagementPage() {
 
   const classOptions = [
     { value: '', label: 'Tất cả lớp' },
-    ...classes.map((c) => ({ 
-      value: c.classId, 
-      label: c.className ? `${c.classCode} - ${c.className}` : c.classCode 
-    })),
+    ...courseClasses.map((cc) => {
+      const id = cc.courseClassId || cc.id;
+      if (!id) return null;
+      const code = cc.courseClassCode || cc.code || '';
+      const semesterName = cc.semesterName || '';
+      const label = semesterName 
+        ? `${code} - ${semesterName}`
+        : code;
+      return {
+        value: id,
+        label: label,
+      };
+    }).filter((opt): opt is { value: string; label: string } => opt !== null),
   ];
 
   return (
@@ -650,7 +659,7 @@ export default function ExamScheduleManagementPage() {
             searchTerm: searchKeyword || undefined,
             semesterId: selectedSemester || undefined,
             courseClassId: selectedClass || undefined,
-            status: selectedStatus as any || undefined,
+            status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
           });
         }}
       />
@@ -669,7 +678,7 @@ export default function ExamScheduleManagementPage() {
             searchTerm: searchKeyword || undefined,
             semesterId: selectedSemester || undefined,
             courseClassId: selectedClass || undefined,
-            status: selectedStatus as any || undefined,
+            status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
           });
         }}
       />
