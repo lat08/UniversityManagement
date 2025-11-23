@@ -68,7 +68,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
           { icon: GraduationCap, label: "Quản lý chuyên ngành", href: "/admin/major-management" },
           { icon: Building2, label: "Quản lý tòa nhà", href: "/admin/building-management" },
           { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
-          { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule" },
+          { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule-management" },
           { icon: Building2, label: "Lớp học & Phân công", href: "/admin/classes" },
           { icon: BookOpen, label: "Đăng ký học phần", href: "/admin/course-registration" },
           { icon: Building2, label: "Yêu cầu phòng học", href: "/admin/room-requests" },

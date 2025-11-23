@@ -7,10 +7,14 @@ import {
   GetClassesResponse,
   GetAcademicYearsResponse,
   GetBuildingsResponse,
+  GetCourseClassesBySubjectResponse,
+  GetInstructorsResponse,
   GetClassesParams,
   GetDepartmentsParams,
   GetAcademicYearsParams,
   GetSubjectsParams,
+  GetCourseClassesBySubjectParams,
+  GetInstructorsParams,
 } from '../types/common';
 
 export const commonApi = {
@@ -48,6 +52,7 @@ export const commonApi = {
       params: {
         departmentId: params?.departmentId || undefined,
         facultyId: params?.facultyId || undefined,
+        semesterId: params?.semesterId || undefined,
       },
     });
     return response.data;
@@ -64,6 +69,25 @@ export const commonApi = {
 
   getBuildings: async (): Promise<GetBuildingsResponse> => {
     const response = await api.get<GetBuildingsResponse>('/v1/common/buildings');
+    return response.data;
+  },
+
+  getCourseClassesBySubject: async (params: GetCourseClassesBySubjectParams): Promise<GetCourseClassesBySubjectResponse> => {
+    const response = await api.get<GetCourseClassesBySubjectResponse>('/v1/common/course-classes', {
+      params: {
+        subjectId: params.subjectId,
+        semesterId: params.semesterId || undefined,
+      },
+    });
+    return response.data;
+  },
+
+  getInstructors: async (params?: GetInstructorsParams): Promise<GetInstructorsResponse> => {
+    const response = await api.get<GetInstructorsResponse>('/v1/common/instructors', {
+      params: {
+        searchString: params?.searchString || undefined,
+      },
+    });
     return response.data;
   },
 };
