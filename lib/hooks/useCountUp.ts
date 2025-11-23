@@ -5,16 +5,23 @@ import { useEffect, useState, useRef } from 'react'
 interface UseCountUpOptions {
   readonly duration?: number
   readonly start?: number
+  readonly enabled?: boolean
 }
 
 export function useCountUp(target: number, options: UseCountUpOptions = {}) {
-  const { duration = 500, start = 0 } = options
+  const { duration = 500, start = 0, enabled = true } = options
   const [count, setCount] = useState(start)
   const prevTargetRef = useRef<number | null>(null)
   const animationFrameRef = useRef<number | undefined>(undefined)
   const mountedRef = useRef(false)
 
   useEffect(() => {
+    if (!enabled) {
+      setCount(target)
+      prevTargetRef.current = target
+      return
+    }
+
     if (!mountedRef.current) {
       mountedRef.current = true
       prevTargetRef.current = start
@@ -58,7 +65,7 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [target, duration, start])
+  }, [target, duration, start, enabled])
 
   return count
 }

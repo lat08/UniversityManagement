@@ -3,7 +3,6 @@ import { api } from '@/lib/api/client';
 export interface Regulation {
   id: string;
   title: string;
-  target: string;
   description: string;
   fileUrl: string;
   fileName: string;

@@ -14,6 +14,8 @@ export interface ExamEntry {
   createdAt: string;
   reviewedAt: string | null;
   reviewerName: string | null;
+  questionFilePath?: string | null;
+  answerFilePath?: string | null;
 }
 
 export interface ExamEntryDetail extends ExamEntry {

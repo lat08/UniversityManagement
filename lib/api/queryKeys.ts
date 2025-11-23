@@ -3,9 +3,21 @@
  * Consistent cache key structure for React Query
  */
 
-import { NotificationQueryParams } from "@/lib/types/notification";
+import { NotificationQueryParams } from '@/lib/types/notification';
+import { RegulationQueryParams } from '@/lib/types/regulation';
 
 export const queryKeys = {
+  common: {
+    all: ['common'] as const,
+    semesters: () => ['common', 'semesters'] as const,
+    subjects: (semesterId?: string) => ['common', 'subjects', semesterId ?? 'all'] as const,
+    faculties: () => ['common', 'faculties'] as const,
+    departments: (facultyId?: string) => ['common', 'departments', facultyId ?? 'all'] as const,
+    instructors: (searchKey?: string) => ['common', 'instructors', searchKey ?? 'all'] as const,
+    courseClasses: (subjectId?: string, semesterId?: string) =>
+      ['common', 'courseClasses', subjectId ?? 'all', semesterId ?? 'all'] as const,
+  },
+
   notifications: {
     all: ['notifications'] as const,
     lists: () => [...queryKeys.notifications.all, 'list'] as const,
@@ -63,7 +75,7 @@ export const queryKeys = {
   regulations: {
     all: ['regulations'] as const,
     lists: () => [...queryKeys.regulations.all, 'list'] as const,
-    list: (params?: { pageIndex?: number; pageSize?: number; orderBy?: number; searchTerm?: string }) => 
+    list: (params?: RegulationQueryParams) =>
       [...queryKeys.regulations.lists(), params ?? {}] as const,
     details: () => [...queryKeys.regulations.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.regulations.details(), id] as const,
@@ -159,5 +171,15 @@ export const queryKeys = {
     documentTypes: () => [...queryKeys.materials.all, 'documentTypes'] as const,
     courseClasses: (semesterId?: string) => 
       [...queryKeys.materials.all, 'courseClasses', semesterId] as const,
+  },
+
+  adminGradeApprovals: {
+    all: ['adminGradeApprovals'] as const,
+    lists: () => ['adminGradeApprovals', 'list'] as const,
+    list: (params: unknown) =>
+      ['adminGradeApprovals', 'list', params] as const,
+    details: () => ['adminGradeApprovals', 'detail'] as const,
+    detail: (gradeVersionId: string) => ['adminGradeApprovals', 'detail', gradeVersionId] as const,
+    statistics: () => ['adminGradeApprovals', 'statistics'] as const,
   },
 } as const;

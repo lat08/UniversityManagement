@@ -3,21 +3,27 @@
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/app/components/ui';
+import { ApprovalStatus } from '../lib/types/types';
 
 interface GradeApprovalActionsMenuProps {
   gradeApprovalId: string;
+  versionStatus: ApprovalStatus;
   onView: () => void;
   onApprove: () => void;
   onReject: () => void;
   compact?: boolean;
+  disabled?: boolean;
 }
 
 export default function GradeApprovalActionsMenu({
+  versionStatus,
   onView,
   onApprove,
   onReject,
   compact = false,
+  disabled = false,
 }: GradeApprovalActionsMenuProps) {
+  const canApproveOrReject = versionStatus === 'pending';
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +50,8 @@ export default function GradeApprovalActionsMenu({
           variant="ghost"
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
-          className="text-gray-600 hover:text-gray-900"
+          disabled={disabled}
+          className="text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:hover:bg-transparent"
           title="Thao tác"
         >
           <MoreVertical className="w-4 h-4" />
@@ -68,31 +75,38 @@ export default function GradeApprovalActionsMenu({
                   onView();
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                disabled={disabled}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
               >
                 <Eye className="w-4 h-4 text-blue-600" />
                 Xem chi tiết
               </button>
-              <button
-                onClick={() => {
-                  onApprove();
-                  setIsOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-              >
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                Duyệt
-              </button>
-              <button
-                onClick={() => {
-                  onReject();
-                  setIsOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-              >
-                <XCircle className="w-4 h-4 text-red-600" />
-                Từ chối
-              </button>
+              {canApproveOrReject && (
+                <>
+                  <button
+                    onClick={() => {
+                      onApprove();
+                      setIsOpen(false);
+                    }}
+                    disabled={disabled}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Duyệt
+                  </button>
+                  <button
+                    onClick={() => {
+                      onReject();
+                      setIsOpen(false);
+                    }}
+                    disabled={disabled}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <XCircle className="w-4 h-4 text-red-600" />
+                    Từ chối
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -106,29 +120,36 @@ export default function GradeApprovalActionsMenu({
         variant="ghost"
         size="icon"
         onClick={onView}
-        className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+        disabled={disabled}
+        className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 disabled:text-gray-400 disabled:hover:bg-transparent"
         title="Xem chi tiết"
       >
         <Eye className="w-4 h-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onApprove}
-        className="text-gray-600 hover:text-green-600 hover:bg-green-50"
-        title="Duyệt"
-      >
-        <CheckCircle className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onReject}
-        className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-        title="Từ chối"
-      >
-        <XCircle className="w-4 h-4" />
-      </Button>
+      {canApproveOrReject && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onApprove}
+            disabled={disabled}
+            className="text-gray-600 hover:text-green-600 hover:bg-green-50 disabled:text-gray-400 disabled:hover:bg-transparent"
+            title="Duyệt"
+          >
+            <CheckCircle className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onReject}
+            disabled={disabled}
+            className="text-gray-600 hover:text-red-600 hover:bg-red-50 disabled:text-gray-400 disabled:hover:bg-transparent"
+            title="Từ chối"
+          >
+            <XCircle className="w-4 h-4" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }

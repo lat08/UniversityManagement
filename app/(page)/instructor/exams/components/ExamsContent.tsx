@@ -114,8 +114,8 @@ export const ExamsContent = () => {
     await uploadExam(uploadData);
   };
 
-  const handleDownload = async (examEntryId: string, fileType: 'question' | 'answer') => {
-    await downloadExamFile(examEntryId, fileType);
+  const handleDownload = (fileUrl: string, fileName?: string) => {
+    downloadExamFile(fileUrl, fileName);
   };
 
   const handleView = (examEntryId: string) => {

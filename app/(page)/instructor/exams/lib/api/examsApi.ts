@@ -102,17 +102,5 @@ export const examsApi = {
     return response.data;
   },
 
-  downloadExamFile: async (
-    examEntryId: string,
-    fileType: 'question' | 'answer'
-  ): Promise<Blob> => {
-    const response = await api.get<Blob>(
-      EXAMS_API.DOWNLOAD_EXAM_FILE(examEntryId, fileType),
-      {
-        responseType: 'blob',
-      }
-    );
-    return response.data;
-  },
 };
 

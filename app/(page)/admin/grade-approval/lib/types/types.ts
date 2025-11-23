@@ -1,80 +1,126 @@
-export interface GradeApproval {
-  gradeApprovalId: string;
-  gradeSheetCode: string; // Mã bản điểm
-  courseName: string;
-  courseCode: string;
-  className: string;
-  instructorName: string;
-  semester: string;
-  studentCount: number; // Số sinh viên
-  submittedDate: string;
-  approvalStatus: 'pending' | 'approved' | 'rejected';
+import {
+  CourseClassOption,
+  Department,
+  Faculty,
+  InstructorOption,
+  Semester,
+  Subject,
+} from '@/lib/types/common';
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface GradeApprovalFilterState {
+  versionStatus?: ApprovalStatus | '';
+  semesterId?: string;
+  subjectId?: string;
+  courseClassId?: string;
+  courseId?: string;
+  facultyId?: string;
+  departmentId?: string;
+  instructorId?: string;
 }
 
-export interface Pagination {
-  currentPage: number;
-  pageSize: number;
+export interface GetGradeApprovalsParams extends GradeApprovalFilterState {
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: 'subject' | 'instructor' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  searchKey?: string;
+}
+
+export type ExportGradeApprovalsParams = Omit<GetGradeApprovalsParams, 'pageNumber' | 'pageSize' | 'sortBy' | 'sortOrder'>;
+
+export interface AdminGradeApprovalListItem {
+  gradeVersionId: string;
+  courseClassId: string;
+  versionNumber: number;
+  versionStatus: ApprovalStatus;
+  courseCode: string;
+  courseName: string;
+  className: string;
+  semesterId: string;
+  semesterName: string;
+  submittedBy: string;
+  submittedAt: string | null;
+  submissionNote?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  approvalNote?: string | null;
+  totalStudents: number;
+  studentsWithGrades: number;
+  facultyName?: string | null;
+}
+
+export interface AdminGradeApprovalList {
+  items: AdminGradeApprovalListItem[];
   totalCount: number;
+  pageNumber: number;
+  pageSize: number;
   totalPages: number;
 }
 
-export interface GradeApprovalsResponse {
-  gradeApprovals: GradeApproval[];
-  pagination: Pagination;
-  statistics?: {
-    totalApprovals: number;
-    pendingApprovals: number;
-    approvedApprovals: number;
-    rejectedApprovals: number;
-  };
+export interface AdminGradeDetailEntry {
+  enrollmentId: string;
+  mssv: string;
+  fullName: string;
+  attendanceGrade?: number | null;
+  midtermGrade?: number | null;
+  finalGrade?: number | null;
+  averageGrade?: number | null;
+  previousAttendanceGrade?: number | null;
+  previousMidtermGrade?: number | null;
+  previousFinalGrade?: number | null;
+  previousAverageGrade?: number | null;
+  note?: string | null;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-  errors?: string[];
+export interface AdminGradeVersionDetail {
+  gradeVersionId: string;
+  versionNumber: number;
+  versionStatus: ApprovalStatus;
+  submittedBy: string;
+  submittedAt: string | null;
+  submissionNote?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  approvalNote?: string | null;
+  courseClassId: string;
+  courseCode: string;
+  courseName: string;
+  className: string;
+  semesterId: string;
+  semesterName: string;
+  totalStudents: number;
+  previousVersionNumber?: number | null;
+  hasPreviousVersion: boolean;
+  students: AdminGradeDetailEntry[];
 }
 
-export interface Faculty {
-  facultyId: string;
-  facultyName: string;
-  facultyCode: string;
+export interface AdminBulkGradeActionRequest {
+  gradeVersionIds: string[];
+  approvalNote?: string;
 }
 
-export interface Department {
-  departmentId: string;
-  departmentName: string;
-  departmentCode: string;
-  facultyId: string;
-  facultyName: string;
+export interface AdminBulkGradeActionResult {
+  successCount: number;
+  failureCount: number;
+  errorMessages: string[];
 }
 
-export interface Instructor {
-  instructorId: string;
-  instructorName: string;
-  instructorCode: string;
-  email: string;
-  departmentId: string;
-  departmentName: string;
+export interface AdminGradeStatistics {
+  totalGradeVersions: number;
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
 }
 
-export interface GetGradeApprovalsParams {
-  pageNumber?: number;
-  pageSize?: number;
-  searchKeyword?: string;
-  facultyId?: string;
-  departmentId?: string;
-  instructorId?: string;
-  approvalStatus?: string;
-}
-
-export interface ExportGradeApprovalsParams {
-  searchKeyword?: string;
-  facultyId?: string;
-  departmentId?: string;
-  instructorId?: string;
-  approvalStatus?: string;
+export interface GradeApprovalDropdownContext {
+  semesters: Semester[];
+  subjects: Subject[];
+  courseClasses: CourseClassOption[];
+  faculties: Faculty[];
+  departments: Department[];
+  instructors: InstructorOption[];
 }
 
 export const APPROVAL_STATUS_OPTIONS = [
@@ -84,7 +130,7 @@ export const APPROVAL_STATUS_OPTIONS = [
   { value: 'rejected', label: 'Từ chối' },
 ];
 
-export const getApprovalStatusDisplay = (status: string) => {
+export const getApprovalStatusDisplay = (status: ApprovalStatus | string) => {
   const statusMap: Record<string, { label: string; color: string }> = {
     pending: { label: 'Chờ duyệt', color: 'bg-yellow-100 text-yellow-700' },
     approved: { label: 'Đã duyệt', color: 'bg-green-100 text-green-700' },

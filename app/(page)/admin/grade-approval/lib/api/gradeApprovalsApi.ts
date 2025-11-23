@@ -1,83 +1,164 @@
 import { api } from '@/lib/api/client';
+import { ApiResponse } from '@/lib/types/common';
 import {
-  ApiResponse,
-  GradeApprovalsResponse,
-  GetGradeApprovalsParams,
+  AdminBulkGradeActionRequest,
+  AdminBulkGradeActionResult,
+  AdminGradeApprovalList,
+  AdminGradeStatistics,
+  AdminGradeVersionDetail,
   ExportGradeApprovalsParams,
-  Faculty,
-  Department,
-  Instructor,
+  GetGradeApprovalsParams,
 } from '../types/types';
 
-export const gradeApprovalsApi = {
-  // Get grade approvals with filters
-  getGradeApprovals: async (params: GetGradeApprovalsParams): Promise<ApiResponse<GradeApprovalsResponse>> => {
-    const queryParams = new URLSearchParams();
-    
-    if (params.pageNumber) queryParams.append('PageNumber', params.pageNumber.toString());
-    if (params.pageSize) queryParams.append('PageSize', params.pageSize.toString());
-    if (params.searchKeyword) queryParams.append('SearchKeyword', params.searchKeyword);
-    if (params.facultyId) queryParams.append('FacultyId', params.facultyId);
-    if (params.departmentId) queryParams.append('DepartmentId', params.departmentId);
-    if (params.instructorId) queryParams.append('InstructorId', params.instructorId);
-    if (params.approvalStatus) queryParams.append('ApprovalStatus', params.approvalStatus);
+const sanitizeParams = (params: Record<string, string | number | undefined | null>) =>
+  Object.fromEntries(
+    Object.entries(params).filter(
+      ([, value]) => value !== undefined && value !== null && value !== '',
+    ),
+  );
 
-    const response = await api.get(`/api/grades/approvals?${queryParams.toString()}`);
-    return response.data;
-  },
+/**
+ * @api GET /v1/admin/grade-approvals
+ * @description Retrieve paginated grade approval requests for admin review.
+ * @param {GetGradeApprovalsParams} params - Filter, search, and pagination parameters.
+ * @returns {Promise<AdminGradeApprovalList>} Paginated list of grade approvals.
+ * @auth Required (Role: Admin)
+ */
+const getGradeApprovals = async (
+  params: GetGradeApprovalsParams,
+): Promise<AdminGradeApprovalList> => {
+  const response = await api.get<ApiResponse<AdminGradeApprovalList>>('/v1/admin/grade-approvals', {
+    params: sanitizeParams({
+      semesterId: params.semesterId,
+      subjectId: params.subjectId,
+      courseClassId: params.courseClassId,
+      courseId: params.courseId,
+      versionStatus: params.versionStatus,
+      searchKey: params.searchKey,
+      facultyId: params.facultyId,
+      departmentId: params.departmentId,
+      instructorId: params.instructorId,
+      sortBy: params.sortBy,
+      sortOrder: params.sortOrder,
+      pageNumber: params.pageNumber,
+      pageSize: params.pageSize,
+    }),
+  });
+  return response.data.data;
+};
 
-  // Get faculties for filter dropdown
-  getFaculties: async (): Promise<ApiResponse<Faculty[]>> => {
-    const response = await api.get('/api/faculties');
-    return response.data;
-  },
+/**
+ * @api GET /v1/admin/grade-approvals/{gradeVersionId}
+ * @description Get detailed information for a specific grade version awaiting approval.
+ * @param {string} gradeVersionId - Grade version identifier.
+ * @returns {Promise<AdminGradeVersionDetail>} Grade version detail with student breakdown.
+ * @auth Required (Role: Admin)
+ */
+const getGradeApprovalDetail = async (
+  gradeVersionId: string,
+): Promise<AdminGradeVersionDetail> => {
+  const response = await api.get<ApiResponse<AdminGradeVersionDetail>>(
+    `/v1/admin/grade-approvals/${gradeVersionId}`,
+  );
+  return response.data.data;
+};
 
-  // Get departments for filter dropdown
-  getDepartments: async (params?: { facultyId?: string }): Promise<ApiResponse<{ items: Department[] }>> => {
-    const queryParams = new URLSearchParams();
-    if (params?.facultyId) queryParams.append('FacultyId', params.facultyId);
-    
-    const response = await api.get(`/api/departments?${queryParams.toString()}`);
-    return response.data;
-  },
+/**
+ * @api GET /v1/admin/grade-approvals/statistics
+ * @description Fetch aggregated grade approval statistics (total, pending, approved, rejected).
+ * @returns {Promise<AdminGradeStatistics>} Statistics summary for dashboard cards.
+ * @auth Required (Role: Admin)
+ */
+const getGradeApprovalStatistics = async (): Promise<AdminGradeStatistics> => {
+  const response = await api.get<ApiResponse<AdminGradeStatistics>>(
+    '/v1/admin/grade-approvals/statistics',
+  );
+  return response.data.data;
+};
 
-  // Get instructors for filter dropdown
-  getInstructors: async (params?: { departmentId?: string }): Promise<ApiResponse<Instructor[]>> => {
-    const queryParams = new URLSearchParams();
-    if (params?.departmentId) queryParams.append('DepartmentId', params.departmentId);
-    
-    const response = await api.get(`/api/instructors?${queryParams.toString()}`);
-    return response.data;
-  },
+/**
+ * @api POST /v1/admin/grade-approvals/approve
+ * @description Approve one or multiple grade versions in bulk.
+ * @param {AdminBulkGradeActionRequest} payload - Grade version ids and optional note.
+ * @returns {Promise<AdminBulkGradeActionResult>} Action result with success/failure counts.
+ * @auth Required (Role: Admin)
+ */
+const bulkApproveGrades = async (
+  payload: AdminBulkGradeActionRequest,
+): Promise<AdminBulkGradeActionResult> => {
+  const response = await api.post<ApiResponse<AdminBulkGradeActionResult>>(
+    '/v1/admin/grade-approvals/approve',
+    payload,
+  );
+  return response.data.data;
+};
 
-  // Export grade approvals to Excel
-  exportGradeApprovals: async (params: ExportGradeApprovalsParams): Promise<Blob> => {
-    const queryParams = new URLSearchParams();
-    
-    if (params.searchKeyword) queryParams.append('SearchKeyword', params.searchKeyword);
-    if (params.facultyId) queryParams.append('FacultyId', params.facultyId);
-    if (params.departmentId) queryParams.append('DepartmentId', params.departmentId);
-    if (params.instructorId) queryParams.append('InstructorId', params.instructorId);
-    if (params.approvalStatus) queryParams.append('ApprovalStatus', params.approvalStatus);
+/**
+ * @api POST /v1/admin/grade-approvals/reject
+ * @description Reject one or multiple grade versions in bulk.
+ * @param {AdminBulkGradeActionRequest} payload - Grade version ids and optional rejection note.
+ * @returns {Promise<AdminBulkGradeActionResult>} Action outcome with error messages (if any).
+ * @auth Required (Role: Admin)
+ */
+const bulkRejectGrades = async (
+  payload: AdminBulkGradeActionRequest,
+): Promise<AdminBulkGradeActionResult> => {
+  const response = await api.post<ApiResponse<AdminBulkGradeActionResult>>(
+    '/v1/admin/grade-approvals/reject',
+    payload,
+  );
+  return response.data.data;
+};
 
-    const response = await api.get(`/api/grades/approvals/export?${queryParams.toString()}`, {
+/**
+ * @api GET /v1/admin/grade-approvals/export
+ * @description Export the filtered grade approval list into an Excel file.
+ * @param {ExportGradeApprovalsParams} params - Filters applied on the main table.
+ * @returns {Promise<Blob>} Excel file blob for download.
+ * @auth Required (Role: Admin)
+ */
+const exportGradeApprovals = async (params: ExportGradeApprovalsParams): Promise<Blob> => {
+  const response = await api.get('/v1/admin/grade-approvals/export', {
+    params: sanitizeParams({
+      semesterId: params.semesterId,
+      subjectId: params.subjectId,
+      courseClassId: params.courseClassId,
+      courseId: params.courseId,
+      versionStatus: params.versionStatus,
+      searchKey: params.searchKey,
+      facultyId: params.facultyId,
+      departmentId: params.departmentId,
+      instructorId: params.instructorId,
+    }),
+    responseType: 'blob',
+  });
+  return response.data as Blob;
+};
+
+/**
+ * @api POST /v1/admin/grade-approvals/export-by-ids
+ * @description Export selected grade versions with detailed grade sheets into an Excel file.
+ * @param {string[]} gradeVersionIds - List of grade version IDs to export.
+ * @returns {Promise<Blob>} Excel file blob for download with summary and detail sheets.
+ * @auth Required (Role: Admin)
+ */
+const exportGradeApprovalsByIds = async (gradeVersionIds: string[]): Promise<Blob> => {
+  const response = await api.post(
+    '/v1/admin/grade-approvals/export-by-ids',
+    { gradeVersionIds },
+    {
       responseType: 'blob',
-    });
-    
-    return response.data;
-  },
+    },
+  );
+  return response.data as Blob;
+};
 
-  // Approve grade
-  approveGrade: async (gradeApprovalId: string): Promise<ApiResponse<void>> => {
-    const response = await api.post(`/api/grades/approvals/${gradeApprovalId}/approve`);
-    return response.data;
-  },
-
-  // Reject grade
-  rejectGrade: async (gradeApprovalId: string, reason?: string): Promise<ApiResponse<void>> => {
-    const response = await api.post(`/api/grades/approvals/${gradeApprovalId}/reject`, {
-      reason,
-    });
-    return response.data;
-  },
+export const gradeApprovalsApi = {
+  getGradeApprovals,
+  getGradeApprovalDetail,
+  getGradeApprovalStatistics,
+  bulkApproveGrades,
+  bulkRejectGrades,
+  exportGradeApprovals,
+  exportGradeApprovalsByIds,
 };

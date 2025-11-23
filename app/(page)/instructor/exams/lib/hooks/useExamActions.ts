@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { examsApi } from '../api/examsApi';
 import { UploadExamRequest, UpdateExamRequest } from '../types';
-import { downloadFileBlob } from '@/lib/utils/fileDownload';
 import { queryKeys } from '@/lib/api/queryKeys';
 import toast from 'react-hot-toast';
 
@@ -68,19 +67,26 @@ export const useExamActions = (onSuccess?: () => void) => {
     }
   };
 
-  const downloadExamFile = async (
-    examEntryId: string,
-    fileType: 'question' | 'answer',
-    fileName?: string
-  ): Promise<boolean> => {
+  const downloadExamFile = (fileUrl: string, fileName?: string): boolean => {
     try {
-      const blob = await examsApi.downloadExamFile(examEntryId, fileType);
-      downloadFileBlob(blob, fileName || `exam_${fileType}_${examEntryId}.pdf`);
-      toast.success('Tải xuống thành công!');
+      if (!fileUrl) {
+        toast.error('Không tìm thấy đường dẫn file');
+        return false;
+      }
+
+      // Tải trực tiếp từ Supabase public URL
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = fileName || fileUrl.split('/').pop() || 'file';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Đang tải xuống file...');
       return true;
     } catch (err: unknown) {
       const errorMessage = 
-        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
         (err as { message?: string })?.message ||
         'Lỗi khi tải xuống file';
       toast.error(errorMessage);

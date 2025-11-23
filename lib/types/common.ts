@@ -44,6 +44,18 @@ export interface Class {
   endDate?: string;
 }
 
+export interface CourseClassOption {
+  courseClassId: string;
+  courseClassCode: string;
+  courseId: string;
+  subjectId: string;
+  subjectCode: string;
+  subjectName: string;
+  semesterId: string;
+  semesterName: string;
+  status?: string;
+}
+
 export interface AcademicYear {
   academicYearId: string;
   yearRange: string;
@@ -88,6 +100,7 @@ export type GetSubjectsResponse = ApiResponse<Subject[]>;
 export type GetFacultiesResponse = ApiResponse<Faculty[]>;
 export type GetDepartmentsResponse = ApiResponse<Department[]>;
 export type GetClassesResponse = ApiResponse<Class[]>;
+export type GetCourseClassesResponse = ApiResponse<CourseClassOption[]>;
 export type GetAcademicYearsResponse = ApiResponse<AcademicYear[]>;
 export type GetBuildingsResponse = ApiResponse<Building[]>;
 export type GetCourseClassesBySubjectResponse = ApiResponse<CourseClass[]>;

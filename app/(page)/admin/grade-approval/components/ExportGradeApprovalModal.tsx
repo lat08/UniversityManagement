@@ -5,15 +5,22 @@ import { Download, X, FileSpreadsheet, CheckCircle2, AlertCircle } from 'lucide-
 import { Button } from '@/app/components/ui';
 import { toast } from 'react-hot-toast';
 import { gradeApprovalsApi } from '../lib/api/gradeApprovalsApi';
-import { ExportGradeApprovalsParams } from '../lib/types/types';
+import { ExportGradeApprovalsParams, GradeApprovalDropdownContext } from '../lib/types/types';
+import { APPROVAL_STATUS_OPTIONS } from '../lib/types/types';
 
 interface ExportGradeApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  filters?: ExportGradeApprovalsParams;
+  filters: ExportGradeApprovalsParams;
+  dropdowns: GradeApprovalDropdownContext;
 }
 
-export default function ExportGradeApprovalModal({ isOpen, onClose, filters }: ExportGradeApprovalModalProps) {
+export default function ExportGradeApprovalModal({
+  isOpen,
+  onClose,
+  filters,
+  dropdowns,
+}: ExportGradeApprovalModalProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -43,7 +50,7 @@ export default function ExportGradeApprovalModal({ isOpen, onClose, filters }: E
     
     setIsExporting(true);
     try {
-      const blob = await gradeApprovalsApi.exportGradeApprovals(filters || {});
+      const blob = await gradeApprovalsApi.exportGradeApprovals(filters);
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -65,6 +72,45 @@ export default function ExportGradeApprovalModal({ isOpen, onClose, filters }: E
   };
 
   if (!isOpen) return null;
+
+  const matchedStatus = APPROVAL_STATUS_OPTIONS.find(
+    (option) => option.value === (filters.versionStatus || ''),
+  );
+  const semesterLabel = dropdowns.semesters.find(
+    (semester) => semester.semesterId === filters.semesterId,
+  )?.semesterName;
+  const subjectLabel = dropdowns.subjects.find(
+    (subject) => subject.subjectId === filters.subjectId,
+  )?.subjectName;
+  const courseClassLabel = dropdowns.courseClasses.find(
+    (courseClass) => courseClass.courseClassId === filters.courseClassId,
+  )?.courseClassCode;
+  const facultyLabel = dropdowns.faculties.find(
+    (faculty) => faculty.facultyId === filters.facultyId,
+  )?.facultyName;
+  const departmentLabel = dropdowns.departments.find(
+    (department) => department.departmentId === filters.departmentId,
+  )?.departmentName;
+  const instructorLabel = dropdowns.instructors.find(
+    (instructor) => instructor.instructorId === filters.instructorId,
+  )?.fullName;
+
+  const summaryRows = [
+    {
+      label: 'Trạng thái',
+      value: matchedStatus?.label,
+    },
+    { label: 'Học kỳ', value: semesterLabel },
+    { label: 'Môn học', value: subjectLabel },
+    { label: 'Lớp học phần', value: courseClassLabel },
+    { label: 'Khoa', value: facultyLabel },
+    { label: 'Bộ môn', value: departmentLabel },
+    { label: 'Giảng viên', value: instructorLabel },
+    {
+      label: 'Từ khóa',
+      value: filters.searchKey,
+    },
+  ].filter((row) => row.value);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isExporting) {
@@ -142,6 +188,24 @@ export default function ExportGradeApprovalModal({ isOpen, onClose, filters }: E
                   </div>
                 </div>
               </div>
+
+              {summaryRows.length > 0 && (
+                <div className="border border-gray-200 rounded-lg">
+                  <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                      Bộ lọc đang áp dụng
+                    </p>
+                  </div>
+                  <ul className="divide-y divide-gray-100">
+                    {summaryRows.map((row) => (
+                      <li key={row.label} className="px-4 py-2 text-sm text-gray-700 flex justify-between gap-4">
+                        <span className="text-gray-500">{row.label}</span>
+                        <span className="font-medium text-gray-900 text-right">{row.value}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* File Format */}
               <div>
