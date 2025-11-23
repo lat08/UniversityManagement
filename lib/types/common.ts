@@ -70,12 +70,22 @@ export interface Building {
   status: string;
 }
 
-export interface InstructorOption {
+export interface CourseClass {
+  courseClassId: string;
+  courseClassCode: string;
+  id?: string; // Alternative field name
+  code?: string; // Alternative field name
+}
+
+export interface Instructor {
   instructorId: string;
-  fullName: string;
   instructorCode?: string;
-  email?: string;
-  phoneNumber?: string;
+  code?: string; // Alternative field name
+  instructorName?: string;
+  fullName?: string;
+  name?: string;
+  id?: string; // Alternative field name
+  userId?: string; // Alternative field name
 }
 
 export interface ApiResponse<T> {
@@ -93,11 +103,13 @@ export type GetClassesResponse = ApiResponse<Class[]>;
 export type GetCourseClassesResponse = ApiResponse<CourseClassOption[]>;
 export type GetAcademicYearsResponse = ApiResponse<AcademicYear[]>;
 export type GetBuildingsResponse = ApiResponse<Building[]>;
-export type GetInstructorsResponse = ApiResponse<InstructorOption[]>;
+export type GetCourseClassesBySubjectResponse = ApiResponse<CourseClass[]>;
+export type GetInstructorsResponse = ApiResponse<Instructor[]>;
 
 export interface GetClassesParams {
   departmentId?: string;
   facultyId?: string;
+  semesterId?: string;
 }
 
 export interface GetDepartmentsParams {
@@ -113,8 +125,8 @@ export interface GetSubjectsParams {
   semesterId?: string;
 }
 
-export interface GetCourseClassesParams {
-  subjectId: string;
+export interface GetCourseClassesBySubjectParams {
+  subjectId?: string;
   semesterId?: string;
 }
 
