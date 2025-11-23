@@ -71,7 +71,7 @@ export const ArchiveNotificationModal = ({
         <div className="p-6">
           <p className="text-gray-700 mb-4">
             Bạn có chắc chắn muốn lưu trữ thông báo{' '}
-            <span className="font-semibold text-gray-900">"{notification.title}"</span>?
+            <span className="font-semibold text-gray-900">&quot;{notification.title}&quot;</span>?
           </p>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
             <p className="text-sm text-gray-700">

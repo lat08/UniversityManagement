@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { notificationsApi } from '../api/notificationsApi';
-import type { Notification, NotificationHistoryFilterDto, PagedResult } from '../types/types';
+import type { Notification, NotificationHistoryFilterDto, NotificationHistoryResponse } from '../types/types';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -32,36 +32,81 @@ export const useNotifications = () => {
         
         // Handle new response structure with paginatedResult and statistics
         // Support both camelCase and PascalCase
-        const paginatedResult = (responseData as any).paginatedResult || (responseData as any).PaginatedResult || responseData;
-        const statistics = (responseData as any).statistics || (responseData as any).Statistics;
+        interface ResponseDataWithVariants {
+          paginatedResult?: NotificationHistoryResponse['paginatedResult'];
+          PaginatedResult?: NotificationHistoryResponse['paginatedResult'];
+          statistics?: NotificationHistoryResponse['statistics'];
+          Statistics?: NotificationHistoryResponse['statistics'];
+        }
+        
+        const responseDataTyped = responseData as NotificationHistoryResponse | ResponseDataWithVariants;
+        let paginatedResult: NotificationHistoryResponse['paginatedResult'] | undefined;
+        let statistics: NotificationHistoryResponse['statistics'] | undefined;
+        
+        if ('paginatedResult' in responseDataTyped && responseDataTyped.paginatedResult) {
+          paginatedResult = responseDataTyped.paginatedResult;
+        } else if ('PaginatedResult' in responseDataTyped && responseDataTyped.PaginatedResult) {
+          paginatedResult = responseDataTyped.PaginatedResult;
+        } else if ('paginatedResult' in responseDataTyped || 'PaginatedResult' in responseDataTyped) {
+          // Fallback: treat as paginatedResult directly
+          paginatedResult = responseDataTyped as NotificationHistoryResponse['paginatedResult'];
+        }
+        
+        if ('statistics' in responseDataTyped) {
+          statistics = responseDataTyped.statistics;
+        } else if ('Statistics' in responseDataTyped) {
+          statistics = responseDataTyped.Statistics;
+        }
         
         // Extract items array - handle both formats
         let items: Notification[] = [];
-        const itemsData = paginatedResult.items || paginatedResult.Items;
-        if (Array.isArray(itemsData)) {
-          items = itemsData;
-        } else if (itemsData && typeof itemsData === 'object') {
-          // Handle nested structure if needed
-          const itemsObj = itemsData as unknown as { Items?: Notification[]; items?: Notification[] };
-          if (Array.isArray(itemsObj.Items)) {
-            items = itemsObj.Items;
-          } else if (Array.isArray(itemsObj.items)) {
-            items = itemsObj.items;
+        if (!paginatedResult) {
+          items = [];
+        } else {
+          const itemsData = paginatedResult.items || (paginatedResult as unknown as { Items?: Notification[] }).Items;
+          if (Array.isArray(itemsData)) {
+            items = itemsData;
+          } else if (itemsData && typeof itemsData === 'object') {
+            // Handle nested structure if needed
+            const itemsObj = itemsData as unknown as { Items?: Notification[]; items?: Notification[] };
+            if (Array.isArray(itemsObj.Items)) {
+              items = itemsObj.Items;
+            } else if (Array.isArray(itemsObj.items)) {
+              items = itemsObj.items;
+            }
           }
         }
         
         setNotifications(items);
-        setTotalCount(paginatedResult.totalCount ?? paginatedResult.TotalCount ?? 0);
-        setTotalPages(paginatedResult.totalPages ?? paginatedResult.TotalPages ?? 0);
-        setCurrentPage(paginatedResult.pageNumber ?? paginatedResult.PageNumber ?? 1);
+        const totalCountValue = paginatedResult 
+          ? (paginatedResult.totalCount ?? (paginatedResult as unknown as { TotalCount?: number }).TotalCount ?? 0)
+          : 0;
+        const totalPagesValue = paginatedResult
+          ? (paginatedResult.totalPages ?? (paginatedResult as unknown as { TotalPages?: number }).TotalPages ?? 0)
+          : 0;
+        const pageNumberValue = paginatedResult
+          ? (paginatedResult.pageNumber ?? (paginatedResult as unknown as { PageNumber?: number }).PageNumber ?? 1)
+          : 1;
+        setTotalCount(totalCountValue);
+        setTotalPages(totalPagesValue);
+        setCurrentPage(pageNumberValue);
         
         // Use statistics from API if available, otherwise calculate from current page
         if (statistics) {
+          const statsTyped = statistics as NotificationHistoryResponse['statistics'] | { TotalNotifications?: number; PendingNotifications?: number; SentNotifications?: number; CancelledNotifications?: number };
           setStats({
-            totalNotifications: statistics.totalNotifications ?? statistics.TotalNotifications ?? 0,
-            pendingNotifications: statistics.pendingNotifications ?? statistics.PendingNotifications ?? 0,
-            sentNotifications: statistics.sentNotifications ?? statistics.SentNotifications ?? 0,
-            cancelledNotifications: statistics.cancelledNotifications ?? statistics.CancelledNotifications ?? 0,
+            totalNotifications: 'totalNotifications' in statsTyped 
+              ? statsTyped.totalNotifications 
+              : (statsTyped as { TotalNotifications?: number }).TotalNotifications ?? 0,
+            pendingNotifications: 'pendingNotifications' in statsTyped
+              ? statsTyped.pendingNotifications
+              : (statsTyped as { PendingNotifications?: number }).PendingNotifications ?? 0,
+            sentNotifications: 'sentNotifications' in statsTyped
+              ? statsTyped.sentNotifications
+              : (statsTyped as { SentNotifications?: number }).SentNotifications ?? 0,
+            cancelledNotifications: 'cancelledNotifications' in statsTyped
+              ? statsTyped.cancelledNotifications
+              : (statsTyped as { CancelledNotifications?: number }).CancelledNotifications ?? 0,
           });
         } else {
           // Fallback: calculate stats from current page data
@@ -70,7 +115,7 @@ export const useNotifications = () => {
           const cancelledCount = items.filter((n) => n.status?.toLowerCase() === 'cancelled').length;
           
           setStats({
-            totalNotifications: paginatedResult.totalCount ?? paginatedResult.TotalCount ?? 0,
+            totalNotifications: totalCountValue,
             pendingNotifications: pendingCount,
             sentNotifications: sentCount,
             cancelledNotifications: cancelledCount,

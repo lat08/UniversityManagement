@@ -7,7 +7,6 @@ import {
   GetInstructorsResponse,
   GetClassesParams,
   GetClassesResponse,
-  GetCourseClassesResponse,
   GetDepartmentsParams,
   GetDepartmentsResponse,
   GetFacultiesResponse,
@@ -18,6 +17,7 @@ import {
   GetCourseClassesBySubjectParams,
   GetStudentsParams,
   GetStudentsResponse,
+  Student,
 } from '../types/common';
 
 export const commonApi = {
@@ -99,7 +99,20 @@ export const commonApi = {
       // Use searchKeyword if provided, otherwise fall back to searchTerm for backward compatibility
       const searchKeyword = params?.searchKeyword || params?.searchTerm;
       
-      const response = await api.get<any>('/v1/admin/students', {
+      interface RawApiResponse {
+        success: boolean;
+        message?: string;
+        data?: {
+          students?: {
+            items?: unknown[];
+          };
+          Students?: {
+            items?: unknown[];
+          } | unknown[];
+        } | unknown[];
+      }
+      
+      const response = await api.get<RawApiResponse>('/v1/admin/students', {
         params: {
           searchKeyword: searchKeyword || undefined,
           facultyId: params?.facultyId || undefined,
@@ -120,37 +133,56 @@ export const commonApi = {
         const responseData = response.data.data;
         
         // Check for students.items (actual structure from API)
-        let studentsArray: any[] | null = null;
+        let studentsArray: unknown[] | null = null;
         
-        if (responseData.students?.items && Array.isArray(responseData.students.items)) {
-          // Actual structure: data.students.items
-          studentsArray = responseData.students.items;
-        } else if (responseData.Students?.items && Array.isArray(responseData.Students.items)) {
-          // Fallback for capital S
-          studentsArray = responseData.Students.items;
-        } else if (responseData.Students && Array.isArray(responseData.Students)) {
-          // Fallback: direct Students array
-          studentsArray = responseData.Students;
-        } else if (responseData.students && Array.isArray(responseData.students)) {
-          // Fallback: direct students array
-          studentsArray = responseData.students;
+        // Type guard: check if responseData is an object (not an array)
+        if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
+          const dataObj = responseData as Record<string, unknown>;
+          
+          if (dataObj.students && typeof dataObj.students === 'object' && !Array.isArray(dataObj.students)) {
+            const studentsObj = dataObj.students as Record<string, unknown>;
+            if (studentsObj.items && Array.isArray(studentsObj.items)) {
+              // Actual structure: data.students.items
+              studentsArray = studentsObj.items;
+            }
+          } else if (dataObj.Students && typeof dataObj.Students === 'object' && !Array.isArray(dataObj.Students)) {
+            const StudentsObj = dataObj.Students as Record<string, unknown>;
+            if (StudentsObj.items && Array.isArray(StudentsObj.items)) {
+              // Fallback for capital S
+              studentsArray = StudentsObj.items;
+            }
+          } else if (dataObj.Students && Array.isArray(dataObj.Students)) {
+            // Fallback: direct Students array
+            studentsArray = dataObj.Students;
+          } else if (dataObj.students && Array.isArray(dataObj.students)) {
+            // Fallback: direct students array
+            studentsArray = dataObj.students;
+          }
         } else if (Array.isArray(responseData)) {
           // Fallback: if data is directly an array (for backward compatibility)
           studentsArray = responseData;
         }
         
         if (studentsArray && studentsArray.length > 0) {
-          const mappedStudents = studentsArray.map((s: any) => {
+          const mappedStudents = studentsArray.map((s): Student => {
+            const student = s as Record<string, unknown>;
+            const classObj = student.class as Record<string, unknown> | undefined;
+            const departmentObj = student.department as Record<string, unknown> | undefined;
+            const facultyObj = student.faculty as Record<string, unknown> | undefined;
+            const ClassObj = student.Class as Record<string, unknown> | undefined;
+            const DepartmentObj = student.Department as Record<string, unknown> | undefined;
+            const FacultyObj = student.Faculty as Record<string, unknown> | undefined;
+            
             return {
-              studentId: s.studentId || s.id || s.userId || s.StudentId,
-              studentCode: s.studentCode || s.code || s.StudentCode || s.Code,
-              fullName: s.fullName || s.name || s.FullName || s.Name,
-              name: s.name || s.fullName || s.Name || s.FullName,
-              id: s.studentId || s.id || s.userId || s.StudentId,
-              userId: s.userId || s.studentId || s.UserId || s.StudentId,
-              className: s.className || s.class?.className || s.ClassName || s.Class?.ClassName || s.ClassCode,
-              departmentName: s.departmentName || s.department?.departmentName || s.DepartmentName || s.Department?.DepartmentName,
-              facultyName: s.facultyName || s.faculty?.facultyName || s.FacultyName || s.Faculty?.FacultyName,
+              studentId: (student.studentId || student.id || student.userId || student.StudentId) as string,
+              studentCode: (student.studentCode || student.code || student.StudentCode || student.Code) as string | undefined,
+              fullName: (student.fullName || student.name || student.FullName || student.Name) as string | undefined,
+              name: (student.name || student.fullName || student.Name || student.FullName) as string | undefined,
+              id: (student.studentId || student.id || student.userId || student.StudentId) as string | undefined,
+              userId: (student.userId || student.studentId || student.UserId || student.StudentId) as string | undefined,
+              className: (student.className || classObj?.className || student.ClassName || ClassObj?.ClassName || student.ClassCode) as string | undefined,
+              departmentName: (student.departmentName || departmentObj?.departmentName || student.DepartmentName || DepartmentObj?.DepartmentName) as string | undefined,
+              facultyName: (student.facultyName || facultyObj?.facultyName || student.FacultyName || FacultyObj?.FacultyName) as string | undefined,
             };
           });
           
@@ -163,13 +195,21 @@ export const commonApi = {
       }
       
       // Log error if we reach here
+      const logData = response.data?.data;
+      const dataObj = logData && typeof logData === 'object' && !Array.isArray(logData) 
+        ? logData as Record<string, unknown>
+        : null;
+      const studentsObj = dataObj?.students && typeof dataObj.students === 'object' && !Array.isArray(dataObj.students)
+        ? dataObj.students as Record<string, unknown>
+        : null;
+      
       console.warn('No students found in response:', {
-        hasData: !!response.data?.data,
-        dataKeys: response.data?.data ? Object.keys(response.data.data) : [],
-        hasStudents: !!response.data?.data?.students,
-        studentsKeys: response.data?.data?.students ? Object.keys(response.data.data.students) : [],
-        hasItems: !!response.data?.data?.students?.items,
-        itemsCount: response.data?.data?.students?.items?.length || 0,
+        hasData: !!logData,
+        dataKeys: dataObj ? Object.keys(dataObj) : [],
+        hasStudents: !!dataObj?.students,
+        studentsKeys: studentsObj ? Object.keys(studentsObj) : [],
+        hasItems: !!studentsObj?.items,
+        itemsCount: Array.isArray(studentsObj?.items) ? studentsObj.items.length : 0,
       });
       
       // Fallback: return empty array if structure doesn't match
@@ -181,7 +221,12 @@ export const commonApi = {
     } catch (error) {
       console.error('Error fetching students:', error);
       if (error && typeof error === 'object' && 'response' in error) {
-        const err = error as any;
+        interface ErrorWithResponse {
+          response?: {
+            data?: unknown;
+          };
+        }
+        const err = error as ErrorWithResponse;
         console.error('Error response:', err.response?.data);
       }
       return {

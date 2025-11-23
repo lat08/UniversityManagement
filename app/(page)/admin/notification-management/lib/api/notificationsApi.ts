@@ -5,7 +5,6 @@ import type {
   UpdateNotificationDto,
   NotificationHistoryFilterDto,
   ApiResponse,
-  PagedResult,
   NotificationHistoryResponse,
 } from '../types/types';
 
@@ -13,7 +12,15 @@ export const notificationsApi = {
   // POST /v1/admin/notifications/save - Lưu nháp thông báo
   save: async (dto: CreateNotificationDto): Promise<ApiResponse<Notification>> => {
     try {
-      const response = await api.post<any>('/v1/admin/notifications/save', dto);
+      interface RawApiResponse {
+        isSuccess?: boolean;
+        success?: boolean;
+        resultMessage?: string;
+        message?: string;
+        data?: Notification;
+        error?: string;
+      }
+      const response = await api.post<RawApiResponse>('/v1/admin/notifications/save', dto);
       const responseData = response.data;
       
       // Transform response to match expected format
@@ -22,15 +29,29 @@ export const notificationsApi = {
           ...responseData,
           success: responseData.isSuccess,
           message: responseData.resultMessage || responseData.message || '',
-        };
+          data: responseData.data || {} as Notification,
+        } as ApiResponse<Notification>;
       }
       
-      return responseData;
-    } catch (error: any) {
+      return {
+        ...responseData,
+        data: responseData.data || {} as Notification,
+      } as ApiResponse<Notification>;
+    } catch (error) {
       // Re-throw with better error message
-      if (error.response?.data) {
-        const errorData = error.response.data;
-        const errorMessage = errorData.message || errorData.resultMessage || errorData.error || 'Lưu nháp thông báo thất bại';
+      interface ErrorWithResponse {
+        response?: {
+          data?: {
+            message?: string;
+            resultMessage?: string;
+            error?: string;
+          };
+        };
+      }
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as ErrorWithResponse;
+        const errorData = err.response?.data;
+        const errorMessage = errorData?.message || errorData?.resultMessage || errorData?.error || 'Lưu nháp thông báo thất bại';
         throw new Error(errorMessage);
       }
       throw error;
@@ -46,7 +67,15 @@ export const notificationsApi = {
   // PUT /v1/admin/notifications/{scheduleId} - Cập nhật thông báo
   update: async (scheduleId: string, dto: UpdateNotificationDto): Promise<ApiResponse<Notification>> => {
     try {
-      const response = await api.put<any>(`/v1/admin/notifications/${scheduleId}`, dto);
+      interface RawApiResponse {
+        isSuccess?: boolean;
+        success?: boolean;
+        resultMessage?: string;
+        message?: string;
+        data?: Notification;
+        error?: string;
+      }
+      const response = await api.put<RawApiResponse>(`/v1/admin/notifications/${scheduleId}`, dto);
       const responseData = response.data;
       
       // Transform response to match expected format
@@ -55,15 +84,29 @@ export const notificationsApi = {
           ...responseData,
           success: responseData.isSuccess,
           message: responseData.resultMessage || responseData.message || '',
-        };
+          data: responseData.data || {} as Notification,
+        } as ApiResponse<Notification>;
       }
       
-      return responseData;
-    } catch (error: any) {
+      return {
+        ...responseData,
+        data: responseData.data || {} as Notification,
+      } as ApiResponse<Notification>;
+    } catch (error) {
       // Re-throw with better error message
-      if (error.response?.data) {
-        const errorData = error.response.data;
-        const errorMessage = errorData.message || errorData.resultMessage || errorData.error || 'Cập nhật thông báo thất bại';
+      interface ErrorWithResponse {
+        response?: {
+          data?: {
+            message?: string;
+            resultMessage?: string;
+            error?: string;
+          };
+        };
+      }
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as ErrorWithResponse;
+        const errorData = err.response?.data;
+        const errorMessage = errorData?.message || errorData?.resultMessage || errorData?.error || 'Cập nhật thông báo thất bại';
         throw new Error(errorMessage);
       }
       throw error;
@@ -155,7 +198,15 @@ export const notificationsApi = {
         ...(payload.isActive !== undefined && { isActive: payload.isActive }),
       };
       
-      const response = await api.put<any>('/v1/admin/notifications/bulk-update', backendPayload);
+      interface RawBulkUpdateResponse {
+        isSuccess?: boolean;
+        success?: boolean;
+        resultMessage?: string;
+        message?: string;
+        data?: { updatedCount: number; totalCount: number };
+        error?: string;
+      }
+      const response = await api.put<RawBulkUpdateResponse>('/v1/admin/notifications/bulk-update', backendPayload);
       const responseData = response.data;
       
       // Transform response to match expected format
@@ -164,15 +215,29 @@ export const notificationsApi = {
           ...responseData,
           success: responseData.isSuccess,
           message: responseData.resultMessage || responseData.message || '',
-        };
+          data: responseData.data || { updatedCount: 0, totalCount: 0 },
+        } as ApiResponse<{ updatedCount: number; totalCount: number }>;
       }
       
-      return responseData;
-    } catch (error: any) {
+      return {
+        ...responseData,
+        data: responseData.data || { updatedCount: 0, totalCount: 0 },
+      } as ApiResponse<{ updatedCount: number; totalCount: number }>;
+    } catch (error) {
       // Re-throw with better error message
-      if (error.response?.data) {
-        const errorData = error.response.data;
-        const errorMessage = errorData.message || errorData.resultMessage || errorData.error || 'Cập nhật hàng loạt thất bại';
+      interface ErrorWithResponse {
+        response?: {
+          data?: {
+            message?: string;
+            resultMessage?: string;
+            error?: string;
+          };
+        };
+      }
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as ErrorWithResponse;
+        const errorData = err.response?.data;
+        const errorMessage = errorData?.message || errorData?.resultMessage || errorData?.error || 'Cập nhật hàng loạt thất bại';
         throw new Error(errorMessage);
       }
       throw error;

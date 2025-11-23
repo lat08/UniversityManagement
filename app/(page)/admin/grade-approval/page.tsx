@@ -2,9 +2,9 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Button, SearchInput, Dropdown, DropdownSearch } from '@/app/components/ui';
+import { SearchInput, Dropdown, DropdownSearch } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
@@ -17,10 +17,8 @@ import { commonApi } from '@/lib/api/common';
 import { queryKeys } from '@/lib/api/queryKeys';
 import {
   AdminGradeApprovalListItem,
-  GradeApprovalDropdownContext,
   GradeApprovalFilterState,
   APPROVAL_STATUS_OPTIONS,
-  ExportGradeApprovalsParams,
   GetGradeApprovalsParams,
   getApprovalStatusDisplay,
 } from './lib/types/types';
@@ -297,18 +295,6 @@ export default function GradeApprovalPage() {
     );
   }, []);
 
-  const dropdownContext: GradeApprovalDropdownContext = useMemo(
-    () => ({
-      semesters: [],
-      subjects: [],
-      courseClasses: [],
-      faculties,
-      departments: [],
-      instructors,
-    }),
-    [faculties, instructors],
-  );
-
   const isAnyMutationPending = bulkApproveMutation.isPending || bulkRejectMutation.isPending || exportMutation.isPending;
 
   const renderGradeApprovalRow = useCallback(
@@ -534,8 +520,10 @@ export default function GradeApprovalPage() {
   );
 
   const dropdownOptions = {
-    faculties: faculties.map((faculty) => ({ value: faculty.facultyId, label: faculty.facultyName })),
-    instructors: instructors.map((instructor) => ({ value: instructor.instructorId, label: instructor.fullName })),
+    faculties: faculties.map((faculty) => ({ value: faculty.facultyId, label: faculty.facultyName || '' })),
+    instructors: instructors
+      .filter((instructor) => instructor.fullName) // Filter out instructors without fullName
+      .map((instructor) => ({ value: instructor.instructorId, label: instructor.fullName || '' })),
   };
 
   return (

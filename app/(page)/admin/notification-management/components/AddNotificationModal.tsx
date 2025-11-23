@@ -13,7 +13,8 @@ import { commonApi } from '@/lib/api/common';
 import type { 
   NotificationType, 
   TargetType, 
-  SendingMethod
+  SendingMethod,
+  CreateNotificationDto
 } from '../lib/types/types';
 import { NOTIFICATION_TYPE_OPTIONS as NOTIF_TYPE_OPTIONS, TARGET_TYPE_OPTIONS as TARGET_OPTIONS, SENDING_METHOD_OPTIONS as SENDING_OPTIONS, requiresTargetId as requiresTarget } from '../lib/types/types';
 import type { Faculty, Department, Class, Instructor, Student } from '@/lib/types/common';
@@ -181,7 +182,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
         }
       }
 
-      const payload: any = {
+      const payload: CreateNotificationDto = {
         title: data.title,
         content: data.content,
         noticeMessage: data.noticeMessage || null,
@@ -189,12 +190,8 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
         targetType: data.targetType as TargetType,
         targetId: needsTargetId && data.targetId ? data.targetId : null,
         sendingMethod: data.sendingMethod as SendingMethod,
+        scheduledDate: scheduledDateValue || null,
       };
-
-      // Only include scheduledDate if it has a value
-      if (scheduledDateValue) {
-        payload.scheduledDate = scheduledDateValue;
-      }
 
       // Validate targetId if required
       if (needsTargetId && !data.targetId) {
