@@ -14,7 +14,8 @@ import type {
   Notification, 
   NotificationType, 
   TargetType, 
-  SendingMethod 
+  SendingMethod,
+  UpdateNotificationDto
 } from '../lib/types/types';
 import { NOTIFICATION_TYPE_OPTIONS as NOTIF_TYPE_OPTIONS, TARGET_TYPE_OPTIONS as TARGET_OPTIONS, SENDING_METHOD_OPTIONS as SENDING_OPTIONS, requiresTargetId } from '../lib/types/types';
 import type { Faculty, Department, Class, Instructor, Student } from '@/lib/types/common';
@@ -311,7 +312,7 @@ export const EditNotificationModal = ({ isOpen, onClose, onSuccess, notification
 
       // Prepare payload matching UpdateNotificationDto
       // Note: API should accept camelCase if configured with JsonSerializerOptions.PropertyNameCaseInsensitive
-      const payload: any = {
+      const payload: UpdateNotificationDto = {
         title: data.title,
         content: data.content,
         noticeMessage: data.noticeMessage || null,
@@ -319,12 +320,8 @@ export const EditNotificationModal = ({ isOpen, onClose, onSuccess, notification
         targetType: data.targetType as TargetType,
         targetId: needsTargetId && data.targetId ? data.targetId : null,
         sendingMethod: data.sendingMethod as SendingMethod,
+        scheduledDate: scheduledDateValue || null,
       };
-
-      // Only include scheduledDate if it has a value
-      if (scheduledDateValue) {
-        payload.scheduledDate = scheduledDateValue;
-      }
 
       const response = await notificationsApi.update(notification.scheduleId, payload);
 

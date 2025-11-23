@@ -88,11 +88,13 @@ const getSubjectsFromApi = async (): Promise<Subject[]> => {
 const getInstructorsFromApi = async (): Promise<Instructor[]> => {
   const response = await commonApi.getInstructors();
   if (response.success && response.data) {
-    return response.data.map((i) => ({
-      instructorId: i.instructorId,
-      instructorName: i.fullName,
-      instructorCode: i.instructorCode,
-    }));
+    return response.data
+      .filter((i) => i.fullName || i.instructorName || i.name) // Filter out instructors without a name
+      .map((i) => ({
+        instructorId: i.instructorId,
+        instructorName: i.fullName || i.instructorName || i.name || '',
+        instructorCode: i.instructorCode || i.code,
+      }));
   }
   return [];
 };

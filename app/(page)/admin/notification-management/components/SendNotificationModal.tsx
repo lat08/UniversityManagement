@@ -71,11 +71,11 @@ export const SendNotificationModal = ({
         <div className="p-6">
           <p className="text-gray-700 mb-4">
             Bạn có chắc chắn muốn gửi thông báo{' '}
-            <span className="font-semibold text-gray-900">"{notification.title}"</span>?
+            <span className="font-semibold text-gray-900">&quot;{notification.title}&quot;</span>?
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <p className="text-sm text-blue-800">
-              <strong>Lưu ý:</strong> Sau khi gửi, thông báo sẽ được chuyển sang trạng thái "Đã gửi" và không thể chỉnh sửa.
+              <strong>Lưu ý:</strong> Sau khi gửi, thông báo sẽ được chuyển sang trạng thái &quot;Đã gửi&quot; và không thể chỉnh sửa.
             </p>
             {notification.sendingMethod === 'Email' || notification.sendingMethod === 'Both' ? (
               <p className="text-sm text-blue-800 mt-2">

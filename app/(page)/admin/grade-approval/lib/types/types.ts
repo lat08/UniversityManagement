@@ -2,7 +2,7 @@ import {
   CourseClassOption,
   Department,
   Faculty,
-  InstructorOption,
+  Instructor,
   Semester,
   Subject,
 } from '@/lib/types/common';
@@ -120,7 +120,7 @@ export interface GradeApprovalDropdownContext {
   courseClasses: CourseClassOption[];
   faculties: Faculty[];
   departments: Department[];
-  instructors: InstructorOption[];
+  instructors: Instructor[];
 }
 
 export const APPROVAL_STATUS_OPTIONS = [
