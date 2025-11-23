@@ -86,7 +86,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
       {
         title: "GIẢNG VIÊN",
         items: [
-          { icon: Users, label: "Hồ sơ giảng viên", href: "/admin/instructors" },
+          { icon: Users, label: "Hồ sơ giảng viên", href: "/admin/instructor-profile" },
           { icon: FileCheck, label: "Duyệt bảng điểm", href: "/admin/grade-approval" },
           { icon: Building2, label: "Danh sách lớp", href: "/admin/class-lists" },
           { icon: Calendar, label: "Thời khóa biểu", href: "/admin/instructor-schedule" },
