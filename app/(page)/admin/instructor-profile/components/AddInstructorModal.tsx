@@ -165,7 +165,6 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
   const genderOptions = [
     { value: 'male', label: 'Nam' },
     { value: 'female', label: 'Nữ' },
-    { value: 'other', label: 'Khác' },
   ];
 
   const facultyOptions = faculties.map((f) => ({ value: f.facultyId, label: f.facultyName }));

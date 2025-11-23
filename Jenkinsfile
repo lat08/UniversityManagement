@@ -34,7 +34,7 @@ pipeline {
                     $class: 'GitSCM',
                     branches: [[name: '*/develop']],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/lat08/UniversityManagement.git',
+                        url: 'https://github.com/manhthien2005/UniversityManagement.git',
                         credentialsId: 'jenkins-github-user'
                     ]]
                 ]) 
@@ -241,4 +241,3 @@ EOF
         }
     }
 }
-
