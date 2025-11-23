@@ -136,5 +136,47 @@ export const notificationsApi = {
     
     return responseData;
   },
+
+  // PUT /v1/admin/notifications/bulk-update - Cập nhật hàng loạt thông báo
+  bulkUpdate: async (payload: {
+    scheduleIds: string[];
+    notificationType?: string;
+    sendingMethod?: string;
+    status?: string;
+    isActive?: boolean;
+  }): Promise<ApiResponse<{ updatedCount: number; totalCount: number }>> => {
+    try {
+      // Convert string[] to Guid[] format for backend
+      const backendPayload = {
+        scheduleIds: payload.scheduleIds.map(id => id), // Keep as string, backend will parse to Guid
+        ...(payload.notificationType && { notificationType: payload.notificationType }),
+        ...(payload.sendingMethod && { sendingMethod: payload.sendingMethod }),
+        ...(payload.status && { status: payload.status }),
+        ...(payload.isActive !== undefined && { isActive: payload.isActive }),
+      };
+      
+      const response = await api.put<any>('/v1/admin/notifications/bulk-update', backendPayload);
+      const responseData = response.data;
+      
+      // Transform response to match expected format
+      if (responseData.isSuccess !== undefined && responseData.success === undefined) {
+        return {
+          ...responseData,
+          success: responseData.isSuccess,
+          message: responseData.resultMessage || responseData.message || '',
+        };
+      }
+      
+      return responseData;
+    } catch (error: any) {
+      // Re-throw with better error message
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        const errorMessage = errorData.message || errorData.resultMessage || errorData.error || 'Cập nhật hàng loạt thất bại';
+        throw new Error(errorMessage);
+      }
+      throw error;
+    }
+  },
 };
 

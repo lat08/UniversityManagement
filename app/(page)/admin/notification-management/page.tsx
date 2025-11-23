@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, Bell, Clock, CheckCircle2, XCircle, Calendar, Filter, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Plus, Bell, Clock, CheckCircle2, XCircle, Calendar, Filter, ChevronDown, ChevronUp, X, Edit2, CircleCheck } from 'lucide-react';
 import { Dropdown, DropdownSearch, SearchInput, Button, Input } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { commonApi } from '@/lib/api/common';
@@ -13,6 +13,7 @@ import { SendNotificationModal } from './components/SendNotificationModal';
 import { ArchiveNotificationModal } from './components/ArchiveNotificationModal';
 import { CancelNotificationModal } from './components/CancelNotificationModal';
 import { ViewNotificationDetailModal } from './components/ViewNotificationDetailModal';
+import { BulkEditNotificationModal } from './components/BulkEditNotificationModal';
 import { NotificationActionsMenu } from './components/NotificationActionsMenu';
 import { NotificationStatCard } from './components/NotificationStatCard';
 import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
@@ -89,13 +90,16 @@ export default function NotificationManagementPage() {
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
   const [viewingNotification, setViewingNotification] = useState<Notification | null>(null);
   const [actionNotification, setActionNotification] = useState<Notification | null>(null);
+  const [selectedNotificationIds, setSelectedNotificationIds] = useState<Set<string>>(new Set());
 
   const { notifications, loading, currentPage, totalCount, totalPages, stats, fetchNotifications, setCurrentPage } = useNotifications();
 
   const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([
+    { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
     { key: 'title', label: 'Tiêu đề', width: 250, minWidth: 200, align: 'left', visible: true, required: true },
     { key: 'notificationType', label: 'Loại', width: 120, minWidth: 100, align: 'center', visible: true },
     { key: 'targetType', label: 'Đối tượng', width: 180, minWidth: 150, align: 'left', visible: true },
@@ -360,6 +364,26 @@ export default function NotificationManagementPage() {
     setIsCancelModalOpen(true);
   }, []);
 
+  const handleSelectAll = useCallback(() => {
+    if (selectedNotificationIds.size === filteredNotifications.length) {
+      setSelectedNotificationIds(new Set());
+    } else {
+      setSelectedNotificationIds(new Set(filteredNotifications.map(n => n.scheduleId)));
+    }
+  }, [filteredNotifications, selectedNotificationIds.size]);
+
+  const handleSelectOne = useCallback((notificationId: string) => {
+    setSelectedNotificationIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(notificationId)) {
+        newSet.delete(notificationId);
+      } else {
+        newSet.add(notificationId);
+      }
+      return newSet;
+    });
+  }, []);
+
   const handleRefresh = useCallback(() => {
     fetchNotifications({
       pageIndex: currentPage,
@@ -376,6 +400,7 @@ export default function NotificationManagementPage() {
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     // Calculate isCompact once at the beginning to avoid scope issues
     const isCompact = parseFloat(cellStyle.paddingX) < 20;
+    const isSelected = selectedNotificationIds.has(notification.scheduleId);
 
     return (
       <>
@@ -392,6 +417,19 @@ export default function NotificationManagementPage() {
           };
 
           switch (column.key) {
+            case 'checkbox':
+              return (
+                <td key="checkbox" style={cellPaddingStyle}>
+                  <div className="flex justify-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleSelectOne(notification.scheduleId)}
+                      className="w-4 h-4 cursor-pointer accent-[#0053AD]"
+                    />
+                  </div>
+                </td>
+              );
             case 'title':
               return (
                 <td key="title" className="text-gray-900 font-medium" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -485,7 +523,7 @@ export default function NotificationManagementPage() {
         })}
       </>
     );
-  }, [handleEditClick, handleSendClick, handleArchiveClick, handleCancelClick]);
+  }, [handleEditClick, handleSendClick, handleArchiveClick, handleCancelClick, handleSelectOne, selectedNotificationIds]);
 
   const statusOptions = [...STATUS_OPTIONS];
   const targetTypeOptions = [
@@ -552,6 +590,37 @@ export default function NotificationManagementPage() {
               </Button>
             </div>
           </div>
+
+          {/* Bulk Actions Bar */}
+          {selectedNotificationIds.size > 0 && (
+            <div className="flex items-center justify-between p-3 bg-[#E8F4FF] border border-[#0053AD]/20 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CircleCheck className="w-5 h-5 text-[#0053AD]" />
+                <span className="text-sm font-medium text-[#0053AD]">
+                  Đã chọn {selectedNotificationIds.size} thông báo
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsBulkEditModalOpen(true)}
+                  className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
+                >
+                  <Edit2 className="w-4 h-4" />
+                  Chỉnh sửa toàn bộ
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedNotificationIds(new Set())}
+                  className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <X className="w-4 h-4" />
+                  Bỏ chọn
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Filters */}
           <div className="space-y-4">
@@ -883,6 +952,19 @@ export default function NotificationManagementPage() {
               emptyMessage="Không có dữ liệu"
               loadingComponent={<TableSkeleton />}
               onColumnsResize={setResizableColumns}
+              renderHeaderCheckbox={() => (
+                <input
+                  type="checkbox"
+                  checked={filteredNotifications.length > 0 && selectedNotificationIds.size === filteredNotifications.length}
+                  onChange={handleSelectAll}
+                  className="w-4 h-4 cursor-pointer accent-[#0053AD]"
+                  ref={(el) => {
+                    if (el) {
+                      el.indeterminate = selectedNotificationIds.size > 0 && selectedNotificationIds.size < filteredNotifications.length;
+                    }
+                  }}
+                />
+              )}
             />
           </div>
         </div>
@@ -957,6 +1039,19 @@ export default function NotificationManagementPage() {
         }}
         notification={actionNotification}
         onSuccess={handleRefresh}
+      />
+
+      <BulkEditNotificationModal
+        isOpen={isBulkEditModalOpen}
+        onClose={() => {
+          setIsBulkEditModalOpen(false);
+          setSelectedNotificationIds(new Set());
+        }}
+        selectedNotificationIds={Array.from(selectedNotificationIds)}
+        onSuccess={() => {
+          setSelectedNotificationIds(new Set());
+          handleRefresh();
+        }}
       />
     </div>
   );
