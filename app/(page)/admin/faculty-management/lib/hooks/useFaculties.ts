@@ -23,14 +23,35 @@ export function useFaculties() {
 
   const { data: divisions = [] } = useQuery({
     queryKey: ["divisions"],
-    queryFn: () => facultyApi.getDivisions(),
+    queryFn: async () => {
+      const result = await facultyApi.getDivisions();
+      console.log('Divisions loaded:', result);
+      return result;
+    },
     staleTime: 3600000,
+    refetchOnWindowFocus: false,
   })
 
   const { data: deans = [] } = useQuery({
     queryKey: ["deans"],
-    queryFn: () => facultyApi.getDeans(),
+    queryFn: async () => {
+      const result = await facultyApi.getDeans();
+      console.log('Deans loaded:', result);
+      return result;
+    },
     staleTime: 3600000,
+    refetchOnWindowFocus: false,
+  })
+
+  const { data: curriculums = [] } = useQuery({
+    queryKey: ["curriculums"],
+    queryFn: async () => {
+      const result = await facultyApi.getCurriculums();
+      console.log('Curriculums loaded:', result);
+      return result;
+    },
+    staleTime: 3600000,
+    refetchOnWindowFocus: false,
   })
 
   const handleSearch = useCallback((query: string) => {
@@ -103,6 +124,7 @@ export function useFaculties() {
     stats,
     divisions,
     deans,
+    curriculums,
     isLoading,
     error,
     refetch,
