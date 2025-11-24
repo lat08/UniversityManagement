@@ -138,6 +138,33 @@ export const notificationsApi = {
     if (filter.status) {
       queryParams.status = filter.status;
     }
+    if (filter.notificationType) {
+      queryParams.notificationType = filter.notificationType;
+    }
+    if (filter.sendingMethod) {
+      queryParams.sendingMethod = filter.sendingMethod;
+    }
+    if (filter.startDate) {
+      queryParams.startDate = filter.startDate;
+    }
+    if (filter.endDate) {
+      queryParams.endDate = filter.endDate;
+    }
+    if (filter.facultyId) {
+      queryParams.facultyId = filter.facultyId;
+    }
+    if (filter.departmentId) {
+      queryParams.departmentId = filter.departmentId;
+    }
+    if (filter.classId) {
+      queryParams.classId = filter.classId;
+    }
+    if (filter.instructorId) {
+      queryParams.instructorId = filter.instructorId;
+    }
+    if (filter.studentId) {
+      queryParams.studentId = filter.studentId;
+    }
     if (filter.pageIndex) {
       queryParams.pageIndex = filter.pageIndex.toString();
     }
