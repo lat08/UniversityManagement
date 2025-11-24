@@ -48,6 +48,15 @@ export interface NotificationHistoryFilterDto {
   searchTerm?: string;
   targetType?: 'all' | 'student' | 'instructor';
   status?: NotificationStatus;
+  notificationType?: NotificationType | string;
+  sendingMethod?: SendingMethod | string;
+  startDate?: string;
+  endDate?: string;
+  facultyId?: string;
+  departmentId?: string;
+  classId?: string;
+  instructorId?: string;
+  studentId?: string;
   pageIndex?: number;
   pageSize?: number;
 }

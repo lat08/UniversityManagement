@@ -121,19 +121,19 @@ export default function NotificationManagementPage() {
         // Load faculties - limit to 15 items (search available)
         const facultiesRes = await commonApi.getFaculties();
         if (facultiesRes.success && facultiesRes.data) {
-          setFaculties(facultiesRes.data.slice(0, 15));
+          setFaculties(facultiesRes.data);
         }
         
         // Load departments (if faculty is selected) - limit to 15 items (search available)
         if (selectedFaculty) {
           const departmentsRes = await commonApi.getDepartments({ facultyId: selectedFaculty });
           if (departmentsRes.success && departmentsRes.data) {
-            setDepartments(departmentsRes.data.slice(0, 15));
+            setDepartments(departmentsRes.data);
           }
         } else {
           const departmentsRes = await commonApi.getDepartments();
           if (departmentsRes.success && departmentsRes.data) {
-            setDepartments(departmentsRes.data.slice(0, 15));
+            setDepartments(departmentsRes.data);
           }
         }
         
@@ -141,30 +141,30 @@ export default function NotificationManagementPage() {
         if (selectedDepartment) {
           const classesRes = await commonApi.getClasses({ departmentId: selectedDepartment });
           if (classesRes.success && classesRes.data) {
-            setClasses(classesRes.data.slice(0, 15));
+            setClasses(classesRes.data);
           }
         } else if (selectedFaculty) {
           const classesRes = await commonApi.getClasses({ facultyId: selectedFaculty });
           if (classesRes.success && classesRes.data) {
-            setClasses(classesRes.data.slice(0, 15));
+            setClasses(classesRes.data);
           }
         } else {
           const classesRes = await commonApi.getClasses();
           if (classesRes.success && classesRes.data) {
-            setClasses(classesRes.data.slice(0, 15));
+            setClasses(classesRes.data);
           }
         }
         
         // Load instructors - limit to 15 items (search available)
         const instructorsRes = await commonApi.getInstructors();
         if (instructorsRes.success && instructorsRes.data) {
-          setInstructors(instructorsRes.data.slice(0, 15));
+          setInstructors(instructorsRes.data);
         }
         
         // Load students - limit to 15 items (search available)
         const studentsRes = await commonApi.getStudents({ 
           pageNumber: 1, 
-          pageSize: 15 // Reduced from 100 to 15
+          pageSize: 100
         });
         if (studentsRes.success && studentsRes.data) {
           setStudents(studentsRes.data);
@@ -209,95 +209,35 @@ export default function NotificationManagementPage() {
       searchTerm: searchKeyword || undefined,
       status: (selectedStatus || undefined) as NotificationStatus | undefined,
       targetType: (selectedTargetType || undefined) as 'all' | 'student' | 'instructor' | undefined,
+      notificationType: selectedNotificationType || undefined,
+      sendingMethod: selectedSendingMethod || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      facultyId: selectedFaculty || undefined,
+      departmentId: selectedDepartment || undefined,
+      classId: selectedClass || undefined,
+      instructorId: selectedInstructor || undefined,
+      studentId: selectedStudent || undefined,
     });
-  }, [currentPage, searchKeyword, selectedStatus, selectedTargetType, fetchNotifications]);
-
-  // Filter notifications on client side with all filters
-  const filteredNotifications = useMemo(() => {
-    let filtered = [...notifications];
-
-    // Filter by date range (createdAt)
-    if (startDate || endDate) {
-      filtered = filtered.filter((notification) => {
-        if (!notification.createdAt) return false;
-        
-        const notificationDate = new Date(notification.createdAt);
-        notificationDate.setHours(0, 0, 0, 0);
-        
-        if (startDate) {
-          const start = new Date(startDate);
-          start.setHours(0, 0, 0, 0);
-          if (notificationDate < start) return false;
-        }
-        
-        if (endDate) {
-          const end = new Date(endDate);
-          end.setHours(23, 59, 59, 999);
-          if (notificationDate > end) return false;
-        }
-        
-        return true;
-      });
-    }
-
-    // Filter by notification type
-    if (selectedNotificationType) {
-      filtered = filtered.filter((notification) => 
-        notification.notificationType === selectedNotificationType
-      );
-    }
-
-    // Filter by sending method
-    if (selectedSendingMethod) {
-      filtered = filtered.filter((notification) => 
-        notification.sendingMethod === selectedSendingMethod
-      );
-    }
-
-    // Filter by target type and specific target
-    if (selectedFaculty || selectedDepartment || selectedClass || selectedInstructor || selectedStudent) {
-      filtered = filtered.filter((notification) => {
-        // Check if notification matches selected filters
-        if (selectedFaculty && notification.targetType === 'faculty' && notification.targetId === selectedFaculty) {
-          return true;
-        }
-        if (selectedDepartment && notification.targetType === 'department' && notification.targetId === selectedDepartment) {
-          return true;
-        }
-        if (selectedClass && notification.targetType === 'class' && notification.targetId === selectedClass) {
-          return true;
-        }
-        if (selectedInstructor && notification.targetType === 'instructor' && notification.targetId === selectedInstructor) {
-          return true;
-        }
-        if (selectedStudent && notification.targetType === 'student' && notification.targetId === selectedStudent) {
-          return true;
-        }
-        
-        // If we have filters but notification doesn't match, exclude it
-        // But keep notifications that target "all" or broader groups
-        if (selectedFaculty || selectedDepartment || selectedClass) {
-          // For faculty/department/class filters, only show exact matches or broader targets
-          return ['all', 'all_students', 'all_instructors'].includes(notification.targetType);
-        }
-        
-        return false;
-      });
-    }
-
-    return filtered;
   }, [
-    notifications, 
-    startDate, 
-    endDate, 
-    selectedNotificationType, 
+    currentPage,
+    searchKeyword,
+    selectedStatus,
+    selectedTargetType,
+    selectedNotificationType,
     selectedSendingMethod,
+    startDate,
+    endDate,
     selectedFaculty,
     selectedDepartment,
     selectedClass,
     selectedInstructor,
-    selectedStudent
+    selectedStudent,
+    fetchNotifications
   ]);
+
+  // Server now handles filtering, memoize for downstream calculations
+  const filteredNotifications = useMemo(() => notifications, [notifications]);
 
   // Check if any advanced filters are active
   const hasActiveAdvancedFilters = useMemo(() => {
@@ -391,8 +331,32 @@ export default function NotificationManagementPage() {
       searchTerm: searchKeyword || undefined,
       status: (selectedStatus || undefined) as NotificationStatus | undefined,
       targetType: (selectedTargetType || undefined) as 'all' | 'student' | 'instructor' | undefined,
+      notificationType: selectedNotificationType || undefined,
+      sendingMethod: selectedSendingMethod || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      facultyId: selectedFaculty || undefined,
+      departmentId: selectedDepartment || undefined,
+      classId: selectedClass || undefined,
+      instructorId: selectedInstructor || undefined,
+      studentId: selectedStudent || undefined,
     });
-  }, [currentPage, searchKeyword, selectedStatus, selectedTargetType, fetchNotifications]);
+  }, [
+    currentPage,
+    searchKeyword,
+    selectedStatus,
+    selectedTargetType,
+    selectedNotificationType,
+    selectedSendingMethod,
+    startDate,
+    endDate,
+    selectedFaculty,
+    selectedDepartment,
+    selectedClass,
+    selectedInstructor,
+    selectedStudent,
+    fetchNotifications
+  ]);
 
   const renderNotificationRow = useCallback((notification: Notification, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
     const statusDisplay = getStatusDisplay(notification.status);
@@ -523,7 +487,7 @@ export default function NotificationManagementPage() {
         })}
       </>
     );
-  }, [handleEditClick, handleSendClick, handleArchiveClick, handleCancelClick, handleSelectOne, selectedNotificationIds]);
+  }, [handleViewClick, handleEditClick, handleSendClick, handleArchiveClick, handleCancelClick, handleSelectOne, selectedNotificationIds]);
 
   const statusOptions = [...STATUS_OPTIONS];
   const targetTypeOptions = [
@@ -660,7 +624,7 @@ export default function NotificationManagementPage() {
 
             {/* Second Row: Date Range Filter and Advanced Filter Button */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-              <div className="sm:col-span-2 lg:col-span-1">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   <Calendar className="w-4 h-4 inline mr-1.5" />
                   Từ ngày
@@ -675,7 +639,7 @@ export default function NotificationManagementPage() {
                   className="w-full"
                 />
               </div>
-              <div className="sm:col-span-2 lg:col-span-1">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   <Calendar className="w-4 h-4 inline mr-1.5" />
                   Đến ngày
@@ -691,23 +655,22 @@ export default function NotificationManagementPage() {
                   className="w-full"
                 />
               </div>
-              {(startDate || endDate) && (
-                <div className="sm:col-span-2 lg:col-span-1 flex items-end">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setStartDate('');
-                      setEndDate('');
-                      setCurrentPage(1);
-                    }}
-                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Xóa bộ lọc ngày
-                  </Button>
-                </div>
-              )}
+              <div className="flex items-end">
+                <Button
+                  variant="outline"
+                  disabled={!startDate && !endDate}
+                  onClick={() => {
+                    setStartDate('');
+                    setEndDate('');
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full border-gray-300 text-gray-700 hover:bg-gray-50 ${(!startDate && !endDate) ? 'pointer-events-none opacity-0' : ''}`}
+                >
+                  Xóa bộ lọc ngày
+                </Button>
+              </div>
               {/* Advanced Filter Button */}
-              <div className={`sm:col-span-2 ${(startDate || endDate) ? 'lg:col-span-1' : 'lg:col-span-2'} flex items-end`}>
+              <div className="flex items-end">
                 <Button
                   variant="outline"
                   onClick={() => setIsAdvancedFilterOpen(!isAdvancedFilterOpen)}
@@ -736,10 +699,12 @@ export default function NotificationManagementPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Notification Type */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Loại thông báo
-                      </label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1 min-h-[48px]">
+                        <label className="text-sm font-medium text-gray-700">
+                          Loại thông báo
+                        </label>
+                      </div>
                       <Dropdown
                         options={[
                           { value: '', label: 'Tất cả' },
@@ -755,10 +720,12 @@ export default function NotificationManagementPage() {
                     </div>
 
                     {/* Sending Method */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Phương thức gửi
-                      </label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1 min-h-[48px]">
+                        <label className="text-sm font-medium text-gray-700">
+                          Phương thức gửi
+                        </label>
+                      </div>
                       <Dropdown
                         options={[
                           { value: '', label: 'Tất cả' },
@@ -774,10 +741,15 @@ export default function NotificationManagementPage() {
                     </div>
 
                     {/* Faculty */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Khoa/Viện
-                      </label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1 min-h-[48px]">
+                        <label className="text-sm font-medium text-gray-700">
+                          Khoa
+                        </label>
+                        <p className="text-xs text-gray-500">
+                          Khi chọn Khoa, danh sách Bộ môn và Lớp sẽ tự động lọc theo khoa được chọn.
+                        </p>
+                      </div>
                       {loadingAdvancedData ? (
                         <div className="text-sm text-gray-500 py-2">Đang tải...</div>
                       ) : (
@@ -787,8 +759,8 @@ export default function NotificationManagementPage() {
                             ...faculties.map(f => ({ value: f.facultyId, label: f.facultyName }))
                           ]}
                           value={selectedFaculty || ''}
-                          placeholder="Chọn khoa/viện"
-                          searchPlaceholder="Tìm kiếm khoa/viện..."
+                          placeholder="Chọn khoa"
+                          searchPlaceholder="Tìm kiếm khoa..."
                           onChange={(value) => {
                             setSelectedFaculty(value);
                             setCurrentPage(1);
@@ -974,11 +946,7 @@ export default function NotificationManagementPage() {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalCount={
-              startDate || endDate || hasActiveAdvancedFilters 
-                ? filteredNotifications.length 
-                : totalCount
-            }
+            totalCount={totalCount}
             pageSize={20}
             onPageChange={setCurrentPage}
           />
