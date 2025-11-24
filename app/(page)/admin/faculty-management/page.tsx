@@ -6,7 +6,6 @@ import { Button, SearchInput } from "@/app/components/ui"
 import { Pagination } from "@/app/components/ui/pagination"
 import { Checkbox } from "@/app/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
-import { Badge } from "@/app/components/ui/badge"
 import { useFaculties } from "./lib/hooks/useFaculties"
 import { Faculty, CreateFacultyDto, UpdateFacultyDto } from "./lib/types/types"
 import {
@@ -16,16 +15,22 @@ import {
   BulkEditFacultyModal,
   BulkDeleteFacultyModal,
   FacultyActionsMenu,
-  FacultyStatCard,
 } from "./components"
 import { GraduationCap, Activity, PauseCircle } from "lucide-react"
 
 export default function FacultyManagementPage() {
+  // Filters
+  const [localSearchQuery, setLocalSearchQuery] = useState("")
+  const [divisionFilter, setDivisionFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [curriculumFilter, setCurriculumFilter] = useState<string>("all")
+
   const {
     faculties,
     stats,
     divisions,
     deans,
+    curriculums,
     isLoading,
     handleSearch,
     createFaculty,
@@ -53,11 +58,6 @@ export default function FacultyManagementPage() {
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  // Filters
-  const [localSearchQuery, setLocalSearchQuery] = useState("")
-  const [divisionFilter, setDivisionFilter] = useState<string>("all")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-
   // Pagination (client-side)
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
@@ -73,20 +73,32 @@ export default function FacultyManagementPage() {
 
   // Filtered faculties (client-side filtering for division and status)
   const filteredFaculties = useMemo(() => {
-    return faculties.filter((faculty) => {
-      const matchesDivision =
-        divisionFilter === "all" || faculty.divisionId === divisionFilter
-      const matchesStatus =
-        statusFilter === "all" || faculty.facultyStatus === statusFilter
+    let result = [...faculties];
 
-      return matchesDivision && matchesStatus
-    })
-  }, [faculties, divisionFilter, statusFilter])
+    // Filter by division
+    if (divisionFilter && divisionFilter !== "all") {
+      result = result.filter((faculty) => faculty.divisionId === divisionFilter);
+    }
+
+    // Filter by status
+    if (statusFilter && statusFilter !== "all") {
+      result = result.filter((faculty) => faculty.facultyStatus === statusFilter);
+    }
+
+    // Filter by curriculum
+    if (curriculumFilter && curriculumFilter !== "all") {
+      result = result.filter((faculty) => 
+        faculty.curriculumCodes?.includes(curriculumFilter)
+      );
+    }
+
+    return result;
+  }, [faculties, divisionFilter, statusFilter, curriculumFilter])
 
   // Reset về trang 1 khi filter/search thay đổi
   useEffect(() => {
     setCurrentPage(1)
-  }, [divisionFilter, statusFilter, localSearchQuery])
+  }, [divisionFilter, statusFilter, curriculumFilter, localSearchQuery])
 
   const totalCount = filteredFaculties.length
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
@@ -146,37 +158,86 @@ export default function FacultyManagementPage() {
     setSelectedIds([])
   }
 
+  const STAT_CARDS = [
+    { 
+      key: 'total', 
+      label: 'Tổng số ngành học', 
+      bgColor: 'bg-[#FFDDAA]',
+      iconColor: 'text-[#CC8800]',
+      Icon: GraduationCap
+    },
+    { 
+      key: 'active', 
+      label: 'Đang hoạt động', 
+      bgColor: 'bg-[#CCEECC]',
+      iconColor: 'text-[#44AA44]',
+      Icon: Activity
+    },
+    { 
+      key: 'inactive', 
+      label: 'Ngừng hoạt động', 
+      bgColor: 'bg-[#FFBBAA]',
+      iconColor: 'text-[#CC4444]',
+      Icon: PauseCircle
+    },
+  ] as const;
+
+  const statValues = useMemo(() => ({
+    total: stats?.total || 0,
+    active: stats?.active || 0,
+    inactive: stats?.inactive || 0,
+  }), [stats]);
+
+  // Debug: Log divisions and curriculums
+  useEffect(() => {
+    console.log('Divisions:', divisions);
+    console.log('Curriculums:', curriculums);
+  }, [divisions, curriculums]);
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quản lý Ngành học</h1>
-          <p className="text-muted-foreground">Quản lý thông tin các ngành học</p>
-        </div>
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Quản lý Ngành học</h1>
+        <p className="text-gray-600 mt-1">Quản lý thông tin các ngành học</p>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <FacultyStatCard
-          title="Tổng số ngành học"
-          value={stats?.total || 0}
-          icon={GraduationCap}
-          color="blue"
-        />
-        <FacultyStatCard
-          title="Đang hoạt động"
-          value={stats?.active || 0}
-          icon={Activity}
-          color="green"
-        />
-        <FacultyStatCard
-          title="Ngừng hoạt động"
-          value={stats?.inactive || 0}
-          icon={PauseCircle}
-          color="orange"
-        />
-      </div>
+      {isLoading && faculties.length === 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="bg-gray-100 rounded-lg p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-24 mb-4"></div>
+              <div className="h-8 bg-gray-200 rounded w-16"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          {STAT_CARDS.map((card) => {
+            const value = statValues[card.key as keyof typeof statValues];
+            const { Icon, bgColor, iconColor } = card;
+            return (
+              <div
+                key={card.key}
+                className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden border border-gray-200"
+              >
+                <div className={`absolute top-0 right-0 w-20 h-20 ${bgColor} rounded-bl-[100%]`}>
+                  <div className="absolute top-5 right-5">
+                    <Icon className={`w-6 h-6 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+                  </div>
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">
+                  {card.label}
+                </p>
+                <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
+                  {typeof value === 'number' ? value.toLocaleString('vi-VN') : value}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Main Content: Filters, actions, table, pagination */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -200,7 +261,7 @@ export default function FacultyManagementPage() {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
             <div className="sm:col-span-2">
               <SearchInput
                 placeholder="Tìm kiếm theo mã, tên ngành học..."
@@ -208,37 +269,51 @@ export default function FacultyManagementPage() {
                 onChange={(e) => setLocalSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex gap-3">
-              <Select
-                value={divisionFilter}
-                onValueChange={setDivisionFilter}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Tất cả khoa" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả khoa</SelectItem>
-                  {divisions.map((div) => (
-                    <SelectItem key={div.divisionId} value={div.divisionId}>
-                      {div.divisionName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Tất cả trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="active">Đang hoạt động</SelectItem>
-                  <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              value={divisionFilter}
+              onValueChange={setDivisionFilter}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Tất cả khoa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả khoa</SelectItem>
+                {divisions.map((div) => (
+                  <SelectItem key={div.divisionId} value={div.divisionId}>
+                    {div.divisionName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={curriculumFilter}
+              onValueChange={setCurriculumFilter}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Tất cả CTĐT" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả CTĐT</SelectItem>
+                {curriculums.map((curr) => (
+                  <SelectItem key={curr.curriculumId} value={curr.curriculumCode}>
+                    {curr.curriculumCode}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Tất cả trạng thái" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                <SelectItem value="active">Đang hoạt động</SelectItem>
+                <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Bulk actions bar */}
@@ -288,32 +363,39 @@ export default function FacultyManagementPage() {
             <table className="w-full">
               <thead className="bg-[#0053AD] text-white">
                 <tr>
-                  <th className="w-12 px-4 py-3 text-left">
+                  <th className="w-12 px-4 py-3 text-center">
                     <Checkbox
-                    checked={
-                      paginatedFaculties.length > 0 &&
-                      paginatedFaculties.every((f) =>
-                        selectedIds.includes(f.facultyId),
-                      )
-                    }
-                    onCheckedChange={(value) =>
-                      handleSelectAll(Boolean(value))
-                    }
-                  />
-                </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
+                      checked={
+                        paginatedFaculties.length > 0 &&
+                        paginatedFaculties.every((f) =>
+                          selectedIds.includes(f.facultyId),
+                        )
+                      }
+                      onCheckedChange={(value) =>
+                        handleSelectAll(Boolean(value))
+                      }
+                      className="border-white"
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
                     Mã
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
                     Tên ngành học
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
                     Khoa
                   </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold border-l border-white/40">
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Trưởng ngành
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold">
+                    Số CTĐT
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold">
                     Trạng thái
                   </th>
-                  <th className="w-12 px-4 py-3 text-center text-sm font-semibold border-l border-white/40">
+                  <th className="w-12 px-4 py-3 text-center text-sm font-semibold">
                     HĐ
                   </th>
                 </tr>
@@ -321,25 +403,32 @@ export default function FacultyManagementPage() {
               <tbody className="divide-y">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center">
+                    <td colSpan={8} className="p-8 text-center">
                       <div className="flex items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0053AD] border-t-transparent" />
                       </div>
                     </td>
                   </tr>
                 ) : paginatedFaculties.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
-                      className="p-8 text-center text-muted-foreground"
+                      colSpan={8}
+                      className="p-8 text-center text-gray-500"
                     >
                       Không tìm thấy ngành học nào
                     </td>
                   </tr>
                 ) : (
-                  paginatedFaculties.map((faculty) => (
-                    <tr key={faculty.facultyId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
+                  paginatedFaculties.map((faculty, index) => (
+                    <tr 
+                      key={faculty.facultyId} 
+                      className={
+                        index % 2 === 0
+                          ? 'border-b border-gray-100 hover:bg-gray-50'
+                          : 'bg-gray-50 border-b border-gray-100 hover:bg-gray-100'
+                      }
+                    >
+                      <td className="px-4 py-3 text-center">
                         <Checkbox
                           checked={selectedIds.includes(faculty.facultyId)}
                           onCheckedChange={(checked) =>
@@ -350,38 +439,35 @@ export default function FacultyManagementPage() {
                           }
                         />
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="font-medium">
-                          {faculty.facultyCode}
-                        </span>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">
+                        {faculty.facultyCode}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="font-medium">
-                          {faculty.facultyName}
-                        </span>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">
+                        {faculty.facultyName}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-muted-foreground">
-                          {faculty.divisionName || "-"}
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-600">
+                        {faculty.divisionName || "-"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-600">
+                        {faculty.deanName || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {faculty.curriculumCodes?.length || 0}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <Badge
-                          variant={
+                        <span
+                          className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${
                             faculty.facultyStatus === "active"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className={
-                            faculty.facultyStatus === "active"
-                              ? "bg-green-100 text-green-800 hover:bg-green-100"
-                              : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                          }
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
                         >
                           {faculty.facultyStatus === "active"
-                            ? "Đang hoạt động"
+                            ? "Hoạt động"
                             : "Ngừng hoạt động"}
-                        </Badge>
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <FacultyActionsMenu
