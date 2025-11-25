@@ -45,6 +45,7 @@ export default function InstructorProfilePage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [detailInstructorId, setDetailInstructorId] = useState<string | null>(null);
   const [editInstructorId, setEditInstructorId] = useState<string | null>(null);
+  const [selectedInstructorIds, setSelectedInstructorIds] = useState<Set<string>>(new Set());
 
   const statValues = useMemo(() => {
     if (!stats) {
@@ -65,6 +66,50 @@ export default function InstructorProfilePage() {
     };
   }, [stats]);
 
+  const handleSelectAll = () => {
+    if (selectedInstructorIds.size === instructors.length) {
+      setSelectedInstructorIds(new Set());
+    } else {
+      setSelectedInstructorIds(new Set(instructors.map((i) => i.instructorId)));
+    }
+  };
+
+  const handleSelectOne = (instructorId: string) => {
+    setSelectedInstructorIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(instructorId)) {
+        next.delete(instructorId);
+      } else {
+        next.add(instructorId);
+      }
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedInstructorIds.size === 0) return;
+
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn xóa ${selectedInstructorIds.size} giảng viên đã chọn? Hành động này không thể hoàn tác.`
+    );
+    if (!confirmed) return;
+
+    try {
+      const deletePromises = Array.from(selectedInstructorIds).map((id) =>
+        instructorsApi.deleteInstructor(id)
+      );
+      
+      await Promise.all(deletePromises);
+      toast.success(`Đã xóa ${selectedInstructorIds.size} giảng viên thành công`);
+      setSelectedInstructorIds(new Set());
+      setCurrentPage(1);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const msg = err.response?.data?.message || err.message || 'Đã xảy ra lỗi khi xóa giảng viên';
+      toast.error(msg);
+    }
+  };
+
   const handleDeleteInstructor = async (instructor: InstructorListItem) => {
     if (instructor.employmentStatus !== 'inactive') {
       toast.error('Chỉ có thể xóa giảng viên khi trạng thái là "Ngưng công tác"');
@@ -78,7 +123,11 @@ export default function InstructorProfilePage() {
       const res = await instructorsApi.deleteInstructor(instructor.instructorId);
       if (res.success) {
         toast.success('Xóa giảng viên thành công');
-        // useInstructors exposes latest filters & pagination; re-fetch by resetting page
+        setSelectedInstructorIds((prev) => {
+          const next = new Set(prev);
+          next.delete(instructor.instructorId);
+          return next;
+        });
         setCurrentPage(1);
       } else {
         toast.error(res.message || 'Xóa giảng viên thất bại');
@@ -159,11 +208,13 @@ export default function InstructorProfilePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
             <div className="sm:col-span-2">
-              <SearchInput
-                placeholder="Tìm kiếm theo mã GV, tên..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <div className="relative">
+                <SearchInput
+                  placeholder="Tìm kiếm theo mã GV, tên... (gõ có dấu: Vũ, Nguyễn)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
 
             <Dropdown
@@ -199,6 +250,31 @@ export default function InstructorProfilePage() {
               }}
             />
           </div>
+
+          {selectedInstructorIds.size > 0 && (
+            <div className="flex items-center justify-between p-3 bg-[#E8F4FF] border border-[#0053AD]/20 rounded-lg">
+              <div className="text-sm font-medium text-[#0053AD]">
+                Đã chọn {selectedInstructorIds.size} giảng viên
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-600 text-red-600 hover:bg-red-50"
+                  onClick={handleBulkDelete}
+                >
+                  Xóa toàn bộ
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setSelectedInstructorIds(new Set())}
+                >
+                  Bỏ chọn
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-gray-200 min-w-0">
@@ -212,8 +288,18 @@ export default function InstructorProfilePage() {
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="bg-[#0053AD] text-white">
-                      <th className="py-3 px-4 text-left w-10">
-                        <input type="checkbox" className="rounded border-white" />
+                      <th className="py-3 px-4 text-center w-10">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-white cursor-pointer accent-white"
+                          checked={instructors.length > 0 && selectedInstructorIds.size === instructors.length}
+                          onChange={handleSelectAll}
+                          ref={(el) => {
+                            if (el) {
+                              el.indeterminate = selectedInstructorIds.size > 0 && selectedInstructorIds.size < instructors.length;
+                            }
+                          }}
+                        />
                       </th>
                       <th className="py-3 px-4 text-left">Mã GV</th>
                       <th className="py-3 px-4 text-left">Họ và tên</th>
@@ -228,6 +314,7 @@ export default function InstructorProfilePage() {
                   <tbody>
                     {instructors.map((ins, index) => {
                       const statusDisplay = getEmploymentStatusDisplay(ins.employmentStatus);
+                      const isSelected = selectedInstructorIds.has(ins.instructorId);
                       return (
                         <tr
                           key={ins.instructorId}
@@ -238,7 +325,14 @@ export default function InstructorProfilePage() {
                           }
                         >
                           <td className="py-3 px-4">
-                            <input type="checkbox" className="rounded border-gray-300" />
+                            <div className="flex justify-center">
+                              <input 
+                                type="checkbox" 
+                                className="rounded border-gray-300 cursor-pointer accent-[#0053AD]"
+                                checked={isSelected}
+                                onChange={() => handleSelectOne(ins.instructorId)}
+                              />
+                            </div>
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap text-gray-900">
                             {ins.instructorCode}
