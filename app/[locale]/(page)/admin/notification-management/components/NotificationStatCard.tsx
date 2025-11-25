@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useCountUp } from '@/lib/hooks/useCountUp';
 import { useMemo } from 'react';
 import { LucideIcon } from 'lucide-react';
@@ -11,11 +10,13 @@ interface NotificationStatCardProps {
   Icon: LucideIcon;
   bgColor: string;
   iconColor: string;
+  locale?: string;
 }
 
-export const NotificationStatCard = ({ label, value, Icon, bgColor, iconColor }: NotificationStatCardProps) => {
+export const NotificationStatCard = ({ label, value, Icon, bgColor, iconColor, locale = 'vi-VN' }: NotificationStatCardProps) => {
   const count = useCountUp(value, { duration: 1200, start: 0 });
   const displayValue = useMemo(() => Math.round(count), [count]);
+  const formattedValue = useMemo(() => new Intl.NumberFormat(locale).format(displayValue), [displayValue, locale]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 relative overflow-hidden">
@@ -28,7 +29,7 @@ export const NotificationStatCard = ({ label, value, Icon, bgColor, iconColor }:
         {label}
       </p>
       <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
-        {displayValue.toLocaleString('vi-VN')}
+        {formattedValue}
       </p>
     </div>
   );

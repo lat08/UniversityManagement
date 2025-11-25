@@ -1,7 +1,8 @@
 "use client"
 
 import { XCircle } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { GradeItem } from "../lib/types/types"
 
 interface AdminGradeDetailModalProps {
@@ -15,6 +16,9 @@ export const AdminGradeDetailModal = ({
   onClose,
   grade,
 }: AdminGradeDetailModalProps) => {
+  const t = useTranslations("admin.studentProfile.gradeDetail")
+  const tCommon = useTranslations("common.actions")
+
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) {
@@ -26,28 +30,34 @@ export const AdminGradeDetailModal = ({
     return () => window.removeEventListener("keydown", handleEscKey)
   }, [isOpen, onClose])
 
-  if (!isOpen || !grade) return null
+  const components = useMemo(
+    () =>
+      grade
+        ? [
+            {
+              stt: 1,
+              name: t("components.attendanceAttitude"),
+              weight: 20,
+              score: grade.attendanceGrade,
+            },
+            {
+              stt: 2,
+              name: t("components.quiz"),
+              weight: 30,
+              score: grade.midtermGrade,
+            },
+            {
+              stt: 3,
+              name: t("components.finalExam"),
+              weight: 50,
+              score: grade.finalGrade,
+            },
+          ]
+        : [],
+    [grade, t],
+  )
 
-  const components = [
-    {
-      stt: 1,
-      name: 'Chuyên cần và Thái độ HT',
-      weight: 20,
-      score: grade.attendanceGrade,
-    },
-    {
-      stt: 2,
-      name: 'Kiểm tra',
-      weight: 30,
-      score: grade.midtermGrade,
-    },
-    {
-      stt: 3,
-      name: 'Điểm thi',
-      weight: 50,
-      score: grade.finalGrade,
-    },
-  ]
+  if (!isOpen || !grade) return null
 
   return (
     <div 
@@ -62,7 +72,9 @@ export const AdminGradeDetailModal = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">{grade.subjectName}</h2>
-              <p className="text-sm text-blue-100 mt-1">Mã môn: {grade.subjectCode} • Số tín chỉ: {grade.credits}</p>
+              <p className="text-sm text-blue-100 mt-1">
+                {t("fields.code")}: {grade.subjectCode} • {t("fields.credits")}: {grade.credits}
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -79,19 +91,19 @@ export const AdminGradeDetailModal = ({
               <thead>
                 <tr className="bg-[#0053AD]">
                   <th className="text-center py-3.5 px-4 font-semibold text-white whitespace-nowrap relative">
-                    STT
+                    {t("components.headers.order")}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
                   </th>
                   <th className="text-left py-3.5 px-6 font-semibold text-white relative">
-                    Tên thành phần
+                    {t("components.headers.name")}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
                   </th>
                   <th className="text-center py-3.5 px-4 font-semibold text-white whitespace-nowrap relative">
-                    Trọng số (%)
+                    {t("components.headers.weight")}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
                   </th>
                   <th className="text-center py-3.5 px-4 font-semibold text-white whitespace-nowrap">
-                    Điểm
+                    {t("components.headers.score")}
                   </th>
                 </tr>
               </thead>
@@ -117,7 +129,7 @@ export const AdminGradeDetailModal = ({
               onClick={onClose}
               className="px-6 py-2.5 bg-[#0053AD] hover:bg-[#003d82] text-white rounded-lg transition-colors cursor-pointer"
             >
-              Đóng
+              {tCommon("close")}
             </button>
           </div>
         </div>

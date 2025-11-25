@@ -1,7 +1,0 @@
-export { AddFacultyModal } from "./AddFacultyModal"
-export { EditFacultyModal } from "./EditFacultyModal"
-export { ConfirmDeleteFacultyModal } from "./ConfirmDeleteFacultyModal"
-export { BulkEditFacultyModal } from "./BulkEditFacultyModal"
-export { BulkDeleteFacultyModal } from "./BulkDeleteFacultyModal"
-export { FacultyActionsMenu } from "./FacultyActionsMenu"
-export { FacultyStatCard } from "./FacultyStatCard"

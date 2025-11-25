@@ -16,11 +16,11 @@ import { Dropdown } from '@/app/components/ui';
 import { getRoomAvailability } from '../lib/api/rooms.api';
 import { commonApi } from '@/lib/api/common';
 import type { Semester } from '@/lib/types/common';
-import { 
+import {
   ROOM_STATUS_COLORS,
   BUSY_SLOT_TYPE_COLORS,
-  type RoomAvailability 
-} from '../lib/types/room.types';
+  type RoomAvailability,
+} from '@/lib/types/room';
 import 'react-day-picker/dist/style.css';
 
 interface BookingModalProps {

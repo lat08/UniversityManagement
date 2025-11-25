@@ -1,2 +1,0 @@
-export { documentsApi } from './documentsApi';
-

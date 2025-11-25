@@ -30,7 +30,7 @@ export const useRegisteredCourses = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchCourses();

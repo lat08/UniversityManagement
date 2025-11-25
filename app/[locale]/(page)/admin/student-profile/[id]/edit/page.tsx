@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
+import { useState, useEffect, useRef, useMemo, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { Calendar, Edit2 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
 import { Tabs } from '@/app/components/ui/tabs';
@@ -11,7 +12,7 @@ import { StudentDetail, Faculty, Department, ClassItem, ENROLLMENT_STATUS_OPTION
 import { toast } from 'react-hot-toast';
 import { DayPicker } from 'react-day-picker';
 import { format, parse } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi as viLocale, enUS } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
 
 export default function EditStudentPage() {
@@ -19,6 +20,11 @@ export default function EditStudentPage() {
   const params = useParams();
   const studentId = params.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const locale = useLocale();
+  const tEdit = useTranslations('admin.studentProfile.editPage');
+  const tForm = useTranslations('admin.studentProfile.editPage.form');
+  const tStatus = useTranslations('admin.studentProfile');
+  const dateLocale = useMemo(() => (locale === 'vi' ? viLocale : enUS), [locale]);
 
   const [studentData, setStudentData] = useState<StudentDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,17 +58,32 @@ export default function EditStudentPage() {
   const [profilePicturePreview, setProfilePicturePreview] = useState<string | null>(null);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
 
-  const genders = [
-    { value: 'male', label: 'Nam' },
-    { value: 'female', label: 'Nữ' },
-  ];
+  const genders = useMemo(
+    () => [
+      { value: 'male', label: tForm('gender.options.male') },
+      { value: 'female', label: tForm('gender.options.female') },
+    ],
+    [tForm],
+  );
 
-  const tabs = [
-    { id: 'basic', label: 'Thông tin cơ bản' },
-    { id: 'contact', label: 'Thông tin liên hệ' },
-    { id: 'academic', label: 'Học vấn' },
-    { id: 'account', label: 'Tài khoản' },
-  ];
+  const tabs = useMemo(
+    () => [
+      { id: 'basic', label: tEdit('tabs.basic') },
+      { id: 'contact', label: tEdit('tabs.contact') },
+      { id: 'academic', label: tEdit('tabs.academic') },
+      { id: 'account', label: tEdit('tabs.account') },
+    ],
+    [tEdit],
+  );
+
+  const enrollmentStatusOptions = useMemo(
+    () =>
+      ENROLLMENT_STATUS_OPTIONS.map(option => ({
+        value: option.value,
+        label: tStatus(option.labelKey),
+      })),
+    [tStatus],
+  );
 
   useEffect(() => {
     const initializeData = async () => {
@@ -188,7 +209,7 @@ export default function EditStudentPage() {
       }
     } catch (error) {
       console.error('Error fetching student detail:', error);
-      toast.error('Không thể tải thông tin sinh viên');
+      toast.error(tEdit('loadError'));
     } finally {
       setLoading(false);
     }
@@ -240,12 +261,12 @@ export default function EditStudentPage() {
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Chỉ chấp nhận file ảnh có định dạng: .jpg, .jpeg, .png');
+        toast.error(tEdit('avatar.typeError'));
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Kích thước ảnh không được vượt quá 5MB');
+        toast.error(tEdit('avatar.sizeError'));
         return;
       }
 
@@ -259,7 +280,7 @@ export default function EditStudentPage() {
       };
       reader.readAsDataURL(file);
       
-      toast.success('Ảnh đã được chọn');
+      toast.success(tEdit('avatar.success'));
     }
   };
 
@@ -306,57 +327,57 @@ export default function EditStudentPage() {
     e.preventDefault();
 
     if (!formData.fullName || !formData.fullName.trim()) {
-      toast.error('Vui lòng nhập họ và tên');
+      toast.error(tForm('validation.fullNameRequired'));
       return;
     }
 
     if (formData.fullName.trim().length > 40) {
-      toast.error('Họ và tên không được vượt quá 40 ký tự');
+      toast.error(tForm('validation.fullNameMax'));
       return;
     }
 
     if (formData.citizenId && (formData.citizenId.length < 9 || formData.citizenId.length > 12)) {
-      toast.error('CMND/CCCD phải từ 9-12 số');
+      toast.error(tForm('validation.citizenId'));
       return;
     }
 
     if (formData.phoneNumber && (formData.phoneNumber.length < 10 || formData.phoneNumber.length > 11)) {
-      toast.error('Số điện thoại phải từ 10-11 số');
+      toast.error(tForm('validation.phoneNumber'));
       return;
     }
 
     if (formData.address && formData.address.trim().length < 5) {
-      toast.error('Địa chỉ phải trên 5 ký tự');
+      toast.error(tForm('validation.address'));
       return;
     }
 
     if (!formData.dateOfBirth) {
-      toast.error('Vui lòng chọn ngày sinh');
+      toast.error(tForm('validation.dateOfBirth'));
       return;
     }
 
     if (!formData.gender) {
-      toast.error('Vui lòng chọn giới tính');
+      toast.error(tForm('validation.gender'));
       return;
     }
 
     if (!formData.classId || formData.classId.trim() === '') {
-      toast.error('Vui lòng chọn lớp');
+      toast.error(tForm('validation.class'));
       return;
     }
 
     if (!formData.enrollmentStatus) {
-      toast.error('Vui lòng chọn trạng thái');
+      toast.error(tForm('validation.status'));
       return;
     }
 
     if (formData.password || formData.confirmPassword) {
       if (formData.password !== formData.confirmPassword) {
-        toast.error('Mật khẩu xác nhận không khớp');
+        toast.error(tForm('validation.passwordConfirm'));
         return;
       }
       if (formData.password.length < 6) {
-        toast.error('Mật khẩu phải có ít nhất 6 ký tự');
+        toast.error(tForm('validation.passwordLength'));
         return;
       }
     }
@@ -387,15 +408,17 @@ export default function EditStudentPage() {
       const response = await studentsApi.updateStudent(studentId, payload);
 
       if (response.success) {
-        toast.success('Cập nhật thông tin sinh viên thành công');
+        toast.success(tEdit('toast.updateSuccess'));
         router.push(`/admin/student-profile/${studentId}`);
       } else {
-        toast.error(response.message || 'Cập nhật thông tin thất bại');
+        toast.error(response.message || tEdit('toast.updateError'));
       }
     } catch (error: unknown) {
-      const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
-                           (error as { message?: string })?.message || 
-                           'Có lỗi xảy ra khi cập nhật thông tin';
+      const fallbackError = tEdit('toast.genericError');
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (error as { message?: string })?.message ||
+        fallbackError;
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -412,7 +435,7 @@ export default function EditStudentPage() {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-gray-600">Đang tải dữ liệu...</div>
+          <div className="text-lg text-gray-600">{tEdit('loading')}</div>
         </div>
       </div>
     );
@@ -422,12 +445,12 @@ export default function EditStudentPage() {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-gray-600">Không tìm thấy thông tin sinh viên</div>
+          <div className="text-lg text-gray-600">{tEdit('notFound')}</div>
           <button
             onClick={handleCancel}
             className="mt-4 px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
           >
-            Quay lại
+            {tEdit('buttons.back')}
           </button>
         </div>
       </div>
@@ -438,8 +461,8 @@ export default function EditStudentPage() {
     <div className="min-h-screen p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Chỉnh sửa thông tin sinh viên</h1>
-        <p className="text-gray-600 mt-1">Cập nhật thông tin chi tiết của sinh viên</p>
+        <h1 className="text-3xl font-bold text-gray-900">{tEdit('title')}</h1>
+        <p className="text-gray-600 mt-1">{tEdit('description')}</p>
       </div>
 
       {/* Tabs */}
@@ -461,8 +484,8 @@ export default function EditStudentPage() {
             {activeTab === 'basic' && (
               <div>
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-1">Thông tin cơ bản</h2>
-                  <p className="text-sm text-gray-600">Thông tin cá nhân của sinh viên</p>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">{tEdit('sections.basic.title')}</h2>
+                  <p className="text-sm text-gray-600">{tEdit('sections.basic.subtitle')}</p>
                 </div>
 
                 <div className="flex gap-8">
@@ -484,7 +507,7 @@ export default function EditStudentPage() {
                         type="button"
                         onClick={handleAvatarClick}
                         className="absolute bottom-0 right-0 w-10 h-10 bg-[#0053AD] rounded-full flex items-center justify-center text-white hover:bg-[#003d82] transition-colors shadow-lg cursor-pointer"
-                        title="Tải ảnh lên"
+                        title={tEdit('avatar.tooltip')}
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
@@ -503,7 +526,7 @@ export default function EditStudentPage() {
                     {/* Họ và tên */}
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Họ và tên <span className="text-red-500">*</span>
+                        {tForm('fullName.label')} <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <input
@@ -511,6 +534,7 @@ export default function EditStudentPage() {
                           value={formData.fullName}
                           onChange={handleFullNameChange}
                           maxLength={40}
+                          placeholder={tForm('fullName.placeholder')}
                           className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                         />
                         <div className="absolute right-3 top-2.5 text-xs text-gray-500">
@@ -522,7 +546,7 @@ export default function EditStudentPage() {
                     {/* Ngày sinh */}
                     <div className="relative" ref={dobWrapperRef}>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Ngày sinh <span className="text-red-500">*</span>
+                        {tForm('dob.label')} <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <input
@@ -530,7 +554,7 @@ export default function EditStudentPage() {
                           value={dobInputValue}
                           onChange={(e) => handleDobInputChange(e.target.value)}
                           onFocus={() => setShowDobCalendar(true)}
-                          placeholder="dd/mm/yyyy"
+                          placeholder={tForm('dob.placeholder')}
                           maxLength={10}
                           className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                           onKeyDown={(e) => {
@@ -543,7 +567,7 @@ export default function EditStudentPage() {
                           type="button"
                           onClick={() => setShowDobCalendar(!showDobCalendar)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          aria-label="Chọn ngày sinh"
+                          aria-label={tForm('dob.ariaLabel')}
                         >
                           <Calendar className="w-5 h-5" />
                         </button>
@@ -557,7 +581,7 @@ export default function EditStudentPage() {
                             mode="single"
                             selected={dobDate}
                             onSelect={handleDobCalendarSelect}
-                            locale={vi}
+                            locale={dateLocale}
                             captionLayout="dropdown"
                             fromYear={1950}
                             toYear={new Date().getFullYear()}
@@ -576,12 +600,12 @@ export default function EditStudentPage() {
                     {/* Giới tính */}
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Giới tính
+                        {tForm('gender.label')}
                       </label>
                       <Dropdown
                         options={genders}
                         value={formData.gender}
-                        placeholder="Chọn giới tính"
+                        placeholder={tForm('gender.placeholder')}
                         onChange={(value) => setFormData({ ...formData, gender: value })}
                       />
                     </div>
@@ -589,7 +613,7 @@ export default function EditStudentPage() {
                     {/* CMND / CCCD */}
                     <div>
                       <label className="block text-sm font-medium text-gray-900 mb-2">
-                        CMND / CCCD
+                        {tForm('citizenId.label')}
                       </label>
                       <div className="relative">
                         <input
@@ -597,14 +621,14 @@ export default function EditStudentPage() {
                           value={formData.citizenId}
                           onChange={handleCitizenIdChange}
                           maxLength={12}
-                          placeholder="9-12 số"
+                          placeholder={tForm('citizenId.placeholder')}
                           className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                         />
                         <div className="absolute right-3 top-2.5 text-xs text-gray-500">
                           {formData.citizenId.length}/12
                         </div>
                       </div>
-                      <p className="mt-1 text-xs text-gray-500">Chỉ nhập số, từ 9-12 ký tự</p>
+                      <p className="mt-1 text-xs text-gray-500">{tForm('citizenId.hint')}</p>
                     </div>
                   </div>
                 </div>
@@ -615,29 +639,29 @@ export default function EditStudentPage() {
             {activeTab === 'contact' && (
               <div>
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-1">Thông tin liên hệ</h2>
-                  <p className="text-sm text-gray-600">Thông tin liên lạc của sinh viên</p>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">{tEdit('sections.contact.title')}</h2>
+                  <p className="text-sm text-gray-600">{tEdit('sections.contact.subtitle')}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6">
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Email
+                      {tForm('email.label')}
                     </label>
                     <input
                       type="email"
                       value={formData.email}
                       disabled
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                      title="Email không thể chỉnh sửa"
+                      title={tForm('email.readonlyHint')}
                     />
                   </div>
 
                   {/* Số điện thoại */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Số điện thoại
+                      {tForm('phone.label')}
                     </label>
                     <div className="relative">
                       <input
@@ -645,20 +669,20 @@ export default function EditStudentPage() {
                         value={formData.phoneNumber}
                         onChange={handlePhoneNumberChange}
                         maxLength={11}
-                        placeholder="10-11 số"
+                        placeholder={tForm('phone.placeholder')}
                         className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                       />
                       <div className="absolute right-3 top-2.5 text-xs text-gray-500">
                         {formData.phoneNumber.length}/11
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Chỉ nhập số, từ 10-11 ký tự</p>
+                    <p className="mt-1 text-xs text-gray-500">{tForm('phone.hint')}</p>
                   </div>
 
                   {/* Địa chỉ - Full width */}
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Địa chỉ
+                      {tForm('address.label')}
                     </label>
                     <div className="relative">
                       <textarea
@@ -666,14 +690,14 @@ export default function EditStudentPage() {
                         value={formData.address}
                         onChange={handleAddressChange}
                         maxLength={255}
-                        placeholder="Nhập địa chỉ đầy đủ (tối thiểu 5 ký tự)"
+                        placeholder={tForm('address.placeholder')}
                         className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent resize-none"
                       />
                       <div className="absolute right-3 bottom-2 text-xs text-gray-500">
                         {formData.address.length}/255
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Tối thiểu 5 ký tự, tối đa 255 ký tự</p>
+                    <p className="mt-1 text-xs text-gray-500">{tForm('address.hint')}</p>
                   </div>
                 </div>
               </div>
@@ -683,33 +707,33 @@ export default function EditStudentPage() {
             {activeTab === 'academic' && (
               <div>
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-1">Thông tin học vấn</h2>
-                  <p className="text-sm text-gray-600">Thông tin về chương trình học và lớp học</p>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">{tEdit('sections.academic.title')}</h2>
+                  <p className="text-sm text-gray-600">{tEdit('sections.academic.subtitle')}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6">
                   {/* Mã sinh viên */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Mã sinh viên
+                      {tForm('studentCode.label')}
                     </label>
                     <input
                       type="text"
                       value={studentData.studentCode}
                       disabled
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                      title="Mã sinh viên không thể chỉnh sửa"
+                      title={tForm('studentCode.readonlyHint')}
                     />
                   </div>
 
                   {/* Hệ đào tạo */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Hệ đào tạo
+                      {tForm('educationLevel.label')}
                     </label>
                     <input
                       type="text"
-                      value="Đại học chính quy"
+                      value={tForm('educationLevel.value')}
                       disabled
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                     />
@@ -718,7 +742,7 @@ export default function EditStudentPage() {
                   {/* Ngành học */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Ngành học
+                      {tForm('faculty.label')}
                     </label>
                     <DropdownSearch
                       options={faculties.map(f => ({
@@ -726,8 +750,8 @@ export default function EditStudentPage() {
                         label: f.facultyName,
                       }))}
                       value={selectedFacultyId}
-                      placeholder="Chọn ngành học"
-                      searchPlaceholder="Tìm kiếm ngành học..."
+                      placeholder={tForm('faculty.placeholder')}
+                      searchPlaceholder={tForm('faculty.searchPlaceholder')}
                       onChange={(value) => {
                         setSelectedFacultyId(value);
                         setSelectedDepartmentId('');
@@ -741,7 +765,7 @@ export default function EditStudentPage() {
                   {/* Chuyên ngành */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Chuyên ngành
+                      {tForm('department.label')}
                     </label>
                     <DropdownSearch
                       options={departments
@@ -751,8 +775,8 @@ export default function EditStudentPage() {
                           label: d.departmentName,
                         }))}
                       value={selectedDepartmentId}
-                      placeholder="Chọn chuyên ngành"
-                      searchPlaceholder="Tìm kiếm chuyên ngành..."
+                      placeholder={tForm('department.placeholder')}
+                      searchPlaceholder={tForm('department.searchPlaceholder')}
                       onChange={(value) => {
                         setSelectedDepartmentId(value);
                         setFormData({ ...formData, classId: '' });
@@ -765,7 +789,7 @@ export default function EditStudentPage() {
                   {/* Lớp */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Lớp <span className="text-red-500">*</span>
+                      {tForm('class.label')} <span className="text-red-500">*</span>
                     </label>
                     <DropdownSearch
                       options={classes.map(c => ({
@@ -773,8 +797,8 @@ export default function EditStudentPage() {
                         label: c.className,
                       }))}
                       value={formData.classId}
-                      placeholder="Chọn lớp"
-                      searchPlaceholder="Tìm kiếm lớp..."
+                      placeholder={tForm('class.placeholder')}
+                      searchPlaceholder={tForm('class.searchPlaceholder')}
                       onChange={(value) => setFormData({ ...formData, classId: value })}
                       disabled={!classes.length || !selectedFacultyId}
                     />
@@ -783,12 +807,12 @@ export default function EditStudentPage() {
                   {/* Trạng thái */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Trạng thái <span className="text-red-500">*</span>
+                      {tForm('status.label')} <span className="text-red-500">*</span>
                     </label>
                     <Dropdown
-                      options={ENROLLMENT_STATUS_OPTIONS}
+                      options={enrollmentStatusOptions}
                       value={formData.enrollmentStatus}
-                      placeholder="Chọn trạng thái"
+                      placeholder={tForm('status.placeholder')}
                       onChange={(value) => setFormData({ ...formData, enrollmentStatus: value })}
                     />
                   </div>
@@ -800,39 +824,39 @@ export default function EditStudentPage() {
             {activeTab === 'account' && (
               <div>
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-1">Tài khoản đăng nhập</h2>
-                  <p className="text-sm text-gray-600">Cập nhật mật khẩu đăng nhập cho sinh viên</p>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">{tEdit('sections.account.title')}</h2>
+                  <p className="text-sm text-gray-600">{tEdit('sections.account.subtitle')}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6">
                   {/* Mật khẩu mới */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Mật khẩu mới
+                      {tForm('password.label')}
                     </label>
                     <input
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="Để trống nếu không đổi"
+                      placeholder={tForm('password.placeholder')}
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                     />
-                    <p className="mt-1 text-xs text-gray-500">Mật khẩu phải có ít nhất 6 ký tự</p>
+                    <p className="mt-1 text-xs text-gray-500">{tForm('password.hint')}</p>
                   </div>
 
                   {/* Xác nhận mật khẩu mới */}
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Xác nhận mật khẩu mới
+                      {tForm('confirmPassword.label')}
                     </label>
                     <input
                       type="password"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      placeholder="Để trống nếu không đổi"
+                      placeholder={tForm('confirmPassword.placeholder')}
                       className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] focus:border-transparent"
                     />
-                    <p className="mt-1 text-xs text-gray-500">Nhập lại mật khẩu để xác nhận</p>
+                    <p className="mt-1 text-xs text-gray-500">{tForm('confirmPassword.hint')}</p>
                   </div>
                 </div>
               </div>
@@ -847,14 +871,14 @@ export default function EditStudentPage() {
               disabled={saving}
               className="px-6 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Quay lại
+              {tEdit('buttons.back')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+              {saving ? tEdit('buttons.saving') : tEdit('buttons.save')}
             </button>
           </div>
         </form>

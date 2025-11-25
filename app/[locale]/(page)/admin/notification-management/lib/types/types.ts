@@ -3,6 +3,8 @@ export type TargetType = 'all' | 'all_students' | 'all_instructors' | 'faculty' 
 export type SendingMethod = 'System' | 'Email' | 'Both';
 export type NotificationStatus = 'pending' | 'sent' | 'cancelled';
 
+export type TranslateFn = (key: string, values?: Record<string, unknown>) => string;
+
 export interface Notification {
   scheduleId: string;
   title: string;
@@ -91,79 +93,134 @@ export interface NotificationStats {
   cancelledNotifications: number;
 }
 
+const DEFAULT_UNKNOWN_KEY = 'general.unknown';
+
 export const NOTIFICATION_TYPE_OPTIONS = [
-  { value: 'event', label: 'Sự kiện' },
-  { value: 'tuition', label: 'Học phí' },
-  { value: 'schedule', label: 'Lịch học' },
-  { value: 'important', label: 'Quan trọng' },
+  { value: 'event', labelKey: 'options.notificationTypes.event' },
+  { value: 'tuition', labelKey: 'options.notificationTypes.tuition' },
+  { value: 'schedule', labelKey: 'options.notificationTypes.schedule' },
+  { value: 'important', labelKey: 'options.notificationTypes.important' },
 ] as const;
 
 export const TARGET_TYPE_OPTIONS = [
-  { value: 'all', label: 'Tất cả người dùng' },
-  { value: 'all_students', label: 'Tất cả sinh viên' },
-  { value: 'all_instructors', label: 'Tất cả giảng viên' },
-  { value: 'faculty', label: 'Khoa/Viện' },
-  { value: 'department', label: 'Bộ môn' },
-  { value: 'class', label: 'Lớp học' },
-  { value: 'instructor', label: 'Giảng viên' },
-  { value: 'student', label: 'Sinh viên' },
+  { value: 'all', labelKey: 'options.targetTypes.all' },
+  { value: 'all_students', labelKey: 'options.targetTypes.allStudents' },
+  { value: 'all_instructors', labelKey: 'options.targetTypes.allInstructors' },
+  { value: 'faculty', labelKey: 'options.targetTypes.faculty' },
+  { value: 'department', labelKey: 'options.targetTypes.department' },
+  { value: 'class', labelKey: 'options.targetTypes.class' },
+  { value: 'instructor', labelKey: 'options.targetTypes.instructor' },
+  { value: 'student', labelKey: 'options.targetTypes.student' },
 ] as const;
 
 export const SENDING_METHOD_OPTIONS = [
-  { value: 'System', label: 'Hệ thống' },
-  { value: 'Email', label: 'Email' },
-  { value: 'Both', label: 'Cả hai' },
+  { value: 'System', labelKey: 'options.sendingMethods.system' },
+  { value: 'Email', labelKey: 'options.sendingMethods.email' },
+  { value: 'Both', labelKey: 'options.sendingMethods.both' },
 ] as const;
 
 export const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
-  { value: 'pending', label: 'Đang chờ' },
-  { value: 'sent', label: 'Đã gửi' },
-  { value: 'cancelled', label: 'Đã hủy' },
+  { value: '', labelKey: 'options.status.all' },
+  { value: 'pending', labelKey: 'options.status.pending' },
+  { value: 'sent', labelKey: 'options.status.sent' },
+  { value: 'cancelled', labelKey: 'options.status.cancelled' },
 ] as const;
 
-export const getStatusDisplay = (status: NotificationStatus | string) => {
+export const buildNotificationTypeOptions = (t: TranslateFn) =>
+  NOTIFICATION_TYPE_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  }));
+
+export const buildTargetTypeOptions = (t: TranslateFn) =>
+  TARGET_TYPE_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  }));
+
+export const buildSendingMethodOptions = (t: TranslateFn) =>
+  SENDING_METHOD_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  }));
+
+export const buildStatusOptions = (t: TranslateFn) =>
+  STATUS_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(option.labelKey),
+  }));
+
+const STATUS_DISPLAY_MAP: Record<string, { labelKey: string; color: string }> = {
+  pending: { labelKey: 'options.status.pending', color: 'bg-yellow-100 text-yellow-700' },
+  sent: { labelKey: 'options.status.sent', color: 'bg-green-100 text-green-700' },
+  cancelled: { labelKey: 'options.status.cancelled', color: 'bg-red-100 text-red-700' },
+};
+
+export const getStatusDisplay = (status: NotificationStatus | string, t: TranslateFn) => {
   const statusLower = status?.toLowerCase() || '';
-  const statusMap: Record<string, { label: string; color: string }> = {
-    pending: { label: 'Đang chờ', color: 'bg-yellow-100 text-yellow-700' },
-    sent: { label: 'Đã gửi', color: 'bg-green-100 text-green-700' },
-    cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-700' },
+  const matchedStatus = STATUS_DISPLAY_MAP[statusLower];
+  if (matchedStatus) {
+    return {
+      label: t(matchedStatus.labelKey),
+      color: matchedStatus.color,
+    };
+  }
+  return {
+    label: typeof status === 'string' && status ? status : t(DEFAULT_UNKNOWN_KEY),
+    color: 'bg-gray-100 text-gray-700',
   };
-  return statusMap[statusLower] || { label: status || 'Không xác định', color: 'bg-gray-100 text-gray-700' };
 };
 
-export const getNotificationTypeDisplay = (type: NotificationType | string) => {
+const NOTIFICATION_TYPE_DISPLAY_MAP: Record<string, { labelKey: string; color: string }> = {
+  event: { labelKey: 'options.notificationTypes.event', color: 'bg-blue-100 text-blue-700' },
+  tuition: { labelKey: 'options.notificationTypes.tuition', color: 'bg-purple-100 text-purple-700' },
+  schedule: { labelKey: 'options.notificationTypes.schedule', color: 'bg-cyan-100 text-cyan-700' },
+  important: { labelKey: 'options.notificationTypes.important', color: 'bg-red-100 text-red-700' },
+};
+
+export const getNotificationTypeDisplay = (type: NotificationType | string, t: TranslateFn) => {
   const typeLower = type?.toLowerCase() || '';
-  const typeMap: Record<string, { label: string; color: string }> = {
-    event: { label: 'Sự kiện', color: 'bg-blue-100 text-blue-700' },
-    tuition: { label: 'Học phí', color: 'bg-purple-100 text-purple-700' },
-    schedule: { label: 'Lịch học', color: 'bg-cyan-100 text-cyan-700' },
-    important: { label: 'Quan trọng', color: 'bg-red-100 text-red-700' },
+  const matchedType = NOTIFICATION_TYPE_DISPLAY_MAP[typeLower];
+  if (matchedType) {
+    return {
+      label: t(matchedType.labelKey),
+      color: matchedType.color,
+    };
+  }
+  return {
+    label: typeof type === 'string' && type ? type : t(DEFAULT_UNKNOWN_KEY),
+    color: 'bg-gray-100 text-gray-700',
   };
-  return typeMap[typeLower] || { label: type || 'Không xác định', color: 'bg-gray-100 text-gray-700' };
 };
 
-export const getTargetTypeDisplay = (targetType: TargetType | string) => {
-  const targetMap: Record<string, string> = {
-    all: 'Tất cả người dùng',
-    all_students: 'Tất cả sinh viên',
-    all_instructors: 'Tất cả giảng viên',
-    faculty: 'Khoa/Viện',
-    department: 'Bộ môn',
-    class: 'Lớp học',
-    instructor: 'Giảng viên',
-    student: 'Sinh viên',
-  };
-  return targetMap[targetType] || targetType || 'Không xác định';
+const TARGET_TYPE_LABEL_MAP: Record<string, string> = TARGET_TYPE_OPTIONS.reduce<Record<string, string>>((acc, option) => {
+  acc[option.value] = option.labelKey;
+  return acc;
+}, {});
+
+export const getTargetTypeDisplay = (targetType: TargetType | string, t: TranslateFn) => {
+  if (targetType && TARGET_TYPE_LABEL_MAP[targetType]) {
+    return t(TARGET_TYPE_LABEL_MAP[targetType]);
+  }
+  if (typeof targetType === 'string' && targetType.trim().length > 0) {
+    return targetType;
+  }
+  return t(DEFAULT_UNKNOWN_KEY);
 };
 
-export const getSendingMethodDisplay = (method: SendingMethod | string) => {
-  const methodMap: Record<string, string> = {
-    System: 'Hệ thống',
-    Email: 'Email',
-    Both: 'Cả hai',
-  };
-  return methodMap[method] || method || 'Không xác định';
+const SENDING_METHOD_LABEL_MAP: Record<string, string> = SENDING_METHOD_OPTIONS.reduce<Record<string, string>>((acc, option) => {
+  acc[option.value] = option.labelKey;
+  return acc;
+}, {});
+
+export const getSendingMethodDisplay = (method: SendingMethod | string, t: TranslateFn) => {
+  if (method && SENDING_METHOD_LABEL_MAP[method]) {
+    return t(SENDING_METHOD_LABEL_MAP[method]);
+  }
+  if (typeof method === 'string' && method.trim().length > 0) {
+    return method;
+  }
+  return t(DEFAULT_UNKNOWN_KEY);
 };
 
 // Helper to check if targetId is required for a targetType

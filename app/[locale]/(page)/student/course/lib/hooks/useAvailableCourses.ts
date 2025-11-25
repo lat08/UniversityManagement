@@ -46,12 +46,11 @@ export const useAvailableCourses = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters.searchQuery, hasClientFilters]);
+  }, [filters.searchQuery, hasClientFilters, t]);
 
   useEffect(() => {
-    fetchCourses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.searchQuery, hasClientFilters]);
+    void fetchCourses();
+  }, [fetchCourses]);
 
   // Client-side filtering
   const filteredCourses = useMemo(() => {

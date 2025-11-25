@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { ApprovalStatus } from '../lib/types/types';
 
@@ -23,6 +24,7 @@ export default function GradeApprovalActionsMenu({
   compact = false,
   disabled = false,
 }: GradeApprovalActionsMenuProps) {
+  const t = useTranslations('admin.gradeApproval');
   const canApproveOrReject = versionStatus === 'pending';
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,21 +54,24 @@ export default function GradeApprovalActionsMenu({
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
           className="text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:hover:bg-transparent"
-          title="Thao tác"
+          title={t('actionsMenu.title')}
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
 
         {isOpen && (
-          <div className="fixed mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[100]"
+          <div
+            className="fixed mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[100]"
             style={{
-              top: dropdownRef.current ? 
-                dropdownRef.current.getBoundingClientRect().bottom + window.scrollY + 4 : 0,
-              left: dropdownRef.current ? 
-                Math.min(
-                  dropdownRef.current.getBoundingClientRect().right - 192,
-                  window.innerWidth - 200
-                ) : 0,
+              top: dropdownRef.current
+                ? dropdownRef.current.getBoundingClientRect().bottom + window.scrollY + 4
+                : 0,
+              left: dropdownRef.current
+                ? Math.min(
+                    dropdownRef.current.getBoundingClientRect().right - 192,
+                    window.innerWidth - 200,
+                  )
+                : 0,
             }}
           >
             <div className="py-1">
@@ -79,7 +84,7 @@ export default function GradeApprovalActionsMenu({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
               >
                 <Eye className="w-4 h-4 text-blue-600" />
-                Xem chi tiết
+                {t('actionsMenu.view')}
               </button>
               {canApproveOrReject && (
                 <>
@@ -92,7 +97,7 @@ export default function GradeApprovalActionsMenu({
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
                     <CheckCircle className="w-4 h-4 text-green-600" />
-                    Duyệt
+                    {t('actionsMenu.approve')}
                   </button>
                   <button
                     onClick={() => {
@@ -103,7 +108,7 @@ export default function GradeApprovalActionsMenu({
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
                     <XCircle className="w-4 h-4 text-red-600" />
-                    Từ chối
+                    {t('actionsMenu.reject')}
                   </button>
                 </>
               )}
@@ -122,7 +127,7 @@ export default function GradeApprovalActionsMenu({
         onClick={onView}
         disabled={disabled}
         className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 disabled:text-gray-400 disabled:hover:bg-transparent"
-        title="Xem chi tiết"
+        title={t('actionsMenu.view')}
       >
         <Eye className="w-4 h-4" />
       </Button>
@@ -134,7 +139,7 @@ export default function GradeApprovalActionsMenu({
             onClick={onApprove}
             disabled={disabled}
             className="text-gray-600 hover:text-green-600 hover:bg-green-50 disabled:text-gray-400 disabled:hover:bg-transparent"
-            title="Duyệt"
+            title={t('actionsMenu.approve')}
           >
             <CheckCircle className="w-4 h-4" />
           </Button>
@@ -144,7 +149,7 @@ export default function GradeApprovalActionsMenu({
             onClick={onReject}
             disabled={disabled}
             className="text-gray-600 hover:text-red-600 hover:bg-red-50 disabled:text-gray-400 disabled:hover:bg-transparent"
-            title="Từ chối"
+            title={t('actionsMenu.reject')}
           >
             <XCircle className="w-4 h-4" />
           </Button>

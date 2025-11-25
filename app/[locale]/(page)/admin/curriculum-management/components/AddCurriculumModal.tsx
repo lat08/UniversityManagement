@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Button, Input, Dropdown, DropdownSearch } from '@/app/components/ui'
 import { X } from 'lucide-react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import type { InferType } from 'yup'
+import type { ObjectSchema } from 'yup'
 import { toast } from 'react-hot-toast'
 import { curriculumsApi } from '../lib/api/curriculumsApi'
 import type { DepartmentOption, FacultyOption } from '../lib/types/types'
+import { useTranslations } from 'next-intl'
 
 interface AddCurriculumModalProps {
   isOpen: boolean
@@ -17,32 +18,43 @@ interface AddCurriculumModalProps {
   onSuccess?: () => void
 }
 
-const validationSchema = yup.object({
-  curriculumCode: yup
-    .string()
-    .required('Mã CTĐT là bắt buộc')
-    .max(50, 'Mã CTĐT tối đa 50 ký tự'),
-  curriculumName: yup
-    .string()
-    .required('Tên CTĐT là bắt buộc')
-    .max(500, 'Tên CTĐT tối đa 500 ký tự'),
-  departmentId: yup.string().required('Chuyên ngành là bắt buộc'),
-  appliedYear: yup
-    .number()
-    .typeError('Năm áp dụng phải là số')
-    .required('Năm áp dụng là bắt buộc')
-    .min(1900, 'Năm áp dụng phải từ 1900 đến 2100')
-    .max(2100, 'Năm áp dụng phải từ 1900 đến 2100'),
-  versionNumber: yup
-    .number()
-    .typeError('Số phiên bản phải là số')
-    .required('Số phiên bản là bắt buộc')
-    .min(1, 'Số phiên bản phải lớn hơn 0'),
-})
-
-type FormData = InferType<typeof validationSchema>
+type FormData = {
+  curriculumCode: string
+  curriculumName: string
+  departmentId: string
+  appliedYear: number
+  versionNumber: number
+}
 
 export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculumModalProps) => {
+  const t = useTranslations('admin.curriculumManagement')
+  const tActions = useTranslations('actions')
+  const validationSchema = useMemo<ObjectSchema<FormData>>(
+    () =>
+      yup.object({
+        curriculumCode: yup
+          .string()
+          .required(t('fields.code.required'))
+          .max(50, t('fields.code.max')),
+        curriculumName: yup
+          .string()
+          .required(t('fields.name.required'))
+          .max(500, t('fields.name.max')),
+        departmentId: yup.string().required(t('fields.department.required')),
+        appliedYear: yup
+          .number()
+          .typeError(t('fields.appliedYear.typeError'))
+          .required(t('fields.appliedYear.required'))
+          .min(1900, t('fields.appliedYear.min'))
+          .max(2100, t('fields.appliedYear.max')),
+        versionNumber: yup
+          .number()
+          .typeError(t('fields.version.typeError'))
+          .required(t('fields.version.required'))
+          .min(1, t('fields.version.min')),
+      }),
+    [t],
+  )
   const {
     register,
     handleSubmit,
@@ -127,16 +139,16 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
       const response = await curriculumsApi.createCurriculum(payload)
 
       if (response.success) {
-        toast.success(response.message || 'Tạo chương trình đào tạo thành công!')
+        toast.success(response.message || t('modals.add.success'))
         reset()
         onSuccess?.()
         handleClose()
       } else {
-        toast.error(response.message || 'Tạo chương trình đào tạo thất bại')
+        toast.error(response.message || t('modals.add.error'))
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(err.response?.data?.message || err.message || 'Đã xảy ra lỗi')
+      toast.error(err.response?.data?.message || err.message || t('modals.add.generalError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -159,8 +171,8 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Thêm mới Chương trình đào tạo</h2>
-              <p className="text-sm text-gray-600 mt-1">Nhập thông tin chương trình</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('modals.add.title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t('modals.add.description')}</p>
             </div>
             <Button
               variant="ghost"
@@ -180,10 +192,10 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Mã CTĐT <span className="text-red-500">*</span>
+                  {t('fields.code.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="VD: CNTT2020"
+                  placeholder={t('fields.code.placeholder')}
                   {...register('curriculumCode')}
                   className={errors.curriculumCode ? 'border-red-500' : ''}
                 />
@@ -194,10 +206,10 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Tên CTĐT <span className="text-red-500">*</span>
+                  {t('fields.name.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="VD: Chương trình đào tạo Công nghệ thông tin"
+                  placeholder={t('fields.name.placeholder')}
                   {...register('curriculumName')}
                   className={errors.curriculumName ? 'border-red-500' : ''}
                 />
@@ -207,14 +219,12 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Khoa phụ trách
-                </label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.faculty.label')}</label>
                 <DropdownSearch
                   options={facultyOptions}
                   value={selectedFacultyId}
-                  placeholder="Chọn khoa"
-                  searchPlaceholder="Tìm kiếm khoa..."
+                  placeholder={t('fields.faculty.placeholder')}
+                  searchPlaceholder={t('fields.faculty.searchPlaceholder')}
                   onChange={(value) => {
                     setSelectedFacultyId(value)
                     if (!value) {
@@ -227,12 +237,12 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Chuyên ngành <span className="text-red-500">*</span>
+                  {t('fields.department.label')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
                   options={departmentOptions}
                   value={formValues.departmentId || ''}
-                  placeholder="Chọn chuyên ngành"
+                  placeholder={t('fields.department.placeholder')}
                   onChange={(value) => {
                     setValue('departmentId', value)
                     clearErrors('departmentId')
@@ -245,19 +255,18 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Số tín chỉ
-                </label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.credits.label')}</label>
                 <Input value={0} disabled className="bg-gray-50 cursor-not-allowed" />
-                <p className="mt-1 text-xs text-gray-500">Tự động tính sau khi thêm môn học</p>
+                <p className="mt-1 text-xs text-gray-500">{t('fields.credits.helper')}</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Năm áp dụng <span className="text-red-500">*</span>
+                  {t('fields.appliedYear.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
+                  placeholder={t('fields.appliedYear.placeholder')}
                   {...register('appliedYear')}
                   className={errors.appliedYear ? 'border-red-500' : ''}
                 />
@@ -268,10 +277,11 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Phiên bản <span className="text-red-500">*</span>
+                  {t('fields.version.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
+                  placeholder={t('fields.version.placeholder')}
                   {...register('versionNumber')}
                   className={errors.versionNumber ? 'border-red-500' : ''}
                 />
@@ -290,14 +300,14 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {tActions('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang lưu...' : 'Thêm mới'}
+              {isSubmitting ? t('modals.add.submitting') : t('modals.add.submit')}
             </Button>
           </div>
         </form>

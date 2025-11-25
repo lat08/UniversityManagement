@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/app/components/ui/badge';
 import { REGULATION_STATUS_META } from '@/lib/constants/regulations';
 import { RegulationStatus } from '@/lib/types/regulation';
@@ -10,6 +11,7 @@ interface RegulationStatusBadgeProps {
 }
 
 export const RegulationStatusBadge = ({ status }: RegulationStatusBadgeProps) => {
+  const t = useTranslations('admin.regulations');
   const statusMeta = REGULATION_STATUS_META[status];
 
   return (
@@ -19,7 +21,7 @@ export const RegulationStatusBadge = ({ status }: RegulationStatusBadgeProps) =>
         statusMeta.badgeClass,
       )}
     >
-      {statusMeta.label}
+      {t(statusMeta.labelKey)}
     </Badge>
   );
 };

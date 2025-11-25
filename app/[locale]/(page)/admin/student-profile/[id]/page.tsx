@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { MapPin, Mail, Phone, Calendar, School, ArrowLeft, Edit } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
 import { Tabs } from '@/app/components/ui/tabs';
@@ -25,6 +26,13 @@ export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string;
+  const tDetail = useTranslations('admin.studentProfile.detail');
+  const tStatus = useTranslations('admin.studentProfile');
+  const tStudentForm = useTranslations('admin.modals.addStudent');
+  const tCommon = useTranslations('common.actions');
+  const tTuition = useTranslations('admin.studentProfile.tuition');
+  const tInsurance = useTranslations('admin.studentProfile.insurance');
+  const tGradeStats = useTranslations('admin.studentProfile.gradeStats');
   
   const [activeTab, setActiveTab] = useState('basic');
   const [selectedTuitionSemester, setSelectedTuitionSemester] = useState<string>('');
@@ -92,11 +100,14 @@ export default function StudentDetailPage() {
     };
   }, [isSemesterOpen]);
 
-  const tabs = useMemo(() => [
-    { id: 'basic', label: 'Thông tin cơ bản' },
-    { id: 'academic', label: 'Kết quả học tập' },
-    { id: 'tuition', label: 'Học phí' },
-  ], []);
+  const tabs = useMemo(
+    () => [
+      { id: 'basic', label: tDetail('tabs.basic') },
+      { id: 'academic', label: tDetail('tabs.academic') },
+      { id: 'tuition', label: tDetail('tabs.tuition') },
+    ],
+    [tDetail],
+  );
 
   const handleBack = () => {
     router.push('/admin/student-profile');
@@ -112,14 +123,14 @@ export default function StudentDetailPage() {
     return `${day}/${month}/${year}`;
   }, []);
 
-  const formatGender = useMemo(() => (gender: string) => {
+  const formatGender = useMemo(() => {
     const genderMap: Record<string, string> = {
-      male: 'Nam',
-      female: 'Nữ',
-      other: 'Khác',
+      male: tStudentForm('genderMale'),
+      female: tStudentForm('genderFemale'),
+      other: tDetail('fields.genderOther'),
     };
-    return genderMap[gender] || gender;
-  }, []);
+    return (gender: string) => genderMap[gender] || gender;
+  }, [tStudentForm, tDetail]);
 
   const formatCurrency = useMemo(() => (amount: number | undefined | null) => {
     if (amount === undefined || amount === null) return '0';
@@ -185,32 +196,32 @@ export default function StudentDetailPage() {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-gray-600">Không tìm thấy thông tin sinh viên</div>
+          <div className="text-lg text-gray-600">{tDetail('noStudent')}</div>
           <button
             onClick={handleBack}
             className="mt-4 px-6 py-2.5 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] cursor-pointer transition-colors"
           >
-            Quay lại
+            {tCommon('back')}
           </button>
         </div>
       </div>
     );
   }
 
-  const statusDisplay = getStatusDisplay(studentData.enrollmentStatus);
+  const statusDisplay = getStatusDisplay(studentData.enrollmentStatus, (key) => tStatus(key));
 
   return (
     <div className="min-h-screen p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Chi tiết Sinh viên</h1>
-        <p className="text-gray-600 mt-1">Thông tin chi tiết và lịch sử học tập của sinh viên</p>
+        <h1 className="text-3xl font-bold text-gray-900">{tDetail('header.title')}</h1>
+        <p className="text-gray-600 mt-1">{tDetail('header.description')}</p>
         <button
           onClick={handleBack}
           className="mt-4 px-4 py-2 text-sm text-[#0053AD] bg-blue-50 border border-[#0053AD] rounded-lg hover:bg-blue-100 flex items-center gap-2 cursor-pointer transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Quay lại
+          {tCommon('back')}
         </button>
       </div>
 
@@ -236,14 +247,16 @@ export default function StudentDetailPage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="text-2xl font-bold text-[#D32F2F] mb-2">{studentData.fullName}</h2>
-                  <p className="text-sm text-gray-600 mb-1">Mã số sinh viên: {studentData.studentCode}</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {tDetail('fields.studentCode', { code: studentData.studentCode })}
+                  </p>
                 </div>
                 <button
                   onClick={() => router.push(`/admin/student-profile/${studentId}/edit`)}
                   className="px-4 py-2 text-sm text-white bg-[#0053AD] rounded-lg hover:bg-[#003d82] flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <Edit className="w-4 h-4" />
-                  Chỉnh sửa
+                  {tCommon('edit')}
                 </button>
               </div>
 
@@ -251,42 +264,42 @@ export default function StudentDetailPage() {
                 <div className="flex items-start gap-2">
                   <Mail className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-xs text-gray-500">{tDetail('fields.email')}</p>
                     <p className="text-sm text-gray-900 truncate">{studentData.email}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Phone className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Số điện thoại</p>
+                    <p className="text-xs text-gray-500">{tStudentForm('phone')}</p>
                     <p className="text-sm text-gray-900">{studentData.phoneNumber}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Ngày sinh</p>
+                    <p className="text-xs text-gray-500">{tStudentForm('dob')}</p>
                     <p className="text-sm text-gray-900">{formatDate(studentData.dateOfBirth)}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <School className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Chuyên ngành</p>
+                    <p className="text-xs text-gray-500">{tStudentForm('department')}</p>
                     <p className="text-sm text-gray-900">{studentData.departmentName || studentData.majorName || '-'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <School className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Khóa</p>
+                    <p className="text-xs text-gray-500">{tDetail('fields.academicYear')}</p>
                     <p className="text-sm text-gray-900">{studentData.academicYear}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs text-gray-500">Địa chỉ</p>
+                    <p className="text-xs text-gray-500">{tStudentForm('address')}</p>
                     <p className="text-sm text-gray-900">{studentData.address}</p>
                   </div>
                 </div>
@@ -304,7 +317,7 @@ export default function StudentDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600 mb-2">GPA hệ 4</p>
+        <p className="text-sm text-gray-600 mb-2">{tGradeStats('gpa4')}</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
             {studentData.averageGPA === null || studentData.averageGPA === undefined 
               ? '-' 
@@ -319,7 +332,7 @@ export default function StudentDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600 mb-2">GPA hệ 10</p>
+        <p className="text-sm text-gray-600 mb-2">{tGradeStats('gpa10')}</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
             {studentData.cumulativeGPA10 === null || studentData.cumulativeGPA10 === undefined 
               ? '-' 
@@ -334,7 +347,7 @@ export default function StudentDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600 mb-2">Tín chỉ tích lũy</p>
+        <p className="text-sm text-gray-600 mb-2">{tGradeStats('totalCredits')}</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
             {studentData.creditsEarnedInCurriculum ?? studentData.earnedCredits ?? '-'}
           </p>
@@ -347,12 +360,12 @@ export default function StudentDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600 mb-2">Công nợ</p>
+        <p className="text-sm text-gray-600 mb-2">{tDetail('stats.debt')}</p>
           <p className="text-4xl font-bold text-gray-900 mb-1">
             {formatCurrency(studentData.unpaidAmount && studentData.unpaidAmount > 0 ? studentData.unpaidAmount : 0)}
           </p>
           <p className="text-xs text-gray-500">
-            {studentData.unpaidAmount && studentData.unpaidAmount > 0 ? 'Chưa thanh toán đầy đủ' : 'Đã thanh toán đầy đủ'}
+            {studentData.unpaidAmount && studentData.unpaidAmount > 0 ? tDetail('stats.debtOutstanding') : tDetail('stats.debtCleared')}
           </p>
         </div>
       </div>
@@ -375,68 +388,66 @@ export default function StudentDetailPage() {
               <div className="grid grid-cols-3 gap-x-12 gap-y-6">
                 {/* Thông tin cơ bản */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Thông tin cơ bản</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">{tDetail('sections.basic.title')}</h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-500">Họ và tên</p>
+                      <p className="text-sm text-gray-500">{tStudentForm('name')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.fullName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Ngày sinh</p>
+                      <p className="text-sm text-gray-500">{tStudentForm('dob')}</p>
                       <p className="text-sm text-gray-900 font-medium">{formatDate(studentData.dateOfBirth)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Giới tính</p>
+                      <p className="text-sm text-gray-500">{tStudentForm('gender')}</p>
                       <p className="text-sm text-gray-900 font-medium">{formatGender(studentData.gender)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">CCCD</p>
+                      <p className="text-sm text-gray-500">{tDetail('fields.citizenId')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.citizenId}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Thông tin liên hệ */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Thông tin liên hệ</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">{tDetail('sections.contact.title')}</h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="text-sm text-gray-500">{tDetail('fields.email')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Số điện thoại</p>
+                      <p className="text-sm text-gray-500">{tStudentForm('phone')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.phoneNumber}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Địa chỉ</p>
+                      <p className="text-sm text-gray-500">{tStudentForm('address')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.address}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Thông tin học vấn */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Thông tin học vấn</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">{tDetail('sections.academic.title')}</h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-500">Ngành học</p>
+                      <p className="text-sm text-gray-500">{tDetail('fields.faculty')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.facultyName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Chuyên ngành</p>
+                      <p className="text-sm text-gray-500">{tStudentForm('department')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.departmentName || studentData.majorName || '-'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Khóa</p>
+                      <p className="text-sm text-gray-500">{tDetail('fields.academicYear')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.academicYear}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Lớp</p>
+                      <p className="text-sm text-gray-500">{tDetail('fields.className')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.className}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Hệ đào tạo</p>
+                      <p className="text-sm text-gray-500">{tDetail('fields.educationLevel')}</p>
                       <p className="text-sm text-gray-900 font-medium">{studentData.educationLevel}</p>
                     </div>
                   </div>
@@ -459,7 +470,7 @@ export default function StudentDetailPage() {
               </div>
             ) : !cumulativeData ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="text-center text-gray-600">Không có dữ liệu điểm</div>
+                <div className="text-center text-gray-600">{tDetail('academic.noData')}</div>
               </div>
             ) : (
               <>
@@ -467,7 +478,7 @@ export default function StudentDetailPage() {
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                   <div className="relative w-full" ref={semesterRef}>
                     <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Lọc theo học kỳ
+                      {tDetail('academic.filterLabel')}
                     </label>
                     <button
                       type="button"
@@ -476,10 +487,10 @@ export default function StudentDetailPage() {
                     >
                       <span className="text-sm text-gray-900 truncate">
                         {selectedSemesters.length === 0 
-                          ? "Chưa chọn học kỳ" 
+                          ? tDetail('academic.filterEmpty') 
                           : selectedSemesters.length === 1
                             ? cumulativeData.semesters.find(s => s.semesterId === selectedSemesters[0])?.semesterName
-                            : `${selectedSemesters.length} học kỳ đã chọn`
+                            : tDetail('academic.filterSelected', { count: selectedSemesters.length })
                         }
                       </span>
                       <svg className={`w-4 h-4 text-gray-700 flex-shrink-0 ml-2 transition-transform ${isSemesterOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -496,14 +507,14 @@ export default function StudentDetailPage() {
                               setSelectedSemesters(cumulativeData.semesters.map(s => s.semesterId));
                             }}
                           >
-                            Chọn tất cả
+                            {tDetail('academic.selectAll')}
                           </button>
                           <button
                             type="button"
                             className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300 cursor-pointer transition-colors"
                             onClick={() => setSelectedSemesters([])}
                           >
-                            Bỏ chọn
+                            {tDetail('academic.clearAll')}
                           </button>
                         </div>
                         
@@ -576,7 +587,7 @@ export default function StudentDetailPage() {
                       <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
-                      <p className="text-sm">Vui lòng chọn ít nhất một học kỳ để xem điểm</p>
+                      <p className="text-sm">{tDetail('academic.emptyState')}</p>
                     </div>
                   </div>
                 )}
@@ -592,8 +603,8 @@ export default function StudentDetailPage() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div className="p-6">
                   <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Lịch sử học phí</h2>
-                    <p className="text-sm text-gray-600">Thông tin thanh toán học phí</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">{tTuition('historyTitle')}</h2>
+                    <p className="text-sm text-gray-600">{tTuition('historyDescription')}</p>
                   </div>
 
                   {/* Semester Selector and Export */}
@@ -605,7 +616,7 @@ export default function StudentDetailPage() {
                           label: s.yearRange ? `${s.semesterName} - ${s.yearRange}` : s.semesterName,
                         }))}
                         value={selectedTuitionSemester}
-                        placeholder="Chọn học kì"
+                        placeholder={tTuition('selectSemester')}
                         onChange={(value) => setSelectedTuitionSemester(value)}
                         disabled={loadingTuition || semesters.length === 0}
                       />
@@ -619,7 +630,7 @@ export default function StudentDetailPage() {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      {exportingTuition ? 'Đang xuất...' : 'Xuất Excel'}
+                      {exportingTuition ? tTuition('exporting') : tTuition('export')}
                     </button>
                   </div>
 
@@ -627,15 +638,15 @@ export default function StudentDetailPage() {
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
                     <Table
                       columns={[
-                        { key: 'courseCode', label: 'Mã môn học', align: 'left' },
-                        { key: 'courseName', label: 'Tên môn học', align: 'left' },
-                        { key: 'credits', label: 'Số tín chỉ', align: 'center' },
-                        { key: 'courseFee', label: 'Học phí', align: 'right' },
-                        { key: 'status', label: 'Trạng thái', align: 'center' },
+                        { key: 'courseCode', label: tTuition('columns.code'), align: 'left' },
+                        { key: 'courseName', label: tTuition('columns.name'), align: 'left' },
+                        { key: 'credits', label: tTuition('columns.credits'), align: 'center' },
+                        { key: 'courseFee', label: tTuition('columns.fee'), align: 'right' },
+                        { key: 'status', label: tTuition('columns.status'), align: 'center' },
                       ]}
                       data={tuitionFees?.courses || []}
                       isLoading={loadingTuition}
-                      emptyMessage="Không có dữ liệu học phí"
+                      emptyMessage={tTuition('empty')}
                       renderRow={(course) => {
                         const statusDisplay = getPaymentStatusDisplay(course.status);
                         return (
@@ -658,18 +669,18 @@ export default function StudentDetailPage() {
                         <table className="w-full">
                           <thead className="sr-only">
                             <tr>
-                              <th scope="col">Mã môn học</th>
-                              <th scope="col">Tên môn học</th>
-                              <th scope="col">Số tín chỉ</th>
-                              <th scope="col">Học phí</th>
-                              <th scope="col">Trạng thái</th>
+                              <th scope="col">{tTuition('columns.code')}</th>
+                              <th scope="col">{tTuition('columns.name')}</th>
+                              <th scope="col">{tTuition('columns.credits')}</th>
+                              <th scope="col">{tTuition('columns.fee')}</th>
+                              <th scope="col">{tTuition('columns.status')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr className="font-semibold">
-                              <td colSpan={2} className="px-6 py-4 text-sm text-gray-900 text-right">Tổng cộng:</td>
+                              <td colSpan={2} className="px-6 py-4 text-sm text-gray-900 text-right">{tTuition('totals.label')}</td>
                               <td className="px-6 py-4 text-sm text-gray-900 text-center">
-                                {tuitionFees.courses.reduce((sum, course) => sum + course.credits, 0)} TC
+                                {tuitionFees.courses.reduce((sum, course) => sum + course.credits, 0)} {tTuition('totals.creditsUnit')}
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-900 text-right">
                                 {formatCurrency(tuitionFees.courses.reduce((sum, course) => sum + course.courseFee, 0))}
@@ -688,8 +699,8 @@ export default function StudentDetailPage() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="p-6">
                   <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Lịch sử Bảo hiểm y tế</h2>
-                    <p className="text-sm text-gray-600">Thông tin thanh toán bảo hiểm y tế</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">{tInsurance('historyTitle')}</h2>
+                    <p className="text-sm text-gray-600">{tInsurance('historyDescription')}</p>
                   </div>
 
                   {/* Semester Selector and Export */}
@@ -701,7 +712,7 @@ export default function StudentDetailPage() {
                           label: s.yearRange ? `${s.semesterName} - ${s.yearRange}` : s.semesterName,
                         }))}
                         value={selectedInsuranceSemester}
-                        placeholder="Chọn học kì"
+                        placeholder={tInsurance('selectSemester')}
                         onChange={(value) => setSelectedInsuranceSemester(value)}
                         disabled={loadingInsurance || semesters.length === 0}
                       />
@@ -715,20 +726,20 @@ export default function StudentDetailPage() {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      {exportingInsurance ? 'Đang xuất...' : 'Xuất Excel'}
+                      {exportingInsurance ? tInsurance('exporting') : tInsurance('export')}
                     </button>
                   </div>
 
                   {/* Insurance Table */}
                   <Table
                     columns={[
-                      { key: 'academicYear', label: 'Năm học', align: 'left' },
-                      { key: 'healthInsuranceFee', label: 'Phí bảo hiểm', align: 'right' },
-                      { key: 'status', label: 'Trạng thái', align: 'center' },
+                      { key: 'academicYear', label: tInsurance('columns.year'), align: 'left' },
+                      { key: 'healthInsuranceFee', label: tInsurance('columns.fee'), align: 'right' },
+                      { key: 'status', label: tInsurance('columns.status'), align: 'center' },
                     ]}
                     data={insurances}
                     isLoading={loadingInsurance}
-                    emptyMessage="Không có dữ liệu bảo hiểm y tế"
+                    emptyMessage={tInsurance('empty')}
                     renderRow={(insurance) => {
                       const statusDisplay = getPaymentStatusDisplay(insurance.status);
                       return (

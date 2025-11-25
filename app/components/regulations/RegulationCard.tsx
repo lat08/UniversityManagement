@@ -49,7 +49,7 @@ const RegulationCardComponent = ({
     } finally {
       setIsDownloading(false);
     }
-  }, [regulation.fileUrl, regulation.fileName, isDownloading]);
+  }, [regulation.fileUrl, regulation.fileName, isDownloading, t]);
 
   const formattedDate = formatDate(regulation.updatedAt || regulation.createdAt);
 

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, Filter } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button, Dropdown } from '@/app/components/ui';
-import { APPROVAL_STATUS_OPTIONS } from '../lib/types/types';
+import { buildApprovalStatusOptions } from '../lib/types/types';
 
 export interface FilterOptions {
   status: string[];
@@ -31,14 +32,14 @@ export default function FilterModal({
   departments,
   instructors,
 }: FilterModalProps) {
+  const t = useTranslations('admin.gradeApproval');
+  const statusOptions = useMemo(() => buildApprovalStatusOptions(t), [t]);
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['status']);
   const [tempFilters, setTempFilters] = useState<FilterOptions>(currentFilters);
 
   useEffect(() => {
     if (isOpen) {
       setTempFilters(currentFilters);
-      
-      // Auto-select filter types based on current values
       const activeFilters = ['status'];
       if (currentFilters.facultyId.length > 0) activeFilters.push('faculty');
       if (currentFilters.departmentId.length > 0) activeFilters.push('department');
@@ -68,20 +69,18 @@ export default function FilterModal({
   }, [isOpen, handleClose]);
 
   const handleFilterToggle = (filter: string) => {
-    setSelectedFilters(prev => {
-      if (filter === 'status') return prev; // Status is always selected
-      
+    setSelectedFilters((prev) => {
+      if (filter === 'status') return prev;
+
       if (prev.includes(filter)) {
-        // Remove filter and clear its values
         const newFilters = { ...tempFilters };
         if (filter === 'faculty') newFilters.facultyId = [];
         if (filter === 'department') newFilters.departmentId = [];
         if (filter === 'instructor') newFilters.instructorId = [];
         setTempFilters(newFilters);
-        return prev.filter(f => f !== filter);
-      } else {
-        return [...prev, filter];
+        return prev.filter((f) => f !== filter);
       }
+      return [...prev, filter];
     });
   };
 
@@ -109,16 +108,13 @@ export default function FilterModal({
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleBackdropClick}>
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Bộ lọc nâng cao</h2>
-              <p className="text-sm text-gray-600 mt-1">Chọn các tiêu chí để lọc dữ liệu</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('filterModal.title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t('filterModal.description')}</p>
             </div>
             <Button
               variant="ghost"
@@ -133,10 +129,9 @@ export default function FilterModal({
         </div>
 
         <div className="overflow-y-auto flex-1 p-6 space-y-6">
-          {/* Filter Type Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-3">
-              Chọn loại lọc (chọn ít nhất 1)
+              {t('filterModal.typeHint')}
             </label>
             <div className="flex flex-wrap gap-2">
               <button
@@ -146,112 +141,90 @@ export default function FilterModal({
                 className="px-4 py-2 rounded-lg border-2 bg-blue-50 border-blue-500 text-blue-700 font-medium cursor-not-allowed"
               >
                 <Filter className="w-4 h-4 inline mr-2" />
-                Trạng thái
+                {t('filterModal.types.status')}
               </button>
-              <button
-                type="button"
-                onClick={() => handleFilterToggle('faculty')}
-                className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                  selectedFilters.includes('faculty')
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-                } font-medium`}
-              >
-                <Filter className="w-4 h-4 inline mr-2" />
-                Khoa
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFilterToggle('department')}
-                className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                  selectedFilters.includes('department')
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-                } font-medium`}
-              >
-                <Filter className="w-4 h-4 inline mr-2" />
-                Bộ môn
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFilterToggle('instructor')}
-                className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                  selectedFilters.includes('instructor')
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-                } font-medium`}
-              >
-                <Filter className="w-4 h-4 inline mr-2" />
-                Giảng viên
-              </button>
+              {(['faculty', 'department', 'instructor'] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => handleFilterToggle(type)}
+                  className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                    selectedFilters.includes(type)
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+                  } font-medium`}
+                >
+                  <Filter className="w-4 h-4 inline mr-2" />
+                  {t(`filterModal.types.${type}`)}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Filter Options */}
           <div className="space-y-4">
-            {/* Status Filter (Always visible) */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Trạng thái
+                {t('filterModal.statusLabel')}
               </label>
               <Dropdown
-                options={APPROVAL_STATUS_OPTIONS}
+                options={statusOptions}
                 value={tempFilters.status[0] || ''}
-                placeholder="Chọn trạng thái"
+                placeholder={t('filterModal.statusPlaceholder')}
                 onChange={(value) => setTempFilters({ ...tempFilters, status: value ? [value] : [] })}
               />
             </div>
 
-            {/* Faculty Filter */}
             {selectedFilters.includes('faculty') && (
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Khoa
+                  {t('filterModal.facultyLabel')}
                 </label>
                 <Dropdown
                   options={[
-                    { value: '', label: 'Tất cả khoa' },
-                    ...faculties.map(f => ({ value: f.facultyId, label: f.facultyName }))
+                    { value: '', label: t('allFaculties') },
+                    ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
                   ]}
                   value={tempFilters.facultyId[0] || ''}
-                  placeholder="Chọn khoa"
+                  placeholder={t('filterModal.facultyPlaceholder')}
                   onChange={(value) => setTempFilters({ ...tempFilters, facultyId: value ? [value] : [] })}
                 />
               </div>
             )}
 
-            {/* Department Filter */}
             {selectedFilters.includes('department') && (
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Bộ môn
+                  {t('filterModal.departmentLabel')}
                 </label>
                 <Dropdown
                   options={[
-                    { value: '', label: 'Tất cả bộ môn' },
-                    ...departments.map(d => ({ value: d.departmentId, label: d.departmentName }))
+                    { value: '', label: t('allDepartments') },
+                    ...departments.map((d) => ({ value: d.departmentId, label: d.departmentName })),
                   ]}
                   value={tempFilters.departmentId[0] || ''}
-                  placeholder="Chọn bộ môn"
-                  onChange={(value) => setTempFilters({ ...tempFilters, departmentId: value ? [value] : [] })}
+                  placeholder={t('filterModal.departmentPlaceholder')}
+                  onChange={(value) =>
+                    setTempFilters({ ...tempFilters, departmentId: value ? [value] : [] })
+                  }
                 />
               </div>
             )}
 
-            {/* Instructor Filter */}
             {selectedFilters.includes('instructor') && (
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Giảng viên
+                  {t('filterModal.instructorLabel')}
                 </label>
                 <Dropdown
                   options={[
-                    { value: '', label: 'Tất cả giảng viên' },
-                    ...instructors.map(i => ({ value: i.instructorId, label: i.instructorName }))
+                    { value: '', label: t('allInstructors') },
+                    ...instructors.map((i) => ({ value: i.instructorId, label: i.instructorName })),
                   ]}
                   value={tempFilters.instructorId[0] || ''}
-                  placeholder="Chọn giảng viên"
-                  onChange={(value) => setTempFilters({ ...tempFilters, instructorId: value ? [value] : [] })}
+                  placeholder={t('filterModal.instructorPlaceholder')}
+                  onChange={(value) =>
+                    setTempFilters({ ...tempFilters, instructorId: value ? [value] : [] })
+                  }
                 />
               </div>
             )}
@@ -265,14 +238,14 @@ export default function FilterModal({
             onClick={handleReset}
             className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Đặt lại
+            {t('filterModal.reset')}
           </Button>
           <Button
             type="button"
             onClick={handleApply}
             className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white"
           >
-            Áp dụng
+            {t('filterModal.apply')}
           </Button>
         </div>
       </div>

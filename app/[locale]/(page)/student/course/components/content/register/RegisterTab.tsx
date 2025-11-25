@@ -17,7 +17,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
   const filters = useCourseFiltersStore((state) => state.filters)
   const [currentPage, setCurrentPage] = useState(1)
   
-  const { courses, isLoading: loading, error, pagination, refetch } = useAvailableCoursesQuery({
+  const { courses, isLoading: loading, error, pagination } = useAvailableCoursesQuery({
     searchQuery: filters.searchQuery,
     pageNumber: currentPage,
     pageSize: 15,
@@ -132,7 +132,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
       disabled: false,
       reason: ''
     }
-  }, [isConflictWithSelected])
+  }, [isConflictWithSelected, t]);
 
   const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
@@ -223,7 +223,7 @@ export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegis
     const startDate = format(new Date(course.startDate), 'dd/MM/yyyy', { locale: vi })
     const endDate = format(new Date(course.endDate), 'dd/MM/yyyy', { locale: vi })
     return `${schedule.dayOfWeekName}, tiết ${schedule.startPeriod} - ${schedule.endPeriod}, phòng ${schedule.roomCode} ${startDate} - ${endDate}`
-  }, [])
+  }, [t]);
 
   const getRemainingSlots = useCallback((course: CourseDto) => {
     return Math.max(0, course.maxStudents - course.registeredStudents)

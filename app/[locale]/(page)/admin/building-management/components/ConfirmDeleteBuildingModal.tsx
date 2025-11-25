@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { X } from 'lucide-react';
 
@@ -16,6 +17,9 @@ export const ConfirmDeleteBuildingModal = ({
   onClose,
   onConfirm,
 }: ConfirmDeleteBuildingModalProps) => {
+  const t = useTranslations('admin.buildingManagement');
+  const tActions = useTranslations('common.actions');
+
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
@@ -28,7 +32,7 @@ export const ConfirmDeleteBuildingModal = ({
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Xác nhận xóa tòa nhà</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('modals.confirmDelete.title')}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -42,11 +46,10 @@ export const ConfirmDeleteBuildingModal = ({
 
         <div className="p-6">
           <p className="text-gray-700">
-            Bạn có chắc chắn muốn xóa tòa nhà{' '}
-            <span className="font-semibold text-gray-900">{buildingName}</span>?
+            {t('modals.confirmDelete.description', { name: buildingName ?? tActions('noName') })}
           </p>
           <p className="text-sm text-red-600 mt-2">
-            Lưu ý: Hành động này không thể hoàn tác.
+            {t('modals.confirmDelete.note')}
           </p>
         </div>
 
@@ -56,13 +59,13 @@ export const ConfirmDeleteBuildingModal = ({
             onClick={onClose}
             className="flex-1"
           >
-            Hủy
+            {tActions('cancel')}
           </Button>
           <Button
             onClick={handleConfirm}
             className="flex-1 bg-red-600 hover:bg-red-700 text-white"
           >
-            Xóa
+            {t('modals.confirmDelete.submit')}
           </Button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { GRADE_WEIGHTS, GRADE_RANGE } from '@/app/(page)/instructor/grades/lib/constants';
+import { GRADE_WEIGHTS, GRADE_RANGE } from "@/app/[locale]/(page)/instructor/grades/lib/constants";
 
 export interface GradeInput {
   attendanceGrade: number | null;

@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { coursesApi } from '../api/coursesApi';
-import { CourseDto } from '../type/courseType';
 import { queryKeys } from '@/lib/api/queryKeys';
 
 interface UseRegisteredCoursesQueryOptions {
@@ -54,5 +53,6 @@ export const useRegisteredCoursesQuery = (options: UseRegisteredCoursesQueryOpti
     refetch: query.refetch,
   };
 };
+
 
 

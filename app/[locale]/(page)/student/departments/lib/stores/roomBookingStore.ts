@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { RoomApiData } from '../types/room.types';
+import type { RoomApiData } from '@/lib/types/room';
 
 export type Room = RoomApiData;
 

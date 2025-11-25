@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../api/dashboardApi";
-import { gradesApi } from "@/app/[locale]/(page)/student/grades/lib/api/gradesApi";
 import type { DashboardData } from "../types/types";
+import { gradesApi } from "@/lib/api/grades";
 import { queryKeys } from "@/lib/api/queryKeys";
 
 const DASHBOARD_STALE_TIME = 5 * 60 * 1000;

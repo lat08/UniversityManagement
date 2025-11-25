@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocale, useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,35 +18,41 @@ import {
 } from '@/lib/constants/regulations';
 import { Calendar, Upload, X } from 'lucide-react';
 import { format, parse } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { enUS, vi } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
-const schema = z
-  .object({
-    code: z.string().min(2, 'Mã quy định tối thiểu 2 ký tự'),
-    title: z.string().min(4, 'Tiêu đề tối thiểu 4 ký tự'),
-    description: z.string().min(10, 'Mô tả tối thiểu 10 ký tự'),
-    category: z.string().min(1, 'Chọn loại quy định'),
-    issuingUnit: z.string().min(1, 'Chọn đơn vị ban hành'),
-    status: z.enum(['draft', 'active', 'archived']),
-    issueDate: z.string().min(1, 'Chọn ngày ban hành'),
-    effectiveDate: z.string().min(1, 'Chọn ngày hiệu lực'),
-    expiredDate: z.string().optional(),
-    targetAudience: z.enum(['student', 'instructor', 'all']),
-  })
-  .refine(
-    (values) => {
-      if (!values.issueDate || !values.effectiveDate) return true;
-      return new Date(values.effectiveDate) >= new Date(values.issueDate);
-    },
-    {
-      path: ['effectiveDate'],
-      message: 'Ngày hiệu lực phải lớn hơn hoặc bằng ngày ban hành',
-    },
-  );
+type TranslateFn = ReturnType<typeof useTranslations>;
 
-type RegulationFormValues = z.infer<typeof schema>;
+const createSchema = (t: TranslateFn) =>
+  z
+    .object({
+      code: z.string().min(2, t('form.validation.codeMin')),
+      title: z.string().min(4, t('form.validation.titleMin')),
+      description: z.string().min(10, t('form.validation.descriptionMin')),
+      category: z.string().min(1, t('form.validation.categoryRequired')),
+      issuingUnit: z.string().min(1, t('form.validation.issuingUnitRequired')),
+      status: z.enum(['draft', 'active', 'archived']),
+      issueDate: z.string().min(1, t('form.validation.issueDateRequired')),
+      effectiveDate: z.string().min(1, t('form.validation.effectiveDateRequired')),
+      expiredDate: z.string().optional(),
+      targetAudience: z.enum(['student', 'instructor', 'all']),
+    })
+    .refine(
+      (values) => {
+        if (!values.issueDate || !values.effectiveDate) return true;
+        return new Date(values.effectiveDate) >= new Date(values.issueDate);
+      },
+      {
+        path: ['effectiveDate'],
+        message: t('form.validation.effectiveAfterIssue'),
+      },
+    );
+
+type RegulationFormValues = z.infer<ReturnType<typeof createSchema>>;
+
+const DEFAULT_DISPLAY_DATE_FORMAT = 'dd/MM/yyyy';
+const ISO_DATE_FORMAT = 'yyyy-MM-dd';
 
 interface RegulationFormModalProps {
   readonly isOpen: boolean;
@@ -54,11 +61,6 @@ interface RegulationFormModalProps {
   readonly onClose: () => void;
   readonly onSubmit: (payload: RegulationMutationPayload, file: File | null) => Promise<void>;
 }
-
-const STATUS_OPTIONS = (Object.keys(REGULATION_STATUS_META) as RegulationStatus[]).map((status) => ({
-  value: status,
-  label: REGULATION_STATUS_META[status].label,
-}));
 
 const defaultFormValues: RegulationFormValues = {
   code: '',
@@ -80,17 +82,49 @@ export const RegulationFormModal = ({
   onClose,
   onSubmit,
 }: RegulationFormModalProps) => {
+  const t = useTranslations('admin.regulations');
+  const locale = useLocale();
+  const schema = useMemo(() => createSchema(t), [t]);
+  const dateLocale = locale === 'vi' ? vi : enUS;
+  const displayDateFormat = locale === 'vi' ? DEFAULT_DISPLAY_DATE_FORMAT : 'MM/dd/yyyy';
+  const datePlaceholder = locale === 'vi' ? 'dd/mm/yyyy' : 'mm/dd/yyyy';
+  const statusOptions = useMemo(
+    () =>
+      (Object.keys(REGULATION_STATUS_META) as RegulationStatus[]).map((status) => ({
+        value: status,
+        label: t(REGULATION_STATUS_META[status].labelKey),
+      })),
+    [t],
+  );
+  const categoryOptions = useMemo(
+    () => REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: t(item.labelKey) })),
+    [t],
+  );
+  const issuingUnitOptions = useMemo(
+    () => REGULATION_ISSUING_UNITS.map((item) => ({ value: item.value, label: t(item.labelKey) })),
+    [t],
+  );
+  const audienceOptions = useMemo(
+    () => REGULATION_AUDIENCE_OPTIONS.map((item) => ({ value: item.value, label: t(item.labelKey) })),
+    [t],
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [showCalendar, setShowCalendar] = useState<{ [key: string]: boolean }>({});
   const [dateInputValues, setDateInputValues] = useState<{ [key: string]: string }>({});
   const [calendarPositions, setCalendarPositions] = useState<{ [key: string]: { top: number; left: number } }>({});
-  const inputRefs = {
-    issueDate: useRef<HTMLInputElement>(null),
-    effectiveDate: useRef<HTMLInputElement>(null),
-    expiredDate: useRef<HTMLInputElement>(null),
-  };
+  const issueDateRef = useRef<HTMLInputElement>(null);
+  const effectiveDateRef = useRef<HTMLInputElement>(null);
+  const expiredDateRef = useRef<HTMLInputElement>(null);
+  const inputRefs = useMemo(
+    () => ({
+      issueDate: issueDateRef,
+      effectiveDate: effectiveDateRef,
+      expiredDate: expiredDateRef,
+    }),
+    [effectiveDateRef, expiredDateRef, issueDateRef],
+  );
 
   const initialValues = useMemo<RegulationFormValues>(() => {
     if (!initialData) return defaultFormValues;
@@ -127,12 +161,18 @@ export const RegulationFormModal = ({
       setFileError(null);
       setShowCalendar({});
       setDateInputValues({
-        issueDate: initialValues.issueDate ? format(new Date(initialValues.issueDate), 'dd/MM/yyyy') : '',
-        effectiveDate: initialValues.effectiveDate ? format(new Date(initialValues.effectiveDate), 'dd/MM/yyyy') : '',
-        expiredDate: initialValues.expiredDate ? format(new Date(initialValues.expiredDate), 'dd/MM/yyyy') : '',
+        issueDate: initialValues.issueDate
+          ? format(new Date(initialValues.issueDate), displayDateFormat, { locale: dateLocale })
+          : '',
+        effectiveDate: initialValues.effectiveDate
+          ? format(new Date(initialValues.effectiveDate), displayDateFormat, { locale: dateLocale })
+          : '',
+        expiredDate: initialValues.expiredDate
+          ? format(new Date(initialValues.expiredDate), displayDateFormat, { locale: dateLocale })
+          : '',
       });
     }
-  }, [initialValues, isOpen, reset]);
+  }, [dateLocale, displayDateFormat, initialValues, isOpen, reset]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -155,7 +195,7 @@ export const RegulationFormModal = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showCalendar]);
+  }, [inputRefs, showCalendar]);
 
   useEffect(() => {
     const updateCalendarPositions = () => {
@@ -168,15 +208,15 @@ export const RegulationFormModal = ({
           const calendarWidth = 300;
           const calendarHeight = 300;
           
-          // Tính toán vị trí, ưu tiên hiển thị bên phải input
+          // Prefer rendering the calendar on the right side of the input
           let left = rect.right + scrollX - calendarWidth;
-          // Nếu không đủ chỗ bên phải, hiển thị bên trái
+          // Fallback to the left side if there is no room
           if (left < scrollX) {
             left = rect.left + scrollX;
           }
           
           let top = rect.bottom + scrollY + 8;
-          // Nếu không đủ chỗ phía dưới, hiển thị phía trên
+          // Fallback above the field when there is no space below
           if (top + calendarHeight > window.innerHeight + scrollY) {
             top = rect.top + scrollY - calendarHeight - 8;
           }
@@ -190,7 +230,7 @@ export const RegulationFormModal = ({
     };
 
     if (Object.values(showCalendar).some((v) => v)) {
-      // Delay để đảm bảo DOM đã render
+      // Delay to ensure the DOM is rendered before measuring
       const timeoutId = setTimeout(updateCalendarPositions, 0);
       window.addEventListener('scroll', updateCalendarPositions, true);
       window.addEventListener('resize', updateCalendarPositions);
@@ -201,7 +241,7 @@ export const RegulationFormModal = ({
         window.removeEventListener('resize', updateCalendarPositions);
       };
     }
-  }, [showCalendar]);
+  }, [inputRefs, showCalendar]);
 
   if (!isOpen) {
     return null;
@@ -218,9 +258,9 @@ export const RegulationFormModal = ({
 
     if (value.length === 10) {
       try {
-        const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
+        const parsedDate = parse(value, displayDateFormat, new Date());
         if (!isNaN(parsedDate.getTime())) {
-          setValue(field as keyof RegulationFormValues, format(parsedDate, 'yyyy-MM-dd'));
+          setValue(field as keyof RegulationFormValues, format(parsedDate, ISO_DATE_FORMAT));
         }
       } catch {
         // Invalid date format
@@ -230,8 +270,8 @@ export const RegulationFormModal = ({
 
   const handleCalendarSelect = (field: string, date: Date | undefined) => {
     if (date) {
-      const dateStr = format(date, 'yyyy-MM-dd');
-      const displayStr = format(date, 'dd/MM/yyyy');
+      const dateStr = format(date, ISO_DATE_FORMAT);
+      const displayStr = format(date, displayDateFormat, { locale: dateLocale });
       setValue(field as keyof RegulationFormValues, dateStr);
       setDateInputValues((prev) => ({ ...prev, [field]: displayStr }));
       setShowCalendar((prev) => ({ ...prev, [field]: false }));
@@ -268,7 +308,7 @@ export const RegulationFormModal = ({
       effectiveDate: values.effectiveDate,
       expireDate: values.expiredDate || null,
       targetAudience: values.targetAudience,
-      version: 'v1.0', // Giá trị mặc định, không hiển thị trong UI
+      version: 'v1.0', // Default value, hidden from UI
       fileUrl: initialData?.fileUrl ?? null,
       fileType: selectedFile ? selectedFile.name.split('.').pop()?.toLowerCase() ?? null : initialData?.fileType ?? null,
     };
@@ -290,11 +330,18 @@ export const RegulationFormModal = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {mode === 'create' ? 'Thêm Quy chế / Quy định' : 'Chỉnh sửa Quy chế / Quy định'}
+                {mode === 'create' ? t('form.title.create') : t('form.title.edit')}
               </h2>
-              <p className="text-sm text-gray-500">Nhập đầy đủ thông tin để đảm bảo quy chế được lưu trữ chính xác</p>
+              <p className="text-sm text-gray-500">{t('form.subtitle')}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose} disabled={isSubmitting} type="button">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              disabled={isSubmitting}
+              type="button"
+              aria-label={t('form.actions.close')}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -304,28 +351,36 @@ export const RegulationFormModal = ({
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-900">
-                Mã quy định <span className="text-red-500">*</span>
+                {t('form.fields.code')} <span className="text-red-500">*</span>
               </label>
-              <Input placeholder="VD: QĐ-1333" {...register('code')} className={errors.code ? 'border-red-500' : ''} />
+              <Input
+                placeholder={t('form.placeholders.code')}
+                {...register('code')}
+                className={errors.code ? 'border-red-500' : ''}
+              />
               {errors.code && <p className="mt-1 text-xs text-red-500">{errors.code.message}</p>}
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-900">
-                Tiêu đề <span className="text-red-500">*</span>
+                {t('form.fields.title')} <span className="text-red-500">*</span>
               </label>
-              <Input placeholder="Nhập tiêu đề quy chế" {...register('title')} className={errors.title ? 'border-red-500' : ''} />
+              <Input
+                placeholder={t('form.placeholders.title')}
+                {...register('title')}
+                className={errors.title ? 'border-red-500' : ''}
+              />
               {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>}
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-900">
-                Mô tả ngắn <span className="text-red-500">*</span>
+                {t('form.fields.description')} <span className="text-red-500">*</span>
               </label>
               <textarea
                 rows={4}
                 className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
-                placeholder="Mô tả nội dung chính của quy chế..."
+                placeholder={t('form.placeholders.description')}
                 {...register('description')}
               />
               {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>}
@@ -334,12 +389,12 @@ export const RegulationFormModal = ({
             <div className="grid gap-5 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
-                  Loại quy định <span className="text-red-500">*</span>
+                  {t('form.fields.category')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: item.label }))}
+                  options={categoryOptions}
                   value={watch('category')}
-                  placeholder="Chọn loại"
+                  placeholder={t('form.placeholders.category')}
                   onChange={(value) => setValue('category', value ?? '')}
                   buttonClassName={errors.category ? 'border-red-500' : ''}
                 />
@@ -347,12 +402,12 @@ export const RegulationFormModal = ({
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
-                  Đơn vị ban hành <span className="text-red-500">*</span>
+                  {t('form.fields.issuingUnit')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={REGULATION_ISSUING_UNITS.map((item) => ({ value: item.value, label: item.label }))}
+                  options={issuingUnitOptions}
                   value={watch('issuingUnit')}
-                  placeholder="Chọn đơn vị"
+                  placeholder={t('form.placeholders.issuingUnit')}
                   onChange={(value) => setValue('issuingUnit', value ?? '')}
                   buttonClassName={errors.issuingUnit ? 'border-red-500' : ''}
                 />
@@ -362,12 +417,16 @@ export const RegulationFormModal = ({
 
             <div className="grid gap-4 md:grid-cols-3">
               {[
-                { label: 'Ngày ban hành', field: 'issueDate', required: true, error: errors.issueDate },
-                { label: 'Ngày hiệu lực', field: 'effectiveDate', required: true, error: errors.effectiveDate },
-                { label: 'Ngày hết hiệu lực', field: 'expiredDate', required: false, error: errors.expiredDate },
+                { label: t('form.fields.issueDate'), field: 'issueDate', required: true, error: errors.issueDate },
+                { label: t('form.fields.effectiveDate'), field: 'effectiveDate', required: true, error: errors.effectiveDate },
+                { label: t('form.fields.expireDate'), field: 'expiredDate', required: false, error: errors.expiredDate },
               ].map(({ label, field, required, error }) => {
                 const dateValue = watch(field as keyof RegulationFormValues);
-                const selectedDate = dateValue ? (dateValue.includes('/') ? parse(dateValue, 'dd/MM/yyyy', new Date()) : new Date(dateValue)) : undefined;
+                const selectedDate = dateValue
+                  ? dateValue.includes('/')
+                    ? parse(dateValue, displayDateFormat, new Date())
+                    : new Date(dateValue)
+                  : undefined;
                 
                 return (
                   <div key={field} className="relative space-y-2">
@@ -381,7 +440,7 @@ export const RegulationFormModal = ({
                         value={dateInputValues[field] || ''}
                         onChange={(e) => handleDateInputChange(field, e.target.value)}
                         onFocus={() => setShowCalendar((prev) => ({ ...prev, [field]: true }))}
-                        placeholder="dd/mm/yyyy"
+                        placeholder={datePlaceholder}
                         maxLength={10}
                         className={`w-full p-3 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] bg-white ${
                           error ? 'border-red-500' : 'border-gray-200'
@@ -422,7 +481,7 @@ export const RegulationFormModal = ({
                             mode="single"
                             selected={selectedDate && !isNaN(selectedDate.getTime()) ? selectedDate : undefined}
                             onSelect={(date) => handleCalendarSelect(field, date)}
-                            locale={vi}
+                            locale={dateLocale}
                             classNames={{
                               day_selected: 'bg-[#0053AD] text-white',
                               day_today: 'bg-[#0053AD]/20 text-[#0053AD] font-semibold',
@@ -442,12 +501,12 @@ export const RegulationFormModal = ({
             <div className="grid gap-5 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
-                  Trạng thái <span className="text-red-500">*</span>
+                  {t('form.fields.status')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={STATUS_OPTIONS}
+                  options={statusOptions}
                   value={watch('status')}
-                  placeholder="Chọn trạng thái"
+                  placeholder={t('form.placeholders.status')}
                   onChange={(value) => setValue('status', (value ? (value as RegulationStatus) : 'draft'))}
                   buttonClassName={errors.status ? 'border-red-500' : ''}
                 />
@@ -455,12 +514,12 @@ export const RegulationFormModal = ({
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-900">
-                  Đối tượng áp dụng <span className="text-red-500">*</span>
+                  {t('form.fields.audience')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={REGULATION_AUDIENCE_OPTIONS}
+                  options={audienceOptions}
                   value={watch('targetAudience')}
-                  placeholder="Chọn đối tượng"
+                  placeholder={t('form.placeholders.audience')}
                   onChange={(value) =>
                     setValue('targetAudience', (value ? (value as RegulationMutationPayload['targetAudience']) : 'all'))
                   }
@@ -471,11 +530,11 @@ export const RegulationFormModal = ({
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-900">Tài liệu đính kèm</label>
+              <label className="mb-2 block text-sm font-medium text-gray-900">{t('form.fields.attachment')}</label>
               <div className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-600">
                 <label className="flex cursor-pointer flex-col items-center gap-2 text-gray-500">
                   <Upload className="h-5 w-5" />
-                  <span>Chọn tệp PDF/DOC/DOCX (tối đa 10MB)</span>
+                  <span>{t('form.file.helper')}</span>
                   <input
                     type="file"
                     accept=".pdf,.doc,.docx"
@@ -493,12 +552,12 @@ export const RegulationFormModal = ({
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                       ];
                       if (!validTypes.includes(file.type)) {
-                        setFileError('Chỉ hỗ trợ PDF, DOC, DOCX');
+                        setFileError(t('form.file.typeError'));
                         setSelectedFile(null);
                         return;
                       }
                       if (file.size > 10 * 1024 * 1024) {
-                        setFileError('Kích thước tệp không vượt quá 10MB');
+                        setFileError(t('form.file.sizeError'));
                         setSelectedFile(null);
                         return;
                       }
@@ -507,11 +566,15 @@ export const RegulationFormModal = ({
                     }}
                   />
                 </label>
-                {selectedFile && <p className="mt-2 text-sm text-gray-700">Đã chọn: {selectedFile.name}</p>}
+                {selectedFile && (
+                  <p className="mt-2 text-sm text-gray-700">{t('form.file.selected', { name: selectedFile.name })}</p>
+                )}
                 {fileError && <p className="mt-1 text-xs text-red-500">{fileError}</p>}
                 {!selectedFile && !fileError && initialData?.fileUrl && (
                   <p className="mt-2 text-xs text-gray-500">
-                    Tệp hiện có: {initialData.fileName || getFileNameFromUrl(initialData.fileUrl)}
+                    {t('form.file.current', {
+                      name: initialData.fileName || getFileNameFromUrl(initialData.fileUrl),
+                    })}
                   </p>
                 )}
               </div>
@@ -526,10 +589,14 @@ export const RegulationFormModal = ({
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
             >
-              Hủy
+              {t('form.actions.cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting} className="flex-1 bg-[#0053AD] text-white hover:bg-[#003d82]">
-              {isSubmitting ? 'Đang lưu...' : mode === 'create' ? 'Lưu bản nháp' : 'Cập nhật'}
+              {isSubmitting
+                ? t('form.actions.saving')
+                : mode === 'create'
+                  ? t('form.actions.saveDraft')
+                  : t('form.actions.update')}
             </Button>
           </div>
         </form>

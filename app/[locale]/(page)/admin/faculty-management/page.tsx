@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Plus, Edit, Trash2, X, CheckCircle2 } from "lucide-react"
+import { Plus, Edit, Trash2, X, CheckCircle2, GraduationCap, Activity, PauseCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button, SearchInput } from "@/app/components/ui"
 import { Pagination } from "@/app/components/ui/pagination"
 import { Checkbox } from "@/app/components/ui/checkbox"
@@ -18,9 +19,9 @@ import {
   FacultyActionsMenu,
   FacultyStatCard,
 } from "./components"
-import { GraduationCap, Activity, PauseCircle } from "lucide-react"
 
 export default function FacultyManagementPage() {
+  const t = useTranslations('admin.facultyManagement')
   const {
     faculties,
     stats,
@@ -151,27 +152,27 @@ export default function FacultyManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quản lý Ngành học</h1>
-          <p className="text-muted-foreground">Quản lý thông tin các ngành học</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <FacultyStatCard
-          title="Tổng số ngành học"
+          title={t('stats.total')}
           value={stats?.total || 0}
           icon={GraduationCap}
           color="blue"
         />
         <FacultyStatCard
-          title="Đang hoạt động"
+          title={t('stats.active')}
           value={stats?.active || 0}
           icon={Activity}
           color="green"
         />
         <FacultyStatCard
-          title="Ngừng hoạt động"
+          title={t('stats.inactive')}
           value={stats?.inactive || 0}
           icon={PauseCircle}
           color="orange"
@@ -185,7 +186,7 @@ export default function FacultyManagementPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                Danh sách Ngành học
+                {t('listTitle')}
               </h2>
             </div>
             <div className="flex gap-3">
@@ -194,7 +195,7 @@ export default function FacultyManagementPage() {
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white"
               >
                 <Plus className="w-4 h-4" />
-                Thêm ngành học
+                {t('actions.add')}
               </Button>
             </div>
           </div>
@@ -203,7 +204,7 @@ export default function FacultyManagementPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
             <div className="sm:col-span-2">
               <SearchInput
-                placeholder="Tìm kiếm theo mã, tên ngành học..."
+                placeholder={t('search.placeholder')}
                 value={localSearchQuery}
                 onChange={(e) => setLocalSearchQuery(e.target.value)}
               />
@@ -214,10 +215,10 @@ export default function FacultyManagementPage() {
                 onValueChange={setDivisionFilter}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Tất cả khoa" />
+                  <SelectValue placeholder={t('filters.allDivisions')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tất cả khoa</SelectItem>
+                  <SelectItem value="all">{t('filters.allDivisions')}</SelectItem>
                   {divisions.map((div) => (
                     <SelectItem key={div.divisionId} value={div.divisionId}>
                       {div.divisionName}
@@ -230,12 +231,12 @@ export default function FacultyManagementPage() {
                 onValueChange={setStatusFilter}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Tất cả trạng thái" />
+                  <SelectValue placeholder={t('filters.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="active">Đang hoạt động</SelectItem>
-                  <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+                  <SelectItem value="all">{t('filters.allStatuses')}</SelectItem>
+                  <SelectItem value="active">{t('filters.active')}</SelectItem>
+                  <SelectItem value="inactive">{t('filters.inactive')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -247,7 +248,7 @@ export default function FacultyManagementPage() {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-[#0053AD]" />
                 <span className="text-sm font-medium text-[#0053AD]">
-                  Đã chọn {selectedIds.length} ngành học
+                  {t('table.selected', { count: selectedIds.length })}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -258,7 +259,7 @@ export default function FacultyManagementPage() {
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
                   <Edit className="h-4 w-4" />
-                  Chỉnh sửa toàn bộ
+                  {t('actions.bulkEdit')}
                 </Button>
                 <Button
                   variant="outline"
@@ -267,7 +268,7 @@ export default function FacultyManagementPage() {
                   className="border-red-600 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Xóa toàn bộ
+                  {t('actions.bulkDelete')}
                 </Button>
                 <Button
                   size="sm"
@@ -275,7 +276,7 @@ export default function FacultyManagementPage() {
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   <X className="h-4 w-4" />
-                  Bỏ chọn
+                  {t('actions.clearSelection')}
                 </Button>
               </div>
             </div>
@@ -302,19 +303,19 @@ export default function FacultyManagementPage() {
                   />
                 </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
-                    Mã
+                    {t('table.columns.code')}
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
-                    Tên ngành học
+                    {t('table.columns.name')}
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
-                    Khoa
+                    {t('table.columns.division')}
                   </th>
                   <th className="px-4 py-3 text-center text-sm font-semibold border-l border-white/40">
-                    Trạng thái
+                    {t('table.columns.status')}
                   </th>
                   <th className="w-12 px-4 py-3 text-center text-sm font-semibold border-l border-white/40">
-                    HĐ
+                    {t('table.columns.actions')}
                   </th>
                 </tr>
               </thead>
@@ -333,7 +334,7 @@ export default function FacultyManagementPage() {
                       colSpan={6}
                       className="p-8 text-center text-muted-foreground"
                     >
-                      Không tìm thấy ngành học nào
+                      {t('table.empty')}
                     </td>
                   </tr>
                 ) : (
@@ -379,8 +380,8 @@ export default function FacultyManagementPage() {
                           }
                         >
                           {faculty.facultyStatus === "active"
-                            ? "Đang hoạt động"
-                            : "Ngừng hoạt động"}
+                            ? t('table.status.active')
+                            : t('table.status.inactive')}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-center">

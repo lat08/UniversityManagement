@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { MoreVertical, Eye, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/app/components/ui";
+import { useEffect, useRef, useState } from 'react';
+import { MoreVertical, Eye, Edit, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Button } from '@/app/components/ui';
 
 interface InstructorActionsMenuProps {
   onView: () => void;
@@ -13,6 +14,7 @@ interface InstructorActionsMenuProps {
 export default function InstructorActionsMenu({ onView, onEdit, onDelete }: InstructorActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('admin.instructorProfile.actionsMenu');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,7 +39,7 @@ export default function InstructorActionsMenu({ onView, onEdit, onDelete }: Inst
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
         className="text-gray-600 hover:text-gray-900"
-        title="Thao tác"
+        title={t('title')}
       >
         <MoreVertical className="w-4 h-4" />
       </Button>
@@ -66,7 +68,7 @@ export default function InstructorActionsMenu({ onView, onEdit, onDelete }: Inst
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               <Eye className="w-4 h-4 text-blue-600" />
-              Xem chi tiết
+              {t('view')}
             </button>
             <button
               onClick={() => {
@@ -76,7 +78,7 @@ export default function InstructorActionsMenu({ onView, onEdit, onDelete }: Inst
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               <Edit className="w-4 h-4 text-green-600" />
-              Cập nhật
+              {t('edit')}
             </button>
             <button
               onClick={() => {
@@ -86,7 +88,7 @@ export default function InstructorActionsMenu({ onView, onEdit, onDelete }: Inst
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               <Trash2 className="w-4 h-4 text-red-600" />
-              Xóa
+              {t('delete')}
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { MoreVertical, Eye, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/app/components/ui';
 
@@ -21,6 +22,7 @@ export default function ActionsMenu({
 }: ActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('admin.studentProfile.actions');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,7 +48,7 @@ export default function ActionsMenu({
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-600 hover:text-gray-900"
-          title="Thao tác"
+          title={t('label')}
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
@@ -72,7 +74,7 @@ export default function ActionsMenu({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Eye className="w-4 h-4 text-blue-600" />
-                Xem chi tiết
+                {t('view')}
               </button>
               <button
                 onClick={() => {
@@ -82,7 +84,7 @@ export default function ActionsMenu({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Edit className="w-4 h-4 text-green-600" />
-                Chỉnh sửa
+                {t('edit')}
               </button>
               <button
                 onClick={() => {
@@ -92,7 +94,7 @@ export default function ActionsMenu({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Trash2 className="w-4 h-4 text-red-600" />
-                Xóa
+                {t('delete')}
               </button>
             </div>
           </div>
@@ -109,7 +111,7 @@ export default function ActionsMenu({
         size="icon"
         onClick={onView}
         className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-        title="Xem chi tiết"
+        title={t('view')}
       >
         <Eye className="w-4 h-4" />
       </Button>
@@ -118,7 +120,7 @@ export default function ActionsMenu({
         size="icon"
         onClick={onEdit}
         className="text-gray-600 hover:text-green-600 hover:bg-green-50"
-        title="Chỉnh sửa"
+        title={t('edit')}
       >
         <Edit className="w-4 h-4" />
       </Button>
@@ -127,7 +129,7 @@ export default function ActionsMenu({
         size="icon"
         onClick={onDelete}
         className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-        title="Xóa"
+        title={t('delete')}
       >
         <Trash2 className="w-4 h-4" />
       </Button>

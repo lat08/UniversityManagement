@@ -1,6 +1,7 @@
-"use client"
+'use client'
 
-import { useMemo } from "react"
+import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 
 interface PaginationProps {
   readonly currentPage: number
@@ -17,8 +18,12 @@ export function Pagination({
   totalCount,
   pageSize,
   onPageChange,
-  className = ""
+  className = ''
 }: PaginationProps) {
+  const t = useTranslations('common.table.pagination')
+  const startItem = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const endItem = totalCount === 0 ? 0 : Math.min(currentPage * pageSize, totalCount)
+
   const pageNumbers = useMemo(() => {
     const pages: Array<{ type: 'page' | 'ellipsis'; value: number | string }> = []
     const maxVisible = 5
@@ -63,8 +68,7 @@ export function Pagination({
   return (
     <div className={`flex items-center justify-between ${className}`}>
       <div className="text-sm text-gray-600">
-        Hiển thị <span className="font-medium">{(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalCount)}</span> trong tổng số{' '}
-        <span className="font-medium">{totalCount}</span>
+        {t('summary', { start: startItem, end: endItem, total: totalCount })}
       </div>
       <div className="flex gap-2">
         <button 
@@ -72,7 +76,7 @@ export function Pagination({
           disabled={currentPage === 1}
           className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          Trước
+          {t('previous')}
         </button>
         {pageNumbers.map((item) => 
           item.type === 'page' ? (
@@ -98,10 +102,9 @@ export function Pagination({
           disabled={currentPage === totalPages}
           className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          Sau
+          {t('next')}
         </button>
       </div>
     </div>
   )
 }
-

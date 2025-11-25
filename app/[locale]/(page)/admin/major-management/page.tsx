@@ -1,49 +1,60 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, School, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck } from 'lucide-react';
-import { Dropdown, SearchInput, Button } from '@/app/components/ui';
-import { Pagination } from '@/app/components/ui/pagination';
-import { AddMajorModal } from './components/AddMajorModal';
-import { EditMajorModal } from './components/EditMajorModal';
-import { BulkEditMajorModal } from './components/BulkEditMajorModal';
-import { ConfirmDeleteMajorModal } from './components/ConfirmDeleteMajorModal';
-import { BulkDeleteMajorModal } from './components/BulkDeleteMajorModal';
-import { MajorActionsMenu } from './components/MajorActionsMenu';
-import { MajorStatCard } from './components/MajorStatCard';
-import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
-import { TableSkeleton } from '@/app/(page)/admin/student-profile/components/LoadingSkeleton';
-import { toast } from 'react-hot-toast';
-import { useMajors } from './lib/hooks/useMajors';
-import { majorsApi } from './lib/api/majorsApi';
-import { getStatusDisplay } from './lib/types/types';
-import type { Major, Faculty, Curriculum } from './lib/types/types';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import {
+  CircleCheck,
+  Edit2,
+  Plus,
+  School,
+  Trash2,
+  X,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+import { Dropdown, SearchInput, Button } from "@/app/components/ui";
+import { Pagination } from "@/app/components/ui/pagination";
+import { AddMajorModal } from "./components/AddMajorModal";
+import { EditMajorModal } from "./components/EditMajorModal";
+import { BulkEditMajorModal } from "./components/BulkEditMajorModal";
+import { ConfirmDeleteMajorModal } from "./components/ConfirmDeleteMajorModal";
+import { BulkDeleteMajorModal } from "./components/BulkDeleteMajorModal";
+import { MajorActionsMenu } from "./components/MajorActionsMenu";
+import { MajorStatCard } from "./components/MajorStatCard";
+import { ResizableTable, ResizableColumn } from "@/app/[locale]/(page)/admin/student-profile/components/ResizableTable";
+import { TableSkeleton } from "@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton";
+import { toast } from "react-hot-toast";
+import { useMajors } from "./lib/hooks/useMajors";
+import { majorsApi } from "./lib/api/majorsApi";
+import { getStatusDisplay } from "./lib/types/types";
+import type { Major, Faculty, Curriculum } from "./lib/types/types";
 
 const STAT_CARDS = [
-  { 
-    key: 'total', 
-    label: 'Tổng chuyên ngành', 
-    bgColor: 'bg-[#FFDDAA]',
-    iconColor: 'text-[#CC8800]',
-    Icon: School
+  {
+    key: "total",
+    labelKey: "stats.total",
+    bgColor: "bg-[#FFDDAA]",
+    iconColor: "text-[#CC8800]",
+    Icon: School,
   },
-  { 
-    key: 'active', 
-    label: 'Đang hoạt động', 
-    bgColor: 'bg-[#CCEECC]',
-    iconColor: 'text-[#44AA44]',
-    Icon: CheckCircle2
+  {
+    key: "active",
+    labelKey: "stats.active",
+    bgColor: "bg-[#CCEECC]",
+    iconColor: "text-[#44AA44]",
+    Icon: CheckCircle2,
   },
-  { 
-    key: 'inactive', 
-    label: 'Ngừng hoạt động', 
-    bgColor: 'bg-[#FFBBAA]',
-    iconColor: 'text-[#CC4444]',
-    Icon: XCircle
+  {
+    key: "inactive",
+    labelKey: "stats.inactive",
+    bgColor: "bg-[#FFBBAA]",
+    iconColor: "text-[#CC4444]",
+    Icon: XCircle,
   },
 ] as const;
 
 export default function MajorManagementPage() {
+  const t = useTranslations("admin.majorManagement");
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -63,14 +74,14 @@ export default function MajorManagementPage() {
 
   const { majors, loading, currentPage, totalCount, totalPages, stats, fetchMajors, setCurrentPage } = useMajors();
 
-  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>(() => [
     { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
-    { key: 'majorCode', label: 'Mã', width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-    { key: 'majorName', label: 'Tên chuyên ngành', width: 250, minWidth: 200, align: 'left', visible: true, required: true },
-    { key: 'facultyName', label: 'Ngành học', width: 200, minWidth: 150, align: 'left', visible: true },
-    { key: 'curriculumName', label: 'Thuộc CTĐT', width: 160, minWidth: 120, align: 'left', visible: true },
-    { key: 'status', label: 'Trạng thái', width: 160, minWidth: 140, align: 'center', visible: true },
-    { key: 'actions', label: 'Thao tác', width: 140, minWidth: 100, align: 'center', visible: true, required: true },
+    { key: 'majorCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+    { key: 'majorName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
+    { key: 'facultyName', label: t('table.columns.faculty'), width: 200, minWidth: 150, align: 'left', visible: true },
+    { key: 'curriculumName', label: t('table.columns.curriculum'), width: 160, minWidth: 120, align: 'left', visible: true },
+    { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
+    { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
   ]);
 
   useEffect(() => {
@@ -122,7 +133,7 @@ export default function MajorManagementPage() {
     if (!deletingMajorId) return;
     const res = await majorsApi.deleteMajor();
     if (res.success) {
-      toast.success('Xóa chuyên ngành thành công');
+      toast.success(t('hooks.deleteSuccess'));
       fetchMajors({
         pageNumber: currentPage,
         pageSize: 20,
@@ -132,7 +143,7 @@ export default function MajorManagementPage() {
         status: selectedStatus || undefined,
       });
     } else {
-      toast.error(res.message || 'Xóa chuyên ngành thất bại');
+      toast.error(res.message || t('hooks.deleteError'));
     }
   };
 
@@ -160,7 +171,7 @@ export default function MajorManagementPage() {
     const ids = Array.from(selectedMajorIds);
     const res = await majorsApi.bulkDeleteMajors(ids);
     if (res.success) {
-      toast.success(res.message || `Đã xóa ${ids.length} chuyên ngành`);
+      toast.success(res.message || t('hooks.bulkDeleteSuccess'));
       setSelectedMajorIds(new Set());
       setIsBulkDeleteModalOpen(false);
       fetchMajors({
@@ -172,7 +183,7 @@ export default function MajorManagementPage() {
         status: selectedStatus || undefined,
       });
     } else {
-      toast.error(res.message || 'Xóa hàng loạt thất bại');
+      toast.error(res.message || t('hooks.bulkDeleteError'));
     }
   };
 
@@ -237,6 +248,7 @@ export default function MajorManagementPage() {
               const isCompact = parseFloat(cellStyle.paddingX) < 20;
               const statusFontSize = isCompact ? '0.65rem' : '0.75rem';
               const statusPadding = isCompact ? '0.125rem 0.375rem' : '0.25rem 0.5rem';
+              const statusKey = major.status === 'active' ? 'active' : 'inactive';
               return (
                 <td key="status" style={cellPaddingStyle}>
                   <div className="flex justify-center">
@@ -246,7 +258,7 @@ export default function MajorManagementPage() {
                       lineHeight: '1.2',
                       whiteSpace: 'nowrap',
                     }}>
-                      {statusDisplay.label}
+                      {t(`table.status.${statusKey}`)}
                     </span>
                   </div>
                 </td>
@@ -269,30 +281,30 @@ export default function MajorManagementPage() {
         })}
       </>
     );
-  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedMajorIds]);
+  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedMajorIds, t]);
 
   const facultyOptions = [
-    { value: '', label: 'Tất cả ngành học' },
+    { value: '', label: t('filters.allFaculties') },
     ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
   ];
 
   const curriculumOptions = [
-    { value: '', label: 'Tất cả CTĐT' },
+    { value: '', label: t('filters.allCurricula') },
     ...curricula.map((c) => ({ value: c.curriculumId, label: c.curriculumName })),
   ];
 
   const statusOptions = [
-    { value: '', label: 'Tất cả' },
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Ngừng hoạt động' },
+    { value: '', label: t('filters.allStatuses') },
+    { value: 'active', label: t('filters.active') },
+    { value: 'inactive', label: t('filters.inactive') },
   ];
 
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Quản lý Chuyên ngành</h1>
-        <p className="text-gray-600 mt-1">Quản lý các chuyên ngành đào tạo</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-600 mt-1">{t('description')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -312,7 +324,7 @@ export default function MajorManagementPage() {
             return (
               <MajorStatCard
                 key={index}
-                label={card.label}
+                label={t(card.labelKey)}
                 value={value}
                 Icon={card.Icon}
                 bgColor={card.bgColor}
@@ -331,7 +343,7 @@ export default function MajorManagementPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                Danh sách Chuyên ngành
+                {t('listTitle')}
               </h2>
             </div>
             <div className="flex gap-3">
@@ -340,7 +352,7 @@ export default function MajorManagementPage() {
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white"
               >
                 <Plus className="w-4 h-4" />
-                Thêm mới
+                {t('actions.add')}
               </Button>
             </div>
           </div>
@@ -350,7 +362,7 @@ export default function MajorManagementPage() {
             {/* Search Input */}
             <div className="sm:col-span-2">
               <SearchInput
-                placeholder="Tìm kiếm theo mã, tên chuyên ngành..."
+                placeholder={t('search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -360,7 +372,7 @@ export default function MajorManagementPage() {
             <Dropdown
               options={facultyOptions}
               value={selectedFacultyId || ''}
-              placeholder="Tất cả ngành học"
+              placeholder={t('filters.allFaculties')}
               onChange={(value) => {
                 setSelectedFacultyId(value);
                 setCurrentPage(1);
@@ -371,7 +383,7 @@ export default function MajorManagementPage() {
             <Dropdown
               options={curriculumOptions}
               value={selectedCurriculumId || ''}
-              placeholder="Tất cả CTĐT"
+              placeholder={t('filters.allCurricula')}
               onChange={(value) => {
                 setSelectedCurriculumId(value);
                 setCurrentPage(1);
@@ -382,7 +394,7 @@ export default function MajorManagementPage() {
             <Dropdown
               options={statusOptions}
               value={selectedStatus || ''}
-              placeholder="Tất cả"
+              placeholder={t('filters.allStatuses')}
               onChange={(value) => {
                 setSelectedStatus(value);
                 setCurrentPage(1);
@@ -396,7 +408,7 @@ export default function MajorManagementPage() {
               <div className="flex items-center gap-2">
                 <CircleCheck className="w-5 h-5 text-[#0053AD]" />
                 <span className="text-sm font-medium text-[#0053AD]">
-                  Đã chọn {selectedMajorIds.size} ngành
+                  {t('table.selected', { count: selectedMajorIds.size })}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -407,7 +419,7 @@ export default function MajorManagementPage() {
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
                   <Edit2 className="w-4 h-4" />
-                  Chỉnh sửa toàn bộ
+                  {t('actions.bulkEdit')}
                 </Button>
                 <Button
                   variant="outline"
@@ -416,7 +428,7 @@ export default function MajorManagementPage() {
                   className="border-red-600 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Xóa toàn bộ
+                  {t('actions.bulkDelete')}
                 </Button>
                 <Button
                   size="sm"
@@ -424,7 +436,7 @@ export default function MajorManagementPage() {
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   <X className="w-4 h-4" />
-                  Bỏ chọn
+                  {t('actions.clearSelection')}
                 </Button>
               </div>
             </div>
@@ -443,7 +455,7 @@ export default function MajorManagementPage() {
                 </tr>
               )}
               isLoading={loading}
-              emptyMessage="Không có dữ liệu"
+              emptyMessage={t('table.empty')}
               loadingComponent={<TableSkeleton />}
               onColumnsResize={setResizableColumns}
               renderHeaderCheckbox={() => (

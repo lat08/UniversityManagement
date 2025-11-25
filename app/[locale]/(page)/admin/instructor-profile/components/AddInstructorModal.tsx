@@ -1,17 +1,16 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import type { InferType } from 'yup';
 import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { Dropdown, Button, Input } from '@/app/components/ui';
 import { commonApi } from '@/lib/api/common';
 import { instructorsApi } from '../lib/api/instructorsApi';
-import { DEGREE_OPTIONS, EMPLOYMENT_STATUS_OPTIONS } from '../lib/constants/filters';
+import { getDegreeOptions, getEmploymentStatusOptions } from '../lib/constants/filters';
 import { FacultyOption, CreateInstructorPayload } from '../lib/types/types';
 
 interface AddInstructorModalProps {
@@ -20,34 +19,35 @@ interface AddInstructorModalProps {
   onSuccess?: () => void;
 }
 
-const getValidationSchema = (t: (key: string) => string) => yup.object({
-  fullName: yup
-    .string()
-    .required(t('fullNameRequired'))
-    .min(2, t('fullNameMin')),
-  gender: yup.string().required(t('genderRequired')),
-  facultyId: yup.string().required(t('facultyRequired')),
-  dateOfBirth: yup.string().nullable(),
-  hireDate: yup.string().nullable(),
-  phoneNumber: yup
-    .string()
-    .nullable()
-    .test('phone-valid', 'Số điện thoại phải có 10-11 số', (value) => {
-      if (!value) return true;
-      return /^[0-9]{10,11}$/.test(value);
-    }),
-  citizenId: yup
-    .string()
-    .nullable()
-    .test('cid-valid', 'CMND/CCCD phải có 9-12 số', (value) => {
-      if (!value) return true;
-      return /^[0-9]{9,12}$/.test(value);
-    }),
-  address: yup.string().nullable(),
-  degree: yup.string().nullable(),
-  specialization: yup.string().nullable(),
-  employmentStatus: yup.string().nullable(),
-});
+const getValidationSchema = (t: (key: string) => string) =>
+  yup.object({
+    fullName: yup
+      .string()
+      .required(t('fullNameRequired'))
+      .min(2, t('fullNameMin')),
+    gender: yup.string().required(t('genderRequired')),
+    facultyId: yup.string().required(t('facultyRequired')),
+    dateOfBirth: yup.string().nullable(),
+    hireDate: yup.string().nullable(),
+    phoneNumber: yup
+      .string()
+      .nullable()
+      .test('phone-valid', t('phoneNumberInvalid'), (value) => {
+        if (!value) return true;
+        return /^[0-9]{10,11}$/.test(value);
+      }),
+    citizenId: yup
+      .string()
+      .nullable()
+      .test('cid-valid', t('citizenIdInvalid'), (value) => {
+        if (!value) return true;
+        return /^[0-9]{9,12}$/.test(value);
+      }),
+    address: yup.string().nullable(),
+    degree: yup.string().nullable(),
+    specialization: yup.string().nullable(),
+    employmentStatus: yup.string().nullable(),
+  });
 
 type FormData = {
   fullName: string;
@@ -65,6 +65,7 @@ type FormData = {
 
 export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddInstructorModalProps) {
   const t = useTranslations('admin.instructorProfile.addModal');
+  const tFilters = useTranslations('admin.instructorProfile.filters');
   const validationSchema = getValidationSchema(t);
   const {
     register,
@@ -94,6 +95,8 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formValues = watch();
+  const degreeOptions = useMemo(() => getDegreeOptions(tFilters), [tFilters]);
+  const statusOptions = useMemo(() => getEmploymentStatusOptions(tFilters), [tFilters]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -184,9 +187,6 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
   const facultyOptions = faculties.map((f) => ({ value: f.facultyId, label: f.facultyName }));
 
-  const degreeOptions = DEGREE_OPTIONS.map((d) => ({ value: d.value, label: d.label }));
-  const statusOptions = EMPLOYMENT_STATUS_OPTIONS.map((s) => ({ value: s.value, label: s.label }));
-
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -220,7 +220,7 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
                   {t('fullName')} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="Nguyễn Văn A"
+                  placeholder={t('fullNamePlaceholder')}
                   {...register('fullName')}
                   className={errors.fullName ? 'border-red-500' : ''}
                 />
@@ -230,9 +230,9 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Số điện thoại</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('phoneNumber')}</label>
                 <Input
-                  placeholder="0000000000"
+                  placeholder={t('phoneNumberPlaceholder')}
                   {...register('phoneNumber')}
                   className={errors.phoneNumber ? 'border-red-500' : ''}
                 />
@@ -242,12 +242,12 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Ngày sinh</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('dateOfBirth')}</label>
                 <Input type="date" {...register('dateOfBirth')} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Ngày tuyển dụng</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('hireDate')}</label>
                 <Input type="date" {...register('hireDate')} />
               </div>
 
@@ -293,13 +293,13 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('specialization')}</label>
-                <Input placeholder="VD: Lập trình Web" {...register('specialization')} />
+                <Input placeholder={t('specializationPlaceholder')} {...register('specialization')} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">CMND/CCCD</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('citizenId')}</label>
                 <Input
-                  placeholder="012345678900"
+                  placeholder={t('citizenIdPlaceholder')}
                   {...register('citizenId')}
                   className={errors.citizenId ? 'border-red-500' : ''}
                 />

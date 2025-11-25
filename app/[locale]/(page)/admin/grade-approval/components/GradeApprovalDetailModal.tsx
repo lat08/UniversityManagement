@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, type ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { X, Users, NotebookPen, Loader2 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { gradeApprovalsApi } from '../lib/api/gradeApprovalsApi';
 import { getApprovalStatusDisplay, type AdminGradeDetailEntry } from '../lib/types/types';
 import { queryKeys } from '@/lib/api/queryKeys';
-import { ResizableTable, type ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
+import { ResizableTable, type ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
 
 interface GradeApprovalDetailModalProps {
   gradeVersionId: string | null;
@@ -18,18 +19,6 @@ interface GradeApprovalDetailModalProps {
   isProcessing?: boolean;
 }
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) return '—';
-  try {
-    return new Intl.DateTimeFormat('vi-VN', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-};
-
 export const GradeApprovalDetailModal = ({
   gradeVersionId,
   isOpen,
@@ -38,17 +27,35 @@ export const GradeApprovalDetailModal = ({
   onReject,
   isProcessing,
 }: GradeApprovalDetailModalProps) => {
+  const t = useTranslations('admin.gradeApproval');
+  const locale = useLocale();
+
+  const formatDateTime = useCallback(
+    (value?: string | null) => {
+      if (!value) return '—';
+      try {
+        return new Intl.DateTimeFormat(locale, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(new Date(value));
+      } catch {
+        return value;
+      }
+    },
+    [locale],
+  );
+
   const studentColumns = useMemo<ResizableColumn[]>(
     () => [
-      { key: 'mssv', label: 'MSSV', width: 140, minWidth: 120, align: 'left' },
-      { key: 'fullName', label: 'Họ tên', width: 200, minWidth: 160, align: 'left' },
-      { key: 'attendance', label: 'Chuyên cần', width: 140, minWidth: 120, align: 'center' },
-      { key: 'midterm', label: 'Giữa kỳ', width: 130, minWidth: 110, align: 'center' },
-      { key: 'final', label: 'Cuối kỳ', width: 130, minWidth: 110, align: 'center' },
-      { key: 'average', label: 'Trung bình', width: 140, minWidth: 120, align: 'center' },
-      { key: 'note', label: 'Ghi chú', width: 200, minWidth: 160, align: 'left' },
+      { key: 'mssv', label: t('detailModal.table.columns.studentId'), width: 140, minWidth: 120, align: 'left' },
+      { key: 'fullName', label: t('detailModal.table.columns.fullName'), width: 200, minWidth: 160, align: 'left' },
+      { key: 'attendance', label: t('detailModal.table.columns.attendance'), width: 140, minWidth: 120, align: 'center' },
+      { key: 'midterm', label: t('detailModal.table.columns.midterm'), width: 130, minWidth: 110, align: 'center' },
+      { key: 'final', label: t('detailModal.table.columns.final'), width: 130, minWidth: 110, align: 'center' },
+      { key: 'average', label: t('detailModal.table.columns.average'), width: 140, minWidth: 120, align: 'center' },
+      { key: 'note', label: t('detailModal.table.columns.note'), width: 200, minWidth: 160, align: 'left' },
     ],
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -100,7 +107,9 @@ export const GradeApprovalDetailModal = ({
           <div className="flex flex-col items-center gap-0.5">
             <span className="font-medium text-gray-900">{current.toFixed(2)}</span>
             {changed && (
-              <span className="text-[10px] text-blue-600">Trước: {previous?.toFixed(2)}</span>
+              <span className="text-[10px] text-blue-600">
+                {t('detailModal.table.previousValue', { value: previous?.toFixed(2) })}
+              </span>
             )}
           </div>
         );
@@ -181,7 +190,7 @@ export const GradeApprovalDetailModal = ({
         </tr>
       );
     },
-    [],
+    [t],
   );
 
   if (!isOpen) return null;
@@ -200,12 +209,15 @@ export const GradeApprovalDetailModal = ({
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-start justify-between border-b border-gray-200 p-6">
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">Chi tiết bảng điểm</p>
+            <p className="text-xs uppercase tracking-wide text-gray-500">{t('detailModal.tag')}</p>
             <h2 className="text-2xl font-semibold text-gray-900 mt-1">
               {data?.courseCode} · {data?.courseName}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Lớp {data?.className} · Học kỳ {data?.semesterName}
+              {t('detailModal.classSemester', {
+                className: data?.className ?? '—',
+                semester: data?.semesterName ?? '—',
+              })}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -213,7 +225,7 @@ export const GradeApprovalDetailModal = ({
               <span
                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${statusDisplay.color}`}
               >
-                {statusDisplay.label}
+                {statusDisplay.translationKey ? t(statusDisplay.translationKey) : statusDisplay.fallbackLabel}
               </span>
             )}
             <Button
@@ -221,7 +233,7 @@ export const GradeApprovalDetailModal = ({
               size="icon"
               onClick={onClose}
               className="text-gray-500 hover:text-gray-900"
-              title="Đóng"
+              title={t('detailModal.close')}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -232,14 +244,14 @@ export const GradeApprovalDetailModal = ({
           {(isLoading || isFetching) && (
             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 border border-gray-100 rounded-lg px-4 py-2.5">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Đang tải dữ liệu phiên bản bảng điểm...
+              {t('detailModal.loading')}
             </div>
           )}
 
           {/* Summary cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border border-gray-200 rounded-lg p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">Người nộp</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">{t('detailModal.submittedBy.title')}</p>
               <p className="text-sm font-semibold text-gray-900 mt-1">{data?.submittedBy || '—'}</p>
               <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(data?.submittedAt)}</p>
               {data?.submissionNote && (
@@ -249,7 +261,7 @@ export const GradeApprovalDetailModal = ({
               )}
             </div>
             <div className="border border-gray-200 rounded-lg p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">Người duyệt</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">{t('detailModal.approvedBy.title')}</p>
               <p className="text-sm font-semibold text-gray-900 mt-1">{data?.approvedBy || '—'}</p>
               <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(data?.approvedAt)}</p>
               {data?.approvalNote && (
@@ -259,17 +271,17 @@ export const GradeApprovalDetailModal = ({
               )}
             </div>
             <div className="border border-gray-200 rounded-lg p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">Phiên bản</p>
+              <p className="text-xs uppercase tracking-wide text-gray-500">{t('detailModal.versionInfo.title')}</p>
               <p className="text-sm font-semibold text-gray-900 mt-1">
-                Lần {data?.versionNumber ?? '—'}
+                {t('detailModal.versionInfo.number', { number: data?.versionNumber ?? '—' })}
               </p>
               <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
-                {data?.totalStudents ?? 0} sinh viên
+                {t('detailModal.versionInfo.students', { count: data?.totalStudents ?? 0 })}
               </p>
               {data?.previousVersionNumber && (
                 <p className="text-xs text-blue-600 mt-1">
-                  Có phiên bản trước: #{data.previousVersionNumber}
+                  {t('detailModal.versionInfo.previous', { version: data.previousVersionNumber })}
                 </p>
               )}
             </div>
@@ -280,10 +292,13 @@ export const GradeApprovalDetailModal = ({
             <div className="flex items-center justify-between bg-gray-50 px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
                 <NotebookPen className="h-4 w-4 text-[#0053AD]" />
-                Bảng điểm chi tiết
+                {t('detailModal.table.title')}
               </div>
               <p className="text-xs text-gray-500">
-                Hiển thị {data?.students.length ?? 0}/{data?.totalStudents ?? 0} sinh viên
+                {t('detailModal.table.displaying', {
+                  visible: data?.students.length ?? 0,
+                  total: data?.totalStudents ?? 0,
+                })}
               </p>
             </div>
             <div className="max-h-[320px] overflow-auto">
@@ -292,12 +307,12 @@ export const GradeApprovalDetailModal = ({
                 data={data?.students ?? []}
                 renderRow={renderStudentRow}
                 isLoading={isLoading || isFetching}
-                emptyMessage="Chưa có dữ liệu sinh viên trong phiên bản này."
+                emptyMessage={t('detailModal.table.empty')}
                 loadingComponent={
                   <div className="px-6 py-8 text-center text-gray-500">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin text-[#0053AD]" />
-                      Đang tải bảng điểm...
+                      {t('detailModal.table.loading')}
                     </div>
                   </div>
                 }
@@ -309,8 +324,8 @@ export const GradeApprovalDetailModal = ({
         <div className="border-t border-gray-200 p-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <p className="text-sm text-gray-500">
             {data
-              ? `Cập nhật lần cuối: ${formatDateTime(data.approvedAt ?? data.submittedAt)}`
-              : 'Đang tải dữ liệu...'}
+              ? t('detailModal.footer.updatedAt', { value: formatDateTime(data.approvedAt ?? data.submittedAt) })
+              : t('detailModal.footer.loading')}
           </p>
           {data?.versionStatus === 'pending' && (
             <div className="flex flex-col sm:flex-row gap-3">
@@ -320,22 +335,22 @@ export const GradeApprovalDetailModal = ({
                 disabled={!gradeVersionId || isProcessing}
                 className="border-red-600 text-red-600 hover:bg-red-50"
               >
-                Từ chối
+                {t('reject')}
               </Button>
               <Button
                 onClick={() => gradeVersionId && onApprove(gradeVersionId)}
                 disabled={!gradeVersionId || isProcessing}
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white disabled:opacity-50"
               >
-                Duyệt
+                {t('approve')}
               </Button>
             </div>
           )}
           {data?.versionStatus !== 'pending' && (
             <p className="text-sm text-gray-500 italic">
               {data?.versionStatus === 'approved'
-                ? 'Bảng điểm này đã được duyệt và không thể thay đổi trạng thái.'
-                : 'Bảng điểm này đã bị từ chối và không thể thay đổi trạng thái.'}
+                ? t('detailModal.footer.locked.approved')
+                : t('detailModal.footer.locked.rejected')}
             </p>
           )}
         </div>
