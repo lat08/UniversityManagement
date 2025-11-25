@@ -58,10 +58,6 @@ function CoursesContent() {
     setRegisteredPage(page)
   }
   
-  const refetchAvailable = () => {
-    void queryClient.invalidateQueries({ queryKey: queryKeys.studentCourses.available() })
-  }
-
   // 2. QUẢN LÝ DIALOG HỦY MÔN
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState<{ id: string; name: string } | null>(null)

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 
-import { gradesApi } from '../api/gradesApi'
+import { gradesApi } from '@/lib/api/grades'
 import { CumulativeGradesData } from '../types/types'
 import { useSemesters } from '@/lib/hooks/useCommonData'
 import { queryKeys } from '@/lib/api/queryKeys'

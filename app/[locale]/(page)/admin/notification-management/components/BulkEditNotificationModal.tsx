@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dropdown, Button } from '@/app/components/ui';
 import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { notificationsApi } from '../lib/api/notificationsApi';
-import { NOTIFICATION_TYPE_OPTIONS, SENDING_METHOD_OPTIONS, STATUS_OPTIONS } from '../lib/types/types';
+import { buildNotificationTypeOptions, buildSendingMethodOptions, buildStatusOptions, type TranslateFn } from '../lib/types/types';
 
 interface BulkEditNotificationModalProps {
   isOpen: boolean;
@@ -19,7 +19,20 @@ export const BulkEditNotificationModal = ({ isOpen, onClose, onSuccess, selected
   const t = useTranslations('admin.modals.bulkEditNotification');
   const tCommon = useTranslations('common.actions');
   const tNotif = useTranslations('admin.notificationManagement');
+  const translate = tNotif as unknown as TranslateFn;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const notificationTypeOptions = useMemo(() => [
+    { value: '', label: t('noChange') },
+    ...buildNotificationTypeOptions(translate),
+  ], [t, translate]);
+  const sendingMethodOptions = useMemo(() => [
+    { value: '', label: t('noChange') },
+    ...buildSendingMethodOptions(translate),
+  ], [t, translate]);
+  const statusOptions = useMemo(() => [
+    { value: '', label: t('noChange') },
+    ...buildStatusOptions(translate).filter(option => option.value),
+  ], [t, translate]);
   
   const [notificationType, setNotificationType] = useState<string>('');
   const [sendingMethod, setSendingMethod] = useState<string>('');
@@ -111,21 +124,6 @@ export const BulkEditNotificationModal = ({ isOpen, onClose, onSuccess, selected
       handleClose();
     }
   };
-
-  const notificationTypeOptions = [
-    { value: '', label: t('noChange') },
-    ...NOTIFICATION_TYPE_OPTIONS,
-  ];
-
-  const sendingMethodOptions = [
-    { value: '', label: t('noChange') },
-    ...SENDING_METHOD_OPTIONS,
-  ];
-
-  const statusOptions = [
-    { value: '', label: t('noChange') },
-    ...STATUS_OPTIONS.filter(s => s.value !== ''), // Remove "Tất cả" option
-  ];
 
   const isActiveOptions = [
     { value: '', label: t('noChange') },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dropdown, DropdownSearch, Button, Input, Textarea } from '@/app/components/ui';
 import { X } from 'lucide-react';
@@ -14,9 +14,15 @@ import type {
   NotificationType, 
   TargetType, 
   SendingMethod,
-  CreateNotificationDto
+  CreateNotificationDto,
+  TranslateFn
 } from '../lib/types/types';
-import { NOTIFICATION_TYPE_OPTIONS as NOTIF_TYPE_OPTIONS, TARGET_TYPE_OPTIONS as TARGET_OPTIONS, SENDING_METHOD_OPTIONS as SENDING_OPTIONS, requiresTargetId as requiresTarget } from '../lib/types/types';
+import { 
+  buildNotificationTypeOptions,
+  buildSendingMethodOptions,
+  buildTargetTypeOptions,
+  requiresTargetId as requiresTarget 
+} from '../lib/types/types';
 import type { Faculty, Department, Class, Instructor, Student } from '@/lib/types/common';
 
 interface AddNotificationModalProps {
@@ -41,6 +47,10 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
   const t = useTranslations('admin.modals.addNotification');
   const tCommon = useTranslations('common.actions');
   const tNotif = useTranslations('admin.notificationManagement');
+  const translate = tNotif as unknown as TranslateFn;
+  const notificationTypeOptions = useMemo(() => buildNotificationTypeOptions(translate), [translate]);
+  const targetTypeOptions = useMemo(() => buildTargetTypeOptions(translate), [translate]);
+  const sendingMethodOptions = useMemo(() => buildSendingMethodOptions(translate), [translate]);
   
   // Tạo validation schema với translations
   const validationSchema = yup.object({
@@ -128,7 +138,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
             if (studentsRes.success && studentsRes.data) {
               setStudents(studentsRes.data);
             } else {
-              toast.error(studentsRes.message || 'Không thể tải danh sách sinh viên');
+              toast.error(studentsRes.message || tNotif('general.studentLoadError'));
             }
             break;
         }
@@ -142,7 +152,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
     if (isOpen) {
       loadTargetOptions();
     }
-  }, [targetType, needsTargetId, isOpen, setValue]);
+  }, [targetType, needsTargetId, isOpen, setValue, tNotif]);
 
   // Reset targetId when targetType changes
   useEffect(() => {
@@ -210,7 +220,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
 
       // Validate targetId if required
       if (needsTargetId && !data.targetId) {
-        toast.error('Vui lòng chọn đối tượng nhận');
+        toast.error(t('targetIdRequired'));
         setIsSubmitting(false);
         return;
       }
@@ -301,6 +311,8 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
 
   // Get target options based on targetType
   const getTargetOptions = () => {
+    const fallbackName = tCommon('noName');
+    const notAvailableLabel = tNotif('general.notAvailable');
     switch (targetType) {
       case 'faculty':
         return faculties.map(f => ({ value: f.facultyId, label: f.facultyName }));
@@ -322,14 +334,14 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
         });
       case 'instructor':
         return instructors.map(i => ({ 
-          value: i.instructorId, 
-          label: i.instructorName || i.fullName || i.name || i.instructorCode || i.code || 'Không có tên' 
+          value: i.instructorId || i.id || i.userId || '', 
+          label: i.instructorName || i.fullName || i.name || i.instructorCode || i.code || fallbackName 
         }));
       case 'student':
         return students.map(s => {
-          const value = s.studentId || s.id || s.userId;
-          const name = s.fullName || s.name || 'Không có tên';
-          const code = s.studentCode || s.code || s.id || 'N/A';
+          const value = s.studentId || s.id || s.userId || '';
+          const name = s.fullName || s.name || fallbackName;
+          const code = s.studentCode || s.code || s.id || notAvailableLabel;
           return { 
             value, 
             label: `${name} (${code})` 
@@ -419,7 +431,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
                   {t('notificationType')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={[...NOTIF_TYPE_OPTIONS]}
+                  options={notificationTypeOptions}
                   value={formValues.notificationType || 'event'}
                   placeholder={tNotif('selectType')}
                   onChange={(value) => setValue('notificationType', value)}
@@ -433,7 +445,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
                   {t('targetType')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={[...TARGET_OPTIONS]}
+                  options={targetTypeOptions}
                   value={formValues.targetType || 'all'}
                   placeholder={t('targetTypePlaceholder')}
                   onChange={(value) => setValue('targetType', value)}
@@ -505,7 +517,7 @@ export const AddNotificationModal = ({ isOpen, onClose, onSuccess }: AddNotifica
                   {t('sendingMethod')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                  options={[...SENDING_OPTIONS]}
+                  options={sendingMethodOptions}
                   value={formValues.sendingMethod || 'System'}
                   placeholder={tNotif('selectMethod')}
                   onChange={(value) => setValue('sendingMethod', value)}

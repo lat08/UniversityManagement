@@ -3,8 +3,10 @@ import { facultyApi } from "../api/facultiesApi"
 import { CreateFacultyDto, UpdateFacultyDto, BulkEditFacultyDto } from "../types/types"
 import { toast } from "react-hot-toast"
 import { useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
 
 export function useFaculties() {
+  const t = useTranslations('admin.facultyManagement')
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -42,10 +44,10 @@ export function useFaculties() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["faculties"] })
       queryClient.invalidateQueries({ queryKey: ["faculty-stats"] })
-      toast.success("Thêm ngành học thành công!")
+      toast.success(t('hooks.createSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Có lỗi xảy ra khi thêm ngành học")
+      toast.error(error.message || t('hooks.createError'))
     },
   })
 
@@ -55,10 +57,10 @@ export function useFaculties() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["faculties"] })
       queryClient.invalidateQueries({ queryKey: ["faculty-stats"] })
-      toast.success("Cập nhật ngành học thành công!")
+      toast.success(t('hooks.updateSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Có lỗi xảy ra khi cập nhật ngành học")
+      toast.error(error.message || t('hooks.updateError'))
     },
   })
 
@@ -67,10 +69,10 @@ export function useFaculties() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["faculties"] })
       queryClient.invalidateQueries({ queryKey: ["faculty-stats"] })
-      toast.success("Xóa ngành học thành công!")
+      toast.success(t('hooks.deleteSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Có lỗi xảy ra khi xóa ngành học")
+      toast.error(error.message || t('hooks.deleteError'))
     },
   })
 
@@ -79,10 +81,10 @@ export function useFaculties() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["faculties"] })
       queryClient.invalidateQueries({ queryKey: ["faculty-stats"] })
-      toast.success("Xóa các ngành học thành công!")
+      toast.success(t('hooks.bulkDeleteSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Có lỗi xảy ra khi xóa các ngành học")
+      toast.error(error.message || t('hooks.bulkDeleteError'))
     },
   })
 
@@ -91,10 +93,10 @@ export function useFaculties() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["faculties"] })
       queryClient.invalidateQueries({ queryKey: ["faculty-stats"] })
-      toast.success("Cập nhật các ngành học thành công!")
+      toast.success(t('hooks.bulkEditSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Có lỗi xảy ra khi cập nhật các ngành học")
+      toast.error(error.message || t('hooks.bulkEditError'))
     },
   })
 

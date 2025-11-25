@@ -152,7 +152,7 @@ export const RegulationsPage = ({ pageTitle, description, noticeText }: Regulati
           <Dropdown
             options={[
               { value: 'all', label: t('filter.allTypes') },
-              ...REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: item.label })),
+              ...REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: t(item.labelKey) })),
             ]}
             value={categoryFilter}
             onChange={(value) => setCategoryFilter(value ?? 'all')}

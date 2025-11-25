@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Dropdown, Button, Input } from '@/app/components/ui';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
+import { Dropdown, Button, Input } from '@/app/components/ui';
 import { buildingsApi } from '../lib/api/buildingsApi';
 
 interface BulkEditBuildingModalProps {
@@ -14,6 +15,8 @@ interface BulkEditBuildingModalProps {
 }
 
 export const BulkEditBuildingModal = ({ isOpen, onClose, onSuccess, selectedBuildingIds }: BulkEditBuildingModalProps) => {
+  const t = useTranslations('admin.buildingManagement');
+  const tActions = useTranslations('common.actions');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [buildingStatus, setBuildingStatus] = useState<string>('');
@@ -43,17 +46,17 @@ export const BulkEditBuildingModal = ({ isOpen, onClose, onSuccess, selectedBuil
     };
   }, [isOpen, isSubmitting, handleClose]);
 
-  const statusOptions = [
-    { value: '', label: 'Không thay đổi' },
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Ngừng hoạt động' },
-  ];
+  const statusOptions = useMemo(() => [
+    { value: '', label: t('filters.noChange') },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+  ], [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!buildingStatus && !address) {
-      toast.error('Vui lòng chọn ít nhất một trường để cập nhật');
+      toast.error(t('hooks.bulkEditValidation'));
       return;
     }
 
@@ -69,18 +72,18 @@ export const BulkEditBuildingModal = ({ isOpen, onClose, onSuccess, selectedBuil
       const response = await buildingsApi.bulkUpdate(payload);
 
       if (response.success) {
-        toast.success(`Đã cập nhật ${selectedBuildingIds.length} tòa nhà`);
+        toast.success(t('hooks.bulkEditSuccess', { count: selectedBuildingIds.length }));
         setBuildingStatus('');
         setAddress('');
         onSuccess?.();
         handleClose();
       } else {
-        toast.error(response.message || 'Cập nhật hàng loạt thất bại');
+        toast.error(response.message || t('hooks.bulkEditError'));
       }
     } catch (error: unknown) {
       const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
                            (error as { message?: string })?.message || 
-                           'Đã xảy ra lỗi';
+                           t('hooks.genericError');
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -104,9 +107,9 @@ export const BulkEditBuildingModal = ({ isOpen, onClose, onSuccess, selectedBuil
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Chỉnh sửa hàng loạt</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('modals.bulkEdit.title')}</h2>
               <p className="text-sm text-gray-600 mt-1">
-                Đã chọn {selectedBuildingIds.length} tòa nhà
+                {t('modals.bulkEdit.description', { count: selectedBuildingIds.length })}
               </p>
             </div>
             <Button
@@ -126,22 +129,22 @@ export const BulkEditBuildingModal = ({ isOpen, onClose, onSuccess, selectedBuil
           <div className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Trạng thái
+                {t('modals.bulkEdit.statusLabel')}
               </label>
               <Dropdown
                 options={statusOptions}
                 value={buildingStatus}
-                placeholder="Chọn trạng thái"
+                placeholder={t('modals.bulkEdit.statusPlaceholder')}
                 onChange={setBuildingStatus}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Địa chỉ
+                {t('modals.bulkEdit.addressLabel')}
               </label>
               <Input
-                placeholder="Nhập địa chỉ mới (để trống nếu không thay đổi)"
+                placeholder={t('modals.bulkEdit.addressPlaceholder')}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
@@ -156,14 +159,14 @@ export const BulkEditBuildingModal = ({ isOpen, onClose, onSuccess, selectedBuil
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {tActions('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+              {isSubmitting ? t('modals.bulkEdit.submitting') : t('modals.bulkEdit.submit')}
             </Button>
           </div>
         </form>

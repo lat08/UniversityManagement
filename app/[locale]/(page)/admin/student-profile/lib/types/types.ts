@@ -148,12 +148,12 @@ export interface CreateStudentResponse {
 }
 
 export const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
-  { value: 'active', label: 'Đang học' },
-  { value: 'inactive', label: 'Đình chỉ' },
-  { value: 'dropped_out', label: 'Thôi học' },
-  { value: 'suspended', label: 'Bảo lưu' },
-  { value: 'qualified', label: 'Đủ điều kiện TN' },
+  { value: '', labelKey: 'status.all' },
+  { value: 'active', labelKey: 'status.active' },
+  { value: 'inactive', labelKey: 'status.inactive' },
+  { value: 'dropped_out', labelKey: 'status.droppedOut' },
+  { value: 'suspended', labelKey: 'status.suspended' },
+  { value: 'qualified', labelKey: 'status.qualified' },
 ];
 
 export interface StudentDetail {
@@ -195,24 +195,73 @@ export interface StudentDetail {
   isQualifiedToGraduate?: boolean;
 }
 
-export const getStatusDisplay = (status: string) => {
-  const statusMap: Record<string, { label: string; color: string }> = {
-    active: { label: 'Đang học', color: 'bg-green-100 text-green-700' },
-    inactive: { label: 'Đình chỉ', color: 'bg-gray-100 text-gray-700' },
-    dropped_out: { label: 'Thôi học', color: 'bg-red-100 text-red-700' },
-    suspended: { label: 'Bảo lưu', color: 'bg-yellow-100 text-yellow-700' },
-    qualified: { label: 'Đủ điều kiện TN', color: 'bg-blue-100 text-blue-700' },
+const STATUS_DISPLAY_MAP: Record<
+  string,
+  { labelKey: keyof StudentProfileStatusMap; fallbackLabel: string; color: string }
+> = {
+  active: {
+    labelKey: 'status.active',
+    fallbackLabel: 'Active',
+    color: 'bg-green-100 text-green-700',
+  },
+  inactive: {
+    labelKey: 'status.inactive',
+    fallbackLabel: 'Inactive',
+    color: 'bg-gray-100 text-gray-700',
+  },
+  dropped_out: {
+    labelKey: 'status.droppedOut',
+    fallbackLabel: 'Dropped out',
+    color: 'bg-red-100 text-red-700',
+  },
+  suspended: {
+    labelKey: 'status.suspended',
+    fallbackLabel: 'Suspended',
+    color: 'bg-yellow-100 text-yellow-700',
+  },
+  qualified: {
+    labelKey: 'status.qualified',
+    fallbackLabel: 'Qualified',
+    color: 'bg-blue-100 text-blue-700',
+  },
+};
+
+export const getStatusDisplay = (
+  status: string,
+  translate?: (key: keyof StudentProfileStatusMap) => string,
+) => {
+  const statusInfo =
+    STATUS_DISPLAY_MAP[status] ??
+    ({
+      labelKey: 'status.unknown',
+      fallbackLabel: status,
+      color: 'bg-gray-100 text-gray-700',
+    } as const);
+
+  return {
+    label: translate ? translate(statusInfo.labelKey) : statusInfo.fallbackLabel,
+    color: statusInfo.color,
+    labelKey: statusInfo.labelKey,
   };
-  return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
 };
 
 export const ENROLLMENT_STATUS_OPTIONS = [
-  { value: 'active', label: 'Đang học' },
-  { value: 'inactive', label: 'Đình chỉ' },
-  { value: 'dropped_out', label: 'Thôi học' },
-  { value: 'suspended', label: 'Bảo lưu' },
-  { value: 'qualified', label: 'Đủ điều kiện TN' },
+  { value: 'active', labelKey: 'status.active' },
+  { value: 'inactive', labelKey: 'status.inactive' },
+  { value: 'dropped_out', labelKey: 'status.droppedOut' },
+  { value: 'suspended', labelKey: 'status.suspended' },
+  { value: 'qualified', labelKey: 'status.qualified' },
 ];
+
+export type StudentProfileStatusMap = {
+  'status.all': string;
+  'status.active': string;
+  'status.inactive': string;
+  'status.droppedOut': string;
+  'status.suspended': string;
+  'status.qualified': string;
+  'status.unknown': string;
+};
 
 export interface UpdateStudentPayload {
   fullName: string;

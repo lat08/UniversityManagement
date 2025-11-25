@@ -1,7 +1,7 @@
 'use client';
 
 import { ConfirmDialog } from '@/app/components/ui/confirm-dialog';
-import type { BookingData } from '../lib/types/room.types';
+import type { BookingData } from '@/lib/types/room';
 import { format, parseISO } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 import { useTranslations, useLocale } from 'next-intl';

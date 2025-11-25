@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
 import { instructorsApi } from '../lib/api/instructorsApi';
@@ -21,6 +22,8 @@ export default function InstructorDetailModal({
 }: InstructorDetailModalProps) {
   const [data, setData] = useState<InstructorDetail | null>(null);
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('admin.instructorProfile.detailModal');
+  const tFilters = useTranslations('admin.instructorProfile.filters');
 
   useEffect(() => {
     if (!isOpen || !instructorId) return;
@@ -46,7 +49,7 @@ export default function InstructorDetailModal({
     if (e.target === e.currentTarget) onClose();
   };
 
-  const statusDisplay = data ? getEmploymentStatusDisplay(data.employmentStatus) : null;
+  const statusDisplay = data ? getEmploymentStatusDisplay(data.employmentStatus, tFilters) : null;
 
   return (
     <div
@@ -56,7 +59,7 @@ export default function InstructorDetailModal({
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">Chi tiết giảng viên</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
             <Button
               type="button"
               variant="ghost"
@@ -72,12 +75,12 @@ export default function InstructorDetailModal({
         <div className="flex-1 overflow-y-auto p-6">
           {loading || !data ? (
             <div className="flex items-center justify-center py-10 text-gray-500 text-sm">
-              Đang tải dữ liệu...
+              {t('loading')}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-8">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Thông tin cá nhân</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('personalInfo')}</h3>
                 <div className="flex items-start gap-4 mb-4">
                   <Avatar className="w-20 h-20 border border-gray-200">
                     <AvatarImage src={data.profilePicture || ''} alt={data.fullName} />
@@ -90,50 +93,50 @@ export default function InstructorDetailModal({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm text-gray-500">Mã giảng viên</p>
+                    <p className="text-sm text-gray-500">{t('instructorCode')}</p>
                     <p className="text-base font-semibold text-gray-900 mb-1">{data.instructorCode}</p>
-                    <p className="text-sm text-gray-500">Họ và tên</p>
+                    <p className="text-sm text-gray-500">{t('fullName')}</p>
                     <p className="text-base font-semibold text-gray-900">{data.fullName}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-sm">
                   <p>
-                    <span className="text-gray-500">Email: </span>
+                    <span className="text-gray-500">{t('email')}: </span>
                     <span className="text-gray-900">{data.email}</span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Số điện thoại: </span>
+                    <span className="text-gray-500">{t('phoneNumber')}: </span>
                     <span className="text-gray-900">{data.phoneNumber}</span>
                   </p>
                   <p>
-                    <span className="text-gray-500">CCCD: </span>
+                    <span className="text-gray-500">{t('citizenId')}: </span>
                     <span className="text-gray-900">{data.citizenId}</span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Địa chỉ: </span>
+                    <span className="text-gray-500">{t('address')}: </span>
                     <span className="text-gray-900">{data.address}</span>
                   </p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Thông tin công tác</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">{t('workInfo')}</h3>
                 <div className="space-y-2 text-sm">
                   <p>
-                    <span className="text-gray-500">Khoa/Bộ môn: </span>
+                    <span className="text-gray-500">{t('faculty')}: </span>
                     <span className="text-gray-900">{data.facultyName}</span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Học vị: </span>
+                    <span className="text-gray-500">{t('degree')}: </span>
                     <span className="text-gray-900">{data.degree || '-'}</span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Chuyên môn: </span>
+                    <span className="text-gray-500">{t('specialization')}: </span>
                     <span className="text-gray-900">{data.specialization || '-'}</span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Trạng thái: </span>
+                    <span className="text-gray-500">{t('status')}: </span>
                     {statusDisplay && (
                       <span
                         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ml-1 ${statusDisplay.color}`}
@@ -143,7 +146,7 @@ export default function InstructorDetailModal({
                     )}
                   </p>
                   <p>
-                    <span className="text-gray-500">Số lớp phụ trách hiện tại: </span>
+                    <span className="text-gray-500">{t('currentClassCount')}: </span>
                     <span className="text-gray-900">{data.currentClassCount ?? 0}</span>
                   </p>
                 </div>
@@ -159,7 +162,7 @@ export default function InstructorDetailModal({
             onClick={onClose}
             className="min-w-[100px]"
           >
-            Đóng
+            {t('close')}
           </Button>
         </div>
       </div>

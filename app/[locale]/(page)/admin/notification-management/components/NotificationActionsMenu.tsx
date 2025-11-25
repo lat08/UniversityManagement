@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { MoreVertical, Edit, Trash2, Send, Archive, XCircle, Eye } from 'lucide-react';
+import { MoreVertical, Edit, Send, Archive, XCircle, Eye } from 'lucide-react';
 import { Button } from '@/app/components/ui';
-import type { Notification, NotificationStatus } from '../lib/types/types';
+import type { Notification } from '../lib/types/types';
 
 interface NotificationActionsMenuProps {
   notification: Notification;

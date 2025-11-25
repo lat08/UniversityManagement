@@ -67,21 +67,23 @@ function getMenuSections(variant: Variant): MenuSection[] {
         items: [
           { icon: Home, labelKey: "menu.dashboard", href: "/admin/dashboard" },
           { icon: Bell, labelKey: "menu.notificationManagement", href: "/admin/notification-management" },
-          { icon: BarChart3, labelKey: "menu.statistics", href: "/admin/reports" },
         ],
       },
       {
         titleKey: "sections.training",
         items: [
-          { icon: GraduationCap, labelKey: "menu.facultyManagement", href: "/admin/faculty-management" },
-          { icon: GraduationCap, labelKey: "menu.majorManagement", href: "/admin/major-management" },
           { icon: FileText, labelKey: "menu.regulations", href: "/admin/regulations" },
           { icon: Building2, labelKey: "menu.buildingManagement", href: "/admin/building-management" },
-          { icon: Calendar, labelKey: "menu.timetable", href: "/admin/timetable" },
-          { icon: FileText, labelKey: "menu.examSchedule", href: "/admin/exam-schedule-management" },
-          { icon: Building2, labelKey: "menu.courseManagement", href: "/admin/course-management" },
+          { icon: Building2, labelKey: "menu.classroomManagement", href: "/admin/classroom-management" },
+          { icon: Building2, labelKey: "menu.facultyManagement", href: "/admin/faculty-management" },
+          { icon: GraduationCap, labelKey: "menu.programManagement", href: "/admin/program-management" },
+          { icon: GraduationCap, labelKey: "menu.majorManagement", href: "/admin/major-management" },
           { icon: BookOpen, labelKey: "menu.curriculumManagement", href: "/admin/curriculum-management" },
-          { icon: BookOpen, labelKey: "menu.courseRegistration", href: "/admin/course-registration" },
+          { icon: Notebook, labelKey: "menu.courseUnitManagement", href: "/admin/course-unit-management" },
+          { icon: BookOpen, labelKey: "menu.subjectManagement", href: "/admin/subject-management" },
+          { icon: Calendar, labelKey: "menu.timetable", href: "/admin/timetable" },
+          { icon: Calendar, labelKey: "menu.examSchedule", href: "/admin/exam-schedule-management" },
+          { icon: BookOpen, labelKey: "menu.courseManagement", href: "/admin/course-management" },
           { icon: Building2, labelKey: "menu.roomRequests", href: "/admin/room-requests" },
         ],
       },
@@ -89,6 +91,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
         titleKey: "sections.students",
         items: [
           { icon: Users, labelKey: "menu.studentProfile", href: "/admin/student-profile" },
+          { icon: Notebook, labelKey: "menu.courseRegistration", href: "/admin/course-registration" },
           { icon: DollarSign, labelKey: "menu.studentTuition", href: "/admin/tuition" },
         ],
       },
@@ -97,25 +100,14 @@ function getMenuSections(variant: Variant): MenuSection[] {
         items: [
           { icon: Users, labelKey: "menu.instructorProfile", href: "/admin/instructor-profile" },
           { icon: FileCheck, labelKey: "menu.gradeApproval", href: "/admin/grade-approval" },
-          { icon: Building2, labelKey: "menu.classLists", href: "/admin/class-lists" },
-          { icon: Calendar, labelKey: "menu.instructorSchedule", href: "/admin/instructor-schedule" },
+          { icon: FileCheck, labelKey: "menu.examApproval", href: "/admin/exam-approval" },
+          { icon: Notebook, labelKey: "menu.classLists", href: "/admin/class-lists" },
           { icon: Bell, labelKey: "menu.scheduleChanges", href: "/admin/schedule-changes" },
         ],
       },
       {
-        titleKey: "sections.finance",
-        items: [
-          { icon: DollarSign, labelKey: "menu.tuitionPolicy", href: "/admin/tuition-policy" },
-          { icon: DollarSign, labelKey: "menu.payments", href: "/admin/payments" },
-          { icon: FileText, labelKey: "menu.revenueReports", href: "/admin/revenue-reports" },
-        ],
-      },
-      {
         titleKey: "sections.system",
-        items: [
-          { icon: Users, labelKey: "menu.personalProfile", href: "/admin/profile" },
-          { icon: BarChart3, labelKey: "menu.themeConfiguration", href: "/admin/theme-configuration" },
-        ],
+        items: [{ icon: BarChart3, labelKey: "menu.themeConfiguration", href: "/admin/theme-configuration" }],
       },
     ]
   }
@@ -211,7 +203,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
   const prefetchAdminStudentResources = useCallback(async () => {
     try {
-      const { studentsApi } = await import("@/app/(page)/admin/student-profile/lib/api/studentsApi")
+      const { studentsApi } = await import("@/app/[locale]/(page)/admin/student-profile/lib/api/studentsApi")
       await Promise.all([
         queryClient.prefetchQuery({
           queryKey: queryKeys.adminStudents.departments(),
@@ -237,7 +229,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
   const prefetchStudentGrades = useCallback(async () => {
     try {
-      const { gradesApi } = await import("@/app/[locale]/(page)/student/grades/lib/api/gradesApi")
+      const { gradesApi } = await import("@/lib/api/grades")
       await queryClient.prefetchQuery({
         queryKey: queryKeys.grades.cumulative(),
         queryFn: async () => {

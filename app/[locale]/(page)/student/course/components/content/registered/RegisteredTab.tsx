@@ -226,7 +226,7 @@ export function RegisteredCourses({
         </td>
       </>
     )
-  }, [selectedCourseIds, handleSelectCourse, formatDate, getStatusDisplay])
+  }, [selectedCourseIds, handleSelectCourse, formatDate, getStatusDisplay, t])
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">

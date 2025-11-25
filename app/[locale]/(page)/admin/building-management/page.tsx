@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Plus, Building2, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { AddBuildingModal } from './components/AddBuildingModal';
@@ -11,8 +12,8 @@ import { ConfirmDeleteBuildingModal } from './components/ConfirmDeleteBuildingMo
 import { BulkDeleteBuildingModal } from './components/BulkDeleteBuildingModal';
 import { BuildingActionsMenu } from './components/BuildingActionsMenu';
 import { BuildingStatCard } from './components/BuildingStatCard';
-import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
-import { TableSkeleton } from '@/app/(page)/admin/student-profile/components/LoadingSkeleton';
+import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
+import { TableSkeleton } from '@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton';
 import { toast } from 'react-hot-toast';
 import { useBuildings } from './lib/hooks/useBuildings';
 import { buildingsApi } from './lib/api/buildingsApi';
@@ -22,21 +23,21 @@ import type { Building } from './lib/types/types';
 const STAT_CARDS = [
   { 
     key: 'total', 
-    label: 'Tổng tòa nhà', 
+    labelKey: 'stats.total',
     bgColor: 'bg-[#FFDDAA]',
     iconColor: 'text-[#CC8800]',
     Icon: Building2
   },
   { 
     key: 'active', 
-    label: 'Đang hoạt động', 
+    labelKey: 'stats.active',
     bgColor: 'bg-[#CCEECC]',
     iconColor: 'text-[#44AA44]',
     Icon: CheckCircle2
   },
   { 
     key: 'inactive', 
-    label: 'Ngừng hoạt động', 
+    labelKey: 'stats.inactive',
     bgColor: 'bg-[#FFBBAA]',
     iconColor: 'text-[#CC4444]',
     Icon: XCircle
@@ -44,6 +45,7 @@ const STAT_CARDS = [
 ] as const;
 
 export default function BuildingManagementPage() {
+  const t = useTranslations('admin.buildingManagement');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -59,13 +61,13 @@ export default function BuildingManagementPage() {
 
   const { buildings, loading, currentPage, totalCount, totalPages, stats, fetchBuildings, setCurrentPage } = useBuildings();
 
-  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>(() => [
     { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
-    { key: 'buildingCode', label: 'Mã', width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-    { key: 'buildingName', label: 'Tên tòa nhà', width: 250, minWidth: 200, align: 'left', visible: true, required: true },
-    { key: 'address', label: 'Địa chỉ', width: 300, minWidth: 200, align: 'left', visible: true },
-    { key: 'status', label: 'Trạng thái', width: 160, minWidth: 140, align: 'center', visible: true },
-    { key: 'actions', label: 'Thao tác', width: 140, minWidth: 100, align: 'center', visible: true, required: true },
+    { key: 'buildingCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+    { key: 'buildingName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
+    { key: 'address', label: t('table.columns.address'), width: 300, minWidth: 200, align: 'left', visible: true },
+    { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
+    { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
   ]);
 
   useEffect(() => {
@@ -96,6 +98,18 @@ export default function BuildingManagementPage() {
     inactive: stats.inactiveBuildings,
   }), [stats]);
 
+  const statusLabels = useMemo(() => ({
+    active: t('status.active'),
+    inactive: t('status.inactive'),
+    unknown: t('status.unknown'),
+  }), [t]);
+
+  const statusOptions = useMemo(() => ([
+    { value: '', label: t('status.all') },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+  ]), [t]);
+
   const handleDeleteClick = useCallback((buildingId: string, buildingName: string) => {
     setDeletingBuildingId(buildingId);
     setDeletingBuildingName(buildingName);
@@ -111,14 +125,14 @@ export default function BuildingManagementPage() {
     if (!deletingBuildingId) return;
     const res = await buildingsApi.delete(deletingBuildingId);
     if (res.success) {
-      toast.success('Xóa tòa nhà thành công');
+      toast.success(t('hooks.deleteSuccess'));
       fetchBuildings({
         pageIndex: currentPage,
         pageSize: 20,
         search: searchKeyword || undefined,
       });
     } else {
-      toast.error(res.message || 'Xóa tòa nhà thất bại');
+      toast.error(res.message || t('hooks.deleteError'));
     }
   };
 
@@ -146,7 +160,7 @@ export default function BuildingManagementPage() {
     const ids = Array.from(selectedBuildingIds);
     const res = await buildingsApi.bulkDelete(ids);
     if (res.success) {
-      toast.success(res.message || `Đã xóa ${ids.length} tòa nhà`);
+      toast.success(res.message || t('hooks.bulkDeleteSuccess', { count: ids.length }));
       setSelectedBuildingIds(new Set());
       setIsBulkDeleteModalOpen(false);
       fetchBuildings({
@@ -155,12 +169,12 @@ export default function BuildingManagementPage() {
         search: searchKeyword || undefined,
       });
     } else {
-      toast.error(res.message || 'Xóa hàng loạt thất bại');
+      toast.error(res.message || t('hooks.bulkDeleteError'));
     }
   };
 
   const renderBuildingRow = useCallback((building: Building, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const statusDisplay = getStatusDisplay(building.buildingStatus);
+    const statusDisplay = getStatusDisplay(building.buildingStatus, statusLabels);
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     const isSelected = selectedBuildingIds.has(building.buildingId);
 
@@ -246,20 +260,14 @@ export default function BuildingManagementPage() {
         })}
       </>
     );
-  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedBuildingIds]);
-
-  const statusOptions = [
-    { value: '', label: 'Tất cả' },
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Ngừng hoạt động' },
-  ];
+  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedBuildingIds, statusLabels]);
 
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Quản lý Tòa nhà</h1>
-        <p className="text-gray-600 mt-1">Quản lý các tòa nhà trong hệ thống</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-600 mt-1">{t('description')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -279,7 +287,7 @@ export default function BuildingManagementPage() {
             return (
               <BuildingStatCard
                 key={index}
-                label={card.label}
+                label={t(card.labelKey)}
                 value={value}
                 Icon={card.Icon}
                 bgColor={card.bgColor}
@@ -298,7 +306,7 @@ export default function BuildingManagementPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                Danh sách Tòa nhà
+                {t('listTitle')}
               </h2>
             </div>
             <div className="flex gap-3">
@@ -307,7 +315,7 @@ export default function BuildingManagementPage() {
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white"
               >
                 <Plus className="w-4 h-4" />
-                Thêm mới
+                {t('actions.add')}
               </Button>
             </div>
           </div>
@@ -317,7 +325,7 @@ export default function BuildingManagementPage() {
             {/* Search Input */}
             <div className="sm:col-span-2">
               <SearchInput
-                placeholder="Tìm kiếm theo mã, tên tòa nhà..."
+                placeholder={t('search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -327,7 +335,7 @@ export default function BuildingManagementPage() {
             <Dropdown
               options={statusOptions}
               value={selectedStatus || ''}
-              placeholder="Tất cả"
+              placeholder={t('status.all')}
               onChange={(value) => {
                 setSelectedStatus(value);
                 setCurrentPage(1);
@@ -341,7 +349,7 @@ export default function BuildingManagementPage() {
               <div className="flex items-center gap-2">
                 <CircleCheck className="w-5 h-5 text-[#0053AD]" />
                 <span className="text-sm font-medium text-[#0053AD]">
-                  Đã chọn {selectedBuildingIds.size} tòa nhà
+                  {t('bulk.selected', { count: selectedBuildingIds.size })}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -352,7 +360,7 @@ export default function BuildingManagementPage() {
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
                   <Edit2 className="w-4 h-4" />
-                  Chỉnh sửa toàn bộ
+                  {t('bulk.edit')}
                 </Button>
                 <Button
                   variant="outline"
@@ -361,7 +369,7 @@ export default function BuildingManagementPage() {
                   className="border-red-600 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Xóa toàn bộ
+                  {t('bulk.delete')}
                 </Button>
                 <Button
                   size="sm"
@@ -369,7 +377,7 @@ export default function BuildingManagementPage() {
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   <X className="w-4 h-4" />
-                  Bỏ chọn
+                  {t('bulk.clear')}
                 </Button>
               </div>
             </div>
@@ -388,7 +396,7 @@ export default function BuildingManagementPage() {
                 </tr>
               )}
               isLoading={loading}
-              emptyMessage="Không có dữ liệu"
+              emptyMessage={t('table.empty')}
               loadingComponent={<TableSkeleton />}
               onColumnsResize={setResizableColumns}
               renderHeaderCheckbox={() => (

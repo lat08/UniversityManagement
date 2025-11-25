@@ -9,6 +9,24 @@ import {
 
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 
+export interface ApprovalStatusOptionDefinition {
+  value: ApprovalStatus | '';
+  translationKey: string;
+}
+
+const APPROVAL_STATUS_OPTION_DEFINITIONS: ApprovalStatusOptionDefinition[] = [
+  { value: '', translationKey: 'admin.gradeApproval.filters.allStatuses' },
+  { value: 'pending', translationKey: 'admin.gradeApproval.statuses.pending' },
+  { value: 'approved', translationKey: 'admin.gradeApproval.statuses.approved' },
+  { value: 'rejected', translationKey: 'admin.gradeApproval.statuses.rejected' },
+];
+
+export const buildApprovalStatusOptions = (translate: (key: string) => string) =>
+  APPROVAL_STATUS_OPTION_DEFINITIONS.map((option) => ({
+    value: option.value,
+    label: translate(option.translationKey),
+  }));
+
 export interface GradeApprovalFilterState {
   versionStatus?: ApprovalStatus | '';
   semesterId?: string;
@@ -123,18 +141,23 @@ export interface GradeApprovalDropdownContext {
   instructors: Instructor[];
 }
 
-export const APPROVAL_STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả trạng thái' },
-  { value: 'pending', label: 'Chờ duyệt' },
-  { value: 'approved', label: 'Đã duyệt' },
-  { value: 'rejected', label: 'Từ chối' },
-];
+export interface ApprovalStatusDisplay {
+  translationKey?: string;
+  fallbackLabel?: string;
+  color: string;
+}
 
-export const getApprovalStatusDisplay = (status: ApprovalStatus | string) => {
-  const statusMap: Record<string, { label: string; color: string }> = {
-    pending: { label: 'Chờ duyệt', color: 'bg-yellow-100 text-yellow-700' },
-    approved: { label: 'Đã duyệt', color: 'bg-green-100 text-green-700' },
-    rejected: { label: 'Từ chối', color: 'bg-red-100 text-red-700' },
+export const getApprovalStatusDisplay = (status: ApprovalStatus | string): ApprovalStatusDisplay => {
+  const statusMap: Record<string, ApprovalStatusDisplay> = {
+    pending: { translationKey: 'admin.gradeApproval.statuses.pending', color: 'bg-yellow-100 text-yellow-700' },
+    approved: { translationKey: 'admin.gradeApproval.statuses.approved', color: 'bg-green-100 text-green-700' },
+    rejected: { translationKey: 'admin.gradeApproval.statuses.rejected', color: 'bg-red-100 text-red-700' },
   };
-  return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
+  return (
+    statusMap[status] ?? {
+      translationKey: 'admin.gradeApproval.statuses.unknown',
+      fallbackLabel: typeof status === 'string' ? status : undefined,
+      color: 'bg-gray-100 text-gray-700',
+    }
+  );
 };

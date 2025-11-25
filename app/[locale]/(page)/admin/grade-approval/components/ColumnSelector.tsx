@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Settings2, Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 
 export interface ColumnConfig {
@@ -17,6 +18,7 @@ interface ColumnSelectorProps {
 }
 
 export default function ColumnSelector({ columns, onColumnsChange }: ColumnSelectorProps) {
+  const t = useTranslations('admin.gradeApproval');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -37,20 +39,20 @@ export default function ColumnSelector({ columns, onColumnsChange }: ColumnSelec
   }, [isOpen]);
 
   const handleToggleColumn = (key: string) => {
-    const updatedColumns = columns.map(col =>
-      col.key === key && !col.required ? { ...col, visible: !col.visible } : col
+    const updatedColumns = columns.map((col) =>
+      col.key === key && !col.required ? { ...col, visible: !col.visible } : col,
     );
     onColumnsChange(updatedColumns);
   };
 
-  const visibleCount = columns.filter(col => col.visible).length;
+  const visibleCount = columns.filter((col) => col.visible).length;
 
   return (
     <div className="relative h-full" ref={dropdownRef}>
       <Button
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
-        title={`Cột hiển thị (${visibleCount}/${columns.length})`}
+        title={t('columnSelector.buttonTitle', { visible: visibleCount, total: columns.length })}
         className="h-full w-full flex items-center justify-center px-3"
       >
         <Settings2 className="w-4 h-4" />
@@ -60,7 +62,7 @@ export default function ColumnSelector({ columns, onColumnsChange }: ColumnSelec
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
           <div className="p-3 border-b border-gray-200">
             <h3 className="text-sm font-semibold text-gray-900">
-              Chọn cột hiển thị ({visibleCount}/{columns.length})
+              {t('columnSelector.title', { visible: visibleCount, total: columns.length })}
             </h3>
           </div>
           <div className="max-h-80 overflow-y-auto">
@@ -86,7 +88,7 @@ export default function ColumnSelector({ columns, onColumnsChange }: ColumnSelec
                 <span className="text-sm text-gray-700 flex-1">
                   {column.label}
                   {column.required && (
-                    <span className="text-xs text-gray-500 ml-1">(Bắt buộc)</span>
+                    <span className="text-xs text-gray-500 ml-1">{t('columnSelector.required')}</span>
                   )}
                 </span>
               </label>

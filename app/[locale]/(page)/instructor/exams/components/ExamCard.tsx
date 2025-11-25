@@ -25,7 +25,6 @@ const ExamCardComponent = ({
   animationDelay = 0,
   onClick,
 }: ExamCardProps) => {
-  const t = useTranslations('instructor.exams');
   const tCard = useTranslations('instructor.exams.examCard');
   const tStatuses = useTranslations('instructor.exams.statuses');
   const tExamTypes = useTranslations('instructor.exams.examTypes');

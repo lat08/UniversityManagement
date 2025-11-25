@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { buildingsApi } from '../api/buildingsApi';
-import type { Building, GetBuildingsParams, PagedResult } from '../types/types';
+import type { Building, GetBuildingsParams } from '../types/types';
 
 export const useBuildings = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);

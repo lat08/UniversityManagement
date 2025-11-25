@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 
 interface BuildingActionsMenuProps {
@@ -17,6 +18,7 @@ export const BuildingActionsMenu = ({
   onDelete,
   compact = false,
 }: BuildingActionsMenuProps) => {
+  const tActions = useTranslations('common.actions');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +46,7 @@ export const BuildingActionsMenu = ({
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-600 hover:text-gray-900"
-          title="Thao tác"
+          title={tActions('actions')}
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
@@ -70,7 +72,7 @@ export const BuildingActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Edit className="w-4 h-4 text-green-600" />
-                Chỉnh sửa
+                {tActions('edit')}
               </button>
               <button
                 onClick={() => {
@@ -80,7 +82,7 @@ export const BuildingActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Trash2 className="w-4 h-4 text-red-600" />
-                Xóa
+                {tActions('delete')}
               </button>
             </div>
           </div>
@@ -96,7 +98,7 @@ export const BuildingActionsMenu = ({
         size="icon"
         onClick={onEdit}
         className="text-gray-600 hover:text-green-600 hover:bg-green-50"
-        title="Chỉnh sửa"
+        title={tActions('edit')}
       >
         <Edit className="w-4 h-4" />
       </Button>
@@ -105,7 +107,7 @@ export const BuildingActionsMenu = ({
         size="icon"
         onClick={onDelete}
         className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-        title="Xóa"
+        title={tActions('delete')}
       >
         <Trash2 className="w-4 h-4" />
       </Button>

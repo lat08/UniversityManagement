@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, type FormEvent } from 'react';
+import { useState, useEffect, useCallback, useMemo, type FormEvent } from 'react';
 import { Download, X, FileSpreadsheet, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/app/components/ui';
 import { toast } from 'react-hot-toast';
 import { studentsApi } from '../lib/api/studentsApi';
+import { useTranslations } from 'next-intl';
 import { ExportStudentsParams } from '../lib/types/types';
 
 interface ExportStudentModalProps {
@@ -15,6 +16,33 @@ interface ExportStudentModalProps {
 
 export default function ExportStudentModal({ isOpen, onClose, filters }: ExportStudentModalProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const t = useTranslations('admin.studentProfile.modals.export');
+  const tCommon = useTranslations('common.actions');
+  const detailItems = useMemo(
+    () => [
+      {
+        title: t('details.items.filtered.title'),
+        description: t('details.items.filtered.description'),
+      },
+      {
+        title: t('details.items.fullInfo.title'),
+        description: t('details.items.fullInfo.description'),
+      },
+      {
+        title: t('details.items.format.title'),
+        description: t('details.items.format.description'),
+      },
+    ],
+    [t],
+  );
+  const noteItems = useMemo(
+    () => [
+      t('notes.autoDownload'),
+      t('notes.duration'),
+      t('notes.filterReminder'),
+    ],
+    [t],
+  );
 
   const handleClose = useCallback(() => {
     if (!isExporting) {
@@ -54,11 +82,11 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success('Xuất file thành công');
+      toast.success(t('toast.success'));
       handleClose();
     } catch (error) {
       console.error('Export error:', error);
-      toast.error('Xuất file thất bại');
+      toast.error(t('toast.error'));
     } finally {
       setIsExporting(false);
     }
@@ -81,8 +109,8 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Xuất danh sách sinh viên</h2>
-              <p className="text-sm text-gray-600 mt-1">Xuất dữ liệu sinh viên ra file Excel</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t('description')}</p>
             </div>
             <Button
               variant="ghost"
@@ -106,8 +134,8 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
                   <FileSpreadsheet className="w-5 h-5 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1">Thông tin xuất</h3>
-                  <p className="text-xs text-gray-600 mb-3">Dữ liệu sẽ được xuất theo bộ lọc hiện tại của bạn</p>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('info.title')}</h3>
+                  <p className="text-xs text-gray-600 mb-3">{t('info.description')}</p>
                 </div>
               </div>
             </div>
@@ -115,38 +143,24 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
             {/* Export Details */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Chi tiết xuất file</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('details.title')}</h3>
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Tất cả sinh viên theo bộ lọc</p>
-                      <p className="text-xs text-gray-600 mt-0.5">Bao gồm tất cả sinh viên phù hợp với điều kiện lọc hiện tại</p>
+                  {detailItems.map((item) => (
+                    <div key={item.title} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                        <p className="text-xs text-gray-600 mt-0.5">{item.description}</p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Thông tin chi tiết đầy đủ</p>
-                      <p className="text-xs text-gray-600 mt-0.5">Bao gồm tất cả thông tin cá nhân, học tập và tài chính của sinh viên</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Định dạng Excel (.xlsx)</p>
-                      <p className="text-xs text-gray-600 mt-0.5">File sẽ được tải xuống ngay sau khi xác nhận</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
               {/* File Format */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  Định dạng file
+                  {t('format.title')}
                 </label>
                 <div className="relative">
                   <div className="flex items-center gap-3 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
@@ -154,8 +168,8 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
                       <FileSpreadsheet className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Excel (.xlsx)</p>
-                      <p className="text-xs text-gray-600 mt-0.5">Định dạng file Excel chuẩn, tương thích với Microsoft Excel và Google Sheets</p>
+                      <p className="text-sm font-medium text-gray-900">{t('format.label')}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">{t('format.description')}</p>
                     </div>
                     <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                   </div>
@@ -168,11 +182,11 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-blue-900 mb-2">Lưu ý</p>
+                  <p className="text-sm font-semibold text-blue-900 mb-2">{t('notes.title')}</p>
                   <ul className="text-xs text-blue-800 space-y-1.5 list-disc list-inside">
-                    <li>File sẽ được tải xuống tự động sau khi xuất thành công</li>
-                    <li>Quá trình xuất có thể mất vài giây tùy thuộc vào số lượng sinh viên</li>
-                    <li>Đảm bảo bạn đã áp dụng bộ lọc phù hợp trước khi xuất</li>
+                    {noteItems.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -187,7 +201,7 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
               disabled={isExporting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {tCommon('cancel')}
             </Button>
             <Button
               type="submit"
@@ -197,12 +211,12 @@ export default function ExportStudentModal({ isOpen, onClose, filters }: ExportS
               {isExporting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Đang xuất...
+                  {t('submitting')}
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  Xuất file
+                  {t('submit')}
                 </>
               )}
             </Button>

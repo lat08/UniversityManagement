@@ -3,17 +3,16 @@
 import { useState, useMemo, memo } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
+import { Monitor } from 'lucide-react';
+
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
 import { Card, CardContent } from '@/app/components/ui/card';
-import { Monitor } from 'lucide-react';
+import { ROOM_TYPE_COLORS, ROOM_STATUS_COLORS } from '@/lib/types/room';
+
 import BookingModal from './BookingModal';
 import type { Room } from '../lib/stores/roomBookingStore';
-import { 
-  ROOM_TYPE_COLORS,
-  ROOM_STATUS_COLORS,
-} from '../lib/types/room.types';
+import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 
 const RoomImage = memo(({ src, alt }: { src: string | null; alt: string }) => {
   const [imageError, setImageError] = useState(false);
