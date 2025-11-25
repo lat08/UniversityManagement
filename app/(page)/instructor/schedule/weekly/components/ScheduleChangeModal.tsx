@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import { Dropdown } from '@/app/components/ui';
 import { X, Calendar } from 'lucide-react';
@@ -38,8 +39,8 @@ interface ScheduleChangeModalProps {
   };
 }
 
-const createRoomTypeOptions = (labels: Record<string, string>) => [
-  { value: '', label: 'Tất cả' },
+const createRoomTypeOptions = (labels: Record<string, string>, t: (key: string) => string) => [
+  { value: '', label: t('changeRequest.all') },
   ...Object.entries(labels).map(([key, label]) => ({ value: key, label }))
 ];
 
@@ -53,6 +54,7 @@ export const ScheduleChangeModal = ({
   weeks,
   currentScheduleInfo,
 }: ScheduleChangeModalProps) => {
+  const t = useTranslations('instructor.schedule.weekly');
   const createMutation = useCreateScheduleChange();
   const { data: buildings } = useBuildings();
   
@@ -160,25 +162,25 @@ export const ScheduleChangeModal = ({
   const suggestions = useMemo(() => suggestionsData?.data?.suggestions || [], [suggestionsData?.data?.suggestions]);
 
   const buildingOptions = useMemo(() => [
-    { value: '', label: 'Tất cả' },
+    { value: '', label: t('changeRequest.all') },
     ...(buildings?.map(b => ({ 
       value: b.buildingId, 
       label: `${b.buildingName} (${b.buildingCode})` 
     })) || [])
-  ], [buildings]);
+  ], [buildings, t]);
 
-  const roomTypeOptions = useMemo(() => createRoomTypeOptions(ROOM_TYPE_LABELS), []);
+  const roomTypeOptions = useMemo(() => createRoomTypeOptions(ROOM_TYPE_LABELS, t), [t]);
 
   const slotOptions = useMemo(() => {
     return suggestions.map((slot) => {
       const uniqueKey = `${slot.roomId}-${slot.date}-${slot.dayOfWeek}-${slot.startPeriod}-${slot.endPeriod}`;
       return {
         value: uniqueKey,
-        label: `${slot.dayOfWeekText}, tiết ${slot.startPeriod} - ${slot.endPeriod}, phòng ${slot.roomCode} (${slot.buildingName})`,
+        label: `${slot.dayOfWeekText}, ${t('changeRequest.period')} ${slot.startPeriod} - ${slot.endPeriod}, ${t('changeRequest.room')} ${slot.roomCode} (${slot.buildingName})`,
         data: slot,
       };
     });
-  }, [suggestions]);
+  }, [suggestions, t]);
 
   const selectedSlotData = useMemo(() => {
     const option = slotOptions.find((opt) => opt.value === selectedSlot);
@@ -241,14 +243,14 @@ export const ScheduleChangeModal = ({
           
           // Check if date is before minimum selectable date
           if (parsedDate < minSelectableDate) {
-            toast.error('Không thể chọn ngày trước ngày lịch dạy hiện tại');
+            toast.error(t('changeRequest.errors.dateBeforeCurrent'));
             setDateInputValue('');
             return;
           }
           
           // Check if date is after semester end date
           if (maxSelectableDate && parsedDate > maxSelectableDate) {
-            toast.error('Không thể chọn ngày sau ngày kết thúc học kỳ');
+            toast.error(t('changeRequest.errors.dateAfterSemester'));
             setDateInputValue('');
             return;
           }
@@ -272,27 +274,27 @@ export const ScheduleChangeModal = ({
 
   const handleSubmit = () => {
     if (!makeupDate) {
-      toast.error('Vui lòng chọn ngày mới');
+      toast.error(t('changeRequest.errors.selectNewDate'));
       return;
     }
 
     if (!makeupWeek) {
-      toast.error('Không thể xác định tuần học bù');
+      toast.error(t('changeRequest.errors.cannotDetermineWeek'));
       return;
     }
 
     if (!selectedSlot || !selectedSlotData) {
-      toast.error('Vui lòng chọn giờ trống');
+      toast.error(t('changeRequest.errors.selectSlot'));
       return;
     }
 
     if (!reason.trim()) {
-      toast.error('Vui lòng nhập lý do đổi lịch');
+      toast.error(t('changeRequest.errors.enterReason'));
       return;
     }
 
     if (reason.length > 500) {
-      toast.error('Lý do không được vượt quá 500 ký tự');
+      toast.error(t('changeRequest.errors.reasonMaxLength'));
       return;
     }
 
@@ -301,12 +303,12 @@ export const ScheduleChangeModal = ({
     const selectedDateStr = format(makeupDate, 'yyyy-MM-dd');
     
     if (slotDateStr !== selectedDateStr) {
-      toast.error('Ngày của slot đã chọn không khớp với ngày đã chọn');
+      toast.error(t('changeRequest.errors.slotDateMismatch'));
       return;
     }
 
     if (!makeupWeek) {
-      toast.error('Không thể xác định tuần học bù');
+      toast.error(t('changeRequest.errors.cannotDetermineWeek'));
       return;
     }
 
@@ -327,7 +329,7 @@ export const ScheduleChangeModal = ({
 
     createMutation.mutate(payload, {
       onSuccess: () => {
-        toast.success('Yêu cầu thay đổi lịch đã được tạo thành công');
+        toast.success(t('changeRequest.success'));
         onClose();
         setMakeupDate(undefined);
         setDateInputValue('');
@@ -338,7 +340,7 @@ export const ScheduleChangeModal = ({
       },
       onError: (error: Error) => {
         const apiError = error as { response?: { data?: { message?: string } } };
-        const errorMessage = apiError?.response?.data?.message || error.message || 'Tạo yêu cầu thất bại';
+        const errorMessage = apiError?.response?.data?.message || error.message || t('changeRequest.error');
         toast.error(errorMessage);
       },
     });
@@ -361,9 +363,9 @@ export const ScheduleChangeModal = ({
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Đề xuất đổi lịch dạy</h2>
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2 overflow-hidden max-w-[400px]" title={`Môn: ${subjectName} (${subjectCode})`}>
-                Môn: {subjectName} ({subjectCode})
+              <h2 className="text-2xl font-bold text-gray-900">{t('changeRequest.title')}</h2>
+              <p className="text-sm text-gray-600 mt-1 line-clamp-2 overflow-hidden max-w-[400px]" title={`${t('changeRequest.subject')}: ${subjectName} (${subjectCode})`}>
+                {t('changeRequest.subject')}: {subjectName} ({subjectCode})
               </p>
             </div>
             <Button
@@ -381,17 +383,17 @@ export const ScheduleChangeModal = ({
           {/* Current Schedule Info */}
           {currentScheduleInfo && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">Thông tin lịch hiện tại</h3>
+              <h3 className="font-semibold text-blue-900 mb-2">{t('changeRequest.currentSchedule')}</h3>
               <div className="text-sm text-blue-800 space-y-1">
                 <p>
-                  <span className="font-medium">Ngày:</span>{' '}
-                  {format(new Date(currentScheduleInfo.date), 'EEEE, dd/MM/yyyy', { locale: vi })} (Tuần {currentWeek})
+                  <span className="font-medium">{t('changeRequest.date')}:</span>{' '}
+                  {format(new Date(currentScheduleInfo.date), 'EEEE, dd/MM/yyyy', { locale: vi })} ({t('changeRequest.week')} {currentWeek})
                 </p>
                 <p>
-                  <span className="font-medium">Tiết:</span> {currentScheduleInfo.startPeriod} - {currentScheduleInfo.endPeriod}
+                  <span className="font-medium">{t('changeRequest.period')}:</span> {currentScheduleInfo.startPeriod} - {currentScheduleInfo.endPeriod}
                 </p>
                 <p>
-                  <span className="font-medium">Phòng:</span> {currentScheduleInfo.roomName} ({currentScheduleInfo.roomCode})
+                  <span className="font-medium">{t('changeRequest.room')}:</span> {currentScheduleInfo.roomName} ({currentScheduleInfo.roomCode})
                 </p>
               </div>
             </div>
@@ -401,7 +403,7 @@ export const ScheduleChangeModal = ({
           <div className="relative">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <span className="text-red-500">*</span>
-              Chọn ngày mới
+              {t('changeRequest.selectNewDate')}
             </h3>
             <div className="relative">
               <input
@@ -453,18 +455,18 @@ export const ScheduleChangeModal = ({
             
             {makeupDate && makeupWeek && (
               <p className="text-sm text-gray-600 mt-2">
-                Ngày đã chọn: {format(makeupDate, 'EEEE, dd/MM/yyyy', { locale: vi })} (Tuần {makeupWeek})
+                {t('changeRequest.selectedDate')}: {format(makeupDate, 'EEEE, dd/MM/yyyy', { locale: vi })} ({t('changeRequest.week')} {makeupWeek})
               </p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-3">Cơ sở (tùy chọn)</h3>
+              <h3 className="font-semibold mb-3">{t('changeRequest.building')}</h3>
               <Dropdown
                 options={buildingOptions}
                 value={selectedBuilding}
-                placeholder="Tất cả"
+                placeholder={t('changeRequest.all')}
                 onChange={(value) => {
                   setSelectedBuilding(value);
                   setSelectedSlot('');
@@ -474,11 +476,11 @@ export const ScheduleChangeModal = ({
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3">Loại phòng (tùy chọn)</h3>
+              <h3 className="font-semibold mb-3">{t('changeRequest.roomType')}</h3>
               <Dropdown
                 options={roomTypeOptions}
                 value={selectedRoomType}
-                placeholder="Tất cả"
+                placeholder={t('changeRequest.all')}
                 onChange={(value) => {
                   setSelectedRoomType(value);
                   setSelectedSlot('');
@@ -491,19 +493,19 @@ export const ScheduleChangeModal = ({
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <span className="text-red-500">*</span>
-              Chọn giờ trống
+              {t('changeRequest.selectSlot')}
             </h3>
              <Dropdown
                options={slotOptions}
                value={selectedSlot}
                placeholder={
                  !makeupDate
-                   ? 'Chọn ngày trước'
+                   ? t('changeRequest.selectDateFirst')
                    : isLoadingSuggestions
-                   ? 'Đang tải gợi ý...'
+                   ? t('changeRequest.loadingSuggestions')
                    : slotOptions.length === 0
-                   ? 'Không có giờ trống khả dụng'
-                   : 'Chọn giờ trống'
+                   ? t('changeRequest.noSlotsAvailable')
+                   : t('changeRequest.selectSlot')
                }
                onChange={setSelectedSlot}
                disabled={!makeupDate || isLoadingSuggestions}
@@ -514,16 +516,16 @@ export const ScheduleChangeModal = ({
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold flex items-center gap-2">
                 <span className="text-red-500">*</span>
-                Lý do đổi lịch
+                {t('changeRequest.reason')}
               </h3>
-              <span className="text-sm text-gray-500">{reason.length} / 500</span>
+              <span className="text-sm text-gray-500">{t('changeRequest.charCount', { count: reason.length })}</span>
             </div>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               maxLength={500}
               className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4E8EE1] min-h-[100px] resize-none"
-              placeholder="Lý do đề xuất thay đổi..."
+              placeholder={t('changeRequest.reasonPlaceholder')}
               rows={3}
             />
           </div>
@@ -534,14 +536,14 @@ export const ScheduleChangeModal = ({
               onClick={onClose}
               className="flex-1 border-[#4E8EE1] bg-white text-[#4E8EE1] hover:bg-[#4E8EE1]/10 hover:border-[#4E8EE1]/80 transition-colors"
             >
-              Hủy
+              {t('changeRequest.cancel')}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={createMutation.isPending}
               className="flex-1 bg-[#4E8EE1] hover:bg-[#4E8EE1]/80 text-white border-[#4E8EE1] hover:border-[#4E8EE1]/80 transition-colors cursor-pointer"
             >
-              {createMutation.isPending ? 'Đang gửi...' : 'Gửi'}
+              {createMutation.isPending ? t('changeRequest.submitting') : t('changeRequest.submit')}
             </Button>
           </div>
         </div>

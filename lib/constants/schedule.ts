@@ -1,11 +1,26 @@
-export const DAYS_OF_WEEK = [
-  { label: "Thứ 2", subLabel: "", value: 2 },
-  { label: "Thứ 3", subLabel: "", value: 3 },
-  { label: "Thứ 4", subLabel: "", value: 4 },
-  { label: "Thứ 5", subLabel: "", value: 5 },
-  { label: "Thứ 6", subLabel: "", value: 6 },
-  { label: "Thứ 7", subLabel: "", value: 7 },
-  { label: "Chủ nhật", subLabel: "", value: 8 },
+export type DayOfWeekKey =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday"
+
+export interface DayOfWeekConfig {
+  value: number
+  key: DayOfWeekKey
+  label: string
+}
+
+export const DAYS_OF_WEEK: DayOfWeekConfig[] = [
+  { label: "Thứ 2", key: "monday", value: 2 },
+  { label: "Thứ 3", key: "tuesday", value: 3 },
+  { label: "Thứ 4", key: "wednesday", value: 4 },
+  { label: "Thứ 5", key: "thursday", value: 5 },
+  { label: "Thứ 6", key: "friday", value: 6 },
+  { label: "Thứ 7", key: "saturday", value: 7 },
+  { label: "Chủ nhật", key: "sunday", value: 8 },
 ]
 
 export const PERIODS = Array.from({ length: 13 }, (_, i) => i + 1)
@@ -35,6 +50,20 @@ export const DAY_NAME_TO_NUMBER: Record<string, number> = {
   "Thứ 7": 7,
   "Chủ Nhật": 8,
   "Chủ nhật": 8,
-  "CN": 8
+  "CN": 8,
+  Monday: 2,
+  Tuesday: 3,
+  Wednesday: 4,
+  Thursday: 5,
+  Friday: 6,
+  Saturday: 7,
+  Sunday: 8,
+  Mon: 2,
+  Tue: 3,
+  Wed: 4,
+  Thu: 5,
+  Fri: 6,
+  Sat: 7,
+  Sun: 8,
 }
 

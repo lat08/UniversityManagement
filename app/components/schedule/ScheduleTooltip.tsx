@@ -1,7 +1,8 @@
 "use client"
 
 import { ReactNode, memo } from "react"
-import { DAYS_OF_WEEK } from "@/lib/constants/schedule"
+import { DAYS_OF_WEEK, type DayOfWeekConfig } from "@/lib/constants/schedule"
+import type { ScheduleTranslationFn } from "@/lib/types"
 
 interface CourseItem {
   id: string
@@ -27,6 +28,8 @@ interface ScheduleTooltipProps {
   readonly showClass?: boolean
   readonly showTeacher?: boolean
   readonly actionButton?: ReactNode
+  readonly translate?: ScheduleTranslationFn
+  readonly formatDate?: (date: Date) => string
 }
 
 export const ScheduleTooltip = memo<ScheduleTooltipProps>(({
@@ -37,9 +40,35 @@ export const ScheduleTooltip = memo<ScheduleTooltipProps>(({
   showClass = true,
   showTeacher = true,
   actionButton,
+  translate,
+  formatDate,
 }) => {
-  const dayName = DAYS_OF_WEEK.find((d: { value: number; label: string }) => d.value === course.dayOfWeek)?.label || ""
-  const courseDate = new Date(course.date).toLocaleDateString('vi-VN')
+  const dayConfig = DAYS_OF_WEEK.find((d: DayOfWeekConfig) => d.value === course.dayOfWeek)
+  const dayName = (() => {
+    if (!dayConfig) return ''
+    if (translate) {
+      return translate(`days.${dayConfig.key}.full`)
+    }
+    return dayConfig.label
+  })()
+
+  const dateFormatter = formatDate ?? ((date: Date) =>
+    date.toLocaleDateString('vi-VN'))
+  const courseDate = dateFormatter(new Date(course.date))
+
+  const periodLabel = translate ? translate('tooltip.period') : 'Tiết';
+  const tooltipLabels = {
+    code: translate ? translate('tooltip.code') : 'Mã MH',
+    course: translate ? translate('tooltip.course') : 'Môn',
+    type: translate ? translate('tooltip.type') : 'Loại',
+    class: translate ? translate('tooltip.class') : 'Lớp',
+    room: translate ? translate('tooltip.room') : 'Phòng',
+    teacher: translate ? translate('tooltip.teacher') : 'GV',
+    dayPeriod: translate ? translate('tooltip.dayPeriod', { day: dayName }) : dayName ? `${dayName} - ${periodLabel}` : '',
+    periodCount: translate ? translate('tooltip.periodCount') : 'Số tiết',
+    date: translate ? translate('tooltip.date') : 'Ngày',
+    note: translate ? translate('tooltip.note') : 'Ghi chú',
+  }
 
   return (
     <div
@@ -65,39 +94,42 @@ export const ScheduleTooltip = memo<ScheduleTooltipProps>(({
         <div className="bg-gray-900 text-white p-4 rounded-md shadow-2xl w-[320px] select-text">
           <div className="space-y-3">
             <div className="font-bold text-xs pb-2 border-b border-gray-700">
-              Mã MH: {course.code}
+                {tooltipLabels.code}: {course.code}
             </div>
             <div className="text-[11px] space-y-1 leading-relaxed">
               <div>
-                <span className="font-semibold">Môn:</span> {course.name}
+                  <span className="font-semibold">{tooltipLabels.course}:</span> {course.name}
               </div>
               {course.courseType && (
                 <div>
-                  <span className="font-semibold">Loại:</span> {course.courseType}
+                    <span className="font-semibold">{tooltipLabels.type}:</span> {course.courseType}
                 </div>
               )}
               {showClass && course.class && (
                 <div>
-                  <span className="font-semibold">Lớp:</span> {course.class}
+                    <span className="font-semibold">{tooltipLabels.class}:</span> {course.class}
                 </div>
               )}
               <div>
-                <span className="font-semibold">Phòng:</span> {course.room}
+                  <span className="font-semibold">{tooltipLabels.room}:</span> {course.room}
               </div>
               {showTeacher && course.teacher && (
                 <div>
-                  <span className="font-semibold">GV:</span> {course.teacher}
+                    <span className="font-semibold">{tooltipLabels.teacher}:</span> {course.teacher}
                 </div>
               )}
               <div>
-                <span className="font-semibold">{dayName} - Tiết:</span> {course.startPeriod} - Số tiết: {course.periodsCount}
+                  <span className="font-semibold">{tooltipLabels.dayPeriod}:</span> {periodLabel} {course.startPeriod}
               </div>
               <div>
-                <span className="font-semibold">Ngày:</span> {courseDate}
+                  <span className="font-semibold">{tooltipLabels.periodCount}:</span> {course.periodsCount}
+                </div>
+                <div>
+                  <span className="font-semibold">{tooltipLabels.date}:</span> {courseDate}
               </div>
               {course.note && (
                 <div>
-                  <span className="font-semibold">Ghi chú:</span> {course.note}
+                    <span className="font-semibold">{tooltipLabels.note}:</span> {course.note}
                 </div>
               )}
             </div>

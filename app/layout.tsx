@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     apple: '/logo-siu.webp',
   },
 };
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
@@ -32,5 +33,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AppProviders>
       </body>
     </html>
-  )
+  );
 }

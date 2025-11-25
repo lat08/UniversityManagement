@@ -10,13 +10,27 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor để thêm token
+// Helper function to get current locale
+const getCurrentLocale = (): string => {
+  if (typeof window === 'undefined') return 'vi';
+  const pathname = window.location.pathname;
+  const localeMatch = pathname.match(/^\/(vi|en)/);
+  return localeMatch ? localeMatch[1] : 'vi';
+};
+
+// Request interceptor để thêm token và locale
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Add Accept-Language header based on current locale
+  const locale = getCurrentLocale();
+  config.headers = config.headers ?? {};
+  config.headers['Accept-Language'] = locale === 'en' ? 'en-US,en;q=0.9' : 'vi-VN,vi;q=0.9';
+  
   return config;
 });
 

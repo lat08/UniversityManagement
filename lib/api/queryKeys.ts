@@ -18,6 +18,12 @@ export const queryKeys = {
       ['common', 'courseClasses', subjectId ?? 'all', semesterId ?? 'all'] as const,
   },
 
+  adminStudents: {
+    all: ['adminStudents'] as const,
+    departments: () => ['adminStudents', 'departments'] as const,
+    academicYears: () => ['adminStudents', 'academicYears'] as const,
+  },
+
   notifications: {
     all: ['notifications'] as const,
     lists: () => [...queryKeys.notifications.all, 'list'] as const,
@@ -118,6 +124,7 @@ export const queryKeys = {
 
   dashboard: {
     all: ['dashboard'] as const,
+    student: () => [...queryKeys.dashboard.all, 'student'] as const,
     instructor: () => [...queryKeys.dashboard.all, 'instructor'] as const,
   },
 
@@ -181,5 +188,19 @@ export const queryKeys = {
     details: () => ['adminGradeApprovals', 'detail'] as const,
     detail: (gradeVersionId: string) => ['adminGradeApprovals', 'detail', gradeVersionId] as const,
     statistics: () => ['adminGradeApprovals', 'statistics'] as const,
+  },
+
+  studentCourses: {
+    all: ['studentCourses'] as const,
+    available: () => [...queryKeys.studentCourses.all, 'available'] as const,
+    availableList: (params: {
+      pageNumber?: number;
+      pageSize?: number;
+      searchQuery?: string;
+      availableOnly?: boolean | null;
+      isGeneral?: boolean | null;
+      isInStudentCurriculum?: boolean | null;
+    }) => [...queryKeys.studentCourses.available(), params] as const,
+    registered: () => [...queryKeys.studentCourses.all, 'registered'] as const,
   },
 } as const;

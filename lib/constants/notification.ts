@@ -1,16 +1,16 @@
 import { NotificationReadStatus, NotificationType } from "../types/notification"
 
-export const notificationFilters: { key: NotificationType; label: string }[] = [
-  { key: "all", label: "Tất cả" },
-  { key: "important", label: "Quan trọng" },
-  { key: "tuition", label: "Học phí" },
-  { key: "event", label: "Sự kiện" },
-  { key: "schedule", label: "Lịch học" },
+export const notificationFilters: { key: NotificationType }[] = [
+  { key: "all" },
+  { key: "important" },
+  { key: "tuition" },
+  { key: "event" },
+  { key: "schedule" },
 ]
 
-export const notificationReadStatusFilters: { key: NotificationReadStatus; label: string }[] = [
-  { key: "all", label: "Tất cả" },
-  { key: "unread", label: "Chưa đọc" },
-  { key: "read", label: "Đã đọc" },
+export const notificationReadStatusFilters: { key: NotificationReadStatus }[] = [
+  { key: "all" },
+  { key: "unread" },
+  { key: "read" },
 ]
 
