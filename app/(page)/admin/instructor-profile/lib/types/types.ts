@@ -49,6 +49,7 @@ export interface ApiResponse<T> {
 
 export interface CreateInstructorPayload {
   fullName: string;
+  email: string;
   gender: string;
   facultyId: string;
   dateOfBirth?: string;
@@ -85,6 +86,7 @@ export interface InstructorDetail {
 
 export interface UpdateInstructorPayload {
   fullName?: string;
+  email?: string;
   gender?: string;
   facultyId?: string;
   dateOfBirth?: string;

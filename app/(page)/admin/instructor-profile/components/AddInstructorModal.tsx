@@ -24,6 +24,10 @@ const validationSchema = yup.object({
     .string()
     .required('Họ và tên là bắt buộc')
     .min(2, 'Họ và tên phải có ít nhất 2 ký tự'),
+  email: yup
+    .string()
+    .required('Email là bắt buộc')
+    .email('Email không hợp lệ'),
   gender: yup.string().required('Giới tính là bắt buộc'),
   facultyId: yup.string().required('Khoa/Bộ môn là bắt buộc'),
   dateOfBirth: yup.string().nullable(),
@@ -62,6 +66,7 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
       fullName: '',
+      email: '',
       gender: '',
       facultyId: '',
       dateOfBirth: '',
@@ -121,6 +126,7 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
     try {
       const payload: CreateInstructorPayload = {
         fullName: data.fullName.trim(),
+        email: data.email.trim(),
         gender: data.gender,
         facultyId: data.facultyId,
         dateOfBirth: data.dateOfBirth || undefined,
@@ -215,6 +221,21 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register('email')}
+                  className={errors.email ? 'border-red-500' : ''}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">Số điện thoại</label>
                 <Input
                   placeholder="0000000000"
@@ -228,12 +249,20 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">Ngày sinh</label>
-                <Input type="date" {...register('dateOfBirth')} />
+                <Input 
+                  type="date" 
+                  max={new Date().toISOString().split('T')[0]}
+                  {...register('dateOfBirth')} 
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">Ngày tuyển dụng</label>
-                <Input type="date" {...register('hireDate')} />
+                <Input 
+                  type="date" 
+                  max={new Date().toISOString().split('T')[0]}
+                  {...register('hireDate')} 
+                />
               </div>
 
               <div>
