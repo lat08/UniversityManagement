@@ -37,8 +37,6 @@ export function ExamDetailModal({
   );
   const { downloadExamFile } = useExamActions();
 
-  if (!isOpen || !examEntryId) return null;
-
   const handleDownload = (fileUrl: string, fileName?: string) => {
     if (!fileUrl) {
       toast.error(t('fileNotFound'));
@@ -56,6 +54,8 @@ export function ExamDetailModal({
     if (!examEntryDetail) return '';
     return tExamTypes(examEntryDetail.examType as 'midterm' | 'final' | 'quiz' | 'makeup') || EXAM_TYPE_LABELS[examEntryDetail.examType] || examEntryDetail.examType;
   }, [examEntryDetail, tExamTypes]);
+
+  if (!isOpen || !examEntryId) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

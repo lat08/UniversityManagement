@@ -10,7 +10,7 @@ import { useInstructorSemesterSchedule } from "../lib/hooks/useInstructorSemeste
 import { instructorSemesterScheduleApi } from "../lib/api/semesterScheduleApi"
 import { downloadFileBlob } from "@/lib/utils/fileDownload"
 import toast from "react-hot-toast"
-import type { ScheduleTranslationFn } from "@/lib/types"
+import type { ScheduleTranslationFn, ScheduleTranslationValues } from "@/lib/types"
 
 export default function InstructorSemesterSchedulePage() {
   const t = useTranslations('instructor.schedule.semester');
@@ -19,9 +19,9 @@ export default function InstructorSemesterSchedulePage() {
 
   // Create translate function for schedule components
   const scheduleTranslate: ScheduleTranslationFn = useMemo(() => {
-    return (key: string, values?: Record<string, string | number | Date>) => {
+    return (key: string, values?: ScheduleTranslationValues) => {
       try {
-        return scheduleT(key, values as any);
+        return scheduleT(key, values);
       } catch {
         return key;
       }
