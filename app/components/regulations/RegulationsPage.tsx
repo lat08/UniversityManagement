@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { AlertTriangle, Search } from 'lucide-react';
 import { useRegulations } from './lib/hooks/useRegulations';
 import { RegulationCard } from './RegulationCard';
@@ -21,6 +22,7 @@ interface RegulationsPageProps {
 }
 
 export const RegulationsPage = ({ pageTitle, description, noticeText }: RegulationsPageProps) => {
+  const t = useTranslations('common.regulations');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -95,14 +97,14 @@ export const RegulationsPage = ({ pageTitle, description, noticeText }: Regulati
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-600" />
             <div className="flex-1">
-              <h3 className="font-semibold text-red-900">Không thể tải dữ liệu</h3>
+              <h3 className="font-semibold text-red-900">{t('error.loadFailed')}</h3>
               <p className="mt-1 text-sm text-red-700">{error}</p>
               <button
                 onClick={refetch}
                 disabled={isRefetching}
                 className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
               >
-                {isRefetching ? 'Đang tải...' : 'Thử lại'}
+                {isRefetching ? t('loading') : t('retry')}
               </button>
             </div>
           </div>
@@ -120,7 +122,7 @@ export const RegulationsPage = ({ pageTitle, description, noticeText }: Regulati
         </header>
 
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center lg:p-6">
-          <p className="text-gray-600">Chưa có quy chế nào được công bố.</p>
+          <p className="text-gray-600">{t('empty.noRegulations')}</p>
         </div>
       </div>
     );
@@ -140,7 +142,7 @@ export const RegulationsPage = ({ pageTitle, description, noticeText }: Regulati
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm theo tiêu đề, mô tả hoặc đối tượng..."
+            placeholder={t('search.placeholder')}
             value={searchQuery}
             onChange={(event) => handleSearchChange(event.target.value)}
             className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -149,12 +151,12 @@ export const RegulationsPage = ({ pageTitle, description, noticeText }: Regulati
         <div className="flex-shrink-0 w-48">
           <Dropdown
             options={[
-              { value: 'all', label: 'Tất cả loại' },
+              { value: 'all', label: t('filter.allTypes') },
               ...REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: item.label })),
             ]}
             value={categoryFilter}
             onChange={(value) => setCategoryFilter(value ?? 'all')}
-            placeholder="Loại quy định"
+            placeholder={t('filter.type')}
           />
         </div>
       </div>
@@ -163,7 +165,7 @@ export const RegulationsPage = ({ pageTitle, description, noticeText }: Regulati
         {filteredRegulations.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
             <p className="text-gray-600">
-              Không tìm thấy quy chế phù hợp với từ khóa &quot;{searchQuery}&quot;
+              {t('empty.noResults', { query: searchQuery })}
             </p>
           </div>
         ) : (

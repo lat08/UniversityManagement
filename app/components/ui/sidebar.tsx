@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useState, useEffect } from "react"
 import Image from "next/image"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname, Link } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { useAuthStore } from "@/lib/store/authStore"
 import { logoutApi } from "@/lib/api/auth"
 import {
@@ -28,6 +29,8 @@ import { cn } from "@/lib/utils/utils"
 import { Button } from "@/app/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/components/ui/tooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
+import { useQueryClient } from "@tanstack/react-query"
+import { queryKeys } from "@/lib/api/queryKeys"
 
 type Variant = "student" | "instructor" | "admin"
 
@@ -43,71 +46,75 @@ interface SidebarProps {
 type MenuItem = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any
-  label: string
+  labelKey: string
   href: string
   expandable?: boolean
-  subItems?: { label: string; href: string }[]
+  subItems?: { labelKey: string; href: string }[]
 }
-type MenuSection = { title: string; items: MenuItem[] }
+type MenuSection = { titleKey: string; items: MenuItem[] }
+
+const deriveLocaleFromPath = (path?: string | null): 'vi' | 'en' => {
+  if (!path) return 'vi'
+  const segment = path.split('/').filter(Boolean)[0]
+  return segment === 'en' ? 'en' : 'vi'
+}
 
 function getMenuSections(variant: Variant): MenuSection[] {
   if (variant === "admin") {
     return [
       {
-        title: "TỔNG QUAN",
+        titleKey: "sections.overview",
         items: [
-          { icon: Home, label: "Bảng điều khiển", href: "/admin/dashboard" },
-          { icon: Bell, label: "Quản lý thông báo", href: "/admin/notification-management" },
-          { icon: BarChart3, label: "Báo cáo thống kê", href: "/admin/reports" },
+          { icon: Home, labelKey: "menu.dashboard", href: "/admin/dashboard" },
+          { icon: Bell, labelKey: "menu.notificationManagement", href: "/admin/notification-management" },
+          { icon: BarChart3, labelKey: "menu.statistics", href: "/admin/reports" },
         ],
       },
       {
-        title: "QUẢN LÝ ĐÀO TẠO",
+        titleKey: "sections.training",
         items: [
-          { icon: Calendar, label: "Quản lý khoa", href: "/admin/division-management" },
-          { icon: GraduationCap, label: "Quản lý môn học", href: "/admin/subject-management" },
-          { icon: GraduationCap, label: "Quản lý ngành học", href: "/admin/faculty-management" },
-          { icon: GraduationCap, label: "Quản lý chuyên ngành", href: "/admin/major-management" },
-          { icon: FileText, label: "Quy chế / Quy định", href: "/admin/regulations" },
-          { icon: Building2, label: "Quản lý tòa nhà", href: "/admin/building-management" },
-          { icon: Calendar, label: "Thời khóa biểu", href: "/admin/timetable" },
-          { icon: FileText, label: "Lịch thi", href: "/admin/exam-schedule-management" },
-          { icon: Building2, label: "Lớp học & Phân công", href: "/admin/course-management" },
-          { icon: BookOpen, label: "Chương trình đào tạo", href: "/admin/curriculum-management" },
-          { icon: BookOpen, label: "Đăng ký học phần", href: "/admin/course-registration" },
-          { icon: Building2, label: "Yêu cầu phòng học", href: "/admin/room-requests" },
+          { icon: GraduationCap, labelKey: "menu.facultyManagement", href: "/admin/faculty-management" },
+          { icon: GraduationCap, labelKey: "menu.majorManagement", href: "/admin/major-management" },
+          { icon: FileText, labelKey: "menu.regulations", href: "/admin/regulations" },
+          { icon: Building2, labelKey: "menu.buildingManagement", href: "/admin/building-management" },
+          { icon: Calendar, labelKey: "menu.timetable", href: "/admin/timetable" },
+          { icon: FileText, labelKey: "menu.examSchedule", href: "/admin/exam-schedule-management" },
+          { icon: Building2, labelKey: "menu.courseManagement", href: "/admin/course-management" },
+          { icon: BookOpen, labelKey: "menu.curriculumManagement", href: "/admin/curriculum-management" },
+          { icon: BookOpen, labelKey: "menu.courseRegistration", href: "/admin/course-registration" },
+          { icon: Building2, labelKey: "menu.roomRequests", href: "/admin/room-requests" },
         ],
       },
       {
-        title: "SINH VIÊN",
+        titleKey: "sections.students",
         items: [
-          { icon: Users, label: "Hồ sơ sinh viên", href: "/admin/student-profile" },
-          { icon: DollarSign, label: "Học phí sinh viên", href: "/admin/tuition" },
+          { icon: Users, labelKey: "menu.studentProfile", href: "/admin/student-profile" },
+          { icon: DollarSign, labelKey: "menu.studentTuition", href: "/admin/tuition" },
         ],
       },
       {
-        title: "GIẢNG VIÊN",
+        titleKey: "sections.instructors",
         items: [
-          { icon: Users, label: "Hồ sơ giảng viên", href: "/admin/instructor-profile" },
-          { icon: FileCheck, label: "Duyệt bảng điểm", href: "/admin/grade-approval" },
-          { icon: Building2, label: "Danh sách lớp", href: "/admin/class-lists" },
-          { icon: Calendar, label: "Thời khóa biểu", href: "/admin/instructor-schedule" },
-          { icon: Bell, label: "Yêu cầu đổi lịch", href: "/admin/schedule-changes" },
+          { icon: Users, labelKey: "menu.instructorProfile", href: "/admin/instructor-profile" },
+          { icon: FileCheck, labelKey: "menu.gradeApproval", href: "/admin/grade-approval" },
+          { icon: Building2, labelKey: "menu.classLists", href: "/admin/class-lists" },
+          { icon: Calendar, labelKey: "menu.instructorSchedule", href: "/admin/instructor-schedule" },
+          { icon: Bell, labelKey: "menu.scheduleChanges", href: "/admin/schedule-changes" },
         ],
       },
       {
-        title: "TÀI CHÍNH",
+        titleKey: "sections.finance",
         items: [
-          { icon: DollarSign, label: "Chính sách học phí", href: "/admin/tuition-policy" },
-          { icon: DollarSign, label: "Thanh toán", href: "/admin/payments" },
-          { icon: FileText, label: "Báo cáo thu", href: "/admin/revenue-reports" },
+          { icon: DollarSign, labelKey: "menu.tuitionPolicy", href: "/admin/tuition-policy" },
+          { icon: DollarSign, labelKey: "menu.payments", href: "/admin/payments" },
+          { icon: FileText, labelKey: "menu.revenueReports", href: "/admin/revenue-reports" },
         ],
       },
       {
-        title: "HỆ THỐNG",
+        titleKey: "sections.system",
         items: [
-          { icon: Users, label: "Hồ sơ cá nhân", href: "/admin/profile" },
-          { icon: BarChart3, label: "Cấu hình chủ đề", href: "/admin/theme-configuration" },
+          { icon: Users, labelKey: "menu.personalProfile", href: "/admin/profile" },
+          { icon: BarChart3, labelKey: "menu.themeConfiguration", href: "/admin/theme-configuration" },
         ],
       },
     ]
@@ -116,32 +123,32 @@ function getMenuSections(variant: Variant): MenuSection[] {
   if (variant === "instructor") {
     return [
       {
-        title: "TỔNG QUAN",
+        titleKey: "sections.overview",
         items: [
-          { icon: Home, label: "Bảng điều khiển", href: "/instructor/dashboard" },
-          { icon: FileText, label: "Quy chế / Quy định", href: "/instructor/regulations" },
-          { icon: Bell, label: "Thông báo", href: "/instructor/notification" },
+          { icon: Home, labelKey: "menu.dashboard", href: "/instructor/dashboard" },
+          { icon: FileText, labelKey: "menu.regulations", href: "/instructor/regulations" },
+          { icon: Bell, labelKey: "menu.notification", href: "/instructor/notification" },
         ],
       },
       {
-        title: "HỌC VỤ",
+        titleKey: "sections.academic",
         items: [
           {
-            icon: Calendar, label: "Kế hoạch giảng dạy", href: "/instructor/schedule", expandable: true,
+            icon: Calendar, labelKey: "menu.teachingPlan", href: "/instructor/schedule", expandable: true,
             subItems: [
-              { label: "TKB theo tuần", href: "/instructor/schedule/weekly" },
-              { label: "TKB theo học kỳ", href: "/instructor/schedule/semester" },
+              { labelKey: "menu.weeklySchedule", href: "/instructor/schedule/weekly" },
+              { labelKey: "menu.semesterSchedule", href: "/instructor/schedule/semester" },
             ],
           },
-          { icon: BarChart3, label: "Bài giảng & Giáo trình", href: "/instructor/materials" },
-          { icon: FileCheck, label: "Đề thi", href: "/instructor/exams" },
-          { icon: Notebook, label: "Điểm số", href: "/instructor/grades" },
+          { icon: BarChart3, labelKey: "menu.materials", href: "/instructor/materials" },
+          { icon: FileCheck, labelKey: "menu.exams", href: "/instructor/exams" },
+          { icon: Notebook, labelKey: "menu.grades", href: "/instructor/grades" },
         ],
       },
       {
-        title: "HỆ THỐNG",
+        titleKey: "sections.system",
         items: [
-          { icon: Users, label: "Hồ sơ cá nhân", href: "/instructor/profile" },
+          { icon: Users, labelKey: "menu.personalProfile", href: "/instructor/profile" },
         ],
       },
     ]
@@ -149,35 +156,35 @@ function getMenuSections(variant: Variant): MenuSection[] {
 
   return [
     {
-      title: "TỔNG QUAN",
+      titleKey: "sections.overview",
       items: [
-        { icon: Home, label: "Bảng điều khiển", href: "/student/dashboard" },
-        { icon: FileText, label: "Quy chế / Quy định", href: "/student/regulations" },
-        { icon: Bell, label: "Thông báo", href: "/student/notification" },
+        { icon: Home, labelKey: "menu.dashboard", href: "/student/dashboard" },
+        { icon: FileText, labelKey: "menu.regulations", href: "/student/regulations" },
+        { icon: Bell, labelKey: "menu.notification", href: "/student/notification" },
       ],
     },
     {
-      title: "HỌC VỤ",
+      titleKey: "sections.academic",
       items: [
-        { icon: BookOpen, label: "Khóa học", href: "/student/course" },
-        { icon: Building2, label: "Phòng chức năng", href: "/student/departments" },
+        { icon: BookOpen, labelKey: "menu.courses", href: "/student/course" },
+        { icon: Building2, labelKey: "menu.departments", href: "/student/departments" },
         {
-          icon: Calendar, label: "Kế hoạch học tập", href: "/schedule", expandable: true,
+          icon: Calendar, labelKey: "menu.studyPlan", href: "/schedule", expandable: true,
           subItems: [
-            { label: "TKB theo tuần", href: "/student/schedule/weekly" },
-            { label: "TKB theo học kỳ", href: "/student/schedule/semester" },
-            { label: "Lịch thi", href: "/student/exam-schedule" },
+            { labelKey: "menu.weeklySchedule", href: "/student/schedule/weekly" },
+            { labelKey: "menu.semesterSchedule", href: "/student/schedule/semester" },
+            { labelKey: "menu.examSchedule", href: "/student/exam-schedule" },
           ],
         },
-        { icon: BarChart3, label: "Điểm số", href: "/student/grades" },
-        { icon: Notebook, label: "Tài liệu", href: "/student/documents" },
-        { icon: DollarSign, label: "Học phí", href: "/student/tuition" },
+        { icon: BarChart3, labelKey: "menu.grades", href: "/student/grades" },
+        { icon: Notebook, labelKey: "menu.documents", href: "/student/documents" },
+        { icon: DollarSign, labelKey: "menu.tuition", href: "/student/tuition" },
       ],
     },
     {
-      title: "HỆ THỐNG",
+      titleKey: "sections.system",
       items: [
-        { icon: Users, label: "Hồ sơ cá nhân", href: "/student/profile" },
+        { icon: Users, labelKey: "menu.personalProfile", href: "/student/profile" },
       ],
     },
   ]
@@ -186,6 +193,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
 export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobileToggle, currentPath }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations('common.sidebar')
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
 
@@ -199,6 +207,72 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
 
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [openPopover, setOpenPopover] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+
+  const prefetchAdminStudentResources = useCallback(async () => {
+    try {
+      const { studentsApi } = await import("@/app/(page)/admin/student-profile/lib/api/studentsApi")
+      await Promise.all([
+        queryClient.prefetchQuery({
+          queryKey: queryKeys.adminStudents.departments(),
+          queryFn: async () => {
+            const response = await studentsApi.getDepartments({ pageNumber: 1, pageSize: 100 })
+            return response.success ? response.data.items : []
+          },
+          staleTime: 5 * 60 * 1000,
+        }),
+        queryClient.prefetchQuery({
+          queryKey: queryKeys.adminStudents.academicYears(),
+          queryFn: async () => {
+            const response = await studentsApi.getAcademicYears({ count: 4 })
+            return response.success ? response.data : []
+          },
+          staleTime: 5 * 60 * 1000,
+        }),
+      ])
+    } catch {
+      // ignore prefetch errors
+    }
+  }, [queryClient])
+
+  const prefetchStudentGrades = useCallback(async () => {
+    try {
+      const { gradesApi } = await import("@/app/[locale]/(page)/student/grades/lib/api/gradesApi")
+      await queryClient.prefetchQuery({
+        queryKey: queryKeys.grades.cumulative(),
+        queryFn: async () => {
+          const response = await gradesApi.getCumulativeGrades()
+          if (response.success) {
+            return response.data
+          }
+          throw new Error(response.message || 'Không thể tải dữ liệu điểm')
+        },
+        staleTime: 5 * 60 * 1000,
+      })
+    } catch {
+      // ignore prefetch errors
+    }
+  }, [queryClient])
+
+  const prefetchRouteResources = useCallback(
+    (href: string) => {
+      if (!href) return
+      if (typeof router.prefetch === "function") {
+        try {
+          void router.prefetch(href)
+        } catch {
+          // ignore router prefetch errors
+        }
+      }
+      if (resolvedVariant === "admin" && href.startsWith("/admin/student-profile")) {
+        void prefetchAdminStudentResources()
+      }
+      if (resolvedVariant === "student" && (href.startsWith("/student/grades") || href.startsWith("/grades"))) {
+        void prefetchStudentGrades()
+      }
+    },
+    [prefetchAdminStudentResources, prefetchStudentGrades, resolvedVariant, router],
+  )
 
   const activePage = pathname || currentPath || "/"
 
@@ -221,14 +295,16 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
     try {
       const currentRefreshToken = useAuthStore.getState().refreshToken
       logout()
-      router.push('/login')
+      const detectedLocale = deriveLocaleFromPath(activePage)
+      router.push(`/${detectedLocale}/login`)
       try {
         if (currentRefreshToken) {
           await logoutApi(currentRefreshToken)
         }
       } catch {}
     } catch {
-      router.push('/login')
+      const detectedLocale = deriveLocaleFromPath(activePage)
+      router.push(`/${detectedLocale}/login`)
     }
   }
 
@@ -278,8 +354,8 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                 "flex flex-col",
                 isCollapsed && "lg:hidden"
               )}>
-                <span className="text-[10px] lg:text-xs font-bold text-[var(--sidebar-foreground)] opacity-70">ĐẠI HỌC</span>
-                <span className="text-xs lg:text-sm font-bold text-[var(--sidebar-foreground)]">QUỐC TẾ SÀI GÒN</span>
+                <span className="text-[10px] lg:text-xs font-bold text-[var(--sidebar-foreground)] opacity-70">{t('university')}</span>
+                <span className="text-xs lg:text-sm font-bold text-[var(--sidebar-foreground)]">{t('universityName')}</span>
               </div>
             </div>
             <Button 
@@ -303,7 +379,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                   <h3 className={cn(
                     "mb-2 px-3 text-xs font-semibold text-[var(--sidebar-foreground)] opacity-50 uppercase",
                     isCollapsed && "lg:hidden"
-                  )}>{section.title}</h3>
+                  )}>{t(section.titleKey)}</h3>
                   <div className="space-y-1">
                     {section.items.map((item, itemIndex) => {
                       const itemKey = `${sectionIndex}-${itemIndex}`
@@ -333,21 +409,32 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                     </PopoverTrigger>
                                   </TooltipTrigger>
                                   <TooltipContent side="right" className="bg-gray-900 text-white">
-                                    <p>{item.label}</p>
+                                    <p>{t(item.labelKey)}</p>
                                   </TooltipContent>
                                 </Tooltip>
                                 <PopoverContent side="right" align="start" className="w-48 p-2 ml-2">
                                   <div className="space-y-1">
-                                    {item.subItems.map((subItem, subIndex) => (
-                                      <Button
-                                        key={subIndex}
-                                        variant="ghost"
-                                        className="w-full justify-start text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => router.push(subItem.href)}
-                                      >
-                                        {subItem.label}
-                                      </Button>
-                                    ))}
+                                    {item.subItems.map((subItem, subIndex) => {
+                                      const isSubActive = activePage === subItem.href
+                                      return (
+                                        <Link
+                                          key={subIndex}
+                                          href={subItem.href}
+                                          prefetch
+                                          onMouseEnter={() => prefetchRouteResources(subItem.href)}
+                                        >
+                                          <Button
+                                            variant="ghost"
+                                            className={cn(
+                                              "w-full justify-start text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
+                                              isSubActive && "bg-gray-200"
+                                            )}
+                                          >
+                                            {t(subItem.labelKey)}
+                                          </Button>
+                                        </Link>
+                                      )
+                                    })}
                                   </div>
                                 </PopoverContent>
                               </Popover>
@@ -359,19 +446,24 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                           <div key={itemIndex} className="hidden lg:block">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className={cn(
-                                    "w-full justify-center px-2 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
-                                    isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]",
-                                  )}
-                                  onClick={() => router.push(item.href)}
+                                <Link
+                                  href={item.href}
+                                  prefetch
+                                  onMouseEnter={() => prefetchRouteResources(item.href)}
                                 >
-                                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                                </Button>
+                                  <Button
+                                    variant="ghost"
+                                    className={cn(
+                                      "w-full justify-center px-2 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                                      isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]"
+                                    )}
+                                  >
+                                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                                  </Button>
+                                </Link>
                               </TooltipTrigger>
                               <TooltipContent side="right" className="bg-gray-900 text-white">
-                                <p>{item.label}</p>
+                                <p>{t(item.labelKey)}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>
@@ -381,31 +473,42 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                       // Full view (mobile + desktop expanded)
                       return (
                         <div key={itemIndex}>
-                          <Button
-                            variant="ghost"
-                            className={cn(
-                              "w-full justify-start gap-3 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
-                              isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]",
-                            )}
-                            onClick={() => {
-                              if (!item.expandable) {
-                                router.push(item.href)
-                              } else {
-                                toggleSection(itemKey)
-                              }
-                            }}
-                          >
-                            <item.icon className="h-5 w-5 flex-shrink-0" />
-                            <span className="flex-1 text-left text-sm">{item.label}</span>
-                            {item.expandable && (
+                          {!item.expandable ? (
+                            <Link
+                              href={item.href}
+                              prefetch
+                              onMouseEnter={() => prefetchRouteResources(item.href)}
+                            >
+                              <Button
+                                variant="ghost"
+                                className={cn(
+                                  "w-full justify-start gap-3 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                                  isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]"
+                                )}
+                              >
+                                <item.icon className="h-5 w-5 flex-shrink-0" />
+                                <span className="flex-1 text-left text-sm">{t(item.labelKey)}</span>
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start gap-3 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer",
+                                isActive && "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]",
+                              )}
+                              onClick={() => toggleSection(itemKey)}
+                            >
+                              <item.icon className="h-5 w-5 flex-shrink-0" />
+                              <span className="flex-1 text-left text-sm">{t(item.labelKey)}</span>
                               <ChevronRight
                                 className={cn(
                                   "h-4 w-4 transition-transform",
                                   expandedSection === itemKey && "rotate-90",
                                 )}
                               />
-                            )}
-                          </Button>
+                            </Button>
+                          )}
                           {item.expandable && item.subItems && expandedSection === itemKey && (
                             <div className="ml-6 mt-1 space-y-1 relative">
                               {/* Vertical line connecting all sub-items */}
@@ -419,18 +522,21 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                                     {/* Horizontal line connecting to the sub-item */}
                                     <div className="absolute left-0 top-1/2 w-4 h-px bg-[var(--sidebar-border)]" />
                                     
-                                    <Button
-                                      variant="ghost"
-                                      className={cn(
-                                        "w-[calc(100%-16px)] justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer pl-6 ml-4",
-                                        isSubActive ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] font-semibold hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]" : "text-[var(--sidebar-item-text)] opacity-80"
-                                      )}
-                                      onClick={() => {
-                                        router.push(subItem.href)
-                                      }}
+                                    <Link
+                                      href={subItem.href}
+                                      prefetch
+                                      onMouseEnter={() => prefetchRouteResources(subItem.href)}
                                     >
-                                      {subItem.label}
-                                    </Button>
+                                      <Button
+                                        variant="ghost"
+                                        className={cn(
+                                          "w-[calc(100%-16px)] justify-start text-sm hover:bg-[var(--sidebar-hover)] cursor-pointer pl-6 ml-4",
+                                          isSubActive ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-item-text-active)] font-semibold hover:bg-[var(--sidebar-primary)] hover:text-[var(--sidebar-item-text-active)]" : "text-[var(--sidebar-item-text)] opacity-80"
+                                        )}
+                                      >
+                                        {t(subItem.labelKey)}
+                                      </Button>
+                                    </Link>
                                     
                                     {/* Stop vertical line at the last item */}
                                     {isLastItem && (
@@ -463,7 +569,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="bg-gray-900 text-white">
-                        <p>Trợ giúp</p>
+                        <p>{t('help')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -479,7 +585,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="bg-gray-900 text-white">
-                        <p>Đăng xuất</p>
+                        <p>{t('logout')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -490,7 +596,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
               <div className={cn(isCollapsed && "lg:hidden")}> 
                 <Button variant="ghost" className="w-full justify-start gap-3 text-[var(--sidebar-item-text)] hover:bg-[var(--sidebar-hover)] cursor-pointer">
                   <HelpCircle className="h-5 w-5 flex-shrink-0" />
-                  <span className="text-sm">Trợ giúp</span>
+                  <span className="text-sm">{t('help')}</span>
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -498,7 +604,7 @@ export function Sidebar({ variant, isCollapsed, onToggle, isMobileOpen, onMobile
                   onClick={onLogout}
                 >
                   <LogOut className="h-5 w-5 flex-shrink-0" />
-                  <span className="text-sm">Đăng xuất</span>
+                  <span className="text-sm">{t('logout')}</span>
                 </Button>
               </div>
             </div>

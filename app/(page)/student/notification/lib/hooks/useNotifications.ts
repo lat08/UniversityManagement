@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { notificationApi } from "@/lib/api/notification";
 import { NotificationApiItem, NotificationQueryParams, NotificationReadStatus, NotificationType } from "@/lib/types/notification";
 
@@ -13,6 +14,8 @@ interface UseNotificationsOptions {
 
 export const useNotifications = (options: UseNotificationsOptions) => {
   const { notificationType, readStatus, role, searchTerm } = options;
+  const translationNamespace = role === "Instructor" ? "instructor.notification" : "student.notification";
+  const t = useTranslations(translationNamespace);
   const [notifications, setNotifications] = useState<NotificationApiItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,10 +54,10 @@ export const useNotifications = (options: UseNotificationsOptions) => {
         setTotalCount(response.data.notifications.totalCount);
         setCurrentPage(response.data.notifications.page);
       } else {
-        setError(response.resultMessage || "Không thể tải thông báo");
+        setError(response.resultMessage || t('error.title'));
       }
     } catch {
-      setError("Đã xảy ra lỗi khi tải thông báo");
+      setError(t('error.title'));
     } finally {
       setLoading(false);
     }

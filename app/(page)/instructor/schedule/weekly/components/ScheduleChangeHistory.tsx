@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { Trash2, Eye, Clock, CheckCircle, XCircle } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { vi } from "date-fns/locale"
@@ -18,38 +19,39 @@ interface ScheduleChangeHistoryProps {
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
 
-const STATUS_CONFIG = {
+const getStatusConfig = (t: (key: string) => string) => ({
   pending: {
-    label: 'Đang chờ',
+    label: t('history.pending'),
     bgColor: 'bg-yellow-100',
     textColor: 'text-yellow-800',
     borderColor: 'border-yellow-200',
     icon: Clock,
   },
   approved: {
-    label: 'Đã duyệt',
+    label: t('history.approved'),
     bgColor: 'bg-green-100',
     textColor: 'text-green-800',
     borderColor: 'border-green-200',
     icon: CheckCircle,
   },
   rejected: {
-    label: 'Đã từ chối',
+    label: t('history.rejected'),
     bgColor: 'bg-red-100',
     textColor: 'text-red-800',
     borderColor: 'border-red-200',
     icon: XCircle,
   },
-}
+});
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'Tất cả' },
-  { value: 'pending', label: 'Đang chờ' },
-  { value: 'approved', label: 'Đã duyệt' },
-  { value: 'rejected', label: 'Đã từ chối' },
-]
+const getStatusOptions = (t: (key: string) => string) => [
+  { value: 'all', label: t('history.all') },
+  { value: 'pending', label: t('history.pending') },
+  { value: 'approved', label: t('history.approved') },
+  { value: 'rejected', label: t('history.rejected') },
+];
 
 export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChangeHistoryProps) {
+  const t = useTranslations('instructor.schedule.weekly');
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -108,11 +110,11 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
     setDeletingId(deleteConfirmId)
     try {
       await deleteRequest.mutateAsync(deleteConfirmId)
-      toast.success('Xóa yêu cầu thành công')
+      toast.success(t('history.delete.success'))
       await refetch()
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { message?: string } }; message?: string }
-      const errorMessage = apiError?.response?.data?.message || apiError?.message || 'Xóa yêu cầu thất bại'
+      const errorMessage = apiError?.response?.data?.message || apiError?.message || t('history.delete.error')
       toast.error(errorMessage)
     } finally {
       setDeletingId(null)
@@ -125,6 +127,9 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
     setDeleteConfirmId(null)
     setDeleteConfirmItem(null)
   }
+
+  const STATUS_CONFIG = getStatusConfig(t);
+  const STATUS_OPTIONS = getStatusOptions(t);
 
   const renderStatusBadge = (status: string) => {
     const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending
@@ -139,12 +144,12 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
   }
 
   const columns: TableColumn[] = [
-    { key: 'createdAt', label: 'Ngày tạo', align: 'left' },
-    { key: 'subjectCode', label: 'Mã môn', align: 'left' },
-    { key: 'subjectName', label: 'Tên môn', align: 'left' },
-    { key: 'cancelledWeek', label: 'Tuần hủy', align: 'center' },
-    { key: 'status', label: 'Trạng thái', align: 'center' },
-    { key: 'actions', label: 'Thao tác', align: 'center' },
+    { key: 'createdAt', label: t('history.columns.createdAt'), align: 'left' },
+    { key: 'subjectCode', label: t('history.columns.subjectCode'), align: 'left' },
+    { key: 'subjectName', label: t('history.columns.subjectName'), align: 'left' },
+    { key: 'cancelledWeek', label: t('history.columns.cancelledWeek'), align: 'center' },
+    { key: 'status', label: t('history.columns.status'), align: 'center' },
+    { key: 'actions', label: t('history.columns.actions'), align: 'center' },
   ]
 
   const renderRow = (change: AdminScheduleChangeRequestDto) => (
@@ -164,7 +169,7 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
         <div className="text-sm text-gray-900 line-clamp-2 overflow-hidden" title={change.subjectName}>{change.subjectName}</div>
       </td>
       <td className="px-6 py-4 text-center">
-        <span className="font-medium text-gray-900">Tuần {change.cancelledWeek}</span>
+        <span className="font-medium text-gray-900">{t('changeRequest.week')} {change.cancelledWeek}</span>
       </td>
       <td className="px-6 py-4 text-center">
         {renderStatusBadge(change.status)}
@@ -174,8 +179,8 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
           <button
             onClick={() => handleView(change)}
             className="p-2 rounded-md cursor-pointer text-[#4E8EE1] hover:text-[#4E8EE1]/80 hover:bg-[#4E8EE1]/10 transition-colors"
-            title="Xem chi tiết"
-            aria-label="Xem chi tiết"
+            title={t('history.viewDetail')}
+            aria-label={t('history.viewDetail')}
           >
             <Eye className="w-4 h-4" />
           </button>
@@ -185,8 +190,8 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
               onClick={() => handleDeleteClick(change)}
               disabled={deletingId === change.scheduleChangeRequestId}
               className="p-2 rounded-md cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Xóa yêu cầu"
-              aria-label="Xóa yêu cầu"
+              title={t('history.deleteRequest')}
+              aria-label={t('history.deleteRequest')}
             >
               {deletingId === change.scheduleChangeRequestId ? (
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -209,7 +214,7 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
     <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Lịch sử đổi lịch</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{t('history.title')}</h2>
       </div>
 
       {/* Toolbar */}
@@ -219,7 +224,7 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
             <SearchInput
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm kiếm theo mã môn, tên môn..."
+              placeholder={t('history.searchPlaceholder')}
               className="w-full"
             />
           </div>
@@ -228,7 +233,7 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
               options={STATUS_OPTIONS}
               value={filterStatus}
               onChange={(value) => setFilterStatus(value as FilterStatus)}
-              placeholder="Lọc theo trạng thái"
+              placeholder={t('history.filterStatus')}
             />
           </div>
         </div>
@@ -242,19 +247,19 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
             data={filteredData}
             renderRow={renderRow}
             isLoading={isLoading}
-            loadingMessage="Đang tải lịch sử đổi lịch..."
+            loadingMessage={t('history.loading')}
             emptyMessage={
               searchQuery
-                ? `Không tìm thấy kết quả cho "${searchQuery}"`
+                ? t('history.empty.noResults', { query: searchQuery })
                 : selectedWeek
-                ? `Không có yêu cầu đổi lịch nào cho tuần ${selectedWeek}`
-                : 'Chưa có yêu cầu đổi lịch nào trong học kỳ này'
+                ? t('history.empty.noRequestsForWeek', { week: selectedWeek })
+                : t('history.empty.noRequests')
             }
           />
 
           {error && (
             <div className="text-center py-4 text-red-600 mt-4">
-              Không thể tải lịch sử đổi lịch
+              {t('history.error')}
             </div>
           )}
         </div>
@@ -270,14 +275,14 @@ export function ScheduleChangeHistory({ semesterId, selectedWeek }: ScheduleChan
         isOpen={deleteConfirmId !== null}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
-        title="Xác nhận xóa yêu cầu đổi lịch"
+        title={t('history.delete.confirmTitle')}
         description={
           deleteConfirmItem
-            ? `Bạn có chắc muốn xóa yêu cầu đổi lịch cho môn "${deleteConfirmItem.subjectName}" (${deleteConfirmItem.subjectCode})? Hành động này không thể hoàn tác.`
-            : 'Bạn có chắc muốn xóa yêu cầu đổi lịch này?'
+            ? t('history.delete.confirmDescription', { subjectName: deleteConfirmItem.subjectName, subjectCode: deleteConfirmItem.subjectCode })
+            : t('history.delete.confirmDescriptionGeneric')
         }
-        confirmText="Xóa"
-        cancelText="Hủy"
+        confirmText={t('history.delete.confirm')}
+        cancelText={t('history.delete.cancel')}
         variant="danger"
         isLoading={deletingId === deleteConfirmId}
       />

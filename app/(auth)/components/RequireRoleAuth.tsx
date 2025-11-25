@@ -1,11 +1,11 @@
 'use client';
 
 import { useAuthStore } from '@/lib/store/authStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import AuthErrorBoundary from './AuthErrorBoundary';
 import AuthLoading from './AuthLoading';
-
+import { routing } from '@/i18n/routing';
 import { UserRole, RequireRoleAuthProps } from '../lib/types/types';
 
 // Note: Database lưu "Student", "Instructor", "Admin" (viết hoa)
@@ -14,7 +14,19 @@ import { UserRole, RequireRoleAuthProps } from '../lib/types/types';
  
 
 // Custom hook để tái sử dụng logic auth guard
-const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string = '/login') => {
+type Locale = (typeof routing.locales)[number];
+const SUPPORTED_LOCALES = new Set(routing.locales);
+
+const getLocaleFromPathname = (pathname?: string | null): Locale => {
+  if (!pathname) return routing.defaultLocale as Locale;
+  const [, potentialLocale] = pathname.split('/');
+  if (potentialLocale && SUPPORTED_LOCALES.has(potentialLocale as Locale)) {
+    return potentialLocale as Locale;
+  }
+  return routing.defaultLocale as Locale;
+};
+
+const useAuthGuard = (allowedRoles: UserRole[], redirectTo: string) => {
   const { isAuthenticated, accessToken, user } = useAuthStore();
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
@@ -74,7 +86,10 @@ export function RequireRoleAuth({
   redirectTo = '/login' 
 }: RequireRoleAuthProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { isAuthorized, hasValidToken, isChecking } = useAuthGuard(allowedRoles, redirectTo);
+  const pathname = usePathname();
+  const locale = useMemo(() => getLocaleFromPathname(pathname), [pathname]);
+  const resolvedRedirect = redirectTo === '/login' ? `/${locale}/login` : redirectTo;
+  const { isAuthorized, hasValidToken, isChecking } = useAuthGuard(allowedRoles, resolvedRedirect);
 
   useEffect(() => {
     setIsMounted(true);

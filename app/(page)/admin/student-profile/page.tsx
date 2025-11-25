@@ -1,23 +1,58 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Download, Plus, Edit, Trash2, X, Users, GraduationCap, BookOpen, School } from 'lucide-react';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
-import AddStudentModal from './components/AddStudentModal';
-import ImportExcelModal from './components/ImportExcelModal';
-import ExportStudentModal from './components/ExportStudentModal';
-import ConfirmDeleteStudentModal from './components/ConfirmDeleteStudentModal';
-import BulkEditStudentModal from './components/BulkEditStudentModal';
-import BulkDeleteStudentModal from './components/BulkDeleteStudentModal';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/api/queryKeys';
 import ColumnSelector, { ColumnConfig } from './components/ColumnSelector';
-import { ResizableTable, ResizableColumn } from './components/ResizableTable';
+import type { ResizableColumn } from './components/ResizableTable';
 import ActionsMenu from './components/ActionsMenu';
 import { studentsApi } from './lib/api/studentsApi';
 import { toast } from 'react-hot-toast';
 import { Student, AcademicYear, Department, STATUS_OPTIONS, getStatusDisplay } from './lib/types/types';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
+
+const ResizableTable = dynamic(
+  () => import('./components/ResizableTable').then((mod) => mod.ResizableTable),
+  {
+    ssr: false,
+    loading: () => <TableSkeleton />,
+  },
+) as typeof import('./components/ResizableTable').ResizableTable;
+
+const AddStudentModal = dynamic(() => import('./components/AddStudentModal'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ImportExcelModal = dynamic(() => import('./components/ImportExcelModal'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ExportStudentModal = dynamic(() => import('./components/ExportStudentModal'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const ConfirmDeleteStudentModal = dynamic(() => import('./components/ConfirmDeleteStudentModal'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const BulkEditStudentModal = dynamic(() => import('./components/BulkEditStudentModal'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const BulkDeleteStudentModal = dynamic(() => import('./components/BulkDeleteStudentModal'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const STAT_CARDS = [
   { 
@@ -68,6 +103,27 @@ export default function StudentProfilePage() {
   const [deletingStudentId, setDeletingStudentId] = useState<string | null>(null);
   const [deletingStudentName, setDeletingStudentName] = useState<string | undefined>(undefined);
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
+
+  const { data: departments = [] } = useQuery<Department[]>({
+    queryKey: queryKeys.adminStudents.departments(),
+    queryFn: async () => {
+      const response = await studentsApi.getDepartments({
+        pageNumber: 1,
+        pageSize: 100,
+      });
+      return response.success ? response.data.items : [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: academicYears = [] } = useQuery<AcademicYear[]>({
+    queryKey: queryKeys.adminStudents.academicYears(),
+    queryFn: async () => {
+      const response = await studentsApi.getAcademicYears({ count: 4 });
+      return response.success ? response.data : [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
   
   // Column configuration
   const [columnConfigs, setColumnConfigs] = useState<ColumnConfig[]>([
@@ -111,8 +167,6 @@ export default function StudentProfilePage() {
   const [totalPages, setTotalPages] = useState(0);
   const pageSize = 20;
 
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
   const [stats, setStats] = useState({
     currentYear: undefined as number | undefined,
@@ -125,17 +179,6 @@ export default function StudentProfilePage() {
   });
   const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>('');
 
-  // Priority 1: Fetch dropdowns in parallel first for better UX
-  useEffect(() => {
-    const fetchDropdownData = async () => {
-      await Promise.all([
-        fetchDepartments(),
-        fetchAcademicYears(),
-      ]);
-    };
-    fetchDropdownData();
-  }, []);
-
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -145,31 +188,6 @@ export default function StudentProfilePage() {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await studentsApi.getDepartments({
-        pageNumber: 1,
-        pageSize: 100,
-      });
-      if (response.success) {
-        setDepartments(response.data.items);
-      }
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    }
-  };
-
-  const fetchAcademicYears = async () => {
-    try {
-      const response = await studentsApi.getAcademicYears({ count: 4 });
-      if (response.success) {
-        setAcademicYears(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching academic years:', error);
-    }
-  };
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -696,58 +714,72 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Modals */}
-      <AddStudentModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
-        onSuccess={fetchStudents}
-      />
-      <ImportExcelModal 
-        isOpen={isImportModalOpen} 
-        onClose={() => setIsImportModalOpen(false)} 
-        onSuccess={fetchStudents}
-      />
-      <ExportStudentModal 
-        isOpen={isExportModalOpen} 
-        onClose={() => setIsExportModalOpen(false)}
-        filters={{
-          searchKeyword: searchKeyword || undefined,
-          departmentId: selectedDepartmentId || undefined,
-          facultyId: departments.find(d => d.departmentId === selectedDepartmentId)?.facultyId || undefined,
-          academicYearId: selectedAcademicYearId || undefined,
-          enrollmentStatus: selectedStatus || undefined,
-        }}
-      />
+      {isAddModalOpen && (
+        <AddStudentModal 
+          isOpen={isAddModalOpen} 
+          onClose={() => setIsAddModalOpen(false)} 
+          onSuccess={fetchStudents}
+        />
+      )}
 
-      <ConfirmDeleteStudentModal
-        isOpen={isDeleteModalOpen}
-        studentName={deletingStudentName}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setDeletingStudentId(null);
-          setDeletingStudentName(undefined);
-        }}
-        onConfirm={handleDeleteConfirm}
-      />
+      {isImportModalOpen && (
+        <ImportExcelModal 
+          isOpen={isImportModalOpen} 
+          onClose={() => setIsImportModalOpen(false)} 
+          onSuccess={fetchStudents}
+        />
+      )}
 
-      <BulkEditStudentModal
-        isOpen={isBulkEditModalOpen}
-        onClose={() => setIsBulkEditModalOpen(false)}
-        selectedStudentIds={Array.from(selectedStudentIds)}
-        onSuccess={() => {
-          fetchStudents();
-          setSelectedStudentIds(new Set());
-        }}
-      />
+      {isExportModalOpen && (
+        <ExportStudentModal 
+          isOpen={isExportModalOpen} 
+          onClose={() => setIsExportModalOpen(false)}
+          filters={{
+            searchKeyword: searchKeyword || undefined,
+            departmentId: selectedDepartmentId || undefined,
+            facultyId: departments.find(d => d.departmentId === selectedDepartmentId)?.facultyId || undefined,
+            academicYearId: selectedAcademicYearId || undefined,
+            enrollmentStatus: selectedStatus || undefined,
+          }}
+        />
+      )}
 
-      <BulkDeleteStudentModal
-        isOpen={isBulkDeleteModalOpen}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        selectedStudentIds={Array.from(selectedStudentIds)}
-        onSuccess={() => {
-          fetchStudents();
-          setSelectedStudentIds(new Set());
-        }}
-      />
+      {isDeleteModalOpen && (
+        <ConfirmDeleteStudentModal
+          isOpen={isDeleteModalOpen}
+          studentName={deletingStudentName}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setDeletingStudentId(null);
+            setDeletingStudentName(undefined);
+          }}
+          onConfirm={handleDeleteConfirm}
+        />
+      )}
+
+      {isBulkEditModalOpen && (
+        <BulkEditStudentModal
+          isOpen={isBulkEditModalOpen}
+          onClose={() => setIsBulkEditModalOpen(false)}
+          selectedStudentIds={Array.from(selectedStudentIds)}
+          onSuccess={() => {
+            fetchStudents();
+            setSelectedStudentIds(new Set());
+          }}
+        />
+      )}
+
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteStudentModal
+          isOpen={isBulkDeleteModalOpen}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          selectedStudentIds={Array.from(selectedStudentIds)}
+          onSuccess={() => {
+            fetchStudents();
+            setSelectedStudentIds(new Set());
+          }}
+        />
+      )}
     </div>
   );
 }

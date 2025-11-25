@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { X, Calendar, FileText, CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -14,33 +15,35 @@ interface ScheduleChangeDetailModalProps {
   data: AdminScheduleChangeRequestDto | null;
 }
 
-const STATUS_CONFIG = {
+const getStatusConfig = (t: (key: string) => string) => ({
   pending: {
-    label: 'Đang chờ',
+    label: t('history.pending'),
     bgColor: 'bg-yellow-100',
     textColor: 'text-yellow-800',
     borderColor: 'border-yellow-200',
     icon: AlertCircle,
   },
   approved: {
-    label: 'Đã duyệt',
+    label: t('history.approved'),
     bgColor: 'bg-green-100',
     textColor: 'text-green-800',
     borderColor: 'border-green-200',
     icon: CheckCircle,
   },
   rejected: {
-    label: 'Đã từ chối',
+    label: t('history.rejected'),
     bgColor: 'bg-red-100',
     textColor: 'text-red-800',
     borderColor: 'border-red-200',
     icon: XCircle,
   },
-};
+});
 
 export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleChangeDetailModalProps) => {
+  const t = useTranslations('instructor.schedule.weekly');
   if (!isOpen || !data) return null;
 
+  const STATUS_CONFIG = getStatusConfig(t);
   const statusConfig = STATUS_CONFIG[data.status] || STATUS_CONFIG.pending;
   const StatusIcon = statusConfig.icon;
 
@@ -88,8 +91,8 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Chi tiết yêu cầu đổi lịch</h2>
-              <p className="mt-1 text-sm text-gray-600">Ngày tạo: {formatDateTime(data.createdAt)}</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('detail.title')}</h2>
+              <p className="mt-1 text-sm text-gray-600">{t('detail.createdAt')}: {formatDateTime(data.createdAt)}</p>
             </div>
             <Button
               variant="ghost"
@@ -109,22 +112,22 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                     <Info className="w-5 h-5 text-[#4E8EE1]" />
-                    Thông tin chung
+                    {t('detail.generalInfo')}
                   </h3>
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Tên môn:</span>
+                        <span className="text-sm text-gray-600">{t('detail.subjectName')}:</span>
                         <span className="text-base font-semibold text-gray-900">{data.subjectName}</span>
                       </div>
                       <p className="text-sm text-gray-600">
-                        Mã môn: <span className="font-medium text-gray-900">{data.subjectCode}</span>
+                        {t('detail.subjectCode')}: <span className="font-medium text-gray-900">{data.subjectCode}</span>
                       </p>
                     </div>
                     {data.reviewedAt && (
                       <div className="space-y-2 text-sm text-gray-600 min-w-[200px]">
                         <div className="flex items-center justify-between gap-4">
-                          <span>Ngày duyệt</span>
+                          <span>{t('detail.reviewedAt')}</span>
                           <span className="font-medium text-gray-900 text-right">{formatDateTime(data.reviewedAt)}</span>
                         </div>
                       </div>
@@ -147,16 +150,16 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
             <CardContent className="p-4 space-y-4">
               <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-red-600" />
-                Thông tin lịch bị hủy
+                {t('detail.cancelledSchedule')}
               </h4>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-gray-600">Tuần hủy</span>
-                  <span className="font-medium text-gray-900">Tuần {data.cancelledWeek}</span>
+                  <span className="text-gray-600">{t('detail.cancelledWeek')}</span>
+                  <span className="font-medium text-gray-900">{t('changeRequest.week')} {data.cancelledWeek}</span>
                 </div>
                 {data.cancelledDate && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Ngày hủy</span>
+                    <span className="text-gray-600">{t('detail.cancelledDate')}</span>
                     <span className="font-medium text-gray-900">
                       {data.cancelledDateText || formatDate(data.cancelledDate)}
                     </span>
@@ -164,21 +167,21 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
                 )}
                 {data.cancelledDayOfWeekText && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Thứ</span>
+                    <span className="text-gray-600">{t('detail.dayOfWeek')}</span>
                     <span className="font-medium text-gray-900">{data.cancelledDayOfWeekText}</span>
                   </div>
                 )}
                 {data.cancelledStartPeriod && data.cancelledEndPeriod && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Thời gian</span>
+                    <span className="text-gray-600">{t('detail.time')}</span>
                     <span className="font-medium text-gray-900">
-                      Tiết {data.cancelledStartPeriod} - {data.cancelledEndPeriod}
+                      {t('changeRequest.period')} {data.cancelledStartPeriod} - {data.cancelledEndPeriod}
                     </span>
                   </div>
                 )}
                 {data.cancelledRoomCode && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Phòng học</span>
+                    <span className="text-gray-600">{t('detail.room')}</span>
                     <span className="font-medium text-gray-900 text-right">
                       {data.cancelledRoomCode}
                       {data.cancelledRoomName ? ` - ${data.cancelledRoomName}` : ''}
@@ -193,32 +196,32 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
             <CardContent className="p-4 space-y-4">
               <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-green-600" />
-                Thông tin lịch học bù
+                {t('detail.makeupSchedule')}
               </h4>
               <div className="space-y-2 text-sm">
                 {data.makeupWeek && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Tuần bù</span>
-                    <span className="font-medium text-gray-900">Tuần {data.makeupWeek}</span>
+                    <span className="text-gray-600">{t('detail.makeupWeek')}</span>
+                    <span className="font-medium text-gray-900">{t('changeRequest.week')} {data.makeupWeek}</span>
                   </div>
                 )}
                 {data.makeupDate && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Ngày bù</span>
+                    <span className="text-gray-600">{t('detail.makeupDate')}</span>
                     <span className="font-medium text-gray-900 text-right">
                       {`${formatDate(data.makeupDate)}${makeupDayLabel !== '-' ? ` (${makeupDayLabel})` : ''}`}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-gray-600">Thời gian</span>
+                  <span className="text-gray-600">{t('detail.time')}</span>
                   <span className="font-medium text-gray-900">
-                    Tiết {data.startPeriod} - {data.endPeriod}
+                    {t('changeRequest.period')} {data.startPeriod} - {data.endPeriod}
                   </span>
                 </div>
                 {data.makeupRoomCode && (
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-gray-600">Phòng học</span>
+                    <span className="text-gray-600">{t('detail.room')}</span>
                     <span className="font-medium text-gray-900 text-right">
                       {data.makeupRoomCode}
                       {data.makeupRoomName ? ` - ${data.makeupRoomName}` : ''}
@@ -233,7 +236,7 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
             <CardContent className="p-4 space-y-4">
               <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#4E8EE1]" />
-                Lý do đổi lịch
+                {t('detail.reason')}
               </h4>
               <p className="text-gray-700 whitespace-pre-wrap">{data.reason}</p>
             </CardContent>
@@ -244,7 +247,7 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
               <CardContent className="p-4 space-y-4">
                 <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-[#4E8EE1]" />
-                  Ghi chú từ admin
+                  {t('detail.reviewNote')}
                 </h4>
                 <p className="text-gray-700 whitespace-pre-wrap">{data.reviewNote}</p>
               </CardContent>
@@ -256,7 +259,7 @@ export const ScheduleChangeDetailModal = ({ isOpen, onClose, data }: ScheduleCha
               onClick={onClose}
               className="bg-[#4E8EE1] hover:bg-[#4E8EE1]/80 text-white"
             >
-              Đóng
+              {t('detail.close')}
             </Button>
           </div>
         </div>

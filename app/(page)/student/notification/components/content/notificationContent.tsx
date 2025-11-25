@@ -3,6 +3,7 @@
 import { CheckCheck, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { NotificationCard } from "@/app/components/notification/NotificationCard";
 import { Button } from "@/app/components/ui/button";
@@ -33,6 +34,8 @@ interface NotificationsContentProps {
 export function NotificationsContent({ role = "Student" }: NotificationsContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const translationNamespace = role === "Instructor" ? "instructor.notification" : "student.notification";
+  const t = useTranslations(translationNamespace);
   const { expandedNotificationId, initialFilter, initialReadStatusFilter, notificationIdFromParams } = useNotificationParams();
   
   // Stable reference cho URL params để tránh re-render
@@ -58,9 +61,9 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
     () =>
       notificationReadStatusFilters.map((filter) => ({
         value: filter.key,
-        label: filter.label,
+        label: t(`filters.${filter.key}`),
       })),
-    [],
+    [t],
   );
 
   const { unreadCounts, isLoading: isLoadingCounts, isFetching: isFetchingCounts, refetchUnreadCounts } = useUnreadCounts(role);
@@ -229,7 +232,7 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
           <div className="w-full sm:flex-1 sm:max-w-sm">
             <SearchInput
               value={searchQuery}
-              placeholder="Tìm kiếm thông báo..."
+              placeholder={t('search.placeholder')}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
           </div>
@@ -238,14 +241,14 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
             value={readStatusFilter}
             onChange={(value) => setReadStatusFilter(value as NotificationReadStatus)}
             disabled={isLoading}
-            placeholder="Trạng thái"
+            placeholder={t('filters.status')}
             className="w-full sm:w-48"
             buttonClassName="h-10"
           />
           {unreadCounts.all > 0 && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 sm:ml-auto">
               <div className="text-xs sm:text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                {unreadCounts.all} thông báo chưa đọc
+                {t('unreadCount', { count: unreadCounts.all })}
               </div>
               <Button
                 variant="outline"
@@ -257,12 +260,12 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
                 {isMarkingAllAsRead ? (
                   <>
                     <Loader2 className="h-3 sm:h-4 w-3 sm:w-4 animate-spin" />
-                    <span className="truncate">Đang xử lý...</span>
+                    <span className="truncate">{t('markAllAsRead.processing')}</span>
                   </>
                 ) : (
                   <>
                     <CheckCheck className="h-3 sm:h-4 w-3 sm:w-4" />
-                    <span className="truncate">Đánh dấu tất cả đã đọc</span>
+                    <span className="truncate">{t('markAllAsRead.button')}</span>
                   </>
                 )}
               </Button>
@@ -277,19 +280,20 @@ export function NotificationsContent({ role = "Student" }: NotificationsContentP
         loading={isLoadingCounts}
         isFetching={isFetchingCounts}
         onFilterChange={setActiveFilter}
+        translationNamespace={translationNamespace}
       />
 
       {isLoading && !notificationIdFromParams ? (
         <LoadingState />
       ) : isError ? (
-        <ErrorState error={error ?? "Unknown error"} onRetry={refetch} />
+        <ErrorState error={error ?? "Unknown error"} onRetry={refetch} role={role} />
       ) : (
         <>
           <div className="space-y-4">
             {isLoading || isLoadingTargetPage ? (
               <LoadingState />
             ) : !Array.isArray(notifications) || notifications.length === 0 ? (
-              <EmptyState activeFilter={activeFilter} />
+              <EmptyState activeFilter={activeFilter} role={role} />
             ) : (
               notifications.map((notification: NotificationApiItem) => {
                 const shouldExpand = notification.scheduleId === expandedNotificationId || 

@@ -1,3 +1,5 @@
+import type { ScheduleTranslationFn } from '@/lib/types'
+
 export const getColorByCourseType = (courseType?: string): string => {
   if (!courseType) return 'blue'
   const lowerType = courseType.toLowerCase()
@@ -10,10 +12,29 @@ export const getColorByCourseType = (courseType?: string): string => {
   return 'blue'
 }
 
-export const formatWeekDisplay = (week: { weekNumber: number; startDate: string; endDate: string } | null) => {
-  if (!week) return "Chọn tuần"
-  const start = new Date(week.startDate).toLocaleDateString('vi-VN')
-  const end = new Date(week.endDate).toLocaleDateString('vi-VN')
+interface FormatWeekDisplayOptions {
+  translate?: ScheduleTranslationFn
+  formatDate?: (date: Date) => string
+  emptyLabel?: string
+}
+
+export const formatWeekDisplay = (
+  week: { weekNumber: number; startDate: string; endDate: string } | null,
+  options?: FormatWeekDisplayOptions
+) => {
+  if (!week) {
+    if (options?.translate) {
+      return options.translate('selectWeek') || (options?.emptyLabel ?? '')
+    }
+    return options?.emptyLabel ?? 'Chọn tuần'
+  }
+  const formatDate = options?.formatDate ?? ((date: Date) =>
+    date.toLocaleDateString('vi-VN'))
+  const start = formatDate(new Date(week.startDate))
+  const end = formatDate(new Date(week.endDate))
+  if (options?.translate) {
+    return options.translate('weekLabel', { number: week.weekNumber, start, end })
+  }
   return `Tuần ${week.weekNumber} [từ ngày ${start} đến ngày ${end}]`
 }
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Dropdown, DropdownSearch } from "@/app/components/ui"
 import { SemesterScheduleTable, SemesterScheduleSkeleton } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
@@ -11,7 +12,8 @@ import { downloadFileBlob } from "@/lib/utils/fileDownload"
 import toast from "react-hot-toast"
 
 export default function InstructorSemesterSchedulePage() {
-  usePageTitle('TKB theo học kỳ');
+  const t = useTranslations('instructor.schedule.semester');
+  usePageTitle(t('title'));
   const [isExporting, setIsExporting] = useState(false)
   const [isPending, startTransition] = useTransition()
   
@@ -41,8 +43,8 @@ export default function InstructorSemesterSchedulePage() {
   }))
 
   const viewTypeOptions = [
-    { value: 'personal', label: 'Chương trình cá nhân' },
-    { value: 'subject', label: 'Chương trình theo môn học' },
+    { value: 'personal', label: t('viewType.personal') },
+    { value: 'subject', label: t('viewType.subject') },
   ]
 
   const subjectOptions = subjects.map(s => ({
@@ -52,7 +54,7 @@ export default function InstructorSemesterSchedulePage() {
 
   const handleExportPdf = async () => {
     if (!selectedSemester) {
-      toast.error('Vui lòng chọn học kỳ')
+      toast.error(t('errors.selectSemester'))
       return
     }
 
@@ -68,10 +70,10 @@ export default function InstructorSemesterSchedulePage() {
       const filename = `ThoiKhoaBieu_HocKy_GiangVien_${timestamp}.pdf`
       
       downloadFileBlob(blob, filename)
-      toast.success('Xuất PDF thành công')
+      toast.success(t('export.success'))
     } catch (error) {
       console.error('Export error:', error)
-      toast.error('Xuất PDF thất bại')
+      toast.error(t('export.error'))
     } finally {
       setIsExporting(false)
     }
@@ -83,9 +85,9 @@ export default function InstructorSemesterSchedulePage() {
   return (
     <div style={{ minWidth: '1000px' }}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Khung chương trình theo học kỳ</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Hiển thị chương trình giảng dạy theo từng học kỳ
+          {t('description')}
         </p>
       </div>
 
@@ -100,7 +102,7 @@ export default function InstructorSemesterSchedulePage() {
           <Dropdown
             options={semesterOptions}
             value={selectedSemester?.semesterId || ''}
-            placeholder="Đang tải..."
+            placeholder={t('loading')}
             onChange={(value) => {
               startTransition(() => {
                 handleSemesterChange(value);
@@ -121,14 +123,14 @@ export default function InstructorSemesterSchedulePage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              <span className="text-sm font-medium">Đang xuất...</span>
+              <span className="text-sm font-medium">{t('export.exporting')}</span>
             </>
           ) : (
             <>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
-              <span className="text-sm font-medium">In</span>
+              <span className="text-sm font-medium">{t('export.button')}</span>
             </>
           )}
         </button>
@@ -139,7 +141,7 @@ export default function InstructorSemesterSchedulePage() {
           <Dropdown
             options={viewTypeOptions}
             value={viewType || 'personal'}
-            placeholder="Chọn loại xem"
+            placeholder={t('selectViewType')}
             onChange={(value) => {
               startTransition(() => {
                 handleViewTypeChange(value as 'personal' | 'subject');
@@ -154,8 +156,8 @@ export default function InstructorSemesterSchedulePage() {
             <DropdownSearch
               options={subjectOptions}
               value={selectedSubject?.subjectId || ''}
-              placeholder="Chọn môn học"
-              searchPlaceholder="Tìm kiếm môn học..."
+              placeholder={t('selectSubject')}
+              searchPlaceholder={t('searchSubject')}
               onChange={(value) => {
                 startTransition(() => {
                   handleSubjectChange(value);

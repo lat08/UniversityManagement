@@ -3,7 +3,8 @@
 import { memo, useMemo, useCallback } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
-import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "@/lib/constants/schedule"
+import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES, type DayOfWeekConfig } from "@/lib/constants/schedule"
+import type { ScheduleTranslationFn } from "@/lib/types"
 
 const HIGHLIGHT_KEYFRAMES = `
 @keyframes highlight-blink {
@@ -48,6 +49,7 @@ interface WeeklyScheduleGridProps {
   readonly showClass?: boolean
   readonly showTeacher?: boolean
   readonly showCode?: boolean
+  readonly translate?: ScheduleTranslationFn
 }
 
 const COLOR_CLASSES: Record<string, { bg: string; hover: string; border: string }> = {
@@ -92,7 +94,31 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
   showClass = false,
   showTeacher = true,
   showCode = false,
+  translate,
 }) => {
+  const getDayLabel = useCallback((day: DayOfWeekConfig) => {
+    if (translate) {
+      return translate(`days.${day.key}.short`)
+    }
+    return day.label
+  }, [translate])
+
+  const getDayFullLabel = useCallback((day: DayOfWeekConfig) => {
+    if (translate) {
+      return translate(`days.${day.key}.full`)
+    }
+    return day.label
+  }, [translate])
+
+  const formatPeriodLabel = useCallback((period: number) => (
+    translate ? translate('grid.period', { period }) : `Tiết ${period}`
+  ), [translate])
+
+  const codeLabel = translate ? translate('grid.code') : 'Mã'
+  const classLabel = translate ? translate('grid.class') : 'Lớp'
+  const roomLabel = translate ? translate('grid.room') : 'Phòng'
+  const teacherLabel = translate ? translate('grid.teacher') : 'GV'
+
   const formattedDates = useMemo(() => 
     weekDates.map(date => 
       date ? `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}` : ''
@@ -134,7 +160,7 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
             </div>
 
             {/* Days of week */}
-            {DAYS_OF_WEEK.map((day: { value: number; label: string; subLabel: string }, index: number) => {
+            {DAYS_OF_WEEK.map((day: DayOfWeekConfig, index: number) => {
               const formattedDate = formattedDates[index]
               
               return (
@@ -142,8 +168,8 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
                   key={day.value}
                   className="flex-1 min-w-[120px] text-[var(--schedule-header-text)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--schedule-header-bg)]"
                 >
-                  <div className="font-semibold text-sm">{day.label}</div>
-                  <div className="text-xs mt-1">{formattedDate || day.subLabel}</div>
+                  <div className="font-semibold text-sm">{getDayLabel(day)}</div>
+                  <div className="text-xs mt-1">{formattedDate || getDayFullLabel(day)}</div>
                 </div>
               )
             })}
@@ -171,11 +197,11 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
               <div key={period} className="flex gap-2 mb-2">
                 {/* Period Label */}
                 <div className="w-[90px] flex-shrink-0 text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--schedule-header-bg)]">
-                  Tiết {period}
+                  {formatPeriodLabel(period)}
                 </div>
 
                 {/* Day Cells */}
-                {DAYS_OF_WEEK.map((day: { value: number; label: string }) => {
+                {DAYS_OF_WEEK.map((day: DayOfWeekConfig) => {
                   const course = findCourse(day.value, period)
 
                   return (
@@ -207,12 +233,12 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
                           <div className="space-y-0.5 text-[11px] text-gray-900">
                             {showCode && (
                               <div>
-                                <strong>Mã:</strong> {course.code}
+                                <strong>{codeLabel}:</strong> {course.code}
                               </div>
                             )}
                             {showClass && course.class && (
                               <div>
-                                <strong>Lớp:</strong> {(() => {
+                                <strong>{classLabel}:</strong> {(() => {
                                   const classes = course.class.split(/[,;\s]+/).filter(c => c.trim());
                                   if (classes.length > 5) {
                                     return classes.slice(0, 3).join(', ') + '...';
@@ -222,11 +248,11 @@ export const WeeklyScheduleGrid = memo<WeeklyScheduleGridProps>(({
                               </div>
                             )}
                             <div>
-                              <strong>Phòng:</strong> {course.room}
+                              <strong>{roomLabel}:</strong> {course.room}
                             </div>
                             {showTeacher && course.teacher && (
                               <div>
-                                <strong>GV:</strong> {course.teacher}
+                                <strong>{teacherLabel}:</strong> {course.teacher}
                               </div>
                             )}
                           </div>

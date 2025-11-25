@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Download, ExternalLink, AlertTriangle, ChevronDown, FileText } from "lucide-react";
 import { downloadFile } from "@/lib/utils/fileDownload";
 import { formatDate } from "@/lib/utils/format";
@@ -28,6 +29,7 @@ const RegulationCardComponent = ({
   noticeText, 
   animationDelay = 0 
 }: RegulationCardProps) => {
+  const t = useTranslations('common.regulations');
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = useCallback(async () => {
@@ -37,13 +39,13 @@ const RegulationCardComponent = ({
     }
 
     setIsDownloading(true);
-    const loadingToast = toast.loading('Đang tải xuống tệp...');
+    const loadingToast = toast.loading(t('download.loading'));
 
     try {
       await downloadFile(regulation.fileUrl, regulation.fileName);
-      toast.success('Đã tải xuống tệp thành công', { id: loadingToast });
+      toast.success(t('download.success'), { id: loadingToast });
     } catch {
-      toast.error('Không thể tải xuống tệp. Vui lòng thử lại.', { id: loadingToast });
+      toast.error(t('download.error'), { id: loadingToast });
     } finally {
       setIsDownloading(false);
     }
@@ -75,11 +77,11 @@ const RegulationCardComponent = ({
             {(() => {
               const extendedReg = regulation as ExtendedRegulation;
               const categoryMap: Record<string, string> = {
-                admission: 'Tuyển sinh',
-                academic: 'Học vụ',
-                finance: 'Tài chính',
-                student_affairs: 'Công tác sinh viên',
-                general: 'Chung',
+                admission: t('categories.admission'),
+                academic: t('categories.academic'),
+                finance: t('categories.finance'),
+                student_affairs: t('categories.studentAffairs'),
+                general: t('categories.general'),
               };
               const categoryColors: Record<string, string> = {
                 admission: 'bg-blue-100 text-blue-700 ring-blue-200',
@@ -95,7 +97,7 @@ const RegulationCardComponent = ({
               ) : null;
             })()}
           </div>
-          <p className="text-sm text-gray-500">Cập nhật: {formattedDate}</p>
+          <p className="text-sm text-gray-500">{t('updated')}: {formattedDate}</p>
         </div>
 
         <ChevronDown 
@@ -120,13 +122,13 @@ const RegulationCardComponent = ({
                 <div className="grid gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm sm:grid-cols-2">
                   {extendedReg.issueDate && (
                     <div>
-                      <p className="text-xs font-semibold uppercase text-gray-500">Ngày ban hành</p>
+                      <p className="text-xs font-semibold uppercase text-gray-500">{t('issueDate')}</p>
                       <p className="mt-1 font-medium text-gray-900">{formatDate(extendedReg.issueDate)}</p>
                     </div>
                   )}
                   {extendedReg.effectiveDate && (
                     <div>
-                      <p className="text-xs font-semibold uppercase text-gray-500">Ngày hiệu lực</p>
+                      <p className="text-xs font-semibold uppercase text-gray-500">{t('effectiveDate')}</p>
                       <p className="mt-1 font-medium text-gray-900">{formatDate(extendedReg.effectiveDate)}</p>
                     </div>
                   )}
@@ -137,12 +139,12 @@ const RegulationCardComponent = ({
           })()}
 
           <div>
-            <p className="mb-2 text-sm font-semibold text-gray-900">Nội dung:</p>
+            <p className="mb-2 text-sm font-semibold text-gray-900">{t('content')}:</p>
             <p className="text-sm leading-relaxed text-gray-700">{regulation.description}</p>
           </div>
 
           <div>
-            <h4 className="mb-3 text-sm font-semibold text-gray-900">Xem tài liệu chi tiết:</h4>
+            <h4 className="mb-3 text-sm font-semibold text-gray-900">{t('viewDocument')}:</h4>
             
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
@@ -152,7 +154,7 @@ const RegulationCardComponent = ({
                 type="button"
               >
                 <Download className="h-4 w-4" />
-                {isDownloading ? 'Đang tải...' : 'Tải file'}
+                {isDownloading ? t('download.loading') : t('download.button')}
               </button>
 
               <a
@@ -162,12 +164,12 @@ const RegulationCardComponent = ({
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 <ExternalLink className="h-4 w-4" />
-                Xem trực tuyến
+                {t('viewOnline')}
               </a>
             </div>
 
             {regulation.fileName && (
-              <p className="mt-2 text-xs text-gray-500">Tên file: {regulation.fileName}</p>
+              <p className="mt-2 text-xs text-gray-500">{t('fileName')}: {regulation.fileName}</p>
             )}
           </div>
 
@@ -175,7 +177,7 @@ const RegulationCardComponent = ({
             <div className="flex gap-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
               <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600" />
               <div className="flex-1">
-                <p className="mb-1 text-sm font-semibold text-yellow-900">Lưu ý</p>
+                <p className="mb-1 text-sm font-semibold text-yellow-900">{t('notice')}</p>
                 <p className="text-sm leading-relaxed text-yellow-800">{noticeText}</p>
               </div>
             </div>

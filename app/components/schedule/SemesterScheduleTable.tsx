@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState, memo } from "react"
+import type { DateTimeFormatOptions } from "use-intl"
 import { cn } from "@/lib/utils/utils"
+import type { ScheduleTranslationFn } from "@/lib/types"
 
 interface SemesterCourse {
   subjectId?: string
@@ -26,6 +28,8 @@ interface SemesterScheduleTableProps {
   readonly showClass?: boolean
   readonly showInstructor?: boolean
   readonly highlightSubjectCode?: string
+  readonly translate?: ScheduleTranslationFn
+  readonly formatDate?: (date: Date, options?: DateTimeFormatOptions) => string
 }
 
 export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
@@ -35,9 +39,20 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
   showClass = true,
   showInstructor = true,
   highlightSubjectCode,
+  translate,
+  formatDate,
 }) => {
   const highlightedRowRef = useRef<HTMLTableRowElement>(null)
   const [isHighlighting, setIsHighlighting] = useState(false)
+
+  const dateFormatter = formatDate ?? ((date: Date, options?: Intl.DateTimeFormatOptions) =>
+    date.toLocaleDateString('vi-VN', options))
+
+  const headerLabel = (key: string, fallback: string) =>
+    translate ? translate(`table.headers.${key}`) : fallback
+
+  const loadingText = translate ? translate('table.loading') : 'Đang tải dữ liệu...'
+  const emptyText = translate ? translate('table.empty') : 'Không có dữ liệu thời khóa biểu'
 
   useEffect(() => {
     if (highlightSubjectCode && highlightedRowRef.current && scheduleData.length > 0) {
@@ -60,35 +75,35 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
 
   const getColumns = () => {
     const baseColumns = [
-      { key: 'subjectCode', label: showInstructor ? 'Mã MH' : 'Mã môn', className: '' },
-      { key: 'subjectName', label: 'Tên môn học', className: '' },
-      { key: 'courseGroup', label: 'Nhóm tổ', className: 'text-center' },
+      { key: 'subjectCode', label: headerLabel('subjectCode', showInstructor ? 'Mã MH' : 'Mã môn'), className: '' },
+      { key: 'subjectName', label: headerLabel('subjectName', 'Tên môn học'), className: '' },
+      { key: 'courseGroup', label: headerLabel('courseGroup', 'Nhóm tổ'), className: 'text-center' },
     ]
 
     if (showCredits) {
-      baseColumns.push({ key: 'credits', label: 'Số tín chỉ', className: 'text-center' })
+      baseColumns.push({ key: 'credits', label: headerLabel('credits', 'Số tín chỉ'), className: 'text-center' })
     }
 
     if (showClass) {
-      baseColumns.push({ key: 'classCode', label: 'Lớp', className: 'text-center' })
+      baseColumns.push({ key: 'classCode', label: headerLabel('class', 'Lớp'), className: 'text-center' })
     }
 
     baseColumns.push(
-      { key: 'dayOfWeek', label: 'Thứ', className: 'text-center' },
-      { key: 'startPeriod', label: showInstructor ? 'Tiết bắt đầu' : 'Tiết', className: 'text-center' },
+      { key: 'dayOfWeek', label: headerLabel('dayOfWeek', 'Thứ'), className: 'text-center' },
+      { key: 'startPeriod', label: headerLabel('startPeriod', showInstructor ? 'Tiết bắt đầu' : 'Tiết'), className: 'text-center' },
     )
 
     if (showInstructor) {
-      baseColumns.push({ key: 'numberOfPeriods', label: 'Số tiết', className: 'text-center' })
+      baseColumns.push({ key: 'numberOfPeriods', label: headerLabel('numberOfPeriods', 'Số tiết'), className: 'text-center' })
     }
 
-    baseColumns.push({ key: 'roomCode', label: 'Phòng', className: 'text-center' })
+    baseColumns.push({ key: 'roomCode', label: headerLabel('roomCode', 'Phòng'), className: 'text-center' })
 
     if (showInstructor) {
-      baseColumns.push({ key: 'instructorName', label: 'Giảng viên', className: '' })
+      baseColumns.push({ key: 'instructorName', label: headerLabel('instructorName', 'Giảng viên'), className: '' })
     }
 
-    baseColumns.push({ key: 'schedule', label: 'Thời gian học', className: 'text-center' })
+    baseColumns.push({ key: 'schedule', label: headerLabel('time', 'Thời gian học'), className: 'text-center' })
 
     return baseColumns
   }
@@ -121,7 +136,7 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
                 return (
                   <tr>
                     <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                      Đang tải dữ liệu...
+                      {loadingText}
                     </td>
                   </tr>
                 );
@@ -130,7 +145,7 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
                 return (
                   <tr>
                     <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                      Không có dữ liệu thời khóa biểu
+                      {emptyText}
                     </td>
                   </tr>
                 );
@@ -149,14 +164,16 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
                 })();
 
                 const startDate = course.scheduleStartDate
-                  ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                  ? dateFormatter(new Date(course.scheduleStartDate), { day: '2-digit', month: '2-digit', year: 'numeric' })
                   : ''
                 const endDate = course.scheduleEndDate
-                  ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                  ? dateFormatter(new Date(course.scheduleEndDate), { day: '2-digit', month: '2-digit', year: 'numeric' })
                   : ''
                 const timeDisplay = (() => {
                   if (startDate && endDate) {
-                    return `${startDate} đến ${endDate}`;
+                    return translate
+                      ? translate('table.dateRange', { start: startDate, end: endDate })
+                      : `${startDate} đến ${endDate}`;
                   }
                   return startDate || endDate || '-';
                 })();
@@ -218,18 +235,28 @@ export const SemesterScheduleTable = memo<SemesterScheduleTableProps>(({
                     <td className="px-4 py-3 text-sm text-center text-gray-900">
                       {(() => {
                         if (showInstructor) {
+                          const rangeStart = course.scheduleStartDate
+                            ? dateFormatter(new Date(course.scheduleStartDate))
+                            : '-'
+                          const rangeEnd = course.scheduleEndDate
+                            ? dateFormatter(new Date(course.scheduleEndDate))
+                            : '-'
+
                           return (
                             <div>
                               <div>
-                                {course.scheduleStartDate
-                                  ? new Date(course.scheduleStartDate).toLocaleDateString('vi-VN')
-                                  : '-'} đến
+                                {translate
+                                  ? translate('table.dateRange', {
+                                      start: rangeStart,
+                                      end: rangeEnd,
+                                    })
+                                  : `${rangeStart} đến`}
                               </div>
-                              <div>
-                                {course.scheduleEndDate
-                                  ? new Date(course.scheduleEndDate).toLocaleDateString('vi-VN')
-                                  : '-'}
-                              </div>
+                              {!translate && (
+                                <div>
+                                  {rangeEnd}
+                                </div>
+                              )}
                             </div>
                           );
                         }

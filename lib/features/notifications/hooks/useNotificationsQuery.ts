@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { notificationApi } from "@/lib/api/notification";
 import { NotificationQueryParams, NotificationType, NotificationReadStatus } from "@/lib/types/notification";
 import { queryKeys } from "@/lib/api/queryKeys";
@@ -16,6 +17,8 @@ interface UseNotificationsQueryOptions {
 export const useNotificationsQuery = (options: UseNotificationsQueryOptions) => {
   const { notificationType, readStatus, role, searchTerm, page = 1 } = options;
   const queryClient = useQueryClient();
+  const translationNamespace = role === "Instructor" ? "instructor.notification" : "student.notification";
+  const t = useTranslations(translationNamespace);
 
   const params: NotificationQueryParams = {
     PageIndex: page,
@@ -41,7 +44,7 @@ export const useNotificationsQuery = (options: UseNotificationsQueryOptions) => 
       const response = await notificationApi.getNotifications(params);
       
       if (!response.isSuccess) {
-        throw new Error(response.resultMessage || "Không thể tải thông báo");
+        throw new Error(response.resultMessage || t('error.title'));
       }
 
       // Prefetch next page for smoother pagination

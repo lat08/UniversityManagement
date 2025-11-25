@@ -4,8 +4,10 @@ import { Menu } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
 import { Avatar, AvatarFallback } from "@/app/components/ui/avatar"
 import { NotificationPopup } from "@/app/components/notification/header-popup/content/NotificationContent"
+import { LanguageSwitcher } from "@/app/components/header/language-switcher"
 import { useAuthStore } from "@/lib/store/authStore"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 
 interface HeaderProps {
   onMobileMenuToggle: () => void
@@ -14,13 +16,14 @@ interface HeaderProps {
 export function Header({ onMobileMenuToggle }: HeaderProps) {
   const user = useAuthStore((state) => state.user)
   const router = useRouter()
+  const t = useTranslations('common.roles')
 
   const displayName = user?.name || user?.email || "Name"
   const roleLabel = (() => {
     const role = (user?.role || "").toLowerCase()
-    if (role.includes("instructor") || role.includes("teacher") || role === "giang_vien") return "Giảng viên"
-    if (role.includes("student") || role === "sinh_vien") return "Sinh viên"
-    return "Quản trị viên"
+    if (role.includes("instructor") || role.includes("teacher") || role === "giang_vien") return t('instructor')
+    if (role.includes("student") || role === "sinh_vien") return t('student')
+    return t('admin')
   })()
 
   const initials = (() => {
@@ -47,6 +50,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
       <div className="flex-1 lg:flex-none" />
 
       <div className="flex items-center gap-2 lg:gap-4">
+        <LanguageSwitcher />
         <NotificationPopup />
 
         <button 

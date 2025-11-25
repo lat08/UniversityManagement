@@ -1,11 +1,15 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { ToastProvider } from './components/ui/toaster';
 
+const ReactQueryDevtools = dynamic(
+  () => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools),
+  { ssr: false },
+);
 
 export default function AppProviders({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient({
@@ -39,7 +43,9 @@ export default function AppProviders({ children }: { children: React.ReactNode }
       <ThemeProvider>
         <ToastProvider />
         {children}
-        <ReactQueryDevtools initialIsOpen={false} />
+        {process.env.NODE_ENV === 'development' ? (
+          <ReactQueryDevtools initialIsOpen={false} />
+        ) : null}
       </ThemeProvider>
     </QueryClientProvider>
   );

@@ -3,13 +3,22 @@
 import { BellOff, Bell, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Button } from "@/app/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover"
 import { NotificationCard } from "@/app/components/notification/header-popup/notification-card/NotificationCard"
 import { notificationApi } from "@/lib/api/notification"
 import { NotificationApiItem } from "@/lib/types/notification"
 import { useAuthStore } from "@/lib/store/authStore"
+
+const SUPPORTED_LOCALES = new Set(['vi', 'en'])
+
+const resolveLocaleFromPath = (path?: string | null): 'vi' | 'en' => {
+  if (!path) return 'vi'
+  const segment = path.split('/').filter(Boolean)[0]
+  return SUPPORTED_LOCALES.has(segment as 'vi' | 'en') ? (segment as 'vi' | 'en') : 'vi'
+}
 
 export function NotificationPopup() {
   const [unreadCount, setUnreadCount] = useState(0)
@@ -19,6 +28,28 @@ export function NotificationPopup() {
   const { user } = useAuthStore()
   const userRole = user?.role
   const router = useRouter()
+  const pathname = usePathname()
+  const locale = resolveLocaleFromPath(pathname)
+  const translationNamespace = userRole === "Instructor" ? "instructor.notification" : userRole === "Admin" ? "admin.notification" : "student.notification"
+  const t = useTranslations(translationNamespace)
+
+  const buildLocalePath = useCallback(
+    (path: string) => {
+      if (!path) {
+        return `/${locale}/login`
+      }
+      if (path.startsWith("http")) {
+        return path
+      }
+      const normalized = path.startsWith("/") ? path : `/${path}`
+      const firstSegment = normalized.split("/").filter(Boolean)[0]
+      if (SUPPORTED_LOCALES.has(firstSegment as 'vi' | 'en')) {
+        return normalized
+      }
+      return `/${locale}${normalized}`
+    },
+    [locale],
+  )
 
   const fetchUnreadCount = useCallback(async () => {
     if (!userRole) return
@@ -75,15 +106,20 @@ export function NotificationPopup() {
     }
   }, [isOpen, userRole, fetchRecentNotifications])
 
-  const getNotificationLink = (readStatus?: string) => {
-    if (!user) return "/login"
-    const basePath = user.role === "Student" 
-      ? "/student/notification" 
-      : user.role === "Instructor" 
-      ? "/instructor/notification" 
-      : "/admin/notification"
-    return readStatus ? `${basePath}?readStatus=${readStatus}` : basePath
-  }
+  const getNotificationLink = useCallback(
+    (readStatus?: string) => {
+      if (!user) return buildLocalePath('/login')
+      const basePath =
+        user.role === "Student"
+          ? "/student/notification"
+          : user.role === "Instructor"
+          ? "/instructor/notification"
+          : "/admin/notification"
+      const localePath = buildLocalePath(basePath)
+      return readStatus ? `${localePath}?readStatus=${readStatus}` : localePath
+    },
+    [user, buildLocalePath],
+  )
 
   const handleUnreadNavigate = () => {
     router.push(getNotificationLink("unread"))
@@ -103,7 +139,7 @@ export function NotificationPopup() {
           {unreadCount > 0 && (
             <span
               className="absolute -top-1.5 -right-1.5 flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full border border-white bg-red-500 px-0.5 text-[9px] font-semibold text-white"
-              title={`${unreadCount} thông báo chưa đọc`}
+              title={t('unreadCount', { count: unreadCount })}
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
@@ -115,14 +151,14 @@ export function NotificationPopup() {
           {/* Header - Fixed */}
           <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Thông báo</h3>
+              <h3 className="text-lg font-semibold">{t('title')}</h3>
               {unreadCount > 0 && (
                 <button
                   type="button"
                   onClick={handleUnreadNavigate}
                   className="text-xs font-medium text-blue-600 underline-offset-2 hover:text-blue-700 hover:underline cursor-pointer"
                 >
-                  {unreadCount} chưa đọc
+                  {t('unreadCount', { count: unreadCount })}
                 </button>
               )}
             </div>
@@ -133,13 +169,13 @@ export function NotificationPopup() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Loader2 className="h-10 w-10 text-blue-500 mb-3 animate-spin" />
-                <p className="text-sm text-gray-500">Đang tải...</p>
+                <p className="text-sm text-gray-500">{t('loading')}</p>
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
                 <BellOff className="h-12 w-12 text-gray-300 mb-3" />
-                <p className="text-sm font-medium text-gray-500 mb-1">Không có thông báo</p>
-                <p className="text-xs text-gray-400">Bạn chưa có thông báo nào</p>
+                <p className="text-sm font-medium text-gray-500 mb-1">{t('empty.title')}</p>
+                <p className="text-xs text-gray-400">{t('empty.noNotifications')}</p>
               </div>
             ) : (
               <div className="p-3">
@@ -156,7 +192,7 @@ export function NotificationPopup() {
                   variant="outline"
                   className="w-full text-blue-600 border-blue-600 hover:bg-blue-50 bg-transparent"
                 >
-                  Xem tất cả
+                  {t('viewAll')}
                 </Button>
               </Link>
             </div>

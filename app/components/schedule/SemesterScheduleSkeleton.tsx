@@ -1,8 +1,19 @@
-export const SemesterScheduleSkeleton = () => {
+import type { ScheduleTranslationFn } from "@/lib/types"
+
+export const SemesterScheduleSkeleton = ({ translate }: { translate?: ScheduleTranslationFn } = {}) => {
   const rows = 8
   const columns = [
-    'Mã MH', 'Tên môn học', 'Nhóm tổ', 'Số tín chỉ', 'Lớp',
-    'Thứ', 'Tiết bắt đầu', 'Số tiết', 'Phòng', 'Giảng viên', 'Thời gian học'
+    translate ? translate('table.headers.subjectCode') : 'Mã MH',
+    translate ? translate('table.headers.subjectName') : 'Tên môn học',
+    translate ? translate('table.headers.courseGroup') : 'Nhóm tổ',
+    translate ? translate('table.headers.credits') : 'Số tín chỉ',
+    translate ? translate('table.headers.class') : 'Lớp',
+    translate ? translate('table.headers.dayOfWeek') : 'Thứ',
+    translate ? translate('table.headers.startPeriod') : 'Tiết bắt đầu',
+    translate ? translate('table.headers.numberOfPeriods') : 'Số tiết',
+    translate ? translate('table.headers.roomCode') : 'Phòng',
+    translate ? translate('table.headers.instructorName') : 'Giảng viên',
+    translate ? translate('table.headers.time') : 'Thời gian học',
   ]
 
   return (

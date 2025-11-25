@@ -1,7 +1,17 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES } from "@/lib/constants/schedule"
+import { DAYS_OF_WEEK, PERIODS, PERIOD_TIMES, type DayOfWeekConfig } from "@/lib/constants/schedule"
+import type { ScheduleTranslationFn } from "@/lib/types"
 
-export const WeeklyScheduleSkeleton = () => {
+export const WeeklyScheduleSkeleton = ({ translate }: { translate?: ScheduleTranslationFn } = {}) => {
+  const getDayLabel = (day: DayOfWeekConfig) =>
+    translate ? translate(`days.${day.key}.short`) : day.label
+
+  const getDayFullLabel = (day: DayOfWeekConfig) =>
+    translate ? translate(`days.${day.key}.full`) : day.label
+
+  const formatPeriodLabel = (period: number) =>
+    translate ? translate('grid.period', { period }) : `Tiết ${period}`
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden p-3">
       <div>
@@ -18,8 +28,11 @@ export const WeeklyScheduleSkeleton = () => {
                 key={day.value}
                 className="flex-1 min-w-[120px] text-[var(--schedule-header-text)] rounded-lg flex flex-col items-center justify-center h-[60px] bg-[var(--schedule-header-bg)]"
               >
-                <div className="font-semibold text-sm">{day.label}</div>
-                <div className="text-xs mt-1 h-4 w-16 bg-gray-300 rounded animate-pulse" />
+                <div className="font-semibold text-sm">{getDayLabel(day)}</div>
+                <div className="text-xs mt-1">
+                  <span className="sr-only">{getDayFullLabel(day)}</span>
+                  <span className="block h-4 w-16 bg-gray-300 rounded animate-pulse" />
+                </div>
               </div>
             ))}
 
@@ -34,7 +47,7 @@ export const WeeklyScheduleSkeleton = () => {
             {PERIODS.map((period) => (
               <div key={period} className="flex gap-2 mb-2">
                 <div className="w-[90px] flex-shrink-0 text-[var(--schedule-header-text)] rounded-lg flex items-center justify-center font-semibold text-sm h-[52px] bg-[var(--schedule-header-bg)]">
-                  Tiết {period}
+                  {formatPeriodLabel(period)}
                 </div>
 
                 {DAYS_OF_WEEK.map((day) => (
