@@ -65,18 +65,25 @@ export interface UpdateBuildingPayload {
   buildingStatus?: 'active' | 'inactive';
 }
 
-export const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
-  { value: 'active', label: 'Đang hoạt động' },
-  { value: 'inactive', label: 'Ngừng hoạt động' },
+export const STATUS_OPTIONS: Array<{ value: string; labelKey: string }> = [
+  { value: '', labelKey: 'status.all' },
+  { value: 'active', labelKey: 'status.active' },
+  { value: 'inactive', labelKey: 'status.inactive' },
 ];
 
-export const getStatusDisplay = (status: string) => {
+export const getStatusDisplay = (
+  status: string,
+  labels?: {
+    active: string;
+    inactive: string;
+    unknown: string;
+  }
+) => {
   const statusLower = status?.toLowerCase() || '';
   const statusMap: Record<string, { label: string; color: string }> = {
-    active: { label: 'Đang hoạt động', color: 'bg-green-100 text-green-700' },
-    inactive: { label: 'Ngừng hoạt động', color: 'bg-red-100 text-red-700' },
+    active: { label: labels?.active ?? 'Active', color: 'bg-green-100 text-green-700' },
+    inactive: { label: labels?.inactive ?? 'Inactive', color: 'bg-red-100 text-red-700' },
   };
-  return statusMap[statusLower] || { label: status || 'Không xác định', color: 'bg-gray-100 text-gray-700' };
+  return statusMap[statusLower] || { label: labels?.unknown ?? (status || 'Unknown'), color: 'bg-gray-100 text-gray-700' };
 };
 

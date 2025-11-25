@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Dropdown, DropdownSearch, Button, Input } from '@/app/components/ui';
-import { X } from 'lucide-react';
-import { useForm, type Resolver } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import type { InferType } from 'yup';
-import { toast } from 'react-hot-toast';
-import { majorsApi } from '../lib/api/majorsApi';
-import type { Faculty, TrainingSystem, Curriculum } from '../lib/types/types';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Dropdown, DropdownSearch, Button, Input } from "@/app/components/ui";
+import { X } from "lucide-react";
+import { useForm, type Resolver } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { toast } from "react-hot-toast";
+import { majorsApi } from "../lib/api/majorsApi";
+import type { Faculty, TrainingSystem, Curriculum } from "../lib/types/types";
+import { useTranslations } from "next-intl";
 
 interface AddMajorModalProps {
   isOpen: boolean;
@@ -17,18 +17,36 @@ interface AddMajorModalProps {
   onSuccess?: () => void;
 }
 
-const validationSchema = yup.object({
-  majorName: yup.string().required('Tên chuyên ngành là bắt buộc').min(3, 'Tên chuyên ngành phải có ít nhất 3 ký tự'),
-  majorCode: yup.string().required('Mã chuyên ngành là bắt buộc').min(2, 'Mã chuyên ngành phải có ít nhất 2 ký tự'),
-  facultyId: yup.string().required('Ngành học là bắt buộc'),
-  trainingSystemId: yup.string().required('Hệ đào tạo là bắt buộc'),
-  curriculumId: yup.string().required('CTĐT là bắt buộc'),
-  status: yup.string().optional(),
-});
-
-type FormData = InferType<typeof validationSchema>;
+type FormData = {
+  majorName: string;
+  majorCode: string;
+  facultyId: string;
+  trainingSystemId: string;
+  curriculumId: string;
+  status?: string;
+};
 
 export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps) => {
+  const t = useTranslations("admin.majorManagement");
+  const tCommon = useTranslations("common.actions");
+  const validationSchema = useMemo(
+    () =>
+      yup.object({
+        majorName: yup
+          .string()
+          .required(t("form.majorName.required"))
+          .min(3, t("form.majorName.min")),
+        majorCode: yup
+          .string()
+          .required(t("form.majorCode.required"))
+          .min(2, t("form.majorCode.min")),
+        facultyId: yup.string().required(t("form.faculty.required")),
+        trainingSystemId: yup.string().required(t("form.trainingSystem.required")),
+        curriculumId: yup.string().required(t("form.curriculum.required")),
+        status: yup.string().optional(),
+      }),
+    [t],
+  );
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset, clearErrors } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
@@ -66,8 +84,8 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
   const trainingSystemOptions = trainingSystems.map((t) => ({ value: t.trainingSystemId, label: t.trainingSystemName }));
   const curriculumOptions = curricula.map((c) => ({ value: c.curriculumId, label: c.curriculumName }));
   const statusOptions = [
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Ngừng hoạt động' },
+    { value: 'active', label: t('filters.active') },
+    { value: 'inactive', label: t('filters.inactive') },
   ];
 
   const handleClose = useCallback(() => {
@@ -108,17 +126,17 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
       const response = await majorsApi.createMajor(payload);
 
       if (response.success) {
-        toast.success('Thêm chuyên ngành thành công!');
+        toast.success(t('hooks.createSuccess'));
         reset();
         onSuccess?.();
         handleClose();
       } else {
-        toast.error(response.message || 'Thêm chuyên ngành thất bại');
+        toast.error(response.message || t('hooks.createError'));
       }
     } catch (error: unknown) {
       const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
                            (error as { message?: string })?.message || 
-                           'Đã xảy ra lỗi';
+                           tCommon('error');
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -142,8 +160,8 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Thêm chuyên ngành mới</h2>
-              <p className="text-sm text-gray-600 mt-1">Nhập thông tin chuyên ngành</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('modals.add.title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t('modals.add.description')}</p>
             </div>
             <Button
               variant="ghost"
@@ -164,10 +182,10 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               {/* Mã chuyên ngành */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Mã chuyên ngành <span className="text-red-500">*</span>
+                  {t('form.majorCode.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="VD: KTDN"
+                  placeholder={t('form.majorCode.placeholder')}
                   {...register('majorCode')}
                   className={errors.majorCode ? 'border-red-500' : ''}
                 />
@@ -177,10 +195,10 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               {/* Tên chuyên ngành */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Tên chuyên ngành <span className="text-red-500">*</span>
+                  {t('form.majorName.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="VD: Kế toán doanh nghiệp"
+                  placeholder={t('form.majorName.placeholder')}
                   {...register('majorName')}
                   className={errors.majorName ? 'border-red-500' : ''}
                 />
@@ -190,13 +208,13 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               {/* Ngành học */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Ngành học <span className="text-red-500">*</span>
+                  {t('form.faculty.label')} <span className="text-red-500">*</span>
                 </label>
                 <DropdownSearch
                   options={facultyOptions}
                   value={formValues.facultyId || ''}
-                  placeholder="Chọn ngành"
-                  searchPlaceholder="Tìm kiếm ngành..."
+                  placeholder={t('form.faculty.placeholder')}
+                  searchPlaceholder={t('form.faculty.search')}
                   onChange={(value) => {
                     setValue('facultyId', value);
                     clearErrors('facultyId');
@@ -209,12 +227,12 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               {/* Hệ đào tạo */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Hệ đào tạo <span className="text-red-500">*</span>
+                  {t('form.trainingSystem.label')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
                   options={trainingSystemOptions}
                   value={formValues.trainingSystemId || ''}
-                  placeholder="Chọn hệ đào tạo"
+                  placeholder={t('form.trainingSystem.placeholder')}
                   onChange={(value) => {
                     setValue('trainingSystemId', value);
                     clearErrors('trainingSystemId');
@@ -227,12 +245,12 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               {/* Thuộc CTĐT */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Thuộc CTĐT <span className="text-red-500">*</span>
+                  {t('form.curriculum.label')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
                   options={curriculumOptions}
                   value={formValues.curriculumId || ''}
-                  placeholder="Chọn CTĐT"
+                  placeholder={t('form.curriculum.placeholder')}
                   onChange={(value) => {
                     setValue('curriculumId', value);
                     clearErrors('curriculumId');
@@ -245,12 +263,12 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               {/* Trạng thái */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Trạng thái
+                  {t('form.status.label')}
                 </label>
                 <Dropdown
                   options={statusOptions}
                   value={formValues.status || 'active'}
-                  placeholder="Chọn trạng thái"
+                  placeholder={t('form.status.placeholder')}
                   onChange={(value) => setValue('status', value)}
                 />
               </div>
@@ -265,14 +283,14 @@ export const AddMajorModal = ({ isOpen, onClose, onSuccess }: AddMajorModalProps
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {tCommon('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang lưu...' : 'Lưu'}
+              {isSubmitting ? t('modals.add.submitting') : t('modals.add.submit')}
             </Button>
           </div>
         </form>

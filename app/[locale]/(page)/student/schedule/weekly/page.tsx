@@ -12,7 +12,7 @@ import {
 } from "@/app/components/schedule"
 import { usePageTitle } from "@/lib/hooks/usePageTitle"
 import { useScheduleData } from "../lib/hooks/useScheduleData"
-import { useScheduleTooltip } from "../lib/hooks/useScheduleTooltip"
+import { useScheduleTooltip } from "@/lib/hooks/useScheduleTooltip"
 import { useScheduleConflicts } from "../lib/hooks/useScheduleConflicts"
 import { formatWeekDisplay, getColorByCourseType, generateWeekDates } from "@/lib/utils/scheduleHelpers"
 

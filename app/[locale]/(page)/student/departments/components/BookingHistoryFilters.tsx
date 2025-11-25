@@ -4,7 +4,7 @@ import { memo, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRoomBookingStore } from '../lib/stores/roomBookingStore';
 import { Dropdown } from '@/app/components/ui/dropdown';
-import { ROOM_TYPE_LABELS, BOOKING_STATUS_LABELS, type RoomType, type BookingStatus } from '../lib/types/room.types';
+import { ROOM_TYPE_LABELS, BOOKING_STATUS_LABELS, type RoomType, type BookingStatus } from '@/lib/types/room';
 import { useBuildings } from '@/lib/hooks/useCommonData';
 
 function BookingHistoryFilters() {

@@ -5,6 +5,7 @@ import { X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/app/components/ui';
 import { studentsApi } from '../lib/api/studentsApi';
 import { toast } from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 
 interface BulkDeleteStudentModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export default function BulkDeleteStudentModal({
   onSuccess,
 }: BulkDeleteStudentModalProps) {
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('admin.studentProfile.modals.bulkDelete');
+  const tCommon = useTranslations('common.actions');
 
   const handleDelete = async () => {
     try {
@@ -28,15 +31,17 @@ export default function BulkDeleteStudentModal({
       const response = await studentsApi.bulkDeleteStudents(selectedStudentIds);
 
       if (response.success) {
-        toast.success(`Xóa thành công ${selectedStudentIds.length} sinh viên`);
+        toast.success(
+          t('toast.success', { count: selectedStudentIds.length }),
+        );
         onSuccess();
         onClose();
       } else {
-        toast.error(response.message || 'Xóa thất bại');
+        toast.error(response.message || t('toast.error'));
       }
     } catch (error) {
       console.error('Error bulk deleting students:', error);
-      toast.error('Có lỗi xảy ra khi xóa');
+      toast.error(t('toast.genericError'));
     } finally {
       setLoading(false);
     }
@@ -54,7 +59,7 @@ export default function BulkDeleteStudentModal({
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Xác nhận xóa
+              {t('title')}
             </h2>
           </div>
           <button
@@ -68,12 +73,10 @@ export default function BulkDeleteStudentModal({
         {/* Content */}
         <div className="p-6">
           <p className="text-gray-700">
-            Bạn có chắc chắn muốn xóa{' '}
-            <span className="font-semibold text-gray-900">{selectedStudentIds.length}</span>{' '}
-            sinh viên đã chọn?
+            {t('description', { count: selectedStudentIds.length })}
           </p>
           <p className="text-sm text-red-600 mt-2">
-            Hành động này không thể hoàn tác!
+            {t('warning')}
           </p>
         </div>
 
@@ -85,7 +88,7 @@ export default function BulkDeleteStudentModal({
             onClick={onClose}
             disabled={loading}
           >
-            Hủy
+            {tCommon('cancel')}
           </Button>
           <Button
             type="button"
@@ -93,7 +96,7 @@ export default function BulkDeleteStudentModal({
             disabled={loading}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {loading ? 'Đang xóa...' : 'Xóa'}
+            {loading ? t('submitting') : tCommon('delete')}
           </Button>
         </div>
       </div>

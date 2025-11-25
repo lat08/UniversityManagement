@@ -2,6 +2,7 @@
 
 import { Button } from "@/app/components/ui"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface BulkDeleteCurriculumModalProps {
   isOpen: boolean
@@ -18,6 +19,8 @@ export const BulkDeleteCurriculumModal = ({
   selectedCount,
   isLoading,
 }: BulkDeleteCurriculumModalProps) => {
+  const t = useTranslations('admin.curriculumManagement')
+  const tActions = useTranslations('actions')
   if (!isOpen) return null
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -34,9 +37,9 @@ export const BulkDeleteCurriculumModal = ({
       <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Xác nhận xóa chương trình đào tạo</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{t('modals.bulkDelete.title')}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Bạn có chắc chắn muốn xóa toàn bộ <strong>{selectedCount}</strong> chương trình đào tạo được chọn?
+              {t('modals.bulkDelete.description', { count: selectedCount })}
             </p>
           </div>
           <Button
@@ -53,8 +56,8 @@ export const BulkDeleteCurriculumModal = ({
 
         <div className="p-6">
           <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800">
-            <p className="font-semibold mb-1">Cảnh báo:</p>
-            <p>Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.</p>
+            <p className="font-semibold mb-1">{t('modals.bulkDelete.warningTitle')}</p>
+            <p>{t('modals.bulkDelete.warningDescription')}</p>
           </div>
         </div>
 
@@ -66,7 +69,7 @@ export const BulkDeleteCurriculumModal = ({
             disabled={isLoading}
             className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Hủy
+            {tActions('cancel')}
           </Button>
           <Button
             type="button"
@@ -74,7 +77,7 @@ export const BulkDeleteCurriculumModal = ({
             disabled={isLoading}
             className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Đang xóa..." : "Xác nhận"}
+            {isLoading ? t('modals.bulkDelete.submitting') : t('modals.bulkDelete.submit')}
           </Button>
         </div>
       </div>

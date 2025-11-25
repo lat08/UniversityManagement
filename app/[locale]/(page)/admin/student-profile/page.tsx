@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Download, Plus, Edit, Trash2, X, Users, GraduationCap, BookOpen, School } from 'lucide-react';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
@@ -20,25 +20,24 @@ import { toast } from 'react-hot-toast';
 import { Student, AcademicYear, Department, STATUS_OPTIONS, getStatusDisplay } from './lib/types/types';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
 
-// STAT_CARDS sẽ được định nghĩa trong component để sử dụng translations
-
 export default function StudentProfilePage() {
   const t = useTranslations('admin.studentProfile');
   const tCommon = useTranslations('common.actions');
+  const locale = useLocale();
   const router = useRouter();
   
   const STAT_CARDS = [
     { 
       key: 'total', 
-      label: t('totalStudents'), 
+      label: t('statCards.totalStudents'), 
       bgColor: 'bg-[#FFDDAA]', 
       iconColor: 'text-[#CC8800]',
       Icon: Users,
-      subtitle: t('studying') 
+      subtitle: t('statCards.studying') 
     },
     { 
       key: 'enrolled', 
-      label: t('newStudents'), 
+      label: t('statCards.newStudents'), 
       bgColor: 'bg-[#CCEECC]', 
       iconColor: 'text-[#44AA44]',
       Icon: GraduationCap,
@@ -46,19 +45,19 @@ export default function StudentProfilePage() {
     },
     { 
       key: 'graduating', 
-      label: t('graduatingSoon'), 
+      label: t('statCards.graduatingSoon'), 
       bgColor: 'bg-[#AACCFF]', 
       iconColor: 'text-[#3366CC]',
       Icon: BookOpen,
-      subtitle: 'Dự kiến' 
+      subtitle: t('statCards.expected') 
     },
     { 
       key: 'onLeave', 
-      label: t('onLeave'), 
+      label: t('statCards.onLeave'), 
       bgColor: 'bg-[#FFBBAA]', 
       iconColor: 'text-[#CC4444]',
       Icon: School,
-      subtitle: t('onLeaveSubtitle') 
+      subtitle: t('statCards.onLeaveSubtitle') 
     },
   ] as const;
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,19 +93,19 @@ export default function StudentProfilePage() {
 
   const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([
     { key: 'checkbox', label: '', width: 50, minWidth: 50, align: 'center', visible: true, required: true },
-    { key: 'studentCode', label: 'MSSV', width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-    { key: 'fullName', label: 'Họ và tên', width: 200, minWidth: 150, align: 'left', visible: true, required: true },
-    { key: 'email', label: 'Email', width: 220, minWidth: 180, align: 'left', visible: true },
-    { key: 'facultyName', label: 'Khoa', width: 180, minWidth: 120, align: 'left', visible: false },
-    { key: 'departmentName', label: 'Chuyên ngành', width: 180, minWidth: 120, align: 'left', visible: true },
-    { key: 'className', label: 'Lớp', width: 140, minWidth: 100, align: 'left', visible: true },
-    { key: 'academicYear', label: 'Khóa', width: 100, minWidth: 80, align: 'left', visible: true },
-    { key: 'trainingSystemName', label: 'Hệ đào tạo', width: 140, minWidth: 100, align: 'left', visible: false },
-    { key: 'averageGPA', label: 'GPA', width: 100, minWidth: 80, align: 'center', visible: false },
-    { key: 'creditsEarned', label: 'Tín chỉ', width: 100, minWidth: 80, align: 'center', visible: false },
-    { key: 'totalOwedAmount', label: 'Công nợ', width: 120, minWidth: 100, align: 'center', visible: false },
-    { key: 'enrollmentStatus', label: 'Trạng thái', width: 140, minWidth: 120, align: 'center', visible: true },
-    { key: 'actions', label: 'Thao tác', width: 140, minWidth: 50, align: 'center', visible: true, required: true },
+    { key: 'studentCode', label: t('columns.mssv'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+    { key: 'fullName', label: t('columns.fullName'), width: 200, minWidth: 150, align: 'left', visible: true, required: true },
+    { key: 'email', label: t('columns.email'), width: 220, minWidth: 180, align: 'left', visible: true },
+    { key: 'facultyName', label: t('columns.faculty'), width: 180, minWidth: 120, align: 'left', visible: false },
+    { key: 'departmentName', label: t('columns.department'), width: 180, minWidth: 120, align: 'left', visible: true },
+    { key: 'className', label: t('columns.class'), width: 140, minWidth: 100, align: 'left', visible: true },
+    { key: 'academicYear', label: t('columns.academicYear'), width: 100, minWidth: 80, align: 'left', visible: true },
+    { key: 'trainingSystemName', label: t('columns.trainingSystem'), width: 140, minWidth: 100, align: 'left', visible: false },
+    { key: 'averageGPA', label: t('columns.gpa'), width: 100, minWidth: 80, align: 'center', visible: false },
+    { key: 'creditsEarned', label: t('columns.credits'), width: 100, minWidth: 80, align: 'center', visible: false },
+    { key: 'totalOwedAmount', label: t('columns.debt'), width: 120, minWidth: 100, align: 'center', visible: false },
+    { key: 'enrollmentStatus', label: t('columns.status'), width: 140, minWidth: 120, align: 'center', visible: true },
+    { key: 'actions', label: t('columns.actions'), width: 140, minWidth: 50, align: 'center', visible: true, required: true },
   ]);
   
   const [students, setStudents] = useState<Student[]>([]);
@@ -216,6 +215,35 @@ export default function StudentProfilePage() {
     onLeave: stats.onLeave,
   }), [stats]);
 
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(locale),
+    [locale],
+  );
+
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'VND',
+        maximumFractionDigits: 0,
+      }),
+    [locale],
+  );
+
+  const translatedStatusOptions = useMemo(
+    () =>
+      STATUS_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t],
+  );
+
+  const translateStatusDisplay = useCallback(
+    (status: string) => getStatusDisplay(status, (key) => t(key)),
+    [t],
+  );
+
   // Delete handler
   const handleDeleteClick = useCallback((studentId: string, studentName: string) => {
     setDeletingStudentId(studentId);
@@ -293,7 +321,7 @@ export default function StudentProfilePage() {
 
   // Table row renderer with dynamic columns
   const renderStudentRow = useCallback((student: Student, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const statusDisplay = getStatusDisplay(student.enrollmentStatus);
+    const statusDisplay = translateStatusDisplay(student.enrollmentStatus);
     const isSelected = selectedStudentIds.has(student.studentId);
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     
@@ -395,10 +423,12 @@ export default function StudentProfilePage() {
                 <td key="totalOwedAmount" className="text-center text-gray-900" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {student.totalOwedAmount > 0 ? (
                     <span className="text-red-600 font-medium">
-                      {student.totalOwedAmount.toLocaleString('vi-VN')}đ
+                      {currencyFormatter.format(student.totalOwedAmount)}
                     </span>
                   ) : (
-                    <span className="text-green-600">0đ</span>
+                    <span className="text-green-600">
+                      {currencyFormatter.format(0)}
+                    </span>
                   )}
                 </td>
               );
@@ -438,16 +468,16 @@ export default function StudentProfilePage() {
         })}
       </>
     );
-  }, [router, handleDeleteClick, handleSelectOne, selectedStudentIds]);
+  }, [router, handleDeleteClick, handleSelectOne, selectedStudentIds, translateStatusDisplay, currencyFormatter]);
 
   const handleDeleteConfirm = async () => {
     if (!deletingStudentId) return;
     const res = await studentsApi.deleteStudent(deletingStudentId);
     if (res.success) {
-      toast.success('Xoá sinh viên thành công');
+      toast.success(t('toast.deleteSuccess'));
       await fetchStudents();
     } else {
-      toast.error(res.message || 'Xoá sinh viên thất bại');
+      toast.error(res.message || t('toast.deleteError'));
     }
   };
 
@@ -455,8 +485,8 @@ export default function StudentProfilePage() {
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Hồ sơ sinh viên</h1>
-        <p className="text-gray-600 mt-1">Quản lý thông tin sinh viên</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-600 mt-1">{t('description')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -478,7 +508,7 @@ export default function StudentProfilePage() {
                   {card.label}
                 </p>
                 <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
-                  {typeof value === 'number' ? value.toLocaleString('vi-VN') : value}
+                  {typeof value === 'number' ? numberFormatter.format(value) : value}
                 </p>
                 {card.subtitle && (
                   <p className="text-xs sm:text-sm text-gray-600 relative z-10">
@@ -495,7 +525,7 @@ export default function StudentProfilePage() {
                       )}
                       {`${stats.growthPercentage > 0 ? '+' : ''}${stats.growthPercentage.toFixed(1)}%`}
                     </span>
-                    <span className="text-xs text-gray-500">so với năm trước</span>
+                    <span className="text-xs text-gray-500">{t('statCards.growthCompared')}</span>
                   </div>
                 )}
               </div>
@@ -512,10 +542,10 @@ export default function StudentProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                Danh sách sinh viên
+                {t('list.title')}
               </h2>
               <p className="text-xs lg:text-sm text-gray-600 mt-1">
-                Quản lý hồ sơ và thông tin sinh viên
+                {t('list.description')}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 lg:gap-3">
@@ -524,14 +554,14 @@ export default function StudentProfilePage() {
                 onClick={() => setIsImportModalOpen(true)}
               >
                 <Download className="w-4 h-4" />
-                Nhập Excel
+                {t('import')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setIsExportModalOpen(true)}
               >
                 <Download className="w-4 h-4" />
-                Xuất Excel
+                {t('export')}
               </Button>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
@@ -557,11 +587,11 @@ export default function StudentProfilePage() {
             {/* Department Dropdown */}
             <Dropdown
               options={[
-                { value: '', label: 'Tất cả chuyên ngành' },
+                { value: '', label: t('filters.allDepartments') },
                 ...departments.map(d => ({ value: d.departmentId, label: d.departmentName }))
               ]}
               value={selectedDepartmentId || ''}
-              placeholder="Tất cả chuyên ngành"
+              placeholder={t('filters.allDepartments')}
               onChange={(value) => {
                 setSelectedDepartmentId(value);
                 setCurrentPage(1);
@@ -585,9 +615,9 @@ export default function StudentProfilePage() {
             {/* Status Dropdown & Column Selector */}
             <div className="flex gap-2">
               <Dropdown
-                options={STATUS_OPTIONS}
+                options={translatedStatusOptions}
                 value={selectedStatus || ''}
-                placeholder={t('filters.allStatus')}
+                placeholder={t('filters.allStatuses')}
                 onChange={(value) => {
                   setSelectedStatus(value);
                   setCurrentPage(1);

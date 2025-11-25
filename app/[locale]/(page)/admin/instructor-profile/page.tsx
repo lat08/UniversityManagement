@@ -3,11 +3,11 @@
 import { useMemo, useState } from 'react';
 import { Plus, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { SearchInput, Dropdown, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { InstructorListItem } from './lib/types/types';
-import { EMPLOYMENT_STATUS_OPTIONS, DEGREE_OPTIONS } from './lib/constants/filters';
+import { getEmploymentStatusOptions, getDegreeOptions } from './lib/constants/filters';
 import { getEmploymentStatusDisplay } from './lib/utils/display';
 import { instructorsApi } from './lib/api/instructorsApi';
 import { TableSkeleton, StatCardsSkeleton } from '../student-profile/components/LoadingSkeleton';
@@ -22,6 +22,9 @@ import { useInstructors } from './lib/hooks/useInstructors';
 
 export default function InstructorProfilePage() {
   const t = useTranslations('admin.instructorProfile');
+  const tFilters = useTranslations('admin.instructorProfile.filters');
+  const tStatCards = useTranslations('admin.instructorProfile.statCards');
+  const locale = useLocale();
   const {
     searchQuery,
     setSearchQuery,
@@ -48,6 +51,9 @@ export default function InstructorProfilePage() {
   const [detailInstructorId, setDetailInstructorId] = useState<string | null>(null);
   const [editInstructorId, setEditInstructorId] = useState<string | null>(null);
 
+  const degreeOptions = useMemo(() => getDegreeOptions(tFilters), [tFilters]);
+  const statusOptions = useMemo(() => getEmploymentStatusOptions(tFilters), [tFilters]);
+
   const statValues = useMemo(() => {
     if (!stats) {
       return {
@@ -60,7 +66,7 @@ export default function InstructorProfilePage() {
 
     return {
       total: stats.totalInstructors,
-      // Tạm dùng doctorCount cho card Giáo sư nếu backend chưa tách riêng
+      // Temporarily reuse doctorCount for professor card until backend exposes value
       professor: stats.doctorCount,
       doctor: stats.doctorCount,
       master: stats.masterCount,
@@ -106,6 +112,8 @@ export default function InstructorProfilePage() {
           {STAT_CARDS.map((card) => {
             const value = statValues[card.key as keyof typeof statValues];
             const { Icon, bgColor, iconColor } = card;
+            const label = tStatCards(card.labelKey);
+            const subtitle = card.subtitleKey ? tStatCards(card.subtitleKey) : null;
             return (
               <div
                 key={card.key}
@@ -117,13 +125,13 @@ export default function InstructorProfilePage() {
                   </div>
                 </div>
                 <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">
-                  {card.label}
+                  {label}
                 </p>
                 <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
-                  {typeof value === 'number' ? value.toLocaleString('vi-VN') : value}
+                  {typeof value === 'number' ? value.toLocaleString(locale) : value}
                 </p>
-                {card.subtitle && (
-                  <p className="text-xs sm:text-sm text-gray-600 relative z-10">{card.subtitle}</p>
+                {subtitle && (
+                  <p className="text-xs sm:text-sm text-gray-600 relative z-10">{subtitle}</p>
                 )}
               </div>
             );
@@ -182,7 +190,7 @@ export default function InstructorProfilePage() {
             />
 
             <Dropdown
-              options={DEGREE_OPTIONS}
+              options={degreeOptions}
               value={selectedDegree}
               placeholder={t('allDegrees')}
               onChange={(value) => {
@@ -192,7 +200,7 @@ export default function InstructorProfilePage() {
             />
 
             <Dropdown
-              options={EMPLOYMENT_STATUS_OPTIONS}
+              options={statusOptions}
               value={selectedStatus}
               placeholder={t('allStatuses')}
               onChange={(value) => {
@@ -229,7 +237,7 @@ export default function InstructorProfilePage() {
                   </thead>
                   <tbody>
                     {instructors.map((ins, index) => {
-                      const statusDisplay = getEmploymentStatusDisplay(ins.employmentStatus);
+                      const statusDisplay = getEmploymentStatusDisplay(ins.employmentStatus, tFilters);
                       return (
                         <tr
                           key={ins.instructorId}

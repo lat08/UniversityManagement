@@ -1,6 +1,8 @@
 "use client"
 
 import { List } from "lucide-react"
+import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { SemesterResult } from "../lib/types/types"
 
 interface AdminGradeSemesterTableProps {
@@ -12,7 +14,48 @@ export const AdminGradeSemesterTable = ({
   semester,
   onShowDetail,
 }: AdminGradeSemesterTableProps) => {
-  const completedCourses = semester.grades.filter(g => g.status === "Đạt")
+  const t = useTranslations("admin.studentProfile.semesterTable")
+  const tGrade = useTranslations("admin.studentProfile.gradeDetail")
+
+  const normalizeStatus = (status?: string | null) => (status ?? "").toLowerCase().trim()
+  const isPassed = (status?: string | null) => {
+    const normalized = normalizeStatus(status)
+    return ["đạt", "pass", "passed"].includes(normalized)
+  }
+  const getStatusLabel = (status?: string | null) => (isPassed(status) ? tGrade("result.pass") : tGrade("result.fail"))
+
+  const classificationMeta = useMemo(() => {
+    const normalized = normalizeStatus(semester.cumulativeClassification)
+    const meta =
+      ({
+        "xuất sắc": { color: "#FF512F", labelKey: "classification.excellent" },
+        excellent: { color: "#FF512F", labelKey: "classification.excellent" },
+        "giỏi": { color: "#1FA2FF", labelKey: "classification.good" },
+        good: { color: "#1FA2FF", labelKey: "classification.good" },
+        "khá": { color: "#56ab2f", labelKey: "classification.fair" },
+        fair: { color: "#56ab2f", labelKey: "classification.fair" },
+        "trung bình": { color: "#F7971E", labelKey: "classification.average" },
+        average: { color: "#F7971E", labelKey: "classification.average" },
+      } as Record<
+        string,
+        {
+          color: string
+          labelKey: string
+        }
+      >)[normalized]
+    if (!meta) {
+      return {
+        color: "#9ca3af",
+        label: semester.cumulativeClassification ?? "-",
+      }
+    }
+    return {
+      color: meta.color,
+      label: t(meta.labelKey),
+    }
+  }, [semester.cumulativeClassification, t])
+
+  const completedCourses = semester.grades.filter(g => isPassed(g.status))
   const totalCredits = completedCourses.reduce((sum, g) => sum + g.credits, 0)
 
   const stats = {
@@ -37,39 +80,39 @@ export const AdminGradeSemesterTable = ({
           <thead>
             <tr className="bg-[#0053AD]">
               <th className="text-left py-3.5 px-4 font-semibold text-white whitespace-nowrap relative">
-                Mã MH
+                {t("columns.code")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-left py-3.5 px-4 font-semibold text-white min-w-[200px] relative">
-                Tên môn học
+                {t("columns.name")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white relative">
-                TC
+                {t("columns.creditsShort")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white whitespace-nowrap relative">
-                Điểm thi
+                {t("columns.examScore")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white whitespace-nowrap relative">
-                TK (10)
+                {t("columns.score10")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white whitespace-nowrap relative">
-                TK (4)
+                {t("columns.score4")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white whitespace-nowrap relative">
-                TK (C)
+                {t("columns.scoreLetter")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white whitespace-nowrap relative">
-                Kết quả
+                {t("columns.result")}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white/30"></div>
               </th>
               <th className="text-center py-3.5 px-3 font-semibold text-white whitespace-nowrap">
-                Chi tiết
+                {t("columns.detail")}
               </th>
             </tr>
           </thead>
@@ -95,19 +138,19 @@ export const AdminGradeSemesterTable = ({
                   {grade.gradeLetter || "-"}
                 </td>
                 <td className="py-3.5 px-3 text-center">
-                  <span className={`font-medium ${
-                    grade.status === "Đạt" 
-                      ? "text-green-600" 
-                      : "text-red-600"
-                  }`}>
-                    {grade.status}
+                  <span
+                    className={`font-medium ${
+                      isPassed(grade.status) ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {getStatusLabel(grade.status)}
                   </span>
                 </td>
                 <td className="py-3.5 px-3 text-center">
                   <button
                     onClick={() => onShowDetail(grade.subjectCode, semester.semesterId)}
                     className="p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                    title="Xem chi tiết"
+                    title={t("columns.detail")}
                   >
                     <List className="w-4 h-4 text-gray-700" />
                   </button>
@@ -123,7 +166,7 @@ export const AdminGradeSemesterTable = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-900">
-                - Điểm TB học kỳ hệ 4:
+                {t("stats.semesterGpa4")}
               </span>
               <span className="text-sm font-semibold text-[#0053AD] ml-2">
                 {stats.semesterGPA4}
@@ -131,7 +174,7 @@ export const AdminGradeSemesterTable = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-900">
-                - Điểm TB học kỳ hệ 10:
+                {t("stats.semesterGpa10")}
               </span>
               <span className="text-sm font-semibold text-[#0053AD] ml-2">
                 {stats.semesterGPA10}
@@ -139,7 +182,7 @@ export const AdminGradeSemesterTable = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-900">
-                - Số tín chỉ đạt học kỳ:
+                {t("stats.semesterCredits")}
               </span>
               <span className="text-sm font-semibold text-[#0053AD] ml-2">
                 {stats.semesterCredits}
@@ -151,7 +194,7 @@ export const AdminGradeSemesterTable = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-600 flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-gray-600 flex-shrink-0" />
-                      Trong CTDT:
+                      {t("stats.inProgram")}
                     </span>
                     <span className="text-xs font-medium text-gray-700 ml-2">
                       {semester.semesterCreditsInCurriculum}
@@ -162,7 +205,7 @@ export const AdminGradeSemesterTable = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-600 flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-gray-600 flex-shrink-0" />
-                      Ngoài CTDT:
+                      {t("stats.outProgram")}
                     </span>
                     <span className="text-xs font-medium text-gray-700 ml-2">
                       {semester.semesterCreditsOutOfCurriculum}
@@ -176,7 +219,7 @@ export const AdminGradeSemesterTable = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-gray-900">
-                - Điểm TB tích lũy hệ 4:
+                {t("stats.cumulativeGpa4")}
               </span>
               <span className="text-sm font-bold text-[#0053AD] ml-2">
                 {stats.cumulativeGPA4}
@@ -184,7 +227,7 @@ export const AdminGradeSemesterTable = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-gray-900">
-                - Điểm TB tích lũy hệ 10:
+                {t("stats.cumulativeGpa10")}
               </span>
               <span className="text-sm font-bold text-[#0053AD] ml-2">
                 {stats.cumulativeGPA10}
@@ -192,7 +235,7 @@ export const AdminGradeSemesterTable = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-gray-900">
-                - Số tín chỉ tích lũy:
+                {t("stats.cumulativeCredits")}
               </span>
               <span className="text-sm font-bold text-[#0053AD] ml-2">
                 {stats.cumulativeCredits}
@@ -203,18 +246,13 @@ export const AdminGradeSemesterTable = ({
         
         <div className="mt-3 pt-3 border-t border-gray-300">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-gray-900">Xếp loại học lực tích lũy:</span>
-            {stats.cumulativeClassification ? (
-              <span className={`px-3 py-1 rounded-full text-xs font-bold text-white`} style={{
-                backgroundColor: (() => {
-                  if (stats.cumulativeClassification === "Xuất sắc") return "#FF512F"
-                  if (stats.cumulativeClassification === "Giỏi") return "#1FA2FF"
-                  if (stats.cumulativeClassification === "Khá") return "#56ab2f"
-                  if (stats.cumulativeClassification === "Trung bình") return "#F7971E"
-                  return "#9ca3af"
-                })()
-              }}>
-                {stats.cumulativeClassification}
+            <span className="text-sm font-bold text-gray-900">{t("stats.classificationLabel")}</span>
+            {semester.cumulativeClassification ? (
+              <span
+                className="px-3 py-1 rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: classificationMeta.color }}
+              >
+                {classificationMeta.label}
               </span>
             ) : (
               <span className="text-sm text-gray-500">-</span>

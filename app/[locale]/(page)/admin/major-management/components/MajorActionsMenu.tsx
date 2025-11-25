@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Edit, Trash2 } from 'lucide-react';
-import { Button } from '@/app/components/ui';
+import { useState, useRef, useEffect } from "react";
+import { MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Button } from "@/app/components/ui";
+import { useTranslations } from "next-intl";
 
 interface MajorActionsMenuProps {
   majorId: string;
@@ -17,6 +18,7 @@ export const MajorActionsMenu = ({
   onDelete,
   compact = false,
 }: MajorActionsMenuProps) => {
+  const tCommon = useTranslations("common.actions");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +46,7 @@ export const MajorActionsMenu = ({
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-600 hover:text-gray-900"
-          title="Thao tác"
+          title={tCommon("actions")}
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
@@ -70,7 +72,7 @@ export const MajorActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Edit className="w-4 h-4 text-green-600" />
-                Chỉnh sửa
+                {tCommon("edit")}
               </button>
               <button
                 onClick={() => {
@@ -80,7 +82,7 @@ export const MajorActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Trash2 className="w-4 h-4 text-red-600" />
-                Xóa
+                {tCommon("delete")}
               </button>
             </div>
           </div>
@@ -96,7 +98,7 @@ export const MajorActionsMenu = ({
         size="icon"
         onClick={onEdit}
         className="text-gray-600 hover:text-green-600 hover:bg-green-50"
-        title="Chỉnh sửa"
+        title={tCommon("edit")}
       >
         <Edit className="w-4 h-4" />
       </Button>
@@ -105,7 +107,7 @@ export const MajorActionsMenu = ({
         size="icon"
         onClick={onDelete}
         className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-        title="Xóa"
+        title={tCommon("delete")}
       >
         <Trash2 className="w-4 h-4" />
       </Button>

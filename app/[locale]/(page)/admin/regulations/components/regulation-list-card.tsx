@@ -1,12 +1,17 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import { RegulationRecord } from '@/lib/types/regulation';
-import { REGULATION_AUDIENCE_LABEL, REGULATION_CATEGORY_LABEL, REGULATION_ISSUING_UNIT_LABEL } from '@/lib/constants/regulations';
+import {
+  REGULATION_AUDIENCE_LABEL_KEY,
+  REGULATION_CATEGORY_LABEL_KEY,
+  REGULATION_ISSUING_UNIT_LABEL_KEY,
+} from '@/lib/constants/regulations';
 import { RegulationStatusBadge } from './regulation-status-badge';
 import { Download, Eye, FileText, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { enUS, vi } from 'date-fns/locale';
 import {
   Tooltip,
   TooltipContent,
@@ -22,19 +27,6 @@ interface RegulationListCardProps {
   readonly onDelete: () => void;
 }
 
-const formatDate = (value: string | null | undefined): string => {
-  if (!value) {
-    return '—';
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return format(parsed, 'dd/MM/yyyy', { locale: vi });
-};
-
 export const RegulationListCard = ({
   regulation,
   onView,
@@ -42,9 +34,30 @@ export const RegulationListCard = ({
   onDownload,
   onDelete,
 }: RegulationListCardProps) => {
-  const categoryLabel = REGULATION_CATEGORY_LABEL[regulation.category] ?? regulation.category;
-  const issuingUnitLabel = REGULATION_ISSUING_UNIT_LABEL[regulation.issuingUnit] ?? regulation.issuingUnit;
-  const audienceLabel = REGULATION_AUDIENCE_LABEL[regulation.targetAudience];
+  const t = useTranslations('admin.regulations');
+  const locale = useLocale();
+  const emptyValue = t('common.emptyValue');
+  const localeConfig = locale === 'vi' ? vi : enUS;
+  const dateFormat = locale === 'vi' ? 'dd/MM/yyyy' : 'MM/dd/yyyy';
+  const formatDateValue = (value: string | null | undefined): string => {
+    if (!value) {
+      return emptyValue;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    return format(parsed, dateFormat, { locale: localeConfig });
+  };
+
+  const categoryLabelKey = REGULATION_CATEGORY_LABEL_KEY[regulation.category];
+  const issuingUnitLabelKey = REGULATION_ISSUING_UNIT_LABEL_KEY[regulation.issuingUnit];
+  const audienceLabelKey = REGULATION_AUDIENCE_LABEL_KEY[regulation.targetAudience];
+  const categoryLabel = categoryLabelKey ? t(categoryLabelKey) : regulation.category;
+  const issuingUnitLabel = issuingUnitLabelKey ? t(issuingUnitLabelKey) : regulation.issuingUnit;
+  const audienceLabel = audienceLabelKey ? t(audienceLabelKey) : regulation.targetAudience;
 
   const categoryColors: Record<string, string> = {
     admission: 'bg-blue-100 text-blue-700 ring-blue-200',
@@ -55,7 +68,7 @@ export const RegulationListCard = ({
   };
 
   const handleCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    // Chỉ mở detail khi click vào card, không phải vào các button
+    // Open detail only when clicking on the card, not the action buttons
     const target = event.target as HTMLElement;
     if (target.closest('button') || target.closest('a')) {
       return;
@@ -84,7 +97,9 @@ export const RegulationListCard = ({
                 {audienceLabel}
               </span>
             </div>
-            <p className="text-sm font-medium text-gray-500">Mã: {regulation.code}</p>
+            <p className="text-sm font-medium text-gray-500">
+              {t('list.code')} {regulation.code}
+            </p>
             <p className="text-sm text-gray-600">{regulation.description}</p>
           </div>
         </div>
@@ -102,12 +117,12 @@ export const RegulationListCard = ({
                     onView();
                   }}
                   type="button"
-                  aria-label="Xem chi tiết"
+                  aria-label={t('list.actions.view')}
                 >
                   <Eye className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Xem chi tiết</TooltipContent>
+              <TooltipContent>{t('list.actions.view')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -120,12 +135,12 @@ export const RegulationListCard = ({
                     onEdit();
                   }}
                   type="button"
-                  aria-label="Chỉnh sửa"
+                  aria-label={t('list.actions.edit')}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Chỉnh sửa</TooltipContent>
+              <TooltipContent>{t('list.actions.edit')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -138,12 +153,12 @@ export const RegulationListCard = ({
                     onDownload();
                   }}
                   type="button"
-                  aria-label="Tải xuống"
+                  aria-label={t('list.actions.download')}
                 >
                   <Download className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Tải xuống</TooltipContent>
+              <TooltipContent>{t('list.actions.download')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -156,12 +171,12 @@ export const RegulationListCard = ({
                     onDelete();
                   }}
                   type="button"
-                  aria-label="Xóa"
+                  aria-label={t('list.actions.delete')}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Xóa</TooltipContent>
+              <TooltipContent>{t('list.actions.delete')}</TooltipContent>
             </Tooltip>
           </div>
         </TooltipProvider>
@@ -169,19 +184,19 @@ export const RegulationListCard = ({
 
       <div className="mt-4 grid gap-4 border-t border-gray-100 pt-4 text-sm text-gray-600 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="text-xs uppercase text-gray-400">Ngày ban hành</p>
-          <p className="font-medium text-gray-900">{formatDate(regulation.issueDate)}</p>
+          <p className="text-xs uppercase text-gray-400">{t('list.issueDate')}</p>
+          <p className="font-medium text-gray-900">{formatDateValue(regulation.issueDate)}</p>
         </div>
         <div>
-          <p className="text-xs uppercase text-gray-400">Ngày hiệu lực</p>
-          <p className="font-medium text-gray-900">{formatDate(regulation.effectiveDate)}</p>
+          <p className="text-xs uppercase text-gray-400">{t('list.effectiveDate')}</p>
+          <p className="font-medium text-gray-900">{formatDateValue(regulation.effectiveDate)}</p>
         </div>
         <div>
-          <p className="text-xs uppercase text-gray-400">Đơn vị ban hành</p>
+          <p className="text-xs uppercase text-gray-400">{t('list.issuingUnit')}</p>
           <p className="font-medium text-gray-900">{issuingUnitLabel}</p>
         </div>
         <div>
-          <p className="text-xs uppercase text-gray-400">Đối tượng áp dụng</p>
+          <p className="text-xs uppercase text-gray-400">{t('list.audience')}</p>
           <p className="font-medium text-gray-900">{audienceLabel}</p>
         </div>
       </div>

@@ -8,8 +8,8 @@ import { Badge } from '@/app/components/ui/badge';
 import { Calendar } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import toast from 'react-hot-toast';
-import type { BookingData } from '../lib/types/room.types';
-import { BOOKING_STATUS_COLORS } from '../lib/types/room.types';
+import type { BookingData } from '@/lib/types/room';
+import { BOOKING_STATUS_COLORS } from '@/lib/types/room';
 import CancelBookingModal from './CancelBookingModal';
 
 interface BookingHistoryProps {

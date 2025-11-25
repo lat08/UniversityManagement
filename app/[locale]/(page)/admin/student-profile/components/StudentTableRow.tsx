@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, Edit, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Student, getStatusDisplay } from '../lib/types/types';
 
 interface StudentTableRowProps {
@@ -11,7 +12,12 @@ interface StudentTableRowProps {
 
 const StudentTableRow = memo<StudentTableRowProps>(({ student, onDelete, onPrefetch }) => {
   const router = useRouter();
-  const statusDisplay = getStatusDisplay(student.enrollmentStatus);
+  const t = useTranslations('admin.studentProfile');
+  const tActions = useTranslations('admin.studentProfile.actions');
+  const statusDisplay = useMemo(
+    () => getStatusDisplay(student.enrollmentStatus, (key) => t(key)),
+    [student.enrollmentStatus, t],
+  );
 
   return (
     <tr
@@ -46,21 +52,21 @@ const StudentTableRow = memo<StudentTableRowProps>(({ student, onDelete, onPrefe
             onClick={() => router.push(`/admin/student-profile/${student.studentId}`)}
             onMouseEnter={onPrefetch}
             className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-            title="Xem chi tiết"
+            title={tActions('view')}
           >
             <Eye className="w-4 h-4" />
           </button>
           <button
             onClick={() => router.push(`/admin/student-profile/${student.studentId}/edit`)}
             className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors cursor-pointer"
-            title="Chỉnh sửa"
+            title={tActions('edit')}
           >
             <Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => onDelete(student.studentId, student.fullName)}
             className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
-            title="Xóa"
+            title={tActions('delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>

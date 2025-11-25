@@ -1,15 +1,29 @@
-export const EMPLOYMENT_STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả trạng thái' },
-  { value: 'active', label: 'Đang công tác' },
-  { value: 'on_leave', label: 'Nghỉ phép' },
-  { value: 'retired', label: 'Nghỉ hưu' },
-  { value: 'inactive', label: 'Ngưng công tác' },
-];
+type Translator = (key: string) => string;
 
-export const DEGREE_OPTIONS = [
-  { value: '', label: 'Tất cả học vị' },
-  { value: 'PhD', label: 'Tiến sĩ' },
-  { value: 'Master', label: 'Thạc sĩ' },
-  { value: 'Bachelor', label: 'Cử nhân' },
-  { value: 'Engineer', label: 'Kỹ sư' },
-];
+const EMPLOYMENT_STATUS_OPTION_DEFINITIONS = [
+  { value: '', labelKey: 'allStatuses' },
+  { value: 'active', labelKey: 'active' },
+  { value: 'on_leave', labelKey: 'onLeave' },
+  { value: 'retired', labelKey: 'retired' },
+  { value: 'inactive', labelKey: 'inactive' },
+] as const;
+
+const DEGREE_OPTION_DEFINITIONS = [
+  { value: '', labelKey: 'allDegrees' },
+  { value: 'PhD', labelKey: 'phd' },
+  { value: 'Master', labelKey: 'master' },
+  { value: 'Bachelor', labelKey: 'bachelor' },
+  { value: 'Engineer', labelKey: 'engineer' },
+] as const;
+
+export const getEmploymentStatusOptions = (t: Translator) =>
+  EMPLOYMENT_STATUS_OPTION_DEFINITIONS.map(({ value, labelKey }) => ({
+    value,
+    label: t(labelKey),
+  }));
+
+export const getDegreeOptions = (t: Translator) =>
+  DEGREE_OPTION_DEFINITIONS.map(({ value, labelKey }) => ({
+    value,
+    label: t(labelKey),
+  }));

@@ -11,7 +11,7 @@ import { DayPicker } from 'react-day-picker';
 import toast from 'react-hot-toast';
 import { useCreateScheduleChange, useMakeupSlotSuggestions } from '../lib/hooks/useScheduleChange';
 import { useBuildings } from '@/lib/hooks/useCommonData';
-import { ROOM_TYPE_LABELS } from '@/app/(page)/student/departments/lib/types/room.types';
+import { ROOM_TYPE_LABELS } from '@/lib/types/room';
 import type { ScheduleChangeRequest } from '../lib/types/scheduleChange.types';
 import 'react-day-picker/dist/style.css';
 

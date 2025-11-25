@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dropdown, DropdownSearch, Button, Input } from '@/app/components/ui';
 import { X } from 'lucide-react';
@@ -53,6 +53,7 @@ const fetchClasses = async (departmentId?: string): Promise<ClassItem[]> => {
 export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalProps) {
   const t = useTranslations('admin.modals.addStudent');
   const tCommon = useTranslations('common.actions');
+  const tStudentProfile = useTranslations('admin.studentProfile');
   
   // FormData type definition
   type FormData = {
@@ -157,7 +158,14 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
 
   const classOptions = classes.map(c => ({ value: c.classId, label: c.className }));
 
-  const enrollmentStatusOptions = ENROLLMENT_STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }));
+  const enrollmentStatusOptions = useMemo(
+    () =>
+      ENROLLMENT_STATUS_OPTIONS.map((status) => ({
+        value: status.value,
+        label: tStudentProfile(status.labelKey),
+      })),
+    [tStudentProfile],
+  );
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) {

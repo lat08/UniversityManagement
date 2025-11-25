@@ -2,6 +2,7 @@
 
 import { ConfirmDialog } from '@/app/components/ui/confirm-dialog';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface ConfirmDeleteStudentModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface ConfirmDeleteStudentModalProps {
 
 export default function ConfirmDeleteStudentModal({ isOpen, studentName, onClose, onConfirm }: ConfirmDeleteStudentModalProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const t = useTranslations('admin.studentProfile.modals.confirmDelete');
+  const tCommon = useTranslations('common.actions');
 
   const handleConfirm = async () => {
     setIsProcessing(true);
@@ -27,10 +30,10 @@ export default function ConfirmDeleteStudentModal({ isOpen, studentName, onClose
       isOpen={isOpen}
       onClose={onClose}
       onConfirm={handleConfirm}
-      title="Xác nhận xoá sinh viên"
-      description={`Bạn có chắc chắn muốn xoá sinh viên ${studentName || ''}? Hành động này là xoá mềm và có thể khôi phục sau.`}
-      confirmText="Xoá"
-      cancelText="Huỷ"
+      title={t('title')}
+      description={t('description', { name: studentName ?? '' })}
+      confirmText={tCommon('delete')}
+      cancelText={tCommon('cancel')}
       variant="danger"
       isLoading={isProcessing}
     />

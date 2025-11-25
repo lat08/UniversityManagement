@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Button, Input } from '@/app/components/ui'
 import { X } from 'lucide-react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import type { InferType } from 'yup'
+import type { ObjectSchema } from 'yup'
 import { toast } from 'react-hot-toast'
 import { curriculumsApi } from '../lib/api/curriculumsApi'
 import type { CurriculumListItem } from '../lib/types/types'
+import { useTranslations } from 'next-intl'
 
 interface EditCurriculumModalProps {
   isOpen: boolean
@@ -18,22 +19,30 @@ interface EditCurriculumModalProps {
   curriculum: CurriculumListItem | null
 }
 
-const validationSchema = yup.object({
-  curriculumName: yup
-    .string()
-    .required('Tên CTĐT là bắt buộc')
-    .max(500, 'Tên CTĐT tối đa 500 ký tự'),
-  appliedYear: yup
-    .number()
-    .typeError('Năm áp dụng phải là số')
-    .required('Năm áp dụng là bắt buộc')
-    .min(1900, 'Năm áp dụng phải từ 1900 đến 2100')
-    .max(2100, 'Năm áp dụng phải từ 1900 đến 2100'),
-})
-
-type FormData = InferType<typeof validationSchema>
+type FormData = {
+  curriculumName: string
+  appliedYear: number
+}
 
 export const EditCurriculumModal = ({ isOpen, onClose, onSuccess, curriculum }: EditCurriculumModalProps) => {
+  const t = useTranslations('admin.curriculumManagement')
+  const tActions = useTranslations('actions')
+  const validationSchema = useMemo<ObjectSchema<FormData>>(
+    () =>
+      yup.object({
+        curriculumName: yup
+          .string()
+          .required(t('fields.name.required'))
+          .max(500, t('fields.name.max')),
+        appliedYear: yup
+          .number()
+          .typeError(t('fields.appliedYear.typeError'))
+          .required(t('fields.appliedYear.required'))
+          .min(1900, t('fields.appliedYear.min'))
+          .max(2100, t('fields.appliedYear.max')),
+      }),
+    [t],
+  )
   const {
     register,
     handleSubmit,
@@ -93,16 +102,16 @@ export const EditCurriculumModal = ({ isOpen, onClose, onSuccess, curriculum }: 
       const response = await curriculumsApi.updateCurriculum(curriculum.curriculumId, payload)
 
       if (response.success) {
-        toast.success(response.message || 'Cập nhật chương trình đào tạo thành công!')
+        toast.success(response.message || t('modals.edit.success'))
         reset()
         onSuccess?.()
         handleClose()
       } else {
-        toast.error(response.message || 'Cập nhật chương trình đào tạo thất bại')
+        toast.error(response.message || t('modals.edit.error'))
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(err.response?.data?.message || err.message || 'Đã xảy ra lỗi')
+      toast.error(err.response?.data?.message || err.message || t('modals.edit.generalError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -122,8 +131,8 @@ export const EditCurriculumModal = ({ isOpen, onClose, onSuccess, curriculum }: 
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Chỉnh sửa Chương trình đào tạo</h2>
-              <p className="text-sm text-gray-600 mt-1">Cập nhật tên và năm áp dụng của CTĐT</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('modals.edit.title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{t('modals.edit.description')}</p>
             </div>
             <Button
               variant="ghost"
@@ -141,18 +150,16 @@ export const EditCurriculumModal = ({ isOpen, onClose, onSuccess, curriculum }: 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
           <div className="overflow-y-auto flex-1 p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Mã CTĐT
-              </label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.code.label')}</label>
               <Input value={curriculum.curriculumCode} disabled className="bg-gray-50 cursor-not-allowed" />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Tên CTĐT <span className="text-red-500">*</span>
+                {t('fields.name.label')} <span className="text-red-500">*</span>
               </label>
               <Input
-                placeholder="Nhập tên chương trình đào tạo"
+                placeholder={t('fields.name.placeholder')}
                 {...register('curriculumName')}
                 className={errors.curriculumName ? 'border-red-500' : ''}
               />
@@ -162,30 +169,23 @@ export const EditCurriculumModal = ({ isOpen, onClose, onSuccess, curriculum }: 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Khoa phụ trách</label>
-              <Input
-                value={curriculum.facultyName || curriculum.departmentName}
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.faculty.label')}</label>
+              <Input value={curriculum.facultyName || curriculum.departmentName} disabled className="bg-gray-50 cursor-not-allowed" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Số tín chỉ</label>
-              <Input
-                value={curriculum.totalCredits}
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
-              <p className="mt-1 text-xs text-gray-500">Giá trị này được tính tự động từ danh sách môn học.</p>
+              <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.credits.label')}</label>
+              <Input value={curriculum.totalCredits} disabled className="bg-gray-50 cursor-not-allowed" />
+              <p className="mt-1 text-xs text-gray-500">{t('fields.credits.note')}</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Năm áp dụng <span className="text-red-500">*</span>
+                {t('fields.appliedYear.label')} <span className="text-red-500">*</span>
               </label>
               <Input
                 type="number"
+                placeholder={t('fields.appliedYear.placeholder')}
                 {...register('appliedYear')}
                 className={errors.appliedYear ? 'border-red-500' : ''}
               />
@@ -203,14 +203,14 @@ export const EditCurriculumModal = ({ isOpen, onClose, onSuccess, curriculum }: 
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {tActions('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+              {isSubmitting ? t('modals.edit.submitting') : t('modals.edit.submit')}
             </Button>
           </div>
         </form>

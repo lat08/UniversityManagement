@@ -5,7 +5,7 @@ import { Archive, ClipboardCheck, FilePenLine, Layers3, Plus } from 'lucide-reac
 import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { Button, Dropdown, Pagination, SearchInput } from '@/app/components/ui';
-import { MajorStatCard } from '@/app/(page)/admin/major-management/components/MajorStatCard';
+import { MajorStatCard } from '@/app/[locale]/(page)/admin/major-management/components/MajorStatCard';
 import {
   REGULATION_AUDIENCE_OPTIONS,
   REGULATION_CATEGORIES,
@@ -39,7 +39,8 @@ const EMPTY_REGULATIONS: RegulationRecord[] = [];
 
 const AdminRegulationsPage = () => {
   const t = useTranslations('admin.regulations');
-  usePageTitle('Quản lý Quy chế / Quy định');
+  const pageTitle = t('pageTitle');
+  usePageTitle(pageTitle);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -65,6 +66,29 @@ const AdminRegulationsPage = () => {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: 'all', label: t('filters.category.all') },
+      ...REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: t(item.labelKey) })),
+    ],
+    [t],
+  );
+  const issuingUnitOptions = useMemo(
+    () => [
+      { value: 'all', label: t('filters.unit.all') },
+      ...REGULATION_ISSUING_UNITS.map((item) => ({ value: item.value, label: t(item.labelKey) })),
+    ],
+    [t],
+  );
+  const statusOptions = useMemo(
+    () => REGULATION_STATUS_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) })),
+    [t],
+  );
+  const audienceOptions = useMemo(
+    () => REGULATION_AUDIENCE_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) })),
+    [t],
+  );
 
   const queryParams = useMemo<RegulationQueryParams>(
     () => ({
@@ -99,7 +123,7 @@ const AdminRegulationsPage = () => {
   const totalPages = Math.max(1, data?.totalPages ?? 1);
   const totalCount = data?.totalCount ?? regulations.length;
 
-  // Stats từ query riêng (không bị ảnh hưởng bởi filter)
+  // Stats calculated from a separate query (not affected by filters)
   const stats = useMemo(() => {
     const source = statsData?.data ?? [];
     return {
@@ -133,17 +157,18 @@ const AdminRegulationsPage = () => {
     }
 
     if (!regulation.fileUrl) {
-      toast.error('Không tìm thấy tệp để tải xuống');
+      toast.error(t('toast.fileMissing'));
       return;
     }
 
     setDownloadingId(regulation.id);
-    const loadingToast = toast.loading('Đang tải xuống tệp...');
+    const loadingToast = toast.loading(t('toast.downloadLoading'));
 
     try {
+      const defaultFileName = t('common.defaultFileName');
       const response = await fetch(regulation.fileUrl);
       if (!response.ok) {
-        throw new Error('Không thể tải file');
+        throw new Error(t('toast.downloadError'));
       }
 
       const blob = await response.blob();
@@ -151,7 +176,7 @@ const AdminRegulationsPage = () => {
       const link = document.createElement('a');
       link.href = url;
 
-      // Lấy tên file từ fileName hoặc extract từ URL
+      // Use provided fileName or extract from URL
       const getFileName = () => {
         if (regulation.fileName) return regulation.fileName;
         try {
@@ -163,9 +188,9 @@ const AdminRegulationsPage = () => {
           if (parts.length > 1 && /^\d+$/.test(parts[0])) {
             return parts.slice(1).join('-');
           }
-          return fileName || 'regulation-document';
+          return fileName || defaultFileName;
         } catch {
-          return 'regulation-document';
+          return defaultFileName;
         }
       };
 
@@ -174,9 +199,9 @@ const AdminRegulationsPage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success(t('downloadSuccess'), { id: loadingToast });
+      toast.success(t('toast.downloadSuccess'), { id: loadingToast });
     } catch {
-      toast.error(t('downloadError'), { id: loadingToast });
+      toast.error(t('toast.downloadError'), { id: loadingToast });
     } finally {
       setDownloadingId(null);
     }
@@ -223,7 +248,8 @@ const AdminRegulationsPage = () => {
       setIsFormOpen(false);
       setEditingRegulation(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể lưu quy chế';
+      const fallbackMessage = t('toast.saveError');
+      const message = error instanceof Error && error.message ? error.message : fallbackMessage;
       toast.error(message);
       throw error;
     }
@@ -241,11 +267,12 @@ const AdminRegulationsPage = () => {
 
     try {
       await deleteMutation.mutateAsync(deletingRegulation.id);
-      toast.success('Đã xóa quy chế');
+      toast.success(t('toast.deleteSuccess'));
       setIsDeleteModalOpen(false);
       setDeletingRegulation(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể xóa quy chế';
+      const fallbackMessage = t('toast.deleteError');
+      const message = error instanceof Error && error.message ? error.message : fallbackMessage;
       toast.error(message);
     }
   };
@@ -254,28 +281,34 @@ const AdminRegulationsPage = () => {
     <>
       <div className="space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Quy chế / Quy định</h1>
-          <p className="mt-1 text-sm text-gray-600">Quản lý thông tin của các quy chế/quy định của trường</p>
+          <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+          <p className="mt-1 text-sm text-gray-600">{t('pageDescription')}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MajorStatCard label="Tổng số quy chế" value={stats.total} Icon={Layers3} bgColor="bg-sky-100/80" iconColor="text-sky-700" />
           <MajorStatCard
-            label={REGULATION_STATUS_META.active.label}
+            label={t('stats.total')}
+            value={stats.total}
+            Icon={Layers3}
+            bgColor="bg-sky-100/80"
+            iconColor="text-sky-700"
+          />
+          <MajorStatCard
+            label={t(REGULATION_STATUS_META.active.labelKey)}
             value={stats.active}
             Icon={ClipboardCheck}
             bgColor="bg-emerald-100/80"
             iconColor="text-emerald-700"
           />
           <MajorStatCard
-            label={REGULATION_STATUS_META.draft.label}
+            label={t(REGULATION_STATUS_META.draft.labelKey)}
             value={stats.draft}
             Icon={FilePenLine}
             bgColor="bg-amber-100/80"
             iconColor="text-amber-700"
           />
           <MajorStatCard
-            label={REGULATION_STATUS_META.archived.label}
+            label={t(REGULATION_STATUS_META.archived.labelKey)}
             value={stats.archived}
             Icon={Archive}
             bgColor="bg-stone-100/80"
@@ -287,65 +320,65 @@ const AdminRegulationsPage = () => {
           <div className="space-y-4 border-b border-gray-200 p-4 lg:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Danh sách Quy chế / Quy định</h2>
-                {isFetching && <p className="text-xs text-gray-500">Đang đồng bộ dữ liệu...</p>}
+                <h2 className="text-lg font-semibold text-gray-900">{t('list.title')}</h2>
+                {isFetching && <p className="text-xs text-gray-500">{t('list.syncing')}</p>}
               </div>
               <Button className="bg-[#0053AD] text-white hover:bg-[#003d82]" onClick={handleOpenCreate} type="button">
                 <Plus className="h-4 w-4" />
-                Thêm mới
+                {t('actions.add')}
               </Button>
             </div>
 
             <div className="flex flex-nowrap items-center gap-3 overflow-x-auto">
               <div className="relative min-w-0 flex-1">
                 <SearchInput
-                  placeholder="Tìm theo mã, tiêu đề, mô tả..."
+                  placeholder={t('filters.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
               </div>
               <div className="flex-shrink-0 w-48">
                 <Dropdown
-                  options={[{ value: 'all', label: 'Tất cả loại' }, ...REGULATION_CATEGORIES.map((item) => ({ value: item.value, label: item.label }))]}
+                  options={categoryOptions}
                   value={categoryFilter}
                   onChange={(value) => {
                     setCategoryFilter(value ?? 'all');
                     setCurrentPage(1);
                   }}
-                  placeholder="Loại quy định"
+                  placeholder={t('filters.category.placeholder')}
                 />
               </div>
               <div className="flex-shrink-0 w-48">
                 <Dropdown
-                  options={[{ value: 'all', label: 'Tất cả đơn vị' }, ...REGULATION_ISSUING_UNITS.map((item) => ({ value: item.value, label: item.label }))]}
+                  options={issuingUnitOptions}
                   value={unitFilter}
                   onChange={(value) => {
                     setUnitFilter(value ?? 'all');
                     setCurrentPage(1);
                   }}
-                  placeholder="Đơn vị ban hành"
+                  placeholder={t('filters.unit.placeholder')}
                 />
               </div>
               <div className="flex-shrink-0 w-48">
                 <Dropdown
-                  options={REGULATION_STATUS_OPTIONS}
+                  options={statusOptions}
                   value={statusFilter}
                   onChange={(value) => {
                     setStatusFilter((value ?? 'all') as RegulationStatus | 'all');
                     setCurrentPage(1);
                   }}
-                  placeholder="Trạng thái"
+                  placeholder={t('filters.status.placeholder')}
                 />
               </div>
               <div className="flex-shrink-0 w-48">
                 <Dropdown
-                  options={REGULATION_AUDIENCE_OPTIONS}
+                  options={audienceOptions}
                   value={audienceFilter}
                   onChange={(value) => {
                     setAudienceFilter((value ?? 'all') as RegulationAudience | 'all');
                     setCurrentPage(1);
                   }}
-                  placeholder="Đối tượng áp dụng"
+                  placeholder={t('filters.audience.placeholder')}
                 />
               </div>
             </div>
@@ -354,15 +387,15 @@ const AdminRegulationsPage = () => {
           <div className="space-y-4 px-4 py-6 lg:px-6">
             {listError ? (
               <div className="rounded-2xl border border-dashed border-red-200 p-8 text-center text-red-600">
-                Không thể tải danh sách quy chế. Vui lòng thử lại sau.
+                {t('list.states.error')}
               </div>
             ) : isLoading ? (
               <div className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-gray-500">
-                Đang tải danh sách quy chế...
+                {t('list.states.loading')}
               </div>
             ) : regulations.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-gray-500">
-                Không tìm thấy quy chế phù hợp với bộ lọc.
+                {t('list.states.empty')}
               </div>
             ) : (
               regulations.map((regulation) => (

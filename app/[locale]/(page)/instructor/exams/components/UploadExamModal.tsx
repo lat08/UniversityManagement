@@ -72,7 +72,6 @@ export function UploadExamModal({
   const t = useTranslations('instructor.exams');
   const tModal = useTranslations('instructor.exams.uploadModal');
   const tExamTypes = useTranslations('instructor.exams.examTypes');
-  const tCommon = useTranslations('common.actions');
   
   const [formData, setFormData] = useState<UploadExamFormData>({
     courseClassId: "",

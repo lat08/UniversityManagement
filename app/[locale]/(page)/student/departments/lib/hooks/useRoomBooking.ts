@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { queryKeys } from '@/lib/api/queryKeys';
 import { useRoomBookingStore } from '../stores/roomBookingStore';
-import type { RoomApiResponse, BookingApiResponse, CreateBookingRequest } from '../types/room.types';
+import type { RoomApiResponse, BookingApiResponse, CreateBookingRequest } from '@/lib/types/room';
 import { createRoomBooking, cancelRoomBooking } from '../api/rooms.api';
 
 export const useRooms = (page: number = 1, pageSize: number = 10) => {

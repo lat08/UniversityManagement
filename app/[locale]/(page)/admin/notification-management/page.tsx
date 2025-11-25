@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Plus, Bell, Clock, CheckCircle2, XCircle, Calendar, Filter, ChevronDown, ChevronUp, X, Edit2, CircleCheck } from 'lucide-react';
 import { Dropdown, DropdownSearch, SearchInput, Button, Input } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { commonApi } from '@/lib/api/common';
 import type { Faculty, Department, Class, Instructor, Student } from '@/lib/types/common';
-import { NOTIFICATION_TYPE_OPTIONS, SENDING_METHOD_OPTIONS } from './lib/types/types';
 import { AddNotificationModal } from './components/AddNotificationModal';
 import { EditNotificationModal } from './components/EditNotificationModal';
 import { SendNotificationModal } from './components/SendNotificationModal';
@@ -17,22 +16,39 @@ import { ViewNotificationDetailModal } from './components/ViewNotificationDetail
 import { BulkEditNotificationModal } from './components/BulkEditNotificationModal';
 import { NotificationActionsMenu } from './components/NotificationActionsMenu';
 import { NotificationStatCard } from './components/NotificationStatCard';
-import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
-import { TableSkeleton } from '@/app/(page)/admin/student-profile/components/LoadingSkeleton';
+import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
+import { TableSkeleton } from '@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton';
 import { useNotifications } from './lib/hooks/useNotifications';
 import { 
+  buildNotificationTypeOptions,
+  buildSendingMethodOptions,
+  buildTargetTypeOptions,
+  buildStatusOptions,
   getStatusDisplay, 
   getNotificationTypeDisplay, 
   getTargetTypeDisplay, 
-  getSendingMethodDisplay,
-  STATUS_OPTIONS 
+  getSendingMethodDisplay
 } from './lib/types/types';
-import type { Notification, NotificationStatus } from './lib/types/types';
+import type { Notification, NotificationStatus, TranslateFn } from './lib/types/types';
 
 export default function NotificationManagementPage() {
   const t = useTranslations('admin.notificationManagement');
   const tCommon = useTranslations('common.actions');
-  
+  const translate = t as unknown as TranslateFn;
+  const locale = useLocale();
+  const statusOptions = useMemo(() => buildStatusOptions(translate), [translate]);
+  const targetTypeOptions = useMemo(() => [
+    { value: '', label: t('allTargets') },
+    ...buildTargetTypeOptions(translate),
+  ], [t, translate]);
+  const notificationTypeFilterOptions = useMemo(() => [
+    { value: '', label: t('all') },
+    ...buildNotificationTypeOptions(translate),
+  ], [t, translate]);
+  const sendingMethodFilterOptions = useMemo(() => [
+    { value: '', label: t('all') },
+    ...buildSendingMethodOptions(translate),
+  ], [t, translate]);
   const STAT_CARDS = [
     { 
       key: 'total', 
@@ -398,8 +414,8 @@ export default function NotificationManagementPage() {
   }, [currentPage, searchKeyword, selectedStatus, selectedTargetType, fetchNotifications]);
 
   const renderNotificationRow = useCallback((notification: Notification, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const statusDisplay = getStatusDisplay(notification.status);
-    const typeDisplay = getNotificationTypeDisplay(notification.notificationType || 'event');
+    const statusDisplay = getStatusDisplay(notification.status, translate);
+    const typeDisplay = getNotificationTypeDisplay(notification.notificationType || 'event', translate);
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     // Calculate isCompact once at the beginning to avoid scope issues
     const isCompact = parseFloat(cellStyle.paddingX) < 20;
@@ -459,7 +475,7 @@ export default function NotificationManagementPage() {
             case 'targetType':
               return (
                 <td key="targetType" className="text-gray-700" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {getTargetTypeDisplay(notification.targetType)}
+                  {getTargetTypeDisplay(notification.targetType, translate)}
                   {notification.targetValue && (
                     <span className="text-gray-500 text-xs ml-1">({notification.targetValue})</span>
                   )}
@@ -468,7 +484,7 @@ export default function NotificationManagementPage() {
             case 'sendingMethod':
               return (
                 <td key="sendingMethod" className="text-gray-700 text-center" style={cellPaddingStyle}>
-                  {getSendingMethodDisplay(notification.sendingMethod)}
+                  {getSendingMethodDisplay(notification.sendingMethod, translate)}
                 </td>
               );
             case 'totalRecipients':
@@ -497,13 +513,13 @@ export default function NotificationManagementPage() {
             case 'scheduledDate':
               return (
                 <td key="scheduledDate" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {notification.scheduledDate ? new Date(notification.scheduledDate).toLocaleString('vi-VN') : '-'}
+                  {notification.scheduledDate ? new Date(notification.scheduledDate).toLocaleString(locale) : '-'}
                 </td>
               );
             case 'createdAt':
               return (
                 <td key="createdAt" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {notification.createdAt ? new Date(notification.createdAt).toLocaleString('vi-VN') : '-'}
+                  {notification.createdAt ? new Date(notification.createdAt).toLocaleString(locale) : '-'}
                 </td>
               );
             case 'actions':
@@ -526,15 +542,17 @@ export default function NotificationManagementPage() {
         })}
       </>
     );
-  }, [handleEditClick, handleSendClick, handleArchiveClick, handleCancelClick, handleSelectOne, selectedNotificationIds]);
-
-  const statusOptions = [...STATUS_OPTIONS];
-  const targetTypeOptions = [
-    { value: '', label: 'Tất cả' },
-    { value: 'all', label: 'Tất cả người dùng' },
-    { value: 'student', label: 'Sinh viên' },
-    { value: 'instructor', label: 'Giảng viên' },
-  ];
+  }, [
+    handleViewClick,
+    handleEditClick,
+    handleSendClick,
+    handleArchiveClick,
+    handleCancelClick,
+    handleSelectOne,
+    selectedNotificationIds,
+    translate,
+    locale,
+  ]);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -566,6 +584,7 @@ export default function NotificationManagementPage() {
                 Icon={card.Icon}
                 bgColor={card.bgColor}
                 iconColor={card.iconColor}
+                locale={locale}
               />
             );
           })}
@@ -744,10 +763,7 @@ export default function NotificationManagementPage() {
                         {t('notificationType')}
                       </label>
                       <Dropdown
-                        options={[
-                          { value: '', label: t('all') },
-                          ...NOTIFICATION_TYPE_OPTIONS
-                        ]}
+                        options={notificationTypeFilterOptions}
                         value={selectedNotificationType || ''}
                         placeholder={t('selectType')}
                         onChange={(value) => {
@@ -763,10 +779,7 @@ export default function NotificationManagementPage() {
                         {t('sendingMethod')}
                       </label>
                       <Dropdown
-                        options={[
-                          { value: '', label: t('all') },
-                          ...SENDING_METHOD_OPTIONS
-                        ]}
+                        options={sendingMethodFilterOptions}
                         value={selectedSendingMethod || ''}
                         placeholder={t('selectMethod')}
                         onChange={(value) => {
@@ -874,7 +887,7 @@ export default function NotificationManagementPage() {
                             { value: '', label: t('all') },
                             ...instructors.map(i => ({ 
                               value: i.instructorId || i.id || i.userId || '', 
-                              label: i.instructorName || i.fullName || i.name || i.instructorCode || i.code || 'Không có tên' 
+                              label: i.instructorName || i.fullName || i.name || i.instructorCode || i.code || tCommon('noName') 
                             }))
                           ]}
                           value={selectedInstructor || ''}
@@ -901,8 +914,8 @@ export default function NotificationManagementPage() {
                             { value: '', label: t('all') },
                             ...students.map(s => {
                               const value = s.studentId || s.id || s.userId || '';
-                              const name = s.fullName || s.name || 'Không có tên';
-                              const code = s.studentCode || s.code || s.id || 'N/A';
+                              const name = s.fullName || s.name || tCommon('noName');
+                              const code = s.studentCode || s.code || s.id || t('general.notAvailable');
                               return { 
                                 value, 
                                 label: `${name} (${code})` 

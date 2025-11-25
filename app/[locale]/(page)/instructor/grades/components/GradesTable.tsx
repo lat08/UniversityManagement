@@ -120,7 +120,7 @@ export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBul
     }));
     
     setEditingCell(null);
-  }, [editValue]);
+  }, [editValue, t]);
 
   const handleCancel = useCallback(() => {
     setEditingCell(null);
@@ -292,7 +292,21 @@ export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBul
         )}
       </div>
     );
-  }, [editingCell, editValue, canEdit, isPending, handleEdit, handleSave, handleCancel, getDisplayValue, pendingChanges, handleInputChange, handleKeyPress, handlePaste]);
+  }, [
+    editingCell,
+    editValue,
+    canEdit,
+    isPending,
+    handleEdit,
+    handleSave,
+    handleCancel,
+    getDisplayValue,
+    pendingChanges,
+    handleInputChange,
+    handleKeyPress,
+    handlePaste,
+    t,
+  ]);
 
   const renderNoteCell = useCallback((student: InstructorGradeDto) => {
     const isEditing = editingNote?.enrollmentId === student.enrollmentId;
@@ -351,7 +365,18 @@ export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBul
         )}
       </div>
     );
-  }, [editingNote, editNoteValue, canEdit, isPending, handleEditNote, handleSaveNote, handleCancelNote, getDisplayValue, pendingChanges]);
+  }, [
+    editingNote,
+    editNoteValue,
+    canEdit,
+    isPending,
+    handleEditNote,
+    handleSaveNote,
+    handleCancelNote,
+    getDisplayValue,
+    pendingChanges,
+    t,
+  ]);
 
   const columns: TableColumn[] = [
     { key: 'mssv', label: t('mssv'), align: 'left' },

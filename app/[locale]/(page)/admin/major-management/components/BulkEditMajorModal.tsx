@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Dropdown, Button } from '@/app/components/ui';
-import { X } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { majorsApi } from '../lib/api/majorsApi';
-import type { Faculty, Curriculum } from '../lib/types/types';
+import { useCallback, useEffect, useState } from "react";
+import { Dropdown, Button } from "@/app/components/ui";
+import { X } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { majorsApi } from "../lib/api/majorsApi";
+import type { Faculty, Curriculum } from "../lib/types/types";
+import { useTranslations } from "next-intl";
 
 interface BulkEditMajorModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface BulkEditMajorModalProps {
 }
 
 export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorIds }: BulkEditMajorModalProps) => {
+  const t = useTranslations("admin.majorManagement");
+  const tCommon = useTranslations("common.actions");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
@@ -35,19 +38,19 @@ export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorId
   }, [isOpen]);
 
   const facultyOptions = [
-    { value: '', label: 'Không thay đổi' },
+    { value: '', label: t('filters.noChange') },
     ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
   ];
 
   const curriculumOptions = [
-    { value: '', label: 'Không thay đổi' },
+    { value: '', label: t('filters.noChange') },
     ...curricula.map((c) => ({ value: c.curriculumId, label: c.curriculumName })),
   ];
 
   const statusOptions = [
-    { value: '', label: 'Không thay đổi' },
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Ngừng hoạt động' },
+    { value: '', label: t('filters.noChange') },
+    { value: 'active', label: t('filters.active') },
+    { value: 'inactive', label: t('filters.inactive') },
   ];
 
   const handleClose = useCallback(() => {
@@ -79,7 +82,7 @@ export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorId
     e.preventDefault();
 
     if (!facultyId && !curriculumId && !status) {
-      toast.error('Vui lòng chọn ít nhất một trường để cập nhật');
+      toast.error(t('hooks.bulkEditValidation'));
       return;
     }
 
@@ -96,19 +99,19 @@ export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorId
       const response = await majorsApi.bulkUpdateMajors(payload);
 
       if (response.success) {
-        toast.success(`Đã cập nhật ${selectedMajorIds.length} chuyên ngành`);
+        toast.success(response.message || t('hooks.bulkEditSuccess'));
         setFacultyId('');
         setCurriculumId('');
         setStatus('');
         onSuccess?.();
         handleClose();
       } else {
-        toast.error(response.message || 'Cập nhật hàng loạt thất bại');
+        toast.error(response.message || t('hooks.bulkEditError'));
       }
     } catch (error: unknown) {
       const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
                            (error as { message?: string })?.message || 
-                           'Đã xảy ra lỗi';
+                           tCommon('error');
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -132,9 +135,9 @@ export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorId
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Chỉnh sửa hàng loạt</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('modals.bulkEdit.title')}</h2>
               <p className="text-sm text-gray-600 mt-1">
-                Đã chọn {selectedMajorIds.length} chuyên ngành
+                {t('modals.bulkEdit.description', { count: selectedMajorIds.length })}
               </p>
             </div>
             <Button
@@ -154,36 +157,36 @@ export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorId
           <div className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Thuộc Ngành
+                {t('form.faculty.label')}
               </label>
               <Dropdown
                 options={facultyOptions}
                 value={facultyId}
-                placeholder="Chọn ngành"
+                placeholder={t('form.faculty.placeholder')}
                 onChange={setFacultyId}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Thuộc CTĐT
+                {t('form.curriculum.label')}
               </label>
               <Dropdown
                 options={curriculumOptions}
                 value={curriculumId}
-                placeholder="Chọn CTĐT"
+                placeholder={t('form.curriculum.placeholder')}
                 onChange={setCurriculumId}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Trạng thái
+                {t('form.status.label')}
               </label>
               <Dropdown
                 options={statusOptions}
                 value={status}
-                placeholder="Chọn trạng thái"
+                placeholder={t('form.status.placeholder')}
                 onChange={setStatus}
               />
             </div>
@@ -197,14 +200,14 @@ export const BulkEditMajorModal = ({ isOpen, onClose, onSuccess, selectedMajorId
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {tCommon('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+              {isSubmitting ? t('modals.bulkEdit.submitting') : t('modals.bulkEdit.submit')}
             </Button>
           </div>
         </form>

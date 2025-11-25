@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
-import { useCountUp } from '@/lib/hooks/useCountUp';
-import { useMemo } from 'react';
-import { LucideIcon } from 'lucide-react';
+import { useMemo } from "react";
+import { LucideIcon } from "lucide-react";
+import { useCountUp } from "@/lib/hooks/useCountUp";
+import { useLocale } from "next-intl";
 
 interface MajorStatCardProps {
   label: string;
@@ -14,6 +14,7 @@ interface MajorStatCardProps {
 }
 
 export const MajorStatCard = ({ label, value, Icon, bgColor, iconColor }: MajorStatCardProps) => {
+  const locale = useLocale();
   const count = useCountUp(value, { duration: 1200, start: 0 });
   const displayValue = useMemo(() => Math.round(count), [count]);
 
@@ -28,7 +29,7 @@ export const MajorStatCard = ({ label, value, Icon, bgColor, iconColor }: MajorS
         {label}
       </p>
       <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
-        {displayValue.toLocaleString('vi-VN')}
+        {displayValue.toLocaleString(locale)}
       </p>
     </div>
   );

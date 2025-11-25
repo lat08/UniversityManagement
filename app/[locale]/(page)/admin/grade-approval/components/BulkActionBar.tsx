@@ -1,6 +1,7 @@
 'use client';
 
 import { CircleCheck, CheckCircle, XCircle, X, Download, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 
 interface BulkActionBarProps {
@@ -20,6 +21,8 @@ export function BulkActionBar({
   onClear,
   isProcessing,
 }: BulkActionBarProps) {
+  const t = useTranslations('admin.gradeApproval');
+
   if (selectedCount === 0) return null;
 
   return (
@@ -27,7 +30,7 @@ export function BulkActionBar({
       <div className="flex items-center gap-2">
         <CircleCheck className="w-5 h-5 text-[#0053AD]" />
         <span className="text-sm font-medium text-[#0053AD]">
-          Đã chọn {selectedCount} bảng điểm
+          {t('bulkBar.selected', { count: selectedCount })}
         </span>
       </div>
       <div className="flex gap-2">
@@ -37,17 +40,17 @@ export function BulkActionBar({
           onClick={onExport}
           disabled={isProcessing}
           className="border-blue-600 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
-          title="Xuất Excel các bảng điểm đã chọn"
+          title={t('bulkBar.exportTooltip')}
         >
           {isProcessing ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Đang xuất...
+              {t('bulkBar.exporting')}
             </>
           ) : (
             <>
               <Download className="w-4 h-4" />
-              Xuất Excel
+              {t('bulkBar.export')}
             </>
           )}
         </Button>
@@ -59,7 +62,7 @@ export function BulkActionBar({
           className="border-green-600 text-green-600 hover:bg-green-50 disabled:opacity-50"
         >
           <CheckCircle className="w-4 h-4" />
-          Duyệt toàn bộ
+          {t('bulkBar.approveAll')}
         </Button>
         <Button
           variant="outline"
@@ -69,7 +72,7 @@ export function BulkActionBar({
           className="border-red-600 text-red-600 hover:bg-red-50 disabled:opacity-50"
         >
           <XCircle className="w-4 h-4" />
-          Từ chối toàn bộ
+          {t('bulkBar.rejectAll')}
         </Button>
         <Button
           size="sm"
@@ -78,7 +81,7 @@ export function BulkActionBar({
           className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
         >
           <X className="w-4 h-4" />
-          Bỏ chọn
+          {t('bulkBar.clear')}
         </Button>
       </div>
     </div>

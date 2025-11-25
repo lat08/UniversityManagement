@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { X, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { notificationsApi } from '../lib/api/notificationsApi';
-import type { Notification } from '../lib/types/types';
+import type { Notification, TranslateFn } from '../lib/types/types';
 import { 
   getStatusDisplay, 
   getNotificationTypeDisplay, 
@@ -27,6 +27,9 @@ export const ViewNotificationDetailModal = ({
 }: ViewNotificationDetailModalProps) => {
   const t = useTranslations('admin.modals.viewNotification');
   const tCommon = useTranslations('common.actions');
+  const tNotif = useTranslations('admin.notificationManagement');
+  const translate = tNotif as unknown as TranslateFn;
+  const locale = useLocale();
   const [detailNotification, setDetailNotification] = useState<Notification | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -74,13 +77,13 @@ export const ViewNotificationDetailModal = ({
     };
 
     fetchDetail();
-  }, [isOpen, notification]);
+  }, [isOpen, notification, t]);
 
   if (!isOpen || !notification) return null;
 
   const displayNotification = detailNotification || notification;
-  const statusDisplay = getStatusDisplay(displayNotification.status);
-  const typeDisplay = getNotificationTypeDisplay(displayNotification.notificationType || 'event');
+  const statusDisplay = getStatusDisplay(displayNotification.status, translate);
+  const typeDisplay = getNotificationTypeDisplay(displayNotification.notificationType || 'event', translate);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -176,9 +179,9 @@ export const ViewNotificationDetailModal = ({
                 <label className="block text-sm font-semibold text-gray-700 mb-2">{t('fields.targetType')}</label>
                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                   <p className="text-gray-900">
-                    {getTargetTypeDisplay(notification.targetType)}
-                    {notification.targetValue && (
-                      <span className="text-gray-600 ml-2">({notification.targetValue})</span>
+                    {getTargetTypeDisplay(displayNotification.targetType, translate)}
+                    {displayNotification.targetValue && (
+                      <span className="text-gray-600 ml-2">({displayNotification.targetValue})</span>
                     )}
                   </p>
                 </div>
@@ -188,7 +191,7 @@ export const ViewNotificationDetailModal = ({
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">{t('fields.sendingMethod')}</label>
                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                  <p className="text-gray-900">{getSendingMethodDisplay(displayNotification.sendingMethod)}</p>
+                  <p className="text-gray-900">{getSendingMethodDisplay(displayNotification.sendingMethod, translate)}</p>
                 </div>
               </div>
 
@@ -206,7 +209,7 @@ export const ViewNotificationDetailModal = ({
                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                   <p className="text-gray-900">
                     {displayNotification.scheduledDate 
-                      ? new Date(displayNotification.scheduledDate).toLocaleString('vi-VN')
+                      ? new Date(displayNotification.scheduledDate).toLocaleString(locale)
                       : '-'}
                   </p>
                 </div>
@@ -218,7 +221,7 @@ export const ViewNotificationDetailModal = ({
                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                   <p className="text-gray-900">
                     {displayNotification.createdAt 
-                      ? new Date(displayNotification.createdAt).toLocaleString('vi-VN')
+                      ? new Date(displayNotification.createdAt).toLocaleString(locale)
                       : '-'}
                   </p>
                 </div>
@@ -238,7 +241,7 @@ export const ViewNotificationDetailModal = ({
                   <label className="block text-sm font-semibold text-gray-700 mb-2">{t('fields.updatedAt')}</label>
                   <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                     <p className="text-gray-900">
-                      {new Date(displayNotification.updatedAt).toLocaleString('vi-VN')}
+                    {new Date(displayNotification.updatedAt).toLocaleString(locale)}
                     </p>
                   </div>
                 </div>

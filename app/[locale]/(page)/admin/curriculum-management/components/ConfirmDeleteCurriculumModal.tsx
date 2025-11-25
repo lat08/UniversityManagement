@@ -2,6 +2,7 @@
 
 import { Button } from '@/app/components/ui'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface ConfirmDeleteCurriculumModalProps {
   isOpen: boolean
@@ -16,19 +17,22 @@ export const ConfirmDeleteCurriculumModal = ({
   onClose,
   onConfirm,
 }: ConfirmDeleteCurriculumModalProps) => {
+  const t = useTranslations('admin.curriculumManagement')
+  const tActions = useTranslations('actions')
   if (!isOpen) return null
 
   const handleConfirm = async () => {
     await onConfirm()
     onClose()
   }
+  const safeName = curriculumName ?? tActions('noName')
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Xác nhận xóa Chương trình đào tạo</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('modals.confirmDelete.title')}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -41,21 +45,16 @@ export const ConfirmDeleteCurriculumModal = ({
         </div>
 
         <div className="p-6">
-          <p className="text-gray-700">
-            Bạn có chắc chắn muốn xóa chương trình đào tạo{' '}
-            <span className="font-semibold text-gray-900">{curriculumName}</span>?
-          </p>
-          <p className="text-sm text-red-600 mt-2">
-            Lưu ý: Đây là xóa mềm, CTĐT sẽ không bị xóa vĩnh viễn nhưng không thể sử dụng cho lớp học mới.
-          </p>
+          <p className="text-gray-700">{t('modals.confirmDelete.description', { name: safeName })}</p>
+          <p className="text-sm text-red-600 mt-2">{t('modals.confirmDelete.note')}</p>
         </div>
 
         <div className="flex gap-3 p-6 border-t">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            Hủy
+            {tActions('cancel')}
           </Button>
           <Button onClick={handleConfirm} className="flex-1 bg-red-600 hover:bg-red-700 text-white">
-            Xóa
+            {t('modals.confirmDelete.submit')}
           </Button>
         </div>
       </div>

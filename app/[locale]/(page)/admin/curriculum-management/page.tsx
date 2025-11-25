@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useState, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus, MoreVertical, Upload, Download, Trash2, Edit } from 'lucide-react'
 import { Dropdown, SearchInput, Button } from '@/app/components/ui'
 import { Pagination } from '@/app/components/ui/pagination'
 import { useCurriculums } from './lib/hooks/useCurriculums'
 import { curriculumsApi } from './lib/api/curriculumsApi'
 import type { CurriculumListItem, DepartmentOption, FacultyOption } from './lib/types/types'
-import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable'
-import { TableSkeleton } from '@/app/(page)/admin/student-profile/components/LoadingSkeleton'
+import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable'
+import { TableSkeleton } from '@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton'
 import { AddCurriculumModal } from './components/AddCurriculumModal'
 import { ConfirmDeleteCurriculumModal } from './components/ConfirmDeleteCurriculumModal'
 import { ImportCurriculumModal } from './components/ImportCurriculumModal'
@@ -26,6 +27,7 @@ type CurriculumActionsMenuProps = {
 }
 
 function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumActionsMenuProps) {
+  const t = useTranslations('admin.curriculumManagement.actionsMenu')
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
@@ -68,7 +70,7 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
               }}
             >
               <Edit className="w-4 h-4 text-green-600" />
-              <span>Chỉnh sửa</span>
+              <span>{t('edit')}</span>
             </button>
             <button
               type="button"
@@ -79,7 +81,7 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
               }}
             >
               <Download className="w-4 h-4 text-blue-600" />
-              <span>Xuất Excel</span>
+              <span>{t('export')}</span>
             </button>
             <button
               type="button"
@@ -90,7 +92,7 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
               }}
             >
               <Trash2 className="w-4 h-4 text-red-600" />
-              <span>Xóa CTĐT</span>
+              <span>{t('delete')}</span>
             </button>
           </div>
         </div>
@@ -100,6 +102,7 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
 }
 
 export default function CurriculumManagementPage() {
+  const t = useTranslations('admin.curriculumManagement')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedFacultyId, setSelectedFacultyId] = useState('')
@@ -119,15 +122,23 @@ export default function CurriculumManagementPage() {
   const { curriculums, loading, currentPage, totalCount, totalPages, fetchCurriculums, setCurrentPage } =
     useCurriculums()
 
-  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>(() => [
     { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
-    { key: 'code', label: 'Mã', width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-    { key: 'name', label: 'Tên chương trình đào tạo', width: 260, minWidth: 200, align: 'left', visible: true, required: true },
-    { key: 'faculty', label: 'Khoa', width: 220, minWidth: 160, align: 'left', visible: true },
-    { key: 'credits', label: 'Số tín chỉ', width: 120, minWidth: 100, align: 'center', visible: true },
-    { key: 'year', label: 'Năm áp dụng', width: 120, minWidth: 100, align: 'center', visible: true },
-    { key: 'status', label: 'Trạng thái', width: 150, minWidth: 130, align: 'center', visible: true },
-    { key: 'actions', label: 'HĐ', width: 80, minWidth: 70, align: 'center', visible: true, required: true },
+    { key: 'code', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+    {
+      key: 'name',
+      label: t('table.columns.name'),
+      width: 260,
+      minWidth: 200,
+      align: 'left',
+      visible: true,
+      required: true,
+    },
+    { key: 'faculty', label: t('table.columns.faculty'), width: 220, minWidth: 160, align: 'left', visible: true },
+    { key: 'credits', label: t('table.columns.credits'), width: 120, minWidth: 100, align: 'center', visible: true },
+    { key: 'year', label: t('table.columns.year'), width: 120, minWidth: 100, align: 'center', visible: true },
+    { key: 'status', label: t('table.columns.status'), width: 150, minWidth: 130, align: 'center', visible: true },
+    { key: 'actions', label: t('table.columns.actions'), width: 80, minWidth: 70, align: 'center', visible: true, required: true },
   ])
 
   useEffect(() => {
@@ -156,10 +167,10 @@ export default function CurriculumManagementPage() {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      toast.success('Xuất CTĐT ra Excel thành công')
+      toast.success(t('toast.exportSuccess'))
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(err.response?.data?.message || err.message || 'Xuất CTĐT thất bại')
+      toast.error(err.response?.data?.message || err.message || t('toast.exportError'))
     }
   }
 
@@ -173,7 +184,7 @@ export default function CurriculumManagementPage() {
     try {
       const res = await curriculumsApi.deleteCurriculum(deletingCurriculum.curriculumId)
       if (res.success) {
-        toast.success(res.message || 'Xóa chương trình đào tạo thành công')
+        toast.success(res.message || t('toast.deleteSuccess'))
         setSelectedCurriculumIds((prev) => {
           const next = new Set(prev)
           next.delete(deletingCurriculum.curriculumId)
@@ -187,11 +198,11 @@ export default function CurriculumManagementPage() {
           departmentId: selectedDepartmentId || undefined,
         })
       } else {
-        toast.error(res.message || 'Xóa chương trình đào tạo thất bại')
+        toast.error(res.message || t('toast.deleteError'))
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(err.response?.data?.message || err.message || 'Đã xảy ra lỗi khi xóa CTĐT')
+      toast.error(err.response?.data?.message || err.message || t('toast.deleteGeneralError'))
     }
   }
 
@@ -230,18 +241,18 @@ export default function CurriculumManagementPage() {
 
   const facultyOptions = useMemo(
     () => [
-      { value: '', label: 'Tất cả khoa' },
+      { value: '', label: t('filters.allFaculties') },
       ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
     ],
-    [faculties],
+    [faculties, t],
   )
 
   const departmentOptions = useMemo(
     () => [
-      { value: '', label: 'Tất cả ngành' },
+      { value: '', label: t('filters.allDepartments') },
       ...departments.map((d) => ({ value: d.departmentId, label: d.departmentName })),
     ],
-    [departments],
+    [departments, t],
   )
 
   const handleSelectAll = () => {
@@ -266,7 +277,7 @@ export default function CurriculumManagementPage() {
 
   const handleBulkEditSelected = () => {
     if (selectedCurriculumIds.size === 0) return
-    toast('Tính năng chỉnh sửa toàn bộ CTĐT (trạng thái) sẽ được bổ sung sau khi có API backend.')
+    toast(t('page.bulkEditPending'))
   }
 
   const handleBulkDeleteSelected = () => {
@@ -354,7 +365,7 @@ export default function CurriculumManagementPage() {
                 <td key="status" style={cellPaddingStyle}>
                   <div className="flex justify-center">
                     <span className="text-xs font-medium rounded px-2 py-1 bg-green-100 text-green-700 whitespace-nowrap">
-                      Đang hoạt động
+                      {t('table.status.active')}
                     </span>
                   </div>
                 </td>
@@ -385,15 +396,15 @@ export default function CurriculumManagementPage() {
   return (
     <div className="space-y-4 lg:space-y-6">
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Quản lý Chương trình đào tạo</h1>
-        <p className="text-gray-600 mt-1">Quản lý thông tin chương trình đào tạo của các khoa ngành</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('page.title')}</h1>
+        <p className="text-gray-600 mt-1">{t('page.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 lg:p-6 border-b border-gray-200 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Danh sách Chương trình Đào tạo</h2>
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900">{t('page.listTitle')}</h2>
             </div>
             <div className="flex gap-3">
               <Button
@@ -401,14 +412,14 @@ export default function CurriculumManagementPage() {
                 onClick={() => setIsImportModalOpen(true)}
               >
                 <Upload className="w-4 h-4" />
-                Nhập Excel
+                {t('page.import')}
               </Button>
               <Button
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white"
                 onClick={() => setIsAddModalOpen(true)}
               >
                 <Plus className="w-4 h-4" />
-                Thêm mới
+                {t('page.add')}
               </Button>
             </div>
           </div>
@@ -416,7 +427,7 @@ export default function CurriculumManagementPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
             <div className="sm:col-span-2">
               <SearchInput
-                placeholder="Tìm kiếm theo Mã CTĐT hoặc Tên CTĐT..."
+                placeholder={t('page.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -425,7 +436,7 @@ export default function CurriculumManagementPage() {
             <Dropdown
               options={facultyOptions}
               value={selectedFacultyId || ''}
-              placeholder="Tất cả khoa"
+              placeholder={t('filters.allFaculties')}
               onChange={(value) => {
                 setSelectedFacultyId(value)
                 setSelectedDepartmentId('')
@@ -436,7 +447,7 @@ export default function CurriculumManagementPage() {
             <Dropdown
               options={departmentOptions}
               value={selectedDepartmentId || ''}
-              placeholder="Tất cả ngành"
+              placeholder={t('filters.allDepartments')}
               onChange={(value) => {
                 setSelectedDepartmentId(value)
                 setCurrentPage(1)
@@ -445,11 +456,11 @@ export default function CurriculumManagementPage() {
 
             <Dropdown
               options={[
-                { value: '', label: 'Tất cả trạng thái' },
-                { value: 'active', label: 'Đang hoạt động' },
+                { value: '', label: t('filters.allStatuses') },
+                { value: 'active', label: t('filters.statusActive') },
               ]}
               value={''}
-              placeholder="Tất cả trạng thái"
+              placeholder={t('filters.allStatuses')}
               onChange={() => {
                 /* hin ta1n reserved for future status filter */
               }}
@@ -459,7 +470,7 @@ export default function CurriculumManagementPage() {
           {hasSelection && (
             <div className="flex items-center justify-between p-3 bg-[#E8F4FF] border border-[#0053AD]/20 rounded-lg">
               <div className="text-sm font-medium text-[#0053AD]">
-                Đã chọn {selectedCurriculumIds.size} chương trình đào tạo
+                {t('page.bulkSelection', { count: selectedCurriculumIds.size })}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -468,7 +479,7 @@ export default function CurriculumManagementPage() {
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                   onClick={handleBulkEditSelected}
                 >
-                  Chỉnh sửa toàn bộ
+                  {t('selection.bulkEdit')}
                 </Button>
                 <Button
                   variant="outline"
@@ -476,14 +487,14 @@ export default function CurriculumManagementPage() {
                   className="border-red-600 text-red-600 hover:bg-red-50"
                   onClick={handleBulkDeleteSelected}
                 >
-                  Xóa toàn bộ
+                  {t('selection.bulkDelete')}
                 </Button>
                 <Button
                   size="sm"
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                   onClick={() => setSelectedCurriculumIds(new Set())}
                 >
-                  Bỏ chọn
+                  {t('selection.clear')}
                 </Button>
               </div>
             </div>
@@ -501,7 +512,7 @@ export default function CurriculumManagementPage() {
                 </tr>
               )}
               isLoading={loading}
-              emptyMessage="Không có dữ liệu"
+              emptyMessage={t('table.empty')}
               loadingComponent={<TableSkeleton />}
               onColumnsResize={setResizableColumns}
               renderHeaderCheckbox={() => (
@@ -611,15 +622,15 @@ export default function CurriculumManagementPage() {
               try {
                 const res = await curriculumsApi.deleteCurriculum(id)
                 if (!res.success) {
-                  toast.error(res.message || 'Xóa CTĐT thất bại')
+                  toast.error(res.message || t('toast.bulkDeleteLoopError'))
                 }
               } catch (error: unknown) {
                 const err = error as { response?: { data?: { message?: string } }; message?: string }
-                toast.error(err.response?.data?.message || err.message || 'Đã xảy ra lỗi khi xóa CTĐT')
+                toast.error(err.response?.data?.message || err.message || t('toast.bulkDeleteGeneralError'))
               }
             }
 
-            toast.success('Đã xóa các chương trình đào tạo được chọn (nếu không có lỗi).')
+            toast.success(t('toast.bulkDeleteSuccess'))
             setSelectedCurriculumIds(new Set())
             await fetchCurriculums({
               pageNumber: currentPage,

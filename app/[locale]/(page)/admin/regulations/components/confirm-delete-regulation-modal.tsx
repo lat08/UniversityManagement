@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -16,6 +17,7 @@ export const ConfirmDeleteRegulationModal = ({
   onClose,
   onConfirm,
 }: ConfirmDeleteRegulationModalProps) => {
+  const t = useTranslations('admin.regulations');
   if (!isOpen) {
     return null;
   }
@@ -24,26 +26,25 @@ export const ConfirmDeleteRegulationModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-900">Xác nhận xóa quy chế</h2>
-          <Button variant="ghost" size="icon" onClick={onClose} type="button">
+          <h2 className="text-xl font-semibold text-gray-900">{t('delete.title')}</h2>
+          <Button variant="ghost" size="icon" onClick={onClose} type="button" aria-label={t('delete.cancel')}>
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="px-6 py-5">
           <p className="text-gray-700">
-            Bạn có chắc chắn muốn xóa{' '}
-            <span className="font-semibold text-gray-900">{regulationTitle ?? 'quy chế này'}</span>?
+            {t('delete.message', { title: regulationTitle ?? t('delete.defaultName') })}
           </p>
-          <p className="mt-2 text-sm text-red-600">Hành động này không thể hoàn tác.</p>
+          <p className="mt-2 text-sm text-red-600">{t('delete.warning')}</p>
         </div>
 
         <div className="flex gap-3 border-t px-6 py-4">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            Hủy
+            {t('delete.cancel')}
           </Button>
           <Button onClick={onConfirm} className="flex-1 bg-red-600 text-white hover:bg-red-700">
-            Xóa
+            {t('delete.confirm')}
           </Button>
         </div>
       </div>

@@ -4,10 +4,10 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { SearchInput, Dropdown, DropdownSearch } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
-import { ResizableTable, ResizableColumn } from '@/app/(page)/admin/student-profile/components/ResizableTable';
+import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
 import { BulkActionBar } from './components/BulkActionBar';
 import GradeApprovalActionsMenu from './components/GradeApprovalActionsMenu';
@@ -19,27 +19,30 @@ import { queryKeys } from '@/lib/api/queryKeys';
 import {
   AdminGradeApprovalListItem,
   GradeApprovalFilterState,
-  APPROVAL_STATUS_OPTIONS,
   GetGradeApprovalsParams,
   getApprovalStatusDisplay,
+  buildApprovalStatusOptions,
 } from './lib/types/types';
 import { useCountUp } from '@/lib/hooks/useCountUp';
 
 
-const formatDate = (value?: string | null) => {
-  if (!value) return '—';
-  try {
-    return new Intl.DateTimeFormat('vi-VN', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-};
-
 export default function GradeApprovalPage() {
   const t = useTranslations('admin.gradeApproval');
+  const locale = useLocale();
+  const formatDate = useCallback(
+    (value?: string | null) => {
+      if (!value) return '—';
+      try {
+        return new Intl.DateTimeFormat(locale, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(new Date(value));
+      } catch {
+        return value;
+      }
+    },
+    [locale],
+  );
   const queryClient = useQueryClient();
   const [isStatsAnimationActive, setIsStatsAnimationActive] = useState(true);
   const [searchInput, setSearchInput] = useState('');
@@ -50,12 +53,25 @@ export default function GradeApprovalPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
   
-  const STAT_CARDS = [
-    { key: 'total', label: t('stats.total'), color: 'blue', icon: FileText, description: t('stats.totalDescription') },
-    { key: 'pending', label: t('stats.pending'), color: 'orange', icon: Clock, description: t('stats.pendingDescription') },
-    { key: 'approved', label: t('stats.approved'), color: 'green', icon: CheckCircle, description: t('stats.approvedDescription') },
-    { key: 'rejected', label: t('stats.rejected'), color: 'red', icon: XCircle, description: t('stats.rejectedDescription') },
-  ];
+  type StatCardDefinition = {
+    key: 'total' | 'pending' | 'approved' | 'rejected';
+    label: string;
+    color: 'blue' | 'orange' | 'green' | 'red';
+    icon: typeof FileText;
+    description?: string;
+  };
+
+  const statCardConfigs = useMemo<StatCardDefinition[]>(
+    () => [
+      { key: 'total', label: t('stats.total'), color: 'blue', icon: FileText, description: t('stats.totalDescription') },
+      { key: 'pending', label: t('stats.pending'), color: 'orange', icon: Clock, description: t('stats.pendingDescription') },
+      { key: 'approved', label: t('stats.approved'), color: 'green', icon: CheckCircle, description: t('stats.approvedDescription') },
+      { key: 'rejected', label: t('stats.rejected'), color: 'red', icon: XCircle, description: t('stats.rejectedDescription') },
+    ],
+    [t],
+  );
+
+  const approvalStatusOptions = useMemo(() => buildApprovalStatusOptions(t), [t]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -232,14 +248,16 @@ export default function GradeApprovalPage() {
           );
         }
         if (result.failureCount > 0 && result.errorMessages.length > 0) {
-          const errorMessage =
+          const truncatedErrors = result.errorMessages.slice(0, 3).join('; ');
+          const additionalErrors =
             result.errorMessages.length > 3
-              ? `${result.errorMessages.slice(0, 3).join('; ')} và ${result.errorMessages.length - 3} lỗi khác.`
-              : result.errorMessages.join('; ');
+              ? t('partialErrorSuffix', { count: result.errorMessages.length - 3 })
+              : '';
+          const errorMessage = additionalErrors ? `${truncatedErrors} ${additionalErrors}` : truncatedErrors;
           toast.error(
             action === 'approve'
               ? t('approveError', { failureCount: result.failureCount, errorMessage })
-              : t('rejectError', { failureCount: result.failureCount, errorMessage })
+              : t('rejectError', { failureCount: result.failureCount, errorMessage }),
           );
         }
         setSelectedGradeVersionIds(new Set());
@@ -252,7 +270,7 @@ export default function GradeApprovalPage() {
         toast.error(message);
       }
     },
-    [bulkApproveMutation, bulkRejectMutation, invalidateGradeData],
+    [bulkApproveMutation, bulkRejectMutation, invalidateGradeData, t],
   );
 
   const handleBulkApprove = () =>
@@ -273,7 +291,7 @@ export default function GradeApprovalPage() {
       const a = document.createElement('a');
       a.href = url;
       const dateStr = new Date().toISOString().split('T')[0];
-      a.download = `Bang_diem_duyet_${dateStr}.xlsx`;
+      a.download = `${t('exportModal.fileNamePrefix')}_${dateStr}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -435,7 +453,7 @@ export default function GradeApprovalPage() {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {statusDisplay.label}
+                        {statusDisplay.translationKey ? t(statusDisplay.translationKey) : statusDisplay.fallbackLabel}
                       </span>
                     </div>
                   </td>
@@ -462,16 +480,24 @@ export default function GradeApprovalPage() {
         </>
       );
     },
-    [handleSelectOne, selectedGradeVersionIds, isAnyMutationPending, handleBulkAction],
+    [handleSelectOne, selectedGradeVersionIds, isAnyMutationPending, handleBulkAction, t, formatDate],
   );
 
   const isAllSelected = gradeApprovals.length > 0 && selectedGradeVersionIds.size === gradeApprovals.length;
   const isIndeterminate = selectedGradeVersionIds.size > 0 && !isAllSelected;
 
-  type StatCardConfig = Omit<(typeof STAT_CARDS)[number], 'key'> & { value: number };
+  type StatCardConfig = Omit<StatCardDefinition, 'key'> & { value: number };
 
   const StatsCardWithIcon = memo(
-    ({ label, value, description, color, icon: Icon, animate }: StatCardConfig & { animate: boolean }) => {
+    ({
+      label,
+      value,
+      description,
+      color,
+      icon: Icon,
+      animate,
+      locale: currentLocale,
+    }: StatCardConfig & { animate: boolean; locale: string }) => {
       const count = useCountUp(value, { duration: 1200, start: 0, enabled: animate });
       const displayValue = useMemo(() => (animate ? Math.round(count) : Math.round(value)), [animate, count, value]);
 
@@ -501,7 +527,7 @@ export default function GradeApprovalPage() {
           </div>
           <p className="text-xs sm:text-sm text-gray-600 mb-2 font-medium relative z-10">{label}</p>
           <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
-            {displayValue.toLocaleString('vi-VN')}
+            {displayValue.toLocaleString(currentLocale)}
           </p>
           {description && (
             <p className="text-xs sm:text-sm text-gray-600 relative z-10">{description}</p>
@@ -514,18 +540,19 @@ export default function GradeApprovalPage() {
       prev.label === next.label &&
       prev.description === next.description &&
       prev.color === next.color &&
-      prev.animate === next.animate,
+      prev.animate === next.animate &&
+      prev.locale === next.locale,
   );
 
   StatsCardWithIcon.displayName = 'StatsCardWithIcon';
 
   const statsCardData = useMemo(
     () =>
-      STAT_CARDS.map((card) => ({
+      statCardConfigs.map((card) => ({
         ...card,
         value: statValues[card.key as keyof typeof statValues],
       })),
-    [statValues],
+    [statCardConfigs, statValues],
   );
 
   const dropdownOptions = {
@@ -538,8 +565,8 @@ export default function GradeApprovalPage() {
   return (
     <div className="space-y-4 lg:space-y-6">
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Duyệt bảng điểm</h1>
-        <p className="text-gray-600 mt-1">Xét duyệt bảng điểm sinh viên</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-600 mt-1">{t('description')}</p>
       </div>
 
       {isStatsLoading ? (
@@ -555,6 +582,7 @@ export default function GradeApprovalPage() {
               icon={card.icon}
               value={card.value}
               animate={isStatsAnimationActive}
+              locale={locale}
             />
           ))}
         </div>
@@ -564,10 +592,8 @@ export default function GradeApprovalPage() {
         <div className="p-4 lg:p-6 border-b border-gray-200 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="text-lg lg:text-xl font-semibold text-gray-900">Quản lý yêu cầu duyệt</h2>
-              <p className="text-xs lg:text-sm text-gray-600 mt-1">
-                Duyệt từng bảng điểm, xem chi tiết yêu cầu
-              </p>
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900">{t('managementTitle')}</h2>
+              <p className="text-xs lg:text-sm text-gray-600 mt-1">{t('managementDescription')}</p>
             </div>
           </div>
 
@@ -582,9 +608,9 @@ export default function GradeApprovalPage() {
 
             <div className="w-full sm:w-48">
               <Dropdown
-                options={APPROVAL_STATUS_OPTIONS}
+                options={approvalStatusOptions}
                 value={filters.versionStatus || ''}
-                placeholder={t('status')}
+                placeholder={t('filters.statusPlaceholder')}
                 onChange={(value) => handleFilterChange('versionStatus', value || undefined)}
               />
             </div>
@@ -606,9 +632,9 @@ export default function GradeApprovalPage() {
                 options={dropdownOptions.instructors}
                 value={filters.instructorId || ''}
                 placeholder={t('allInstructors')}
-                searchPlaceholder="Tìm kiếm giảng viên..."
+                searchPlaceholder={t('searchInstructorPlaceholder')}
                 showEmptyOption
-                emptyOptionLabel="Tất cả giảng viên"
+                emptyOptionLabel={t('allInstructors')}
                 onChange={(value) => handleFilterChange('instructorId', value || undefined)}
               />
             </div>
@@ -639,7 +665,7 @@ export default function GradeApprovalPage() {
                 </tr>
               )}
               isLoading={isListLoading && !listData}
-              emptyMessage={gradeApprovals.length === 0 ? 'Không có dữ liệu' : undefined}
+              emptyMessage={gradeApprovals.length === 0 ? t('noData') : undefined}
               loadingComponent={<TableSkeleton />}
               onColumnsResize={setResizableColumns}
               renderHeaderCheckbox={() => (

@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect } from 'react';
-import { Button } from '@/app/components/ui';
-import { X } from 'lucide-react';
+import { useCallback, useEffect } from "react";
+import { Button } from "@/app/components/ui";
+import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface BulkDeleteMajorModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ export const BulkDeleteMajorModal = ({
   selectedCount,
   isDeleting = false
 }: BulkDeleteMajorModalProps) => {
+  const t = useTranslations("admin.majorManagement");
+  const tCommon = useTranslations("common.actions");
   const handleClose = useCallback(() => {
     if (!isDeleting) {
       onClose();
@@ -57,7 +60,7 @@ export const BulkDeleteMajorModal = ({
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Xác nhận xóa</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('modals.bulkDelete.title')}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -73,10 +76,10 @@ export const BulkDeleteMajorModal = ({
 
         <div className="p-6">
           <p className="text-gray-700">
-            Bạn có chắc chắn muốn xóa <span className="font-semibold">{selectedCount}</span> chuyên ngành đã chọn?
+            {t('modals.bulkDelete.description', { count: selectedCount })}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            Hành động này không thể hoàn tác.
+            {t('modals.bulkDelete.note')}
           </p>
         </div>
 
@@ -87,14 +90,14 @@ export const BulkDeleteMajorModal = ({
             disabled={isDeleting}
             className="flex-1"
           >
-            Hủy
+            {tCommon('cancel')}
           </Button>
           <Button
             onClick={onConfirm}
             disabled={isDeleting}
             className="flex-1 bg-red-600 hover:bg-red-700 text-white"
           >
-            {isDeleting ? 'Đang xóa...' : 'Xóa'}
+            {isDeleting ? t('modals.bulkDelete.submitting') : t('modals.bulkDelete.submit')}
           </Button>
         </div>
       </div>

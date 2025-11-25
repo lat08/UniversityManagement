@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { useThemeStore } from '@/app/(page)/admin/theme-configuration/lib/store/themeStore';
-import { useThemeSignalR } from '@/app/(page)/admin/theme-configuration/lib/hooks/useThemeSignalR';
-import { themeApi } from '@/app/(page)/admin/theme-configuration/lib';
+import { useThemeStore } from '@/app/[locale]/(page)/admin/theme-configuration/lib/store/themeStore';
+import { useThemeSignalR } from '@/app/[locale]/(page)/admin/theme-configuration/lib/hooks/useThemeSignalR';
+import { themeApi } from '@/app/[locale]/(page)/admin/theme-configuration/lib';
 
 interface ThemeProviderProps {
   children: React.ReactNode;

@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { useCountUp } from '@/lib/hooks/useCountUp';
 import { useMemo } from 'react';
 import { LucideIcon } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { useCountUp } from '@/lib/hooks/useCountUp';
 
 interface BuildingStatCardProps {
   label: string;
@@ -14,6 +15,7 @@ interface BuildingStatCardProps {
 }
 
 export const BuildingStatCard = ({ label, value, Icon, bgColor, iconColor }: BuildingStatCardProps) => {
+  const locale = useLocale();
   const count = useCountUp(value, { duration: 1200, start: 0 });
   const displayValue = useMemo(() => Math.round(count), [count]);
 
@@ -28,7 +30,7 @@ export const BuildingStatCard = ({ label, value, Icon, bgColor, iconColor }: Bui
         {label}
       </p>
       <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1 relative z-10">
-        {displayValue.toLocaleString('vi-VN')}
+        {displayValue.toLocaleString(locale)}
       </p>
     </div>
   );
