@@ -10,6 +10,7 @@ import { ViewScheduleChangeDetailModal } from './components/ViewScheduleChangeDe
 import { ApproveScheduleChangeModal } from './components/ApproveScheduleChangeModal';
 import { RejectScheduleChangeModal } from './components/RejectScheduleChangeModal';
 import { RevertScheduleChangeModal } from './components/RevertScheduleChangeModal';
+import { EditScheduleChangeModal } from './components/EditScheduleChangeModal';
 import { BulkApproveScheduleChangeModal } from './components/BulkApproveScheduleChangeModal';
 import { BulkRejectScheduleChangeModal } from './components/BulkRejectScheduleChangeModal';
 import { BulkRevertScheduleChangeModal } from './components/BulkRevertScheduleChangeModal';
@@ -18,7 +19,7 @@ import { TableSkeleton } from '@/app/(page)/admin/student-profile/components/Loa
 import { toast } from 'react-hot-toast';
 import { useScheduleChanges } from './lib/hooks/useScheduleChanges';
 import { scheduleChangeApi } from './lib/api/scheduleChangeApi';
-import { getStatusDisplay, getPeriodLabel, getPeriodTimeRange, STATUS_OPTIONS } from './lib/types/types';
+import { getStatusDisplay, getPeriodLabel, STATUS_OPTIONS } from './lib/types/types';
 import type { LeaveRequest } from './lib/types/types';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -64,6 +65,7 @@ export default function ScheduleChangeManagementPage() {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isRevertModalOpen, setIsRevertModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBulkApproveModalOpen, setIsBulkApproveModalOpen] = useState(false);
   const [isBulkRejectModalOpen, setIsBulkRejectModalOpen] = useState(false);
   const [isBulkRevertModalOpen, setIsBulkRevertModalOpen] = useState(false);
@@ -130,6 +132,11 @@ export default function ScheduleChangeManagementPage() {
     setIsRevertModalOpen(true);
   }, []);
 
+  const handleEditClick = useCallback((request: LeaveRequest) => {
+    setViewingRequest(request);
+    setIsEditModalOpen(true);
+  }, []);
+
   const handleSelectAll = useCallback(() => {
     if (selectedRequestIds.size === requests.length) {
       setSelectedRequestIds(new Set());
@@ -175,12 +182,41 @@ export default function ScheduleChangeManagementPage() {
     }
   };
 
+  // Helper function to calculate date from cancelled week and day of week
+  // Assumes week 1 starts from a reference date (could be semester start)
+  const calculateCancelledDate = useCallback((cancelledWeek: number, dayOfWeek: number, createdAt: string): Date | null => {
+    try {
+      // Use created date as reference, or calculate from a base date
+      // For now, we'll try to estimate from created date
+      const createdDate = new Date(createdAt);
+      const createdDayOfWeek = createdDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Convert to our dayOfWeek format (2=Monday, 8=Sunday)
+      let createdDayOfWeekFormatted = createdDayOfWeek === 0 ? 8 : createdDayOfWeek + 1;
+      
+      // Calculate days difference
+      let daysDiff = dayOfWeek - createdDayOfWeekFormatted;
+      if (daysDiff < 0) daysDiff += 7;
+      
+      // Estimate: assume cancelled week is relative to created date
+      // Week 1 would be the week containing created date
+      const weekOffset = (cancelledWeek - 1) * 7;
+      const cancelledDate = new Date(createdDate);
+      cancelledDate.setDate(createdDate.getDate() + daysDiff + weekOffset);
+      
+      return cancelledDate;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const renderRequestRow = useCallback((request: LeaveRequest, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
     const statusDisplay = getStatusDisplay(request.status);
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     const isSelected = selectedRequestIds.has(request.requestId);
-    const cancelDate = new Date(request.cancelDate);
     const makeUpDate = request.makeUpDate ? new Date(request.makeUpDate) : null;
+    const cancelledDate = calculateCancelledDate(request.cancelledWeek, request.dayOfWeek, request.createdAt);
+    const dayLabel = request.dayOfWeekText || `Thứ ${request.dayOfWeek}`;
 
     return (
       <>
@@ -237,13 +273,25 @@ export default function ScheduleChangeManagementPage() {
             case 'currentSchedule':
               return (
                 <td key="currentSchedule" style={{ ...cellPaddingStyle, overflow: 'hidden' }}>
-                  <div className="flex flex-col">
-                    <span className="text-gray-900">{format(cancelDate, 'dd/MM/yyyy', { locale: vi })}</span>
-                    <span className="text-gray-500 text-sm">
-                      {getPeriodLabel(request.cancelStartPeriod, request.cancelEndPeriod)}
-                      {request.oldRoomCode && ` (${request.oldRoomCode})`}
-                    </span>
-                  </div>
+                  {cancelledDate ? (
+                    <div className="flex flex-col">
+                      <span className="text-gray-900">{format(cancelledDate, 'dd/MM/yyyy', { locale: vi })}</span>
+                      <span className="text-gray-500 text-sm">
+                        {getPeriodLabel(request.startPeriod, request.endPeriod)}
+                        {request.currentRoomCode && ` (${request.currentRoomCode})`}
+                      </span>
+                      <span className="text-gray-500 text-xs">Tuần {request.cancelledWeek}</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      <span className="text-gray-900">{dayLabel}</span>
+                      <span className="text-gray-500 text-sm">
+                        {getPeriodLabel(request.startPeriod, request.endPeriod)}
+                        {request.currentRoomCode && ` (${request.currentRoomCode})`}
+                      </span>
+                      <span className="text-gray-500 text-xs">Tuần {request.cancelledWeek}</span>
+                    </div>
+                  )}
                 </td>
               );
             case 'proposedSchedule':
@@ -255,6 +303,16 @@ export default function ScheduleChangeManagementPage() {
                       <span className="text-gray-500 text-sm">
                         {getPeriodLabel(request.startPeriod, request.endPeriod)}
                         {request.makeUpRoomCode && ` (${request.makeUpRoomCode})`}
+                      </span>
+                      {request.makeupWeek && (
+                        <span className="text-gray-500 text-xs">Tuần dạy bù {request.makeupWeek}</span>
+                      )}
+                    </div>
+                  ) : request.makeupWeek ? (
+                    <div className="flex flex-col">
+                      <span className="text-gray-900">Tuần dạy bù {request.makeupWeek}</span>
+                      <span className="text-gray-500 text-sm">
+                        {getPeriodLabel(request.startPeriod, request.endPeriod)}
                       </span>
                     </div>
                   ) : (
@@ -291,6 +349,7 @@ export default function ScheduleChangeManagementPage() {
                     onApprove={request.status === 'pending' ? () => handleApproveClick(request) : undefined}
                     onReject={request.status === 'pending' ? () => handleRejectClick(request) : undefined}
                     onRevert={(request.status === 'approved' || request.status === 'rejected') ? () => handleRevertClick(request) : undefined}
+                    onEdit={(request.status === 'pending' || request.status === 'approved') ? () => handleEditClick(request) : undefined}
                     compact={(column.width || 0) < 120}
                   />
                 </td>
@@ -301,7 +360,7 @@ export default function ScheduleChangeManagementPage() {
         })}
       </>
     );
-  }, [handleViewClick, handleApproveClick, handleRejectClick, handleRevertClick, handleSelectOne, selectedRequestIds]);
+  }, [handleViewClick, handleApproveClick, handleRejectClick, handleRevertClick, handleSelectOne, selectedRequestIds, calculateCancelledDate]);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -555,6 +614,25 @@ export default function ScheduleChangeManagementPage() {
         isOpen={isRevertModalOpen}
         onClose={() => {
           setIsRevertModalOpen(false);
+          setViewingRequest(null);
+        }}
+        request={viewingRequest}
+        onSuccess={() => {
+          fetchScheduleChanges({
+            searchTerm: searchKeyword || undefined,
+            status: selectedStatus || undefined,
+            dateFrom: dateFrom || undefined,
+            dateTo: dateTo || undefined,
+            pageNumber: currentPage,
+            pageSize: 20,
+          });
+        }}
+      />
+
+      <EditScheduleChangeModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
           setViewingRequest(null);
         }}
         request={viewingRequest}

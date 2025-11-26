@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button, Dropdown, Input } from '@/app/components/ui';
-import { X, Calendar, Clock, MapPin } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -38,6 +38,30 @@ export const ApproveScheduleChangeModal = ({
 
   const calendarRef = useRef<HTMLDivElement>(null);
   const selectedRoomIdRef = useRef<string>('');
+
+  // Helper function to calculate date from cancelled week and day of week
+  const calculateCancelledDate = useCallback((cancelledWeek: number, dayOfWeek: number, createdAt: string): Date | null => {
+    try {
+      const createdDate = new Date(createdAt);
+      const createdDayOfWeek = createdDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Convert to our dayOfWeek format (2=Monday, 8=Sunday)
+      let createdDayOfWeekFormatted = createdDayOfWeek === 0 ? 8 : createdDayOfWeek + 1;
+      
+      // Calculate days difference
+      let daysDiff = dayOfWeek - createdDayOfWeekFormatted;
+      if (daysDiff < 0) daysDiff += 7;
+      
+      // Estimate: assume cancelled week is relative to created date
+      const weekOffset = (cancelledWeek - 1) * 7;
+      const cancelledDate = new Date(createdDate);
+      cancelledDate.setDate(createdDate.getDate() + daysDiff + weekOffset);
+      
+      return cancelledDate;
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -134,10 +158,12 @@ export const ApproveScheduleChangeModal = ({
 
           // If request has proposed room code and we haven't selected a room yet, try to find and select it
           if (request.makeUpRoomCode && !selectedRoomIdRef.current && rooms.length > 0) {
-            const proposedRoom = rooms.find(r => 
-              r.roomName.toLowerCase().includes(request.makeUpRoomCode.toLowerCase()) ||
-              r.roomId.toLowerCase() === request.makeUpRoomCode.toLowerCase()
-            );
+            const normalizedCode = request.makeUpRoomCode.toLowerCase();
+            const proposedRoom = rooms.find((r) => {
+              const roomName = r.roomName ? r.roomName.toLowerCase() : '';
+              const roomId = r.roomId ? r.roomId.toLowerCase() : '';
+              return roomName.includes(normalizedCode) || roomId === normalizedCode;
+            });
             if (proposedRoom) {
               selectedRoomIdRef.current = proposedRoom.roomId;
               setSelectedRoomId(proposedRoom.roomId);
@@ -178,7 +204,7 @@ export const ApproveScheduleChangeModal = ({
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [isOpen, makeupDate, startPeriod, endPeriod, request?.requestId, request?.makeUpRoomCode]);
+  }, [isOpen, makeupDate, startPeriod, endPeriod, request]);
 
   const handleDateInputChange = (value: string) => {
     setDateInputValue(value);
@@ -213,9 +239,32 @@ export const ApproveScheduleChangeModal = ({
       setDateInputValue(format(makeUpDate, 'dd/MM/yyyy'));
       setStartPeriod(request.startPeriod);
       setEndPeriod(request.endPeriod);
-      toast.success('Đã áp dụng lịch đề xuất');
+      
+      // Try to find and select proposed room if available rooms are already loaded
+      if (request.makeUpRoomCode && availableRooms.length > 0) {
+        const normalizedCode = request.makeUpRoomCode.toLowerCase();
+        const proposedRoom = availableRooms.find((r) => {
+          const roomName = r.roomName ? r.roomName.toLowerCase() : '';
+          const roomId = r.roomId ? r.roomId.toLowerCase() : '';
+          return roomName.includes(normalizedCode) || roomId === normalizedCode;
+        });
+        if (proposedRoom) {
+          selectedRoomIdRef.current = proposedRoom.roomId;
+          setSelectedRoomId(proposedRoom.roomId);
+        } else {
+          // Reset if proposed room not found
+          setSelectedRoomId('');
+          selectedRoomIdRef.current = '';
+        }
+      } else {
+        // Reset room selection - will be auto-selected when availability loads
+        setSelectedRoomId('');
+        selectedRoomIdRef.current = '';
+      }
+      
+      toast.success('Đã quay lại lịch đề xuất');
     }
-  }, [request]);
+  }, [request, availableRooms]);
 
   const handleSubmit = async () => {
     if (!request) return;
@@ -236,7 +285,7 @@ export const ApproveScheduleChangeModal = ({
     }
 
     // Validate period count matches cancelled periods
-    const cancelledPeriodCount = request.cancelEndPeriod - request.cancelStartPeriod + 1;
+    const cancelledPeriodCount = request.endPeriod - request.startPeriod + 1;
     const makeupPeriodCount = endPeriod - startPeriod + 1;
     if (makeupPeriodCount !== cancelledPeriodCount) {
       toast.error(`Số tiết dạy bù (${makeupPeriodCount}) phải bằng số tiết hủy (${cancelledPeriodCount})`);
@@ -284,6 +333,8 @@ export const ApproveScheduleChangeModal = ({
   // Early return after all hooks
   if (!isOpen || !request) return null;
 
+  const cancelledDate = calculateCancelledDate(request.cancelledWeek, request.dayOfWeek, request.createdAt);
+
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isSubmitting) {
       onClose();
@@ -295,17 +346,34 @@ export const ApproveScheduleChangeModal = ({
     label: `${p.label} (${p.startTime} - ${p.endTime})`,
   }));
 
-  const cancelDate = new Date(request.cancelDate);
-  const makeUpDate = request.makeUpDate ? new Date(request.makeUpDate) : null;
-  const hasProposedSchedule = makeUpDate && request.startPeriod > 0 && request.endPeriod > 0;
+  const makeUpDateFromRequest = request.makeUpDate ? new Date(request.makeUpDate) : null;
+  const hasProposedSchedule = makeUpDateFromRequest && request.startPeriod > 0 && request.endPeriod > 0;
 
-  // Check if current form matches proposed schedule
-  const isUsingProposedSchedule = 
-    makeUpDate && 
+  // Check if current form matches proposed schedule (date and periods)
+  const isUsingProposedDateAndPeriods = 
+    makeUpDateFromRequest && 
     makeupDate && 
-    format(makeupDate, 'yyyy-MM-dd') === format(makeUpDate, 'yyyy-MM-dd') &&
+    format(makeupDate, 'yyyy-MM-dd') === format(makeUpDateFromRequest, 'yyyy-MM-dd') &&
     startPeriod === request.startPeriod &&
     endPeriod === request.endPeriod;
+
+  // Check if current room matches proposed room
+  const isUsingProposedRoom = request.makeUpRoomCode && selectedRoomId && availableRooms.length > 0
+    ? (() => {
+        const normalizedCode = request.makeUpRoomCode.toLowerCase();
+        const selectedRoom = availableRooms.find(r => r.roomId === selectedRoomId);
+        if (!selectedRoom) return false;
+        const roomName = selectedRoom.roomName ? selectedRoom.roomName.toLowerCase() : '';
+        const roomId = selectedRoom.roomId ? selectedRoom.roomId.toLowerCase() : '';
+        return roomName.includes(normalizedCode) || roomId === normalizedCode;
+      })()
+    : !request.makeUpRoomCode && !selectedRoomId; // Both empty
+
+  // Check if completely using proposed schedule
+  const isUsingProposedSchedule = isUsingProposedDateAndPeriods && isUsingProposedRoom;
+
+  // Check if admin has changed anything from proposed schedule
+  const hasChangedFromProposed = hasProposedSchedule && !isUsingProposedSchedule;
 
   return (
     <div
@@ -357,22 +425,30 @@ export const ApproveScheduleChangeModal = ({
           {/* Lịch hiện tại */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Lịch hiện tại (sẽ hủy)</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-4 gap-4 text-sm">
               <div>
-                <span className="text-gray-600">Ngày:</span>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày:</label>
                 <p className="text-gray-900 font-medium">
-                  {format(cancelDate, 'dd/MM/yyyy', { locale: vi })}
+                  {cancelledDate 
+                    ? format(cancelledDate, 'EEEE, dd/MM/yyyy', { locale: vi })
+                    : request.dayOfWeekText}
                 </p>
               </div>
               <div>
-                <span className="text-gray-600">Phòng:</span>
-                <p className="text-gray-900 font-medium">{request.oldRoomCode || '-'}</p>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tuần nghỉ:</label>
+                <p className="text-gray-900 font-medium">Tuần {request.cancelledWeek}</p>
               </div>
-              <div className="col-span-2">
-                <span className="text-gray-600">Tiết học:</span>
-                <p className="text-gray-900 font-medium">
-                  {getPeriodLabel(request.cancelStartPeriod, request.cancelEndPeriod)} ({getPeriodTimeRange(request.cancelStartPeriod, request.cancelEndPeriod)})
-                </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tiết:</label>
+                <p className="text-gray-900 font-medium">{getPeriodLabel(request.startPeriod, request.endPeriod)}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phòng:</label>
+                <p className="text-gray-900 font-medium">{request.currentRoomCode || request.currentRoomName || '-'}</p>
+              </div>
+              <div className="col-span-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Khung giờ:</label>
+                <p className="text-gray-900 font-medium">{getPeriodTimeRange(request.startPeriod, request.endPeriod)}</p>
               </div>
             </div>
           </div>
@@ -390,7 +466,7 @@ export const ApproveScheduleChangeModal = ({
                     onClick={handleUseProposedSchedule}
                     className="border-blue-300 text-blue-700 hover:bg-blue-100"
                   >
-                    Sử dụng lịch đề xuất
+                    Quay lại lịch đề xuất
                   </Button>
                 )}
                 {isUsingProposedSchedule && (
@@ -399,26 +475,55 @@ export const ApproveScheduleChangeModal = ({
                   </span>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-blue-700">Ngày:</span>
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Ngày:</label>
                   <p className="text-blue-900 font-medium">
-                    {format(makeUpDate, 'dd/MM/yyyy', { locale: vi })}
+                    {format(makeUpDateFromRequest, 'EEEE, dd/MM/yyyy', { locale: vi })}
                   </p>
                 </div>
-                {request.makeUpRoomCode && (
-                  <div>
-                    <span className="text-blue-700">Phòng đề xuất:</span>
-                    <p className="text-blue-900 font-medium">{request.makeUpRoomCode}</p>
-                  </div>
-                )}
-                <div className="col-span-2">
-                  <span className="text-blue-700">Tiết học:</span>
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Tuần dạy bù:</label>
+                  <p className="text-blue-900 font-medium">{request.makeupWeek ? `Tuần ${request.makeupWeek}` : '-'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Tiết:</label>
                   <p className="text-blue-900 font-medium">
-                    {getPeriodLabel(request.startPeriod, request.endPeriod)} ({getPeriodTimeRange(request.startPeriod, request.endPeriod)})
+                    {getPeriodLabel(request.startPeriod, request.endPeriod)}
                   </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Phòng:</label>
+                  <p className="text-blue-900 font-medium">{request.makeUpRoomCode || request.makeUpRoomName || '-'}</p>
+                </div>
+                <div className="col-span-4">
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Khung giờ:</label>
+                  <p className="text-blue-900 font-medium">{getPeriodTimeRange(request.startPeriod, request.endPeriod)}</p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Alert khi đã thay đổi */}
+          {hasChangedFromProposed && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-900 mb-1">
+                  Bạn đã thay đổi so với lịch đề xuất
+                </p>
+                <p className="text-xs text-amber-700">
+                  Bạn có thể quay lại lịch đề xuất của giảng viên bất cứ lúc nào
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleUseProposedSchedule}
+                className="border-amber-300 text-amber-700 hover:bg-amber-100 whitespace-nowrap"
+              >
+                Quay lại lịch đề xuất
+              </Button>
             </div>
           )}
 
@@ -428,13 +533,13 @@ export const ApproveScheduleChangeModal = ({
               <label className="block text-sm font-medium text-gray-900">
                 Ngày dạy bù <span className="text-red-500">*</span>
               </label>
-              {hasProposedSchedule && !isUsingProposedSchedule && (
+              {hasProposedSchedule && !isUsingProposedDateAndPeriods && (
                 <button
                   type="button"
                   onClick={handleUseProposedSchedule}
                   className="text-xs text-blue-600 hover:text-blue-700 underline"
                 >
-                  Sử dụng ngày đề xuất
+                  Dùng ngày đề xuất
                 </button>
               )}
             </div>
@@ -494,7 +599,7 @@ export const ApproveScheduleChangeModal = ({
                     }}
                     className="text-xs text-blue-600 hover:text-blue-700 underline"
                   >
-                    Dùng đề xuất
+                    Dùng đề xuất ({request.startPeriod})
                   </button>
                 )}
               </div>
@@ -521,7 +626,7 @@ export const ApproveScheduleChangeModal = ({
                     onClick={() => setEndPeriod(request.endPeriod)}
                     className="text-xs text-blue-600 hover:text-blue-700 underline"
                   >
-                    Dùng đề xuất
+                    Dùng đề xuất ({request.endPeriod})
                   </button>
                 )}
               </div>
@@ -536,9 +641,31 @@ export const ApproveScheduleChangeModal = ({
 
           {/* Chọn phòng học */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Phòng học <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-900">
+                Phòng học <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                {request.makeUpRoomCode && (
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    isUsingProposedRoom 
+                      ? 'text-blue-600 bg-blue-100' 
+                      : 'text-amber-600 bg-amber-100'
+                  }`}>
+                    {isUsingProposedRoom ? '✓ Đang dùng: ' : 'Đề xuất: '}{request.makeUpRoomCode}
+                  </span>
+                )}
+                {hasProposedSchedule && request.makeUpRoomCode && !isUsingProposedRoom && selectedRoomId && (
+                  <button
+                    type="button"
+                    onClick={handleUseProposedSchedule}
+                    className="text-xs text-blue-600 hover:text-blue-700 underline"
+                  >
+                    Dùng phòng đề xuất
+                  </button>
+                )}
+              </div>
+            </div>
             {loadingAvailability ? (
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <p className="text-sm text-gray-600">Đang tải danh sách phòng trống...</p>
@@ -553,10 +680,15 @@ export const ApproveScheduleChangeModal = ({
               </div>
             ) : (
               <Dropdown
-                options={availableRooms.map((room) => ({
-                  value: room.roomId,
-                  label: `${room.roomName} (Sức chứa: ${room.capacity})`,
-                }))}
+                options={availableRooms.map((room) => {
+                  const isProposedRoom = request.makeUpRoomCode && 
+                    (room.roomName.toLowerCase().includes(request.makeUpRoomCode.toLowerCase()) ||
+                     room.roomId.toLowerCase() === request.makeUpRoomCode.toLowerCase());
+                  return {
+                    value: room.roomId,
+                    label: `${room.roomName} (Sức chứa: ${room.capacity})${isProposedRoom ? ' ⭐' : ''}`,
+                  };
+                })}
                 value={selectedRoomId}
                 placeholder="Chọn phòng học"
                 onChange={(value) => {

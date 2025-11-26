@@ -1,24 +1,26 @@
 export interface LeaveRequest {
   requestId: string;
   requestCode: string;
-  instructorId: string;
-  instructorName: string;
   courseClassId: string;
   courseClassCode: string;
   subjectName: string;
-  cancelDate: string; // ISO date string - ngày hủy (lịch hiện tại)
-  cancelStartPeriod: number; // Tiết bắt đầu của lịch hiện tại
-  cancelEndPeriod: number; // Tiết kết thúc của lịch hiện tại
-  oldRoomCode: string; // Mã phòng của lịch hiện tại
-  makeUpDate: string; // ISO date string - ngày dạy bù đề xuất (lịch đề xuất)
-  startPeriod: number; // Tiết bắt đầu của lịch đề xuất
-  endPeriod: number; // Tiết kết thúc của lịch đề xuất
-  makeUpRoomCode: string; // Mã phòng của lịch đề xuất
-  totalPeriods: number;
-  reason: string;
+  subjectCode: string;
+  instructorName: string;
+  cancelledWeek: number;
+  makeupWeek?: number | null;
+  dayOfWeek: number;
+  dayOfWeekText: string;
+  startPeriod: number;
+  endPeriod: number;
+  makeUpDate?: string | null;
+  makeUpRoomCode?: string | null;
+  makeUpRoomName?: string | null;
+  currentRoomCode?: string | null;
+  currentRoomName?: string | null;
+  reason?: string | null;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string; // ISO date string
-  makeup?: MakeupAssignment;
+  makeup?: MakeupAssignment | null;
 }
 
 export interface MakeupAssignment {
@@ -75,6 +77,15 @@ export interface RejectPayload {
 
 export interface RevertPayload {
   reason?: string; // Optional reason for reverting
+}
+
+export interface UpdateScheduleChangePayload {
+  makeupWeek?: number | null;
+  makeupDate?: string | null; // ISO date string
+  makeupRoomId?: string | null;
+  startPeriod?: number | null;
+  endPeriod?: number | null;
+  reason?: string | null;
 }
 
 export interface AvailabilityQuery {

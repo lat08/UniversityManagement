@@ -6,7 +6,6 @@ import { X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { scheduleChangeApi } from '../lib/api/scheduleChangeApi';
 import type { LeaveRequest } from '../lib/types/types';
-import { format } from 'date-fns';
 
 interface BulkApproveScheduleChangeModalProps {
   isOpen: boolean;
@@ -129,6 +128,16 @@ export const BulkApproveScheduleChangeModal = ({
           // Lấy roomId từ availability API
           let roomId = request.makeUpRoomCode; // Fallback: dùng roomCode
           
+          // Validate required fields
+          if (!request.makeUpDate) {
+            failedCount++;
+            errors.push({
+              id: request.requestId,
+              message: 'Thiếu ngày dạy bù',
+            });
+            continue;
+          }
+
           try {
             // Thử lấy availability để tìm roomId từ roomCode
             const availability = await scheduleChangeApi.getAvailability(request.requestId, {
@@ -138,19 +147,30 @@ export const BulkApproveScheduleChangeModal = ({
             });
             
             // Tìm room có roomName hoặc roomId khớp với makeUpRoomCode
-            const matchingRoom = availability.rooms?.find(
-              (room) =>
-                room.roomName.toLowerCase().includes(request.makeUpRoomCode.toLowerCase()) ||
-                room.roomId.toLowerCase() === request.makeUpRoomCode.toLowerCase()
-            );
-            
-            if (matchingRoom) {
-              roomId = matchingRoom.roomId;
+            if (request.makeUpRoomCode) {
+              const matchingRoom = availability.rooms?.find(
+                (room) =>
+                  room.roomName.toLowerCase().includes(request.makeUpRoomCode!.toLowerCase()) ||
+                  room.roomId.toLowerCase() === request.makeUpRoomCode!.toLowerCase()
+              );
+              
+              if (matchingRoom) {
+                roomId = matchingRoom.roomId;
+              }
             }
           } catch (availabilityError) {
             // Nếu không lấy được availability, vẫn thử approve với roomCode
             // API sẽ trả về lỗi nếu không hợp lệ
             console.warn(`Could not get availability for request ${request.requestId}:`, availabilityError);
+          }
+
+          if (!roomId) {
+            failedCount++;
+            errors.push({
+              id: request.requestId,
+              message: 'Thiếu thông tin phòng',
+            });
+            continue;
           }
 
           const payload = {
@@ -230,12 +250,6 @@ export const BulkApproveScheduleChangeModal = ({
       handleClose();
     }
   };
-
-  const statusOptions = [
-    { value: 'pending', label: 'Chờ duyệt' },
-    { value: 'approved', label: 'Đã duyệt' },
-    { value: 'rejected', label: 'Từ chối' },
-  ];
 
   return (
     <div

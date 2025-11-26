@@ -128,7 +128,7 @@ export const RevertScheduleChangeModal = ({
                   Xác nhận hoàn tác
                 </p>
                 <p className="text-xs text-yellow-700">
-                  Yêu cầu này sẽ được chuyển về trạng thái "Chờ duyệt". 
+                  Yêu cầu này sẽ được chuyển về trạng thái &quot;Chờ duyệt&quot;. 
                   {request.status === 'approved' && ' Lịch dạy bù đã được phân công sẽ bị hủy.'}
                 </p>
               </div>

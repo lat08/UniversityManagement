@@ -226,7 +226,7 @@ export const BulkRevertScheduleChangeModal = ({
                     {eligibleRequests.length} yêu cầu đủ điều kiện để hoàn tác
                   </p>
                   <p className="text-xs text-yellow-700">
-                    Các yêu cầu này sẽ được chuyển về trạng thái "Chờ duyệt". 
+                    Các yêu cầu này sẽ được chuyển về trạng thái &quot;Chờ duyệt&quot;. 
                     Lịch dạy bù đã được phân công (nếu có) sẽ bị hủy.
                   </p>
                 </div>
@@ -241,7 +241,7 @@ export const BulkRevertScheduleChangeModal = ({
                     Không có yêu cầu nào đủ điều kiện
                   </p>
                   <p className="text-xs text-red-700">
-                    Chỉ có thể hoàn tác yêu cầu ở trạng thái "Đã duyệt" hoặc "Từ chối".
+                    Chỉ có thể hoàn tác yêu cầu ở trạng thái &quot;Đã duyệt&quot; hoặc &quot;Từ chối&quot;.
                   </p>
                 </div>
               </div>

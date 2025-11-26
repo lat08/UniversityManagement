@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Button, Dropdown } from '@/app/components/ui';
+import { useEffect, useCallback } from 'react';
+import { Button } from '@/app/components/ui';
 import { X } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -47,9 +47,34 @@ export const ViewScheduleChangeDetailModal = ({
     }
   };
 
-  const cancelDate = new Date(request.cancelDate);
   const makeUpDate = request.makeUpDate ? new Date(request.makeUpDate) : null;
   const approvedMakeupDate = request.makeup ? new Date(request.makeup.makeupDate) : null;
+
+  // Helper function to calculate date from cancelled week and day of week
+  const calculateCancelledDate = (cancelledWeek: number, dayOfWeek: number, createdAt: string): Date | null => {
+    try {
+      const createdDate = new Date(createdAt);
+      const createdDayOfWeek = createdDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Convert to our dayOfWeek format (2=Monday, 8=Sunday)
+      let createdDayOfWeekFormatted = createdDayOfWeek === 0 ? 8 : createdDayOfWeek + 1;
+      
+      // Calculate days difference
+      let daysDiff = dayOfWeek - createdDayOfWeekFormatted;
+      if (daysDiff < 0) daysDiff += 7;
+      
+      // Estimate: assume cancelled week is relative to created date
+      const weekOffset = (cancelledWeek - 1) * 7;
+      const cancelledDate = new Date(createdDate);
+      cancelledDate.setDate(createdDate.getDate() + daysDiff + weekOffset);
+      
+      return cancelledDate;
+    } catch {
+      return null;
+    }
+  };
+
+  const cancelledDate = calculateCancelledDate(request.cancelledWeek, request.dayOfWeek, request.createdAt);
 
   return (
     <div
@@ -118,38 +143,52 @@ export const ViewScheduleChangeDetailModal = ({
           {/* Lịch hiện tại */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-3">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Lịch hiện tại</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ngày:</label>
                 <p className="text-gray-900">
-                  {format(cancelDate, "EEEE, dd/MM/yyyy", { locale: vi })}
+                  {cancelledDate 
+                    ? format(cancelledDate, 'EEEE, dd/MM/yyyy', { locale: vi })
+                    : request.dayOfWeekText}
                 </p>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tuần nghỉ:</label>
+                <p className="text-gray-900">Tuần {request.cancelledWeek}</p>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tiết:</label>
-                <p className="text-gray-900">{getPeriodLabel(request.cancelStartPeriod, request.cancelEndPeriod)}</p>
+                <p className="text-gray-900">{getPeriodLabel(request.startPeriod, request.endPeriod)}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phòng:</label>
-                <p className="text-gray-900">{request.oldRoomCode || '-'}</p>
+                <p className="text-gray-900">{request.currentRoomCode || request.currentRoomName || '-'}</p>
               </div>
-              <div className="col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Thời gian:</label>
-                <p className="text-gray-900">{getPeriodTimeRange(request.cancelStartPeriod, request.cancelEndPeriod)}</p>
+              <div className="col-span-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Khung giờ:</label>
+                <p className="text-gray-900">{getPeriodTimeRange(request.startPeriod, request.endPeriod)}</p>
               </div>
             </div>
           </div>
 
           {/* Lịch đề xuất */}
-          {makeUpDate && (
+          {(makeUpDate || request.makeupWeek) && (
             <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300 space-y-3">
               <h3 className="text-lg font-semibold text-blue-900 mb-3">Lịch đề xuất</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-blue-700 mb-1">Ngày:</label>
                   <p className="text-blue-900 font-medium">
-                    {format(makeUpDate, "EEEE, dd/MM/yyyy", { locale: vi })}
+                    {makeUpDate
+                      ? format(makeUpDate, "EEEE, dd/MM/yyyy", { locale: vi })
+                      : request.makeupWeek
+                        ? `Tuần ${request.makeupWeek}`
+                        : '-'}
                   </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Tuần dạy bù:</label>
+                  <p className="text-blue-900 font-medium">{request.makeupWeek ? `Tuần ${request.makeupWeek}` : '-'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-blue-700 mb-1">Tiết:</label>
@@ -159,10 +198,10 @@ export const ViewScheduleChangeDetailModal = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-blue-700 mb-1">Phòng:</label>
-                  <p className="text-blue-900 font-medium">{request.makeUpRoomCode || '-'}</p>
+                  <p className="text-blue-900 font-medium">{request.makeUpRoomCode || request.makeUpRoomName || '-'}</p>
                 </div>
-                <div className="col-span-3">
-                  <label className="block text-sm font-medium text-blue-700 mb-1">Thời gian:</label>
+                <div className="col-span-4">
+                  <label className="block text-sm font-medium text-blue-700 mb-1">Khung giờ:</label>
                   <p className="text-blue-900 font-medium">{getPeriodTimeRange(request.startPeriod, request.endPeriod)}</p>
                 </div>
               </div>

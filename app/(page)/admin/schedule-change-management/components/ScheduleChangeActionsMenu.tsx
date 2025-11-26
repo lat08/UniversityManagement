@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Eye, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { MoreVertical, Eye, CheckCircle2, XCircle, RotateCcw, Edit2 } from 'lucide-react';
 import { Button } from '@/app/components/ui';
 
 interface ScheduleChangeActionsMenuProps {
@@ -12,6 +12,7 @@ interface ScheduleChangeActionsMenuProps {
   onApprove?: () => void;
   onReject?: () => void;
   onRevert?: () => void;
+  onEdit?: () => void;
   compact?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const ScheduleChangeActionsMenu = ({
   onApprove,
   onReject,
   onRevert,
+  onEdit,
   status,
   compact = false,
 }: ScheduleChangeActionsMenuProps) => {
@@ -27,7 +29,9 @@ export const ScheduleChangeActionsMenu = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isPending = status?.toLowerCase() === 'pending';
+  const isApproved = status?.toLowerCase() === 'approved';
   const canRevert = status?.toLowerCase() === 'approved' || status?.toLowerCase() === 'rejected';
+  const canEdit = isPending || isApproved;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,6 +95,18 @@ export const ScheduleChangeActionsMenu = ({
                 <Eye className="w-4 h-4 text-blue-600" />
                 Xem chi tiết
               </button>
+              {canEdit && onEdit && (
+                <button
+                  onClick={() => {
+                    onEdit();
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <Edit2 className="w-4 h-4 text-purple-600" />
+                  Chỉnh sửa
+                </button>
+              )}
               {isPending && onApprove && (
                 <button
                   onClick={() => {
@@ -145,6 +161,17 @@ export const ScheduleChangeActionsMenu = ({
       >
         <Eye className="w-4 h-4" />
       </Button>
+      {canEdit && onEdit && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onEdit}
+          className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+          title="Chỉnh sửa"
+        >
+          <Edit2 className="w-4 h-4" />
+        </Button>
+      )}
       {isPending && onApprove && (
         <Button
           variant="ghost"
