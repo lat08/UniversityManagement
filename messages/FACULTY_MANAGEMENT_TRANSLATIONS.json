@@ -1,0 +1,125 @@
+{
+  "facultyManagement": {
+    "title": "Quản lý Ngành học",
+    "description": "Quản lý thông tin các ngành học",
+    "listTitle": "Danh sách Ngành học",
+    "stats": {
+      "total": "Tổng số ngành",
+      "active": "Đang hoạt động",
+      "inactive": "Ngưng hoạt động"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm theo mã, tên ngành học..."
+    },
+    "status": {
+      "all": "Tất cả trạng thái",
+      "active": "Đang hoạt động",
+      "inactive": "Ngưng hoạt động",
+      "unknown": "Không xác định"
+    },
+    "filters": {
+      "allDivisions": "Tất cả Khoa",
+      "allCurriculums": "Tất cả CTĐT",
+      "allStatus": "Tất cả trạng thái"
+    },
+    "table": {
+      "columns": {
+        "code": "Mã",
+        "name": "Tên ngành học",
+        "division": "Khoa",
+        "curriculum": "Thuộc CTĐT",
+        "status": "Trạng thái",
+        "actions": "HD"
+      },
+      "empty": "Không có dữ liệu ngành học"
+    },
+    "actions": {
+      "add": "Thêm ngành"
+    },
+    "bulk": {
+      "selected": "Đã chọn {count} ngành",
+      "edit": "Chỉnh sửa toàn bộ",
+      "delete": "Xóa toàn bộ",
+      "clear": "Bỏ chọn",
+      "selectStatus": "Chọn trạng thái",
+      "selectStatusError": "Vui lòng chọn trạng thái"
+    },
+    "form": {
+      "facultyCode": {
+        "label": "Mã ngành",
+        "placeholder": "Nhập mã ngành",
+        "required": "Mã ngành không được để trống",
+        "min": "Mã ngành phải có ít nhất 2 ký tự"
+      },
+      "facultyName": {
+        "label": "Tên Ngành",
+        "placeholder": "Ví dụ: Khoa học máy tính",
+        "required": "Tên ngành không được để trống",
+        "min": "Tên ngành phải có ít nhất 3 ký tự"
+      },
+      "divisionId": {
+        "label": "Khoa phụ trách",
+        "placeholder": "Chọn Khoa",
+        "required": "Vui lòng chọn khoa phụ trách"
+      },
+      "deanId": {
+        "label": "Trưởng ngành",
+        "placeholder": "Chọn trưởng ngành (tùy chọn)"
+      },
+      "status": {
+        "label": "Trạng thái",
+        "placeholder": "Chọn trạng thái",
+        "required": "Vui lòng chọn trạng thái",
+        "invalid": "Trạng thái không hợp lệ"
+      }
+    },
+    "modals": {
+      "add": {
+        "title": "Thêm ngành học mới",
+        "description": "Điền thông tin để tạo ngành học mới",
+        "submit": "Thêm mới",
+        "submitting": "Đang thêm..."
+      },
+      "edit": {
+        "title": "Chỉnh sửa ngành học",
+        "description": "Cập nhật thông tin ngành học",
+        "submit": "Lưu thay đổi",
+        "submitting": "Đang lưu..."
+      },
+      "bulkEdit": {
+        "title": "Chỉnh sửa toàn bộ",
+        "description": "Cập nhật thông tin cho {count} ngành học đã chọn",
+        "submit": "Cập nhật",
+        "submitting": "Đang cập nhật..."
+      },
+      "confirmDelete": {
+        "title": "Xác nhận xóa ngành",
+        "description": "Bạn có chắc chắn muốn xóa ngành {name}?",
+        "warning": "Cảnh báo:",
+        "note": "Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+        "submit": "Xóa"
+      },
+      "bulkDelete": {
+        "title": "Xác nhận xóa ngành",
+        "description": "Bạn có chắc chắn muốn xóa {count} ngành đã chọn?",
+        "warning": "Cảnh báo:",
+        "note": "Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+        "submit": "Xóa",
+        "submitting": "Đang xóa..."
+      }
+    },
+    "hooks": {
+      "createSuccess": "Thêm ngành thành công",
+      "createError": "Thêm ngành thất bại",
+      "updateSuccess": "Cập nhật ngành thành công",
+      "updateError": "Cập nhật ngành thất bại",
+      "deleteSuccess": "Xóa ngành thành công",
+      "deleteError": "Xóa ngành thất bại",
+      "bulkUpdateSuccess": "Cập nhật {count} ngành thành công",
+      "bulkUpdateError": "Cập nhật hàng loạt thất bại",
+      "bulkDeleteSuccess": "Xóa {count} ngành thành công",
+      "bulkDeleteError": "Xóa hàng loạt thất bại",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại"
+    }
+  }
+}

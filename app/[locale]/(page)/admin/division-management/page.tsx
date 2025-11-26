@@ -1,186 +1,348 @@
-"use client"
+'use client';
 
-import { useState, useMemo, useEffect } from "react"
-import { Plus, Edit, Trash2, X, CheckCircle2, GraduationCap, Activity, PauseCircle } from "lucide-react"
-import { useTranslations } from "next-intl"
-import { Button, SearchInput } from "@/app/components/ui"
-import { Pagination } from "@/app/components/ui/pagination"
-import { Checkbox } from "@/app/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
-import { Badge } from "@/app/components/ui/badge"
-import { useFaculties } from "./lib/hooks/useFaculties"
-import { Faculty, CreateFacultyDto, UpdateFacultyDto } from "./lib/types/types"
-import {
-  AddFacultyModal,
-  EditFacultyModal,
-  ConfirmDeleteFacultyModal,
-  BulkEditFacultyModal,
-  BulkDeleteFacultyModal,
-  FacultyActionsMenu,
-  FacultyStatCard,
-} from "./components"
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, School, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck, Download } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Dropdown, SearchInput, Button } from '@/app/components/ui';
+import { Pagination } from '@/app/components/ui/pagination';
+import { AddDivisionModal } from './components/AddDivisionModal';
+import { EditDivisionModal } from './components/EditDivisionModal';
+import { BulkEditDivisionModal } from './components/BulkEditDivisionModal';
+import { ConfirmDeleteDivisionModal } from './components/ConfirmDeleteDivisionModal';
+import { BulkDeleteDivisionModal } from './components/BulkDeleteDivisionModal';
+import { DivisionActionsMenu } from './components/DivisionActionsMenu';
+import { DivisionStatCard } from './components/DivisionStatCard';
+import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
+import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
+import { toast } from 'react-hot-toast';
+import { useDivisions } from './lib/hooks/useDivisions';
+import { divisionsApi } from './lib/api/divisionsApi';
+import { getStatusDisplay } from './lib/types/types';
+import type { Division } from './lib/types/types';
 
-export default function FacultyManagementPage() {
-  const t = useTranslations('admin.divisionManagement')
-  const {
-    faculties,
-    stats,
-    divisions,
-    deans,
-    isLoading,
-    handleSearch,
-    createFaculty,
-    updateFaculty,
-    deleteFaculty,
-    bulkDeleteFaculties,
-    bulkEditFaculties,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    isBulkDeleting,
-    isBulkEditing,
-  } = useFaculties()
+const STAT_CARDS = [
+  { 
+    key: 'total', 
+    labelKey: 'stats.total',
+    bgColor: 'bg-[#FFDDAA]',
+    iconColor: 'text-[#CC8800]',
+    Icon: School
+  },
+  { 
+    key: 'active', 
+    labelKey: 'stats.active',
+    bgColor: 'bg-[#CCEECC]',
+    iconColor: 'text-[#44AA44]',
+    Icon: CheckCircle2
+  },
+  { 
+    key: 'inactive', 
+    labelKey: 'stats.inactive',
+    bgColor: 'bg-[#FFBBAA]',
+    iconColor: 'text-[#CC4444]',
+    Icon: XCircle
+  },
+] as const;
 
-  // Modal states
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false)
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
+export default function DivisionManagementPage() {
+  const t = useTranslations('admin.divisionManagement');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [deletingDivisionId, setDeletingDivisionId] = useState<string | null>(null);
+  const [deletingDivisionName, setDeletingDivisionName] = useState<string | undefined>(undefined);
+  const [editingDivision, setEditingDivision] = useState<Division | null>(null);
+  const [selectedDivisionIds, setSelectedDivisionIds] = useState<Set<string>>(new Set());
 
-  // Selected faculty for edit/delete
-  const [selectedFaculty, setSelectedFaculty] = useState<Faculty | null>(null)
+  const { divisions, loading, currentPage, totalCount, totalPages, stats, fetchDivisions, setCurrentPage } = useDivisions();
 
-  // Bulk selection
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  // Initialize columns after translations are loaded
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([]);
 
-  // Filters
-  const [localSearchQuery, setLocalSearchQuery] = useState("")
-  const [divisionFilter, setDivisionFilter] = useState<string>("all")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  useEffect(() => {
+    setResizableColumns([
+      { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
+      { key: 'divisionCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+      { key: 'divisionName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
+      { key: 'deanName', label: t('table.columns.dean'), width: 200, minWidth: 150, align: 'left', visible: true },
+      { key: 'facultyCount', label: t('table.columns.facultyCount'), width: 120, minWidth: 100, align: 'center', visible: true },
+      { key: 'instructorCount', label: t('table.columns.instructorCount'), width: 140, minWidth: 120, align: 'center', visible: true },
+      { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
+      { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
+    ]);
+  }, [t]);
 
-  // Pagination (client-side)
-  const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 10
-
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
-      handleSearch(localSearchQuery)
-    }, 500)
+      setSearchKeyword(searchQuery);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, setCurrentPage]);
 
-    return () => clearTimeout(timer)
-  }, [localSearchQuery, handleSearch])
-
-  // Filtered faculties (client-side filtering for division and status)
-  const filteredFaculties = useMemo(() => {
-    return faculties.filter((faculty) => {
-      const matchesDivision =
-        divisionFilter === "all" || faculty.divisionId === divisionFilter
-      const matchesStatus =
-        statusFilter === "all" || faculty.facultyStatus === statusFilter
-
-      return matchesDivision && matchesStatus
-    })
-  }, [faculties, divisionFilter, statusFilter])
-
-  // Reset về trang 1 khi filter/search thay đổi
   useEffect(() => {
-    setCurrentPage(1)
-  }, [divisionFilter, statusFilter, localSearchQuery])
+    fetchDivisions({
+      pageNumber: currentPage,
+      pageSize: 20,
+      searchTerm: searchKeyword || undefined,
+      status: selectedStatus || undefined,
+    });
+  }, [currentPage, searchKeyword, selectedStatus, fetchDivisions]);
 
-  const totalCount = filteredFaculties.length
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
+  const filteredDivisions = useMemo(() => divisions, [divisions]);
 
-  const paginatedFaculties = useMemo(() => {
-    const start = (currentPage - 1) * pageSize
-    const end = start + pageSize
-    return filteredFaculties.slice(start, end)
-  }, [filteredFaculties, currentPage])
+  const statValues = useMemo(() => ({
+    total: stats.totalDivisions,
+    active: stats.activeDivisions,
+    inactive: stats.inactiveDivisions,
+  }), [stats]);
 
-  // Handlers
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedIds([
-        ...new Set([
-          ...selectedIds,
-          ...paginatedFaculties.map((f) => f.facultyId),
-        ]),
-      ])
+  const statusLabels = useMemo(() => ({
+    active: t('status.active'),
+    inactive: t('status.inactive'),
+    unknown: t('status.unknown'),
+  }), [t]);
+
+  const statusOptions = useMemo(() => ([
+    { value: '', label: t('status.all') },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+  ]), [t]);
+
+  const handleDeleteClick = useCallback((divisionId: string, divisionName: string) => {
+    setDeletingDivisionId(divisionId);
+    setDeletingDivisionName(divisionName);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleEditClick = useCallback((division: Division) => {
+    setEditingDivision(division);
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingDivisionId) return;
+    const res = await divisionsApi.bulkDelete({ divisionIds: [deletingDivisionId] });
+    if (res.isSuccess) {
+      toast.success(t('hooks.deleteSuccess'));
+      fetchDivisions({
+        pageNumber: currentPage,
+        pageSize: 20,
+        searchTerm: searchKeyword || undefined,
+        status: selectedStatus || undefined,
+      });
     } else {
-      // Bỏ chọn chỉ các item trong trang hiện tại
-      setSelectedIds(
-        selectedIds.filter(
-          (id) => !paginatedFaculties.some((f) => f.facultyId === id),
-        ),
-      )
+      toast.error(res.message || t('hooks.deleteError'));
     }
-  }
+  };
 
-  const handleSelectOne = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedIds([...selectedIds, id])
+  const handleSelectAll = useCallback(() => {
+    if (selectedDivisionIds.size === filteredDivisions.length) {
+      setSelectedDivisionIds(new Set());
     } else {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id))
+      setSelectedDivisionIds(new Set(filteredDivisions.map(d => d.divisionId)));
     }
-  }
+  }, [filteredDivisions, selectedDivisionIds.size]);
 
-  const handleEdit = (faculty: Faculty) => {
-    setSelectedFaculty(faculty)
-    setIsEditModalOpen(true)
-  }
+  const handleSelectOne = useCallback((divisionId: string) => {
+    setSelectedDivisionIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(divisionId)) {
+        newSet.delete(divisionId);
+      } else {
+        newSet.add(divisionId);
+      }
+      return newSet;
+    });
+  }, []);
 
-  const handleDelete = (faculty: Faculty) => {
-    setSelectedFaculty(faculty)
-    setIsDeleteModalOpen(true)
-  }
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedDivisionIds);
+    const res = await divisionsApi.bulkDelete({ divisionIds: ids });
+    if (res.isSuccess) {
+      toast.success(res.message || t('hooks.bulkDeleteSuccess', { count: res.data.deletedCount }));
+      setSelectedDivisionIds(new Set());
+      setIsBulkDeleteModalOpen(false);
+      fetchDivisions({
+        pageNumber: currentPage,
+        pageSize: 20,
+        searchTerm: searchKeyword || undefined,
+        status: selectedStatus || undefined,
+      });
+    } else {
+      toast.error(res.message || t('hooks.bulkDeleteError'));
+    }
+  };
 
-  const handleBulkEdit = () => {
-    setIsBulkEditModalOpen(true)
-  }
+  const handleExport = async () => {
+    try {
+      const blob = await divisionsApi.export({
+        searchTerm: searchKeyword || undefined,
+        status: selectedStatus || undefined,
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      link.download = `DanhSachKhoa_${timestamp}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(t('hooks.exportSuccess'));
+    } catch (error) {
+      toast.error(t('hooks.exportError'));
+      console.error('Export error:', error);
+    }
+  };
 
-  const handleBulkDelete = () => {
-    setIsBulkDeleteModalOpen(true)
-  }
+  const renderDivisionRow = useCallback((division: Division, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
+    const statusDisplay = getStatusDisplay(division.divisionStatus, statusLabels);
+    const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
+    const isSelected = selectedDivisionIds.has(division.divisionId);
 
-  const handleClearSelection = () => {
-    setSelectedIds([])
-  }
+    return (
+      <>
+        {visibleColumns.map((column) => {
+          const widthPercent = (column as { widthPercent?: number }).widthPercent || 
+            (baseTotalWidth > 0 ? (column.width / baseTotalWidth) * 100 : 100 / visibleColumns.length);
+          
+          const cellPaddingStyle = {
+            width: `${widthPercent}%`,
+            paddingLeft: cellStyle.paddingX,
+            paddingRight: cellStyle.paddingX,
+            paddingTop: cellStyle.paddingY,
+            paddingBottom: cellStyle.paddingY,
+          };
+
+          switch (column.key) {
+            case 'checkbox':
+              return (
+                <td key="checkbox" style={cellPaddingStyle}>
+                  <div className="flex justify-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleSelectOne(division.divisionId)}
+                      className="w-4 h-4 cursor-pointer accent-[#0053AD]"
+                    />
+                  </div>
+                </td>
+              );
+            case 'divisionCode':
+              return (
+                <td key="divisionCode" className="text-gray-900 font-medium" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {division.divisionCode}
+                </td>
+              );
+            case 'divisionName':
+              return (
+                <td key="divisionName" className="text-gray-900" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {division.divisionName}
+                </td>
+              );
+            case 'deanName':
+              return (
+                <td key="deanName" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {division.deanName || '-'}
+                </td>
+              );
+            case 'facultyCount':
+              return (
+                <td key="facultyCount" className="text-gray-900 text-center" style={cellPaddingStyle}>
+                  {division.facultyCount ?? 0}
+                </td>
+              );
+            case 'instructorCount':
+              return (
+                <td key="instructorCount" className="text-gray-900 text-center" style={cellPaddingStyle}>
+                  {division.instructorCount ?? 0}
+                </td>
+              );
+            case 'status':
+              const isCompact = parseFloat(cellStyle.paddingX) < 20;
+              const statusFontSize = isCompact ? '0.65rem' : '0.75rem';
+              const statusPadding = isCompact ? '0.125rem 0.375rem' : '0.25rem 0.5rem';
+              return (
+                <td key="status" style={cellPaddingStyle}>
+                  <div className="flex justify-center">
+                    <span className={`text-center font-medium rounded ${statusDisplay.color}`} style={{ 
+                      padding: statusPadding,
+                      fontSize: statusFontSize,
+                      lineHeight: '1.2',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {statusDisplay.label}
+                    </span>
+                  </div>
+                </td>
+              );
+            case 'actions':
+              return (
+                <td key="actions" style={{ ...cellPaddingStyle, paddingLeft: '8px', paddingRight: '8px' }}>
+                  <DivisionActionsMenu
+                    divisionId={division.divisionId}
+                    divisionName={division.divisionName}
+                    onEdit={() => handleEditClick(division)}
+                    onDelete={() => handleDeleteClick(division.divisionId, division.divisionName)}
+                    compact={(column.width || 0) < 120}
+                  />
+                </td>
+              );
+            default:
+              return null;
+          }
+        })}
+      </>
+    );
+  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedDivisionIds, statusLabels]);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-muted-foreground">{t('description')}</p>
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-600 mt-1">{t('description')}</p>
+      </div>
+
+      {/* Stats Cards */}
+      {loading && divisions.length === 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-lg shadow-sm p-4 sm:p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="h-10 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          {STAT_CARDS.map((card, index) => {
+            const value = statValues[card.key];
+            return (
+              <DivisionStatCard
+                key={index}
+                label={t(card.labelKey)}
+                value={value}
+                Icon={card.Icon}
+                bgColor={card.bgColor}
+                iconColor={card.iconColor}
+              />
+            );
+          })}
+        </div>
+      )}
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <FacultyStatCard
-          title={t('stats.total')}
-          value={stats?.total || 0}
-          icon={GraduationCap}
-          color="blue"
-        />
-        <FacultyStatCard
-          title={t('stats.active')}
-          value={stats?.active || 0}
-          icon={Activity}
-          color="green"
-        />
-        <FacultyStatCard
-          title={t('stats.inactive')}
-          value={stats?.inactive || 0}
-          icon={PauseCircle}
-          color="orange"
-        />
-      </div>
-
-      {/* Main Content: Filters, actions, table, pagination */}
+      {/* Main Content */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* Toolbar */}
         <div className="p-4 lg:p-6 border-b border-gray-200 space-y-4">
           {/* Title & Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -190,6 +352,14 @@ export default function FacultyManagementPage() {
               </h2>
             </div>
             <div className="flex gap-3">
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                <Download className="w-4 h-4" />
+                {t('actions.export')}
+              </Button>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white"
@@ -202,81 +372,62 @@ export default function FacultyManagementPage() {
 
           {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+            {/* Search Input */}
             <div className="sm:col-span-2">
               <SearchInput
                 placeholder={t('search.placeholder')}
-                value={localSearchQuery}
-                onChange={(e) => setLocalSearchQuery(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex gap-3">
-              <Select
-                value={divisionFilter}
-                onValueChange={setDivisionFilter}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('filters.allDivisions')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('filters.allDivisions')}</SelectItem>
-                  {divisions.map((div) => (
-                    <SelectItem key={div.divisionId} value={div.divisionId}>
-                      {div.divisionName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('filters.allStatuses')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('filters.allStatuses')}</SelectItem>
-                  <SelectItem value="active">{t('filters.active')}</SelectItem>
-                  <SelectItem value="inactive">{t('filters.inactive')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+            {/* Status Dropdown */}
+            <Dropdown
+              options={statusOptions}
+              value={selectedStatus || ''}
+              placeholder={t('status.all')}
+              onChange={(value) => {
+                setSelectedStatus(value);
+                setCurrentPage(1);
+              }}
+            />
           </div>
 
-          {/* Bulk actions bar */}
-          {selectedIds.length > 0 && (
+          {/* Bulk Actions Bar */}
+          {selectedDivisionIds.size > 0 && (
             <div className="flex items-center justify-between p-3 bg-[#E8F4FF] border border-[#0053AD]/20 rounded-lg">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-[#0053AD]" />
+                <CircleCheck className="w-5 h-5 text-[#0053AD]" />
                 <span className="text-sm font-medium text-[#0053AD]">
-                  {t('table.selected', { count: selectedIds.length })}
+                  {t('bulk.selected', { count: selectedDivisionIds.size })}
                 </span>
               </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleBulkEdit}
+                  onClick={() => setIsBulkEditModalOpen(true)}
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
-                  <Edit className="h-4 w-4" />
-                  {t('actions.bulkEdit')}
+                  <Edit2 className="w-4 h-4" />
+                  {t('bulk.edit')}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleBulkDelete}
+                  onClick={() => setIsBulkDeleteModalOpen(true)}
                   className="border-red-600 text-red-600 hover:bg-red-50"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  {t('actions.bulkDelete')}
+                  <Trash2 className="w-4 h-4" />
+                  {t('bulk.delete')}
                 </Button>
                 <Button
                   size="sm"
-                  onClick={handleClearSelection}
+                  onClick={() => setSelectedDivisionIds(new Set())}
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
-                  <X className="h-4 w-4" />
-                  {t('actions.clearSelection')}
+                  <X className="w-4 h-4" />
+                  {t('bulk.clear')}
                 </Button>
               </div>
             </div>
@@ -284,199 +435,112 @@ export default function FacultyManagementPage() {
         </div>
 
         {/* Table */}
-        <div className="border-t border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#0053AD] text-white">
-                <tr>
-                  <th className="w-12 px-4 py-3 text-left">
-                    <Checkbox
-                    checked={
-                      paginatedFaculties.length > 0 &&
-                      paginatedFaculties.every((f) =>
-                        selectedIds.includes(f.facultyId),
-                      )
-                    }
-                    onCheckedChange={(value) =>
-                      handleSelectAll(Boolean(value))
-                    }
-                  />
-                </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
-                    {t('table.columns.code')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
-                    {t('table.columns.name')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold border-l border-white/40">
-                    {t('table.columns.division')}
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold border-l border-white/40">
-                    {t('table.columns.status')}
-                  </th>
-                  <th className="w-12 px-4 py-3 text-center text-sm font-semibold border-l border-white/40">
-                    {t('table.columns.actions')}
-                  </th>
+        <div className="border-t border-gray-200 min-w-0">
+          <div className="p-4 lg:p-6 min-w-0">
+            <ResizableTable
+              columns={resizableColumns}
+              data={filteredDivisions}
+              renderRow={(division, visibleColumns, cellStyle) => (
+                <tr key={division.divisionId} className="hover:bg-gray-50 transition-colors">
+                  {renderDivisionRow(division, visibleColumns, cellStyle)}
                 </tr>
-              </thead>
-              <tbody className="divide-y">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="p-8 text-center">
-                      <div className="flex items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                      </div>
-                    </td>
-                  </tr>
-                ) : paginatedFaculties.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="p-8 text-center text-muted-foreground"
-                    >
-                      {t('table.empty')}
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedFaculties.map((faculty) => (
-                    <tr key={faculty.facultyId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <Checkbox
-                          checked={selectedIds.includes(faculty.facultyId)}
-                          onCheckedChange={(checked) =>
-                            handleSelectOne(
-                              faculty.facultyId,
-                              checked as boolean,
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-medium">
-                          {faculty.facultyCode}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-medium">
-                          {faculty.facultyName}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-sm text-muted-foreground">
-                          {faculty.divisionName || "-"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge
-                          variant={
-                            faculty.facultyStatus === "active"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className={
-                            faculty.facultyStatus === "active"
-                              ? "bg-green-100 text-green-800 hover:bg-green-100"
-                              : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                          }
-                        >
-                          {faculty.facultyStatus === "active"
-                            ? t('table.status.active')
-                            : t('table.status.inactive')}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <FacultyActionsMenu
-                          faculty={faculty}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+              )}
+              isLoading={loading}
+              emptyMessage={t('table.empty')}
+              loadingComponent={<TableSkeleton />}
+              onColumnsResize={setResizableColumns}
+              renderHeaderCheckbox={() => (
+                <input
+                  type="checkbox"
+                  checked={filteredDivisions.length > 0 && selectedDivisionIds.size === filteredDivisions.length}
+                  onChange={handleSelectAll}
+                  className="w-4 h-4 cursor-pointer accent-[#0053AD]"
+                  ref={(el) => {
+                    if (el) {
+                      el.indeterminate = selectedDivisionIds.size > 0 && selectedDivisionIds.size < filteredDivisions.length;
+                    }
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
 
         {/* Pagination */}
-        {!isLoading && totalCount > 0 && (
-          <div className="px-4 lg:px-6 py-4 border-t border-gray-200">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
-              pageSize={pageSize}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
+        <div className="px-4 lg:px-6 py-4 border-t border-gray-200">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={20}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
 
       {/* Modals */}
-      <AddFacultyModal
+      <AddDivisionModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSubmit={(data: CreateFacultyDto) => createFaculty(data)}
-        isLoading={isCreating}
-        divisions={divisions}
-        deans={deans}
+        onSuccess={() => {
+          fetchDivisions({
+            pageNumber: currentPage,
+            pageSize: 20,
+            searchTerm: searchKeyword || undefined,
+            status: selectedStatus || undefined,
+          });
+        }}
       />
 
-      <EditFacultyModal
+      <EditDivisionModal
         isOpen={isEditModalOpen}
         onClose={() => {
-          setIsEditModalOpen(false)
-          setSelectedFaculty(null)
+          setIsEditModalOpen(false);
+          setEditingDivision(null);
         }}
-        onSubmit={(id: string, data: UpdateFacultyDto) => updateFaculty({ id, data })}
-        faculty={selectedFaculty}
-        isLoading={isUpdating}
-        divisions={divisions}
-        deans={deans}
+        division={editingDivision}
+        onSuccess={() => {
+          fetchDivisions({
+            pageNumber: currentPage,
+            pageSize: 20,
+            searchTerm: searchKeyword || undefined,
+            status: selectedStatus || undefined,
+          });
+        }}
       />
 
-      <ConfirmDeleteFacultyModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false)
-          setSelectedFaculty(null)
-        }}
-        onConfirm={() => {
-          if (selectedFaculty) {
-            deleteFaculty(selectedFaculty.facultyId)
-            setIsDeleteModalOpen(false)
-            setSelectedFaculty(null)
-          }
-        }}
-        faculty={selectedFaculty}
-        isLoading={isDeleting}
-      />
-
-      <BulkEditFacultyModal
+      <BulkEditDivisionModal
         isOpen={isBulkEditModalOpen}
         onClose={() => setIsBulkEditModalOpen(false)}
-        onSubmit={(updates) => {
-          bulkEditFaculties({ ids: selectedIds, updates })
-          setSelectedIds([])
+        selectedDivisionIds={Array.from(selectedDivisionIds)}
+        onSuccess={() => {
+          setSelectedDivisionIds(new Set());
+          fetchDivisions({
+            pageNumber: currentPage,
+            pageSize: 20,
+            searchTerm: searchKeyword || undefined,
+            status: selectedStatus || undefined,
+          });
         }}
-        selectedCount={selectedIds.length}
-        isLoading={isBulkEditing}
-        divisions={divisions}
-        deans={deans}
       />
 
-      <BulkDeleteFacultyModal
+      <ConfirmDeleteDivisionModal
+        isOpen={isDeleteModalOpen}
+        divisionName={deletingDivisionName}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeletingDivisionId(null);
+          setDeletingDivisionName(undefined);
+        }}
+        onConfirm={handleDeleteConfirm}
+      />
+
+      <BulkDeleteDivisionModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
-        onConfirm={() => {
-          bulkDeleteFaculties(selectedIds)
-          setSelectedIds([])
-          setIsBulkDeleteModalOpen(false)
-        }}
-        selectedCount={selectedIds.length}
-        isLoading={isBulkDeleting}
+        selectedCount={selectedDivisionIds.size}
+        onConfirm={handleBulkDelete}
       />
     </div>
-  )
+  );
 }
