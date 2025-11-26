@@ -8,7 +8,7 @@ import { vi, enUS } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import { Button, Dropdown, Pagination, SearchInput, Table, Checkbox } from '@/app/components/ui';
 import 'react-day-picker/dist/style.css';
-import { MajorStatCard } from '@/app/[locale]/(page)/admin/faculty-management/components/MajorStatCard';
+import { MajorStatCard } from './components/MajorStatCard';
 import { ROOM_REQUEST_STATUS_META, ROOM_REQUEST_STATUS_OPTIONS } from '@/lib/constants/room-request';
 import { ROOM_TYPE_LABELS } from '@/lib/types/room';
 import { usePageTitle } from '@/lib/hooks/usePageTitle';

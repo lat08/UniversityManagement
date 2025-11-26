@@ -45,6 +45,7 @@ type CurriculumActionsMenuProps = {
 function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumActionsMenuProps) {
   const t = useTranslations('admin.curriculumManagement.actionsMenu')
   const [open, setOpen] = useState(false)
+  const [openUpwards, setOpenUpwards] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -67,7 +68,18 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
       <button
         type="button"
         className="inline-flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md cursor-pointer"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => {
+          setOpen((prev) => {
+            const next = !prev
+            if (next && dropdownRef.current) {
+              const rect = dropdownRef.current.getBoundingClientRect()
+              const spaceBelow = window.innerHeight - rect.bottom
+              // Nếu không đủ khoảng trống bên dưới thì mở menu hướng lên
+              setOpenUpwards(spaceBelow < 200)
+            }
+            return next
+          })
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -75,7 +87,11 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
       </button>
 
       {open && (
-        <div className="origin-top-right absolute right-0 mt-1 w-44 rounded-md bg-white shadow-lg border border-gray-200 z-10">
+        <div
+          className={`absolute right-0 w-44 rounded-md bg-white shadow-lg border border-gray-200 z-10 ${
+            openUpwards ? 'bottom-full mb-1' : 'mt-1'
+          }`}
+        >
           <div className="py-1 text-sm text-gray-700">
             <button
               type="button"
@@ -119,6 +135,7 @@ function CurriculumActionsMenu({ item, onExport, onEdit, onDelete }: CurriculumA
 
 export default function CurriculumManagementPage() {
   const t = useTranslations('admin.curriculumManagement')
+  const MAX_SEARCH_LENGTH = 100
   const [searchQuery, setSearchQuery] = useState('')
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedFacultyId, setSelectedFacultyId] = useState('')
@@ -906,7 +923,7 @@ export default function CurriculumManagementPage() {
         <p className="text-gray-600 mt-1">{t('page.subtitle')}</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="p-4 lg:p-6 border-b border-gray-200 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -935,7 +952,10 @@ export default function CurriculumManagementPage() {
               <SearchInput
                 placeholder={t('page.searchPlaceholder')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.slice(0, MAX_SEARCH_LENGTH)
+                  setSearchQuery(value)
+                }}
               />
             </div>
 
