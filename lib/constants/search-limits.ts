@@ -1,0 +1,9 @@
+export const GLOBAL_SEARCH_MAX_LENGTH = 100;
+export const NAME_SEARCH_MAX_LENGTH = 80;
+export const CODE_SEARCH_MAX_LENGTH = 30;
+export const EMAIL_SEARCH_MAX_LENGTH = 100;
+export const ROOM_SEARCH_MAX_LENGTH = 20;
+export const DROPDOWN_SEARCH_MAX_LENGTH = 80;
+
+
+

@@ -23,11 +23,13 @@ import { coursesApi } from './lib/api/coursesApi';
 import { getStatusDisplay } from './lib/types/types';
 import type { Course, FacultyAssignment, Batch, Major, Specialization, Subject, Instructor } from './lib/types/types';
 import { format } from 'date-fns';
+import { useSearchParams } from 'next/navigation';
 
 type TabKey = 'courses' | 'assignments';
 
 export default function CourseManagementPage() {
   const t = useTranslations('admin.courseManagement');
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabKey>('courses');
   
   // Course List state
@@ -72,6 +74,15 @@ export default function CourseManagementPage() {
 
   const { courses, loading: coursesLoading, currentPage: coursesCurrentPage, totalCount: coursesTotalCount, totalPages: coursesTotalPages, fetchCourses, setCurrentPage: setCoursesCurrentPage } = useCourses();
   const { assignments, loading: assignmentsLoading, currentPage: assignmentsCurrentPage, totalCount: assignmentsTotalCount, totalPages: assignmentsTotalPages, fetchAssignments, setCurrentPage: setAssignmentsCurrentPage } = useFacultyAssignments();
+
+  // Open Add Course modal when triggered from dashboard
+  const action = searchParams.get('action');
+  useEffect(() => {
+    if (action === 'openClass') {
+      setActiveTab('courses');
+      setIsAddCourseModalOpen(true);
+    }
+  }, [action]);
 
   // Course List columns
   const [courseResizableColumns, setCourseResizableColumns] = useState<ResizableColumn[]>([

@@ -16,7 +16,7 @@ interface ImportCurriculumModalProps {
 
 export const ImportCurriculumModal = ({ isOpen, onClose, onSuccess }: ImportCurriculumModalProps) => {
   const t = useTranslations('admin.curriculumManagement')
-  const tActions = useTranslations('actions')
+  const tActions = useTranslations('common.actions')
   const [file, setFile] = useState<File | null>(null)
   const [curriculumCode, setCurriculumCode] = useState('')
   const [curriculumName, setCurriculumName] = useState('')

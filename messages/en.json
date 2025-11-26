@@ -471,8 +471,12 @@
         },
         "validation": {
           "codeMin": "Regulation code must be at least 2 characters",
+          "codePattern": "Regulation code may only contain letters A-Z, numbers, hyphen (-) and underscore (_)",
           "titleMin": "Title must be at least 4 characters",
+          "titleMax": "Title must not exceed 200 characters",
+          "titlePattern": "Title may only contain letters, numbers, spaces, hyphen (-) and underscore (_)",
           "descriptionMin": "Description must be at least 10 characters",
+          "descriptionMax": "Description must not exceed 500 characters",
           "categoryRequired": "Select a regulation type",
           "issuingUnitRequired": "Select an issuing unit",
           "issueDateRequired": "Select the issue date",
@@ -1772,9 +1776,10 @@
       "api": "API: Active",
       "email": "Email: Active",
       "configure": "Configure",
-      "addUser": "Add User",
+      "quickAddStudent": "Add Student",
+      "quickAddInstructor": "Add Instructor",
       "openClass": "Open Class",
-      "publishSchedule": "Publish Schedule",
+      "publishExamSchedule": "Publish Exam Schedule",
       "sendNotification": "Send Notification",
       "themeConfig": "Theme Configuration",
       "themeConfigDesc": "Customize system colors in real-time",
@@ -1804,21 +1809,22 @@
       },
       "tasks": {
         "roomRequest": "Room Function Request",
-        "roomRequestDesc": "3 room function requests pending approval",
-        "courseRegistration": "Course Registration",
-        "courseRegistrationDesc": "8 course registration requests pending approval",
-        "examSchedule": "Unpublished Exam Schedule",
-        "examScheduleDesc": "1 major transfer exam schedule needs to be published for students"
+        "roomRequestDesc": "{count} room function requests pending approval",
+        "gradeApproval": "Grade Approval Requests",
+        "gradeApprovalDesc": "{count} grade approval requests pending",
+        "scheduleChange": "Instructor Schedule Change Requests",
+        "scheduleChangeDesc": "{count} instructor schedule change requests pending"
       },
       "updates": {
         "tuitionDeadline": "Tuition Payment Deadline for Semester I 2025 - 2026",
         "tuitionDeadlineDesc": "Tuition payment deadline for Semester I from 10/11/2025",
-        "timestamp1": "10 hours ago",
         "examSchedule": "Exam Schedule Published for Semester I 2025 - 2026",
         "examScheduleDesc": "Please view detailed exam schedule for Semester I 2025 - 2026",
-        "timestamp2": "5 hours ago",
         "courseRegistration": "Course Registration",
         "courseRegistrationDesc": "Course registration opens from Semester I 2025 - 2026",
+        "fromNow": "{value}",
+        "timestamp1": "10 hours ago",
+        "timestamp2": "5 hours ago",
         "timestamp3": "1 hour ago"
       }
     },
@@ -3047,7 +3053,8 @@
         "curriculum": {
           "label": "Curriculum",
           "placeholder": "Select curriculum",
-          "required": "Curriculum is required"
+          "required": "Curriculum is required",
+          "note": "You can select multiple curricula after creating the department"
         },
         "status": {
           "label": "Status",
@@ -3329,7 +3336,8 @@
       "status": {
         "draft": "Draft",
         "active": "In effect",
-        "archived": "Archived"
+        "archived": "Archived",
+        "unknown": "Unknown"
       },
       "statusDescriptions": {
         "draft": "Being drafted or pending approval",
@@ -3435,8 +3443,12 @@
         },
         "validation": {
           "codeMin": "Regulation code must be at least 2 characters",
+          "codePattern": "Regulation code may only contain letters A-Z, numbers, hyphen (-) and underscore (_)",
           "titleMin": "Title must be at least 4 characters",
+          "titleMax": "Title must not exceed 200 characters",
+          "titlePattern": "Title may only contain letters, numbers, spaces, hyphen (-) and underscore (_)",
           "descriptionMin": "Description must be at least 10 characters",
+          "descriptionMax": "Description must not exceed 500 characters",
           "categoryRequired": "Select a regulation type",
           "issuingUnitRequired": "Select an issuing unit",
           "issueDateRequired": "Select the issue date",
@@ -4430,35 +4442,6 @@
           "minLength": "Rejection reason must be at least {min} characters",
           "maxLength": "Rejection reason must not exceed {max} characters"
         }
-      }
-    },
-    "studentProfile": {
-      "title": "Student Profile Management",
-      "totalStudents": "Total Students",
-      "newStudents": "New Students",
-      "graduatingSoon": "Graduating Soon",
-      "onLeave": "On Leave",
-      "onLeaveSubtitle": "Temporarily Absent",
-      "studying": "Studying",
-      "add": "Add Student",
-      "addSuccess": "Student added successfully!",
-      "addSuccessWithCode": "Student added successfully!\nStudent Code: {code}",
-      "addError": "Failed to add student",
-      "search": "Search students...",
-      "columns": {
-        "mssv": "Student ID",
-        "fullName": "Full Name",
-        "email": "Email",
-        "faculty": "Faculty",
-        "department": "Department",
-        "class": "Class",
-        "academicYear": "Academic Year",
-        "trainingSystem": "Training System",
-        "gpa": "GPA",
-        "credits": "Earned Credits",
-        "debt": "Debt",
-        "status": "Status",
-        "actions": "Actions"
       }
     },
     "themeConfiguration": {

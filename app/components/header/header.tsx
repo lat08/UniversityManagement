@@ -19,10 +19,15 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   const t = useTranslations('common.roles')
 
   const displayName = user?.name || user?.email || "Name"
+
+  const roleValue = (user?.role || "").toLowerCase()
+  const isInstructor = roleValue.includes("instructor") || roleValue.includes("teacher") || roleValue === "giang_vien"
+  const isStudent = roleValue.includes("student") || roleValue === "sinh_vien"
+  const isAdmin = !isInstructor && !isStudent
+
   const roleLabel = (() => {
-    const role = (user?.role || "").toLowerCase()
-    if (role.includes("instructor") || role.includes("teacher") || role === "giang_vien") return t('instructor')
-    if (role.includes("student") || role === "sinh_vien") return t('student')
+    if (isInstructor) return t('instructor')
+    if (isStudent) return t('student')
     return t('admin')
   })()
 
@@ -34,13 +39,18 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   })()
 
   const handleProfileClick = () => {
-    const role = (user?.role || "").toLowerCase()
-    if (role.includes("instructor") || role.includes("teacher") || role === "giang_vien") {
+    if (isInstructor) {
       router.push("/instructor/profile")
-    } else if (role.includes("student") || role === "sinh_vien") {
+      return
+    }
+
+    if (isStudent) {
       router.push("/student/profile")
     }
   }
+
+  const shouldShowNotification = !isAdmin
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[var(--header-border)] bg-[var(--header)] px-4 lg:px-6">
       <Button variant="ghost" size="icon" onClick={onMobileMenuToggle} className="lg:hidden">
@@ -51,7 +61,8 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
 
       <div className="flex items-center gap-2 lg:gap-4">
         <LanguageSwitcher />
-        <NotificationPopup />
+
+        {shouldShowNotification && <NotificationPopup />}
 
         <button 
           className="flex items-center gap-2 lg:gap-3 cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-0 p-0"

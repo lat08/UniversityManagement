@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, type CSSProperties } from 'react'
 import { useTranslations } from 'next-intl'
 import { Plus, MoreVertical, Upload, Download, Trash2, Edit } from 'lucide-react'
 import { Dropdown, SearchInput, Button } from '@/app/components/ui'
@@ -285,7 +285,11 @@ export default function CurriculumManagementPage() {
     setIsBulkDeleteModalOpen(true)
   }
 
-  const renderRow = (item: CurriculumListItem, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
+  const renderRow = (
+    item: CurriculumListItem,
+    visibleColumns: ResizableColumn[],
+    cellStyle: { paddingX: string; paddingY: string },
+  ) => {
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0)
     const isSelected = selectedCurriculumIds.has(item.curriculumId)
 
@@ -296,7 +300,7 @@ export default function CurriculumManagementPage() {
             (column as { widthPercent?: number }).widthPercent ||
             (baseTotalWidth > 0 ? (column.width / baseTotalWidth) * 100 : 100 / visibleColumns.length)
 
-          const cellPaddingStyle: React.CSSProperties = {
+          const cellPaddingStyle: CSSProperties = {
             width: `${widthPercent}%`,
             paddingLeft: cellStyle.paddingX,
             paddingRight: cellStyle.paddingX,

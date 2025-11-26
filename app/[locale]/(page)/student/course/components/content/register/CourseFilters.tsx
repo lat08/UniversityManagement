@@ -3,6 +3,7 @@
 import { memo, useEffect, useRef, useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { SearchInput, Dropdown } from "@/app/components/ui"
+import { GLOBAL_SEARCH_MAX_LENGTH } from "@/lib/constants/search-limits"
 import { useCourseFiltersStore } from "../../../lib/stores/courseFiltersStore"
 
 function CourseFilters() {
@@ -83,6 +84,7 @@ function CourseFilters() {
           <SearchInput
             placeholder={t('searchPlaceholder')}
             value={searchQuery}
+            maxLength={GLOBAL_SEARCH_MAX_LENGTH}
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>

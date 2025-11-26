@@ -6,8 +6,7 @@ export type ExamType =
   | 'midterm'
   | 'final'
   | 'quiz'
-  | 'makeup'
-  | string;
+  | 'makeup';
 
 export interface AdminExamQueryParams {
   page?: number;
