@@ -546,7 +546,7 @@ export const coursesApi = {
   },
 
   /**
-   * @api GET /v1/rooms
+   * @api GET /v1/room
    * @description Lấy danh sách phòng học
    * @param status - Trạng thái phòng (tùy chọn, mặc định: active)
    * @returns Danh sách phòng học
@@ -570,11 +570,11 @@ export const coursesApi = {
           }>;
           totalCount: number;
         };
-      }>('/v1/rooms', {
+      }>('/v1/room', {
         params: {
-          Page: 1,
-          PageSize: 1000,
-          Status: status,
+          pageNumber: 1,
+          pageSize: 1000,
+          roomStatus: status,
         },
       });
 

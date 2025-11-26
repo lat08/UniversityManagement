@@ -54,6 +54,7 @@ export default function ExamScheduleManagementPage() {
   const [selectedExamScheduleIds, setSelectedExamScheduleIds] = useState<Set<string>>(new Set());
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [courseClasses, setCourseClasses] = useState<CourseClass[]>([]);
+  const [currentSemesterInfo, setCurrentSemesterInfo] = useState<Semester | null>(null);
 
   const { examSchedules, loading, currentPage, totalCount, totalPages, fetchExamSchedules, setCurrentPage } = useExamSchedules();
 
@@ -75,18 +76,63 @@ export default function ExamScheduleManagementPage() {
     loadCommonData();
   }, []);
 
+  const resolveCurrentSemester = (items: Semester[]): Semester | null => {
+    if (!Array.isArray(items) || items.length === 0) return null;
+    const today = new Date();
+    const normalized = items
+      .map((semester) => {
+        const start = semester.startDate ? new Date(semester.startDate) : null;
+        const end = semester.endDate ? new Date(semester.endDate) : null;
+        return start && end ? { raw: semester, start, end } : null;
+      })
+      .filter((entry): entry is { raw: Semester; start: Date; end: Date } => entry !== null)
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+    const running = normalized.find(
+      (semester) => today >= semester.start && today <= semester.end
+    );
+    if (running) return running.raw;
+
+    const upcoming = normalized.find((semester) => semester.start > today);
+    if (upcoming) return upcoming.raw;
+
+    const past = [...normalized].reverse().find((semester) => semester.start <= today);
+    if (past) return past.raw;
+
+    return items[0];
+  };
+
+  const formatSemesterRange = (semester: Semester | null) => {
+    if (!semester?.startDate || !semester?.endDate) return '';
+    const start = new Date(semester.startDate).toLocaleDateString('vi-VN');
+    const end = new Date(semester.endDate).toLocaleDateString('vi-VN');
+    return `${start} - ${end}`;
+  };
+
   const loadCommonData = async () => {
     try {
       const [semestersRes, courseClassesRes] = await Promise.all([
         commonApi.getSemesters(),
         commonApi.getCourseClassesBySubject(), // Get all course classes without subjectId filter
       ]);
-      if (semestersRes.success) setSemesters(semestersRes.data || []);
+      if (semestersRes.success) {
+        const semesterData = semestersRes.data || [];
+        setSemesters(semesterData);
+        const defaultSemester = resolveCurrentSemester(semesterData);
+        setCurrentSemesterInfo(defaultSemester);
+        setSelectedSemester((prev) => prev || defaultSemester?.semesterId || '');
+      }
       if (courseClassesRes.success) setCourseClasses(courseClassesRes.data || []);
     } catch {
       // Silent fail
     }
   };
+
+  const handleJumpToCurrentSemester = useCallback(() => {
+    if (!currentSemesterInfo) return;
+    setSelectedSemester(currentSemesterInfo.semesterId);
+    setCurrentPage(1);
+  }, [currentSemesterInfo, setCurrentPage]);
 
   // Combine all search terms into one searchKeyword
   useEffect(() => {
@@ -418,7 +464,13 @@ export default function ExamScheduleManagementPage() {
 
   const semesterOptions = [
     { value: '', label: 'Tất cả học kỳ' },
-    ...semesters.map((s) => ({ value: s.semesterId, label: s.semesterName })),
+    ...semesters.map((s) => ({
+      value: s.semesterId,
+      label:
+        currentSemesterInfo?.semesterId === s.semesterId
+          ? `${s.semesterName} (Hiện tại)`
+          : s.semesterName,
+    })),
   ];
 
   const classOptions = [
@@ -574,6 +626,29 @@ export default function ExamScheduleManagementPage() {
                 }}
               />
             </div>
+
+            {currentSemesterInfo && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-900">
+                <div>
+                  <span className="font-semibold">Học kỳ hiện tại:</span>{' '}
+                  {currentSemesterInfo.semesterName}
+                  {formatSemesterRange(currentSemesterInfo) && (
+                    <span className="text-[11px] text-blue-700 ml-2">
+                      ({formatSemesterRange(currentSemesterInfo)})
+                    </span>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleJumpToCurrentSemester}
+                  disabled={selectedSemester === currentSemesterInfo.semesterId}
+                  className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
+                >
+                  Xem học kỳ hiện tại
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Bulk Actions Bar */}

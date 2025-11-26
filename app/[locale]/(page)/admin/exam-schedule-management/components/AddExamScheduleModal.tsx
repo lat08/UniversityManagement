@@ -12,7 +12,7 @@ import { examSchedulesApi } from '../lib/api/examSchedulesApi';
 import { commonApi } from '@/lib/api/common';
 import { api } from '@/lib/api/client';
 import { EXAM_FORMAT_OPTIONS, EXAM_TIME_OPTIONS } from '../lib/types/types';
-import type { Subject, Instructor } from '@/lib/types/common';
+import type { Subject, Instructor, Semester } from '@/lib/types/common';
 import type { Room, CourseClass } from '../lib/types/types';
 
 interface AddExamScheduleModalProps {
@@ -60,9 +60,68 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
   const [loadingData, setLoadingData] = useState(false);
   const [loadingCourseClasses, setLoadingCourseClasses] = useState(false);
   const [proctorSearchQuery, setProctorSearchQuery] = useState('');
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [selectedSemesterId, setSelectedSemesterId] = useState('');
+  const [currentSemesterId, setCurrentSemesterId] = useState('');
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
+  const [hasLoadedSemesterFilter, setHasLoadedSemesterFilter] = useState(false);
 
   const formValues = watch();
   const selectedSubjectId = formValues.subjectId;
+
+  const determineCurrentSemester = useCallback((items: Semester[]) => {
+    if (!Array.isArray(items) || items.length === 0) {
+      return null;
+    }
+
+    const today = new Date();
+    const normalized = items
+      .map((semester) => {
+        const start = semester.startDate ? new Date(semester.startDate) : null;
+        const end = semester.endDate ? new Date(semester.endDate) : null;
+        return start && end
+          ? { raw: semester, start, end }
+          : null;
+      })
+      .filter((item): item is { raw: Semester; start: Date; end: Date } => item !== null)
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+    const running = normalized.find(
+      (semester) => today >= semester.start && today <= semester.end
+    );
+    if (running) return running.raw;
+
+    const upcoming = normalized.find((semester) => semester.start > today);
+    if (upcoming) return upcoming.raw;
+
+    const past = [...normalized].reverse().find((semester) => semester.start <= today);
+    if (past) return past.raw;
+
+    return items[0];
+  }, []);
+
+  const loadSubjects = useCallback(async (semesterId?: string) => {
+    setLoadingSubjects(true);
+    try {
+      const subjectsRes = await commonApi.getSubjects(
+        semesterId ? { semesterId } : undefined
+      );
+      if (subjectsRes.success) {
+        setSubjects(
+          Array.isArray(subjectsRes.data) ? subjectsRes.data : []
+        );
+      } else {
+        setSubjects([]);
+        toast.error('Không thể tải danh sách môn học');
+      }
+    } catch (error) {
+      console.error('Error loading subjects:', error);
+      setSubjects([]);
+      toast.error('Không thể tải danh sách môn học');
+    } finally {
+      setLoadingSubjects(false);
+    }
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -71,24 +130,118 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || !hasLoadedSemesterFilter) return;
+    loadSubjects(selectedSemesterId || undefined);
+  }, [isOpen, hasLoadedSemesterFilter, selectedSemesterId, loadSubjects]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setValue('subjectId', '');
+    setValue('courseClassId', '');
+    setCourseClasses([]);
+  }, [selectedSemesterId, isOpen, setValue]);
+
+  const loadCourseClasses = useCallback(async (subjectId: string, semesterId?: string) => {
+    if (!subjectId) {
+      setCourseClasses([]);
+      return;
+    }
+
+    const normalizedSemesterId =
+      semesterId && semesterId.trim() && semesterId.trim().length === 36
+        ? semesterId.trim()
+        : undefined;
+
+    setLoadingCourseClasses(true);
+    try {
+      const fetchCourseClasses = async (semesterFilter?: string) =>
+        commonApi.getCourseClassesBySubject({
+          subjectId,
+          semesterId: semesterFilter || undefined,
+        });
+
+      let response = await fetchCourseClasses(normalizedSemesterId);
+      let classes = response.success && Array.isArray(response.data) ? response.data : [];
+      let usedFallback = false;
+
+      if (classes.length === 0 && normalizedSemesterId) {
+        const fallbackResponse = await fetchCourseClasses(undefined);
+        if (fallbackResponse.success) {
+          const fallbackClasses = Array.isArray(fallbackResponse.data) ? fallbackResponse.data : [];
+          if (fallbackClasses.length > 0) {
+            classes = fallbackClasses;
+            usedFallback = true;
+          }
+        }
+      }
+
+      setCourseClasses(classes);
+      if (classes.length === 0) {
+        toast.error('Môn học này chưa có lớp học phần nào', { duration: 3000 });
+      } else if (usedFallback) {
+        toast((t) => (
+          <div className="text-sm text-gray-800">
+            Không có lớp học phần trong học kỳ đã chọn. Đang hiển thị tất cả lớp học phần của môn này.
+            <button
+              type="button"
+              className="ml-2 text-[#0053AD] underline"
+              onClick={() => toast.dismiss(t.id)}
+            >
+              Đóng
+            </button>
+          </div>
+        ), { duration: 4500 });
+      }
+    } catch (error) {
+      console.error('Error loading course classes:', error);
+      toast.error('Không thể tải danh sách lớp học phần');
+      setCourseClasses([]);
+    } finally {
+      setLoadingCourseClasses(false);
+    }
+  }, []);
+
   // Load course classes when subject changes
   useEffect(() => {
     if (selectedSubjectId) {
-      loadCourseClasses(selectedSubjectId);
+      loadCourseClasses(selectedSubjectId, selectedSemesterId);
     } else {
       setCourseClasses([]);
     }
-  }, [selectedSubjectId]);
+  }, [selectedSubjectId, selectedSemesterId, loadCourseClasses]);
+
+  useEffect(() => {
+    if (!selectedSubjectId) return;
+    const exists = subjects.some(
+      (subject) => subject.subjectId === selectedSubjectId
+    );
+    if (!exists) {
+      setValue('subjectId', '');
+    }
+  }, [subjects, selectedSubjectId, setValue]);
 
   const loadInitialData = async () => {
     setLoadingData(true);
+    setHasLoadedSemesterFilter(false);
+    setSubjects([]);
     try {
-      const [subjectsRes, instructorsRes] = await Promise.all([
-        commonApi.getSubjects(),
+      const [semestersRes, instructorsRes] = await Promise.all([
+        commonApi.getSemesters().catch(() => ({ success: false, data: [] })),
         commonApi.getInstructors().catch(() => ({ success: false, data: [] })),
       ]);
 
-      if (subjectsRes.success) setSubjects(Array.isArray(subjectsRes.data) ? subjectsRes.data : []);
+      if (semestersRes.success) {
+        const semesterList = Array.isArray(semestersRes.data) ? semestersRes.data : [];
+        setSemesters(semesterList);
+        const defaultSemester = determineCurrentSemester(semesterList);
+        setCurrentSemesterId(defaultSemester?.semesterId || '');
+        setSelectedSemesterId(defaultSemester?.semesterId || '');
+      } else {
+        setSemesters([]);
+        setCurrentSemesterId('');
+        setSelectedSemesterId('');
+      }
       
       // Handle instructors response
       if (instructorsRes.success) {
@@ -98,10 +251,10 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       }
       
       // Load rooms from multiple room types: exam, computer_lab, laboratory, swimming_pool
-      // API: GET /v1/rooms?roomType={type}&pageNumber=1&pageSize=1000
+      // API: GET /v1/room?roomType={type}&pageNumber=1&pageSize=1000
       const roomTypes = ['exam', 'computer_lab', 'laboratory', 'swimming_pool'];
       const roomPromises = roomTypes.map(roomType =>
-        api.get('/v1/rooms', { 
+        api.get('/v1/room', { 
           params: { 
             roomType: roomType, 
             pageNumber: 1, 
@@ -134,39 +287,14 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       console.error('Error loading initial data:', error);
       toast.error('Không thể tải dữ liệu');
       // Ensure arrays are set to empty on error
-      setSubjects([]);
+      setSemesters([]);
+      setCurrentSemesterId('');
+      setSelectedSemesterId('');
       setInstructors([]);
       setRooms([]);
     } finally {
+      setHasLoadedSemesterFilter(true);
       setLoadingData(false);
-    }
-  };
-
-  const loadCourseClasses = async (subjectId: string) => {
-    if (!subjectId) {
-      setCourseClasses([]);
-      return;
-    }
-    
-    setLoadingCourseClasses(true);
-    try {
-      const response = await commonApi.getCourseClassesBySubject({ subjectId });
-      if (response.success) {
-        const classes = Array.isArray(response.data) ? response.data : [];
-        setCourseClasses(classes);
-        if (classes.length === 0) {
-          toast.error('Môn học này chưa có lớp học phần nào', { duration: 3000 });
-        }
-      } else {
-        setCourseClasses([]);
-        toast.error('Không thể tải danh sách lớp học phần');
-      }
-    } catch (error) {
-      console.error('Error loading course classes:', error);
-      toast.error('Không thể tải danh sách lớp học phần');
-      setCourseClasses([]);
-    } finally {
-      setLoadingCourseClasses(false);
     }
   };
 
@@ -178,6 +306,11 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
       setCourseClasses([]);
       setRooms([]);
       setInstructors([]);
+      setSemesters([]);
+      setSelectedSemesterId('');
+      setCurrentSemesterId('');
+      setSubjects([]);
+      setHasLoadedSemesterFilter(false);
       onClose();
     }
   }, [isSubmitting, reset, onClose]);
@@ -401,6 +534,60 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
     label: `${s.subjectCode} - ${s.subjectName}`,
   })) : [];
 
+  const selectedSubject = subjects.find((s) => s.subjectId === formValues.subjectId);
+  const selectedCourseClass = courseClasses.find(
+    (cc) => (cc.courseClassId || cc.id) === formValues.courseClassId
+  );
+  const selectedRoom = rooms.find((room) => (room.roomId || room.id) === formValues.roomId);
+  const formHighlights = [
+    selectedSubject
+      ? {
+          label: 'Môn thi',
+          value: `${selectedSubject.subjectCode} - ${selectedSubject.subjectName}`,
+        }
+      : null,
+    selectedCourseClass
+      ? {
+          label: 'Lớp học phần',
+          value: `${selectedCourseClass.courseClassCode || selectedCourseClass.code || ''}${
+            selectedCourseClass.semesterName ? ` • ${selectedCourseClass.semesterName}` : ''
+          }`,
+        }
+      : null,
+    selectedRoom
+      ? {
+          label: 'Phòng thi',
+          value: `${selectedRoom.roomCode || selectedRoom.code || ''} - ${
+            selectedRoom.roomName || selectedRoom.name || ''
+          }`,
+        }
+      : null,
+    formValues.examDate
+      ? {
+          label: 'Ngày/Giờ',
+          value: `${new Date(formValues.examDate).toLocaleDateString('vi-VN')} ${
+            formValues.examTime || ''
+          }`,
+        }
+      : null,
+  ].filter((item): item is { label: string; value: string } => Boolean(item));
+
+  const semesterOptions = [
+    { value: '', label: 'Tất cả học kỳ' },
+    ...semesters.map((semester) => ({
+      value: semester.semesterId,
+      label:
+        semester.semesterId === currentSemesterId
+          ? `${semester.semesterName} (Hiện tại)`
+          : semester.semesterName,
+    })),
+  ];
+
+  const currentSemester = semesters.find(
+    (semester) => semester.semesterId === currentSemesterId
+  );
+  const isSubjectDropdownDisabled = loadingSubjects || !hasLoadedSemesterFilter;
+
   const courseClassOptions = Array.isArray(courseClasses) ? courseClasses
     .map((cc) => {
       const id = cc.courseClassId || cc.id;
@@ -505,21 +692,114 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-6">
+                {formHighlights.length > 0 && (
+                  <div className="col-span-2">
+                    <div className="rounded-lg border border-blue-100 bg-blue-50/70 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">
+                        Tổng quan lựa chọn
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {formHighlights.map((item) => (
+                          <span
+                            key={item.label}
+                            className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs text-blue-900 shadow-sm ring-1 ring-blue-100"
+                          >
+                            <span className="font-semibold text-blue-700">{item.label}:</span>
+                            <span className="text-blue-900">{item.value}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Bước 1 · Chọn môn & lớp học phần
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Ưu tiên lọc theo học kỳ để tìm đúng môn, sau đó chọn lớp học phần tương ứng.
+                  </p>
+                </div>
+
+                {/* Bộ lọc học kỳ */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Học kỳ hiển thị môn học
+                  </label>
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                    <div className="flex-1">
+                      <Dropdown
+                        options={semesterOptions}
+                        value={selectedSemesterId}
+                        placeholder="Chọn học kỳ"
+                        onChange={(value) => setSelectedSemesterId(value)}
+                        disabled={!hasLoadedSemesterFilter}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedSemesterId(currentSemesterId || '')}
+                        disabled={!currentSemesterId || selectedSemesterId === currentSemesterId}
+                        className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
+                      >
+                        Về học kỳ hiện tại
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedSemesterId('')}
+                        disabled={selectedSemesterId === ''}
+                        className="text-gray-600 hover:text-gray-900"
+                      >
+                        Xem tất cả môn
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {currentSemester
+                      ? `Mặc định ưu tiên học kỳ ${currentSemester.semesterName} để tránh chọn nhầm môn ở học kỳ khác.`
+                      : 'Bạn có thể chọn học kỳ để thu gọn danh sách môn học.'}
+                  </p>
+                </div>
+
                 {/* Tên môn thi */}
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-2">
                     Tên môn thi <span className="text-red-500">*</span>
+                    {loadingSubjects && (
+                      <span className="ml-2 inline-flex items-center gap-1 text-xs text-gray-500">
+                        <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#0053AD]"></span>
+                        Đang tải môn học...
+                      </span>
+                    )}
                   </label>
                   <DropdownSearch
                     options={subjectOptions}
                     value={formValues.subjectId || ''}
-                    placeholder="Chọn môn thi"
+                    placeholder={
+                      loadingSubjects
+                        ? 'Đang tải môn học...'
+                        : subjectOptions.length === 0
+                          ? 'Không có môn trong học kỳ này'
+                          : 'Chọn môn thi'
+                    }
                     searchPlaceholder="Tìm kiếm môn thi..."
                     onChange={(value) => {
                       setValue('subjectId', value);
                       setValue('courseClassId', ''); // Reset course class
                     }}
+                    disabled={isSubjectDropdownDisabled || subjectOptions.length === 0}
                   />
+                  {!loadingSubjects && hasLoadedSemesterFilter && subjectOptions.length === 0 && (
+                    <p className="mt-1 text-xs text-amber-600">
+                      Không có môn học khả dụng cho học kỳ này. Vui lòng chọn học kỳ khác hoặc kiểm tra dữ liệu.
+                    </p>
+                  )}
                   {errors.subjectId && (
                     <p className="mt-1 text-xs text-red-500">{errors.subjectId.message}</p>
                   )}
@@ -559,6 +839,15 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
                       )}
                     </>
                   )}
+                </div>
+
+                <div className="col-span-2 pt-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Bước 2 · Thiết lập lịch thi
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Kiểm tra kỹ ngày giờ, thời lượng và phòng thi để tránh trùng lịch.
+                  </p>
                 </div>
 
                 {/* Ngày thi */}
@@ -641,6 +930,16 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
                   {errors.examFormat && (
                     <p className="mt-1 text-xs text-red-500">{errors.examFormat.message}</p>
                   )}
+                </div>
+
+                <div className="col-span-2 pt-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Bước 3 · Giám thị coi thi
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Sử dụng ô tìm kiếm để lọc nhanh theo mã hoặc tên. Có thể chọn tất cả kết quả lọc chỉ với một cú
+                    nhấp chuột.
+                  </p>
                 </div>
 
                 {/* Giám thị */}
@@ -765,6 +1064,15 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
                   {errors.proctorIds && (
                     <p className="mt-1 text-xs text-red-500">{errors.proctorIds.message}</p>
                   )}
+                </div>
+
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Bước 4 · Ghi chú bổ sung
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Ghi lại yêu cầu đặc biệt hoặc lưu ý dành cho giám thị/ban quản trị (không bắt buộc).
+                  </p>
                 </div>
 
                 {/* Ghi chú */}

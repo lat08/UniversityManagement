@@ -86,10 +86,10 @@ export const EditExamScheduleModal = ({
       }
 
       // Load rooms from multiple room types: exam, computer_lab, laboratory, swimming_pool
-      // API: GET /v1/rooms?roomType={type}&pageNumber=1&pageSize=1000
+      // API: GET /v1/room?roomType={type}&pageNumber=1&pageSize=1000
       const roomTypes = ['exam', 'computer_lab', 'laboratory', 'swimming_pool'];
       const roomPromises = roomTypes.map(roomType =>
-        api.get('/v1/rooms', { 
+        api.get('/v1/room', { 
           params: { 
             roomType: roomType, 
             pageNumber: 1, 
@@ -386,6 +386,29 @@ export const EditExamScheduleModal = ({
     })
     .filter((opt): opt is { value: string; label: string } => opt !== null) : [];
 
+  const summaryItems = [
+    examSchedule?.subjectName
+      ? { label: 'Môn thi', value: `${examSchedule.subjectCode || ''} - ${examSchedule.subjectName}` }
+      : null,
+    examSchedule?.courseClassCode
+      ? { label: 'Lớp học phần', value: examSchedule.courseClassCode }
+      : null,
+    examSchedule?.roomCode
+      ? {
+          label: 'Phòng thi',
+          value: `${examSchedule.roomCode}${examSchedule.roomName ? ` - ${examSchedule.roomName}` : ''}`,
+        }
+      : null,
+    examSchedule?.examDate
+      ? {
+          label: 'Ngày/Giờ',
+          value: `${new Date(examSchedule.examDate).toLocaleDateString('vi-VN')} ${
+            formValues.examTime || examSchedule.examTime || ''
+          }`,
+        }
+      : null,
+  ].filter((item): item is { label: string; value: string } => Boolean(item));
+
   const handleProctorToggle = (instructorId: string) => {
     const newProctors = selectedProctors.includes(instructorId)
       ? selectedProctors.filter((id) => id !== instructorId)
@@ -448,6 +471,36 @@ export const EditExamScheduleModal = ({
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-6">
+                {summaryItems.length > 0 && (
+                  <div className="col-span-2">
+                    <div className="rounded-lg border border-blue-100 bg-blue-50/70 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">
+                        Tổng quan lịch thi
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {summaryItems.map((item) => (
+                          <span
+                            key={item.label}
+                            className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs text-blue-900 shadow-sm ring-1 ring-blue-100"
+                          >
+                            <span className="font-semibold text-blue-700">{item.label}:</span>
+                            <span className="text-blue-900">{item.value}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Môn thi & lớp học phần
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Thông tin cố định, sử dụng chỉ để tham chiếu khi cập nhật lịch thi.
+                  </p>
+                </div>
+
                 {/* Tên môn thi - Read only */}
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-2">Tên môn thi</label>
@@ -462,6 +515,15 @@ export const EditExamScheduleModal = ({
                   <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
                     {examSchedule.courseClassCode}
                   </div>
+                </div>
+
+                <div className="col-span-2 pt-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Lịch thi
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Điều chỉnh ngày, giờ, phòng thi và hình thức nếu cần thiết.
+                  </p>
                 </div>
 
                 {/* Ngày thi */}
@@ -544,6 +606,15 @@ export const EditExamScheduleModal = ({
                   {errors.examFormat && (
                     <p className="mt-1 text-xs text-red-500">{errors.examFormat.message}</p>
                   )}
+                </div>
+
+                <div className="col-span-2 pt-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Giám thị
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Tận dụng ô tìm kiếm hoặc nút “Chọn tất cả” theo kết quả lọc để quản lý nhanh danh sách giám thị.
+                  </p>
                 </div>
 
                 {/* Giám thị */}
@@ -668,6 +739,15 @@ export const EditExamScheduleModal = ({
                   {errors.proctorIds && (
                     <p className="mt-1 text-xs text-red-500">{errors.proctorIds.message}</p>
                   )}
+                </div>
+
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    Ghi chú
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Sử dụng để lưu lại lưu ý nội bộ hoặc thông tin gửi tới giám thị.
+                  </p>
                 </div>
 
                 {/* Ghi chú */}
