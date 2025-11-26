@@ -8,14 +8,14 @@ import { Calendar } from 'lucide-react';
 import 'react-day-picker/dist/style.css';
 
 interface DatePickerProps {
-  value: string; // Format: YYYY-MM-DD
-  onChange: (value: string) => void;
-  placeholder?: string;
-  minDate?: string; // Format: YYYY-MM-DD
-  maxDate?: string; // Format: YYYY-MM-DD
-  locale?: string;
-  disabled?: boolean;
-  label?: string;
+  readonly value: string; // Format: YYYY-MM-DD
+  readonly onChange: (value: string) => void;
+  readonly placeholder?: string;
+  readonly minDate?: string; // Format: YYYY-MM-DD
+  readonly maxDate?: string; // Format: YYYY-MM-DD
+  readonly locale?: string;
+  readonly disabled?: boolean;
+  readonly label?: string;
 }
 
 export function DatePicker({
@@ -135,34 +135,31 @@ export function DatePicker({
 
   // Handle manual date input
   const handleDateInputChange = (input: string) => {
-    // Allow only numbers and slashes
     const cleaned = input.replace(/[^\d/]/g, '');
-    
-    // Auto-insert slashes
     let formatted = cleaned;
+
     if (cleaned.length >= 2 && !cleaned.includes('/')) {
-      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
+      formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
     }
+
     if (cleaned.length >= 5 && cleaned.split('/').length === 2) {
-      const parts = cleaned.split('/');
-      formatted = parts[0] + '/' + parts[1].slice(0, 2) + '/' + parts[1].slice(2);
+      const [day, rest] = cleaned.split('/');
+      formatted = `${day}/${rest.slice(0, 2)}/${rest.slice(2)}`;
     }
-    
+
     setDateInputValue(formatted);
 
-    // Try to parse the date when it's complete
-    if (formatted.length === 10) {
-      try {
-        const parsedDate = parse(formatted, 'dd/MM/yyyy', new Date());
-        if (isValid(parsedDate)) {
-          // Convert to YYYY-MM-DD format
-          const isoDate = format(parsedDate, 'yyyy-MM-dd');
-          onChange(isoDate);
-        }
-      } catch {
-        console.error('Invalid date format');
-      }
+    if (formatted.length !== 10) {
+      return;
     }
+
+    const parsedDate = parse(formatted, 'dd/MM/yyyy', new Date());
+    if (!isValid(parsedDate)) {
+      return;
+    }
+
+    const isoDate = format(parsedDate, 'yyyy-MM-dd');
+    onChange(isoDate);
   };
 
   // Handle calendar selection

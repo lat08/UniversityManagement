@@ -6,15 +6,18 @@ import { useSemesters } from '@/lib/hooks/useCommonData';
 import { EXAM_TYPE_OPTIONS, EXAM_STATUS_OPTIONS } from '@/lib/constants/adminExam';
 import { ExamType, ExamStatus } from '@/lib/types/adminExam';
 
+type ExamTypeFilter = ExamType | 'all';
+type ExamStatusFilter = ExamStatus | 'all';
+
 interface ExamFiltersProps {
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
   readonly semesterFilter: string;
   readonly onSemesterChange: (value: string) => void;
-  readonly examTypeFilter: ExamType | 'all';
-  readonly onExamTypeChange: (value: ExamType | 'all') => void;
-  readonly statusFilter: ExamStatus | 'all';
-  readonly onStatusChange: (value: ExamStatus | 'all') => void;
+  readonly examTypeFilter: ExamTypeFilter;
+  readonly onExamTypeChange: (value: ExamTypeFilter) => void;
+  readonly statusFilter: ExamStatusFilter;
+  readonly onStatusChange: (value: ExamStatusFilter) => void;
 }
 
 export const ExamFilters = ({

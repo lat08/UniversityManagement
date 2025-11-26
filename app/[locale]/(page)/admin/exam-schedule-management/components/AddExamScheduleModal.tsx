@@ -16,9 +16,9 @@ import type { Subject, Instructor, Semester } from '@/lib/types/common';
 import type { Room, CourseClass } from '../lib/types/types';
 
 interface AddExamScheduleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess?: () => void;
 }
 
 const validationSchema = yup.object({
@@ -34,6 +34,118 @@ const validationSchema = yup.object({
 });
 
 type FormData = InferType<typeof validationSchema>;
+
+const getExamScheduleValidationError = (data: FormData): string | null => {
+  if (!data.courseClassId) {
+    return 'Vui lòng chọn lớp học phần';
+  }
+  if (!data.roomId) {
+    return 'Vui lòng chọn phòng thi';
+  }
+  if (!data.examDate) {
+    return 'Vui lòng chọn ngày thi';
+  }
+  if (!data.examTime) {
+    return 'Vui lòng chọn giờ thi';
+  }
+  if (!data.proctorIds || data.proctorIds.length === 0) {
+    return 'Vui lòng chọn ít nhất một giám thị';
+  }
+
+  if (data.examDate && data.examTime) {
+    const examDateTime = new Date(`${data.examDate}T${data.examTime}`);
+    const now = new Date();
+
+    if (examDateTime <= now) {
+      return 'Thời gian thi phải ở trong tương lai';
+    }
+  }
+
+  if (data.durationInMinutes < 15 || data.durationInMinutes > 300) {
+    return 'Thời gian thi phải từ 15 đến 300 phút';
+  }
+
+  return null;
+};
+
+const buildExamSchedulePayload = (data: FormData) => {
+  const examTimeFormatted = data.examTime.includes(':')
+    ? (data.examTime.split(':').length === 2 ? `${data.examTime}:00` : data.examTime)
+    : `${data.examTime}:00:00`;
+
+  return {
+    courseClassId: data.courseClassId,
+    roomId: data.roomId,
+    examDate: data.examDate,
+    examTime: examTimeFormatted,
+    durationInMinutes: Number(data.durationInMinutes),
+    examFormat: data.examFormat,
+    proctorIds: (data.proctorIds || []).filter((id): id is string => Boolean(id)),
+    notes: data.notes && data.notes.trim() ? data.notes.trim() : undefined,
+  };
+};
+
+const getExamScheduleErrorMessage = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const apiError = error as {
+      response?: {
+        status?: number;
+        statusText?: string;
+        data?: {
+          errors?: Record<string, string | string[]>;
+          message?: string;
+          title?: string;
+          detail?: string;
+        };
+      };
+    };
+
+    const errorData = apiError.response?.data;
+    if (errorData?.errors) {
+      const { errors } = errorData;
+      const errorMessages: string[] = [];
+
+      Object.keys(errors).forEach((field) => {
+        const fieldErrors = errors[field];
+        if (Array.isArray(fieldErrors)) {
+          fieldErrors.forEach((msg) => {
+            errorMessages.push(`${field}: ${msg}`);
+          });
+        } else if (typeof fieldErrors === 'string') {
+          errorMessages.push(`${field}: ${fieldErrors}`);
+        }
+      });
+
+      if (errorMessages.length > 0) {
+        return errorMessages.join('\n');
+      }
+
+      const validationErrors = Object.values(errors)
+        .flat()
+        .filter((msg): msg is string => typeof msg === 'string');
+
+      if (validationErrors.length > 0) {
+        return validationErrors.join(', ');
+      }
+    }
+
+    if (errorData?.message) {
+      return errorData.message;
+    }
+
+    if (errorData?.title) {
+      return errorData.detail ? `${errorData.title}: ${errorData.detail}` : errorData.title;
+    }
+
+    if (apiError.response?.status === 500 && errorData?.message) {
+      return errorData.message;
+    }
+  } else if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Đã xảy ra lỗi khi thêm lịch thi';
+};
 
 export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamScheduleModalProps) => {
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
@@ -328,95 +440,17 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
+
+    const validationError = getExamScheduleValidationError(data);
+    if (validationError) {
+      toast.error(validationError);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Validate required fields
-      if (!data.courseClassId) {
-        toast.error('Vui lòng chọn lớp học phần');
-        setIsSubmitting(false);
-        return;
-      }
-      if (!data.roomId) {
-        toast.error('Vui lòng chọn phòng thi');
-        setIsSubmitting(false);
-        return;
-      }
-      if (!data.examDate) {
-        toast.error('Vui lòng chọn ngày thi');
-        setIsSubmitting(false);
-        return;
-      }
-      if (!data.examTime) {
-        toast.error('Vui lòng chọn giờ thi');
-        setIsSubmitting(false);
-        return;
-      }
-      if (!data.proctorIds || data.proctorIds.length === 0) {
-        toast.error('Vui lòng chọn ít nhất một giám thị');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validate exam date and time - must be in the future
-      if (data.examDate && data.examTime) {
-        const examDateTime = new Date(`${data.examDate}T${data.examTime}`);
-        const now = new Date();
-        if (examDateTime <= now) {
-          toast.error('Thời gian thi phải ở trong tương lai');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      // Validate duration
-      if (data.durationInMinutes < 15 || data.durationInMinutes > 300) {
-        toast.error('Thời gian thi phải từ 15 đến 300 phút');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Prepare payload matching CreateAdminExamScheduleDto
-      // Backend expects: Guid CourseClassId, Guid RoomId, DateOnly ExamDate, TimeOnly ExamTime, 
-      // int DurationInMinutes, string ExamFormat, List<Guid> ProctorIds, string? Notes
-      
-      // Format examTime to HH:mm:ss for .NET TimeOnly deserialization
-      // TimeOnly can parse "HH:mm" or "HH:mm:ss", but "HH:mm:ss" is more reliable
-      const examTimeFormatted = data.examTime.includes(':') 
-        ? (data.examTime.split(':').length === 2 ? `${data.examTime}:00` : data.examTime)
-        : `${data.examTime}:00:00`;
-      
-      const payload = {
-        courseClassId: data.courseClassId, // Will be converted to Guid by backend
-        roomId: data.roomId, // Will be converted to Guid by backend
-        examDate: data.examDate, // Format: YYYY-MM-DD (DateOnly)
-        examTime: examTimeFormatted, // Format: HH:mm:ss (TimeOnly - .NET requires seconds for reliable parsing)
-        durationInMinutes: Number(data.durationInMinutes),
-        examFormat: data.examFormat,
-        proctorIds: (data.proctorIds || []).filter((id): id is string => !!id), // Will be converted to List<Guid> by backend
-        notes: data.notes && data.notes.trim() ? data.notes.trim() : undefined,
-      };
-
-      // Debug: Log payload before sending
-      console.log('=== Add Exam Schedule - Payload Debug ===');
-      console.log('Raw form data:', data);
-      console.log('Payload to send:', JSON.stringify(payload, null, 2));
-      console.log('Payload types:', {
-        courseClassId: typeof payload.courseClassId,
-        roomId: typeof payload.roomId,
-        examDate: typeof payload.examDate,
-        examTime: typeof payload.examTime,
-        durationInMinutes: typeof payload.durationInMinutes,
-        examFormat: typeof payload.examFormat,
-        proctorIds: Array.isArray(payload.proctorIds) ? `Array[${payload.proctorIds.length}]` : typeof payload.proctorIds,
-        notes: typeof payload.notes,
-      });
-      console.log('========================================');
-
+      const payload = buildExamSchedulePayload(data);
       const response = await examSchedulesApi.create(payload);
-
-      // Debug: Log response
-      console.log('=== Add Exam Schedule - Response ===');
-      console.log('Response:', response);
-      console.log('=====================================');
 
       if (response.success) {
         toast.success('Thêm lịch thi thành công!');
@@ -428,88 +462,13 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
         toast.error(response.message || 'Thêm lịch thi thất bại');
       }
     } catch (error: unknown) {
-      console.error('Error creating exam schedule:', error);
-      
-      // Debug: Log full error response
-      console.log('=== Add Exam Schedule - Error Details ===');
-      if (error && typeof error === 'object' && 'response' in error) {
-        const apiError = error as { response?: { status?: number; statusText?: string; data?: { errors?: unknown } } };
-        if (apiError.response) {
-          console.log('Status:', apiError.response.status);
-          console.log('Status Text:', apiError.response.statusText);
-          console.log('Response Data:', JSON.stringify(apiError.response.data, null, 2));
-          if (apiError.response.data?.errors) {
-            console.log('Validation Errors:', JSON.stringify(apiError.response.data.errors, null, 2));
-          }
-        }
-      }
-      console.log('==========================================');
-      
-      // Handle different error response formats
-      let errorMessage = 'Đã xảy ra lỗi khi thêm lịch thi';
-      
-      if (error && typeof error === 'object' && 'response' in error) {
-        const apiError = error as { response?: { status?: number; data?: { errors?: Record<string, string | string[]>; message?: string; title?: string; detail?: string } } };
-        const errorData = apiError.response?.data;
-        
-        if (errorData) {
-        // Handle ASP.NET Core validation errors (ModelState)
-          const errors = errorData.errors;
-          if (errors) {
-            console.log('Parsing validation errors:', errors);
-          // errors object structure: { "FieldName": ["Error message 1", "Error message 2"] }
-          const errorMessages: string[] = [];
-            Object.keys(errors).forEach((field) => {
-              const fieldErrors = errors[field];
-            if (Array.isArray(fieldErrors)) {
-              fieldErrors.forEach((msg: string) => {
-                errorMessages.push(`${field}: ${msg}`);
-              });
-            } else if (typeof fieldErrors === 'string') {
-              errorMessages.push(`${field}: ${fieldErrors}`);
-            }
-          });
-          
-          if (errorMessages.length > 0) {
-            errorMessage = errorMessages.join('\n');
-            console.log('Formatted error messages:', errorMessages);
-          } else {
-            // Fallback: try to extract all error messages
-              const validationErrors = Object.values(errors)
-              .flat()
-              .filter((msg): msg is string => typeof msg === 'string');
-            if (validationErrors.length > 0) {
-              errorMessage = validationErrors.join(', ');
-            }
-          }
-        }
-        // Handle standard error message from backend
-        else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-        // Handle problem+json format
-        else if (errorData.title) {
-          errorMessage = errorData.title;
-          if (errorData.detail) {
-            errorMessage += ': ' + errorData.detail;
-          }
-        }
-        // Handle 500 Internal Server Error - show backend message if available
-          else if (apiError.response?.status === 500 && errorData.message) {
-          errorMessage = errorData.message || 'Lỗi máy chủ. Vui lòng thử lại sau.';
-          }
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      // Show error toast with longer duration for better visibility
-      toast.error(errorMessage, { 
+      const errorMessage = getExamScheduleErrorMessage(error);
+      toast.error(errorMessage, {
         duration: 6000,
         style: {
           maxWidth: '500px',
           whiteSpace: 'pre-line',
-        }
+        },
       });
     } finally {
       setIsSubmitting(false);
