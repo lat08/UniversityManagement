@@ -29,6 +29,7 @@ interface GradesTableProps {
 
 export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBulkSaveSuccess, isPending = false, isLoading = false }: GradesTableProps) => {
   const t = useTranslations('instructor.grades.table');
+  const NOTE_CHAR_LIMIT = 100;
   const [editingCell, setEditingCell] = useState<{ enrollmentId: string; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [editingNote, setEditingNote] = useState<{ enrollmentId: string } | null>(null);
@@ -319,6 +320,7 @@ export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBul
           <input
             type="text"
             value={editNoteValue}
+            maxLength={NOTE_CHAR_LIMIT}
             onChange={(e) => setEditNoteValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSaveNote(student.enrollmentId);
@@ -352,7 +354,18 @@ export const GradesTable = ({ students, canEdit, onNoteChange, onBulkSave, onBul
     return (
       <div className="flex items-center gap-2 group">
         <span className={`flex-1 ${hasPendingChange ? 'text-orange-600 font-medium' : 'text-gray-500'}`}>
-          {displayNote || '-'}
+          {displayNote ? (
+            <span
+              className="block max-w-[200px] truncate text-ellipsis"
+              title={displayNote.length > NOTE_CHAR_LIMIT ? displayNote : undefined}
+            >
+              {displayNote.length > NOTE_CHAR_LIMIT
+                ? `${displayNote.slice(0, NOTE_CHAR_LIMIT - 1)}…`
+                : displayNote}
+            </span>
+          ) : (
+            <span>-</span>
+          )}
         </span>
         {canEdit && !isPending && (
           <button
