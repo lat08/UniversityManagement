@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { format, parse, isValid } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, type Matcher } from 'react-day-picker';
 import { Calendar } from 'lucide-react';
 import 'react-day-picker/dist/style.css';
 
@@ -159,7 +159,7 @@ export function DatePicker({
           const isoDate = format(parsedDate, 'yyyy-MM-dd');
           onChange(isoDate);
         }
-      } catch (error) {
+      } catch {
         console.error('Invalid date format');
       }
     }
@@ -176,22 +176,21 @@ export function DatePicker({
     }
   };
 
-  // Handle clear
-  const handleClear = () => {
-    onChange('');
-    setDateInputValue('');
-  };
-
   // Build disabled matcher
-  const getDisabledMatcher = () => {
-    const matcher: { before?: Date; after?: Date } = {};
+  const getDisabledMatcher = (): Matcher | Matcher[] | undefined => {
+    const matchers: Matcher[] = [];
+
     if (minDate) {
-      matcher.before = new Date(minDate);
+      matchers.push({ before: new Date(minDate) });
     }
+
     if (maxDate) {
-      matcher.after = new Date(maxDate);
+      matchers.push({ after: new Date(maxDate) });
     }
-    return Object.keys(matcher).length > 0 ? matcher : undefined;
+
+    if (matchers.length === 0) return undefined;
+    if (matchers.length === 1) return matchers[0];
+    return matchers;
   };
 
   return (
@@ -241,7 +240,7 @@ export function DatePicker({
             mode="single"
             selected={selectedDate}
             onSelect={handleCalendarSelect}
-            disabled={getDisabledMatcher() as any}
+            disabled={getDisabledMatcher()}
             locale={dateLocale}
             classNames={{
               day_selected: 'bg-[#0053AD] text-white hover:bg-[#003d82]',
