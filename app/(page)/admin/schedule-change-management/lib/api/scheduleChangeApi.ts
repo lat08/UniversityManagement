@@ -244,13 +244,13 @@ export const scheduleChangeApi = {
     queryParams.append('format', format);
 
     try {
-      const response = await api.get(
-        `/v1/admin/schedule-changes/export?${queryParams.toString()}`,
-        {
-          responseType: 'blob',
-        }
-      );
-      return response.data;
+    const response = await api.get(
+      `/v1/admin/schedule-changes/export?${queryParams.toString()}`,
+      {
+        responseType: 'blob',
+      }
+    );
+    return response.data;
     } catch (error) {
       const apiError = error as { response?: { data?: Blob; status?: number }; message?: string };
       // If error response is a blob (file), try to read it as text

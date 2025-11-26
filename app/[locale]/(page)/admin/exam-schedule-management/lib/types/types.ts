@@ -74,7 +74,7 @@ export interface GetExamSchedulesParams {
   pageSize?: number;
   semesterId?: string;
   courseClassId?: string;
-  status?: 'ready' | 'published' | 'cancelled';
+  status?: 'scheduled' | 'published' | 'cancelled' | 'completed';
   searchTerm?: string;
 }
 
@@ -115,9 +115,10 @@ export interface BulkActionResultDto {
 
 export const STATUS_OPTIONS = [
   { value: '', label: 'Tất cả trạng thái' },
-  { value: 'ready', label: 'Sẵn sàng' },
+  { value: 'scheduled', label: 'Đã lên lịch' },
   { value: 'published', label: 'Đã công bố' },
   { value: 'cancelled', label: 'Đã hủy' },
+  { value: 'completed', label: 'Đã hoàn thành' },
 ];
 
 // Exam format mapping: Database value -> Display label
@@ -163,12 +164,12 @@ export const EXAM_TIME_OPTIONS = [
 export const getStatusDisplay = (status: string) => {
   const statusLower = status?.toLowerCase() || '';
   const statusMap: Record<string, { label: string; color: string }> = {
-    ready: { label: 'Sẵn sàng', color: 'bg-amber-100 text-amber-800 border border-amber-300' },
+    scheduled: { label: 'Đã lên lịch', color: 'bg-amber-100 text-amber-800 border border-amber-300' },
     published: { label: 'Đã công bố', color: 'bg-emerald-100 text-emerald-800 border border-emerald-300' },
     cancelled: { label: 'Đã hủy', color: 'bg-rose-100 text-rose-800 border border-rose-300' },
+    completed: { label: 'Đã hoàn thành', color: 'bg-blue-100 text-blue-800 border border-blue-300' },
     // Backward compatibility
-    scheduled: { label: 'Sẵn sàng', color: 'bg-amber-100 text-amber-800 border border-amber-300' },
-    completed: { label: 'Đã công bố', color: 'bg-emerald-100 text-emerald-800 border border-emerald-300' },
+    ready: { label: 'Đã lên lịch', color: 'bg-amber-100 text-amber-800 border border-amber-300' },
   };
   return statusMap[statusLower] || { label: status || 'Không xác định', color: 'bg-slate-100 text-slate-700 border border-slate-300' };
 };

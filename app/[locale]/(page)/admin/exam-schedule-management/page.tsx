@@ -112,7 +112,7 @@ export default function ExamScheduleManagementPage() {
       searchTerm: searchKeyword || undefined,
       semesterId: selectedSemester || undefined,
       courseClassId: selectedClass || undefined,
-      status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+      status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
     });
   }, [currentPage, searchKeyword, selectedSemester, selectedClass, selectedStatus, fetchExamSchedules]);
 
@@ -122,7 +122,7 @@ export default function ExamScheduleManagementPage() {
   }, []);
 
   const handleEditClick = useCallback((examSchedule: ExamSchedule) => {
-    if (examSchedule.status !== 'ready') {
+    if (examSchedule.status !== 'scheduled') {
       toast.error(t('canOnlyEditReady'));
       return;
     }
@@ -160,7 +160,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+        status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Công bố lịch thi thất bại');
@@ -178,7 +178,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+        status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Hủy lịch thi thất bại');
@@ -196,7 +196,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+        status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Xóa lịch thi thất bại');
@@ -223,7 +223,25 @@ export default function ExamScheduleManagementPage() {
     });
   }, []);
 
+  const hasCancelledSelected = useCallback(() => {
+    return examSchedules.some(
+      (schedule) => selectedExamScheduleIds.has(schedule.id) && schedule.status === 'cancelled'
+    );
+  }, [examSchedules, selectedExamScheduleIds]);
+
+  const handleOpenBulkPublishModal = useCallback(() => {
+    if (hasCancelledSelected()) {
+      toast.error('Không thể công bố lịch thi đã bị hủy. Vui lòng bỏ chọn các lịch thi này.');
+      return;
+    }
+    setIsBulkPublishModalOpen(true);
+  }, [hasCancelledSelected]);
+
   const handleBulkPublish = async () => {
+    if (hasCancelledSelected()) {
+      toast.error('Không thể công bố lịch thi đã bị hủy. Vui lòng bỏ chọn các lịch thi này.');
+      return;
+    }
     const ids = Array.from(selectedExamScheduleIds);
     const res = await examSchedulesApi.publish({ ids });
     if (res.success) {
@@ -236,7 +254,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+        status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Công bố hàng loạt thất bại');
@@ -256,7 +274,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+        status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Hủy hàng loạt thất bại');
@@ -276,7 +294,7 @@ export default function ExamScheduleManagementPage() {
         searchTerm: searchKeyword || undefined,
         semesterId: selectedSemester || undefined,
         courseClassId: selectedClass || undefined,
-        status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+        status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
       toast.error(res.message || 'Xóa hàng loạt thất bại');
@@ -571,7 +589,7 @@ export default function ExamScheduleManagementPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsBulkPublishModalOpen(true)}
+                  onClick={handleOpenBulkPublishModal}
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
                   Công bố
@@ -661,7 +679,7 @@ export default function ExamScheduleManagementPage() {
             searchTerm: searchKeyword || undefined,
             semesterId: selectedSemester || undefined,
             courseClassId: selectedClass || undefined,
-            status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+            status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
           });
         }}
       />
@@ -680,7 +698,7 @@ export default function ExamScheduleManagementPage() {
             searchTerm: searchKeyword || undefined,
             semesterId: selectedSemester || undefined,
             courseClassId: selectedClass || undefined,
-            status: (selectedStatus as 'ready' | 'published' | 'cancelled' | undefined) || undefined,
+            status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
           });
         }}
       />

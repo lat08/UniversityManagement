@@ -283,14 +283,14 @@ export default function ScheduleChangeManagementPage() {
                       <span className="text-gray-500 text-xs">Tuần {request.cancelledWeek}</span>
                     </div>
                   ) : (
-                    <div className="flex flex-col">
-                      <span className="text-gray-900">{dayLabel}</span>
-                      <span className="text-gray-500 text-sm">
-                        {getPeriodLabel(request.startPeriod, request.endPeriod)}
+                  <div className="flex flex-col">
+                    <span className="text-gray-900">{dayLabel}</span>
+                    <span className="text-gray-500 text-sm">
+                      {getPeriodLabel(request.startPeriod, request.endPeriod)}
                         {request.currentRoomCode && ` (${request.currentRoomCode})`}
-                      </span>
-                      <span className="text-gray-500 text-xs">Tuần {request.cancelledWeek}</span>
-                    </div>
+                    </span>
+                    <span className="text-gray-500 text-xs">Tuần {request.cancelledWeek}</span>
+                  </div>
                   )}
                 </td>
               );

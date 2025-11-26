@@ -49,10 +49,10 @@ export const ExamScheduleActionsMenu = ({
     };
   }, [isOpen]);
 
-  const canEdit = examSchedule.status === 'ready';
-  const canCancel = examSchedule.status === 'ready' || examSchedule.status === 'published';
-  const canPublish = examSchedule.status === 'ready';
-  const canDelete = examSchedule.status !== 'published';
+  const canEdit = examSchedule.status === 'scheduled';
+  const canCancel = examSchedule.status === 'scheduled' || examSchedule.status === 'published';
+  const canPublish = examSchedule.status === 'scheduled';
+  const canDelete = examSchedule.status !== 'published' && examSchedule.status !== 'completed';
 
   if (compact) {
     return (

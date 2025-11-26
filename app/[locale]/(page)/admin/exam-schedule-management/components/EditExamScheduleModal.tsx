@@ -690,11 +690,10 @@ export const EditExamScheduleModal = ({
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-900 mb-2">Trạng thái</label>
                   <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
-                    {examSchedule.status === 'ready' ? 'Sẵn sàng' :
+                    {examSchedule.status === 'scheduled' ? 'Đã lên lịch' :
                      examSchedule.status === 'published' ? 'Đã công bố' :
                      examSchedule.status === 'cancelled' ? 'Đã hủy' : 
-                     examSchedule.status === 'scheduled' ? 'Sẵn sàng' : // backward compatibility
-                     examSchedule.status === 'completed' ? 'Đã công bố' : // backward compatibility
+                     examSchedule.status === 'completed' ? 'Đã hoàn thành' :
                      examSchedule.status || 'Không xác định'}
                   </div>
                 </div>
