@@ -3772,13 +3772,15 @@
         "add": "Thêm mới",
         "searchPlaceholder": "Tìm kiếm theo Mã CTĐT hoặc Tên CTĐT...",
         "bulkSelection": "Đã chọn {count} chương trình đào tạo",
-        "bulkEditPending": "Tính năng chỉnh sửa toàn bộ CTĐT (trạng thái) sẽ được bổ sung sau khi có API backend."
+        "bulkEditPending": "Tính năng chỉnh sửa toàn bộ CTĐT (trạng thái) sẽ được bổ sung sau khi có API backend.",
+        "detailPanelLabel": "Cấu trúc chương trình đào tạo"
       },
       "filters": {
         "allFaculties": "Tất cả khoa",
         "allDepartments": "Tất cả ngành",
         "allStatuses": "Tất cả trạng thái",
-        "statusActive": "Đang hoạt động"
+        "statusActive": "Đang hoạt động",
+        "statusDisabled": "Đã vô hiệu hóa"
       },
       "table": {
         "empty": "Không có dữ liệu",
@@ -3792,13 +3794,18 @@
           "actions": "HĐ"
         },
         "status": {
-          "active": "Đang hoạt động"
+          "active": "Đang hoạt động",
+          "disabled": "Đã vô hiệu hóa",
+          "inactive": "Ngừng hoạt động"
         }
       },
       "selection": {
         "bulkEdit": "Chỉnh sửa toàn bộ",
         "bulkDelete": "Xóa toàn bộ",
         "clear": "Bỏ chọn"
+      },
+      "actions": {
+        "cancel": "Hủy"
       },
       "actionsMenu": {
         "edit": "Chỉnh sửa",
@@ -3813,7 +3820,8 @@
         "deleteGeneralError": "Đã xảy ra lỗi khi xóa CTĐT",
         "bulkDeleteLoopError": "Xóa CTĐT thất bại",
         "bulkDeleteGeneralError": "Đã xảy ra lỗi khi xóa CTĐT",
-        "bulkDeleteSuccess": "Đã xóa các chương trình đào tạo được chọn (nếu không có lỗi)."
+        "bulkDeleteSuccess": "Đã xóa các chương trình đào tạo được chọn (nếu không có lỗi).",
+        "detailError": "Không thể tải chi tiết chương trình đào tạo. Vui lòng thử lại."
       },
       "fields": {
         "code": {
@@ -3836,7 +3844,8 @@
         "department": {
           "label": "Chuyên ngành",
           "placeholder": "Chọn chuyên ngành",
-          "required": "Chuyên ngành là bắt buộc"
+          "required": "Chuyên ngành là bắt buộc",
+          "searchPlaceholder": "Tìm kiếm chuyên ngành..."
         },
         "credits": {
           "label": "Số tín chỉ",
@@ -3863,11 +3872,15 @@
         "add": {
           "title": "Thêm mới Chương trình đào tạo",
           "description": "Nhập thông tin chương trình",
+          "summaryTitle": "Thông tin chung về CTĐT",
+          "summaryLine1": "Mã CTĐT và tên CTĐT sẽ được hiển thị trên các màn hình quản lý khác.",
+          "summaryLine2": "Bạn có thể cập nhật thêm cấu trúc môn học sau khi tạo CTĐT.",
           "submit": "Thêm mới",
           "submitting": "Đang lưu...",
           "success": "Tạo chương trình đào tạo thành công!",
           "error": "Tạo chương trình đào tạo thất bại",
-          "generalError": "Đã xảy ra lỗi"
+          "generalError": "Đã xảy ra lỗi",
+          "helperIntro": "Vui lòng kiểm tra kỹ mã CTĐT trước khi lưu, tránh bị trùng với CTĐT khác."
         },
         "edit": {
           "title": "Chỉnh sửa Chương trình đào tạo",
@@ -3881,12 +3894,18 @@
         "import": {
           "title": "Nhập CTĐT từ Excel",
           "description": "Chọn file Excel và thông tin chương trình đào tạo",
+          "helperIntro": "Bạn có thể tải file mẫu từ hệ thống để đảm bảo đúng định dạng trước khi nhập.",
+          "summaryTitle": "Hướng dẫn nhập CTĐT từ Excel",
+          "summaryLine1": "Đảm bảo file Excel đúng cấu trúc theo mẫu hệ thống, bao gồm danh sách môn học và số tín chỉ.",
+          "summaryLine2": "Các thông tin mã CTĐT, tên CTĐT và năm áp dụng sẽ được sử dụng để tạo mới CTĐT.",
           "fileLabel": "File Excel *",
           "fileHelper": "Hỗ trợ file .xlsx, .xls, tối đa 10MB",
           "fileTypeError": "Chỉ chấp nhận file Excel (.xlsx, .xls)",
           "fileSizeError": "Kích thước file tối đa 10MB",
           "fileRequired": "Vui lòng chọn file Excel",
           "infoRequired": "Vui lòng nhập đầy đủ thông tin bắt buộc",
+          "chooseFileButton": "Chọn file",
+          "changeFileButton": "Thay đổi file",
           "submit": "Nhập CTĐT",
           "submitting": "Đang nhập...",
           "success": "Nhập khẩu chương trình đào tạo thành công!",
@@ -3902,11 +3921,73 @@
         "bulkDelete": {
           "title": "Xác nhận xóa chương trình đào tạo",
           "description": "Bạn có chắc chắn muốn xóa toàn bộ {count} chương trình đào tạo được chọn?",
+          "helperIntro": "Hành động này sẽ áp dụng cho tất cả CTĐT đang được chọn.",
           "warningTitle": "Cảnh báo:",
           "warningDescription": "Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+          "warningPoint1": "Các lớp học đang sử dụng CTĐT này có thể bị ảnh hưởng.",
+          "warningPoint2": "Bạn nên kiểm tra kỹ trước khi thực hiện xóa hàng loạt.",
           "submit": "Xác nhận",
           "submitting": "Đang xóa..."
+        },
+        "bulkEdit": {
+          "title": "Chỉnh sửa trạng thái CTĐT",
+          "description": "Đã chọn {count} chương trình đào tạo",
+          "helperIntro": "Thay đổi trạng thái hoạt động cho tất cả các chương trình đào tạo đã chọn.",
+          "statusLabel": "Trạng thái hoạt động",
+          "statusPlaceholder": "Chọn trạng thái",
+          "statusNote": "Chỉ áp dụng cho trường trạng thái. Các thuộc tính khác của CTĐT sẽ được giữ nguyên.",
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật...",
+          "success": "Đã cập nhật trạng thái cho các chương trình đào tạo đã chọn.",
+          "error": "Cập nhật trạng thái hàng loạt thất bại.",
+          "generalError": "Đã xảy ra lỗi khi cập nhật trạng thái hàng loạt.",
+          "validation": "Vui lòng chọn trạng thái cần cập nhật trước khi lưu."
         }
+      },
+      "subjects": {
+        "loading": "Đang tải danh sách môn học...",
+        "noData": "Chưa có dữ liệu môn học cho chương trình đào tạo này.",
+        "summary": "{totalSubjects} môn \u2022 {totalCredits} tín chỉ",
+        "yearSummary": "{totalSubjects} môn \u2022 {totalCredits} tín chỉ",
+        "semesterSummary": "{totalSubjects} môn \u2022 {totalCredits} tín chỉ",
+        "totalSubjectsChip": "{count} môn",
+        "totalCreditsChip": "{credits} tín chỉ",
+        "noSubjects": "Chưa có môn học trong học kỳ này.",
+        "creditsShort": "TC",
+        "hoursShort": "tiết",
+        "type": {
+          "general": "Môn chung",
+          "specialized": "Môn chuyên ngành"
+        },
+        "addButton": "Thêm môn",
+        "noSelectedForRemove": "Vui lòng chọn ít nhất 1 môn để xóa.",
+        "removeSelected": "Xóa các môn đã chọn",
+        "removing": "Đang xóa...",
+        "removeSuccess": "Đã xóa các môn đã chọn khỏi chương trình đào tạo.",
+        "removeError": "Xóa các môn đã chọn thất bại.",
+        "removeGeneralError": "Đã xảy ra lỗi khi xóa môn khỏi chương trình đào tạo.",
+        "saveAll": "Lưu cấu trúc CTĐT",
+        "saving": "Đang lưu...",
+        "saveSuccess": "Cập nhật danh sách môn học của CTĐT thành công.",
+        "saveError": "Cập nhật danh sách môn học của CTĐT thất bại.",
+        "saveGeneralError": "Đã xảy ra lỗi khi lưu danh sách môn học của CTĐT.",
+        "addTitle": "Thêm môn học vào CTĐT",
+        "addSubtitle": "Chọn môn học và vị trí để thêm vào CTĐT {code} - {name}",
+        "yearLabel": "Năm học",
+        "yearPlaceholder": "Chọn năm học",
+        "semesterLabel": "Học kỳ",
+        "semesterPlaceholder": "Chọn học kỳ",
+        "subjectLabel": "Môn học",
+        "subjectPlaceholder": "Chọn môn học",
+        "subjectSearchPlaceholder": "Tìm theo mã hoặc tên môn học...",
+        "addRequired": "Vui lòng chọn đầy đủ năm học, học kỳ và môn học.",
+        "alreadyInCurriculum": "Môn học này đã tồn tại trong CTĐT.",
+        "addSubmitting": "Đang thêm...",
+        "addSubmit": "Thêm môn học",
+        "addSuccess": "Đã thêm môn học vào chương trình đào tạo.",
+        "addError": "Thêm môn học vào chương trình đào tạo thất bại.",
+        "addGeneralError": "Đã xảy ra lỗi khi thêm môn học vào chương trình đào tạo.",
+        "loadSubjectsError": "Không thể tải danh sách môn học. Vui lòng thử lại."
       }
     },
     "divisionManagement": {

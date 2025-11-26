@@ -31,15 +31,20 @@ export const BulkDeleteCurriculumModal = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{t('modals.bulkDelete.title')}</h2>
-            <p className="text-sm text-gray-600 mt-1">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-red-100">
+        <div className="px-6 py-4 border-b bg-gradient-to-r from-red-50 via-white to-white flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+              {t('modals.bulkDelete.title')}
+            </p>
+            <h2 className="mt-1 text-base font-semibold text-gray-900">
               {t('modals.bulkDelete.description', { count: selectedCount })}
+            </h2>
+            <p className="mt-1 text-xs text-gray-500">
+              {t('modals.bulkDelete.helperIntro')}
             </p>
           </div>
           <Button
@@ -47,21 +52,25 @@ export const BulkDeleteCurriculumModal = ({
             size="sm"
             onClick={onClose}
             disabled={isLoading}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 shrink-0"
             type="button"
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <div className="p-6">
-          <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800">
-            <p className="font-semibold mb-1">{t('modals.bulkDelete.warningTitle')}</p>
+        <div className="px-6 py-5">
+          <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-800 space-y-2">
+            <p className="font-semibold">{t('modals.bulkDelete.warningTitle')}</p>
             <p>{t('modals.bulkDelete.warningDescription')}</p>
+            <ul className="list-disc list-inside text-xs text-red-700 space-y-1 mt-1">
+              <li>{t('modals.bulkDelete.warningPoint1')}</li>
+              <li>{t('modals.bulkDelete.warningPoint2')}</li>
+            </ul>
           </div>
         </div>
 
-        <div className="flex gap-3 p-6 border-t justify-end">
+        <div className="flex flex-col sm:flex-row gap-3 px-6 py-4 border-t bg-gray-50 justify-end">
           <Button
             type="button"
             variant="outline"

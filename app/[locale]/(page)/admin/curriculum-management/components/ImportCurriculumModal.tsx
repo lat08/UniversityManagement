@@ -124,20 +124,27 @@ export const ImportCurriculumModal = ({ isOpen, onClose, onSuccess }: ImportCurr
   const departmentOptions = departments.map((d) => ({ value: d.departmentId, label: d.departmentName }))
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{t('modals.import.title')}</h2>
-              <p className="text-sm text-gray-600 mt-1">{t('modals.import.description')}</p>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
+        <div className="px-6 py-4 border-b bg-gradient-to-r from-[#0053AD]/5 via-white to-white">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0053AD]">
+                {t('modals.import.title')}
+              </p>
+              <h2 className="mt-1 text-base font-semibold text-gray-900">
+                {t('modals.import.description')}
+              </h2>
+              <p className="mt-1 text-xs text-gray-500">
+                {t('modals.import.helperIntro')}
+              </p>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 shrink-0"
               type="button"
             >
               <X className="h-5 w-5" />
@@ -146,22 +153,36 @@ export const ImportCurriculumModal = ({ isOpen, onClose, onSuccess }: ImportCurr
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="overflow-y-auto flex-1 p-6 space-y-6">
+          <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
+            <div className="rounded-lg border border-blue-50 bg-blue-50/60 px-4 py-3 text-xs text-blue-800">
+              <p className="font-medium mb-1">{t('modals.import.summaryTitle')}</p>
+              <p className="mb-1">{t('modals.import.summaryLine1')}</p>
+              <p>{t('modals.import.summaryLine2')}</p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">{t('modals.import.fileLabel')}</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileChange}
-                  className="text-sm"
-                />
-                {file && <span className="text-xs text-gray-600 truncate max-w-[200px]">{file.name}</span>}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <label className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                  <Upload className="w-4 h-4 text-[#0053AD]" />
+                  <span>{file ? t('modals.import.changeFileButton') : t('modals.import.chooseFileButton')}</span>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+                {file && (
+                  <span className="text-xs text-gray-600 truncate max-w-[220px]">
+                    {file.name}
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-xs text-gray-500">{t('modals.import.fileHelper')}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('fields.code.label')} <span className="text-red-500">*</span>

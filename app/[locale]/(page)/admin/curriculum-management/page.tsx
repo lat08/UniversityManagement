@@ -2,12 +2,19 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { Plus, MoreVertical, Upload, Download, Trash2, Edit } from 'lucide-react'
-import { Dropdown, SearchInput, Button } from '@/app/components/ui'
+import { Plus, MoreVertical, Upload, Download, Trash2, Edit, X } from 'lucide-react'
+import { Dropdown, DropdownSearch, SearchInput, Button } from '@/app/components/ui'
 import { Pagination } from '@/app/components/ui/pagination'
 import { useCurriculums } from './lib/hooks/useCurriculums'
 import { curriculumsApi } from './lib/api/curriculumsApi'
-import type { CurriculumListItem, DepartmentOption, FacultyOption } from './lib/types/types'
+import type {
+  CurriculumAcademicYear,
+  CurriculumDetail,
+  CurriculumListItem,
+  CurriculumSemester,
+  DepartmentOption,
+  FacultyOption,
+} from './lib/types/types'
 import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable'
 import { TableSkeleton } from '../student-profile/components/LoadingSkeleton'
 import { AddCurriculumModal } from './components/AddCurriculumModal'
@@ -15,9 +22,18 @@ import { ConfirmDeleteCurriculumModal } from './components/ConfirmDeleteCurricul
 import { ImportCurriculumModal } from './components/ImportCurriculumModal'
 import { EditCurriculumModal } from './components/EditCurriculumModal'
 import { BulkDeleteCurriculumModal } from './components/BulkDeleteCurriculumModal'
+import { BulkEditCurriculumModal } from './components/BulkEditCurriculumModal'
+import { AddSubjectToCurriculumModal } from './components/AddSubjectToCurriculumModal'
 import { toast } from 'react-hot-toast'
 
 const PAGE_SIZE = 10
+
+const DEBUG_CURRICULUM_PAGE = false
+
+const debugCurriculumPage = (...args: unknown[]) => {
+  if (!DEBUG_CURRICULUM_PAGE) return
+  console.log('[CurriculumManagementPage]', ...args)
+}
 
 type CurriculumActionsMenuProps = {
   item: CurriculumListItem
@@ -107,6 +123,7 @@ export default function CurriculumManagementPage() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedFacultyId, setSelectedFacultyId] = useState('')
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('')
   const [faculties, setFaculties] = useState<FacultyOption[]>([])
   const [departments, setDepartments] = useState<DepartmentOption[]>([])
   const [selectedCurriculumIds, setSelectedCurriculumIds] = useState<Set<string>>(new Set())
@@ -114,10 +131,24 @@ export default function CurriculumManagementPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false)
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const [deletingCurriculum, setDeletingCurriculum] = useState<CurriculumListItem | null>(null)
   const [editingCurriculum, setEditingCurriculum] = useState<CurriculumListItem | null>(null)
+  const [addingSubjectsCurriculumId, setAddingSubjectsCurriculumId] = useState<string | null>(null)
+  const [expandedCurriculumId, setExpandedCurriculumId] = useState<string | null>(null)
+  const [curriculumDetails, setCurriculumDetails] = useState<Record<string, CurriculumDetail>>({})
+  const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null)
+  const [savingSubjectsId, setSavingSubjectsId] = useState<string | null>(null)
+  const [removingSubjectsId, setRemovingSubjectsId] = useState<string | null>(null)
+  const [removingDetailIdsByCurriculum, setRemovingDetailIdsByCurriculum] = useState<
+    Record<string, Set<string>>
+  >({})
+  const [draggingSubject, setDraggingSubject] = useState<{
+    curriculumId: string
+    curriculumDetailId: string
+  } | null>(null)
 
   const { curriculums, loading, currentPage, totalCount, totalPages, fetchCurriculums, setCurrentPage } =
     useCurriculums()
@@ -152,6 +183,45 @@ export default function CurriculumManagementPage() {
   const handleDeleteClick = (item: CurriculumListItem) => {
     setDeletingCurriculum(item)
     setIsDeleteModalOpen(true)
+  }
+
+  const toggleExpandCurriculum = async (item: CurriculumListItem) => {
+    debugCurriculumPage('toggleExpandCurriculum: clicked', {
+      curriculumId: item.curriculumId,
+      curriculumCode: item.curriculumCode,
+    })
+
+    const id = item.curriculumId
+    if (expandedCurriculumId === id) {
+      debugCurriculumPage('toggleExpandCurriculum: collapse', { curriculumId: id })
+      setExpandedCurriculumId(null)
+      return
+    }
+
+    setExpandedCurriculumId(id)
+    if (curriculumDetails[id]) return
+
+    try {
+      setDetailLoadingId(id)
+      debugCurriculumPage('toggleExpandCurriculum: loading detail', { curriculumId: id })
+      const res = await curriculumsApi.getCurriculumDetail(id)
+      if (res.success && res.data) {
+        debugCurriculumPage('toggleExpandCurriculum: detail loaded', res.data)
+        setCurriculumDetails((prev) => ({
+          ...prev,
+          [id]: res.data,
+        }))
+      } else {
+        debugCurriculumPage('toggleExpandCurriculum: detail failed', res)
+        toast.error(res.message || t('toast.detailError'))
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string }
+      debugCurriculumPage('toggleExpandCurriculum: exception', err)
+      toast.error(err.response?.data?.message || err.message || t('toast.detailError'))
+    } finally {
+      setDetailLoadingId(null)
+    }
   }
 
   const handleExport = async (item: CurriculumListItem) => {
@@ -255,11 +325,20 @@ export default function CurriculumManagementPage() {
     [departments, t],
   )
 
+  const filteredCurriculums = useMemo(
+    () => {
+      if (!selectedStatus) return curriculums
+      const wantActive = selectedStatus === 'active'
+      return curriculums.filter((c) => c.isActive === wantActive)
+    },
+    [curriculums, selectedStatus],
+  )
+
   const handleSelectAll = () => {
-    if (selectedCurriculumIds.size === curriculums.length) {
+    if (selectedCurriculumIds.size === filteredCurriculums.length) {
       setSelectedCurriculumIds(new Set())
     } else {
-      setSelectedCurriculumIds(new Set(curriculums.map((c) => c.curriculumId)))
+      setSelectedCurriculumIds(new Set(filteredCurriculums.map((c) => c.curriculumId)))
     }
   }
 
@@ -277,7 +356,7 @@ export default function CurriculumManagementPage() {
 
   const handleBulkEditSelected = () => {
     if (selectedCurriculumIds.size === 0) return
-    toast(t('page.bulkEditPending'))
+    setIsBulkEditModalOpen(true)
   }
 
   const handleBulkDeleteSelected = () => {
@@ -285,7 +364,221 @@ export default function CurriculumManagementPage() {
     setIsBulkDeleteModalOpen(true)
   }
 
-  const renderRow = (item: CurriculumListItem, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
+  const handleToggleSubjectForRemove = (curriculumId: string, curriculumDetailId: string) => {
+    setRemovingDetailIdsByCurriculum((prev) => {
+      const currentSet = new Set(prev[curriculumId] ?? [])
+      if (currentSet.has(curriculumDetailId)) {
+        currentSet.delete(curriculumDetailId)
+      } else {
+        currentSet.add(curriculumDetailId)
+      }
+      return {
+        ...prev,
+        [curriculumId]: currentSet,
+      }
+    })
+  }
+
+  const handleRemoveSelectedSubjects = async (curriculumId: string) => {
+    const selected = Array.from(removingDetailIdsByCurriculum[curriculumId] ?? [])
+    if (selected.length === 0) {
+      toast(t('subjects.noSelectedForRemove'))
+      return
+    }
+
+    try {
+      setRemovingSubjectsId(curriculumId)
+      debugCurriculumPage('handleRemoveSelectedSubjects: request', {
+        curriculumId,
+        curriculumDetailIds: selected,
+      })
+      const res = await curriculumsApi.removeSubjects(curriculumId, {
+        curriculumDetailIds: selected,
+      })
+      if (res.success) {
+        debugCurriculumPage('handleRemoveSelectedSubjects: success', res)
+        toast.success(res.message || t('subjects.removeSuccess'))
+        // Reload detail
+        const detailRes = await curriculumsApi.getCurriculumDetail(curriculumId)
+        if (detailRes.success && detailRes.data) {
+          debugCurriculumPage('handleRemoveSelectedSubjects: reload detail success', detailRes.data)
+          setCurriculumDetails((prev) => ({
+            ...prev,
+            [curriculumId]: detailRes.data,
+          }))
+        }
+        setRemovingDetailIdsByCurriculum((prev) => ({
+          ...prev,
+          [curriculumId]: new Set(),
+        }))
+      } else {
+        debugCurriculumPage('handleRemoveSelectedSubjects: failed', res)
+        toast.error(res.message || t('subjects.removeError'))
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string }
+      debugCurriculumPage('handleRemoveSelectedSubjects: exception', err)
+      toast.error(err.response?.data?.message || err.message || t('subjects.removeGeneralError'))
+    } finally {
+      setRemovingSubjectsId(null)
+    }
+  }
+
+  const collectSubjectPositions = (detail: CurriculumDetail) =>
+    /**
+     * Thu thập danh sách môn theo (subjectId, năm, học kỳ) và đảm bảo
+     * không có subjectId trùng lặp trong payload gửi backend.
+     *
+     * Nếu vì lý do nào đó cùng một môn xuất hiện ở nhiều vị trí,
+     * chúng ta chỉ giữ lại 1 bản ghi theo subjectId để tránh backend báo lỗi.
+     */
+    Array.from(
+      detail.academicYears.reduce((map, year) => {
+        year.semesters.forEach((semester) => {
+          semester.subjects.forEach((subject) => {
+            const key = subject.subjectId
+            if (!map.has(key)) {
+              map.set(key, {
+                subjectId: subject.subjectId,
+                academicYearIndex: year.academicYearIndex,
+                semesterIndex: semester.semesterIndex,
+              })
+            }
+          })
+        })
+        return map
+      }, new Map<string, { subjectId: string; academicYearIndex: number; semesterIndex: number }>() ).values(),
+    )
+
+  const handleSaveSubjects = async (curriculumId: string) => {
+    const detail = curriculumDetails[curriculumId]
+    if (!detail) return
+
+    try {
+      setSavingSubjectsId(curriculumId)
+      const subjectsPayload = collectSubjectPositions(detail)
+      debugCurriculumPage('handleSaveSubjects: request', {
+        curriculumId,
+        subjects: subjectsPayload,
+      })
+      const payload = { subjects: subjectsPayload }
+
+      // Log body trước khi gửi request để dễ debug
+      // eslint-disable-next-line no-console
+      console.log('[CurriculumManagementPage] setSubjects payload', {
+        curriculumId,
+        payload,
+      })
+
+      const res = await curriculumsApi.setSubjects(curriculumId, payload)
+      if (res.success) {
+        debugCurriculumPage('handleSaveSubjects: success', res)
+        toast.success(res.message || t('subjects.saveSuccess'))
+        // Reload list and detail to sync totals
+        await fetchCurriculums({
+          pageNumber: currentPage,
+          pageSize: PAGE_SIZE,
+          searchKeyword: searchKeyword || undefined,
+          facultyId: selectedFacultyId || undefined,
+          departmentId: selectedDepartmentId || undefined,
+        })
+        const detailRes = await curriculumsApi.getCurriculumDetail(curriculumId)
+        if (detailRes.success && detailRes.data) {
+          debugCurriculumPage('handleSaveSubjects: reload detail success', detailRes.data)
+          setCurriculumDetails((prev) => ({
+            ...prev,
+            [curriculumId]: detailRes.data,
+          }))
+        }
+      } else {
+        debugCurriculumPage('handleSaveSubjects: failed', res)
+        toast.error(res.message || t('subjects.saveError'))
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string }
+      debugCurriculumPage('handleSaveSubjects: exception', err)
+      toast.error(err.response?.data?.message || err.message || t('subjects.saveGeneralError'))
+    } finally {
+      setSavingSubjectsId(null)
+    }
+  }
+
+  const moveSubjectToSemester = (
+    curriculumId: string,
+    curriculumDetailId: string,
+    targetYear: CurriculumAcademicYear,
+    targetSemester: CurriculumSemester,
+  ) => {
+    setCurriculumDetails((prev) => {
+      const detail = prev[curriculumId]
+      if (!detail) return prev
+
+      debugCurriculumPage('moveSubjectToSemester: start', {
+        curriculumId,
+        curriculumDetailId,
+        targetYearIndex: targetYear.academicYearIndex,
+        targetSemesterIndex: targetSemester.semesterIndex,
+      })
+
+      // Deep clone academicYears structure shallowly
+      const newAcademicYears = detail.academicYears.map((year) => ({
+        ...year,
+        semesters: year.semesters.map((semester) => ({
+          ...semester,
+          subjects: [...semester.subjects],
+        })),
+      }))
+
+      let subjectToMove: CurriculumSemester['subjects'][number] | null = null
+
+      for (const year of newAcademicYears) {
+        for (const semester of year.semesters) {
+          const index = semester.subjects.findIndex(
+            (s) => s.curriculumDetailId === curriculumDetailId,
+          )
+          if (index !== -1) {
+            subjectToMove = semester.subjects[index]
+            semester.subjects.splice(index, 1)
+            break
+          }
+        }
+        if (subjectToMove) break
+      }
+
+      if (!subjectToMove) return prev
+
+      const targetYearRef = newAcademicYears.find(
+        (y) => y.academicYearIndex === targetYear.academicYearIndex,
+      )
+      const targetSemesterRef = targetYearRef?.semesters.find(
+        (s) => s.semesterIndex === targetSemester.semesterIndex,
+      )
+
+      if (!targetSemesterRef) return prev
+      targetSemesterRef.subjects.push(subjectToMove)
+
+      debugCurriculumPage('moveSubjectToSemester: completed', {
+        curriculumId,
+        curriculumDetailId,
+        newYearIndex: targetYearRef?.academicYearIndex,
+        newSemesterIndex: targetSemesterRef.semesterIndex,
+      })
+
+      return {
+        ...prev,
+        [curriculumId]: {
+          ...detail,
+          academicYears: newAcademicYears,
+        },
+      }
+    })
+  }
+
+  const renderRow = (
+    item: CurriculumListItem,
+    visibleColumns: ResizableColumn[],
+    cellStyle: { paddingX: string; paddingY: string },
+  ) => {
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0)
     const isSelected = selectedCurriculumIds.has(item.curriculumId)
 
@@ -325,7 +618,16 @@ export default function CurriculumManagementPage() {
                   className="text-gray-900 font-medium"
                   style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                 >
-                  {item.curriculumCode}
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-left hover:text-[#0053AD] cursor-pointer"
+                    onClick={() => toggleExpandCurriculum(item)}
+                  >
+                    <span>{item.curriculumCode}</span>
+                    <span className="text-xs text-gray-400">
+                      {expandedCurriculumId === item.curriculumId ? '▲' : '▼'}
+                    </span>
+                  </button>
                 </td>
               )
             case 'name':
@@ -360,16 +662,23 @@ export default function CurriculumManagementPage() {
                   {item.appliedYear}
                 </td>
               )
-            case 'status':
+            case 'status': {
+              const isActive = item.isActive
+              const badgeClasses = isActive
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-200 text-gray-700'
+              const label = isActive ? t('table.status.active') : t('table.status.disabled')
+
               return (
                 <td key="status" style={cellPaddingStyle}>
                   <div className="flex justify-center">
-                    <span className="text-xs font-medium rounded px-2 py-1 bg-green-100 text-green-700 whitespace-nowrap">
-                      {t('table.status.active')}
+                    <span className={`text-xs font-medium rounded px-2 py-1 whitespace-nowrap ${badgeClasses}`}>
+                      {label}
                     </span>
                   </div>
                 </td>
               )
+            }
             case 'actions':
               return (
                 <td key="actions" style={{ ...cellPaddingStyle, paddingLeft: '8px', paddingRight: '8px' }}>
@@ -391,7 +700,204 @@ export default function CurriculumManagementPage() {
     )
   }
 
+  const renderCurriculumDetail = (curriculumId: string) => {
+    const detail = curriculumDetails[curriculumId]
+    const isLoading = detailLoadingId === curriculumId && !detail
+    const removingLoading = removingSubjectsId === curriculumId
+    const savingLoading = savingSubjectsId === curriculumId
+
+    if (isLoading) {
+      return (
+        <div className="py-4 text-sm text-gray-500">
+          {t('subjects.loading')}
+        </div>
+      )
+    }
+
+    if (!detail) {
+      return (
+        <div className="py-4 text-sm text-gray-500">
+          {t('subjects.noData')}
+        </div>
+      )
+    }
+
+    const selectedForRemove = removingDetailIdsByCurriculum[curriculumId]
+
+    return (
+      <div className="py-4 h-full flex flex-col overflow-y-auto">
+        {/* Header summary + actions (pinned at top of panel) */}
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-100">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 px-0 pb-3">
+            <div className="text-sm text-gray-700">
+              <div className="font-medium text-gray-900">
+                {t('subjects.summary', {
+                  totalSubjects: detail.totalSubjects,
+                  totalCredits: detail.totalCredits,
+                })}
+              </div>
+              <div className="mt-1 inline-flex flex-wrap gap-2 text-xs text-gray-500">
+                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0053AD] mr-1" />
+                  {t('subjects.totalSubjectsChip', { count: detail.totalSubjects })}
+                </span>
+                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+                  {t('subjects.totalCreditsChip', { credits: detail.totalCredits })}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 md:justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={() => setAddingSubjectsCurriculumId(curriculumId)}
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                {t('subjects.addButton')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-red-600 text-red-600 hover:bg-red-50"
+                disabled={removingLoading}
+                onClick={() => handleRemoveSelectedSubjects(curriculumId)}
+              >
+                {removingLoading ? t('subjects.removing') : t('subjects.removeSelected')}
+              </Button>
+              <Button
+                size="sm"
+                className="bg-[#0053AD] hover:bg-[#003d82] text-white"
+                disabled={savingLoading}
+                onClick={() => handleSaveSubjects(curriculumId)}
+              >
+                {savingLoading ? t('subjects.saving') : t('subjects.saveAll')}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll content inside panel: full height within panel body */}
+        <div className="mt-3 pr-1">
+          <div className="grid gap-4 md:grid-cols-2">
+            {detail.academicYears.map((year) => (
+              <div
+                key={year.academicYearIndex}
+                className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+              >
+                <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">{year.academicYearName}</div>
+                    <div className="text-xs text-gray-500">
+                      {t('subjects.yearSummary', {
+                        totalSubjects: year.totalSubjects,
+                        totalCredits: year.totalCredits,
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <div className="divide-y divide-gray-200">
+                  {year.semesters.map((semester) => (
+                    <div
+                      key={semester.semesterIndex}
+                      className="px-4 py-3 space-y-2"
+                      onDragOver={(e) => {
+                        if (draggingSubject?.curriculumId === curriculumId) {
+                          e.preventDefault()
+                        }
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        if (draggingSubject?.curriculumId === curriculumId) {
+                          moveSubjectToSemester(
+                            curriculumId,
+                            draggingSubject.curriculumDetailId,
+                            year,
+                            semester,
+                          )
+                        }
+                        setDraggingSubject(null)
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium text-gray-800">{semester.semesterName}</div>
+                        <div className="text-xs text-gray-500">
+                          {t('subjects.semesterSummary', {
+                            totalSubjects: semester.totalSubjects,
+                            totalCredits: semester.totalCredits,
+                          })}
+                        </div>
+                      </div>
+                      {semester.subjects.length === 0 ? (
+                        <div className="mt-2 text-xs text-gray-400 italic">{t('subjects.noSubjects')}</div>
+                      ) : (
+                        <ul className="mt-2 space-y-1">
+                          {semester.subjects.map((subject) => {
+                            const checked = selectedForRemove?.has(subject.curriculumDetailId) ?? false
+                            return (
+                              <li
+                                key={subject.curriculumDetailId}
+                                className="flex items-center justify-between gap-2 rounded-md border border-gray-100 bg-white px-2 py-1.5 text-xs shadow-sm"
+                                draggable
+                                onDragStart={() =>
+                                  setDraggingSubject({
+                                    curriculumId,
+                                    curriculumDetailId: subject.curriculumDetailId,
+                                  })
+                                }
+                                onDragEnd={() => setDraggingSubject(null)}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <input
+                                    type="checkbox"
+                                    className="w-3.5 h-3.5 cursor-pointer accent-red-600"
+                                    checked={checked}
+                                    onChange={() =>
+                                      handleToggleSubjectForRemove(curriculumId, subject.curriculumDetailId)
+                                    }
+                                  />
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="font-medium text-gray-900 truncate">
+                                      {subject.subjectName}
+                                    </span>
+                                    <span className="text-[11px] text-gray-500">
+                                      {subject.subjectCode} • {subject.credits} {t('subjects.creditsShort')}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col items-end text-[11px] text-gray-500">
+                                  <span>
+                                    {subject.theoryHours}/{subject.practiceHours} {t('subjects.hoursShort')}
+                                  </span>
+                                  <span>
+                                    {subject.isGeneral
+                                      ? t('subjects.type.general')
+                                      : t('subjects.type.specialized')}
+                                  </span>
+                                </div>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const hasSelection = selectedCurriculumIds.size > 0
+
+  const panelCurriculum = useMemo(
+    () => curriculums.find((c) => c.curriculumId === expandedCurriculumId) ?? null,
+    [curriculums, expandedCurriculumId],
+  )
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -433,23 +939,27 @@ export default function CurriculumManagementPage() {
               />
             </div>
 
-            <Dropdown
+            <DropdownSearch
               options={facultyOptions}
-              value={selectedFacultyId || ''}
+              value={selectedFacultyId}
               placeholder={t('filters.allFaculties')}
+              searchPlaceholder={t('fields.faculty.searchPlaceholder')}
               onChange={(value) => {
                 setSelectedFacultyId(value)
                 setSelectedDepartmentId('')
+                setSelectedCurriculumIds(new Set())
                 setCurrentPage(1)
               }}
             />
 
-            <Dropdown
+            <DropdownSearch
               options={departmentOptions}
-              value={selectedDepartmentId || ''}
+              value={selectedDepartmentId}
               placeholder={t('filters.allDepartments')}
+              searchPlaceholder={t('fields.department.searchPlaceholder')}
               onChange={(value) => {
                 setSelectedDepartmentId(value)
+                setSelectedCurriculumIds(new Set())
                 setCurrentPage(1)
               }}
             />
@@ -458,11 +968,13 @@ export default function CurriculumManagementPage() {
               options={[
                 { value: '', label: t('filters.allStatuses') },
                 { value: 'active', label: t('filters.statusActive') },
+              { value: 'disabled', label: t('filters.statusDisabled') },
               ]}
-              value={''}
+            value={selectedStatus || ''}
               placeholder={t('filters.allStatuses')}
-              onChange={() => {
-                /* hin ta1n reserved for future status filter */
+            onChange={(value) => {
+              setSelectedStatus(value)
+              setCurrentPage(1)
               }}
             />
           </div>
@@ -505,7 +1017,7 @@ export default function CurriculumManagementPage() {
           <div className="p-4 lg:p-6 min-w-0">
             <ResizableTable
               columns={resizableColumns}
-              data={curriculums}
+              data={filteredCurriculums}
               renderRow={(item, visibleColumns, cellStyle) => (
                 <tr className="hover:bg-gray-50 transition-colors">
                   {renderRow(item as CurriculumListItem, visibleColumns, cellStyle)}
@@ -518,13 +1030,17 @@ export default function CurriculumManagementPage() {
               renderHeaderCheckbox={() => (
                 <input
                   type="checkbox"
-                  checked={curriculums.length > 0 && selectedCurriculumIds.size === curriculums.length}
+                  checked={
+                    filteredCurriculums.length > 0 &&
+                    selectedCurriculumIds.size === filteredCurriculums.length
+                  }
                   onChange={handleSelectAll}
                   className="w-4 h-4 cursor-pointer accent-[#0053AD]"
                   ref={(el) => {
                     if (el) {
                       el.indeterminate =
-                        selectedCurriculumIds.size > 0 && selectedCurriculumIds.size < curriculums.length
+                        selectedCurriculumIds.size > 0 &&
+                        selectedCurriculumIds.size < filteredCurriculums.length
                     }
                   }}
                 />
@@ -543,6 +1059,47 @@ export default function CurriculumManagementPage() {
           />
         </div>
       </div>
+
+      {/* Detail panel for curriculum subjects */}
+      {expandedCurriculumId && (
+        <div className="fixed inset-0 z-40 flex">
+          {/* Backdrop */}
+          <button
+            type="button"
+            className="flex-1 bg-black/30"
+            onClick={() => setExpandedCurriculumId(null)}
+          />
+
+          {/* Right side panel */}
+          <div className="w-full max-w-3xl md:max-w-4xl h-full bg-white shadow-xl border-l border-gray-200 flex flex-col">
+            <div className="px-4 lg:px-6 py-3 border-b border-gray-200 flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
+                  {t('page.detailPanelLabel')}
+                </p>
+                <h2 className="text-base md:text-lg font-semibold text-gray-900 truncate">
+                  {panelCurriculum
+                    ? `${panelCurriculum.curriculumCode} — ${panelCurriculum.curriculumName}`
+                    : t('page.title')}
+                </h2>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedCurriculumId(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-4">
+              {renderCurriculumDetail(expandedCurriculumId)}
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddCurriculumModal
         isOpen={isAddModalOpen}
@@ -617,20 +1174,12 @@ export default function CurriculumManagementPage() {
           try {
             setIsBulkDeleting(true)
             const ids = Array.from(selectedCurriculumIds)
-
-            for (const id of ids) {
-              try {
-                const res = await curriculumsApi.deleteCurriculum(id)
-                if (!res.success) {
-                  toast.error(res.message || t('toast.bulkDeleteLoopError'))
-                }
-              } catch (error: unknown) {
-                const err = error as { response?: { data?: { message?: string } }; message?: string }
-                toast.error(err.response?.data?.message || err.message || t('toast.bulkDeleteGeneralError'))
-              }
+            const res = await curriculumsApi.bulkDeleteCurriculums(ids)
+            if (res.success) {
+              toast.success(res.message || t('toast.bulkDeleteSuccess'))
+            } else {
+              toast.error(res.message || t('toast.bulkDeleteGeneralError'))
             }
-
-            toast.success(t('toast.bulkDeleteSuccess'))
             setSelectedCurriculumIds(new Set())
             await fetchCurriculums({
               pageNumber: currentPage,
@@ -643,6 +1192,45 @@ export default function CurriculumManagementPage() {
             setIsBulkDeleting(false)
             setIsBulkDeleteModalOpen(false)
           }
+        }}
+      />
+      <BulkEditCurriculumModal
+        isOpen={isBulkEditModalOpen}
+        onClose={() => setIsBulkEditModalOpen(false)}
+        selectedCurriculumIds={Array.from(selectedCurriculumIds)}
+        onSuccess={() => {
+          setSelectedCurriculumIds(new Set())
+          fetchCurriculums({
+            pageNumber: currentPage,
+            pageSize: PAGE_SIZE,
+            searchKeyword: searchKeyword || undefined,
+            facultyId: selectedFacultyId || undefined,
+            departmentId: selectedDepartmentId || undefined,
+          })
+        }}
+      />
+      <AddSubjectToCurriculumModal
+        isOpen={Boolean(addingSubjectsCurriculumId)}
+        curriculumDetail={
+          addingSubjectsCurriculumId ? curriculumDetails[addingSubjectsCurriculumId] ?? null : null
+        }
+        onClose={() => setAddingSubjectsCurriculumId(null)}
+        onSuccess={async () => {
+          if (!addingSubjectsCurriculumId) return
+          const detailRes = await curriculumsApi.getCurriculumDetail(addingSubjectsCurriculumId)
+          if (detailRes.success && detailRes.data) {
+            setCurriculumDetails((prev) => ({
+              ...prev,
+              [addingSubjectsCurriculumId]: detailRes.data,
+            }))
+          }
+          await fetchCurriculums({
+            pageNumber: currentPage,
+            pageSize: PAGE_SIZE,
+            searchKeyword: searchKeyword || undefined,
+            facultyId: selectedFacultyId || undefined,
+            departmentId: selectedDepartmentId || undefined,
+          })
         }}
       />
     </div>
