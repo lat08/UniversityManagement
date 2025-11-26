@@ -12,8 +12,8 @@ import { ConfirmDeleteBuildingModal } from './components/ConfirmDeleteBuildingMo
 import { BulkDeleteBuildingModal } from './components/BulkDeleteBuildingModal';
 import { BuildingActionsMenu } from './components/BuildingActionsMenu';
 import { BuildingStatCard } from './components/BuildingStatCard';
-import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
-import { TableSkeleton } from '@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton';
+import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
+import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
 import { toast } from 'react-hot-toast';
 import { useBuildings } from './lib/hooks/useBuildings';
 import { buildingsApi } from './lib/api/buildingsApi';
@@ -491,4 +491,3 @@ export default function BuildingManagementPage() {
     </div>
   );
 }
-

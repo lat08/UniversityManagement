@@ -5,6 +5,7 @@
 
 import { NotificationQueryParams } from '@/lib/types/notification';
 import { RegulationQueryParams } from '@/lib/types/regulation';
+import { RoomRequestQueryParams } from '@/lib/types/room-request';
 
 export const queryKeys = {
   common: {
@@ -16,6 +17,7 @@ export const queryKeys = {
     instructors: (searchKey?: string) => ['common', 'instructors', searchKey ?? 'all'] as const,
     courseClasses: (subjectId?: string, semesterId?: string) =>
       ['common', 'courseClasses', subjectId ?? 'all', semesterId ?? 'all'] as const,
+    buildings: () => ['common', 'buildings'] as const,
   },
 
   adminStudents: {
@@ -43,6 +45,11 @@ export const queryKeys = {
       [...queryKeys.tuition.all, 'fees', semesterId] as const,
     insurance: () => [...queryKeys.tuition.all, 'insurance'] as const,
     history: () => [...queryKeys.tuition.all, 'history'] as const,
+    debts: () => [...queryKeys.tuition.all, 'debts'] as const,
+    debtList: (filter: unknown) => 
+      [...queryKeys.tuition.debts(), 'list', filter] as const,
+    debtDetail: (studentCode: string) => 
+      [...queryKeys.tuition.debts(), 'detail', studentCode] as const,
   },
   
   schedule: {
@@ -148,8 +155,8 @@ export const queryKeys = {
     all: ['instructorGrades'] as const,
     courseClasses: (semesterId?: string) => 
       [...queryKeys.instructorGrades.all, 'courseClasses', semesterId] as const,
-    grades: (courseClassId: string, type?: 'draft' | 'official') => 
-      [...queryKeys.instructorGrades.all, 'grades', courseClassId, type] as const,
+    grades: (courseClassId: string, type?: 'draft' | 'official', classId?: string, academicYearId?: string) => 
+      [...queryKeys.instructorGrades.all, 'grades', courseClassId, type, classId, academicYearId] as const,
     history: (courseClassId: string) => 
       [...queryKeys.instructorGrades.all, 'history', courseClassId] as const,
     version: (courseClassId: string, versionNumber: number) => 
@@ -202,5 +209,23 @@ export const queryKeys = {
       isInStudentCurriculum?: boolean | null;
     }) => [...queryKeys.studentCourses.available(), params] as const,
     registered: () => [...queryKeys.studentCourses.all, 'registered'] as const,
+  },
+
+  adminExams: {
+    all: ['adminExams'] as const,
+    lists: () => [...queryKeys.adminExams.all, 'list'] as const,
+    list: (params?: unknown) => [...queryKeys.adminExams.lists(), params ?? {}] as const,
+    details: () => [...queryKeys.adminExams.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.adminExams.details(), id] as const,
+  },
+
+  roomRequests: {
+    all: ['roomRequests'] as const,
+    lists: () => [...queryKeys.roomRequests.all, 'list'] as const,
+    list: (params?: RoomRequestQueryParams) =>
+      [...queryKeys.roomRequests.lists(), params ?? {}] as const,
+    details: () => [...queryKeys.roomRequests.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.roomRequests.details(), id] as const,
+    stats: () => [...queryKeys.roomRequests.all, 'stats'] as const,
   },
 } as const;

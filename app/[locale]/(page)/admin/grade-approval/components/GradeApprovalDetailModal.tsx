@@ -8,7 +8,7 @@ import { Button } from '@/app/components/ui';
 import { gradeApprovalsApi } from '../lib/api/gradeApprovalsApi';
 import { getApprovalStatusDisplay, type AdminGradeDetailEntry } from '../lib/types/types';
 import { queryKeys } from '@/lib/api/queryKeys';
-import { ResizableTable, type ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
+import { ResizableTable, type ResizableColumn } from '../../student-profile/components/ResizableTable';
 
 interface GradeApprovalDetailModalProps {
   gradeVersionId: string | null;
@@ -358,4 +358,3 @@ export const GradeApprovalDetailModal = ({
     </div>
   );
 };
-

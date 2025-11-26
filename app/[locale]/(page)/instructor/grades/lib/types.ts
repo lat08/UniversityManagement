@@ -22,6 +22,10 @@ export interface InstructorGradeDto {
   previousMidtermGrade: number | null;
   previousFinalGrade: number | null;
   note: string | null;
+  className: string | null;
+  classId: string | null;
+  academicYearName: string | null;
+  academicYearId: string | null;
 }
 
 export interface CourseClassGradesDto {

@@ -10,4 +10,5 @@ export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 export { Button, buttonVariants } from "./button"
 export { Input } from "./input"
 export { Textarea } from "./textarea"
+export { Checkbox } from "./checkbox"
 

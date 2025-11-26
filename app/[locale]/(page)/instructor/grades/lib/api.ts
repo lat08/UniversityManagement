@@ -17,9 +17,14 @@ export const instructorGradesApi = {
 
   getCourseClassGrades: async (
     courseClassId: string,
-    type?: 'draft' | 'official'
+    type?: 'draft' | 'official',
+    classId?: string,
+    academicYearId?: string
   ): Promise<ApiResponse<CourseClassGradesDto>> => {
-    const params = type ? { type } : {};
+    const params: Record<string, string> = {};
+    if (type) params.type = type;
+    if (classId) params.classId = classId;
+    if (academicYearId) params.academicYearId = academicYearId;
     const response = await api.get(`/v1/instructor/course-classes/${courseClassId}/grades`, { params });
     return response.data;
   },

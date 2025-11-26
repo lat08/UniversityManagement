@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import { useLocale, useTranslations } from 'next-intl';
 import { SearchInput, Dropdown, DropdownSearch } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
-import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
+import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
 import { TableSkeleton, StatCardsSkeleton } from './components/LoadingSkeleton';
 import { BulkActionBar } from './components/BulkActionBar';
 import GradeApprovalActionsMenu from './components/GradeApprovalActionsMenu';
@@ -706,4 +706,3 @@ export default function GradeApprovalPage() {
     </div>
   );
 }
-

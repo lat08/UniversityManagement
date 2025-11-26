@@ -170,9 +170,10 @@
         "notificationManagement": "Thông báo",
         "statistics": "Báo cáo thống kê",
         "classroomManagement": "Quản lý phòng học",
-        "facultyManagement": "Quản lý khoa",
+        "divisionManagement": "Quản lý khoa",
         "programManagement": "Quản lý ngành học",
-        "majorManagement": "Quản lý chuyên ngành",
+        "facultyManagement": "Quản lý ngành",
+        "departmentManagement": "Quản lý chuyên ngành",
         "regulations": "Quy chế / Quy định",
         "buildingManagement": "Quản lý tòa nhà",
         "curriculumManagement": "Chương trình đào tạo",
@@ -184,7 +185,7 @@
         "courseRegistration": "Đăng ký học phần",
         "roomRequests": "Yêu cầu phòng học",
         "studentProfile": "Hồ sơ sinh viên",
-        "studentTuition": "Học phí",
+        "studentTuition": "Học phí - Công nợ",
         "instructorProfile": "Hồ sơ giảng viên",
         "gradeApproval": "Duyệt bảng điểm",
         "examApproval": "Duyệt đề thi",
@@ -247,6 +248,7 @@
       },
       "grid": {
         "period": "Tiết {period}",
+        "periodRange": "Tiết {start}-{end}",
         "code": "Mã",
         "class": "Lớp",
         "room": "Phòng",
@@ -366,7 +368,8 @@
       "status": {
         "draft": "Bản nháp",
         "active": "Đang áp dụng",
-        "archived": "Đã lưu trữ"
+        "archived": "Đã lưu trữ",
+        "unknown": "Không xác định"
       },
       "statusDescriptions": {
         "draft": "Đang soạn thảo hoặc chờ phê duyệt",
@@ -1343,7 +1346,13 @@
         "courseClass": "Lớp học phần",
         "selectCourseClass": "Chọn lớp học phần",
         "loadingCourseClasses": "Đang tải lớp học phần...",
-        "loadingCourseClassesList": "Đang tải danh sách lớp học phần..."
+        "loadingCourseClassesList": "Đang tải danh sách lớp học phần...",
+        "class": "Lớp",
+        "selectClass": "Chọn lớp",
+        "allClasses": "Tất cả lớp",
+        "academicYear": "Khóa",
+        "selectAcademicYear": "Chọn khóa",
+        "allAcademicYears": "Tất cả khóa"
       },
       "stats": {
         "totalStudents": "Tổng sinh viên",
@@ -1809,6 +1818,294 @@
       "empty": {
         "title": "Chưa có thông báo",
         "noNotifications": "Bạn chưa có thông báo nào."
+      }
+    },
+    "scheduleChangeManagement": {
+      "pageTitle": "Phép & Đổi lịch giảng viên",
+      "pageDescription": "Quản lý yêu cầu nghỉ phép và đổi lịch giảng dạy của giảng viên",
+      "stats": {
+        "total": "Tổng yêu cầu",
+        "approved": "Đã duyệt",
+        "pending": "Chờ duyệt",
+        "rejected": "Từ chối"
+      },
+      "list": {
+        "title": "Danh sách yêu cầu",
+        "exportExcel": "Xuất Excel",
+        "searchPlaceholder": "Tìm kiếm theo mã, tên giảng viên...",
+        "statusAll": "Tất cả trạng thái",
+        "dateFrom": "Từ ngày",
+        "dateTo": "Đến ngày",
+        "empty": "Không có dữ liệu",
+        "columns": {
+          "requestCode": "Mã YC",
+          "instructor": "Giảng viên",
+          "subject": "Môn học",
+          "class": "Lớp",
+          "currentSchedule": "Lịch hiện tại",
+          "proposedSchedule": "Lịch đề xuất",
+          "status": "Trạng thái",
+          "actions": "HD"
+        },
+        "bulkActions": {
+          "selected": "Đã chọn {count} yêu cầu",
+          "approve": "Duyệt yêu cầu",
+          "reject": "Từ chối",
+          "revert": "Hoàn tác",
+          "deselect": "Bỏ chọn"
+        },
+        "week": "Tuần {week}",
+        "makeupWeek": "Tuần dạy bù {week}",
+        "dayOfWeek": "Thứ {day}"
+      },
+      "actions": {
+        "view": "Xem chi tiết",
+        "edit": "Chỉnh sửa",
+        "approve": "Duyệt yêu cầu",
+        "reject": "Từ chối",
+        "revert": "Hoàn tác",
+        "actions": "Thao tác"
+      },
+      "status": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "all": "Tất cả trạng thái",
+        "unknown": "Không xác định"
+      },
+      "toast": {
+        "exportSuccess": "Xuất file thành công",
+        "exportError": "Xuất file thất bại"
+      },
+      "modals": {
+        "viewDetail": {
+          "title": "Thông tin yêu cầu đổi lịch",
+          "description": "Chi tiết yêu cầu đổi lịch của giảng viên",
+          "code": "Mã:",
+          "generalInfo": "Thông tin chung",
+          "instructor": "Giảng viên:",
+          "subject": "Môn học:",
+          "class": "Lớp học:",
+          "proposedDate": "Ngày đề xuất:",
+          "reason": "Lý do đề xuất:",
+          "currentSchedule": "Lịch hiện tại",
+          "date": "Ngày:",
+          "cancelledWeek": "Tuần nghỉ:",
+          "period": "Tiết:",
+          "room": "Phòng:",
+          "timeRange": "Khung giờ:",
+          "proposedSchedule": "Lịch đề xuất",
+          "makeupWeek": "Tuần dạy bù:",
+          "approvedSchedule": "Lịch dạy bù đã duyệt",
+          "time": "Thời gian:",
+          "status": "Trạng thái:",
+          "close": "Đóng"
+        },
+        "approve": {
+          "title": "Duyệt yêu cầu đổi lịch",
+          "description": "Phân công lịch dạy bù cho yêu cầu {code}",
+          "requestInfo": "Thông tin yêu cầu",
+          "instructor": "Giảng viên:",
+          "subject": "Môn học:",
+          "class": "Lớp:",
+          "currentSchedule": "Lịch hiện tại (sẽ hủy)",
+          "date": "Ngày:",
+          "cancelledWeek": "Tuần nghỉ:",
+          "period": "Tiết:",
+          "room": "Phòng:",
+          "timeRange": "Khung giờ:",
+          "proposedSchedule": "Lịch đề xuất",
+          "makeupWeek": "Tuần dạy bù:",
+          "usingProposed": "Đang sử dụng",
+          "revertToProposed": "Quay lại lịch đề xuất",
+          "changedAlert": "Bạn đã thay đổi so với lịch đề xuất",
+          "changedAlertDesc": "Bạn có thể quay lại lịch đề xuất của giảng viên bất cứ lúc nào",
+          "makeupDate": "Ngày dạy bù",
+          "useProposedDate": "Dùng ngày đề xuất",
+          "startPeriod": "Tiết bắt đầu",
+          "endPeriod": "Tiết kết thúc",
+          "useProposedPeriod": "Dùng đề xuất ({period})",
+          "room": "Phòng học",
+          "useProposedRoom": "Dùng phòng đề xuất",
+          "usingProposedRoom": "✓ Đang dùng:",
+          "proposedRoom": "Đề xuất:",
+          "loadingRooms": "Đang tải danh sách phòng trống...",
+          "noRooms": "Không có phòng trống trong khung giờ đã chọn",
+          "selectDatePeriod": "Vui lòng chọn ngày và tiết học để xem danh sách phòng trống",
+          "roomCapacity": "Sức chứa:",
+          "note": "Ghi chú (Tối đa 500 ký tự)",
+          "notePlaceholder": "Thêm ghi chú cho yêu cầu này",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "save": "Lưu thay đổi",
+          "processing": "Đang xử lý...",
+          "errors": {
+            "makeupDateRequired": "Vui lòng chọn ngày dạy bù",
+            "periodRequired": "Vui lòng chọn tiết học",
+            "startPeriodGreater": "Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc",
+            "periodCountMismatch": "Số tiết dạy bù ({makeup}) phải bằng số tiết hủy ({cancelled})",
+            "roomRequired": "Vui lòng chọn phòng học",
+            "noteMaxLength": "Ghi chú không được vượt quá 500 ký tự"
+          },
+          "success": "Duyệt yêu cầu thành công",
+          "error": "Duyệt yêu cầu thất bại",
+          "revertSuccess": "Đã quay lại lịch đề xuất",
+          "availabilityError": "Không thể tải thông tin phòng trống"
+        },
+        "reject": {
+          "title": "Từ chối yêu cầu đổi lịch",
+          "description": "Yêu cầu: {code}",
+          "reason": "Lý do từ chối",
+          "reasonPlaceholder": "Nhập lý do từ chối yêu cầu này",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "submit": "Từ chối yêu cầu",
+          "processing": "Đang xử lý...",
+          "errors": {
+            "reasonRequired": "Vui lòng nhập lý do từ chối",
+            "reasonMaxLength": "Lý do từ chối không được vượt quá 500 ký tự"
+          },
+          "success": "Từ chối yêu cầu thành công",
+          "error": "Từ chối yêu cầu thất bại"
+        },
+        "revert": {
+          "title": "Hoàn tác yêu cầu đổi lịch",
+          "description": "Yêu cầu: {code} (Trạng thái: {status})",
+          "statusApproved": "đã duyệt",
+          "statusRejected": "đã từ chối",
+          "confirmTitle": "Xác nhận hoàn tác",
+          "confirmDesc": "Yêu cầu này sẽ được chuyển về trạng thái \"Chờ duyệt\". {additional}",
+          "confirmDescApproved": "Lịch dạy bù đã được phân công sẽ bị hủy.",
+          "reason": "Lý do hoàn tác (Tùy chọn)",
+          "reasonPlaceholder": "Nhập lý do hoàn tác yêu cầu này (nếu có)",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "submit": "Hoàn tác yêu cầu",
+          "processing": "Đang xử lý...",
+          "errors": {
+            "reasonMaxLength": "Lý do hoàn tác không được vượt quá 500 ký tự"
+          },
+          "success": "Hoàn tác yêu cầu thành công",
+          "error": "Hoàn tác yêu cầu thất bại"
+        },
+        "edit": {
+          "title": "Chỉnh sửa yêu cầu đổi lịch",
+          "description": "Chỉnh sửa thông tin yêu cầu {code}",
+          "cannotEdit": "Không thể chỉnh sửa",
+          "cannotEditDesc": "Chỉ có thể chỉnh sửa yêu cầu ở trạng thái \"Chờ duyệt\" hoặc \"Đã duyệt\".",
+          "requestInfo": "Thông tin yêu cầu",
+          "instructor": "Giảng viên:",
+          "subject": "Môn học:",
+          "class": "Lớp:",
+          "currentSchedule": "Lịch hiện tại (sẽ hủy)",
+          "date": "Ngày:",
+          "cancelledWeek": "Tuần nghỉ:",
+          "period": "Tiết:",
+          "room": "Phòng:",
+          "timeRange": "Khung giờ:",
+          "makeupInfo": "Thông tin dạy bù",
+          "makeupWeek": "Tuần dạy bù",
+          "makeupWeekPlaceholder": "Nhập tuần dạy bù (tùy chọn)",
+          "makeupDate": "Ngày dạy bù",
+          "startPeriod": "Tiết bắt đầu",
+          "endPeriod": "Tiết kết thúc",
+          "startPeriodPlaceholder": "Chọn tiết bắt đầu",
+          "endPeriodPlaceholder": "Chọn tiết kết thúc",
+          "room": "Phòng học",
+          "roomPlaceholder": "Chọn phòng học (tùy chọn)",
+          "loadingRooms": "Đang tải danh sách phòng trống...",
+          "noRooms": "Không có phòng trống trong khung giờ đã chọn",
+          "selectDatePeriod": "Vui lòng chọn ngày và tiết học để xem danh sách phòng trống",
+          "roomCapacity": "Sức chứa:",
+          "reason": "Lý do (Tối đa 500 ký tự)",
+          "reasonPlaceholder": "Nhập lý do (tùy chọn)",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "save": "Lưu thay đổi",
+          "saving": "Đang lưu...",
+          "errors": {
+            "periodCountMismatch": "Số tiết dạy bù ({makeup}) phải bằng số tiết hủy ({cancelled})",
+            "startPeriodGreater": "Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc",
+            "reasonMaxLength": "Lý do không được vượt quá 500 ký tự"
+          },
+          "success": "Chỉnh sửa yêu cầu thành công",
+          "error": "Chỉnh sửa yêu cầu thất bại",
+          "availabilityError": "Không thể tải thông tin phòng trống"
+        },
+        "bulkApprove": {
+          "title": "Duyệt yêu cầu đổi lịch",
+          "description": "Cập nhật yêu cầu đổi lịch của {count} yêu cầu đã chọn",
+          "eligible": "{count} yêu cầu đủ điều kiện để duyệt",
+          "eligibleDesc": "Các yêu cầu này đã có đầy đủ lịch đề xuất (ngày, tiết, phòng) và sẽ được duyệt tự động.",
+          "noEligible": "Không có yêu cầu nào đủ điều kiện",
+          "noEligibleDesc": "Tất cả yêu cầu đã chọn đều thiếu thông tin lịch đề xuất. Vui lòng duyệt từng yêu cầu một để chọn lịch dạy bù phù hợp.",
+          "skipped": "{count} yêu cầu sẽ bị bỏ qua (thiếu thông tin lịch đề xuất)",
+          "processing": "Đang xử lý:",
+          "success": "Thành công:",
+          "failed": "Thất bại:",
+          "skipped": "Bỏ qua:",
+          "errorDetails": "Chi tiết lỗi:",
+          "note": "Ghi chú (Tối đa 500 ký tự) - Áp dụng cho tất cả yêu cầu",
+          "notePlaceholder": "Thêm ghi chú cho các yêu cầu này (tùy chọn)",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "close": "Đóng",
+          "submit": "Duyệt {count} yêu cầu",
+          "processing": "Đang xử lý...",
+          "errors": {
+            "noteMaxLength": "Ghi chú không được vượt quá 500 ký tự",
+            "noEligible": "Không có yêu cầu nào đủ điều kiện để duyệt hàng loạt. Yêu cầu cần có đầy đủ: ngày dạy bù, tiết học và phòng đề xuất.",
+            "missingMakeupDate": "Thiếu ngày dạy bù",
+            "missingRoom": "Thiếu thông tin phòng"
+          },
+          "success": "Đã duyệt thành công {success}/{total} yêu cầu",
+          "partialSuccess": "Từ chối thành công {success}/{total} yêu cầu",
+          "failed": "{count} yêu cầu duyệt thất bại",
+          "skipped": "{count} yêu cầu bị bỏ qua (thiếu thông tin lịch đề xuất)"
+        },
+        "bulkReject": {
+          "title": "Từ chối yêu cầu đổi lịch",
+          "description": "Từ chối {count} yêu cầu đã chọn",
+          "reason": "Lý do từ chối",
+          "reasonPlaceholder": "Nhập lý do từ chối (áp dụng cho tất cả các yêu cầu đã chọn)",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "submit": "Từ chối {count} yêu cầu",
+          "processing": "Đang xử lý...",
+          "errors": {
+            "reasonRequired": "Vui lòng nhập lý do từ chối",
+            "reasonMaxLength": "Lý do từ chối không được vượt quá 500 ký tự"
+          },
+          "success": "Đã từ chối {count} yêu cầu",
+          "partialSuccess": "Từ chối thành công {success}/{total} yêu cầu"
+        },
+        "bulkRevert": {
+          "title": "Hoàn tác yêu cầu đổi lịch",
+          "description": "Hoàn tác {count} yêu cầu đã chọn",
+          "eligible": "{count} yêu cầu đủ điều kiện để hoàn tác",
+          "eligibleDesc": "Các yêu cầu này sẽ được chuyển về trạng thái \"Chờ duyệt\". Lịch dạy bù đã được phân công (nếu có) sẽ bị hủy.",
+          "noEligible": "Không có yêu cầu nào đủ điều kiện",
+          "noEligibleDesc": "Chỉ có thể hoàn tác yêu cầu ở trạng thái \"Đã duyệt\" hoặc \"Từ chối\".",
+          "skipped": "{count} yêu cầu sẽ bị bỏ qua (không ở trạng thái đã duyệt/từ chối)",
+          "processing": "Đang xử lý:",
+          "success": "Thành công:",
+          "failed": "Thất bại:",
+          "errorDetails": "Chi tiết lỗi:",
+          "reason": "Lý do hoàn tác (Tùy chọn) - Áp dụng cho tất cả yêu cầu",
+          "reasonPlaceholder": "Nhập lý do hoàn tác (nếu có)",
+          "characters": "{count}/500 ký tự",
+          "cancel": "Hủy",
+          "close": "Đóng",
+          "submit": "Hoàn tác {count} yêu cầu",
+          "processing": "Đang xử lý...",
+          "errors": {
+            "reasonMaxLength": "Lý do hoàn tác không được vượt quá 500 ký tự",
+            "noEligible": "Không có yêu cầu nào đủ điều kiện để hoàn tác. Chỉ có thể hoàn tác yêu cầu ở trạng thái \"Đã duyệt\" hoặc \"Từ chối\"."
+          },
+          "success": "Đã hoàn tác thành công {success}/{total} yêu cầu",
+          "failed": "{count} yêu cầu hoàn tác thất bại",
+          "skipped": "{count} yêu cầu bị bỏ qua (chỉ có thể hoàn tác yêu cầu đã duyệt/từ chối)"
+        }
       }
     },
     "studentProfile": {
@@ -2491,9 +2788,21 @@
     },
     "courseManagement": {
       "title": "Quản lý lớp học & Phân công",
+      "description": "Quản lý tập trung thông tin lớp học và phân công giảng viên trong toàn trường",
+      "coursesTab": "Danh sách lớp học",
+      "assignmentsTab": "Danh sách phân công",
       "add": "Thêm lớp học",
+      "addNew": "Thêm mới",
       "edit": "Sửa lớp học",
       "assignInstructor": "Phân công giảng viên",
+      "searchCourse": "Tìm theo mã, tên môn...",
+      "searchAssignment": "Tìm kiếm...",
+      "allClasses": "Tất cả lớp",
+      "allMajors": "Tất cả chuyên ngành",
+      "allSpecializations": "Tất cả chuyên sâu",
+      "allSubjects": "Tất cả môn học",
+      "allInstructors": "Tất cả giảng viên",
+      "noData": "Không có dữ liệu",
       "columns": {
         "courseCode": "Mã lớp học phần",
         "subjectName": "Môn học",
@@ -2508,15 +2817,15 @@
         "notes": "Ghi chú"
       }
     },
-    "majorManagement": {
-      "title": "Quản lý chuyên ngành",
-      "description": "Quản lý chuyên ngành, khoa và chương trình đào tạo",
-      "listTitle": "Danh sách chuyên ngành",
+    "facultyManagement": {
+      "title": "Quản lý ngành",
+      "description": "Quản lý ngành, khoa và chương trình đào tạo",
+      "listTitle": "Danh sách ngành",
       "search": {
-        "placeholder": "Tìm kiếm theo mã, tên chuyên ngành..."
+        "placeholder": "Tìm kiếm theo mã, tên ngành..."
       },
       "stats": {
-        "total": "Tổng chuyên ngành",
+        "total": "Tổng ngành",
         "active": "Đang hoạt động",
         "inactive": "Ngừng hoạt động"
       },
@@ -2529,12 +2838,12 @@
         "inactive": "Ngừng hoạt động"
       },
       "table": {
-        "selected": "Đã chọn {count} chuyên ngành",
-        "empty": "Không tìm thấy chuyên ngành nào",
+        "selected": "Đã chọn {count} ngành",
+        "empty": "Không tìm thấy ngành nào",
         "columns": {
           "code": "Mã",
-          "name": "Chuyên ngành",
-          "faculty": "Ngành học",
+          "name": "Ngành",
+          "faculty": "Khoa",
           "curriculum": "CTĐT",
           "status": "Trạng thái",
           "actions": "HĐ"
@@ -2545,7 +2854,148 @@
         }
       },
       "actions": {
-        "add": "Thêm chuyên ngành",
+        "add": "Thêm ngành",
+        "bulkEdit": "Chỉnh sửa đã chọn",
+        "bulkDelete": "Xóa đã chọn",
+        "clearSelection": "Bỏ chọn"
+      },
+      "hooks": {
+        "createSuccess": "Thêm ngành thành công!",
+        "createError": "Không thể thêm ngành",
+        "updateSuccess": "Cập nhật ngành thành công!",
+        "updateError": "Không thể cập nhật ngành",
+        "deleteSuccess": "Xóa ngành thành công!",
+        "deleteError": "Không thể xóa ngành",
+        "bulkDeleteSuccess": "Đã xóa các ngành đã chọn thành công",
+        "bulkDeleteError": "Không thể xóa các ngành đã chọn",
+        "bulkEditSuccess": "Đã cập nhật các ngành đã chọn thành công",
+        "bulkEditError": "Không thể cập nhật các ngành đã chọn",
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật"
+      },
+      "form": {
+        "facultyCode": {
+          "label": "Mã ngành",
+          "placeholder": "VD: KTPM",
+          "required": "Mã ngành là bắt buộc",
+          "min": "Mã ngành phải có ít nhất 2 ký tự"
+        },
+        "facultyName": {
+          "label": "Tên ngành",
+          "placeholder": "VD: Kỹ thuật phần mềm",
+          "required": "Tên ngành là bắt buộc",
+          "min": "Tên ngành phải có ít nhất 3 ký tự"
+        },
+        "majorName": {
+          "label": "Tên chuyên ngành",
+          "placeholder": "VD: Công nghệ thông tin",
+          "required": "Tên chuyên ngành là bắt buộc",
+          "min": "Tên chuyên ngành phải có ít nhất 3 ký tự"
+        },
+        "majorCode": {
+          "label": "Mã chuyên ngành",
+          "placeholder": "VD: CNTT",
+          "required": "Mã chuyên ngành là bắt buộc",
+          "min": "Mã chuyên ngành phải có ít nhất 2 ký tự"
+        },
+        "faculty": {
+          "label": "Ngành học",
+          "placeholder": "Chọn ngành học",
+          "search": "Tìm kiếm ngành học...",
+          "required": "Ngành học là bắt buộc"
+        },
+        "division": {
+          "label": "Khoa",
+          "placeholder": "Chọn khoa",
+          "search": "Tìm kiếm khoa...",
+          "required": "Khoa là bắt buộc"
+        },
+        "trainingSystem": {
+          "label": "Hệ đào tạo",
+          "placeholder": "Chọn hệ đào tạo",
+          "required": "Hệ đào tạo là bắt buộc"
+        },
+        "curriculum": {
+          "label": "Chương trình đào tạo",
+          "placeholder": "Chọn CTĐT",
+          "required": "CTĐT là bắt buộc"
+        },
+        "status": {
+          "label": "Trạng thái",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm ngành",
+          "description": "Nhập thông tin ngành",
+          "submit": "Lưu",
+          "submitting": "Đang lưu..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa ngành",
+          "description": "Cập nhật thông tin ngành",
+          "submit": "Lưu thay đổi",
+          "submitting": "Đang lưu..."
+        },
+        "bulkEdit": {
+          "title": "Chỉnh sửa hàng loạt",
+          "description": "Đã chọn {count} ngành",
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật..."
+        },
+        "bulkDelete": {
+          "title": "Xóa ngành",
+          "description": "Bạn có chắc chắn muốn xóa {count} ngành đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa",
+          "submitting": "Đang xóa..."
+        },
+        "confirmDelete": {
+          "title": "Xóa ngành",
+          "description": "Bạn có chắc chắn muốn xóa {name}?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa"
+        }
+      }
+    },
+    "departmentManagement": {
+      "title": "Quản lý Chuyên ngành",
+      "description": "Quản lý thông tin các chuyên ngành",
+      "listTitle": "Danh sách Chuyên ngành",
+      "search": {
+        "placeholder": "Tìm kiếm theo mã, tên chuyên ngành..."
+      },
+      "stats": {
+        "total": "Tổng chuyên ngành",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "filters": {
+        "allFaculties": "Tất cả Ngành",
+        "allCurricula": "Tất cả CTĐT",
+        "allStatuses": "Tất cả trạng thái",
+        "noChange": "Không thay đổi",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "table": {
+        "selected": "Đã chọn {count} chuyên ngành",
+        "empty": "Không tìm thấy chuyên ngành nào",
+        "columns": {
+          "code": "Mã",
+          "name": "Tên chuyên ngành",
+          "faculty": "Ngành học",
+          "curriculum": "Thuộc CTĐT",
+          "status": "Trạng thái",
+          "actions": "HD"
+        },
+        "status": {
+          "active": "Đang hoạt động",
+          "inactive": "Ngừng hoạt động"
+        }
+      },
+      "actions": {
+        "add": "Thêm mới",
         "bulkEdit": "Chỉnh sửa đã chọn",
         "bulkDelete": "Xóa đã chọn",
         "clearSelection": "Bỏ chọn"
@@ -2564,15 +3014,15 @@
         "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật"
       },
       "form": {
-        "majorCode": {
+        "departmentCode": {
           "label": "Mã chuyên ngành",
-          "placeholder": "VD: KTPM",
+          "placeholder": "VD: CNTT",
           "required": "Mã chuyên ngành là bắt buộc",
           "min": "Mã chuyên ngành phải có ít nhất 2 ký tự"
         },
-        "majorName": {
+        "departmentName": {
           "label": "Tên chuyên ngành",
-          "placeholder": "VD: Kỹ thuật phần mềm",
+          "placeholder": "VD: Công nghệ thông tin",
           "required": "Tên chuyên ngành là bắt buộc",
           "min": "Tên chuyên ngành phải có ít nhất 3 ký tự"
         },
@@ -2581,11 +3031,6 @@
           "placeholder": "Chọn ngành học",
           "search": "Tìm kiếm ngành học...",
           "required": "Ngành học là bắt buộc"
-        },
-        "trainingSystem": {
-          "label": "Hệ đào tạo",
-          "placeholder": "Chọn hệ đào tạo",
-          "required": "Hệ đào tạo là bắt buộc"
         },
         "curriculum": {
           "label": "Chương trình đào tạo",
@@ -2629,6 +3074,238 @@
           "note": "Hành động này không thể hoàn tác.",
           "submit": "Xóa"
         }
+      }
+    },
+    "subjectManagement": {
+      "title": "Quản lý môn học",
+      "description": "Quản lý thông tin các môn học",
+      "listTitle": "Danh sách môn học",
+      "search": {
+        "placeholder": "Tìm kiếm theo Mã môn học, tên..."
+      },
+      "filters": {
+        "allFaculties": "Tất cả khoa",
+        "allDepartments": "Tất cả bộ môn",
+        "allStatuses": "Tất cả trạng thái",
+        "general": "Đại cương",
+        "specialized": "Chuyên ngành",
+        "status": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        }
+      },
+      "table": {
+        "loading": "Đang tải...",
+        "empty": "Không có dữ liệu",
+        "selected": "Đã chọn {count} môn học",
+        "columns": {
+          "code": "Mã",
+          "name": "Tên môn học",
+          "instructor": "Giảng viên",
+          "credits": "Tín chỉ",
+          "students": "Sinh viên",
+          "semester": "Kỳ",
+          "status": "Trạng thái",
+          "actions": "HĐ"
+        }
+      },
+      "actions": {
+        "add": "Thêm mới",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa môn học",
+        "export": "Xuất Excel",
+        "bulkEdit": "Chỉnh sửa toàn bộ",
+        "bulkDelete": "Xóa toàn bộ",
+        "deselectAll": "Bỏ chọn"
+      },
+      "messages": {
+        "deleteSuccess": "Xóa môn học thành công",
+        "deleteError": "Xóa môn học thất bại"
+      },
+      "addModal": {
+        "title": "Thêm mới môn học",
+        "description": "Nhập thông tin môn học mới",
+        "saving": "Đang lưu...",
+        "success": "Thêm môn học thành công!",
+        "error": "Thêm môn học thất bại",
+        "errorGeneric": "Đã xảy ra lỗi khi thêm môn học",
+        "validation": {
+          "hoursRequired": "Ít nhất một trong số giờ lý thuyết hoặc thực hành phải > 0"
+        },
+        "statusOptions": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        },
+        "isGeneralOptions": {
+          "general": "Môn đại cương",
+          "specialized": "Môn chuyên ngành"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Tên môn học",
+            "placeholder": "VD: Đại số tuyến tính",
+            "required": "Tên môn học là bắt buộc",
+            "max": "Tên môn học tối đa 200 ký tự"
+          },
+          "subjectCode": {
+            "label": "Mã môn học",
+            "placeholder": "VD: DSTT",
+            "required": "Mã môn học là bắt buộc",
+            "max": "Mã môn học tối đa 50 ký tự"
+          },
+          "credits": {
+            "label": "Số tín chỉ",
+            "required": "Số tín chỉ là bắt buộc",
+            "min": "Tối thiểu 1 tín chỉ",
+            "max": "Tối đa 10 tín chỉ"
+          },
+          "theoryHours": {
+            "label": "Số giờ lý thuyết",
+            "required": "Số giờ lý thuyết là bắt buộc",
+            "min": "Số giờ lý thuyết phải >= 0"
+          },
+          "practiceHours": {
+            "label": "Số giờ thực hành",
+            "required": "Số giờ thực hành là bắt buộc",
+            "min": "Số giờ thực hành phải >= 0"
+          },
+          "isGeneral": {
+            "label": "Loại môn học",
+            "placeholder": "Chọn loại môn học",
+            "required": "Loại môn học là bắt buộc"
+          },
+          "departmentId": {
+            "label": "Khoa/Bộ môn",
+            "placeholder": "Chọn khoa/bộ môn",
+            "required": "Khoa/Bộ môn là bắt buộc"
+          },
+          "subjectStatus": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái",
+            "required": "Trạng thái là bắt buộc"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Môn tiên quyết",
+            "placeholder": "Chọn môn tiên quyết",
+            "none": "Không có"
+          },
+          "description": {
+            "label": "Mô tả môn học",
+            "placeholder": "Nhập mô tả về môn học...",
+            "max": "Mô tả tối đa 500 ký tự"
+          }
+        }
+      },
+      "editModal": {
+        "title": "Chỉnh sửa môn học",
+        "description": "Chỉnh sửa thông tin các môn học được chọn",
+        "saving": "Đang lưu...",
+        "success": "Cập nhật môn học thành công!",
+        "error": "Cập nhật môn học thất bại",
+        "errorGeneric": "Đã xảy ra lỗi khi cập nhật môn học",
+        "errorLoad": "Không thể tải thông tin môn học",
+        "validation": {
+          "hoursRequired": "Ít nhất một trong số giờ lý thuyết hoặc thực hành phải > 0"
+        },
+        "statusOptions": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        },
+        "isGeneralOptions": {
+          "general": "Môn đại cương",
+          "specialized": "Môn chuyên ngành"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Tên môn học",
+            "placeholder": "VD: Đại số tuyến tính",
+            "required": "Tên môn học là bắt buộc",
+            "max": "Tên môn học tối đa 200 ký tự"
+          },
+          "subjectCode": {
+            "label": "Mã môn học",
+            "placeholder": "VD: DSTT",
+            "required": "Mã môn học là bắt buộc",
+            "max": "Mã môn học tối đa 50 ký tự"
+          },
+          "credits": {
+            "label": "Số tín chỉ",
+            "required": "Số tín chỉ là bắt buộc",
+            "min": "Tối thiểu 1 tín chỉ",
+            "max": "Tối đa 10 tín chỉ"
+          },
+          "theoryHours": {
+            "label": "Số giờ lý thuyết",
+            "required": "Số giờ lý thuyết là bắt buộc",
+            "min": "Số giờ lý thuyết phải >= 0"
+          },
+          "practiceHours": {
+            "label": "Số giờ thực hành",
+            "required": "Số giờ thực hành là bắt buộc",
+            "min": "Số giờ thực hành phải >= 0"
+          },
+          "isGeneral": {
+            "label": "Loại môn học",
+            "placeholder": "Chọn loại môn học",
+            "required": "Loại môn học là bắt buộc"
+          },
+          "departmentId": {
+            "label": "Khoa/Bộ môn",
+            "placeholder": "Chọn khoa/bộ môn",
+            "required": "Khoa/Bộ môn là bắt buộc"
+          },
+          "subjectStatus": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái",
+            "required": "Trạng thái là bắt buộc"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Môn tiên quyết",
+            "placeholder": "Chọn môn tiên quyết",
+            "none": "Không có"
+          }
+        }
+      },
+      "deleteModal": {
+        "title": "Xác nhận xóa môn học",
+        "warning": "Cảnh báo:",
+        "message": "Bạn có chắc chắn muốn xóa môn học {subjectName} (Mã: {subjectCode})? Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+        "cancel": "Hủy",
+        "confirm": "Xóa",
+        "deleting": "Đang xóa..."
+      },
+      "bulkEditModal": {
+        "title": "Chỉnh sửa môn học",
+        "description": "Chỉnh sửa thông tin các môn học được chọn",
+        "statusLabel": "Kỳ học",
+        "statusPlaceholder": "Chọn trạng thái",
+        "cancel": "Hủy",
+        "update": "Cập nhật",
+        "updating": "Đang cập nhật...",
+        "success": "Cập nhật trạng thái thành công!",
+        "errorGeneric": "Đã xảy ra lỗi khi cập nhật",
+        "validation": {
+          "statusRequired": "Vui lòng chọn trạng thái"
+        },
+        "statusOptions": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        }
+      },
+      "bulkDeleteModal": {
+        "title": "Xác nhận xóa môn học",
+        "warning": "Cảnh báo:",
+        "message": "Bạn có chắc chắn muốn xóa {count} môn học đã chọn? Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+        "cancel": "Hủy",
+        "confirm": "Xóa",
+        "deleting": "Đang xóa...",
+        "success": "Đã xóa thành công {count} môn học",
+        "error": "Không thể xóa {count} môn học",
+        "errorGeneric": "Đã xảy ra lỗi khi xóa"
       }
     },
     "regulations": {
@@ -2811,6 +3488,281 @@
         "defaultFileName": "quy-che"
       }
     },
+    "roomRequests": {
+      "pageTitle": "Quản lý Đơn đăng ký Phòng",
+      "pageDescription": "Xử lý tập trung các đơn đăng ký sử dụng phòng của sinh viên và giảng viên",
+      "stats": {
+        "total": "Tổng đơn",
+        "pending": "Chờ duyệt",
+        "confirmed": "Đã duyệt",
+        "rejected": "Từ chối"
+      },
+      "status": {
+        "pending": "Chờ duyệt",
+        "confirmed": "Đã duyệt",
+        "rejected": "Từ chối",
+        "cancelled": "Đã hủy"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm...",
+        "building": {
+          "all": "Tất cả toà nhà",
+          "placeholder": "Tòa nhà"
+        },
+        "roomType": {
+          "all": "Tất cả loại phòng",
+          "placeholder": "Loại phòng"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "placeholder": "Trạng thái"
+        },
+        "usageDate": "Ngày sử dụng"
+      },
+      "list": {
+        "title": "Danh sách đơn đăng ký",
+        "syncing": "Đang đồng bộ dữ liệu...",
+        "states": {
+          "error": "Không thể tải danh sách đơn đăng ký. Vui lòng thử lại sau.",
+          "loading": "Đang tải danh sách đơn đăng ký...",
+          "empty": "Không tìm thấy đơn đăng ký phù hợp với bộ lọc."
+        },
+        "columns": {
+          "selectAll": "Chọn tất cả",
+          "code": "Mã",
+          "room": "Phòng",
+          "student": "Sinh viên",
+          "usageDate": "Ngày SD",
+          "registrationDate": "Ngày ĐK",
+          "status": "Trạng thái",
+          "action": "HĐ"
+        },
+        "actions": {
+          "view": "Xem chi tiết",
+          "approve": "Duyệt",
+          "reject": "Từ chối",
+          "cancel": "Hủy"
+        }
+      },
+      "bulkActions": {
+        "approve": "Duyệt nhiều",
+        "reject": "Từ chối nhiều"
+      },
+      "detailModal": {
+        "title": "Chi tiết Đơn đăng ký",
+        "subtitle": "Thông tin chi tiết về đơn đăng ký phòng",
+        "sections": {
+          "requestInfo": "THÔNG TIN ĐƠN ĐĂNG KÝ",
+          "studentInfo": "THÔNG TIN SINH VIÊN",
+          "roomInfo": "THÔNG TIN PHÒNG",
+          "usageInfo": "THÔNG TIN SỬ DỤNG"
+        },
+        "fields": {
+          "code": "Mã đơn",
+          "createdDate": "Ngày tạo đơn",
+          "status": "Trạng thái",
+          "studentId": "Mã số sinh viên",
+          "fullName": "Họ tên",
+          "class": "Lớp",
+          "roomId": "Mã phòng",
+          "roomName": "Tên phòng",
+          "roomType": "Loại phòng",
+          "building": "Toà nhà",
+          "usageDate": "Ngày sử dụng",
+          "timeSlot": "Khung giờ",
+          "peopleCount": "Số người",
+          "purpose": "Mục đích sử dụng"
+        },
+        "actions": {
+          "close": "Đóng",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "de_thi.pdf",
+        "defaultAnswerFileName": "dap_an.pdf"
+      }
+    },
+      "approveModal": {
+        "title": "Duyệt đơn đăng ký",
+        "question": "Bạn có chắc chắn muốn duyệt đơn đăng ký này?",
+        "code": "Mã: {code}",
+        "details": {
+          "room": "Phòng",
+          "building": "Toà nhà",
+          "student": "Sinh viên",
+          "usageTime": "Thời gian sử dụng"
+        },
+        "note": "Ghi chú",
+        "notePlaceholder": "Nhập ghi chú (Tuỳ chọn)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "rejectModal": {
+        "title": "Từ chối đơn đăng ký",
+        "instruction": "Nhập lý do từ chối đơn đăng ký này",
+        "code": "Mã: {code}",
+        "details": {
+          "room": "Phòng",
+          "building": "Toà nhà",
+          "student": "Sinh viên",
+          "usageTime": "Thời gian sử dụng"
+        },
+        "reason": "Lý do từ chối",
+        "reasonPlaceholder": "Nhập lý do từ chối (Tối thiểu 10 ký tự)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "cancelModal": {
+        "title": "Huỷ đơn đăng ký đã duyệt",
+        "subtitle": "Bạn sắp huỷ đơn đã được duyệt",
+        "code": "Mã: {code}",
+        "details": {
+          "room": "Phòng",
+          "building": "Toà nhà",
+          "student": "Sinh viên",
+          "usageTime": "Thời gian sử dụng"
+        },
+        "reason": "Lý do huỷ",
+        "reasonPlaceholder": "Nhập lý do huỷ đơn (Tối thiểu 10 ký tự)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "bulkApproveModal": {
+        "title": "Duyệt {count} đơn đăng ký",
+        "description": "Danh sách các đơn sẽ được duyệt:",
+        "note": "Ghi chú chung",
+        "notePlaceholder": "Nhập ghi chú (Tuỳ chọn)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "bulkRejectModal": {
+        "title": "Từ chối {count} đơn đăng ký",
+        "warning": "Cảnh báo: Hành động này sẽ từ chối tất cả {count} đơn đã chọn",
+        "description": "Danh sách các đơn sẽ bị từ chối:",
+        "reason": "Lý do bị từ chối chung",
+        "reasonPlaceholder": "Nhập lý do từ chối (Tối thiểu 10 ký tự)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      }
+    },
+    "tuition": {
+      "pageTitle": "Học phí - Công nợ",
+      "pageDescription": "Quản lý học phí và công nợ của sinh viên",
+      "stats": {
+        "totalFee": "Tổng thu học kỳ",
+        "totalPaid": "Đã thu",
+        "totalDebt": "Còn nợ",
+        "overdue": "Quá hạn"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo mã, tên sinh viên,...",
+        "semester": {
+          "all": "Tất cả học kỳ",
+          "placeholder": "Chọn học kỳ"
+        },
+        "class": {
+          "all": "Tất cả khóa/ lớp",
+          "placeholder": "Chọn lớp"
+        },
+        "department": {
+          "all": "Tất cả ngành",
+          "placeholder": "Chọn ngành"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "paid": "Đã thanh toán",
+          "unpaid": "Chưa thanh toán",
+          "overdue": "Quá hạn",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "list": {
+        "title": "Danh sách công nợ",
+        "syncing": "Đang đồng bộ dữ liệu...",
+        "states": {
+          "error": "Không thể tải danh sách công nợ. Vui lòng thử lại sau.",
+          "loading": "Đang tải danh sách công nợ...",
+          "empty": "Không tìm thấy công nợ phù hợp với bộ lọc."
+        }
+      },
+      "table": {
+        "columns": {
+          "studentCode": "MSSV",
+          "fullName": "Họ và tên",
+          "major": "Ngành",
+          "className": "Lớp",
+          "totalFee": "Phải thu",
+          "debt": "Còn nợ",
+          "deadline": "Hạn đóng",
+          "status": "Trạng thái",
+          "actions": "HD"
+        }
+      },
+      "actions": {
+        "menu": "Hành động",
+        "viewDetail": "Xem chi tiết"
+      },
+      "detail": {
+        "title": "Chi tiết học phí",
+        "subtitle": "Chi tiết học phí – công nợ của sinh viên",
+        "loading": "Đang tải chi tiết...",
+        "notFound": "Không tìm thấy thông tin công nợ",
+        "close": "Đóng",
+        "studentInfo": {
+          "title": "Thông tin sinh viên",
+          "studentCode": "MSSV",
+          "fullName": "Họ và tên",
+          "className": "Lớp học",
+          "major": "Ngành học"
+        },
+        "tuitionInfo": {
+          "title": "Thông tin học phí",
+          "totalFee": "Tổng phải thu",
+          "debt": "Còn nợ",
+          "totalCredits": "Tổng tín chỉ",
+          "paid": "Đã thu",
+          "status": "Trạng thái"
+        },
+        "registeredSubjects": {
+          "title": "Danh sách môn học đã đăng ký",
+          "code": "Mã môn",
+          "name": "Tên môn",
+          "credits": "Số tín chỉ",
+          "fee": "Học phí"
+        },
+        "paymentHistory": {
+          "title": "Lịch sử thanh toán",
+          "date": "Ngày",
+          "amount": "Số tiền",
+          "method": "Phương thức",
+          "transactionCode": "Mã GD",
+          "confirmedBy": "Người xác nhận"
+        }
+      },
+      "loadListError": "Không thể tải danh sách công nợ",
+      "status": {
+        "paid": "Đã thanh toán",
+        "unpaid": "Chưa thanh toán",
+        "overdue": "Quá hạn"
+      }
+    },
     "curriculumManagement": {
       "page": {
         "title": "Quản lý Chương trình đào tạo",
@@ -2957,9 +3909,9 @@
         }
       }
     },
-    "facultyManagement": {
+    "divisionManagement": {
       "title": "Quản lý khoa",
-      "description": "Quản lý thông tin khoa, bộ môn và ban chủ nhiệm",
+      "description": "Quản lý thông tin khoa, ngành và ban chủ nhiệm",
       "search": {
         "placeholder": "Tìm kiếm theo mã, tên khoa..."
       },
@@ -3204,7 +4156,8 @@
         "faculty": "Khoa",
         "department": "Bộ môn",
         "instructor": "Giảng viên",
-        "keyword": "Từ khóa"
+        "keyword": "Từ khóa",
+        "allStatuses": "Tất cả trạng thái"
       },
       "bulkBar": {
         "selected": "Đã chọn {count} bảng điểm",
@@ -3348,6 +4301,147 @@
         }
       }
     },
+    "examApproval": {
+      "pageTitle": "Duyệt đề thi",
+      "pageDescription": "Quản lý và duyệt đề thi của giảng viên",
+      "loadListError": "Không thể tải danh sách đề thi",
+      "approveSuccess": "Duyệt đề thi thành công",
+      "approveError": "Không thể duyệt đề thi",
+      "rejectSuccess": "Từ chối đề thi thành công",
+      "rejectError": "Không thể từ chối đề thi",
+      "exportSuccess": "Xuất Excel thành công",
+      "exportError": "Không thể xuất Excel",
+      "exportNoData": "Không có dữ liệu để xuất",
+      "downloadPdfSuccess": "Tải PDF thành công",
+      "downloadPdfError": "Không thể tải PDF",
+      "list": {
+        "title": "Danh sách đề thi",
+        "syncing": "Đang đồng bộ...",
+        "states": {
+          "loading": "Đang tải...",
+          "error": "Có lỗi xảy ra khi tải dữ liệu",
+          "empty": "Không có đề thi nào"
+        }
+      },
+      "table": {
+        "class": "Lớp",
+        "subject": "Môn học",
+        "instructor": "Giảng viên",
+        "examType": "Loại thi",
+        "submissionDate": "Ngày nộp",
+        "semester": "Kỳ",
+        "status": "Trạng thái",
+        "actions": "HĐ"
+      },
+      "status": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo Môn học, Lớp, Giảng viên...",
+        "semester": {
+          "all": "Tất cả học kỳ",
+          "placeholder": "Chọn học kỳ"
+        },
+        "examType": {
+          "all": "Tất cả loại thi",
+          "placeholder": "Chọn loại thi",
+          "midterm": "Giữa kỳ",
+          "final": "Cuối kỳ",
+          "quiz": "15 phút",
+          "makeup": "Thi lại"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "placeholder": "Chọn trạng thái",
+          "pending": "Chờ duyệt",
+          "approved": "Đã duyệt",
+          "rejected": "Từ chối"
+        }
+      },
+      "exportExcel": "Xuất Excel",
+      "common": {
+        "na": "N/A"
+      },
+      "actionsMenu": {
+        "view": "Xem chi tiết",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "downloadPdf": "Tải PDF"
+      },
+      "bulkActions": {
+        "selected": "{count} đề thi đã chọn",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "clearSelection": "Bỏ chọn"
+      },
+      "modals": {
+        "bulkApprove": {
+          "title": "Phê duyệt đề thi",
+          "description": "Bạn có chắc chắn muốn phê duyệt {count} đề thi đã chọn?",
+          "submit": "Phê duyệt",
+          "submitting": "Đang phê duyệt..."
+        },
+        "bulkReject": {
+          "title": "Từ chối đề thi",
+          "description": "Bạn có chắc chắn muốn từ chối {count} đề thi đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "reasonLabel": "Lý do từ chối",
+          "reasonPlaceholder": "Nhập lý do từ chối đề thi...",
+          "submit": "Từ chối",
+          "submitting": "Đang từ chối..."
+        }
+      },
+      "detailModal": {
+        "title": "Chi tiết đề thi",
+        "description": "Thông tin chi tiết về đề thi và trạng thái",
+        "close": "Đóng",
+        "loading": "Đang tải...",
+        "error": "Không thể tải chi tiết đề thi",
+        "currentStatus": "TRẠNG THÁI HIỆN TẠI",
+        "subjectCode": "Mã môn",
+        "examInfo": "THÔNG TIN ĐỀ THI",
+        "subject": "Môn học",
+        "courseClass": "Lớp học phần",
+        "semester": "Học kỳ",
+        "examType": "Loại đề thi",
+        "duration": "Thời lượng",
+        "entryCode": "Mã đề",
+        "minutes": "phút",
+        "files": "CÁC TỆP ĐỀ THI",
+        "uploaded": "Đã tải lên",
+        "download": "Tải xuống",
+        "downloadPdf": "Tải PDF",
+        "downloadSuccess": "Tải xuống thành công",
+        "downloadError": "Không thể tải xuống",
+        "fileNotFound": "Không tìm thấy file",
+        "rejectionReason": "Lý do từ chối",
+        "instructor": "GIẢNG VIÊN",
+        "submissionDate": "NGÀY NỘP",
+        "approvalDate": "NGÀY DUYỆT",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "de_thi.pdf",
+        "defaultAnswerFileName": "dap_an.pdf"
+      },
+      "rejectModal": {
+        "title": "Vui lòng nhập lí do từ chối đề thi",
+        "confirmation": "Bạn có chắc chắn muốn từ chối đề thi **{title}** (Loại: {type})?",
+        "reasonLabel": "Lý do từ chối",
+        "reasonPlaceholder": "Nhập lý do từ chối đề thi..",
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "reject": "Từ chối",
+        "validation": {
+          "minLength": "Lý do từ chối phải có ít nhất {min} ký tự",
+          "maxLength": "Lý do từ chối không được vượt quá {max} ký tự"
+        }
+      }
+    },
     "notificationManagement": {
       "general": {
         "unknown": "Không xác định",
@@ -3398,6 +4492,292 @@
       "bulkEdit": "Chỉnh sửa toàn bộ",
       "deselect": "Bỏ chọn",
       "allStatus": "Tất cả trạng thái",
+      "allTargets": "Tất cả đối tượng",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "notificationType": "Loại thông báo",
+      "selectType": "Chọn loại thông báo",
+      "sendingMethod": "Phương thức gửi",
+      "selectMethod": "Chọn phương thức",
+      "faculty": "Khoa/Viện",
+      "selectFaculty": "Chọn khoa/viện",
+      "searchFaculty": "Tìm kiếm khoa/viện...",
+      "department": "Bộ môn",
+      "selectDepartment": "Chọn bộ môn",
+      "searchDepartment": "Tìm kiếm bộ môn...",
+      "class": "Lớp học",
+      "selectClass": "Chọn lớp học",
+      "searchClass": "Tìm kiếm lớp học...",
+      "instructor": "Giảng viên",
+      "selectInstructor": "Chọn giảng viên",
+      "searchInstructor": "Tìm kiếm giảng viên...",
+      "student": "Sinh viên",
+      "selectStudent": "Chọn sinh viên",
+      "searchStudent": "Tìm kiếm sinh viên...",
+      "all": "Tất cả",
+      "filtering": "Đang lọc",
+      "noData": "Không có dữ liệu",
+      "loading": "Đang tải...",
+      "columns": {
+        "title": "Tiêu đề",
+        "type": "Loại",
+        "target": "Đối tượng",
+        "method": "Phương thức",
+        "recipients": "Người nhận",
+        "status": "Trạng thái",
+        "scheduledDate": "Ngày gửi dự kiến",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "actions": {
+        "view": "Xem chi tiết",
+        "edit": "Chỉnh sửa",
+        "send": "Gửi",
+        "archive": "Lưu trữ",
+        "cancel": "Hủy"
+      },
+      "stats": {
+        "total": "Tổng số thông báo",
+        "pending": "Đang chờ",
+        "sent": "Đã gửi",
+        "cancelled": "Đã hủy",
+        "archived": "Đã lưu trữ"
+      }
+    },
+    "studentProfile": {
+      "title": "Quản lý hồ sơ sinh viên",
+      "totalStudents": "Tổng sinh viên",
+      "newStudents": "Tân sinh viên",
+      "graduatingSoon": "Sắp tốt nghiệp",
+      "onLeave": "Bảo lưu",
+      "onLeaveSubtitle": "Tạm nghỉ",
+      "studying": "Đang học",
+      "add": "Thêm sinh viên",
+      "addSuccess": "Thêm sinh viên thành công!",
+      "addSuccessWithCode": "Thêm sinh viên thành công!\nMã sinh viên: {code}",
+      "addError": "Thêm sinh viên thất bại",
+      "search": "Tìm kiếm sinh viên...",
+      "columns": {
+        "mssv": "MSSV",
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "faculty": "Khoa",
+        "department": "Chuyên ngành",
+        "class": "Lớp",
+        "academicYear": "Khóa",
+        "trainingSystem": "Hệ đào tạo",
+        "gpa": "GPA",
+        "credits": "Tín chỉ tích lũy",
+        "debt": "Công nợ",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "filters": {
+        "allDepartments": "Tất cả chuyên ngành",
+        "allAcademicYears": "Tất cả khóa"
+      },
+      "bulkActions": {
+        "selected": "Đã chọn {count} sinh viên",
+        "edit": "Chỉnh sửa chung",
+        "delete": "Xóa hàng loạt",
+        "deselect": "Bỏ chọn"
+      }
+    },
+    "themeConfiguration": {
+      "title": "Cấu hình chủ đề",
+      "add": "Thêm theme",
+      "edit": "Sửa theme"
+    },
+    "modals": {
+      "addStudent": {
+        "title": "Thêm sinh viên mới",
+        "description": "Nhập thông tin sinh viên",
+        "name": "Họ và tên",
+        "namePlaceholder": "Nguyễn Văn A",
+        "nameRequired": "Họ và tên là bắt buộc",
+        "nameMin": "Họ và tên phải có ít nhất 2 ký tự",
+        "citizenId": "CMND / CCCD",
+        "citizenIdPlaceholder": "012345678900",
+        "citizenIdRequired": "CMND/CCCD là bắt buộc",
+        "citizenIdInvalid": "CMND/CCCD phải có 9-12 số",
+        "dob": "Ngày sinh",
+        "dobRequired": "Ngày sinh là bắt buộc",
+        "dobInvalid": "Ngày sinh phải có định dạng DD/MM/YYYY",
+        "dobInvalidDate": "Ngày sinh không hợp lệ",
+        "gender": "Giới tính",
+        "genderRequired": "Giới tính là bắt buộc",
+        "genderMale": "Nam",
+        "genderFemale": "Nữ",
+        "selectGender": "Chọn giới tính",
+        "phone": "Số điện thoại",
+        "phonePlaceholder": "0000000000",
+        "phoneRequired": "Số điện thoại là bắt buộc",
+        "phoneInvalid": "Số điện thoại phải có 10-11 số",
+        "faculty": "Ngành học",
+        "facultyRequired": "Ngành học là bắt buộc",
+        "selectFaculty": "Chọn ngành",
+        "searchFaculty": "Tìm kiếm ngành...",
+        "department": "Chuyên ngành",
+        "departmentRequired": "Chuyên ngành là bắt buộc",
+        "selectDepartment": "Chọn chuyên ngành",
+        "searchDepartment": "Tìm kiếm chuyên ngành...",
+        "class": "Lớp",
+        "classRequired": "Lớp là bắt buộc",
+        "selectClass": "Chọn lớp",
+        "searchClass": "Tìm kiếm lớp...",
+        "address": "Địa chỉ",
+        "addressPlaceholder": "Nhập địa chỉ",
+        "addressRequired": "Địa chỉ là bắt buộc",
+        "addressMin": "Địa chỉ phải có ít nhất 5 ký tự",
+        "status": "Trạng thái",
+        "selectStatus": "Chọn trạng thái",
+        "submit": "Lưu",
+        "submitting": "Đang lưu...",
+        "success": "Thêm sinh viên thành công!",
+        "error": "Thêm sinh viên thất bại",
+        "addSuccessWithCode": "Thêm sinh viên thành công!\nMã sinh viên: {code}"
+      },
+      "addNotification": {
+        "title": "Tạo thông báo",
+        "titleLabel": "Tiêu đề",
+        "titleRequired": "Tiêu đề là bắt buộc",
+        "titleMin": "Tiêu đề phải có ít nhất 3 ký tự",
+        "content": "Nội dung",
+        "contentRequired": "Nội dung là bắt buộc",
+        "contentMin": "Nội dung phải có ít nhất 10 ký tự",
+        "noticeMessage": "Thông báo ngắn",
+        "noticeMessageMax": "Thông báo ngắn không được vượt quá 1000 ký tự",
+        "notificationType": "Loại thông báo",
+        "notificationTypeRequired": "Loại thông báo là bắt buộc",
+        "targetType": "Đối tượng nhận",
+        "targetTypeRequired": "Đối tượng nhận là bắt buộc",
+        "targetId": "Chọn đối tượng",
+        "targetIdRequired": "Vui lòng chọn đối tượng nhận",
+        "sendingMethod": "Phương thức gửi",
+        "sendingMethodRequired": "Phương thức gửi là bắt buộc",
+        "scheduledDate": "Ngày gửi (tùy chọn)",
+        "submit": "Lưu nháp",
+        "submitting": "Đang lưu...",
+        "note": "Lưu ý: Chỉ gửi đến tài khoản có email đã xác thực"
+      },
+      "courseDetail": {
+        "title": "Chi tiết môn học",
+        "description": "Hiển thị thông tin chi tiết môn học",
+        "subjectCode": "Mã môn",
+        "subjectName": "Tên môn",
+        "credits": "Số tín chỉ",
+        "instructor": "Giảng viên",
+        "schedule": "Thời khóa biểu",
+        "noSchedule": "Chưa có thời khóa biểu",
+        "room": "Phòng học",
+        "status": "Trạng thái",
+        "registered": "Đã đăng kí",
+        "class": "Lớp",
+        "enrollmentDate": "Ngày đăng ký"
+      },
+      "uploadDocument": {
+        "title": "Tải lên tài liệu mới",
+        "description": "Thêm tài liệu giảng dạy cho môn học của bạn",
+        "subjectClass": "Môn học - Lớp",
+        "selectSubjectClass": "Chọn phương án",
+        "subjectClassRequired": "Vui lòng chọn môn học - lớp",
+        "documentType": "Loại tài liệu",
+        "selectDocumentType": "Chọn loại",
+        "documentTypeRequired": "Vui lòng chọn loại tài liệu",
+        "documentName": "Tên tài liệu",
+        "documentNamePlaceholder": "Nhập tên tài liệu",
+        "documentNameRequired": "Vui lòng nhập tên tài liệu",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Mô tả nội dung tài liệu...",
+        "file": "File",
+        "fileRequired": "Vui lòng chọn file để tải lên",
+        "dragDrop": "Kéo thả file vào đây hoặc",
+        "clickToUpload": "click để tải lên",
+        "supportedFormats": "Định dạng hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX",
+        "maxSize": "Kích thước tối đa: 50MB",
+        "submit": "Tải lên",
+        "uploading": "Đang tải lên...",
+        "cancel": "Hủy"
+      },
+      "editDocument": {
+        "title": "Chỉnh sửa tài liệu",
+        "subjectClass": "Môn học - Lớp",
+        "documentType": "Loại tài liệu",
+        "documentName": "Tên tài liệu",
+        "description": "Mô tả",
+        "file": "File mới (tùy chọn)",
+        "submit": "Cập nhật",
+        "updating": "Đang cập nhật...",
+        "cancel": "Hủy"
+      },
+      "deleteDocument": {
+        "title": "Xóa tài liệu",
+        "confirm": "Bạn có chắc chắn muốn xóa tài liệu này?",
+        "description": "Hành động này không thể hoàn tác.",
+        "delete": "Xóa",
+        "deleting": "Đang xóa...",
+        "cancel": "Hủy"
+      },
+      "viewNotification": {
+        "title": "Chi tiết thông báo",
+        "loadError": "Không thể tải chi tiết thông báo",
+        "loadingContent": "Đang tải nội dung...",
+        "noContent": "Không có nội dung",
+        "active": "Đang hoạt động",
+        "archived": "Đã lưu trữ",
+        "recipientsCount": "{count} người",
+        "fields": {
+          "title": "Tiêu đề",
+          "noticeMessage": "Thông báo ngắn",
+          "content": "Nội dung",
+          "notificationType": "Loại thông báo",
+          "status": "Trạng thái",
+          "targetType": "Đối tượng nhận",
+          "sendingMethod": "Phương thức gửi",
+          "totalRecipients": "Số người nhận",
+          "scheduledDate": "Ngày lên lịch",
+          "createdAt": "Ngày tạo",
+          "createdBy": "Người tạo",
+          "updatedAt": "Ngày cập nhật",
+          "isActive": "Trạng thái hoạt động"
+        }
+      },
+      "sendNotification": {
+        "title": "Xác nhận gửi thông báo",
+        "confirm": "Bạn có chắc chắn muốn gửi thông báo \"{title}\"?",
+        "noteLabel": "Lưu ý",
+        "note": "Sau khi gửi, thông báo sẽ được chuyển sang trạng thái \"Đã gửi\" và không thể chỉnh sửa.",
+        "emailNote": "Thông báo sẽ chỉ được gửi đến các tài khoản có email đã xác thực.",
+        "send": "Gửi thông báo",
+        "sending": "Đang gửi...",
+        "success": "Gửi thông báo thành công!",
+        "error": "Gửi thông báo thất bại"
+      },
+      "bulkEditNotification": {
+        "title": "Chỉnh sửa hàng loạt",
+        "selected": "Đã chọn {count} thông báo",
+        "selectAtLeastOne": "Vui lòng chọn ít nhất một trường để cập nhật",
+        "noChange": "Không thay đổi",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động",
+        "selectStatus": "Chọn trạng thái",
+        "selectIsActive": "Chọn trạng thái hoạt động",
+        "update": "Cập nhật",
+        "updating": "Đang cập nhật...",
+        "success": "Đã cập nhật {count} thông báo",
+        "error": "Cập nhật hàng loạt thất bại",
+        "fields": {
+          "notificationType": "Loại thông báo",
+          "sendingMethod": "Phương thức gửi",
+          "status": "Trạng thái",
+          "isActive": "Trạng thái hoạt động"
+        }
+      }
+    }
+  }
+}
+
+
       "allTargets": "Tất cả đối tượng",
       "fromDate": "Từ ngày",
       "toDate": "Đến ngày",

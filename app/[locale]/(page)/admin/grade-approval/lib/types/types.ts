@@ -15,10 +15,10 @@ export interface ApprovalStatusOptionDefinition {
 }
 
 const APPROVAL_STATUS_OPTION_DEFINITIONS: ApprovalStatusOptionDefinition[] = [
-  { value: '', translationKey: 'admin.gradeApproval.filters.allStatuses' },
-  { value: 'pending', translationKey: 'admin.gradeApproval.statuses.pending' },
-  { value: 'approved', translationKey: 'admin.gradeApproval.statuses.approved' },
-  { value: 'rejected', translationKey: 'admin.gradeApproval.statuses.rejected' },
+  { value: '', translationKey: 'filters.allStatuses' },
+  { value: 'pending', translationKey: 'statuses.pending' },
+  { value: 'approved', translationKey: 'statuses.approved' },
+  { value: 'rejected', translationKey: 'statuses.rejected' },
 ];
 
 export const buildApprovalStatusOptions = (translate: (key: string) => string) =>

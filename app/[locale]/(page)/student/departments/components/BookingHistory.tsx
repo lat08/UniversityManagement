@@ -239,7 +239,7 @@ export default function BookingHistory({ bookings, isLoading, pagination, curren
                   <div className="flex items-baseline gap-2">
                     <span className="text-gray-600">{t('history.fields.bookingCode')}</span>
                     <span className="font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded text-xs">
-                      {booking.bookingCode || t('history.noCode')}
+                      {(booking.bookingCode && booking.bookingCode.trim()) ? booking.bookingCode : t('history.noCode')}
                     </span>
                       </div>
 

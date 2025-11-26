@@ -16,8 +16,8 @@ import { ViewNotificationDetailModal } from './components/ViewNotificationDetail
 import { BulkEditNotificationModal } from './components/BulkEditNotificationModal';
 import { NotificationActionsMenu } from './components/NotificationActionsMenu';
 import { NotificationStatCard } from './components/NotificationStatCard';
-import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
-import { TableSkeleton } from '@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton';
+import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
+import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
 import { useNotifications } from './lib/hooks/useNotifications';
 import { 
   buildNotificationTypeOptions,
@@ -1072,4 +1072,3 @@ export default function NotificationManagementPage() {
     </div>
   );
 }
-

@@ -35,6 +35,8 @@ const InstructorGradesPage = () => {
   const t = useTranslations('instructor.grades');
   const [selectedCourseClassId, setSelectedCourseClassId] = useState('');
   const [selectedSemesterId, setSelectedSemesterId] = useState('');
+  const [selectedClassId, setSelectedClassId] = useState('');
+  const [selectedAcademicYearId, setSelectedAcademicYearId] = useState('');
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedVersionNumber, setSelectedVersionNumber] = useState<number | null>(null);
@@ -44,9 +46,21 @@ const InstructorGradesPage = () => {
   const { data: courseClassesData, isLoading: isLoadingCourseClasses } = useInstructorCourseClasses(
     selectedSemesterId || undefined
   );
+  
+  // Fetch all students (without filter) to extract classes and academic years
+  const { data: allGradesData } = useCourseClassGrades(
+    selectedCourseClassId,
+    'draft',
+    undefined, // No classId filter
+    undefined  // No academicYearId filter
+  );
+  
+  // Fetch filtered students for display
   const { data: gradesData, isLoading: isLoadingGrades, isFetching: isFetchingGrades } = useCourseClassGrades(
     selectedCourseClassId,
-    'draft'
+    'draft',
+    selectedClassId || undefined,
+    selectedAcademicYearId || undefined
   );
   
   // Show skeleton when loading or fetching new course class data
@@ -66,6 +80,7 @@ const InstructorGradesPage = () => {
   const semesters = useMemo(() => semestersData?.data || [], [semestersData?.data]);
   const courseClasses = useMemo(() => courseClassesData?.data || [], [courseClassesData?.data]);
   const gradesInfo = gradesData?.data;
+  const allGradesInfo = allGradesData?.data;
   const history = historyData?.data || [];
   const versionDetail = versionData?.data || null;
 
@@ -74,9 +89,60 @@ const InstructorGradesPage = () => {
     [courseClasses, selectedCourseClassId]
   );
 
+  // Extract unique classes and academic years from ALL students (not filtered)
+  // This ensures dropdowns show all available options for the course class
+  const { classes, academicYears } = useMemo(() => {
+    if (!allGradesInfo?.students || !selectedCourseClassId) {
+      return { classes: [], academicYears: [] };
+    }
+
+    const classMap = new Map<string, { value: string; label: string }>();
+    const academicYearMap = new Map<string, { value: string; label: string }>();
+
+    allGradesInfo.students.forEach((student) => {
+      if (student.classId && student.className) {
+        if (!classMap.has(student.classId)) {
+          classMap.set(student.classId, {
+            value: student.classId,
+            label: student.className,
+          });
+        }
+      }
+      if (student.academicYearId && student.academicYearName) {
+        if (!academicYearMap.has(student.academicYearId)) {
+          academicYearMap.set(student.academicYearId, {
+            value: student.academicYearId,
+            label: student.academicYearName,
+          });
+        }
+      }
+    });
+
+    return {
+      classes: Array.from(classMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+      academicYears: Array.from(academicYearMap.values()).sort((a, b) => b.label.localeCompare(a.label)),
+    };
+  }, [allGradesInfo?.students, selectedCourseClassId]);
+
   const handleSemesterChange = (semesterId: string) => {
     setSelectedSemesterId(semesterId);
     setSelectedCourseClassId('');
+    setSelectedClassId('');
+    setSelectedAcademicYearId('');
+  };
+
+  const handleCourseClassChange = (courseClassId: string) => {
+    setSelectedCourseClassId(courseClassId);
+    setSelectedClassId('');
+    setSelectedAcademicYearId('');
+  };
+
+  const handleClassChange = (classId: string) => {
+    setSelectedClassId(classId);
+  };
+
+  const handleAcademicYearChange = (academicYearId: string) => {
+    setSelectedAcademicYearId(academicYearId);
   };
 
   const handleNoteChange = (enrollmentId: string, note: string | null) => {
@@ -149,12 +215,18 @@ const InstructorGradesPage = () => {
           <CourseClassSelector
             courseClasses={courseClasses}
             selectedCourseClassId={selectedCourseClassId}
-            onSelect={setSelectedCourseClassId}
+            onSelect={handleCourseClassChange}
             isLoading={isLoadingCourseClasses}
             semesters={semesters}
             selectedSemesterId={selectedSemesterId}
             onSemesterChange={handleSemesterChange}
             isSemestersLoading={isLoadingSemesters}
+            classes={classes}
+            selectedClassId={selectedClassId}
+            onClassChange={handleClassChange}
+            academicYears={academicYears}
+            selectedAcademicYearId={selectedAcademicYearId}
+            onAcademicYearChange={handleAcademicYearChange}
           />
         </div>
 

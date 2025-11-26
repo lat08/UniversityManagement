@@ -123,12 +123,83 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
     }
   }, []);
 
+  const loadInitialData = useCallback(async () => {
+    setLoadingData(true);
+    setHasLoadedSemesterFilter(false);
+    setSubjects([]);
+    try {
+      const [semestersRes, instructorsRes] = await Promise.all([
+        commonApi.getSemesters().catch(() => ({ success: false, data: [] })),
+        commonApi.getInstructors().catch(() => ({ success: false, data: [] })),
+      ]);
+
+      if (semestersRes.success) {
+        const semesterList = Array.isArray(semestersRes.data) ? semestersRes.data : [];
+        setSemesters(semesterList);
+        const defaultSemester = determineCurrentSemester(semesterList);
+        setCurrentSemesterId(defaultSemester?.semesterId || '');
+        setSelectedSemesterId(defaultSemester?.semesterId || '');
+      } else {
+        setSemesters([]);
+        setCurrentSemesterId('');
+        setSelectedSemesterId('');
+      }
+
+      if (instructorsRes.success) {
+        setInstructors(Array.isArray(instructorsRes.data) ? instructorsRes.data : []);
+      } else {
+        setInstructors([]);
+      }
+
+      const roomTypes = ['exam', 'computer_lab', 'laboratory', 'swimming_pool'];
+      const roomPromises = roomTypes.map((roomType) =>
+        api
+          .get('/v1/room', {
+            params: {
+              roomType,
+              pageNumber: 1,
+              pageSize: 1000,
+            },
+          })
+          .then((r) => {
+            if (r.data.success && r.data.data) {
+              const roomsData = r.data.data;
+              return roomsData.Items || roomsData.items || (Array.isArray(roomsData) ? roomsData : []);
+            }
+            return [];
+          })
+          .catch((error) => {
+            console.error(`Error loading rooms for type ${roomType}:`, error);
+            return [];
+          }),
+      );
+
+      const allRoomsArrays = await Promise.all(roomPromises);
+      const allRooms = allRoomsArrays.flat();
+      const uniqueRooms = Array.from(
+        new Map(allRooms.map((room: Room) => [room.roomId || room.id || '', room])).values(),
+      );
+      setRooms(uniqueRooms);
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+      toast.error('Không thể tải dữ liệu');
+      setSemesters([]);
+      setCurrentSemesterId('');
+      setSelectedSemesterId('');
+      setInstructors([]);
+      setRooms([]);
+    } finally {
+      setHasLoadedSemesterFilter(true);
+      setLoadingData(false);
+    }
+  }, [determineCurrentSemester]);
+
   // Load initial data
   useEffect(() => {
     if (isOpen) {
       loadInitialData();
     }
-  }, [isOpen]);
+  }, [isOpen, loadInitialData]);
 
   useEffect(() => {
     if (!isOpen || !hasLoadedSemesterFilter) return;
@@ -161,7 +232,7 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
           semesterId: semesterFilter || undefined,
         });
 
-      let response = await fetchCourseClasses(normalizedSemesterId);
+      const response = await fetchCourseClasses(normalizedSemesterId);
       let classes = response.success && Array.isArray(response.data) ? response.data : [];
       let usedFallback = false;
 
@@ -221,82 +292,6 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
     }
   }, [subjects, selectedSubjectId, setValue]);
 
-  const loadInitialData = async () => {
-    setLoadingData(true);
-    setHasLoadedSemesterFilter(false);
-    setSubjects([]);
-    try {
-      const [semestersRes, instructorsRes] = await Promise.all([
-        commonApi.getSemesters().catch(() => ({ success: false, data: [] })),
-        commonApi.getInstructors().catch(() => ({ success: false, data: [] })),
-      ]);
-
-      if (semestersRes.success) {
-        const semesterList = Array.isArray(semestersRes.data) ? semestersRes.data : [];
-        setSemesters(semesterList);
-        const defaultSemester = determineCurrentSemester(semesterList);
-        setCurrentSemesterId(defaultSemester?.semesterId || '');
-        setSelectedSemesterId(defaultSemester?.semesterId || '');
-      } else {
-        setSemesters([]);
-        setCurrentSemesterId('');
-        setSelectedSemesterId('');
-      }
-      
-      // Handle instructors response
-      if (instructorsRes.success) {
-        setInstructors(Array.isArray(instructorsRes.data) ? instructorsRes.data : []);
-      } else {
-        setInstructors([]);
-      }
-      
-      // Load rooms from multiple room types: exam, computer_lab, laboratory, swimming_pool
-      // API: GET /v1/room?roomType={type}&pageNumber=1&pageSize=1000
-      const roomTypes = ['exam', 'computer_lab', 'laboratory', 'swimming_pool'];
-      const roomPromises = roomTypes.map(roomType =>
-        api.get('/v1/room', { 
-          params: { 
-            roomType: roomType, 
-            pageNumber: 1, 
-            pageSize: 1000 
-          } 
-        })
-        .then((r) => {
-          // API returns ApiResponse<RoomListResult>
-          // Structure: { success: true, data: { Items: [...], PageNumber, PageSize, TotalCount, TotalPages } }
-          if (r.data.success && r.data.data) {
-            const roomsData = r.data.data;
-            return roomsData.Items || roomsData.items || (Array.isArray(roomsData) ? roomsData : []);
-          }
-          return [];
-        })
-        .catch((error) => {
-          console.error(`Error loading rooms for type ${roomType}:`, error);
-          return [];
-        })
-      );
-
-      const allRoomsArrays = await Promise.all(roomPromises);
-      // Merge all rooms and remove duplicates by roomId
-      const allRooms = allRoomsArrays.flat();
-      const uniqueRooms = Array.from(
-        new Map(allRooms.map((room: Room) => [room.roomId || room.id || '', room])).values()
-      );
-      setRooms(uniqueRooms);
-    } catch (error) {
-      console.error('Error loading initial data:', error);
-      toast.error('Không thể tải dữ liệu');
-      // Ensure arrays are set to empty on error
-      setSemesters([]);
-      setCurrentSemesterId('');
-      setSelectedSemesterId('');
-      setInstructors([]);
-      setRooms([]);
-    } finally {
-      setHasLoadedSemesterFilter(true);
-      setLoadingData(false);
-    }
-  };
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) {

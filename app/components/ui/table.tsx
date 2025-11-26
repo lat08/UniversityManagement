@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils/utils"
 
 export interface TableColumn {
   key: string
-  label: string
+  label: ReactNode
   className?: string
   headerClassName?: string
   align?: "left" | "center" | "right"
@@ -61,7 +61,7 @@ export function Table<T = unknown>({
                   left: "text-left",
                   center: "text-center",
                   right: "text-right",
-                }[column.align || "left"]
+                }[column.align || "center"]
 
                 return (
                   <th

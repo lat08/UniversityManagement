@@ -25,12 +25,17 @@ export const useInstructorCourseClasses = (semesterId?: string) => {
   });
 };
 
-export const useCourseClassGrades = (courseClassId: string, type?: 'draft' | 'official') => {
+export const useCourseClassGrades = (
+  courseClassId: string, 
+  type?: 'draft' | 'official',
+  classId?: string,
+  academicYearId?: string
+) => {
   const isDraft = type === 'draft' || !type;
   
   return useQuery({
-    queryKey: queryKeys.instructorGrades.grades(courseClassId, type),
-    queryFn: () => instructorGradesApi.getCourseClassGrades(courseClassId, type),
+    queryKey: queryKeys.instructorGrades.grades(courseClassId, type, classId, academicYearId),
+    queryFn: () => instructorGradesApi.getCourseClassGrades(courseClassId, type, classId, academicYearId),
     enabled: !!courseClassId,
     staleTime: isDraft ? 30 * 1000 : 10 * 60 * 1000,
     gcTime: 10 * 60 * 1000, // 10 phút

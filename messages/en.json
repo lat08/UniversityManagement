@@ -180,9 +180,10 @@
         "notificationManagement": "Notifications",
         "statistics": "Statistics Report",
         "classroomManagement": "Classroom Management",
-        "facultyManagement": "Faculty Management",
+        "divisionManagement": "Division Management",
         "programManagement": "Program Management",
-        "majorManagement": "Specialization Management",
+        "facultyManagement": "Faculty Management",
+        "departmentManagement": "Department Management",
         "regulations": "Regulations",
         "buildingManagement": "Building Management",
         "curriculumManagement": "Curriculum Management",
@@ -194,7 +195,7 @@
         "courseRegistration": "Course Registration",
         "roomRequests": "Room Requests",
         "studentProfile": "Student Profile",
-        "studentTuition": "Tuition",
+        "studentTuition": "Tuition - Debt",
         "instructorProfile": "Instructor Profile",
         "gradeApproval": "Grade Approval",
         "examApproval": "Exam Approval",
@@ -257,6 +258,7 @@
       },
       "grid": {
         "period": "Period {period}",
+        "periodRange": "Period {start}-{end}",
         "code": "Code",
         "class": "Class",
         "room": "Room",
@@ -362,7 +364,8 @@
       "status": {
         "draft": "Draft",
         "active": "In effect",
-        "archived": "Archived"
+        "archived": "Archived",
+        "unknown": "Unknown"
       },
       "statusDescriptions": {
         "draft": "Being drafted or pending approval",
@@ -1355,7 +1358,13 @@
         "courseClass": "Course Class",
         "selectCourseClass": "Select Course Class",
         "loadingCourseClasses": "Loading course classes...",
-        "loadingCourseClassesList": "Loading course classes list..."
+        "loadingCourseClassesList": "Loading course classes list...",
+        "class": "Class",
+        "selectClass": "Select Class",
+        "allClasses": "All Classes",
+        "academicYear": "Academic Year",
+        "selectAcademicYear": "Select Academic Year",
+        "allAcademicYears": "All Academic Years"
       },
       "stats": {
         "totalStudents": "Total Students",
@@ -1823,6 +1832,294 @@
         "noNotifications": "You currently have no notifications."
       }
     },
+    "scheduleChangeManagement": {
+      "pageTitle": "Leave & Schedule Change Management",
+      "pageDescription": "Manage instructor leave requests and schedule changes",
+      "stats": {
+        "total": "Total Requests",
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected"
+      },
+      "list": {
+        "title": "Request List",
+        "exportExcel": "Export Excel",
+        "searchPlaceholder": "Search by code, instructor name...",
+        "statusAll": "All Statuses",
+        "dateFrom": "From Date",
+        "dateTo": "To Date",
+        "empty": "No data",
+        "columns": {
+          "requestCode": "Request Code",
+          "instructor": "Instructor",
+          "subject": "Subject",
+          "class": "Class",
+          "currentSchedule": "Current Schedule",
+          "proposedSchedule": "Proposed Schedule",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "bulkActions": {
+          "selected": "{count} requests selected",
+          "approve": "Approve Requests",
+          "reject": "Reject",
+          "revert": "Revert",
+          "deselect": "Deselect"
+        },
+        "week": "Week {week}",
+        "makeupWeek": "Makeup Week {week}",
+        "dayOfWeek": "Day {day}"
+      },
+      "actions": {
+        "view": "View Details",
+        "edit": "Edit",
+        "approve": "Approve Request",
+        "reject": "Reject",
+        "revert": "Revert",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "all": "All Statuses",
+        "unknown": "Unknown"
+      },
+      "toast": {
+        "exportSuccess": "Export file successfully",
+        "exportError": "Export file failed"
+      },
+      "modals": {
+        "viewDetail": {
+          "title": "Schedule Change Request Details",
+          "description": "Details of instructor schedule change request",
+          "code": "Code:",
+          "generalInfo": "General Information",
+          "instructor": "Instructor:",
+          "subject": "Subject:",
+          "class": "Class:",
+          "proposedDate": "Proposed Date:",
+          "reason": "Proposed Reason:",
+          "currentSchedule": "Current Schedule",
+          "date": "Date:",
+          "cancelledWeek": "Cancelled Week:",
+          "period": "Period:",
+          "room": "Room:",
+          "timeRange": "Time Range:",
+          "proposedSchedule": "Proposed Schedule",
+          "makeupWeek": "Makeup Week:",
+          "approvedSchedule": "Approved Makeup Schedule",
+          "time": "Time:",
+          "status": "Status:",
+          "close": "Close"
+        },
+        "approve": {
+          "title": "Approve Schedule Change Request",
+          "description": "Assign makeup schedule for request {code}",
+          "requestInfo": "Request Information",
+          "instructor": "Instructor:",
+          "subject": "Subject:",
+          "class": "Class:",
+          "currentSchedule": "Current Schedule (to be cancelled)",
+          "date": "Date:",
+          "cancelledWeek": "Cancelled Week:",
+          "period": "Period:",
+          "room": "Room:",
+          "timeRange": "Time Range:",
+          "proposedSchedule": "Proposed Schedule",
+          "makeupWeek": "Makeup Week:",
+          "usingProposed": "Using",
+          "revertToProposed": "Revert to Proposed Schedule",
+          "changedAlert": "You have changed from the proposed schedule",
+          "changedAlertDesc": "You can revert to the instructor's proposed schedule at any time",
+          "makeupDate": "Makeup Date",
+          "useProposedDate": "Use Proposed Date",
+          "startPeriod": "Start Period",
+          "endPeriod": "End Period",
+          "useProposedPeriod": "Use Proposed ({period})",
+          "room": "Classroom",
+          "useProposedRoom": "Use Proposed Room",
+          "usingProposedRoom": "✓ Using:",
+          "proposedRoom": "Proposed:",
+          "loadingRooms": "Loading available rooms...",
+          "noRooms": "No available rooms in the selected time slot",
+          "selectDatePeriod": "Please select date and periods to view available rooms",
+          "roomCapacity": "Capacity:",
+          "note": "Note (Max 500 characters)",
+          "notePlaceholder": "Add a note for this request",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "save": "Save Changes",
+          "processing": "Processing...",
+          "errors": {
+            "makeupDateRequired": "Please select makeup date",
+            "periodRequired": "Please select periods",
+            "startPeriodGreater": "Start period must be less than or equal to end period",
+            "periodCountMismatch": "Makeup period count ({makeup}) must equal cancelled period count ({cancelled})",
+            "roomRequired": "Please select a classroom",
+            "noteMaxLength": "Note cannot exceed 500 characters"
+          },
+          "success": "Request approved successfully",
+          "error": "Failed to approve request",
+          "revertSuccess": "Reverted to proposed schedule",
+          "availabilityError": "Unable to load available room information"
+        },
+        "reject": {
+          "title": "Reject Schedule Change Request",
+          "description": "Request: {code}",
+          "reason": "Rejection Reason",
+          "reasonPlaceholder": "Enter reason for rejecting this request",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "submit": "Reject Request",
+          "processing": "Processing...",
+          "errors": {
+            "reasonRequired": "Please enter rejection reason",
+            "reasonMaxLength": "Rejection reason cannot exceed 500 characters"
+          },
+          "success": "Request rejected successfully",
+          "error": "Failed to reject request"
+        },
+        "revert": {
+          "title": "Revert Schedule Change Request",
+          "description": "Request: {code} (Status: {status})",
+          "statusApproved": "approved",
+          "statusRejected": "rejected",
+          "confirmTitle": "Confirm Revert",
+          "confirmDesc": "This request will be changed back to \"Pending\" status. {additional}",
+          "confirmDescApproved": "The assigned makeup schedule will be cancelled.",
+          "reason": "Revert Reason (Optional)",
+          "reasonPlaceholder": "Enter reason for reverting this request (if any)",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "submit": "Revert Request",
+          "processing": "Processing...",
+          "errors": {
+            "reasonMaxLength": "Revert reason cannot exceed 500 characters"
+          },
+          "success": "Request reverted successfully",
+          "error": "Failed to revert request"
+        },
+        "edit": {
+          "title": "Edit Schedule Change Request",
+          "description": "Edit information for request {code}",
+          "cannotEdit": "Cannot Edit",
+          "cannotEditDesc": "Only requests with \"Pending\" or \"Approved\" status can be edited.",
+          "requestInfo": "Request Information",
+          "instructor": "Instructor:",
+          "subject": "Subject:",
+          "class": "Class:",
+          "currentSchedule": "Current Schedule (to be cancelled)",
+          "date": "Date:",
+          "cancelledWeek": "Cancelled Week:",
+          "period": "Period:",
+          "room": "Room:",
+          "timeRange": "Time Range:",
+          "makeupInfo": "Makeup Information",
+          "makeupWeek": "Makeup Week",
+          "makeupWeekPlaceholder": "Enter makeup week (optional)",
+          "makeupDate": "Makeup Date",
+          "startPeriod": "Start Period",
+          "endPeriod": "End Period",
+          "startPeriodPlaceholder": "Select start period",
+          "endPeriodPlaceholder": "Select end period",
+          "room": "Classroom",
+          "roomPlaceholder": "Select classroom (optional)",
+          "loadingRooms": "Loading available rooms...",
+          "noRooms": "No available rooms in the selected time slot",
+          "selectDatePeriod": "Please select date and periods to view available rooms",
+          "roomCapacity": "Capacity:",
+          "reason": "Reason (Max 500 characters)",
+          "reasonPlaceholder": "Enter reason (optional)",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "save": "Save Changes",
+          "saving": "Saving...",
+          "errors": {
+            "periodCountMismatch": "Makeup period count ({makeup}) must equal cancelled period count ({cancelled})",
+            "startPeriodGreater": "Start period must be less than or equal to end period",
+            "reasonMaxLength": "Reason cannot exceed 500 characters"
+          },
+          "success": "Request edited successfully",
+          "error": "Failed to edit request",
+          "availabilityError": "Unable to load available room information"
+        },
+        "bulkApprove": {
+          "title": "Approve Schedule Change Requests",
+          "description": "Update schedule change requests for {count} selected requests",
+          "eligible": "{count} eligible requests for approval",
+          "eligibleDesc": "These requests have complete proposed schedules (date, periods, room) and will be approved automatically.",
+          "noEligible": "No eligible requests",
+          "noEligibleDesc": "All selected requests are missing proposed schedule information. Please approve each request individually to select appropriate makeup schedule.",
+          "skipped": "{count} requests will be skipped (missing proposed schedule information)",
+          "processing": "Processing:",
+          "success": "Success:",
+          "failed": "Failed:",
+          "skipped": "Skipped:",
+          "errorDetails": "Error Details:",
+          "note": "Note (Max 500 characters) - Applies to all requests",
+          "notePlaceholder": "Add a note for these requests (optional)",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "close": "Close",
+          "submit": "Approve {count} requests",
+          "processing": "Processing...",
+          "errors": {
+            "noteMaxLength": "Note cannot exceed 500 characters",
+            "noEligible": "No requests are eligible for bulk approval. Requests must have: makeup date, periods, and proposed room.",
+            "missingMakeupDate": "Missing makeup date",
+            "missingRoom": "Missing room information"
+          },
+          "success": "Successfully approved {success}/{total} requests",
+          "partialSuccess": "Successfully rejected {success}/{total} requests",
+          "failed": "{count} requests failed to approve",
+          "skipped": "{count} requests skipped (missing proposed schedule information)"
+        },
+        "bulkReject": {
+          "title": "Reject Schedule Change Requests",
+          "description": "Reject {count} selected requests",
+          "reason": "Rejection Reason",
+          "reasonPlaceholder": "Enter rejection reason (applies to all selected requests)",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "submit": "Reject {count} requests",
+          "processing": "Processing...",
+          "errors": {
+            "reasonRequired": "Please enter rejection reason",
+            "reasonMaxLength": "Rejection reason cannot exceed 500 characters"
+          },
+          "success": "Rejected {count} requests",
+          "partialSuccess": "Successfully rejected {success}/{total} requests"
+        },
+        "bulkRevert": {
+          "title": "Revert Schedule Change Requests",
+          "description": "Revert {count} selected requests",
+          "eligible": "{count} eligible requests for revert",
+          "eligibleDesc": "These requests will be changed back to \"Pending\" status. The assigned makeup schedule (if any) will be cancelled.",
+          "noEligible": "No eligible requests",
+          "noEligibleDesc": "Only requests with \"Approved\" or \"Rejected\" status can be reverted.",
+          "skipped": "{count} requests will be skipped (not in approved/rejected status)",
+          "processing": "Processing:",
+          "success": "Success:",
+          "failed": "Failed:",
+          "errorDetails": "Error Details:",
+          "reason": "Revert Reason (Optional) - Applies to all requests",
+          "reasonPlaceholder": "Enter revert reason (if any)",
+          "characters": "{count}/500 characters",
+          "cancel": "Cancel",
+          "close": "Close",
+          "submit": "Revert {count} requests",
+          "processing": "Processing...",
+          "errors": {
+            "reasonMaxLength": "Revert reason cannot exceed 500 characters",
+            "noEligible": "No requests are eligible for revert. Only requests with \"Approved\" or \"Rejected\" status can be reverted."
+          },
+          "success": "Successfully reverted {success}/{total} requests",
+          "failed": "{count} requests failed to revert",
+          "skipped": "{count} requests skipped (only approved/rejected requests can be reverted)"
+        }
+      }
+    },
     "studentProfile": {
       "title": "Student Profile Management",
       "description": "Manage student information, classes, academic years and statuses",
@@ -1853,7 +2150,7 @@
         "fullName": "Full Name",
         "email": "Email",
         "faculty": "Faculty",
-        "department": "Major",
+        "department": "Department",
         "class": "Class",
         "academicYear": "Academic Year",
         "trainingSystem": "Training System",
@@ -1864,7 +2161,7 @@
         "actions": "Actions"
       },
       "filters": {
-        "allDepartments": "All Majors",
+        "allDepartments": "All Departments",
         "allAcademicYears": "All Academic Years",
         "allStatuses": "All Statuses"
       },
@@ -2262,9 +2559,9 @@
             "searchPlaceholder": "Search faculties..."
           },
           "department": {
-            "label": "Major",
-            "placeholder": "Select major",
-            "searchPlaceholder": "Search majors..."
+            "label": "Department",
+            "placeholder": "Select department",
+            "searchPlaceholder": "Search departments..."
           },
           "class": {
             "label": "Class",
@@ -2532,15 +2829,15 @@
         "notes": "Notes"
       }
     },
-    "majorManagement": {
-      "title": "Major Management",
-      "description": "Manage majors, faculties, curricula, and training systems",
-      "listTitle": "Major List",
+    "facultyManagement": {
+      "title": "Faculty Management",
+      "description": "Manage faculties, departments, curricula, and training systems",
+      "listTitle": "Faculty List",
       "search": {
-        "placeholder": "Search by major code or name..."
+        "placeholder": "Search by faculty code or name..."
       },
       "stats": {
-        "total": "Total Majors",
+        "total": "Total Faculties",
         "active": "Active",
         "inactive": "Inactive"
       },
@@ -2553,11 +2850,11 @@
         "inactive": "Inactive"
       },
       "table": {
-        "selected": "{count} majors selected",
-        "empty": "No majors found",
+        "selected": "{count} faculties selected",
+        "empty": "No faculties found",
         "columns": {
           "code": "Code",
-          "name": "Major",
+          "name": "Faculty",
           "faculty": "Faculty",
           "curriculum": "Curriculum",
           "status": "Status",
@@ -2569,42 +2866,60 @@
         }
       },
       "actions": {
-        "add": "Add Major",
+        "add": "Add Faculty",
         "bulkEdit": "Edit Selected",
         "bulkDelete": "Delete Selected",
         "clearSelection": "Clear Selection"
       },
       "hooks": {
-        "createSuccess": "Major created successfully",
-        "createError": "Failed to create major",
-        "updateSuccess": "Major updated successfully",
-        "updateError": "Failed to update major",
-        "deleteSuccess": "Major deleted successfully",
-        "deleteError": "Failed to delete major",
-        "bulkDeleteSuccess": "Deleted selected majors successfully",
-        "bulkDeleteError": "Failed to delete selected majors",
-        "bulkEditSuccess": "Updated selected majors successfully",
-        "bulkEditError": "Failed to update selected majors",
+        "createSuccess": "Faculty created successfully",
+        "createError": "Failed to create faculty",
+        "updateSuccess": "Faculty updated successfully",
+        "updateError": "Failed to update faculty",
+        "deleteSuccess": "Faculty deleted successfully",
+        "deleteError": "Failed to delete faculty",
+        "bulkDeleteSuccess": "Deleted selected faculties successfully",
+        "bulkDeleteError": "Failed to delete selected faculties",
+        "bulkEditSuccess": "Updated selected faculties successfully",
+        "bulkEditError": "Failed to update selected faculties",
         "bulkEditValidation": "Select at least one field to update"
       },
       "form": {
-        "majorCode": {
-          "label": "Major code",
+        "facultyCode": {
+          "label": "Faculty code",
           "placeholder": "e.g. KTPM",
-          "required": "Major code is required",
-          "min": "Major code must be at least 2 characters"
+          "required": "Faculty code is required",
+          "min": "Faculty code must be at least 2 characters"
+        },
+        "facultyName": {
+          "label": "Faculty name",
+          "placeholder": "e.g. Software Engineering",
+          "required": "Faculty name is required",
+          "min": "Faculty name must be at least 3 characters"
         },
         "majorName": {
           "label": "Major name",
-          "placeholder": "e.g. Software Engineering",
+          "placeholder": "e.g. Information Technology",
           "required": "Major name is required",
           "min": "Major name must be at least 3 characters"
+        },
+        "majorCode": {
+          "label": "Major code",
+          "placeholder": "e.g. CNTT",
+          "required": "Major code is required",
+          "min": "Major code must be at least 2 characters"
         },
         "faculty": {
           "label": "Faculty",
           "placeholder": "Select faculty",
           "search": "Search faculties...",
           "required": "Faculty is required"
+        },
+        "division": {
+          "label": "Division",
+          "placeholder": "Select division",
+          "search": "Search divisions...",
+          "required": "Division is required"
         },
         "trainingSystem": {
           "label": "Training system",
@@ -2623,36 +2938,386 @@
       },
       "modals": {
         "add": {
-          "title": "Add Major",
-          "description": "Enter major information",
+          "title": "Add Faculty",
+          "description": "Enter faculty information",
           "submit": "Save",
           "submitting": "Saving..."
         },
         "edit": {
-          "title": "Edit Major",
-          "description": "Update major information",
+          "title": "Edit Faculty",
+          "description": "Update faculty information",
           "submit": "Save changes",
           "submitting": "Saving..."
         },
         "bulkEdit": {
           "title": "Bulk Edit",
-          "description": "{count} majors selected",
+          "description": "{count} faculties selected",
           "submit": "Update",
           "submitting": "Updating..."
         },
         "bulkDelete": {
-          "title": "Delete Majors",
-          "description": "Are you sure you want to delete {count} selected majors?",
+          "title": "Delete Faculties",
+          "description": "Are you sure you want to delete {count} selected faculties?",
           "note": "This action cannot be undone.",
           "submit": "Delete",
           "submitting": "Deleting..."
         },
         "confirmDelete": {
-          "title": "Delete Major",
+          "title": "Delete Faculty",
           "description": "Are you sure you want to delete {name}?",
           "note": "This action cannot be undone.",
           "submit": "Delete"
         }
+      }
+    },
+    "departmentManagement": {
+      "title": "Department Management",
+      "description": "Manage department information",
+      "listTitle": "Department List",
+      "search": {
+        "placeholder": "Search by code, department name..."
+      },
+      "stats": {
+        "total": "Total Departments",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filters": {
+        "allFaculties": "All Faculties",
+        "allCurricula": "All Curricula",
+        "allStatuses": "All Statuses",
+        "noChange": "No change",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "selected": "{count} departments selected",
+        "empty": "No departments found",
+        "columns": {
+          "code": "Code",
+          "name": "Department Name",
+          "faculty": "Faculty",
+          "curriculum": "Curriculum",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "actions": {
+        "add": "Add New",
+        "bulkEdit": "Edit Selected",
+        "bulkDelete": "Delete Selected",
+        "clearSelection": "Clear Selection"
+      },
+      "hooks": {
+        "createSuccess": "Department created successfully!",
+        "createError": "Failed to create department",
+        "updateSuccess": "Department updated successfully!",
+        "updateError": "Failed to update department",
+        "deleteSuccess": "Department deleted successfully!",
+        "deleteError": "Failed to delete department",
+        "bulkDeleteSuccess": "Deleted selected departments successfully",
+        "bulkDeleteError": "Failed to delete selected departments",
+        "bulkEditSuccess": "Updated selected departments successfully",
+        "bulkEditError": "Failed to update selected departments",
+        "bulkEditValidation": "Please select at least one field to update"
+      },
+      "form": {
+        "departmentCode": {
+          "label": "Department Code",
+          "placeholder": "e.g. CNTT",
+          "required": "Department code is required",
+          "min": "Department code must be at least 2 characters"
+        },
+        "departmentName": {
+          "label": "Department Name",
+          "placeholder": "e.g. Information Technology",
+          "required": "Department name is required",
+          "min": "Department name must be at least 3 characters"
+        },
+        "faculty": {
+          "label": "Faculty",
+          "placeholder": "Select faculty",
+          "search": "Search faculties...",
+          "required": "Faculty is required"
+        },
+        "curriculum": {
+          "label": "Curriculum",
+          "placeholder": "Select curriculum",
+          "required": "Curriculum is required"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Add Department",
+          "description": "Enter department information",
+          "submit": "Save",
+          "submitting": "Saving..."
+        },
+        "edit": {
+          "title": "Edit Department",
+          "description": "Update department information",
+          "submit": "Save changes",
+          "submitting": "Saving..."
+        },
+        "bulkEdit": {
+          "title": "Bulk Edit",
+          "description": "{count} departments selected",
+          "submit": "Update",
+          "submitting": "Updating..."
+        },
+        "bulkDelete": {
+          "title": "Delete Departments",
+          "description": "Are you sure you want to delete {count} selected departments?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete",
+          "submitting": "Deleting..."
+        },
+        "confirmDelete": {
+          "title": "Delete Department",
+          "description": "Are you sure you want to delete {name}?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete"
+        }
+      }
+    },
+    "subjectManagement": {
+      "title": "Subject Management",
+      "description": "Manage subject information",
+      "listTitle": "Subject List",
+      "search": {
+        "placeholder": "Search by subject code, name..."
+      },
+      "filters": {
+        "allFaculties": "All Faculties",
+        "allDepartments": "All Departments",
+        "allStatuses": "All Statuses",
+        "general": "General",
+        "specialized": "Specialized",
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        }
+      },
+      "table": {
+        "loading": "Loading...",
+        "empty": "No data",
+        "selected": "{count} subjects selected",
+        "columns": {
+          "code": "Code",
+          "name": "Subject Name",
+          "instructor": "Instructor",
+          "credits": "Credits",
+          "students": "Students",
+          "semester": "Semester",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "add": "Add New",
+        "edit": "Edit",
+        "delete": "Delete Subject",
+        "export": "Export Excel",
+        "bulkEdit": "Bulk Edit",
+        "bulkDelete": "Bulk Delete",
+        "deselectAll": "Deselect All"
+      },
+      "messages": {
+        "deleteSuccess": "Subject deleted successfully",
+        "deleteError": "Failed to delete subject"
+      },
+      "addModal": {
+        "title": "Add New Subject",
+        "description": "Enter new subject information",
+        "saving": "Saving...",
+        "success": "Subject added successfully!",
+        "error": "Failed to add subject",
+        "errorGeneric": "An error occurred while adding subject",
+        "validation": {
+          "hoursRequired": "At least one of theory hours or practice hours must be > 0"
+        },
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        },
+        "isGeneralOptions": {
+          "general": "General Subject",
+          "specialized": "Specialized Subject"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Subject Name",
+            "placeholder": "E.g: Linear Algebra",
+            "required": "Subject name is required",
+            "max": "Subject name must not exceed 200 characters"
+          },
+          "subjectCode": {
+            "label": "Subject Code",
+            "placeholder": "E.g: LALG",
+            "required": "Subject code is required",
+            "max": "Subject code must not exceed 50 characters"
+          },
+          "credits": {
+            "label": "Credits",
+            "required": "Credits is required",
+            "min": "Minimum 1 credit",
+            "max": "Maximum 10 credits"
+          },
+          "theoryHours": {
+            "label": "Theory Hours",
+            "required": "Theory hours is required",
+            "min": "Theory hours must be >= 0"
+          },
+          "practiceHours": {
+            "label": "Practice Hours",
+            "required": "Practice hours is required",
+            "min": "Practice hours must be >= 0"
+          },
+          "isGeneral": {
+            "label": "Subject Type",
+            "placeholder": "Select subject type",
+            "required": "Subject type is required"
+          },
+          "departmentId": {
+            "label": "Faculty/Department",
+            "placeholder": "Select faculty/department",
+            "required": "Faculty/Department is required"
+          },
+          "subjectStatus": {
+            "label": "Status",
+            "placeholder": "Select status",
+            "required": "Status is required"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Prerequisite Subject",
+            "placeholder": "Select prerequisite subject",
+            "none": "None"
+          },
+          "description": {
+            "label": "Subject Description",
+            "placeholder": "Enter subject description...",
+            "max": "Description must not exceed 500 characters"
+          }
+        }
+      },
+      "editModal": {
+        "title": "Edit Subject",
+        "description": "Edit selected subject information",
+        "saving": "Saving...",
+        "success": "Subject updated successfully!",
+        "error": "Failed to update subject",
+        "errorGeneric": "An error occurred while updating subject",
+        "errorLoad": "Unable to load subject information",
+        "validation": {
+          "hoursRequired": "At least one of theory hours or practice hours must be > 0"
+        },
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        },
+        "isGeneralOptions": {
+          "general": "General Subject",
+          "specialized": "Specialized Subject"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Subject Name",
+            "placeholder": "E.g: Linear Algebra",
+            "required": "Subject name is required",
+            "max": "Subject name must not exceed 200 characters"
+          },
+          "subjectCode": {
+            "label": "Subject Code",
+            "placeholder": "E.g: LALG",
+            "required": "Subject code is required",
+            "max": "Subject code must not exceed 50 characters"
+          },
+          "credits": {
+            "label": "Credits",
+            "required": "Credits is required",
+            "min": "Minimum 1 credit",
+            "max": "Maximum 10 credits"
+          },
+          "theoryHours": {
+            "label": "Theory Hours",
+            "required": "Theory hours is required",
+            "min": "Theory hours must be >= 0"
+          },
+          "practiceHours": {
+            "label": "Practice Hours",
+            "required": "Practice hours is required",
+            "min": "Practice hours must be >= 0"
+          },
+          "isGeneral": {
+            "label": "Subject Type",
+            "placeholder": "Select subject type",
+            "required": "Subject type is required"
+          },
+          "departmentId": {
+            "label": "Faculty/Department",
+            "placeholder": "Select faculty/department",
+            "required": "Faculty/Department is required"
+          },
+          "subjectStatus": {
+            "label": "Status",
+            "placeholder": "Select status",
+            "required": "Status is required"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Prerequisite Subject",
+            "placeholder": "Select prerequisite subject",
+            "none": "None"
+          }
+        }
+      },
+      "deleteModal": {
+        "title": "Confirm Delete Subject",
+        "warning": "Warning:",
+        "message": "Are you sure you want to delete subject {subjectName} (Code: {subjectCode})? This action cannot be undone. All related data will be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
+      },
+      "bulkEditModal": {
+        "title": "Edit Subjects",
+        "description": "Edit selected subjects information",
+        "statusLabel": "Semester",
+        "statusPlaceholder": "Select status",
+        "cancel": "Cancel",
+        "update": "Update",
+        "updating": "Updating...",
+        "success": "Status updated successfully!",
+        "errorGeneric": "An error occurred while updating",
+        "validation": {
+          "statusRequired": "Please select a status"
+        },
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        }
+      },
+      "bulkDeleteModal": {
+        "title": "Confirm Delete Subjects",
+        "warning": "Warning:",
+        "message": "Are you sure you want to delete {count} selected subjects? This action cannot be undone. All related data will be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting...",
+        "success": "Successfully deleted {count} subjects",
+        "error": "Unable to delete {count} subjects",
+        "errorGeneric": "An error occurred while deleting"
       }
     },
     "regulations": {
@@ -2835,6 +3500,281 @@
         "defaultFileName": "regulation-document"
       }
     },
+    "roomRequests": {
+      "pageTitle": "Room Request Management",
+      "pageDescription": "Centralized processing of room usage requests from students and instructors",
+      "stats": {
+        "total": "Total requests",
+        "pending": "Pending approval",
+        "confirmed": "Approved",
+        "rejected": "Rejected"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Approved",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "filters": {
+        "searchPlaceholder": "Search...",
+        "building": {
+          "all": "All buildings",
+          "placeholder": "Building"
+        },
+        "roomType": {
+          "all": "All room types",
+          "placeholder": "Room type"
+        },
+        "status": {
+          "all": "All statuses",
+          "placeholder": "Status"
+        },
+        "usageDate": "Usage date"
+      },
+      "list": {
+        "title": "List of room requests",
+        "syncing": "Syncing latest data...",
+        "states": {
+          "error": "Unable to load room requests. Please try again later.",
+          "loading": "Loading room request list...",
+          "empty": "No room requests match the current filters."
+        },
+        "columns": {
+          "selectAll": "Select all",
+          "code": "Code",
+          "room": "Room",
+          "student": "Student",
+          "usageDate": "Usage Date",
+          "registrationDate": "Registration Date",
+          "status": "Status",
+          "action": "Action"
+        },
+        "actions": {
+          "view": "View details",
+          "approve": "Approve",
+          "reject": "Reject",
+          "cancel": "Cancel"
+        }
+      },
+      "bulkActions": {
+        "approve": "Bulk approve",
+        "reject": "Bulk reject"
+      },
+      "detailModal": {
+        "title": "Registration Form Details",
+        "subtitle": "Detailed information about the room registration form",
+        "sections": {
+          "requestInfo": "REGISTRATION FORM INFORMATION",
+          "studentInfo": "STUDENT INFORMATION",
+          "roomInfo": "ROOM INFORMATION",
+          "usageInfo": "USAGE INFORMATION"
+        },
+        "fields": {
+          "code": "Form ID",
+          "createdDate": "Creation Date",
+          "status": "Status",
+          "studentId": "Student ID",
+          "fullName": "Full Name",
+          "class": "Class",
+          "roomId": "Room ID",
+          "roomName": "Room Name",
+          "roomType": "Room Type",
+          "building": "Building",
+          "usageDate": "Usage Date",
+          "timeSlot": "Time Slot",
+          "peopleCount": "Number of People",
+          "purpose": "Purpose of Use"
+        },
+        "actions": {
+          "close": "Close",
+        "approve": "Approve",
+        "reject": "Reject",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "exam.pdf",
+        "defaultAnswerFileName": "answer.pdf"
+      }
+    },
+      "approveModal": {
+        "title": "Approve registration request",
+        "question": "Are you sure you want to approve this registration request?",
+        "code": "Code: {code}",
+        "details": {
+          "room": "Room",
+          "building": "Building",
+          "student": "Student",
+          "usageTime": "Usage time"
+        },
+        "note": "Notes",
+        "notePlaceholder": "Enter notes (Optional)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "rejectModal": {
+        "title": "Reject registration application",
+        "instruction": "Enter the reason for rejecting this registration application",
+        "code": "Code: {code}",
+        "details": {
+          "room": "Room",
+          "building": "Building",
+          "student": "Student",
+          "usageTime": "Usage time"
+        },
+        "reason": "Reason for rejection",
+        "reasonPlaceholder": "Enter the reason for rejection (Minimum 10 characters)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "cancelModal": {
+        "title": "Cancel approved registration form",
+        "subtitle": "You are about to cancel an approved form",
+        "code": "Code: {code}",
+        "details": {
+          "room": "Room",
+          "building": "Building",
+          "student": "Student",
+          "usageTime": "Usage time"
+        },
+        "reason": "Reason for cancellation",
+        "reasonPlaceholder": "Enter reason for cancellation (Minimum 10 characters)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "bulkApproveModal": {
+        "title": "Approve {count} registration forms",
+        "description": "List of forms to be approved:",
+        "note": "General notes",
+        "notePlaceholder": "Enter notes (Optional)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "bulkRejectModal": {
+        "title": "Reject {count} applications",
+        "warning": "Warning: This action will reject all {count} selected applications",
+        "description": "List of applications to be rejected:",
+        "reason": "Common reason for rejection",
+        "reasonPlaceholder": "Enter reason for rejection (Minimum 10 characters)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      }
+    },
+    "tuition": {
+      "pageTitle": "Tuition Fees - Debt",
+      "pageDescription": "Manage student tuition fees and debts",
+      "stats": {
+        "totalFee": "Total Semester Revenue",
+        "totalPaid": "Collected",
+        "totalDebt": "Remaining Debt",
+        "overdue": "Overdue"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by ID, student name,...",
+        "semester": {
+          "all": "All semesters",
+          "placeholder": "Select semester"
+        },
+        "class": {
+          "all": "All courses/classes",
+          "placeholder": "Select class"
+        },
+        "department": {
+          "all": "All majors",
+          "placeholder": "Select major"
+        },
+        "status": {
+          "all": "All statuses",
+          "paid": "Paid",
+          "unpaid": "Unpaid",
+          "overdue": "Overdue",
+          "placeholder": "Select status"
+        }
+      },
+      "list": {
+        "title": "Debt List",
+        "syncing": "Syncing data...",
+        "states": {
+          "error": "Unable to load debt list. Please try again later.",
+          "loading": "Loading debt list...",
+          "empty": "No debts match the current filters."
+        }
+      },
+      "table": {
+        "columns": {
+          "studentCode": "Student ID",
+          "fullName": "Full Name",
+          "major": "Major",
+          "className": "Class",
+          "totalFee": "Amount Due",
+          "debt": "Remaining Debt",
+          "deadline": "Due Date",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "menu": "Actions",
+        "viewDetail": "View Details"
+      },
+      "detail": {
+        "title": "Tuition Fee Details",
+        "subtitle": "Tuition fee details - student debt",
+        "loading": "Loading details...",
+        "notFound": "Debt information not found",
+        "close": "Close",
+        "studentInfo": {
+          "title": "Student Information",
+          "studentCode": "Student ID",
+          "fullName": "Full Name",
+          "className": "Class",
+          "major": "Major"
+        },
+        "tuitionInfo": {
+          "title": "Tuition Fee Information",
+          "totalFee": "Total Amount Due",
+          "debt": "Remaining Debt",
+          "totalCredits": "Total Credits",
+          "paid": "Amount Collected",
+          "status": "Status"
+        },
+        "registeredSubjects": {
+          "title": "List of Registered Courses",
+          "code": "Course ID",
+          "name": "Course Name",
+          "credits": "Number of Credits",
+          "fee": "Tuition Fee"
+        },
+        "paymentHistory": {
+          "title": "Payment History",
+          "date": "Date",
+          "amount": "Amount",
+          "method": "Method",
+          "transactionCode": "Transaction ID",
+          "confirmedBy": "Confirmer"
+        }
+      },
+      "loadListError": "Unable to load debt list",
+      "status": {
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "overdue": "Overdue"
+      }
+    },
     "curriculumManagement": {
       "page": {
         "title": "Curriculum Management",
@@ -2981,12 +3921,12 @@
         }
       }
     },
-    "facultyManagement": {
-      "title": "Faculty Management",
-      "description": "Manage faculties, departments, and leadership assignments",
-      "listTitle": "Faculty List",
+    "divisionManagement": {
+      "title": "Division Management",
+      "description": "Manage divisions, faculties, and leadership assignments",
+      "listTitle": "Division List",
       "search": {
-        "placeholder": "Search by faculty code or name..."
+        "placeholder": "Search by division code or name..."
       },
       "filters": {
         "allDivisions": "All Divisions",
@@ -2995,16 +3935,16 @@
         "inactive": "Inactive"
       },
       "stats": {
-        "total": "Total Faculties",
-        "active": "Active Faculties",
-        "inactive": "Inactive Faculties"
+        "total": "Total Divisions",
+        "active": "Active Divisions",
+        "inactive": "Inactive Divisions"
       },
       "table": {
-        "selected": "{count} faculties selected",
-        "empty": "No faculties found",
+        "selected": "{count} divisions selected",
+        "empty": "No divisions found",
         "columns": {
           "code": "Code",
-          "name": "Faculty",
+          "name": "Division",
           "division": "Division",
           "status": "Status",
           "actions": "Actions"
@@ -3015,23 +3955,23 @@
         }
       },
       "actions": {
-        "add": "Add Faculty",
+        "add": "Add Division",
         "bulkEdit": "Edit Selected",
         "bulkDelete": "Delete Selected",
         "clearSelection": "Clear Selection",
         "deleteAll": "Delete All"
       },
       "hooks": {
-        "createSuccess": "Faculty created successfully",
-        "createError": "Failed to create faculty",
-        "updateSuccess": "Faculty updated successfully",
-        "updateError": "Failed to update faculty",
-        "deleteSuccess": "Faculty deleted successfully",
-        "deleteError": "Failed to delete faculty",
-        "bulkDeleteSuccess": "Deleted selected faculties successfully",
-        "bulkDeleteError": "Failed to delete selected faculties",
-        "bulkEditSuccess": "Updated selected faculties successfully",
-        "bulkEditError": "Failed to update selected faculties"
+        "createSuccess": "Division created successfully",
+        "createError": "Failed to create division",
+        "updateSuccess": "Division updated successfully",
+        "updateError": "Failed to update division",
+        "deleteSuccess": "Division deleted successfully",
+        "deleteError": "Failed to delete division",
+        "bulkDeleteSuccess": "Deleted selected divisions successfully",
+        "bulkDeleteError": "Failed to delete selected divisions",
+        "bulkEditSuccess": "Updated selected divisions successfully",
+        "bulkEditError": "Failed to update selected divisions"
       }
     },
     "buildingManagement": {
@@ -3239,6 +4179,9 @@
         "approvalStatus": "Status",
         "actions": "Actions"
       },
+      "filters": {
+        "allStatuses": "All statuses"
+      },
       "search": "Search by code, subject name, instructor...",
       "allFaculties": "All Faculties",
       "allInstructors": "All Instructors",
@@ -3348,6 +4291,147 @@
         "archived": "Archived"
       }
     },
+    "examApproval": {
+      "pageTitle": "Approve Exam Papers",
+      "pageDescription": "Manage and approve exam papers for lecturers",
+      "loadListError": "Failed to load exam list",
+      "approveSuccess": "Exam approved successfully",
+      "approveError": "Failed to approve exam",
+      "rejectSuccess": "Exam rejected successfully",
+      "rejectError": "Failed to reject exam",
+      "exportSuccess": "Excel exported successfully",
+      "exportError": "Failed to export Excel",
+      "exportNoData": "No data to export",
+      "downloadPdfSuccess": "PDF downloaded successfully",
+      "downloadPdfError": "Failed to download PDF",
+      "list": {
+        "title": "List of Exam Papers",
+        "syncing": "Syncing...",
+        "states": {
+          "loading": "Loading...",
+          "error": "Error loading data",
+          "empty": "No exam papers"
+        }
+      },
+      "table": {
+        "class": "Class",
+        "subject": "Subject",
+        "instructor": "Lecturer",
+        "examType": "Exam Type",
+        "submissionDate": "Submission Date",
+        "semester": "Semester",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending Approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by Subject, Class, Lecturer...",
+        "semester": {
+          "all": "All Semesters",
+          "placeholder": "Select semester"
+        },
+        "examType": {
+          "all": "All Exam Types",
+          "placeholder": "Select exam type",
+          "midterm": "Midterm",
+          "final": "Final",
+          "quiz": "15 minutes",
+          "makeup": "Makeup"
+        },
+        "status": {
+          "all": "All Statuses",
+          "placeholder": "Select status",
+          "pending": "Pending Approval",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        }
+      },
+      "exportExcel": "Export Excel",
+      "common": {
+        "na": "N/A"
+      },
+      "actionsMenu": {
+        "view": "View Details",
+        "approve": "Approve",
+        "reject": "Reject",
+        "downloadPdf": "Download PDF"
+      },
+      "bulkActions": {
+        "selected": "{count} exam papers selected",
+        "approve": "Approve",
+        "reject": "Reject",
+        "clearSelection": "Clear Selection"
+      },
+      "modals": {
+        "bulkApprove": {
+          "title": "Approve Exam Papers",
+          "description": "Are you sure you want to approve {count} selected exam papers?",
+          "submit": "Approve",
+          "submitting": "Approving..."
+        },
+        "bulkReject": {
+          "title": "Reject Exam Papers",
+          "description": "Are you sure you want to reject {count} selected exam papers?",
+          "note": "This action cannot be undone.",
+          "reasonLabel": "Rejection Reason",
+          "reasonPlaceholder": "Enter the reason for rejecting the exam papers...",
+          "submit": "Reject",
+          "submitting": "Rejecting..."
+        }
+      },
+      "detailModal": {
+        "title": "Exam Details",
+        "description": "Detailed information about the exam and its status",
+        "close": "Close",
+        "loading": "Loading...",
+        "error": "Failed to load exam details",
+        "currentStatus": "CURRENT STATUS",
+        "subjectCode": "Subject Code",
+        "examInfo": "EXAM INFORMATION",
+        "subject": "Subject",
+        "courseClass": "Course Section",
+        "semester": "Semester",
+        "examType": "Exam Type",
+        "duration": "Duration",
+        "entryCode": "Exam Code",
+        "minutes": "minutes",
+        "files": "EXAM FILES",
+        "uploaded": "Uploaded",
+        "download": "Download",
+        "downloadPdf": "Download PDF",
+        "downloadSuccess": "Download successful",
+        "downloadError": "Failed to download",
+        "fileNotFound": "File not found",
+        "rejectionReason": "Rejection Reason",
+        "instructor": "INSTRUCTOR",
+        "submissionDate": "SUBMISSION DATE",
+        "approvalDate": "APPROVAL DATE",
+        "approve": "Approve",
+        "reject": "Reject",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "exam.pdf",
+        "defaultAnswerFileName": "answer.pdf"
+      },
+      "rejectModal": {
+        "title": "Please enter the reason for rejecting the exam",
+        "confirmation": "Are you sure you want to reject the exam **{title}** (Type: {type})?",
+        "reasonLabel": "Rejection Reason",
+        "reasonPlaceholder": "Enter the reason for rejecting the exam..",
+        "close": "Close",
+        "cancel": "Cancel",
+        "reject": "Reject",
+        "validation": {
+          "minLength": "Rejection reason must be at least {min} characters",
+          "maxLength": "Rejection reason must not exceed {max} characters"
+        }
+      }
+    },
     "studentProfile": {
       "title": "Student Profile Management",
       "totalStudents": "Total Students",
@@ -3366,7 +4450,7 @@
         "fullName": "Full Name",
         "email": "Email",
         "faculty": "Faculty",
-        "department": "Major",
+        "department": "Department",
         "class": "Class",
         "academicYear": "Academic Year",
         "trainingSystem": "Training System",
@@ -3411,10 +4495,296 @@
         "facultyRequired": "Faculty is required",
         "selectFaculty": "Select faculty",
         "searchFaculty": "Search faculty...",
-        "department": "Major",
-        "departmentRequired": "Major is required",
-        "selectDepartment": "Select major",
-        "searchDepartment": "Search major...",
+        "department": "Department",
+        "departmentRequired": "Department is required",
+        "selectDepartment": "Select department",
+        "searchDepartment": "Search department...",
+        "class": "Class",
+        "classRequired": "Class is required",
+        "selectClass": "Select class",
+        "searchClass": "Search class...",
+        "address": "Address",
+        "addressPlaceholder": "Enter address",
+        "addressRequired": "Address is required",
+        "addressMin": "Address must be at least 5 characters",
+        "status": "Status",
+        "selectStatus": "Select status",
+        "submit": "Save",
+        "submitting": "Saving...",
+        "success": "Student added successfully!",
+        "error": "Failed to add student",
+        "addSuccessWithCode": "Student added successfully!\nStudent Code: {code}"
+      },
+      "addNotification": {
+        "title": "Create New Notification",
+        "subtitle": "Save draft notification (not sent)",
+        "titleLabel": "Title",
+        "titlePlaceholder": "E.g: General Notice",
+        "titleRequired": "Title is required",
+        "titleMin": "Title must be at least 3 characters",
+        "content": "Content",
+        "contentPlaceholder": "Enter notification content...",
+        "contentRequired": "Content is required",
+        "contentMin": "Content must be at least 10 characters",
+        "noticeMessage": "Short Message",
+        "noticeMessagePlaceholder": "Enter short message (max 1000 characters)...",
+        "noticeMessageMax": "Short message cannot exceed 1000 characters",
+        "noticeMessageHint": "Short message will be displayed in list or preview",
+        "notificationType": "Notification Type",
+        "notificationTypeRequired": "Notification type is required",
+        "targetType": "Target Audience",
+        "targetTypePlaceholder": "Select target audience",
+        "targetTypeRequired": "Target audience is required",
+        "targetId": "Select Target",
+        "targetIdRequired": "Please select a recipient",
+        "sendingMethod": "Sending Method",
+        "sendingMethodRequired": "Sending method is required",
+        "scheduledDate": "Scheduled Date",
+        "scheduledDateHint": "If not selected, system will use current time",
+        "scheduledDateKeepCurrent": "Leave empty to keep current date",
+        "submit": "Save Draft",
+        "submitting": "Saving...",
+        "saveChanges": "Save Changes",
+        "saveSuccess": "Notification draft saved successfully!",
+        "saveError": "Failed to save notification draft",
+        "editTitle": "Edit Notification",
+        "editSubtitle": "Update notification information",
+        "loadingNotification": "Loading notification information...",
+        "updateSuccess": "Notification updated successfully!",
+        "updateError": "Failed to update notification",
+        "note": "Note: Only send to accounts with verified email"
+      },
+      "courseDetail": {
+        "title": "Course Details",
+        "description": "Display detailed course information",
+        "subjectCode": "Subject Code",
+        "subjectName": "Subject Name",
+        "credits": "Credits",
+        "instructor": "Instructor",
+        "schedule": "Schedule",
+        "noSchedule": "No schedule available",
+        "room": "Room",
+        "status": "Status",
+        "registered": "Registered",
+        "class": "Class",
+        "enrollmentDate": "Enrollment Date"
+      },
+      "uploadDocument": {
+        "title": "Upload New Document",
+        "description": "Add teaching materials for your courses",
+        "subjectClass": "Subject - Class",
+        "selectSubjectClass": "Select option",
+        "subjectClassRequired": "Please select subject - class",
+        "documentType": "Document Type",
+        "selectDocumentType": "Select type",
+        "documentTypeRequired": "Please select document type",
+        "documentName": "Document Name",
+        "documentNamePlaceholder": "Enter document name",
+        "documentNameRequired": "Please enter document name",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe document content...",
+        "file": "File",
+        "fileRequired": "Please select a file to upload",
+        "dragDrop": "Drag and drop file here or",
+        "clickToUpload": "click to upload",
+        "supportedFormats": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX",
+        "maxSize": "Maximum size: 50MB",
+        "submit": "Upload",
+        "uploading": "Uploading...",
+        "cancel": "Cancel"
+      },
+      "editDocument": {
+        "title": "Edit Document",
+        "description": "Edit teaching materials for your courses",
+        "subjectClass": "Subject - Class",
+        "documentType": "Document Type",
+        "documentName": "Document Name",
+        "description": "Description",
+        "file": "New File (optional)",
+        "deleteFile": "Delete File",
+        "submit": "Update",
+        "updating": "Updating...",
+        "cancel": "Cancel"
+      },
+      "deleteDocument": {
+        "title": "Delete Document",
+        "confirm": "Are you sure you want to delete this document?",
+        "description": "This action cannot be undone.",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel"
+      },
+      "viewNotification": {
+        "title": "Notification Details",
+        "loadError": "Unable to load notification details",
+        "loadingContent": "Loading content...",
+        "noContent": "No content",
+        "active": "Active",
+        "archived": "Archived",
+        "recipientsCount": "{count} recipients",
+        "fields": {
+          "title": "Title",
+          "noticeMessage": "Short Notice",
+          "content": "Content",
+          "notificationType": "Notification Type",
+          "status": "Status",
+          "targetType": "Target",
+          "sendingMethod": "Sending Method",
+          "totalRecipients": "Total Recipients",
+          "scheduledDate": "Scheduled Date",
+          "createdAt": "Created At",
+          "createdBy": "Created By",
+          "updatedAt": "Updated At",
+          "isActive": "Active Status"
+        }
+      },
+      "sendNotification": {
+        "title": "Confirm Send Notification",
+        "confirm": "Are you sure you want to send notification \"{title}\"?",
+        "noteLabel": "Note",
+        "note": "After sending, the notification will be changed to \"Sent\" status and cannot be edited.",
+        "emailNote": "The notification will only be sent to accounts with verified email.",
+        "send": "Send Notification",
+        "sending": "Sending...",
+        "success": "Notification sent successfully!",
+        "error": "Failed to send notification"
+      },
+      "bulkEditNotification": {
+        "title": "Bulk Edit",
+        "selected": "Selected {count} notifications",
+        "selectAtLeastOne": "Please select at least one field to update",
+        "noChange": "No Change",
+        "active": "Active",
+        "inactive": "Inactive",
+        "selectStatus": "Select Status",
+        "selectIsActive": "Select Active Status",
+        "update": "Update",
+        "updating": "Updating...",
+        "success": "Updated {count} notifications",
+        "error": "Failed to bulk update",
+        "fields": {
+          "notificationType": "Notification Type",
+          "sendingMethod": "Sending Method",
+          "status": "Status",
+          "isActive": "Active Status"
+        }
+      },
+      "archiveNotification": {
+        "title": "Confirm Archive Notification",
+        "confirm": "Are you sure you want to archive notification \"{title}\"?",
+        "noteLabel": "Note",
+        "note": "The notification will be marked as inactive (isActive = false) but the status will not change.",
+        "archive": "Archive",
+        "archiving": "Archiving...",
+        "success": "Notification archived successfully!",
+        "error": "Failed to archive notification"
+      },
+      "cancelNotification": {
+        "title": "Confirm Cancel Notification",
+        "confirm": "Are you sure you want to cancel notification \"{title}\"?",
+        "noteLabel": "Note",
+        "note": "The notification will be changed to \"Cancelled\" status and cannot be sent afterwards.",
+        "cancel": "Cancel Notification",
+        "cancelling": "Cancelling...",
+        "success": "Notification cancelled successfully!",
+        "error": "Failed to cancel notification"
+      }
+    }
+  }
+}
+
+
+        "submissionDate": "SUBMISSION DATE",
+        "approvalDate": "APPROVAL DATE",
+        "approve": "Approve",
+        "reject": "Reject",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "exam.pdf",
+        "defaultAnswerFileName": "answer.pdf"
+      },
+      "rejectModal": {
+        "title": "Please enter the reason for rejecting the exam",
+        "confirmation": "Are you sure you want to reject the exam **{title}** (Type: {type})?",
+        "reasonLabel": "Rejection Reason",
+        "reasonPlaceholder": "Enter the reason for rejecting the exam..",
+        "close": "Close",
+        "cancel": "Cancel",
+        "reject": "Reject",
+        "validation": {
+          "minLength": "Rejection reason must be at least {min} characters",
+          "maxLength": "Rejection reason must not exceed {max} characters"
+        }
+      }
+    },
+    "studentProfile": {
+      "title": "Student Profile Management",
+      "totalStudents": "Total Students",
+      "newStudents": "New Students",
+      "graduatingSoon": "Graduating Soon",
+      "onLeave": "On Leave",
+      "onLeaveSubtitle": "Temporarily Absent",
+      "studying": "Studying",
+      "add": "Add Student",
+      "addSuccess": "Student added successfully!",
+      "addSuccessWithCode": "Student added successfully!\nStudent Code: {code}",
+      "addError": "Failed to add student",
+      "search": "Search students...",
+      "columns": {
+        "mssv": "Student ID",
+        "fullName": "Full Name",
+        "email": "Email",
+        "faculty": "Faculty",
+        "department": "Department",
+        "class": "Class",
+        "academicYear": "Academic Year",
+        "trainingSystem": "Training System",
+        "gpa": "GPA",
+        "credits": "Earned Credits",
+        "debt": "Debt",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "themeConfiguration": {
+      "title": "Theme Configuration",
+      "add": "Add Theme",
+      "edit": "Edit Theme"
+    },
+    "modals": {
+      "addStudent": {
+        "title": "Add New Student",
+        "description": "Enter student information",
+        "name": "Full Name",
+        "namePlaceholder": "John Doe",
+        "nameRequired": "Full name is required",
+        "nameMin": "Full name must be at least 2 characters",
+        "citizenId": "ID Card / Passport",
+        "citizenIdPlaceholder": "012345678900",
+        "citizenIdRequired": "ID Card/Passport is required",
+        "citizenIdInvalid": "ID Card/Passport must have 9-12 digits",
+        "dob": "Date of Birth",
+        "dobRequired": "Date of birth is required",
+        "dobInvalid": "Date of birth must be in DD/MM/YYYY format",
+        "dobInvalidDate": "Invalid date of birth",
+        "gender": "Gender",
+        "genderRequired": "Gender is required",
+        "genderMale": "Male",
+        "genderFemale": "Female",
+        "selectGender": "Select gender",
+        "phone": "Phone Number",
+        "phonePlaceholder": "0000000000",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Phone number must have 10-11 digits",
+        "faculty": "Faculty",
+        "facultyRequired": "Faculty is required",
+        "selectFaculty": "Select faculty",
+        "searchFaculty": "Search faculty...",
+        "department": "Department",
+        "departmentRequired": "Department is required",
+        "selectDepartment": "Select department",
+        "searchDepartment": "Search department...",
         "class": "Class",
         "classRequired": "Class is required",
         "selectClass": "Select class",

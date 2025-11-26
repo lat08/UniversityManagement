@@ -16,8 +16,8 @@ import { BulkPublishModal } from './components/BulkPublishModal';
 import { BulkDeleteModal } from './components/BulkDeleteModal';
 import { ExportExcelModal } from './components/ExportExcelModal';
 import { ExamScheduleActionsMenu } from './components/ExamScheduleActionsMenu';
-import { ResizableTable, ResizableColumn } from '@/app/[locale]/(page)/admin/student-profile/components/ResizableTable';
-import { TableSkeleton } from '@/app/[locale]/(page)/admin/student-profile/components/LoadingSkeleton';
+import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
+import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
 import { toast } from 'react-hot-toast';
 import { useExamSchedules } from './lib/hooks/useExamSchedules';
 import { examSchedulesApi } from './lib/api/examSchedulesApi';
@@ -71,11 +71,6 @@ export default function ExamScheduleManagementPage() {
     { key: 'actions', label: t('columns.actions'), width: 100, minWidth: 80, align: 'center', visible: true, required: true },
   ]);
 
-  // Load semesters and classes
-  useEffect(() => {
-    loadCommonData();
-  }, []);
-
   const resolveCurrentSemester = (items: Semester[]): Semester | null => {
     if (!Array.isArray(items) || items.length === 0) return null;
     const today = new Date();
@@ -109,7 +104,7 @@ export default function ExamScheduleManagementPage() {
     return `${start} - ${end}`;
   };
 
-  const loadCommonData = async () => {
+  const loadCommonData = useCallback(async () => {
     try {
       const [semestersRes, courseClassesRes] = await Promise.all([
         commonApi.getSemesters(),
@@ -126,7 +121,12 @@ export default function ExamScheduleManagementPage() {
     } catch {
       // Silent fail
     }
-  };
+  }, []);
+
+  // Load semesters and classes
+  useEffect(() => {
+    loadCommonData();
+  }, [loadCommonData]);
 
   const handleJumpToCurrentSemester = useCallback(() => {
     if (!currentSemesterInfo) return;
@@ -848,4 +848,3 @@ export default function ExamScheduleManagementPage() {
     </div>
   );
 }
-

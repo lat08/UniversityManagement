@@ -77,3 +77,8 @@ export const CourseTableSkeleton = (): ReactElement => {
 
 
 
+
+
+
+
+
