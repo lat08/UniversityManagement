@@ -124,7 +124,7 @@ export default function AdminLoginPage() {
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop"
+          src="/background-admin.jpg"
           alt="Admin Background"
           fill
           className="object-cover"
