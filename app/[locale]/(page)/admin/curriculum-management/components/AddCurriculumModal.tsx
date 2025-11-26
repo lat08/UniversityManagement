@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, type MouseEvent } from 'react'
 import { Button, Input, Dropdown, DropdownSearch } from '@/app/components/ui'
 import { X } from 'lucide-react'
 import { useForm, type Resolver } from 'react-hook-form'
@@ -28,7 +28,7 @@ type FormData = {
 
 export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculumModalProps) => {
   const t = useTranslations('admin.curriculumManagement')
-  const tActions = useTranslations('actions')
+  const tActions = useTranslations('common.actions')
   const validationSchema = useMemo<ObjectSchema<FormData>>(
     () =>
       yup.object({
@@ -156,7 +156,7 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
 
   if (!isOpen) return null
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isSubmitting) {
       handleClose()
     }

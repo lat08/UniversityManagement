@@ -18,7 +18,7 @@ export const ConfirmDeleteCurriculumModal = ({
   onConfirm,
 }: ConfirmDeleteCurriculumModalProps) => {
   const t = useTranslations('admin.curriculumManagement')
-  const tActions = useTranslations('actions')
+  const tActions = useTranslations('common.actions')
   if (!isOpen) return null
 
   const handleConfirm = async () => {

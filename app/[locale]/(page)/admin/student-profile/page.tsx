@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Download, Plus, Edit, Trash2, X, Users, GraduationCap, BookOpen, School } from 'lucide-react';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
+import { GLOBAL_SEARCH_MAX_LENGTH } from '@/lib/constants/search-limits';
 import { Pagination } from '@/app/components/ui/pagination';
 import AddStudentModal from './components/AddStudentModal';
 import ImportExcelModal from './components/ImportExcelModal';
@@ -25,6 +26,7 @@ export default function StudentProfilePage() {
   const tCommon = useTranslations('common.actions');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const STAT_CARDS = [
     { 
@@ -243,6 +245,14 @@ export default function StudentProfilePage() {
     (status: string) => getStatusDisplay(status, (key) => t(key)),
     [t],
   );
+
+  // Open Add Student modal when triggered from dashboard
+  const action = searchParams.get('action');
+  useEffect(() => {
+    if (action === 'addStudent') {
+      setIsAddModalOpen(true);
+    }
+  }, [action]);
 
   // Delete handler
   const handleDeleteClick = useCallback((studentId: string, studentName: string) => {
@@ -580,6 +590,7 @@ export default function StudentProfilePage() {
               <SearchInput
                 placeholder={t('search')}
                 value={searchQuery}
+                maxLength={GLOBAL_SEARCH_MAX_LENGTH}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>

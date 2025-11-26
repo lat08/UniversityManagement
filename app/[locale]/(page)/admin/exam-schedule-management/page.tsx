@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileDown, Trash2, X, CircleCheck } from 'lucide-react';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
+import { GLOBAL_SEARCH_MAX_LENGTH, CODE_SEARCH_MAX_LENGTH, ROOM_SEARCH_MAX_LENGTH } from '@/lib/constants/search-limits';
 import { useTranslations } from 'next-intl';
 import { Pagination } from '@/app/components/ui/pagination';
 import { AddExamScheduleModal } from './components/AddExamScheduleModal';
@@ -25,9 +26,11 @@ import { commonApi } from '@/lib/api/common';
 import { getStatusDisplay, STATUS_OPTIONS, getExamFormatLabel } from './lib/types/types';
 import type { ExamSchedule, ExamScheduleDetail, CourseClass } from './lib/types/types';
 import type { Semester } from '@/lib/types/common';
+import { useSearchParams } from 'next/navigation';
 
 export default function ExamScheduleManagementPage() {
   const t = useTranslations('admin.examScheduleManagement');
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchSubjectName, setSearchSubjectName] = useState('');
   const [searchClassName, setSearchClassName] = useState('');
@@ -133,6 +136,22 @@ export default function ExamScheduleManagementPage() {
     setSelectedSemester(currentSemesterInfo.semesterId);
     setCurrentPage(1);
   }, [currentSemesterInfo, setCurrentPage]);
+
+  // Open Add Exam Schedule modal when triggered from dashboard
+  const action = searchParams.get('action');
+  useEffect(() => {
+    if (action === 'add') {
+      setIsAddModalOpen(true);
+    }
+  }, [action]);
+
+  // Open Add Exam Schedule modal when triggered from dashboard
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'add') {
+      setIsAddModalOpen(true);
+    }
+  }, [searchParams]);
 
   // Combine all search terms into one searchKeyword
   useEffect(() => {
@@ -558,6 +577,7 @@ export default function ExamScheduleManagementPage() {
                   <SearchInput
                     placeholder="Tìm kiếm chung (mã, giám thị...)"
                     value={searchQuery}
+                    maxLength={GLOBAL_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
@@ -567,6 +587,7 @@ export default function ExamScheduleManagementPage() {
                   <SearchInput
                     placeholder="Tìm theo tên môn học"
                     value={searchSubjectName}
+                    maxLength={GLOBAL_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchSubjectName(e.target.value)}
                   />
                 </div>
@@ -576,6 +597,7 @@ export default function ExamScheduleManagementPage() {
                   <SearchInput
                     placeholder="Tìm theo mã lớp"
                     value={searchClassName}
+                    maxLength={CODE_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchClassName(e.target.value)}
                   />
                 </div>
@@ -585,6 +607,7 @@ export default function ExamScheduleManagementPage() {
                   <SearchInput
                     placeholder="Tìm theo mã phòng thi"
                     value={searchRoomCode}
+                    maxLength={ROOM_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchRoomCode(e.target.value)}
                   />
                 </div>

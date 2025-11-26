@@ -5,6 +5,7 @@ import { Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Dropdown } from '@/app/components/ui/dropdown';
 import { DropdownSearch } from '@/app/components/ui/dropdown-search';
+import { GLOBAL_SEARCH_MAX_LENGTH } from '@/lib/constants/search-limits';
 import type { DocumentTypeItem } from '../lib/types/types';
 import type { Semester, Subject } from '@/lib/types';
 
@@ -76,6 +77,7 @@ const DocumentsFiltersComponent = ({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t('searchPlaceholder')}
           className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg hover:border-gray-600 focus:outline-none focus:border-gray-600 bg-white text-gray-900 text-sm transition-colors h-full"
+          maxLength={GLOBAL_SEARCH_MAX_LENGTH}
         />
         {searchQuery && (
           <button

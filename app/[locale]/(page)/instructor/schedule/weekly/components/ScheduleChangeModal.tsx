@@ -68,18 +68,12 @@ export const ScheduleChangeModal = ({
   
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  // Calculate minimum date from current schedule info
+  // Calculate minimum selectable date from today
   const minSelectableDate = useMemo(() => {
-    if (currentScheduleInfo?.date) {
-      const currentDate = new Date(currentScheduleInfo.date);
-      currentDate.setHours(0, 0, 0, 0);
-      return currentDate;
-    }
-    // Fallback to today if no current schedule info
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return today;
-  }, [currentScheduleInfo]);
+  }, []);
 
   // Calculate maximum date from semester end (last week end date)
   const maxSelectableDate = useMemo(() => {

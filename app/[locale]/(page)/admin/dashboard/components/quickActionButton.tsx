@@ -22,7 +22,7 @@ export const QuickActionButton: React.FC<QuickActionButtonProps> = ({ action }) 
   return (
     <button
       onClick={action.action}
-      className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-blue-300 rounded-lg transition-all hover:bg-blue-50 text-blue-700"
+      className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-blue-300 rounded-lg transition-all hover:bg-blue-50 text-blue-700 cursor-pointer hover:shadow-sm"
     >
       <div className="flex-shrink-0">{getIcon(action.icon)}</div>
       <span className="font-medium text-sm">{action.title}</span>

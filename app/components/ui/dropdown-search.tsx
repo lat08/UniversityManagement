@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, ReactNode, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils/utils"
+import { DROPDOWN_SEARCH_MAX_LENGTH } from "@/lib/constants/search-limits"
 
 interface DropdownSearchOption<T = string> {
   value: T
@@ -26,6 +27,7 @@ interface DropdownSearchProps<T = string> {
   readonly renderValue?: (value: T | undefined, selectedOption?: DropdownSearchOption<T>) => ReactNode
   readonly onSearch?: (query: string) => void
   readonly filterOptions?: (options: DropdownSearchOption<T>[], query: string) => DropdownSearchOption<T>[]
+  readonly maxLength?: number
 }
 
 export function DropdownSearch<T = string>({
@@ -43,6 +45,7 @@ export function DropdownSearch<T = string>({
   renderValue,
   onSearch,
   filterOptions,
+  maxLength = DROPDOWN_SEARCH_MAX_LENGTH,
 }: DropdownSearchProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
@@ -181,6 +184,7 @@ export function DropdownSearch<T = string>({
                 onChange={handleSearchChange}
                 placeholder={searchPlaceholder}
                 className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-600 text-sm"
+                maxLength={maxLength}
                 onMouseDown={(e) => e.stopPropagation()}
               />
               {searchQuery && (

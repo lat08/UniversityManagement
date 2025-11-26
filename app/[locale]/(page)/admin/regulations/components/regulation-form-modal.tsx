@@ -27,14 +27,24 @@ type TranslateFn = ReturnType<typeof useTranslations>;
 const createSchema = (t: TranslateFn) =>
   z
     .object({
-      code: z.string().min(2, t('form.validation.codeMin')),
-      title: z.string().min(4, t('form.validation.titleMin')),
-      description: z.string().min(10, t('form.validation.descriptionMin')),
-      category: z.string().min(1, t('form.validation.categoryRequired')),
-      issuingUnit: z.string().min(1, t('form.validation.issuingUnitRequired')),
+      code: z
+        .string()
+        .min(2, t('codeMin'))
+        .regex(/^[A-Za-z0-9_-]+$/, t('codePattern')),
+      title: z
+        .string()
+        .min(4, t('titleMin'))
+        .max(200, t('titleMax'))
+        .regex(/^[\p{L}0-9 _-]+$/u, t('titlePattern')),
+      description: z
+        .string()
+        .min(10, t('descriptionMin'))
+        .max(500, t('descriptionMax')),
+      category: z.string().min(1, t('categoryRequired')),
+      issuingUnit: z.string().min(1, t('issuingUnitRequired')),
       status: z.enum(['draft', 'active', 'archived']),
-      issueDate: z.string().min(1, t('form.validation.issueDateRequired')),
-      effectiveDate: z.string().min(1, t('form.validation.effectiveDateRequired')),
+      issueDate: z.string().min(1, t('issueDateRequired')),
+      effectiveDate: z.string().min(1, t('effectiveDateRequired')),
       expiredDate: z.string().optional(),
       targetAudience: z.enum(['student', 'instructor', 'all']),
     })
@@ -45,7 +55,7 @@ const createSchema = (t: TranslateFn) =>
       },
       {
         path: ['effectiveDate'],
-        message: t('form.validation.effectiveAfterIssue'),
+        message: t('effectiveAfterIssue'),
       },
     );
 
@@ -83,8 +93,9 @@ export const RegulationFormModal = ({
   onSubmit,
 }: RegulationFormModalProps) => {
   const t = useTranslations('admin.regulations');
+  const tValidation = useTranslations('admin.regulations.form.validation');
   const locale = useLocale();
-  const schema = useMemo(() => createSchema(t), [t]);
+  const schema = useMemo(() => createSchema(tValidation), [tValidation]);
   const dateLocale = locale === 'vi' ? vi : enUS;
   const displayDateFormat = locale === 'vi' ? DEFAULT_DISPLAY_DATE_FORMAT : 'MM/dd/yyyy';
   const datePlaceholder = locale === 'vi' ? 'dd/mm/yyyy' : 'mm/dd/yyyy';
@@ -357,6 +368,22 @@ export const RegulationFormModal = ({
                 placeholder={t('form.placeholders.code')}
                 {...register('code')}
                 className={errors.code ? 'border-red-500' : ''}
+                onKeyDown={(event) => {
+                  const isControlKey =
+                    event.key === 'Backspace' ||
+                    event.key === 'Delete' ||
+                    event.key === 'Tab' ||
+                    event.key === 'ArrowLeft' ||
+                    event.key === 'ArrowRight' ||
+                    event.key === 'Home' ||
+                    event.key === 'End';
+                  if (isControlKey) {
+                    return;
+                  }
+                  if (!/^[A-Za-z0-9_-]$/.test(event.key)) {
+                    event.preventDefault();
+                  }
+                }}
               />
               {errors.code && <p className="mt-1 text-xs text-red-500">{errors.code.message}</p>}
             </div>
@@ -369,6 +396,7 @@ export const RegulationFormModal = ({
                 placeholder={t('form.placeholders.title')}
                 {...register('title')}
                 className={errors.title ? 'border-red-500' : ''}
+                maxLength={200}
               />
               {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>}
             </div>
@@ -381,6 +409,7 @@ export const RegulationFormModal = ({
                 rows={4}
                 className={`w-full rounded-lg border px-4 py-2 text-sm ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder={t('form.placeholders.description')}
+                maxLength={500}
                 {...register('description')}
               />
               {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, type CSSProperties } from 'react'
 import { useTranslations } from 'next-intl'
 import { Plus, MoreVertical, Upload, Download, Trash2, Edit, X } from 'lucide-react'
 import { Dropdown, DropdownSearch, SearchInput, Button } from '@/app/components/ui'
@@ -606,7 +606,7 @@ export default function CurriculumManagementPage() {
             (column as { widthPercent?: number }).widthPercent ||
             (baseTotalWidth > 0 ? (column.width / baseTotalWidth) * 100 : 100 / visibleColumns.length)
 
-          const cellPaddingStyle: React.CSSProperties = {
+          const cellPaddingStyle: CSSProperties = {
             width: `${widthPercent}%`,
             paddingLeft: cellStyle.paddingX,
             paddingRight: cellStyle.paddingX,

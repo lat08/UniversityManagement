@@ -133,6 +133,7 @@ export const queryKeys = {
     all: ['dashboard'] as const,
     student: () => [...queryKeys.dashboard.all, 'student'] as const,
     instructor: () => [...queryKeys.dashboard.all, 'instructor'] as const,
+  admin: () => [...queryKeys.dashboard.all, 'admin'] as const,
   },
 
   exams: {

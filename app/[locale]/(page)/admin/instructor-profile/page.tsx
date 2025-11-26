@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Plus, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useLocale, useTranslations } from 'next-intl';
@@ -19,12 +19,14 @@ import InstructorDetailModal from './components/InstructorDetailModal';
 import InstructorActionsMenu from './components/InstructorActionsMenu';
 import { STAT_CARDS } from './lib/constants/statCards';
 import { useInstructors } from './lib/hooks/useInstructors';
+import { useSearchParams } from 'next/navigation';
 
 export default function InstructorProfilePage() {
   const t = useTranslations('admin.instructorProfile');
   const tFilters = useTranslations('admin.instructorProfile.filters');
   const tStatCards = useTranslations('admin.instructorProfile.statCards');
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const {
     searchQuery,
     setSearchQuery,
@@ -72,6 +74,14 @@ export default function InstructorProfilePage() {
       master: stats.masterCount,
     };
   }, [stats]);
+
+  // Open Add Instructor modal when triggered from dashboard
+  const action = searchParams.get('action');
+  useEffect(() => {
+    if (action === 'addInstructor') {
+      setIsAddModalOpen(true);
+    }
+  }, [action]);
 
   const handleDeleteInstructor = async (instructor: InstructorListItem) => {
     if (instructor.employmentStatus !== 'inactive') {

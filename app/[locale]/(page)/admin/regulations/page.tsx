@@ -440,7 +440,13 @@ const AdminRegulationsPage = () => {
 
       <RegulationDetailModal
         open={Boolean(detailPreview)}
-        regulation={isDetailLoading ? detailPreview : detailData ?? detailPreview}
+        regulation={
+          detailPreview
+            ? detailData
+              ? { ...detailData, ...detailPreview }
+              : detailPreview
+            : null
+        }
         onClose={handleCloseDetail}
         onDownload={handleDownload}
       />

@@ -5,7 +5,6 @@ import {
   RegulationQueryParams,
   RegulationRecord,
 } from '@/lib/types/regulation';
-import { createSupabaseClient } from '@/lib/utils/supabase';
 
 /**
  * @api GET /v1/regulations
@@ -84,19 +83,29 @@ const getById = async (id: string): Promise<RegulationRecord> => {
 };
 
 /**
- * Upload file lên Supabase bucket 'regulations'
+ * Upload file lên Supabase bucket 'regulations' thông qua API server-side dùng service role
  */
-const uploadFile = async (file: File, code: string): Promise<string> => {
-  const supabase = createSupabaseClient();
-  const filePath = `regulations/${code}/${Date.now()}-${file.name}`;
-  const { data, error } = await supabase.storage.from('regulations').upload(filePath, file, {
-    upsert: true,
-  });
-  if (error) {
-    throw new Error(error.message);
+const uploadFile = async (file: File, code: string, previousFileUrl?: string | null): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('code', code);
+  if (previousFileUrl) {
+    formData.append('previousUrl', previousFileUrl);
   }
-  const { data: publicUrl } = supabase.storage.from('regulations').getPublicUrl(data.path);
-  return publicUrl.publicUrl;
+
+  const response = await fetch('/api/admin/regulations/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { error?: string } | null;
+    const message = errorBody?.error ?? 'Failed to upload file';
+    throw new Error(message);
+  }
+
+  const result = (await response.json()) as { publicUrl: string };
+  return result.publicUrl;
 };
 
 /**
@@ -177,7 +186,7 @@ const create = async (payload: RegulationMutationPayload, file: File | null): Pr
  * @auth Required (Admin)
  */
 const update = async (id: string, payload: RegulationMutationPayload, file: File | null): Promise<RegulationRecord> => {
-  const fileUrl = file ? await uploadFile(file, payload.code) : undefined;
+  const fileUrl = file ? await uploadFile(file, payload.code, payload.fileUrl ?? null) : undefined;
   const fileType = file ? file.name.split('.').pop()?.toLowerCase() ?? null : payload.fileType;
   const response = await api.put(`/v1/regulations/${id}`, {
     code: payload.code,

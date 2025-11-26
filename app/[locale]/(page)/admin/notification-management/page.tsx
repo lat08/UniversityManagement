@@ -20,6 +20,7 @@ import { DatePicker } from './components/DatePicker';
 import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
 import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
 import { useNotifications } from './lib/hooks/useNotifications';
+import { useSearchParams } from 'next/navigation';
 import { 
   buildNotificationTypeOptions,
   buildSendingMethodOptions,
@@ -37,6 +38,7 @@ export default function NotificationManagementPage() {
   const tCommon = useTranslations('common.actions');
   const translate = t as unknown as TranslateFn;
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const statusOptions = useMemo(() => buildStatusOptions(translate), [translate]);
   const targetTypeOptions = useMemo(() => [
     { value: '', label: t('allTargets') },
@@ -117,6 +119,22 @@ export default function NotificationManagementPage() {
   const [selectedNotificationIds, setSelectedNotificationIds] = useState<Set<string>>(new Set());
 
   const { notifications, loading, currentPage, totalCount, totalPages, stats, fetchNotifications, setCurrentPage } = useNotifications();
+
+  // Open Add Notification modal when triggered from dashboard
+  const action = searchParams.get('action');
+  useEffect(() => {
+    if (action === 'create') {
+      setIsAddModalOpen(true);
+    }
+  }, [action]);
+
+  // Open Add Notification modal when triggered from dashboard
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'create') {
+      setIsAddModalOpen(true);
+    }
+  }, [searchParams]);
 
   const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([
     { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },

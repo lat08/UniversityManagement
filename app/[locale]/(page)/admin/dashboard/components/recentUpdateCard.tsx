@@ -17,7 +17,6 @@ export const RecentUpdateCard: React.FC<RecentUpdateCardProps> = ({ update }) =>
       </div>
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-gray-900 text-sm mb-1">{update.title}</h4>
-        <p className="text-xs text-gray-600 mb-2">{update.description}</p>
         <p className="text-xs text-gray-500 flex items-center gap-1">
           <Clock className="w-3 h-3" />
           {update.timestamp}

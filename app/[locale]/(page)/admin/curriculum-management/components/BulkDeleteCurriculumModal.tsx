@@ -1,8 +1,9 @@
-"use client"
+'use client'
 
-import { Button } from "@/app/components/ui"
-import { X } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { type MouseEvent } from 'react'
+import { Button } from '@/app/components/ui'
+import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface BulkDeleteCurriculumModalProps {
   isOpen: boolean
@@ -20,10 +21,10 @@ export const BulkDeleteCurriculumModal = ({
   isLoading,
 }: BulkDeleteCurriculumModalProps) => {
   const t = useTranslations('admin.curriculumManagement')
-  const tActions = useTranslations('actions')
+  const tActions = useTranslations('common.actions')
   if (!isOpen) return null
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isLoading) {
       onClose()
     }
