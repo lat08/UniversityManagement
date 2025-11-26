@@ -123,7 +123,13 @@ export default function AdminLoginPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <Image src="/bg_admin_login.png" alt="Admin Background" fill className="object-cover" priority />
+        <Image
+          src="/background-admin.jpg"
+          alt="Admin Background"
+          fill
+          className="object-cover"
+          priority
+        />
         <div className="absolute inset-0 bg-black/50" />
       </div>
 

@@ -166,20 +166,27 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
   const departmentOptions = departments.map((d) => ({ value: d.departmentId, label: d.departmentName }))
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{t('modals.add.title')}</h2>
-              <p className="text-sm text-gray-600 mt-1">{t('modals.add.description')}</p>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={handleBackdropClick}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
+        <div className="px-6 py-4 border-b bg-gradient-to-r from-[#0053AD]/5 via-white to-white">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0053AD]">
+                {t('modals.add.title')}
+              </p>
+              <h2 className="mt-1 text-xl font-semibold text-gray-900 truncate">
+                {t('modals.add.description')}
+              </h2>
+              <p className="mt-1 text-xs text-gray-500">
+                {t('modals.add.helperIntro')}
+              </p>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 shrink-0"
               type="button"
             >
               <X className="h-5 w-5" />
@@ -188,8 +195,18 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
-          <div className="overflow-y-auto flex-1 p-6">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
+            <div className="rounded-lg border border-gray-100 bg-gray-50/60 px-4 py-3 text-xs text-gray-600">
+              <p className="font-medium text-gray-800 mb-1">
+                {t('modals.add.summaryTitle')}
+              </p>
+              <p className="mb-1">
+                {t('modals.add.summaryLine1')}
+              </p>
+              <p>{t('modals.add.summaryLine2')}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('fields.code.label')} <span className="text-red-500">*</span>
@@ -219,7 +236,9 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.faculty.label')}</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('fields.faculty.label')}
+                </label>
                 <DropdownSearch
                   options={facultyOptions}
                   value={selectedFacultyId}
@@ -255,12 +274,6 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">{t('fields.credits.label')}</label>
-                <Input value={0} disabled className="bg-gray-50 cursor-not-allowed" />
-                <p className="mt-1 text-xs text-gray-500">{t('fields.credits.helper')}</p>
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('fields.appliedYear.label')} <span className="text-red-500">*</span>
                 </label>
@@ -292,7 +305,7 @@ export const AddCurriculumModal = ({ isOpen, onClose, onSuccess }: AddCurriculum
             </div>
           </div>
 
-          <div className="flex gap-3 p-6 border-t">
+          <div className="flex flex-col sm:flex-row gap-3 px-6 py-4 border-t bg-gray-50">
             <Button
               type="button"
               variant="outline"

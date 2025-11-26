@@ -28,28 +28,32 @@ export const ConfirmDeleteCurriculumModal = ({
   const safeName = curriculumName ?? tActions('noName')
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">{t('modals.confirmDelete.title')}</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-red-100">
+        <div className="px-6 py-4 border-b bg-gradient-to-r from-red-50 via-white to-white flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+              {t('modals.confirmDelete.title')}
+            </p>
+            <h2 className="mt-1 text-base font-semibold text-gray-900">
+              {t('modals.confirmDelete.description', { name: safeName })}
+            </h2>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 shrink-0"
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
-        <div className="p-6">
-          <p className="text-gray-700">{t('modals.confirmDelete.description', { name: safeName })}</p>
-          <p className="text-sm text-red-600 mt-2">{t('modals.confirmDelete.note')}</p>
+        <div className="px-6 py-5">
+          <p className="text-sm text-red-700">{t('modals.confirmDelete.note')}</p>
         </div>
 
-        <div className="flex gap-3 p-6 border-t">
+        <div className="flex flex-col sm:flex-row gap-3 px-6 py-4 border-t bg-gray-50">
           <Button variant="outline" onClick={onClose} className="flex-1">
             {tActions('cancel')}
           </Button>

@@ -5,7 +5,7 @@ import { Archive, ClipboardCheck, FilePenLine, Layers3, Plus } from 'lucide-reac
 import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { Button, Dropdown, Pagination, SearchInput } from '@/app/components/ui';
-import { MajorStatCard } from '@/app/[locale]/(page)/admin/faculty-management/components/MajorStatCard';
+import { MajorStatCard } from './components/MajorStatCard';
 import {
   REGULATION_AUDIENCE_OPTIONS,
   REGULATION_CATEGORIES,

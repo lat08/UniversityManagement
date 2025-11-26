@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from "react";
-import { LucideIcon } from "lucide-react";
-import { useCountUp } from "@/lib/hooks/useCountUp";
-import { useLocale } from "next-intl";
+import React, { useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { useCountUp } from '@/lib/hooks/useCountUp';
 
 interface MajorStatCardProps {
   label: string;
@@ -13,7 +13,13 @@ interface MajorStatCardProps {
   iconColor: string;
 }
 
-export const MajorStatCard = ({ label, value, Icon, bgColor, iconColor }: MajorStatCardProps) => {
+export const MajorStatCard: React.FC<MajorStatCardProps> = ({
+  label,
+  value,
+  Icon,
+  bgColor,
+  iconColor,
+}) => {
   const locale = useLocale();
   const count = useCountUp(value, { duration: 1200, start: 0 });
   const displayValue = useMemo(() => Math.round(count), [count]);
@@ -34,3 +40,5 @@ export const MajorStatCard = ({ label, value, Icon, bgColor, iconColor }: MajorS
     </div>
   );
 };
+
+

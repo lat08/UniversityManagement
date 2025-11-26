@@ -13,6 +13,7 @@ export interface CurriculumListItem {
   totalCredits: number
   createdAt: string
   updatedAt: string
+  isActive: boolean
 }
 
 export interface CurriculumListResponse {
