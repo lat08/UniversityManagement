@@ -16,6 +16,7 @@ import { ViewNotificationDetailModal } from './components/ViewNotificationDetail
 import { BulkEditNotificationModal } from './components/BulkEditNotificationModal';
 import { NotificationActionsMenu } from './components/NotificationActionsMenu';
 import { NotificationStatCard } from './components/NotificationStatCard';
+import { DatePicker } from './components/DatePicker';
 import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
 import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
 import { useNotifications } from './lib/hooks/useNotifications';
@@ -683,34 +684,29 @@ export default function NotificationManagementPage() {
             {/* Second Row: Date Range Filter and Advanced Filter Button */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
               <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  <Calendar className="w-4 h-4 inline mr-1.5" />
-                  {t('fromDate')}
-                </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
+                  onChange={(value) => {
+                    setStartDate(value);
                     setCurrentPage(1);
                   }}
-                  className="w-full"
+                  label={t('fromDate')}
+                  placeholder="dd/mm/yyyy"
+                  maxDate={endDate || undefined}
+                  locale={locale}
                 />
               </div>
               <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  <Calendar className="w-4 h-4 inline mr-1.5" />
-                  {t('toDate')}
-                </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
+                  onChange={(value) => {
+                    setEndDate(value);
                     setCurrentPage(1);
                   }}
-                  min={startDate || undefined}
-                  className="w-full"
+                  label={t('toDate')}
+                  placeholder="dd/mm/yyyy"
+                  minDate={startDate || undefined}
+                  locale={locale}
                 />
               </div>
               {(startDate || endDate) && (
