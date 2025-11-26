@@ -1,92 +1,84 @@
-export interface Major {
-  majorId: string;
-  majorCode: string;
-  majorName: string;
+export interface Faculty {
   facultyId: string;
   facultyName: string;
-  trainingSystemName: string;
-  curriculumId: string;
-  curriculumName: string;
-  status: 'active' | 'inactive';
+  facultyCode: string;
+  divisionId: string;
+  divisionName: string;
+  divisionCode: string;
+  deanId?: string;
+  deanName?: string;
+  deanCode?: string;
+  facultyStatus: string;
+  curriculumCodes: string[];
+  departmentCount: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  isActive: boolean;
 }
 
 export interface Pagination {
-  currentPage: number;
-  pageSize: number;
   totalCount: number;
+  pageNumber: number;
+  pageSize: number;
   totalPages: number;
-}
-
-export interface MajorsResponse {
-  majors: Major[];
-  pagination: Pagination;
-  statistics?: {
-    totalMajors: number;
-    activeMajors: number;
-    inactiveMajors: number;
-  };
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
-  errors?: string[];
+  errors?: string[] | null;
 }
 
-export interface Faculty {
-  facultyId: string;
-  facultyName: string;
-  facultyCode: string;
+export interface PagedResult {
+  data: Faculty[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
-export interface TrainingSystem {
-  trainingSystemId: string;
-  trainingSystemName: string;
-  trainingSystemCode: string;
-}
-
-export interface Curriculum {
-  curriculumId: string;
-  curriculumName: string;
-  curriculumCode: string;
-}
-
-export interface GetMajorsParams {
+export interface GetFacultiesParams {
   pageNumber?: number;
   pageSize?: number;
-  searchKeyword?: string;
-  facultyId?: string;
-  trainingSystemId?: string;
-  curriculumId?: string;
+  searchTerm?: string;
+  divisionId?: string;
+  curriculumCode?: string;
   status?: string;
 }
 
-export interface CreateMajorPayload {
-  majorName: string;
-  majorCode: string;
-  facultyId: string;
-  trainingSystemId: string;
-  curriculumId: string;
-  status?: 'active' | 'inactive';
+export interface CreateFacultyPayload {
+  facultyName: string;
+  facultyCode: string;
+  divisionId: string;
+  deanId?: string;
+  facultyStatus?: 'active' | 'inactive';
 }
 
-export interface UpdateMajorPayload extends CreateMajorPayload {
-  majorId: string;
+export interface UpdateFacultyPayload {
+  facultyName: string;
+  facultyCode: string;
+  divisionId: string;
+  deanId?: string;
+  facultyStatus: 'active' | 'inactive';
 }
 
-export const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
-  { value: 'active', label: 'Đang hoạt động' },
-  { value: 'inactive', label: 'Ngừng hoạt động' },
-];
-
-export const getStatusDisplay = (status: string) => {
+export const getStatusDisplay = (
+  status: string,
+  labels?: {
+    active: string;
+    inactive: string;
+    unknown: string;
+  }
+) => {
+  const statusLower = status?.toLowerCase() || '';
   const statusMap: Record<string, { label: string; color: string }> = {
-    active: { label: 'Đang hoạt động', color: 'bg-green-100 text-green-700' },
-    inactive: { label: 'Ngừng hoạt động', color: 'bg-red-100 text-red-700' },
+    active: { label: labels?.active ?? 'Đang hoạt động', color: 'bg-green-100 text-green-700' },
+    inactive: { label: labels?.inactive ?? 'Ngưng hoạt động', color: 'bg-red-100 text-red-700' },
   };
-  return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
+  return statusMap[statusLower] || { label: labels?.unknown ?? (status || 'Không xác định'), color: 'bg-gray-100 text-gray-700' };
 };

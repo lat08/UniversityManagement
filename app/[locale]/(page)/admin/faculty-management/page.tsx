@@ -1,97 +1,82 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
-import {
-  CircleCheck,
-  Edit2,
-  Plus,
-  School,
-  Trash2,
-  X,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
-import { Dropdown, SearchInput, Button } from "@/app/components/ui";
-import { Pagination } from "@/app/components/ui/pagination";
-import { AddMajorModal } from "./components/AddMajorModal";
-import { EditMajorModal } from "./components/EditMajorModal";
-import { BulkEditMajorModal } from "./components/BulkEditMajorModal";
-import { ConfirmDeleteMajorModal } from "./components/ConfirmDeleteMajorModal";
-import { BulkDeleteMajorModal } from "./components/BulkDeleteMajorModal";
-import { MajorActionsMenu } from "./components/MajorActionsMenu";
-import { MajorStatCard } from "./components/MajorStatCard";
-import { ResizableTable, ResizableColumn } from "../student-profile/components/ResizableTable";
-import { TableSkeleton } from "../student-profile/components/LoadingSkeleton";
-import { toast } from "react-hot-toast";
-import { useMajors } from "./lib/hooks/useMajors";
-import { majorsApi } from "./lib/api/majorsApi";
-import { getStatusDisplay } from "./lib/types/types";
-import type { Major, Faculty, Curriculum } from "./lib/types/types";
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, GraduationCap, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Dropdown, SearchInput, Button } from '@/app/components/ui';
+import { Pagination } from '@/app/components/ui/pagination';
+import { AddFacultyModal } from './components/AddFacultyModal';
+import { EditFacultyModal } from './components/EditFacultyModal';
+import { BulkEditFacultyModal } from './components/BulkEditFacultyModal';
+import { ConfirmDeleteFacultyModal } from './components/ConfirmDeleteFacultyModal';
+import { BulkDeleteFacultyModal } from './components/BulkDeleteFacultyModal';
+import { FacultyActionsMenu } from './components/FacultyActionsMenu';
+import { FacultyStatCard } from './components/FacultyStatCard';
+import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
+import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
+import { toast } from 'react-hot-toast';
+import { useFaculties } from './lib/hooks/useFaculties';
+import { facultiesApi } from './lib/api/facultiesApi';
+import { getStatusDisplay } from './lib/types/types';
+import type { Faculty } from './lib/types/types';
 
 const STAT_CARDS = [
-  {
-    key: "total",
-    labelKey: "stats.total",
-    bgColor: "bg-[#FFDDAA]",
-    iconColor: "text-[#CC8800]",
-    Icon: School,
+  { 
+    key: 'total', 
+    labelKey: 'stats.total',
+    bgColor: 'bg-[#FFDDAA]',
+    iconColor: 'text-[#CC8800]',
+    Icon: GraduationCap
   },
-  {
-    key: "active",
-    labelKey: "stats.active",
-    bgColor: "bg-[#CCEECC]",
-    iconColor: "text-[#44AA44]",
-    Icon: CheckCircle2,
+  { 
+    key: 'active', 
+    labelKey: 'stats.active',
+    bgColor: 'bg-[#CCEECC]',
+    iconColor: 'text-[#44AA44]',
+    Icon: CheckCircle2
   },
-  {
-    key: "inactive",
-    labelKey: "stats.inactive",
-    bgColor: "bg-[#FFBBAA]",
-    iconColor: "text-[#CC4444]",
-    Icon: XCircle,
+  { 
+    key: 'inactive', 
+    labelKey: 'stats.inactive',
+    bgColor: 'bg-[#FFBBAA]',
+    iconColor: 'text-[#CC4444]',
+    Icon: XCircle
   },
 ] as const;
 
-export default function MajorManagementPage() {
-  const t = useTranslations("admin.facultyManagement");
+export default function FacultyManagementPage() {
+  const t = useTranslations('admin.facultyManagement');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedDivision, setSelectedDivision] = useState('');
+  const [selectedCurriculum, setSelectedCurriculum] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedFacultyId, setSelectedFacultyId] = useState('');
-  const [selectedCurriculumId, setSelectedCurriculumId] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-  const [deletingMajorId, setDeletingMajorId] = useState<string | null>(null);
-  const [deletingMajorName, setDeletingMajorName] = useState<string | undefined>(undefined);
-  const [editingMajor, setEditingMajor] = useState<Major | null>(null);
-  const [selectedMajorIds, setSelectedMajorIds] = useState<Set<string>>(new Set());
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [curricula, setCurricula] = useState<Curriculum[]>([]);
+  const [deletingFacultyId, setDeletingFacultyId] = useState<string | null>(null);
+  const [deletingFacultyName, setDeletingFacultyName] = useState<string | undefined>(undefined);
+  const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
+  const [selectedFacultyIds, setSelectedFacultyIds] = useState<Set<string>>(new Set());
 
-  const { majors, loading, currentPage, totalCount, totalPages, stats, fetchMajors, setCurrentPage } = useMajors();
+  const { faculties, loading, currentPage, totalCount, totalPages, stats, fetchFaculties, setCurrentPage } = useFaculties();
 
-  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>(() => [
-    { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
-    { key: 'majorCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-    { key: 'majorName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
-    { key: 'facultyName', label: t('table.columns.faculty'), width: 200, minWidth: 150, align: 'left', visible: true },
-    { key: 'curriculumName', label: t('table.columns.curriculum'), width: 160, minWidth: 120, align: 'left', visible: true },
-    { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
-    { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
-  ]);
+  // Initialize columns after translations are loaded
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([]);
 
   useEffect(() => {
-    majorsApi.getFaculties().then((res) => {
-      if (res.success) setFaculties(res.data);
-    });
-    majorsApi.getCurricula().then((res) => {
-      if (res.success) setCurricula(res.data);
-    });
-  }, []);
+    setResizableColumns([
+      { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
+      { key: 'facultyCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+      { key: 'facultyName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
+      { key: 'divisionName', label: t('table.columns.division'), width: 200, minWidth: 150, align: 'left', visible: true },
+      { key: 'curriculumCode', label: t('table.columns.curriculum'), width: 150, minWidth: 120, align: 'left', visible: true },
+      { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
+      { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
+    ]);
+  }, [t]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -102,44 +87,72 @@ export default function MajorManagementPage() {
   }, [searchQuery, setCurrentPage]);
 
   useEffect(() => {
-    fetchMajors({
+    fetchFaculties({
       pageNumber: currentPage,
       pageSize: 20,
-      searchKeyword: searchKeyword || undefined,
-      facultyId: selectedFacultyId || undefined,
-      curriculumId: selectedCurriculumId || undefined,
+      searchTerm: searchKeyword || undefined,
+      divisionId: selectedDivision || undefined,
+      curriculumCode: selectedCurriculum || undefined,
       status: selectedStatus || undefined,
     });
-  }, [currentPage, searchKeyword, selectedFacultyId, selectedCurriculumId, selectedStatus, fetchMajors]);
+  }, [currentPage, searchKeyword, selectedDivision, selectedCurriculum, selectedStatus, fetchFaculties]);
+
+  const filteredFaculties = useMemo(() => faculties, [faculties]);
 
   const statValues = useMemo(() => ({
-    total: stats.totalMajors,
-    active: stats.activeMajors,
-    inactive: stats.inactiveMajors,
+    total: stats.totalFaculties,
+    active: stats.activeFaculties,
+    inactive: stats.inactiveFaculties,
   }), [stats]);
 
-  const handleDeleteClick = useCallback((majorId: string, majorName: string) => {
-    setDeletingMajorId(majorId);
-    setDeletingMajorName(majorName);
+  const statusLabels = useMemo(() => ({
+    active: t('status.active'),
+    inactive: t('status.inactive'),
+    unknown: t('status.unknown'),
+  }), [t]);
+
+  const statusOptions = useMemo(() => ([
+    { value: '', label: t('status.all') },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+  ]), [t]);
+
+  // Mock divisions - replace with actual API call
+  const divisionOptions = useMemo(() => ([
+    { value: '', label: t('filters.allDivisions') },
+    { value: '66b96277-1886-4eaf-98f6-3e03bfddd595', label: 'Khoa học và Công nghệ' },
+    { value: '5e4fd89c-9cc0-488f-b8f7-de8bde3a270c', label: 'Kinh tế và Quản trị' },
+  ]), [t]);
+
+  // Mock curriculums - replace with actual API call
+  const curriculumOptions = useMemo(() => ([
+    { value: '', label: t('filters.allCurriculums') },
+    { value: 'CTDT-KT-2023', label: 'CTDT-KT-2023' },
+    { value: 'CTDT-KT-2022', label: 'CTDT-KT-2022' },
+  ]), [t]);
+
+  const handleDeleteClick = useCallback((facultyId: string, facultyName: string) => {
+    setDeletingFacultyId(facultyId);
+    setDeletingFacultyName(facultyName);
     setIsDeleteModalOpen(true);
   }, []);
 
-  const handleEditClick = useCallback((major: Major) => {
-    setEditingMajor(major);
+  const handleEditClick = useCallback((faculty: Faculty) => {
+    setEditingFaculty(faculty);
     setIsEditModalOpen(true);
   }, []);
 
   const handleDeleteConfirm = async () => {
-    if (!deletingMajorId) return;
-    const res = await majorsApi.deleteMajor();
+    if (!deletingFacultyId) return;
+    const res = await facultiesApi.delete(deletingFacultyId);
     if (res.success) {
       toast.success(t('hooks.deleteSuccess'));
-      fetchMajors({
+      fetchFaculties({
         pageNumber: currentPage,
         pageSize: 20,
-        searchKeyword: searchKeyword || undefined,
-        facultyId: selectedFacultyId || undefined,
-        curriculumId: selectedCurriculumId || undefined,
+        searchTerm: searchKeyword || undefined,
+        divisionId: selectedDivision || undefined,
+        curriculumCode: selectedCurriculum || undefined,
         status: selectedStatus || undefined,
       });
     } else {
@@ -148,38 +161,38 @@ export default function MajorManagementPage() {
   };
 
   const handleSelectAll = useCallback(() => {
-    if (selectedMajorIds.size === majors.length) {
-      setSelectedMajorIds(new Set());
+    if (selectedFacultyIds.size === filteredFaculties.length) {
+      setSelectedFacultyIds(new Set());
     } else {
-      setSelectedMajorIds(new Set(majors.map(m => m.majorId)));
+      setSelectedFacultyIds(new Set(filteredFaculties.map(f => f.facultyId)));
     }
-  }, [majors, selectedMajorIds.size]);
+  }, [filteredFaculties, selectedFacultyIds.size]);
 
-  const handleSelectOne = useCallback((majorId: string) => {
-    setSelectedMajorIds(prev => {
+  const handleSelectOne = useCallback((facultyId: string) => {
+    setSelectedFacultyIds(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(majorId)) {
-        newSet.delete(majorId);
+      if (newSet.has(facultyId)) {
+        newSet.delete(facultyId);
       } else {
-        newSet.add(majorId);
+        newSet.add(facultyId);
       }
       return newSet;
     });
   }, []);
 
   const handleBulkDelete = async () => {
-    const ids = Array.from(selectedMajorIds);
-    const res = await majorsApi.bulkDeleteMajors(ids);
+    const ids = Array.from(selectedFacultyIds);
+    const res = await facultiesApi.bulkDelete(ids);
     if (res.success) {
-      toast.success(res.message || t('hooks.bulkDeleteSuccess'));
-      setSelectedMajorIds(new Set());
+      toast.success(res.message || t('hooks.bulkDeleteSuccess', { count: ids.length }));
+      setSelectedFacultyIds(new Set());
       setIsBulkDeleteModalOpen(false);
-      fetchMajors({
+      fetchFaculties({
         pageNumber: currentPage,
         pageSize: 20,
-        searchKeyword: searchKeyword || undefined,
-        facultyId: selectedFacultyId || undefined,
-        curriculumId: selectedCurriculumId || undefined,
+        searchTerm: searchKeyword || undefined,
+        divisionId: selectedDivision || undefined,
+        curriculumCode: selectedCurriculum || undefined,
         status: selectedStatus || undefined,
       });
     } else {
@@ -187,10 +200,10 @@ export default function MajorManagementPage() {
     }
   };
 
-  const renderMajorRow = useCallback((major: Major, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const statusDisplay = getStatusDisplay(major.status);
+  const renderFacultyRow = useCallback((faculty: Faculty, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
+    const statusDisplay = getStatusDisplay(faculty.facultyStatus, statusLabels);
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
-    const isSelected = selectedMajorIds.has(major.majorId);
+    const isSelected = selectedFacultyIds.has(faculty.facultyId);
 
     return (
       <>
@@ -214,41 +227,40 @@ export default function MajorManagementPage() {
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => handleSelectOne(major.majorId)}
+                      onChange={() => handleSelectOne(faculty.facultyId)}
                       className="w-4 h-4 cursor-pointer accent-[#0053AD]"
                     />
                   </div>
                 </td>
               );
-            case 'majorCode':
+            case 'facultyCode':
               return (
-                <td key="majorCode" className="text-gray-900 font-medium" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {major.majorCode}
-                </td>
-              );
-            case 'majorName':
-              return (
-                <td key="majorName" className="text-gray-900" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {major.majorName}
+                <td key="facultyCode" className="text-gray-900 font-medium" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {faculty.facultyCode}
                 </td>
               );
             case 'facultyName':
               return (
-                <td key="facultyName" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {major.facultyName}
+                <td key="facultyName" className="text-gray-900" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {faculty.facultyName}
                 </td>
               );
-            case 'curriculumName':
+            case 'divisionName':
               return (
-                <td key="curriculumName" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {major.curriculumName}
+                <td key="divisionName" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {faculty.divisionName || '-'}
+                </td>
+              );
+            case 'curriculumCode':
+              return (
+                <td key="curriculumCode" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {faculty.curriculumCodes && faculty.curriculumCodes.length > 0 ? faculty.curriculumCodes[0] : '-'}
                 </td>
               );
             case 'status':
               const isCompact = parseFloat(cellStyle.paddingX) < 20;
               const statusFontSize = isCompact ? '0.65rem' : '0.75rem';
               const statusPadding = isCompact ? '0.125rem 0.375rem' : '0.25rem 0.5rem';
-              const statusKey = major.status === 'active' ? 'active' : 'inactive';
               return (
                 <td key="status" style={cellPaddingStyle}>
                   <div className="flex justify-center">
@@ -258,7 +270,7 @@ export default function MajorManagementPage() {
                       lineHeight: '1.2',
                       whiteSpace: 'nowrap',
                     }}>
-                      {t(`table.status.${statusKey}`)}
+                      {statusDisplay.label}
                     </span>
                   </div>
                 </td>
@@ -266,11 +278,11 @@ export default function MajorManagementPage() {
             case 'actions':
               return (
                 <td key="actions" style={{ ...cellPaddingStyle, paddingLeft: '8px', paddingRight: '8px' }}>
-                  <MajorActionsMenu
-                    majorId={major.majorId}
-                    majorName={major.majorName}
-                    onEdit={() => handleEditClick(major)}
-                    onDelete={() => handleDeleteClick(major.majorId, major.majorName)}
+                  <FacultyActionsMenu
+                    facultyId={faculty.facultyId}
+                    facultyName={faculty.facultyName}
+                    onEdit={() => handleEditClick(faculty)}
+                    onDelete={() => handleDeleteClick(faculty.facultyId, faculty.facultyName)}
                     compact={(column.width || 0) < 120}
                   />
                 </td>
@@ -281,23 +293,7 @@ export default function MajorManagementPage() {
         })}
       </>
     );
-  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedMajorIds, t]);
-
-  const facultyOptions = [
-    { value: '', label: t('filters.allFaculties') },
-    ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
-  ];
-
-  const curriculumOptions = [
-    { value: '', label: t('filters.allCurricula') },
-    ...curricula.map((c) => ({ value: c.curriculumId, label: c.curriculumName })),
-  ];
-
-  const statusOptions = [
-    { value: '', label: t('filters.allStatuses') },
-    { value: 'active', label: t('filters.active') },
-    { value: 'inactive', label: t('filters.inactive') },
-  ];
+  }, [handleDeleteClick, handleEditClick, handleSelectOne, selectedFacultyIds, statusLabels]);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -308,7 +304,7 @@ export default function MajorManagementPage() {
       </div>
 
       {/* Stats Cards */}
-      {loading && majors.length === 0 ? (
+      {loading && faculties.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white rounded-lg shadow-sm p-4 sm:p-6 animate-pulse">
@@ -322,7 +318,7 @@ export default function MajorManagementPage() {
           {STAT_CARDS.map((card, index) => {
             const value = statValues[card.key];
             return (
-              <MajorStatCard
+              <FacultyStatCard
                 key={index}
                 label={t(card.labelKey)}
                 value={value}
@@ -358,7 +354,7 @@ export default function MajorManagementPage() {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {/* Search Input */}
             <div className="sm:col-span-2">
               <SearchInput
@@ -368,13 +364,13 @@ export default function MajorManagementPage() {
               />
             </div>
 
-            {/* Faculty Dropdown */}
+            {/* Division Dropdown */}
             <Dropdown
-              options={facultyOptions}
-              value={selectedFacultyId || ''}
-              placeholder={t('filters.allFaculties')}
+              options={divisionOptions}
+              value={selectedDivision || ''}
+              placeholder={t('filters.allDivisions')}
               onChange={(value) => {
-                setSelectedFacultyId(value);
+                setSelectedDivision(value);
                 setCurrentPage(1);
               }}
             />
@@ -382,10 +378,10 @@ export default function MajorManagementPage() {
             {/* Curriculum Dropdown */}
             <Dropdown
               options={curriculumOptions}
-              value={selectedCurriculumId || ''}
-              placeholder={t('filters.allCurricula')}
+              value={selectedCurriculum || ''}
+              placeholder={t('filters.allCurriculums')}
               onChange={(value) => {
-                setSelectedCurriculumId(value);
+                setSelectedCurriculum(value);
                 setCurrentPage(1);
               }}
             />
@@ -394,7 +390,7 @@ export default function MajorManagementPage() {
             <Dropdown
               options={statusOptions}
               value={selectedStatus || ''}
-              placeholder={t('filters.allStatuses')}
+              placeholder={t('status.all')}
               onChange={(value) => {
                 setSelectedStatus(value);
                 setCurrentPage(1);
@@ -403,12 +399,12 @@ export default function MajorManagementPage() {
           </div>
 
           {/* Bulk Actions Bar */}
-          {selectedMajorIds.size > 0 && (
+          {selectedFacultyIds.size > 0 && (
             <div className="flex items-center justify-between p-3 bg-[#E8F4FF] border border-[#0053AD]/20 rounded-lg">
               <div className="flex items-center gap-2">
                 <CircleCheck className="w-5 h-5 text-[#0053AD]" />
                 <span className="text-sm font-medium text-[#0053AD]">
-                  {t('table.selected', { count: selectedMajorIds.size })}
+                  {t('bulk.selected', { count: selectedFacultyIds.size })}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -419,7 +415,7 @@ export default function MajorManagementPage() {
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
                   <Edit2 className="w-4 h-4" />
-                  {t('actions.bulkEdit')}
+                  {t('bulk.edit')}
                 </Button>
                 <Button
                   variant="outline"
@@ -428,15 +424,15 @@ export default function MajorManagementPage() {
                   className="border-red-600 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
-                  {t('actions.bulkDelete')}
+                  {t('bulk.delete')}
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setSelectedMajorIds(new Set())}
+                  onClick={() => setSelectedFacultyIds(new Set())}
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   <X className="w-4 h-4" />
-                  {t('actions.clearSelection')}
+                  {t('bulk.clear')}
                 </Button>
               </div>
             </div>
@@ -448,10 +444,10 @@ export default function MajorManagementPage() {
           <div className="p-4 lg:p-6 min-w-0">
             <ResizableTable
               columns={resizableColumns}
-              data={majors}
-              renderRow={(major, visibleColumns, cellStyle) => (
-                <tr className="hover:bg-gray-50 transition-colors">
-                  {renderMajorRow(major, visibleColumns, cellStyle)}
+              data={filteredFaculties}
+              renderRow={(faculty, visibleColumns, cellStyle) => (
+                <tr key={faculty.facultyId} className="hover:bg-gray-50 transition-colors">
+                  {renderFacultyRow(faculty, visibleColumns, cellStyle)}
                 </tr>
               )}
               isLoading={loading}
@@ -461,12 +457,12 @@ export default function MajorManagementPage() {
               renderHeaderCheckbox={() => (
                 <input
                   type="checkbox"
-                  checked={majors.length > 0 && selectedMajorIds.size === majors.length}
+                  checked={filteredFaculties.length > 0 && selectedFacultyIds.size === filteredFaculties.length}
                   onChange={handleSelectAll}
                   className="w-4 h-4 cursor-pointer accent-[#0053AD]"
                   ref={(el) => {
                     if (el) {
-                      el.indeterminate = selectedMajorIds.size > 0 && selectedMajorIds.size < majors.length;
+                      el.indeterminate = selectedFacultyIds.size > 0 && selectedFacultyIds.size < filteredFaculties.length;
                     }
                   }}
                 />
@@ -488,72 +484,74 @@ export default function MajorManagementPage() {
       </div>
 
       {/* Modals */}
-      <AddMajorModal
+      <AddFacultyModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        divisions={divisionOptions.filter(d => d.value)}
         onSuccess={() => {
-          fetchMajors({
+          fetchFaculties({
             pageNumber: currentPage,
             pageSize: 20,
-            searchKeyword: searchKeyword || undefined,
-            facultyId: selectedFacultyId || undefined,
-            curriculumId: selectedCurriculumId || undefined,
+            searchTerm: searchKeyword || undefined,
+            divisionId: selectedDivision || undefined,
+            curriculumCode: selectedCurriculum || undefined,
             status: selectedStatus || undefined,
           });
         }}
       />
 
-      <EditMajorModal
+      <EditFacultyModal
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
-          setEditingMajor(null);
+          setEditingFaculty(null);
         }}
-        major={editingMajor}
+        faculty={editingFaculty}
+        divisions={divisionOptions.filter(d => d.value)}
         onSuccess={() => {
-          fetchMajors({
+          fetchFaculties({
             pageNumber: currentPage,
             pageSize: 20,
-            searchKeyword: searchKeyword || undefined,
-            facultyId: selectedFacultyId || undefined,
-            curriculumId: selectedCurriculumId || undefined,
+            searchTerm: searchKeyword || undefined,
+            divisionId: selectedDivision || undefined,
+            curriculumCode: selectedCurriculum || undefined,
             status: selectedStatus || undefined,
           });
         }}
       />
 
-      <BulkEditMajorModal
+      <BulkEditFacultyModal
         isOpen={isBulkEditModalOpen}
         onClose={() => setIsBulkEditModalOpen(false)}
-        selectedMajorIds={Array.from(selectedMajorIds)}
+        selectedFacultyIds={Array.from(selectedFacultyIds)}
         onSuccess={() => {
-          setSelectedMajorIds(new Set());
-          fetchMajors({
+          setSelectedFacultyIds(new Set());
+          fetchFaculties({
             pageNumber: currentPage,
             pageSize: 20,
-            searchKeyword: searchKeyword || undefined,
-            facultyId: selectedFacultyId || undefined,
-            curriculumId: selectedCurriculumId || undefined,
+            searchTerm: searchKeyword || undefined,
+            divisionId: selectedDivision || undefined,
+            curriculumCode: selectedCurriculum || undefined,
             status: selectedStatus || undefined,
           });
         }}
       />
 
-      <ConfirmDeleteMajorModal
+      <ConfirmDeleteFacultyModal
         isOpen={isDeleteModalOpen}
-        majorName={deletingMajorName}
+        facultyName={deletingFacultyName}
         onClose={() => {
           setIsDeleteModalOpen(false);
-          setDeletingMajorId(null);
-          setDeletingMajorName(undefined);
+          setDeletingFacultyId(null);
+          setDeletingFacultyName(undefined);
         }}
         onConfirm={handleDeleteConfirm}
       />
 
-      <BulkDeleteMajorModal
+      <BulkDeleteFacultyModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
-        selectedCount={selectedMajorIds.size}
+        selectedCount={selectedFacultyIds.size}
         onConfirm={handleBulkDelete}
       />
     </div>
