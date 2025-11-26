@@ -236,9 +236,12 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       }
     }
 
+    // Format date as ISO string for backend (backend only uses date part)
+    const bookingDateStr = format(bookingDate, "yyyy-MM-dd") + "T00:00:00";
+    
     createBookingMutation.mutate({
       roomId: selectedRoom.roomId,
-      bookingDate: format(bookingDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+      bookingDate: bookingDateStr,
       startTime,
       endTime,
       purpose: purpose.trim(),
