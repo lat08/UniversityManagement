@@ -218,7 +218,7 @@ export default function ExamScheduleManagementPage() {
     if (!publishingExamSchedule) return;
     const res = await examSchedulesApi.publish({ ids: [publishingExamSchedule.id] });
     if (res.success) {
-      toast.success('Công bố lịch thi thành công');
+      toast.success(t('publishSuccess'));
       fetchExamSchedules({
         pageNumber: currentPage,
         pageSize: 20,
@@ -228,7 +228,7 @@ export default function ExamScheduleManagementPage() {
         status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
-      toast.error(res.message || 'Công bố lịch thi thất bại');
+      toast.error(res.message || t('publishError'));
     }
   };
 
@@ -236,7 +236,7 @@ export default function ExamScheduleManagementPage() {
     if (!cancellingExamSchedule) return;
     const res = await examSchedulesApi.cancel({ ids: [cancellingExamSchedule.id], reason });
     if (res.success) {
-      toast.success('Hủy lịch thi thành công');
+      toast.success(t('cancelSuccess'));
       fetchExamSchedules({
         pageNumber: currentPage,
         pageSize: 20,
@@ -246,7 +246,7 @@ export default function ExamScheduleManagementPage() {
         status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
-      toast.error(res.message || 'Hủy lịch thi thất bại');
+      toast.error(res.message || t('cancelError'));
     }
   };
 
@@ -254,7 +254,7 @@ export default function ExamScheduleManagementPage() {
     if (!deletingExamSchedule) return;
     const res = await examSchedulesApi.delete({ ids: [deletingExamSchedule.id] });
     if (res.success) {
-      toast.success('Xóa lịch thi thành công');
+      toast.success(t('deleteSuccess'));
       fetchExamSchedules({
         pageNumber: currentPage,
         pageSize: 20,
@@ -264,7 +264,7 @@ export default function ExamScheduleManagementPage() {
         status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
-      toast.error(res.message || 'Xóa lịch thi thất bại');
+      toast.error(res.message || t('deleteError'));
     }
   };
 
@@ -296,21 +296,21 @@ export default function ExamScheduleManagementPage() {
 
   const handleOpenBulkPublishModal = useCallback(() => {
     if (hasCancelledSelected()) {
-      toast.error('Không thể công bố lịch thi đã bị hủy. Vui lòng bỏ chọn các lịch thi này.');
+      toast.error(t('cannotPublishCancelled'));
       return;
     }
     setIsBulkPublishModalOpen(true);
-  }, [hasCancelledSelected]);
+  }, [hasCancelledSelected, t]);
 
   const handleBulkPublish = async () => {
     if (hasCancelledSelected()) {
-      toast.error('Không thể công bố lịch thi đã bị hủy. Vui lòng bỏ chọn các lịch thi này.');
+      toast.error(t('cannotPublishCancelled'));
       return;
     }
     const ids = Array.from(selectedExamScheduleIds);
     const res = await examSchedulesApi.publish({ ids });
     if (res.success) {
-      toast.success(res.message || `Đã công bố ${ids.length} lịch thi`);
+      toast.success(res.message || t('bulkPublishSuccess', { count: ids.length }));
       setSelectedExamScheduleIds(new Set());
       setIsBulkPublishModalOpen(false);
       fetchExamSchedules({
@@ -322,7 +322,7 @@ export default function ExamScheduleManagementPage() {
         status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
-      toast.error(res.message || 'Công bố hàng loạt thất bại');
+      toast.error(res.message || t('bulkPublishError'));
     }
   };
 
@@ -330,7 +330,7 @@ export default function ExamScheduleManagementPage() {
     const ids = Array.from(selectedExamScheduleIds);
     const res = await examSchedulesApi.cancel({ ids, reason });
     if (res.success) {
-      toast.success(res.message || `Đã hủy ${ids.length} lịch thi`);
+      toast.success(res.message || t('bulkCancelSuccess', { count: ids.length }));
       setSelectedExamScheduleIds(new Set());
       setIsBulkCancelModalOpen(false);
       fetchExamSchedules({
@@ -342,7 +342,7 @@ export default function ExamScheduleManagementPage() {
         status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
-      toast.error(res.message || 'Hủy hàng loạt thất bại');
+      toast.error(res.message || t('bulkCancelError'));
     }
   };
 
@@ -350,7 +350,7 @@ export default function ExamScheduleManagementPage() {
     const ids = Array.from(selectedExamScheduleIds);
     const res = await examSchedulesApi.delete({ ids });
     if (res.success) {
-      toast.success(res.message || `Đã xóa ${ids.length} lịch thi`);
+      toast.success(res.message || t('bulkDeleteSuccess', { count: ids.length }));
       setSelectedExamScheduleIds(new Set());
       setIsBulkDeleteModalOpen(false);
       fetchExamSchedules({
@@ -362,7 +362,7 @@ export default function ExamScheduleManagementPage() {
         status: (selectedStatus as 'scheduled' | 'published' | 'cancelled' | 'completed' | undefined) || undefined,
       });
     } else {
-      toast.error(res.message || 'Xóa hàng loạt thất bại');
+      toast.error(res.message || t('bulkDeleteError'));
     }
   };
 
@@ -482,18 +482,18 @@ export default function ExamScheduleManagementPage() {
   }, [handleViewClick, handleEditClick, handleDeleteClick, handlePublishClick, handleCancelClick, handleSelectOne, selectedExamScheduleIds]);
 
   const semesterOptions = [
-    { value: '', label: 'Tất cả học kỳ' },
+    { value: '', label: t('allSemesters') },
     ...semesters.map((s) => ({
       value: s.semesterId,
       label:
         currentSemesterInfo?.semesterId === s.semesterId
-          ? `${s.semesterName} (Hiện tại)`
+          ? `${s.semesterName} ${t('currentSemesterSuffix')}`
           : s.semesterName,
     })),
   ];
 
   const classOptions = [
-    { value: '', label: 'Tất cả lớp' },
+    { value: '', label: t('allClasses') },
     ...courseClasses.map((cc) => {
       const id = cc.courseClassId || cc.id;
       if (!id) return null;
@@ -513,8 +513,8 @@ export default function ExamScheduleManagementPage() {
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Quản lý Lịch thi</h1>
-        <p className="text-gray-600 mt-1">Quản lý thông tin lịch thi các môn</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-600 mt-1">{t('description')}</p>
       </div>
 
       {/* Main Content */}
@@ -525,7 +525,7 @@ export default function ExamScheduleManagementPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                Danh sách Lịch thi
+                {t('listTitle')}
               </h2>
             </div>
             <div className="flex gap-3">
@@ -535,14 +535,14 @@ export default function ExamScheduleManagementPage() {
                 className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
               >
                 <FileDown className="w-4 h-4" />
-                Xuất Excel
+                {t('exportExcel')}
               </Button>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
                 className="bg-[#0053AD] hover:bg-[#003d82] text-white"
               >
                 <Plus className="w-4 h-4" />
-                Thêm lịch thi
+                {t('addExamSchedule')}
               </Button>
             </div>
           </div>
@@ -552,7 +552,7 @@ export default function ExamScheduleManagementPage() {
             {/* Search Section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-700">Tìm kiếm</h3>
+                <h3 className="text-sm font-medium text-gray-700">{t('search')}</h3>
                 {(searchQuery || searchSubjectName || searchClassName || searchRoomCode) && (
                   <Button
                     type="button"
@@ -567,7 +567,7 @@ export default function ExamScheduleManagementPage() {
                     className="text-xs text-gray-500 hover:text-gray-700"
                   >
                     <X className="w-3 h-3 mr-1" />
-                    Xóa tất cả
+                    {t('clearAll')}
                   </Button>
                 )}
               </div>
@@ -575,7 +575,7 @@ export default function ExamScheduleManagementPage() {
                 {/* General Search */}
                 <div className="sm:col-span-2 lg:col-span-1">
                   <SearchInput
-                    placeholder="Tìm kiếm chung (mã, giám thị...)"
+                    placeholder={t('searchGeneral')}
                     value={searchQuery}
                     maxLength={GLOBAL_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -585,7 +585,7 @@ export default function ExamScheduleManagementPage() {
                 {/* Subject Name Search */}
                 <div>
                   <SearchInput
-                    placeholder="Tìm theo tên môn học"
+                    placeholder={t('searchBySubject')}
                     value={searchSubjectName}
                     maxLength={GLOBAL_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchSubjectName(e.target.value)}
@@ -595,7 +595,7 @@ export default function ExamScheduleManagementPage() {
                 {/* Class Code Search */}
                 <div>
                   <SearchInput
-                    placeholder="Tìm theo mã lớp"
+                    placeholder={t('searchByClass')}
                     value={searchClassName}
                     maxLength={CODE_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchClassName(e.target.value)}
@@ -605,7 +605,7 @@ export default function ExamScheduleManagementPage() {
                 {/* Room Code Search */}
                 <div>
                   <SearchInput
-                    placeholder="Tìm theo mã phòng thi"
+                    placeholder={t('searchByRoom')}
                     value={searchRoomCode}
                     maxLength={ROOM_SEARCH_MAX_LENGTH}
                     onChange={(e) => setSearchRoomCode(e.target.value)}
@@ -620,7 +620,7 @@ export default function ExamScheduleManagementPage() {
               <Dropdown
                 options={semesterOptions}
                 value={selectedSemester || ''}
-                placeholder="Tất cả học kỳ"
+                placeholder={t('allSemesters')}
                 onChange={(value) => {
                   setSelectedSemester(value);
                   setCurrentPage(1);
@@ -631,7 +631,7 @@ export default function ExamScheduleManagementPage() {
               <Dropdown
                 options={classOptions}
                 value={selectedClass || ''}
-                placeholder="Tất cả lớp"
+                placeholder={t('allClasses')}
                 onChange={(value) => {
                   setSelectedClass(value);
                   setCurrentPage(1);
@@ -642,7 +642,7 @@ export default function ExamScheduleManagementPage() {
               <Dropdown
                 options={STATUS_OPTIONS}
                 value={selectedStatus || ''}
-                placeholder="Tất cả trạng thái"
+                placeholder={t('allStatuses')}
                 onChange={(value) => {
                   setSelectedStatus(value);
                   setCurrentPage(1);
@@ -653,7 +653,7 @@ export default function ExamScheduleManagementPage() {
             {currentSemesterInfo && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-900">
                 <div>
-                  <span className="font-semibold">Học kỳ hiện tại:</span>{' '}
+                  <span className="font-semibold">{t('currentSemesterLabel')}:</span>{' '}
                   {currentSemesterInfo.semesterName}
                   {formatSemesterRange(currentSemesterInfo) && (
                     <span className="text-[11px] text-blue-700 ml-2">
@@ -668,7 +668,7 @@ export default function ExamScheduleManagementPage() {
                   disabled={selectedSemester === currentSemesterInfo.semesterId}
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
-                  Xem học kỳ hiện tại
+                  {t('viewCurrentSemester')}
                 </Button>
               </div>
             )}
@@ -680,7 +680,7 @@ export default function ExamScheduleManagementPage() {
               <div className="flex items-center gap-2">
                 <CircleCheck className="w-5 h-5 text-[#0053AD]" />
                 <span className="text-sm font-medium text-[#0053AD]">
-                  Đã chọn {selectedExamScheduleIds.size} lịch thi
+                  {t('selectedCount', { count: selectedExamScheduleIds.size })}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -690,7 +690,7 @@ export default function ExamScheduleManagementPage() {
                   onClick={handleOpenBulkPublishModal}
                   className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
                 >
-                  Công bố
+                  {t('publish')}
                 </Button>
                 <Button
                   variant="outline"
@@ -698,7 +698,7 @@ export default function ExamScheduleManagementPage() {
                   onClick={() => setIsBulkCancelModalOpen(true)}
                   className="border-orange-600 text-orange-600 hover:bg-orange-50"
                 >
-                  Hủy lịch thi
+                  {t('cancelExamSchedule')}
                 </Button>
                 <Button
                   variant="outline"
@@ -707,7 +707,7 @@ export default function ExamScheduleManagementPage() {
                   className="border-red-600 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Xóa toàn bộ
+                  {t('deleteAll')}
                 </Button>
                 <Button
                   size="sm"
@@ -715,7 +715,7 @@ export default function ExamScheduleManagementPage() {
                   className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   <X className="w-4 h-4" />
-                  Bỏ chọn
+                  {t('clearSelection')}
                 </Button>
               </div>
             </div>
@@ -734,7 +734,7 @@ export default function ExamScheduleManagementPage() {
                 </tr>
               )}
               isLoading={loading}
-              emptyMessage="Không có dữ liệu"
+              emptyMessage={t('noData')}
               loadingComponent={<TableSkeleton />}
               onColumnsResize={setResizableColumns}
               renderHeaderCheckbox={() => (

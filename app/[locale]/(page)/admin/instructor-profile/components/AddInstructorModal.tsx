@@ -24,7 +24,8 @@ const getValidationSchema = (t: (key: string) => string) =>
     fullName: yup
       .string()
       .required(t('fullNameRequired'))
-      .min(2, t('fullNameMin')),
+      .min(2, t('fullNameMin'))
+      .max(100, t('fullNameMax')),
     gender: yup.string().required(t('genderRequired')),
     facultyId: yup.string().required(t('facultyRequired')),
     dateOfBirth: yup.string().nullable(),
@@ -43,9 +44,9 @@ const getValidationSchema = (t: (key: string) => string) =>
         if (!value) return true;
         return /^[0-9]{9,12}$/.test(value);
       }),
-    address: yup.string().nullable(),
+    address: yup.string().nullable().max(255, t('addressMax')),
     degree: yup.string().nullable(),
-    specialization: yup.string().nullable(),
+    specialization: yup.string().nullable().max(200, t('specializationMax')),
     employmentStatus: yup.string().nullable(),
   });
 
@@ -97,6 +98,22 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
   const formValues = watch();
   const degreeOptions = useMemo(() => getDegreeOptions(tFilters), [tFilters]);
   const statusOptions = useMemo(() => getEmploymentStatusOptions(tFilters), [tFilters]);
+
+  // Input handlers với validation
+  const handleFullNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '');
+    setValue('fullName', value, { shouldValidate: true });
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setValue('phoneNumber', value || null, { shouldValidate: true });
+  };
+
+  const handleCitizenIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setValue('citizenId', value || null, { shouldValidate: true });
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -219,11 +236,18 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('fullName')} <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  placeholder={t('fullNamePlaceholder')}
-                  {...register('fullName')}
-                  className={errors.fullName ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    placeholder={t('fullNamePlaceholder')}
+                    maxLength={100}
+                    value={formValues.fullName || ''}
+                    onChange={handleFullNameChange}
+                    className={`pr-16 ${errors.fullName ? 'border-red-500' : ''}`}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                    {formValues.fullName?.length || 0}/100
+                  </span>
+                </div>
                 {errors.fullName && (
                   <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>
                 )}
@@ -231,11 +255,19 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('phoneNumber')}</label>
-                <Input
-                  placeholder={t('phoneNumberPlaceholder')}
-                  {...register('phoneNumber')}
-                  className={errors.phoneNumber ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    type="tel"
+                    placeholder={t('phoneNumberPlaceholder')}
+                    maxLength={11}
+                    value={formValues.phoneNumber || ''}
+                    onChange={handlePhoneNumberChange}
+                    className={`pr-16 ${errors.phoneNumber ? 'border-red-500' : ''}`}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                    {formValues.phoneNumber?.length || 0}/11
+                  </span>
+                </div>
                 {errors.phoneNumber && (
                   <p className="mt-1 text-xs text-red-500">{errors.phoneNumber.message}</p>
                 )}
@@ -293,16 +325,34 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('specialization')}</label>
-                <Input placeholder={t('specializationPlaceholder')} {...register('specialization')} />
+                <div className="relative">
+                  <Input
+                    placeholder={t('specializationPlaceholder')}
+                    maxLength={200}
+                    value={formValues.specialization || ''}
+                    onChange={(e) => setValue('specialization', e.target.value || null, { shouldValidate: true })}
+                    className="pr-16"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                    {formValues.specialization?.length || 0}/200
+                  </span>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('citizenId')}</label>
-                <Input
-                  placeholder={t('citizenIdPlaceholder')}
-                  {...register('citizenId')}
-                  className={errors.citizenId ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    placeholder={t('citizenIdPlaceholder')}
+                    maxLength={12}
+                    value={formValues.citizenId || ''}
+                    onChange={handleCitizenIdChange}
+                    className={`pr-16 ${errors.citizenId ? 'border-red-500' : ''}`}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                    {formValues.citizenId?.length || 0}/12
+                  </span>
+                </div>
                 {errors.citizenId && (
                   <p className="mt-1 text-xs text-red-500">{errors.citizenId.message}</p>
                 )}
@@ -320,11 +370,21 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('address')}</label>
-                <Input
-                  placeholder={t('enterAddress')}
-                  {...register('address')}
-                  className={errors.address ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    placeholder={t('enterAddress')}
+                    maxLength={255}
+                    value={formValues.address || ''}
+                    onChange={(e) => setValue('address', e.target.value || null, { shouldValidate: true })}
+                    className={`pr-16 ${errors.address ? 'border-red-500' : ''}`}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                    {formValues.address?.length || 0}/255
+                  </span>
+                </div>
+                {errors.address && (
+                  <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>
+                )}
               </div>
             </div>
           </div>

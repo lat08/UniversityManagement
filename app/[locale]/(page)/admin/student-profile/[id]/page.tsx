@@ -522,16 +522,14 @@ export default function StudentDetailPage() {
                           {cumulativeData.semesters.map((semester) => {
                             const isSelected = selectedSemesters.includes(semester.semesterId);
                             return (
-                              <button
+                                <div
                                 key={semester.semesterId}
-                                type="button"
                                 className={`w-full text-left px-4 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-3 ${
                                   isSelected
                                     ? 'bg-blue-50 text-[#0053AD] font-medium'
                                     : 'text-gray-900 hover:bg-gray-50'
                                 }`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                                onClick={() => {
                                   setSelectedSemesters(prev => {
                                     if (prev.includes(semester.semesterId)) {
                                       return prev.filter(id => id !== semester.semesterId);
@@ -541,7 +539,7 @@ export default function StudentDetailPage() {
                                   });
                                 }}
                               >
-                                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 pointer-events-none ${
                                   isSelected 
                                     ? 'bg-[#0053AD] border-[#0053AD]' 
                                     : 'border-gray-300'
@@ -553,7 +551,7 @@ export default function StudentDetailPage() {
                                   )}
                                 </div>
                                 <span>{semester.semesterName}</span>
-                              </button>
+                              </div>
                             );
                           })}
                         </div>

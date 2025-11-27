@@ -29,12 +29,20 @@ export const CourseActionsMenu = ({
       }
     };
 
+    const handleScroll = () => {
+      if (isOpen) {
+        setIsOpen(false);
+      }
+    };
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, true);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
     };
   }, [isOpen]);
 
@@ -56,7 +64,7 @@ export const CourseActionsMenu = ({
             className="fixed mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[100]"
             style={{
               top: dropdownRef.current
-                ? dropdownRef.current.getBoundingClientRect().bottom + window.scrollY + 4
+                ? dropdownRef.current.getBoundingClientRect().bottom + 4
                 : 0,
               left: dropdownRef.current
                 ? Math.min(

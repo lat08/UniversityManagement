@@ -4,7 +4,6 @@ import { queryKeys } from '@/lib/api/queryKeys';
 import type {
   TuitionDebtFilter,
   StudentDebtByCode,
-  ApiResponse,
 } from '@/lib/types';
 
 export const useTuitionDebts = (filter: TuitionDebtFilter) => {
@@ -21,13 +20,13 @@ export const useTuitionDebts = (filter: TuitionDebtFilter) => {
 export const useStudentDebtDetail = (
   studentCode: string | null,
 ): UseQueryResult<StudentDebtByCode | null, Error> => {
-  return useQuery<ApiResponse<StudentDebtByCode>, Error, StudentDebtByCode | null>({
+  return useQuery<StudentDebtByCode, Error, StudentDebtByCode | null>({
     queryKey: queryKeys.tuition.debtDetail(studentCode ?? ''),
     queryFn: () => tuitionApi.getStudentDebtByCode(studentCode!),
     enabled: !!studentCode,
     staleTime: 60000, // 1 minute - detail changes less frequently
     gcTime: 600000, // 10 minutes - keep in cache longer
     refetchOnWindowFocus: false,
-    select: (apiResponse) => apiResponse?.data ?? null,
+    select: (data) => data ?? null,
   });
 };

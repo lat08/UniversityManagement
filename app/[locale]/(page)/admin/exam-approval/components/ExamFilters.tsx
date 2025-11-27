@@ -4,10 +4,11 @@ import { useTranslations } from 'next-intl';
 import { SearchInput, Dropdown } from '@/app/components/ui';
 import { useSemesters } from '@/lib/hooks/useCommonData';
 import { EXAM_TYPE_OPTIONS, EXAM_STATUS_OPTIONS } from '@/lib/constants/adminExam';
-import { ExamType, ExamStatus } from '@/lib/types/adminExam';
 
-type ExamTypeFilter = ExamType | 'all';
-type ExamStatusFilter = ExamStatus | 'all';
+type ExamTypeValue = (typeof EXAM_TYPE_OPTIONS)[number]['value'];
+type ExamStatusValue = (typeof EXAM_STATUS_OPTIONS)[number]['value'];
+type ExamTypeFilter = ExamTypeValue | 'all';
+type ExamStatusFilter = ExamStatusValue | 'all';
 
 interface ExamFiltersProps {
   readonly searchQuery: string;
@@ -38,14 +39,20 @@ export const ExamFilters = ({
     ...(semesters?.map((s) => ({ value: s.semesterId, label: s.semesterName })) || []),
   ];
 
-  const examTypeOptions = [
+  const examTypeOptions: { value: ExamTypeFilter; label: string }[] = [
     { value: 'all', label: t('examType.all') },
-    ...EXAM_TYPE_OPTIONS.map((opt) => ({ value: opt.value, label: t(`examType.${opt.value}`) })),
+    ...EXAM_TYPE_OPTIONS.map((opt) => ({
+      value: opt.value,
+      label: t(`examType.${opt.value}`),
+    })),
   ];
 
-  const statusOptions = [
+  const statusOptions: { value: ExamStatusFilter; label: string }[] = [
     { value: 'all', label: t('status.all') },
-    ...EXAM_STATUS_OPTIONS.map((opt) => ({ value: opt.value, label: t(`status.${opt.value}`) })),
+    ...EXAM_STATUS_OPTIONS.map((opt) => ({
+      value: opt.value,
+      label: t(`status.${opt.value}`),
+    })),
   ];
 
   return (
@@ -69,7 +76,7 @@ export const ExamFilters = ({
         <Dropdown
           options={examTypeOptions}
           value={examTypeFilter}
-          onChange={(value) => onExamTypeChange((value ?? 'all') as ExamType | 'all')}
+          onChange={(value) => onExamTypeChange((value ?? 'all') as ExamTypeFilter)}
           placeholder={t('examType.placeholder')}
         />
       </div>
@@ -77,7 +84,7 @@ export const ExamFilters = ({
         <Dropdown
           options={statusOptions}
           value={statusFilter}
-          onChange={(value) => onStatusChange((value ?? 'all') as ExamStatus | 'all')}
+          onChange={(value) => onStatusChange((value ?? 'all') as ExamStatusFilter)}
           placeholder={t('status.placeholder')}
         />
       </div>

@@ -243,7 +243,8 @@
       "noData": "No data available",
       "error": "An error occurred",
       "success": "Success",
-      "failed": "Failed"
+      "failed": "Failed",
+      "back": "Back"
     },
     "schedule": {
       "weekLabel": "Week {number} [{start} - {end}]",
@@ -2643,6 +2644,7 @@
         "fullName": "Full Name",
         "fullNameRequired": "Full name is required",
         "fullNameMin": "Full name must be at least 2 characters",
+        "fullNameMax": "Full name must not exceed 100 characters",
         "faculty": "Faculty/Department",
         "facultyRequired": "Faculty/Department is required",
         "degree": "Degree",
@@ -2653,11 +2655,13 @@
         "selectGender": "Select gender",
         "status": "Status",
         "address": "Address",
+        "addressMax": "Address must not exceed 255 characters",
         "selectFaculty": "Select faculty/department",
         "selectDegree": "Select degree",
         "selectStatus": "Select status",
         "enterAddress": "Enter address",
         "specialization": "Specialization",
+        "specializationMax": "Specialization must not exceed 200 characters",
         "cancel": "Cancel",
         "save": "Save",
         "saving": "Saving...",
@@ -3741,7 +3745,9 @@
       },
       "actions": {
         "menu": "Actions",
-        "viewDetail": "View Details"
+        "viewDetail": "View Details",
+        "edit": "Edit Tuition",
+        "createReminder": "Create Reminder"
       },
       "detail": {
         "title": "Tuition Fee Details",
@@ -3781,6 +3787,64 @@
         }
       },
       "loadListError": "Unable to load debt list",
+      "edit": {
+        "title": "Edit Tuition",
+        "subtitle": "Update student tuition fee information",
+        "bulkDescription": "Update tuition fee information for {count} selected students",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "success": "Tuition updated successfully",
+        "error": "Failed to update tuition",
+        "statusRequired": "Please select a status",
+        "fields": {
+          "code": "Code",
+          "fullName": "Full Name",
+          "status": "Status",
+          "statusPlaceholder": "Select status",
+          "notes": "General Notes",
+          "notesPlaceholder": "Add notes (Max 500 characters)",
+          "maxCharacters": "characters"
+        }
+      },
+      "reminder": {
+        "title": "Create Reminder",
+        "subtitle": "Compose and send tuition fee payment reminders to students",
+        "close": "Close",
+        "cancel": "Cancel",
+        "send": "Send Reminder",
+        "sending": "Sending...",
+        "success": "Reminder sent successfully",
+        "error": "Failed to send reminder",
+        "titleRequired": "Please enter a title",
+        "contentRequired": "Please enter content",
+        "bulkDescription": "Compose and send tuition fee payment reminders to students - {count} students selected",
+        "fields": {
+          "code": "Code",
+          "fullName": "Full Name",
+          "title": "Title",
+          "titlePlaceholder": "Enter reminder title",
+          "content": "Content",
+          "contentPlaceholder": "Enter reminder content..."
+        }
+      },
+      "bulkBar": {
+        "selected": "{count} students selected",
+        "edit": "Edit",
+        "createReminder": "Create Reminder",
+        "delete": "Delete",
+        "clear": "Clear"
+      },
+      "bulkDelete": {
+        "title": "Delete Tuition Debt",
+        "description": "Are you sure you want to delete tuition debt information for {count} selected students?",
+        "warning": "Warning: This action cannot be undone!",
+        "note": "All tuition debt information for the selected students will be permanently deleted.",
+        "submit": "Delete",
+        "submitting": "Deleting...",
+        "success": "Tuition debt deleted successfully"
+      },
       "status": {
         "paid": "Paid",
         "unpaid": "Unpaid",
@@ -4199,12 +4263,19 @@
       "searchGeneral": "General search (code, proctor...)",
       "searchBySubject": "Search by subject name",
       "searchByClass": "Search by class code",
+      "searchByRoom": "Search by room code",
       "clearAll": "Clear All",
       "allSemesters": "All Semesters",
       "allClasses": "All Classes",
       "allStatuses": "All Statuses",
+      "currentSemesterLabel": "Current Semester",
+      "viewCurrentSemester": "View Current Semester",
+      "currentSemesterSuffix": "(Current)",
       "cancelExamSchedule": "Cancel Exam Schedule",
       "deleteAll": "Delete All",
+      "selectedCount": "Selected {count} exam schedules",
+      "clearSelection": "Clear Selection",
+      "noData": "No data available",
       "publishSuccess": "Exam schedule published successfully",
       "publishError": "Failed to publish exam schedule",
       "cancelSuccess": "Exam schedule cancelled successfully",
@@ -4217,6 +4288,7 @@
       "bulkCancelError": "Bulk cancel failed",
       "bulkDeleteSuccess": "Deleted {count} exam schedules",
       "bulkDeleteError": "Bulk delete failed",
+      "cannotPublishCancelled": "Cannot publish cancelled exam schedules. Please deselect them.",
       "columns": {
         "subjectCode": "Code",
         "subjectName": "Subject Name",
@@ -4538,6 +4610,7 @@
         "namePlaceholder": "John Doe",
         "nameRequired": "Full name is required",
         "nameMin": "Full name must be at least 2 characters",
+        "nameMax": "Full name must not exceed 100 characters",
         "citizenId": "ID Card / Passport",
         "citizenIdPlaceholder": "012345678900",
         "citizenIdRequired": "ID Card/Passport is required",
@@ -4571,6 +4644,7 @@
         "addressPlaceholder": "Enter address",
         "addressRequired": "Address is required",
         "addressMin": "Address must be at least 5 characters",
+        "addressMax": "Address must not exceed 255 characters",
         "status": "Status",
         "selectStatus": "Select status",
         "submit": "Save",
@@ -4824,6 +4898,7 @@
         "namePlaceholder": "John Doe",
         "nameRequired": "Full name is required",
         "nameMin": "Full name must be at least 2 characters",
+        "nameMax": "Full name must not exceed 100 characters",
         "citizenId": "ID Card / Passport",
         "citizenIdPlaceholder": "012345678900",
         "citizenIdRequired": "ID Card/Passport is required",
@@ -4857,6 +4932,7 @@
         "addressPlaceholder": "Enter address",
         "addressRequired": "Address is required",
         "addressMin": "Address must be at least 5 characters",
+        "addressMax": "Address must not exceed 255 characters",
         "status": "Status",
         "selectStatus": "Select status",
         "submit": "Save",
