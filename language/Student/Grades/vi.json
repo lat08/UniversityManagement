@@ -1,0 +1,79 @@
+{
+  "student": {
+    "grades": {
+      "title": "Điểm số",
+      "description": "Xem kết quả học tập các môn học",
+      "gpa": "Điểm trung bình",
+      "gpaScale": "GPA 4.0",
+      "totalCredits": "Tổng tín chỉ hoàn thành",
+      "credits": "tín chỉ",
+      "completedCourses": "Môn đã hoàn thành",
+      "courses": "môn học",
+      "noData": "Chưa có dữ liệu điểm",
+      "noDataDescription": "Hiện tại chưa có dữ liệu điểm số nào",
+      "noGradeData": "Chưa có dữ liệu điểm",
+      "loadError": "Không thể tải dữ liệu",
+      "exportPdf": "Xuất PDF",
+      "filterBySemester": "Lọc theo học kỳ",
+      "statusLabel": "Trạng thái",
+      "status": {
+        "passed": "Đạt",
+        "failed": "Không đạt"
+      },
+      "columns": {
+        "courseCode": "Mã môn học",
+        "courseName": "Tên môn học",
+        "credits": "Tín chỉ"
+      },
+      "filters": {
+        "label": "Lọc theo học kỳ",
+        "placeholder": "Chưa chọn học kỳ",
+        "multipleSelected": "{count} học kỳ đã chọn",
+        "selectAll": "Chọn tất cả",
+        "clear": "Bỏ chọn",
+        "exportLabel": "Xuất",
+        "exportButton": "In bảng điểm",
+        "exporting": "Đang xuất..."
+      },
+      "table": {
+        "headers": {
+          "finalExam": "Điểm thi",
+          "finalGpa10": "TK (10)",
+          "finalGpa4": "TK (4)",
+          "letter": "TK (C)",
+          "result": "Kết quả",
+          "detail": "Chi tiết"
+        },
+        "viewDetail": "Xem chi tiết"
+      },
+      "summary": {
+        "semesterGpa4": "Điểm trung bình học kỳ hệ 4",
+        "semesterGpa10": "Điểm trung bình học kỳ hệ 10",
+        "semesterCredits": "Số tín chỉ đạt trong học kỳ",
+        "semesterCreditsInCurriculum": "Trong CTDT",
+        "semesterCreditsOutCurriculum": "Ngoài CTDT",
+        "cumulativeGpa4": "Điểm trung bình tích lũy hệ 4",
+        "cumulativeGpa10": "Điểm trung bình tích lũy hệ 10",
+        "cumulativeCredits": "Số tín chỉ tích lũy",
+        "classificationLabel": "Xếp loại học lực tích lũy",
+        "classification": {
+          "excellent": "Xuất sắc",
+          "good": "Giỏi",
+          "fair": "Khá",
+          "average": "Trung bình",
+          "weak": "Yếu"
+        }
+      },
+      "detailModal": {
+        "meta": "Mã môn: {code} • Số tín chỉ: {credits}",
+        "headers": {
+          "order": "STT",
+          "component": "Tên thành phần",
+          "weight": "Trọng số (%)",
+          "score": "Điểm"
+        },
+        "close": "Đóng"
+      }
+    }
+  }
+}

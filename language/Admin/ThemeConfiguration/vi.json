@@ -1,0 +1,9 @@
+{
+  "admin": {
+    "themeConfiguration": {
+      "title": "Cấu hình chủ đề",
+      "add": "Thêm theme",
+      "edit": "Sửa theme"
+    }
+  }
+}

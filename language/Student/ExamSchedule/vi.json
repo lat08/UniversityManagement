@@ -1,0 +1,62 @@
+{
+  "student": {
+    "examSchedule": {
+      "title": "Lịch thi",
+      "description": "Theo dõi lịch thi theo từng học kỳ và nắm thông tin chi tiết cho từng môn",
+      "filters": {
+        "semesterPlaceholder": "Chọn học kỳ"
+      },
+      "actions": {
+        "export": "Xuất lịch thi"
+      },
+      "sections": {
+        "timeline": {
+          "title": "Lịch thi các môn",
+          "empty": "Chưa có lịch thi nào"
+        },
+        "notes": {
+          "title": "Ghi chú",
+          "create": "Tạo",
+          "createTooltip": "Tạo ghi chú mới",
+          "save": "Lưu",
+          "cancel": "Hủy",
+          "edit": "Sửa",
+          "delete": "Xóa",
+          "placeholder": "Nhập nội dung ghi chú...",
+          "saveTooltip": "Lưu ghi chú",
+          "cancelTooltip": "Hủy tạo ghi chú",
+          "updateTooltip": "Lưu thay đổi",
+          "deleteTooltip": "Xóa ghi chú",
+          "editTooltip": "Chỉnh sửa ghi chú",
+          "empty": "Chưa có ghi chú nào"
+        }
+      },
+      "timeline": {
+        "room": "Phòng {room}",
+        "studentCount": "{count} SV",
+        "format": "{format}",
+        "status": {
+          "upcoming": "Sắp tới",
+          "pending": "Chưa tới",
+          "completed": "Đã thi",
+          "other": "Khác"
+        }
+      },
+      "stats": {
+        "totalExams": {
+          "title": "Tổng số môn thi",
+          "subtitle": "{semesterName}"
+        },
+        "upcomingExams": {
+          "title": "Môn thi sắp tới",
+          "none": "Không có lịch thi sắp tới",
+          "nextExam": "{subject} - {date} - {time}"
+        },
+        "completedExams": {
+          "title": "Môn đã thi",
+          "subtitle": "Tiến độ"
+        }
+      }
+    }
+  }
+}

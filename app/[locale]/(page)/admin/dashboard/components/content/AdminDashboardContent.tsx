@@ -28,36 +28,51 @@ export default function AdminDashboardContent() {
       return [];
     }
 
+    // Tính số giảng viên mới trong năm (current - last year)
+    const newInstructorsCount = Math.max(
+      0,
+      (data.instructorStatistic.currentYearInstructors ?? 0) -
+        (data.instructorStatistic.lastYearInstructors ?? 0)
+    );
+
+    // Format growth rate với dấu + nếu dương
+    const formatGrowthRate = (rate: number): string => {
+      const rounded = Math.round(rate * 100) / 100;
+      return rounded > 0 ? `+${rounded}` : `${rounded}`;
+    };
+
+    const studentGrowthRate = data.studentStatistic.growthRate ?? 0;
+
     return [
       {
         id: '1',
         title: t('stats.totalStudents'),
-        value: data.summary.totalStudents,
+        value: data.summary.totalStudents ?? 0,
         description: t('stats.totalStudentsDesc', {
-          value: data.studentStatistic.growthRate,
+          value: formatGrowthRate(studentGrowthRate),
         }),
         color: 'green',
       },
       {
         id: '2',
         title: t('stats.totalInstructors'),
-        value: data.summary.totalInstructors,
+        value: data.summary.totalInstructors ?? 0,
         description: t('stats.totalInstructorsDesc', {
-          value: data.instructorStatistic.growthRate,
+          newCount: newInstructorsCount,
         }),
         color: 'blue',
       },
       {
         id: '3',
         title: t('stats.totalClasses'),
-        value: data.summary.totalClasses,
+        value: data.summary.totalCourseClassesThisSemester ?? data.summary.totalClasses ?? 0,
         description: t('stats.totalClassesDesc'),
         color: 'red',
       },
       {
         id: '4',
         title: t('stats.totalSubjects'),
-        value: data.summary.totalSubjects,
+        value: data.summary.totalSubjects ?? 0,
         description: t('stats.totalSubjectsDesc'),
         color: 'orange',
       },
@@ -111,7 +126,7 @@ export default function AdminDashboardContent() {
     });
 
     return data.recentUpdates.map(mapUpdate);
-  }, [data, t]);
+  }, [data]);
 
   // Quick actions
   const quickActions: QuickAction[] = [

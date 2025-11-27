@@ -1,0 +1,44 @@
+{
+  "student": {
+    "documents": {
+      "title": "Tài liệu",
+      "header": {
+        "title": "Tài liệu",
+        "subtitle": "Tham khảo tài liệu dành cho sinh viên"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo tên môn học, giảng viên...",
+        "searchAriaLabel": "Tìm kiếm theo tên môn học hoặc giảng viên",
+        "clearSearch": "Xóa tìm kiếm",
+        "allSemesters": "Tất cả học kỳ",
+        "allSubjects": "Tất cả môn học",
+        "allDocumentTypes": "Tất cả loại tài liệu"
+      },
+      "card": {
+        "documentsCount": "{count} tài liệu",
+        "view": "Xem"
+      },
+      "modal": {
+        "generalInfoTitle": "I. Thông tin chung",
+        "documentsTitle": "II. Bài giảng chi tiết",
+        "courseLabel": "Môn học",
+        "uploaderLabel": "Người tải lên",
+        "fileSizeLabel": "Dung lượng: {size}",
+        "viewOnline": "Xem",
+        "download": "Tải",
+        "close": "Đóng"
+      },
+      "empty": {
+        "emptyTitle": "Chưa có tài liệu",
+        "emptyDescription": "Hiện tại chưa có tài liệu nào được tải lên.",
+        "noResultsTitle": "Không tìm thấy tài liệu",
+        "noResultsDescription": "Hãy điều chỉnh bộ lọc để tìm tài liệu phù hợp."
+      },
+      "error": {
+        "title": "Không thể tải dữ liệu",
+        "retry": "Thử lại",
+        "defaultMessage": "Không thể tải dữ liệu tài liệu"
+      }
+    }
+  }
+}

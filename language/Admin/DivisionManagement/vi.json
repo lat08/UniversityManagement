@@ -1,0 +1,57 @@
+{
+  "admin": {
+    "divisionManagement": {
+      "title": "Quản lý khoa",
+      "description": "Quản lý thông tin khoa, ngành và ban chủ nhiệm",
+      "search": {
+        "placeholder": "Tìm kiếm theo mã, tên khoa..."
+      },
+      "listTitle": "Danh sách khoa",
+      "filters": {
+        "allDivisions": "Tất cả đơn vị",
+        "allStatuses": "Tất cả trạng thái",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "stats": {
+        "total": "Tổng số khoa",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "table": {
+        "selected": "Đã chọn {count} khoa",
+        "empty": "Không tìm thấy khoa nào",
+        "columns": {
+          "code": "Mã",
+          "name": "Tên khoa",
+          "division": "Đơn vị",
+          "status": "Trạng thái",
+          "actions": "HĐ"
+        },
+        "status": {
+          "active": "Đang hoạt động",
+          "inactive": "Ngừng hoạt động"
+        }
+      },
+      "actions": {
+        "add": "Thêm khoa",
+        "bulkEdit": "Chỉnh sửa đã chọn",
+        "bulkDelete": "Xóa đã chọn",
+        "clearSelection": "Bỏ chọn",
+        "deleteAll": "Xóa toàn bộ"
+      },
+      "hooks": {
+        "createSuccess": "Thêm khoa thành công",
+        "createError": "Không thể thêm khoa",
+        "updateSuccess": "Cập nhật khoa thành công",
+        "updateError": "Không thể cập nhật khoa",
+        "deleteSuccess": "Xóa khoa thành công",
+        "deleteError": "Không thể xóa khoa",
+        "bulkDeleteSuccess": "Xóa các khoa đã chọn thành công",
+        "bulkDeleteError": "Không thể xóa các khoa đã chọn",
+        "bulkEditSuccess": "Cập nhật các khoa đã chọn thành công",
+        "bulkEditError": "Không thể cập nhật các khoa đã chọn"
+      }
+    }
+  }
+}

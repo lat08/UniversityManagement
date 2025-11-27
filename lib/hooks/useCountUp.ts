@@ -15,10 +15,15 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
   const animationFrameRef = useRef<number | undefined>(undefined)
   const mountedRef = useRef(false)
 
+  // Validate and normalize target value
+  const normalizedTarget = typeof target === 'number' && !isNaN(target) && isFinite(target) 
+    ? Math.max(0, target) 
+    : 0
+
   useEffect(() => {
     if (!enabled) {
-      setCount(target)
-      prevTargetRef.current = target
+      setCount(normalizedTarget)
+      prevTargetRef.current = normalizedTarget
       return
     }
 
@@ -28,13 +33,13 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
       setCount(start)
     }
 
-    if (target === prevTargetRef.current) {
+    if (normalizedTarget === prevTargetRef.current) {
       return
     }
 
     const startValue = prevTargetRef.current ?? start
     const startTime = Date.now()
-    const difference = target - startValue
+    const difference = normalizedTarget - startValue
 
     const updateCount = () => {
       const elapsed = Date.now() - startTime
@@ -43,18 +48,23 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
       const easeOutQuart = 1 - Math.pow(1 - progress, 4)
       const currentValue = startValue + difference * easeOutQuart
       
-      const isDecimal = target % 1 !== 0 || startValue % 1 !== 0
+      const isDecimal = normalizedTarget % 1 !== 0 || startValue % 1 !== 0
       const currentCount = isDecimal 
         ? Math.round(currentValue * 100) / 100
         : Math.round(currentValue)
       
-      setCount(currentCount)
+      // Ensure count is valid number
+      const validCount = typeof currentCount === 'number' && !isNaN(currentCount) && isFinite(currentCount)
+        ? Math.max(0, currentCount)
+        : 0
+      
+      setCount(validCount)
 
       if (progress < 1) {
         animationFrameRef.current = requestAnimationFrame(updateCount)
       } else {
-        setCount(target)
-        prevTargetRef.current = target
+        setCount(normalizedTarget)
+        prevTargetRef.current = normalizedTarget
       }
     }
 
@@ -65,7 +75,7 @@ export function useCountUp(target: number, options: UseCountUpOptions = {}) {
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [target, duration, start, enabled])
+  }, [normalizedTarget, duration, start, enabled])
 
   return count
 }

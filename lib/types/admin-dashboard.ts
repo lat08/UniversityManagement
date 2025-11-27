@@ -1,7 +1,8 @@
 export interface AdminDashboardSummary {
   totalStudents: number;
   totalInstructors: number;
-  totalClasses: number;
+  totalClasses?: number;
+  totalCourseClassesThisSemester?: number; // Backend field name
   totalSubjects: number;
   studentGrowthRate: number;
   instructorGrowthRate: number;

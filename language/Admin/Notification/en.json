@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "notification": {
+      "title": "Notifications",
+      "loading": "Loading notifications...",
+      "viewAll": "View all notifications",
+      "unreadCount": "{count} unread notifications",
+      "empty": {
+        "title": "No notifications",
+        "noNotifications": "You currently have no notifications."
+      }
+    }
+  }
+}

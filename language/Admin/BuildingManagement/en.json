@@ -1,0 +1,121 @@
+{
+  "admin": {
+    "buildingManagement": {
+      "title": "Building Management",
+      "description": "Manage building information, operating status, and addresses",
+      "listTitle": "Building list",
+      "stats": {
+        "total": "Total buildings",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "search": {
+        "placeholder": "Search by code, building name..."
+      },
+      "filters": {
+        "allStatuses": "All",
+        "noChange": "No change",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "bulk": {
+        "selected": "{count} building(s) selected",
+        "edit": "Edit selected",
+        "delete": "Delete selected",
+        "clear": "Clear selection"
+      },
+      "table": {
+        "empty": "No buildings found",
+        "columns": {
+          "code": "Code",
+          "name": "Building name",
+          "address": "Address",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "status": {
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "add": "Add building"
+      },
+      "hooks": {
+        "createSuccess": "Building created successfully!",
+        "createError": "Failed to create building",
+        "updateSuccess": "Building updated successfully!",
+        "updateError": "Failed to update building",
+        "deleteSuccess": "Building deleted successfully",
+        "deleteError": "Failed to delete building",
+        "bulkDeleteSuccess": "Deleted {count} building(s)",
+        "bulkDeleteError": "Failed to delete selected buildings",
+        "bulkEditSuccess": "Updated {count} building(s)",
+        "bulkEditError": "Failed to update selected buildings",
+        "bulkEditValidation": "Select at least one field to update",
+        "genericError": "An error occurred"
+      },
+      "form": {
+        "buildingCode": {
+          "label": "Building code",
+          "placeholder": "E.g. TN-A",
+          "required": "Building code is required",
+          "min": "Building code must be at least 2 characters"
+        },
+        "buildingName": {
+          "label": "Building name",
+          "placeholder": "E.g. Building A",
+          "required": "Building name is required",
+          "min": "Building name must be at least 3 characters"
+        },
+        "address": {
+          "label": "Address",
+          "placeholder": "E.g. 123 ABC Street, District XYZ"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Add new building",
+          "description": "Enter building information",
+          "submit": "Save",
+          "submitting": "Saving..."
+        },
+        "edit": {
+          "title": "Edit building",
+          "description": "Update building information",
+          "submit": "Save changes",
+          "submitting": "Saving..."
+        },
+        "bulkEdit": {
+          "title": "Bulk edit",
+          "description": "{count} building(s) selected",
+          "statusLabel": "Status",
+          "statusPlaceholder": "Select status",
+          "addressLabel": "Address",
+          "addressPlaceholder": "Enter new address (leave blank to keep current)",
+          "submit": "Update",
+          "submitting": "Updating..."
+        },
+        "bulkDelete": {
+          "title": "Delete buildings",
+          "description": "Are you sure you want to delete {count} selected building(s)?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete",
+          "submitting": "Deleting..."
+        },
+        "confirmDelete": {
+          "title": "Delete building",
+          "description": "Are you sure you want to delete {name}?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete"
+        }
+      }
+    }
+  }
+}

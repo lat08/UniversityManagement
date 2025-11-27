@@ -1,0 +1,25 @@
+{
+  "instructor": {
+    "dashboard": {
+      "title": "Bảng điều khiển",
+      "welcome": "Chào mừng trở lại, {name}!",
+      "teachingClasses": "Lớp giảng dạy",
+      "documentsThisWeek": "Tài liệu tuần này",
+      "totalDocuments": "Tổng: {count} tài liệu",
+      "pendingRequests": "Yêu cầu chờ duyệt",
+      "newRequests": "{count} yêu cầu mới",
+      "noNewRequests": "0 yêu cầu mới",
+      "weeklySchedule": "Lịch dạy trong tuần",
+      "semesterSchedule": "TKB học kỳ",
+      "loadingSchedule": "Đang tải lịch dạy...",
+      "noSchedule": "Chưa có lịch dạy nào",
+      "reminders": "Nhắc nhở",
+      "noReminders": "Chưa có nhắc nhở nào",
+      "deadline": "Hạn",
+      "class": "Lớp",
+      "classTypes": {
+        "theory": "Lý thuyết"
+      }
+    }
+  }
+}

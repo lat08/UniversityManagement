@@ -1,0 +1,72 @@
+{
+  "admin": {
+    "dashboard": {
+      "title": "Bảng điều khiển - Admin",
+      "welcome": "Chào mừng trở lại, Name!",
+      "pendingTasks": "Công việc cần xử lý",
+      "recentUpdates": "Cập nhật mới",
+      "viewAll": "Xem tất cả",
+      "quickActions": "Tạo nhanh",
+      "systemSettings": "Cấu hình hệ thống",
+      "systemStatus": "Trạng thái hệ thống",
+      "database": "Cơ sở dữ liệu",
+      "api": "API: Hoạt động",
+      "email": "Email: Hoạt động",
+      "configure": "Cấu hình",
+      "addUser": "Thêm người dùng",
+      "quickAddStudent": "Thêm sinh viên",
+      "quickAddInstructor": "Thêm giảng viên",
+      "openClass": "Mở lớp học",
+      "publishExamSchedule": "Công bố lịch thi",
+      "sendNotification": "Gửi thông báo",
+      "themeConfig": "Cấu hình Theme",
+      "themeConfigDesc": "Tùy chỉnh màu sắc hệ thống real-time",
+      "userManagement": "Quản lý người dùng",
+      "userManagementDesc": "Quản lý tài khoản sinh viên, giảng viên",
+      "departmentManagement": "Quản lý khoa",
+      "departmentManagementDesc": "Quản lý các khoa và phòng ban",
+      "courseManagement": "Quản lý khóa học",
+      "courseManagementDesc": "Quản lý các khóa học và môn học",
+      "databaseDesc": "Backup, restore và bảo trì database",
+      "security": "Bảo mật",
+      "securityDesc": "Cài đặt bảo mật và phân quyền",
+      "notifications": "Thông báo",
+      "notificationsDesc": "Cấu hình hệ thống thông báo",
+      "analytics": "Báo cáo & Thống kê",
+      "analyticsDesc": "Xem báo cáo và thống kê hệ thống",
+      "stats": {
+        "totalStudents": "Tổng sinh viên",
+        "totalStudentsDesc": "{value}% so với năm trước",
+        "totalInstructors": "Tổng giảng viên",
+        "totalInstructorsDesc": "{newCount, plural, =0 {Không có giảng viên mới} one {# giảng viên mới} other {# giảng viên mới}} trong năm",
+        "totalClasses": "Lớp học",
+        "totalClassesDesc": "Học kỳ hiện tại",
+        "totalSubjects": "Môn học",
+        "totalSubjectsDesc": "Đang giảng dạy"
+      },
+      "tasks": {
+        "roomRequest": "Yêu cầu phòng chức năng",
+        "roomRequestDesc": "{count} yêu cầu phòng chức năng chờ duyệt",
+        "gradeApproval": "Yêu cầu duyệt điểm",
+        "gradeApprovalDesc": "{count} yêu cầu duyệt điểm đang chờ xử lý",
+        "scheduleChange": "Yêu cầu đổi lịch giảng dạy",
+        "scheduleChangeDesc": "{count} yêu cầu đổi lịch giảng dạy của giảng viên đang chờ xử lý",
+        "courseRegistration": "Đăng ký môn học",
+        "courseRegistrationDesc": "8 yêu cầu đăng ký môn học chờ duyệt",
+        "examSchedule": "Chưa công bố lịch thi",
+        "examScheduleDesc": "1 lịch thi chuyển ngành cần được công bố cho sinh viên"
+      },
+      "updates": {
+        "tuitionDeadline": "Hạn đóng học phí học kỳ I 2025 - 2026",
+        "tuitionDeadlineDesc": "Hạn đóng học phí học kỳ I từ ngày 10/11/2025",
+        "timestamp1": "10 giờ trước",
+        "examSchedule": "Đã công bố lịch thi học kỳ I 2025 - 2026",
+        "examScheduleDesc": "Vui lòng xem chi tiết lịch thi học kỳ I 2025 - 2026",
+        "timestamp2": "5 giờ trước",
+        "courseRegistration": "Đăng ký môn học",
+        "courseRegistrationDesc": "Mở đăng ký học kỳ I 2025 - 2026",
+        "timestamp3": "1 giờ trước"
+      }
+    }
+  }
+}

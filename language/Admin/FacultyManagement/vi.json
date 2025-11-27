@@ -1,0 +1,146 @@
+{
+  "admin": {
+    "facultyManagement": {
+      "title": "Quản lý ngành",
+      "description": "Quản lý ngành, khoa và chương trình đào tạo",
+      "listTitle": "Danh sách ngành",
+      "search": {
+        "placeholder": "Tìm kiếm theo mã, tên ngành..."
+      },
+      "stats": {
+        "total": "Tổng ngành",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "filters": {
+        "allFaculties": "Tất cả ngành học",
+        "allCurricula": "Tất cả CTĐT",
+        "allStatuses": "Tất cả trạng thái",
+        "noChange": "Không thay đổi",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "table": {
+        "selected": "Đã chọn {count} ngành",
+        "empty": "Không tìm thấy ngành nào",
+        "columns": {
+          "code": "Mã",
+          "name": "Ngành",
+          "faculty": "Khoa",
+          "curriculum": "CTĐT",
+          "status": "Trạng thái",
+          "actions": "HĐ"
+        },
+        "status": {
+          "active": "Đang hoạt động",
+          "inactive": "Ngừng hoạt động"
+        }
+      },
+      "actions": {
+        "add": "Thêm ngành",
+        "bulkEdit": "Chỉnh sửa đã chọn",
+        "bulkDelete": "Xóa đã chọn",
+        "clearSelection": "Bỏ chọn"
+      },
+      "hooks": {
+        "createSuccess": "Thêm ngành thành công!",
+        "createError": "Không thể thêm ngành",
+        "updateSuccess": "Cập nhật ngành thành công!",
+        "updateError": "Không thể cập nhật ngành",
+        "deleteSuccess": "Xóa ngành thành công!",
+        "deleteError": "Không thể xóa ngành",
+        "bulkDeleteSuccess": "Đã xóa các ngành đã chọn thành công",
+        "bulkDeleteError": "Không thể xóa các ngành đã chọn",
+        "bulkEditSuccess": "Đã cập nhật các ngành đã chọn thành công",
+        "bulkEditError": "Không thể cập nhật các ngành đã chọn",
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật"
+      },
+      "form": {
+        "facultyCode": {
+          "label": "Mã ngành",
+          "placeholder": "VD: KTPM",
+          "required": "Mã ngành là bắt buộc",
+          "min": "Mã ngành phải có ít nhất 2 ký tự"
+        },
+        "facultyName": {
+          "label": "Tên ngành",
+          "placeholder": "VD: Kỹ thuật phần mềm",
+          "required": "Tên ngành là bắt buộc",
+          "min": "Tên ngành phải có ít nhất 3 ký tự"
+        },
+        "majorName": {
+          "label": "Tên chuyên ngành",
+          "placeholder": "VD: Công nghệ thông tin",
+          "required": "Tên chuyên ngành là bắt buộc",
+          "min": "Tên chuyên ngành phải có ít nhất 3 ký tự"
+        },
+        "majorCode": {
+          "label": "Mã chuyên ngành",
+          "placeholder": "VD: CNTT",
+          "required": "Mã chuyên ngành là bắt buộc",
+          "min": "Mã chuyên ngành phải có ít nhất 2 ký tự"
+        },
+        "faculty": {
+          "label": "Ngành học",
+          "placeholder": "Chọn ngành học",
+          "search": "Tìm kiếm ngành học...",
+          "required": "Ngành học là bắt buộc"
+        },
+        "division": {
+          "label": "Khoa",
+          "placeholder": "Chọn khoa",
+          "search": "Tìm kiếm khoa...",
+          "required": "Khoa là bắt buộc"
+        },
+        "trainingSystem": {
+          "label": "Hệ đào tạo",
+          "placeholder": "Chọn hệ đào tạo",
+          "required": "Hệ đào tạo là bắt buộc"
+        },
+        "curriculum": {
+          "label": "Chương trình đào tạo",
+          "placeholder": "Chọn CTĐT",
+          "required": "CTĐT là bắt buộc",
+          "note": "Có thể chọn nhiều CTĐT sau khi tạo chuyên ngành"
+        },
+        "status": {
+          "label": "Trạng thái",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm ngành",
+          "description": "Nhập thông tin ngành",
+          "submit": "Lưu",
+          "submitting": "Đang lưu..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa ngành",
+          "description": "Cập nhật thông tin ngành",
+          "submit": "Lưu thay đổi",
+          "submitting": "Đang lưu..."
+        },
+        "bulkEdit": {
+          "title": "Chỉnh sửa hàng loạt",
+          "description": "Đã chọn {count} ngành",
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật..."
+        },
+        "bulkDelete": {
+          "title": "Xóa ngành",
+          "description": "Bạn có chắc chắn muốn xóa {count} ngành đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa",
+          "submitting": "Đang xóa..."
+        },
+        "confirmDelete": {
+          "title": "Xóa ngành",
+          "description": "Bạn có chắc chắn muốn xóa {name}?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa"
+        }
+      }
+    }
+  }
+}

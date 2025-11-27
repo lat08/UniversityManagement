@@ -1,0 +1,25 @@
+{
+  "instructor": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back, {name}!",
+      "teachingClasses": "Teaching Classes",
+      "documentsThisWeek": "Documents This Week",
+      "totalDocuments": "Total: {count} documents",
+      "pendingRequests": "Pending Requests",
+      "newRequests": "{count} new requests",
+      "noNewRequests": "0 new requests",
+      "weeklySchedule": "Weekly Teaching Schedule",
+      "semesterSchedule": "Semester Schedule",
+      "loadingSchedule": "Loading schedule...",
+      "noSchedule": "No teaching schedule available",
+      "reminders": "Reminders",
+      "noReminders": "No reminders yet",
+      "deadline": "Deadline",
+      "class": "Class",
+      "classTypes": {
+        "theory": "Theory"
+      }
+    }
+  }
+}

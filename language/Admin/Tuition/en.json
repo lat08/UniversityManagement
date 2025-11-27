@@ -1,0 +1,165 @@
+{
+  "admin": {
+    "tuition": {
+      "pageTitle": "Tuition Fees - Debt",
+      "pageDescription": "Manage student tuition fees and debts",
+      "stats": {
+        "totalFee": "Total Semester Revenue",
+        "totalPaid": "Collected",
+        "totalDebt": "Remaining Debt",
+        "overdue": "Overdue"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by ID, student name,...",
+        "semester": {
+          "all": "All semesters",
+          "placeholder": "Select semester"
+        },
+        "class": {
+          "all": "All courses/classes",
+          "placeholder": "Select class"
+        },
+        "department": {
+          "all": "All majors",
+          "placeholder": "Select major"
+        },
+        "status": {
+          "all": "All statuses",
+          "paid": "Paid",
+          "unpaid": "Unpaid",
+          "overdue": "Overdue",
+          "placeholder": "Select status"
+        }
+      },
+      "list": {
+        "title": "Debt List",
+        "syncing": "Syncing data...",
+        "states": {
+          "error": "Unable to load debt list. Please try again later.",
+          "loading": "Loading debt list...",
+          "empty": "No debts match the current filters."
+        }
+      },
+      "table": {
+        "columns": {
+          "studentCode": "Student ID",
+          "fullName": "Full Name",
+          "major": "Major",
+          "className": "Class",
+          "totalFee": "Amount Due",
+          "debt": "Remaining Debt",
+          "deadline": "Due Date",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "menu": "Actions",
+        "viewDetail": "View Details",
+        "edit": "Edit Tuition",
+        "createReminder": "Create Reminder"
+      },
+      "detail": {
+        "title": "Tuition Fee Details",
+        "subtitle": "Tuition fee details - student debt",
+        "loading": "Loading details...",
+        "notFound": "Debt information not found",
+        "close": "Close",
+        "studentInfo": {
+          "title": "Student Information",
+          "studentCode": "Student ID",
+          "fullName": "Full Name",
+          "className": "Class",
+          "major": "Major"
+        },
+        "tuitionInfo": {
+          "title": "Tuition Fee Information",
+          "totalFee": "Total Amount Due",
+          "debt": "Remaining Debt",
+          "totalCredits": "Total Credits",
+          "paid": "Amount Collected",
+          "status": "Status"
+        },
+        "registeredSubjects": {
+          "title": "List of Registered Courses",
+          "code": "Course ID",
+          "name": "Course Name",
+          "credits": "Number of Credits",
+          "fee": "Tuition Fee"
+        },
+        "paymentHistory": {
+          "title": "Payment History",
+          "date": "Date",
+          "amount": "Amount",
+          "method": "Method",
+          "transactionCode": "Transaction ID",
+          "confirmedBy": "Confirmer"
+        }
+      },
+      "loadListError": "Unable to load debt list",
+      "edit": {
+        "title": "Edit Tuition",
+        "subtitle": "Update student tuition fee information",
+        "bulkDescription": "Update tuition fee information for {count} selected students",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "success": "Tuition updated successfully",
+        "error": "Failed to update tuition",
+        "statusRequired": "Please select a status",
+        "fields": {
+          "code": "Code",
+          "fullName": "Full Name",
+          "status": "Status",
+          "statusPlaceholder": "Select status",
+          "notes": "General Notes",
+          "notesPlaceholder": "Add notes (Max 500 characters)",
+          "maxCharacters": "characters"
+        }
+      },
+      "reminder": {
+        "title": "Create Reminder",
+        "subtitle": "Compose and send tuition fee payment reminders to students",
+        "close": "Close",
+        "cancel": "Cancel",
+        "send": "Send Reminder",
+        "sending": "Sending...",
+        "success": "Reminder sent successfully",
+        "error": "Failed to send reminder",
+        "titleRequired": "Please enter a title",
+        "contentRequired": "Please enter content",
+        "bulkDescription": "Compose and send tuition fee payment reminders to students - {count} students selected",
+        "fields": {
+          "code": "Code",
+          "fullName": "Full Name",
+          "title": "Title",
+          "titlePlaceholder": "Enter reminder title",
+          "content": "Content",
+          "contentPlaceholder": "Enter reminder content..."
+        }
+      },
+      "bulkBar": {
+        "selected": "{count} students selected",
+        "edit": "Edit",
+        "createReminder": "Create Reminder",
+        "delete": "Delete",
+        "clear": "Clear"
+      },
+      "bulkDelete": {
+        "title": "Delete Tuition Debt",
+        "description": "Are you sure you want to delete tuition debt information for {count} selected students?",
+        "warning": "Warning: This action cannot be undone!",
+        "note": "All tuition debt information for the selected students will be permanently deleted.",
+        "submit": "Delete",
+        "submitting": "Deleting...",
+        "success": "Tuition debt deleted successfully"
+      },
+      "status": {
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "overdue": "Overdue"
+      }
+    }
+  }
+}

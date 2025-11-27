@@ -1,0 +1,123 @@
+{
+  "admin": {
+    "departmentManagement": {
+      "title": "Department Management",
+      "description": "Manage department information",
+      "listTitle": "Department List",
+      "search": {
+        "placeholder": "Search by code, department name..."
+      },
+      "stats": {
+        "total": "Total Departments",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filters": {
+        "allFaculties": "All Faculties",
+        "allCurricula": "All Curricula",
+        "allStatuses": "All Statuses",
+        "noChange": "No change",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "selected": "{count} departments selected",
+        "empty": "No departments found",
+        "columns": {
+          "code": "Code",
+          "name": "Department Name",
+          "faculty": "Faculty",
+          "curriculum": "Curriculum",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "actions": {
+        "add": "Add New",
+        "bulkEdit": "Edit Selected",
+        "bulkDelete": "Delete Selected",
+        "clearSelection": "Clear Selection"
+      },
+      "hooks": {
+        "createSuccess": "Department created successfully!",
+        "createError": "Failed to create department",
+        "updateSuccess": "Department updated successfully!",
+        "updateError": "Failed to update department",
+        "deleteSuccess": "Department deleted successfully!",
+        "deleteError": "Failed to delete department",
+        "bulkDeleteSuccess": "Deleted selected departments successfully",
+        "bulkDeleteError": "Failed to delete selected departments",
+        "bulkEditSuccess": "Updated selected departments successfully",
+        "bulkEditError": "Failed to update selected departments",
+        "bulkEditValidation": "Please select at least one field to update"
+      },
+      "form": {
+        "departmentCode": {
+          "label": "Department Code",
+          "placeholder": "e.g. CNTT",
+          "required": "Department code is required",
+          "min": "Department code must be at least 2 characters"
+        },
+        "departmentName": {
+          "label": "Department Name",
+          "placeholder": "e.g. Information Technology",
+          "required": "Department name is required",
+          "min": "Department name must be at least 3 characters"
+        },
+        "faculty": {
+          "label": "Faculty",
+          "placeholder": "Select faculty",
+          "search": "Search faculties...",
+          "required": "Faculty is required"
+        },
+        "curriculum": {
+          "label": "Curriculum",
+          "placeholder": "Select curriculum",
+          "required": "Curriculum is required",
+          "note": "You can select multiple curricula after creating the department"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Add Department",
+          "description": "Enter department information",
+          "submit": "Save",
+          "submitting": "Saving..."
+        },
+        "edit": {
+          "title": "Edit Department",
+          "description": "Update department information",
+          "submit": "Save changes",
+          "submitting": "Saving..."
+        },
+        "bulkEdit": {
+          "title": "Bulk Edit",
+          "description": "{count} departments selected",
+          "submit": "Update",
+          "submitting": "Updating..."
+        },
+        "bulkDelete": {
+          "title": "Delete Departments",
+          "description": "Are you sure you want to delete {count} selected departments?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete",
+          "submitting": "Deleting..."
+        },
+        "confirmDelete": {
+          "title": "Delete Department",
+          "description": "Are you sure you want to delete {name}?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete"
+        }
+      }
+    }
+  }
+}

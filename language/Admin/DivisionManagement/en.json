@@ -1,0 +1,57 @@
+{
+  "admin": {
+    "divisionManagement": {
+      "title": "Division Management",
+      "description": "Manage divisions, faculties, and leadership assignments",
+      "listTitle": "Division List",
+      "search": {
+        "placeholder": "Search by division code or name..."
+      },
+      "filters": {
+        "allDivisions": "All Divisions",
+        "allStatuses": "All Statuses",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "stats": {
+        "total": "Total Divisions",
+        "active": "Active Divisions",
+        "inactive": "Inactive Divisions"
+      },
+      "table": {
+        "selected": "{count} divisions selected",
+        "empty": "No divisions found",
+        "columns": {
+          "code": "Code",
+          "name": "Division",
+          "division": "Division",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "actions": {
+        "add": "Add Division",
+        "bulkEdit": "Edit Selected",
+        "bulkDelete": "Delete Selected",
+        "clearSelection": "Clear Selection",
+        "deleteAll": "Delete All"
+      },
+      "hooks": {
+        "createSuccess": "Division created successfully",
+        "createError": "Failed to create division",
+        "updateSuccess": "Division updated successfully",
+        "updateError": "Failed to update division",
+        "deleteSuccess": "Division deleted successfully",
+        "deleteError": "Failed to delete division",
+        "bulkDeleteSuccess": "Deleted selected divisions successfully",
+        "bulkDeleteError": "Failed to delete selected divisions",
+        "bulkEditSuccess": "Updated selected divisions successfully",
+        "bulkEditError": "Failed to update selected divisions"
+      }
+    }
+  }
+}

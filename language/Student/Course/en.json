@@ -1,0 +1,107 @@
+{
+  "student": {
+    "course": {
+      "title": "Courses",
+      "registeredTab": "Registered Courses",
+      "availableTab": "Course Registration",
+      "register": "Register",
+      "cancel": "Cancel",
+      "bulkRegister": "Register Multiple",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selectedCount": "Selected {count} courses",
+      "registeringMultiple": "Registering multiple courses...",
+      "registering": "Registering...",
+      "noCourses": "No courses available",
+      "registerSuccess": "Registration successful!",
+      "registerError": "Registration failed!",
+      "cancelConfirm": "Are you sure you want to cancel course",
+      "cancelConfirmDescription": "This action cannot be undone.",
+      "cancelSuccess": "Course cancelled successfully!",
+      "cancelError": "Failed to cancel course!",
+      "scheduleConflict": "This course conflicts with selected courses",
+      "description": "Register and manage your courses",
+      "loadAvailableError": "Failed to load available courses",
+      "loadRegisteredError": "Failed to load registered courses",
+      "unavailableDefault": "Course is not available for registration",
+      "noSchedule": "No schedule yet",
+      "loading": "Loading...",
+      "unavailabilityReasons": {
+        "alreadyRegistered": "Course already registered",
+        "full": "Course is full",
+        "scheduleConflict": "Course conflicts with your current schedule",
+        "conflictWithSelected": "Course conflicts with selected course"
+      },
+      "columns": {
+        "code": "Code",
+        "name": "Course Name",
+        "instructor": "Instructor",
+        "credits": "Credits",
+        "quantity": "Qty",
+        "remaining": "Remaining",
+        "schedule": "Schedule"
+      },
+      "filters": {
+        "title": "Course List",
+        "description": "Search and register for courses",
+        "search": "Search",
+        "searchPlaceholder": "Search by code, course name...",
+        "status": "Status",
+        "statusPlaceholder": "Status",
+        "filterByType": "Filter by Type",
+        "filterByTypePlaceholder": "Filter by Type",
+        "filterByCurriculum": "Filter by Curriculum",
+        "filterByCurriculumPlaceholder": "Filter by Curriculum",
+        "all": "All",
+        "canRegister": "Can Register",
+        "cannotRegister": "Cannot Register",
+        "generalOnly": "General Courses Only",
+        "majorOnly": "Major Courses Only",
+        "inCurriculum": "In Curriculum Only",
+        "outOfCurriculum": "Out of Curriculum Only"
+      },
+      "registered": {
+        "title": "Registered Courses",
+        "summary": "{courses} courses, {credits} credits",
+        "searchPlaceholder": "Search by code, course name...",
+        "register": "Register",
+        "selectedCount": "Selected {count} courses",
+        "cancelRegistration": "Cancel registration",
+        "deselectAll": "Deselect",
+        "noRegisteredCourses": "No courses registered",
+        "lockedTooltip": "Course is locked, cannot select",
+        "viewDetail": "View detail",
+        "filters": {
+          "allStatus": "All statuses",
+          "registered": "Registered",
+          "locked": "Locked"
+        },
+        "columns": {
+          "code": "Code",
+          "name": "Course Name",
+          "instructor": "Instructor",
+          "credits": "Credits",
+          "enrollmentDate": "Enrollment Date",
+          "status": "Status",
+          "action": "Actions"
+        },
+        "status": {
+          "locked": "Locked",
+          "registered": "Registered"
+        }
+      },
+      "card": {
+        "register": "Register",
+        "cancel": "Cancel Registration",
+        "credits": "{count} credits",
+        "full": "Full",
+        "conflict": "Conflict",
+        "instructor": "Instructor {name} ({code})",
+        "location": "{roomCode} - {roomName}",
+        "dateRange": "From {startDate} to {endDate}",
+        "schedule": "{day} {time}",
+        "status": "{status}"
+      }
+    }
+  }
+}

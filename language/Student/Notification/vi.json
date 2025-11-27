@@ -1,0 +1,36 @@
+{
+  "student": {
+    "notification": {
+      "title": "Thông báo",
+      "unreadCount": "{count} thông báo chưa đọc",
+      "loading": "Đang tải...",
+      "viewAll": "Xem tất cả",
+      "search": {
+        "placeholder": "Tìm kiếm thông báo..."
+      },
+      "filters": {
+        "all": "Tất cả",
+        "unread": "Chưa đọc",
+        "read": "Đã đọc",
+        "important": "Quan trọng",
+        "tuition": "Học phí",
+        "event": "Sự kiện",
+        "schedule": "Lịch học",
+        "status": "Trạng thái"
+      },
+      "markAllAsRead": {
+        "button": "Đánh dấu tất cả đã đọc",
+        "processing": "Đang xử lý..."
+      },
+      "empty": {
+        "title": "Không có thông báo",
+        "noNotifications": "Bạn chưa có thông báo nào",
+        "noNotificationsInCategory": "Không có thông báo trong danh mục này"
+      },
+      "error": {
+        "title": "Lỗi tải thông báo",
+        "retry": "Thử lại"
+      }
+    }
+  }
+}

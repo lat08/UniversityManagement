@@ -149,13 +149,13 @@ export interface ApprovalStatusDisplay {
 
 export const getApprovalStatusDisplay = (status: ApprovalStatus | string): ApprovalStatusDisplay => {
   const statusMap: Record<string, ApprovalStatusDisplay> = {
-    pending: { translationKey: 'admin.gradeApproval.statuses.pending', color: 'bg-yellow-100 text-yellow-700' },
-    approved: { translationKey: 'admin.gradeApproval.statuses.approved', color: 'bg-green-100 text-green-700' },
-    rejected: { translationKey: 'admin.gradeApproval.statuses.rejected', color: 'bg-red-100 text-red-700' },
+    pending: { translationKey: 'statuses.pending', color: 'bg-yellow-100 text-yellow-700' },
+    approved: { translationKey: 'statuses.approved', color: 'bg-green-100 text-green-700' },
+    rejected: { translationKey: 'statuses.rejected', color: 'bg-red-100 text-red-700' },
   };
   return (
     statusMap[status] ?? {
-      translationKey: 'admin.gradeApproval.statuses.unknown',
+      translationKey: 'statuses.unknown',
       fallbackLabel: typeof status === 'string' ? status : undefined,
       color: 'bg-gray-100 text-gray-700',
     }

@@ -1,0 +1,142 @@
+{
+  "instructor": {
+    "schedule": {
+      "weekly": {
+        "title": "Weekly Teaching Schedule",
+        "description": "Display teaching schedule by week in the semester",
+        "loading": "Loading...",
+        "selectWeek": "Select Week",
+        "selectViewType": "Select View Type",
+        "selectSubject": "Select Subject",
+        "searchSubject": "Search subject...",
+        "viewType": {
+          "personal": "Personal Schedule",
+          "subject": "Subject Schedule"
+        },
+        "requestChange": "Request Schedule Change",
+        "export": {
+          "button": "Print",
+          "exporting": "Exporting...",
+          "success": "PDF exported successfully",
+          "error": "Failed to export PDF"
+        },
+        "errors": {
+          "courseNotFound": "Course information not found",
+          "selectSemesterAndWeek": "Please select semester and week"
+        },
+        "changeRequest": {
+          "title": "Request Schedule Change",
+          "subject": "Subject",
+          "currentSchedule": "Current Schedule Information",
+          "date": "Date",
+          "period": "Period",
+          "room": "Room",
+          "selectNewDate": "Select New Date",
+          "selectedDate": "Selected Date",
+          "week": "Week",
+          "building": "Building (optional)",
+          "roomType": "Room Type (optional)",
+          "all": "All",
+          "selectSlot": "Select Available Slot",
+          "selectDateFirst": "Please select a date first",
+          "loadingSuggestions": "Loading suggestions...",
+          "noSlotsAvailable": "No available slots",
+          "reason": "Reason for Change",
+          "reasonPlaceholder": "Reason for requesting change...",
+          "charCount": "{count} / 500",
+          "cancel": "Cancel",
+          "submit": "Submit",
+          "submitting": "Submitting...",
+          "errors": {
+            "selectNewDate": "Please select a new date",
+            "cannotDetermineWeek": "Cannot determine makeup week",
+            "selectSlot": "Please select an available slot",
+            "enterReason": "Please enter reason for change",
+            "reasonMaxLength": "Reason cannot exceed 500 characters",
+            "slotDateMismatch": "Selected slot date does not match selected date",
+            "dateBeforeCurrent": "Cannot select date before current teaching date",
+            "dateAfterSemester": "Cannot select date after semester end date"
+          },
+          "success": "Schedule change request created successfully",
+          "error": "Failed to create request"
+        },
+        "history": {
+          "title": "Schedule Change History",
+          "searchPlaceholder": "Search by subject code, name...",
+          "filterStatus": "Filter by Status",
+          "all": "All",
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "columns": {
+            "createdAt": "Created At",
+            "subjectCode": "Subject Code",
+            "subjectName": "Subject Name",
+            "cancelledWeek": "Cancelled Week",
+            "status": "Status",
+            "actions": "Actions"
+          },
+          "viewDetail": "View Details",
+          "deleteRequest": "Delete Request",
+          "loading": "Loading schedule change history...",
+          "empty": {
+            "noResults": "No results found for \"{query}\"",
+            "noRequestsForWeek": "No schedule change requests for week {week}",
+            "noRequests": "No schedule change requests in this semester"
+          },
+          "error": "Unable to load schedule change history",
+          "delete": {
+            "success": "Request deleted successfully",
+            "error": "Failed to delete request",
+            "confirmTitle": "Confirm Delete Request",
+            "confirmDescription": "Are you sure you want to delete the schedule change request for \"{subjectName}\" ({subjectCode})? This action cannot be undone.",
+            "confirmDescriptionGeneric": "Are you sure you want to delete this schedule change request?",
+            "confirm": "Delete",
+            "cancel": "Cancel"
+          }
+        },
+        "detail": {
+          "title": "Schedule Change Request Details",
+          "createdAt": "Created At",
+          "generalInfo": "General Information",
+          "subjectName": "Subject Name",
+          "subjectCode": "Subject Code",
+          "reviewedAt": "Reviewed At",
+          "cancelledSchedule": "Cancelled Schedule Information",
+          "cancelledWeek": "Cancelled Week",
+          "cancelledDate": "Cancelled Date",
+          "dayOfWeek": "Day of Week",
+          "time": "Time",
+          "room": "Room",
+          "makeupSchedule": "Makeup Schedule Information",
+          "makeupWeek": "Makeup Week",
+          "makeupDate": "Makeup Date",
+          "reason": "Reason for Change",
+          "reviewNote": "Admin Note",
+          "close": "Close"
+        }
+      },
+      "semester": {
+        "title": "Semester Schedule",
+        "description": "Display teaching schedule by semester",
+        "loading": "Loading...",
+        "selectViewType": "Select View Type",
+        "selectSubject": "Select Subject",
+        "searchSubject": "Search subject...",
+        "viewType": {
+          "personal": "Personal Schedule",
+          "subject": "Subject Schedule"
+        },
+        "export": {
+          "button": "Print",
+          "exporting": "Exporting...",
+          "success": "PDF exported successfully",
+          "error": "Failed to export PDF"
+        },
+        "errors": {
+          "selectSemester": "Please select semester"
+        }
+      }
+    }
+  }
+}

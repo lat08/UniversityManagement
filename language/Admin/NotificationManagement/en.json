@@ -1,0 +1,106 @@
+{
+  "admin": {
+    "notificationManagement": {
+      "general": {
+        "unknown": "Unknown",
+        "notAvailable": "Not available",
+        "studentLoadError": "Unable to load student list"
+      },
+      "options": {
+        "notificationTypes": {
+          "event": "Event",
+          "tuition": "Tuition",
+          "schedule": "Schedule",
+          "important": "Important"
+        },
+        "targetTypes": {
+          "all": "All users",
+          "allStudents": "All students",
+          "allInstructors": "All instructors",
+          "faculty": "Faculty",
+          "department": "Department",
+          "class": "Class",
+          "instructor": "Instructor",
+          "student": "Student"
+        },
+        "sendingMethods": {
+          "system": "System",
+          "email": "Email",
+          "both": "Both"
+        },
+        "status": {
+          "all": "All",
+          "pending": "Pending",
+          "sent": "Sent",
+          "cancelled": "Cancelled"
+        }
+      },
+      "title": "Notification Management",
+      "description": "Manage and send notifications to users",
+      "add": "Add Notification",
+      "create": "Create Notification",
+      "edit": "Edit Notification",
+      "send": "Send Notification",
+      "search": "Search by title...",
+      "advancedFilter": "Advanced Filter",
+      "clearFilters": "Clear All Advanced Filters",
+      "clearDateFilter": "Clear Date Filter",
+      "listTitle": "Notification List",
+      "selected": "{count} notifications selected",
+      "bulkEdit": "Bulk Edit",
+      "deselect": "Deselect",
+      "allStatus": "All Status",
+      "allTargets": "All Targets",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "notificationType": "Notification Type",
+      "selectType": "Select notification type",
+      "sendingMethod": "Sending Method",
+      "selectMethod": "Select method",
+      "faculty": "Faculty",
+      "selectFaculty": "Select faculty",
+      "searchFaculty": "Search faculty...",
+      "department": "Department",
+      "selectDepartment": "Select department",
+      "searchDepartment": "Search department...",
+      "class": "Class",
+      "selectClass": "Select class",
+      "searchClass": "Search class...",
+      "instructor": "Instructor",
+      "selectInstructor": "Select instructor",
+      "searchInstructor": "Search instructor...",
+      "student": "Student",
+      "selectStudent": "Select student",
+      "searchStudent": "Search student...",
+      "all": "All",
+      "filtering": "Filtering",
+      "noData": "No data available",
+      "loading": "Loading...",
+      "columns": {
+        "title": "Title",
+        "type": "Type",
+        "target": "Target",
+        "method": "Method",
+        "recipients": "Recipients",
+        "status": "Status",
+        "scheduledDate": "Scheduled Date",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "View Details",
+        "edit": "Edit",
+        "send": "Send",
+        "archive": "Archive",
+        "cancel": "Cancel"
+      },
+      "stats": {
+        "total": "Total Notifications",
+        "pending": "Pending",
+        "sent": "Sent",
+        "cancelled": "Cancelled",
+        "archived": "Archived"
+      }
+    }
+  }
+}

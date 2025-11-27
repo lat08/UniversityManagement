@@ -1,0 +1,341 @@
+{
+  "auth": {
+    "login": {
+      "title": "Login",
+      "emailLabel": "Enter Email Address",
+      "emailPlaceholder": "example@email.com",
+      "passwordLabel": "Enter Password",
+      "passwordPlaceholder": "Password (at least 6 characters)",
+      "forgotPassword": "Forgot Password?",
+      "submitButton": "Login",
+      "loadingText": "Logging in...",
+      "success": "Login successful!",
+      "error": "Login failed. Please try again!",
+      "adminBlocked": "Admin account please login at admin page!",
+      "captchaRequired": "Please confirm you are not a robot!",
+      "validation": {
+        "emailRequired": "Email cannot be empty",
+        "emailInvalid": "Invalid email",
+        "passwordRequired": "Password cannot be empty",
+        "passwordMin": "Password must be at least 6 characters",
+        "passwordMax": "Password cannot exceed 100 characters"
+      }
+    },
+    "adminLogin": {
+      "title": "Admin Portal Login",
+      "portalTitle": "Administrator Portal",
+      "portalDescription": "Sign in to access the management console",
+      "emailLabel": "Email",
+      "emailPlaceholder": "admin@university.edu",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "submitButton": "Sign in",
+      "loadingText": "Processing...",
+      "success": "Administrator login successful!",
+      "error": "Login failed. Please try again!",
+      "roleDenied": "Only Admin or Admin_Principal accounts can access this page!",
+      "captchaRequired": "Please confirm you are not a robot!",
+      "validation": {
+        "emailRequired": "Email cannot be empty",
+        "emailInvalid": "Invalid email",
+        "passwordMin": "Password must be at least 6 characters",
+        "passwordMax": "Password cannot exceed 100 characters"
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Please enter your Email to reset password",
+      "emailLabel": "Enter Email Address",
+      "emailPlaceholder": "Email",
+      "submit": "Continue",
+      "loadingText": "Sending...",
+      "success": "OTP code has been sent to your email!",
+      "error": "Failed to send OTP. Please try again!"
+    },
+    "verifyOtp": {
+      "title": "Verify Code",
+      "description": "Verification code has been sent to your email address",
+      "label": "Enter Code",
+      "placeholder": "Verification Code",
+      "submit": "Verify",
+      "resendNow": "Resend Now",
+      "resending": "Sending...",
+      "loadingText": "Verifying...",
+      "success": "OTP verification successful!",
+      "error": "OTP verification failed. Please try again!",
+      "resendSuccess": "New OTP code has been sent to your email!",
+      "resendError": "Failed to resend OTP. Please try again!",
+      "otpRequired": "Please enter OTP code!",
+      "otpInvalid": "OTP code must be 6 digits!",
+      "emailNotFound": "Email not found. Please try again from the beginning.",
+      "resendAfter": "Resend after {seconds}s.",
+      "notReceived": "Didn't receive the code?"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "newPasswordLabel": "Enter New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "placeholder": "Password",
+      "submit": "Confirm",
+      "loadingText": "Processing...",
+      "success": "Password reset successful!",
+      "error": "Password reset failed. Please try again!",
+      "invalidFlow": "Invalid information. Please try again from the beginning.",
+      "validation": {
+        "passwordMin": "Password must be at least 6 characters",
+        "passwordMax": "Password cannot exceed 100 characters",
+        "confirmPasswordRequired": "Please confirm password",
+        "passwordMismatch": "Password confirmation does not match"
+      }
+    },
+    "layout": {
+      "backToLogin": "Back to login",
+      "back": "Back"
+    },
+    "routeGuard": {
+      "otpRequired": "You need to enter email first to receive OTP code!",
+      "resetRequired": "You need to verify OTP before resetting password!"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "retry": "Retry",
+    "actions": {
+      "actions": "Actions",
+      "add": "Add",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "search": "Search",
+      "filter": "Filter",
+      "export": "Export",
+      "import": "Import",
+      "view": "View",
+      "close": "Close",
+      "submit": "Submit",
+      "reset": "Reset",
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "optional": "Optional",
+      "noName": "No name",
+      "noData": "No data available",
+      "error": "An error occurred",
+      "success": "Success",
+      "failed": "Failed",
+      "back": "Back"
+    },
+    "roles": {
+      "student": "Student",
+      "instructor": "Instructor",
+      "admin": "Administrator"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back, {name}!",
+      "welcomeBack": "Welcome back"
+    },
+    "regulations": {
+      "error": {
+        "loadFailed": "Unable to load data"
+      },
+      "empty": {
+        "noRegulations": "No regulations have been published yet.",
+        "noResults": "No regulations found matching keyword \"{query}\""
+      },
+      "search": {
+        "placeholder": "Search by title, description or target audience..."
+      },
+      "filter": {
+        "allTypes": "All Types",
+        "type": "Regulation Type"
+      },
+      "categories": {
+        "admission": "Admission",
+        "academic": "Academic",
+        "finance": "Finance",
+        "studentAffairs": "Student Affairs",
+        "general": "General"
+      },
+      "updated": "Updated",
+      "issueDate": "Issue Date",
+      "effectiveDate": "Effective Date",
+      "content": "Content",
+      "viewDocument": "View detailed document:",
+      "viewOnline": "View Online",
+      "fileName": "File Name",
+      "notice": "Notice",
+      "download": {
+        "loading": "Downloading file...",
+        "button": "Download File",
+        "success": "File downloaded successfully",
+        "error": "Unable to download file. Please try again."
+      }
+    },
+    "profile": {
+      "changePassword": {
+        "title": "Reset Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "fillAllFields": "Please fill in all fields",
+        "passwordMismatch": "New password and confirm password do not match",
+        "passwordMinLength": "New password must be at least 8 characters",
+        "changePasswordError": "An error occurred while changing password",
+        "processing": "Processing...",
+        "saveChanges": "Save Changes"
+      }
+    },
+    "sidebar": {
+      "help": "Help",
+      "logout": "Logout",
+      "university": "UNIVERSITY",
+      "universityName": "SAIGON INTERNATIONAL",
+      "sections": {
+        "overview": "OVERVIEW",
+        "academic": "ACADEMIC",
+        "students": "STUDENTS",
+        "instructors": "INSTRUCTORS",
+        "finance": "FINANCE",
+        "system": "SYSTEM",
+        "training": "TRAINING MANAGEMENT"
+      },
+      "menu": {
+        "dashboard": "Dashboard",
+        "notificationManagement": "Notifications",
+        "statistics": "Statistics Report",
+        "classroomManagement": "Classroom Management",
+        "divisionManagement": "Division Management",
+        "programManagement": "Program Management",
+        "facultyManagement": "Faculty Management",
+        "departmentManagement": "Department Management",
+        "regulations": "Regulations",
+        "buildingManagement": "Building Management",
+        "curriculumManagement": "Curriculum Management",
+        "courseUnitManagement": "Course Unit Management",
+        "subjectManagement": "Subject Management",
+        "timetable": "Timetable",
+        "examSchedule": "Exam Schedule",
+        "courseManagement": "Classes & Assignments",
+        "classManagement": "Class Management",
+        "courseRegistration": "Course Registration",
+        "roomRequests": "Room Requests",
+        "studentProfile": "Student Profile",
+        "studentTuition": "Tuition - Debt",
+        "instructorProfile": "Instructor Profile",
+        "gradeApproval": "Grade Approval",
+        "examApproval": "Exam Approval",
+        "classLists": "Class Lists",
+        "instructorSchedule": "Timetable",
+        "scheduleChanges": "Schedule Change Requests",
+        "tuitionPolicy": "Tuition Policy",
+        "payments": "Payments",
+        "revenueReports": "Revenue Reports",
+        "personalProfile": "Personal Profile",
+        "themeConfiguration": "System Configuration",
+        "notification": "Notification",
+        "teachingPlan": "Teaching Plan",
+        "weeklySchedule": "Weekly Schedule",
+        "semesterSchedule": "Semester Schedule",
+        "materials": "Materials & Textbooks",
+        "exams": "Exams",
+        "grades": "Grades",
+        "courses": "Courses",
+        "departments": "Departments",
+        "studyPlan": "Study Plan",
+        "documents": "Documents",
+        "tuition": "Tuition"
+      }
+    },
+    "schedule": {
+      "weekLabel": "Week {number} [{start} - {end}]",
+      "days": {
+        "monday": {
+          "short": "Mon",
+          "full": "Monday"
+        },
+        "tuesday": {
+          "short": "Tue",
+          "full": "Tuesday"
+        },
+        "wednesday": {
+          "short": "Wed",
+          "full": "Wednesday"
+        },
+        "thursday": {
+          "short": "Thu",
+          "full": "Thursday"
+        },
+        "friday": {
+          "short": "Fri",
+          "full": "Friday"
+        },
+        "saturday": {
+          "short": "Sat",
+          "full": "Saturday"
+        },
+        "sunday": {
+          "short": "Sun",
+          "full": "Sunday"
+        }
+      },
+      "grid": {
+        "period": "Period {period}",
+        "periodRange": "Period {start}-{end}",
+        "code": "Code",
+        "class": "Class",
+        "room": "Room",
+        "teacher": "Instructor"
+      },
+      "tooltip": {
+        "code": "Course code",
+        "course": "Course",
+        "type": "Type",
+        "class": "Class",
+        "room": "Room",
+        "teacher": "Instructor",
+        "period": "Period",
+        "dayPeriod": "{day} - Period",
+        "periodCount": "Sessions",
+        "date": "Date",
+        "note": "Notes"
+      },
+      "conflicts": {
+        "title": "Schedule conflict warning",
+        "item": "{day} - Period {period}:",
+        "courseDetail": "{name} ({code}) - {room} - Instructor: {teacher}"
+      },
+      "table": {
+        "headers": {
+          "subjectCode": "Course code",
+          "subjectName": "Course name",
+          "courseGroup": "Group",
+          "credits": "Credits",
+          "class": "Class",
+          "dayOfWeek": "Day",
+          "startPeriod": "Start period",
+          "period": "Period",
+          "numberOfPeriods": "Sessions",
+          "roomCode": "Room",
+          "instructorName": "Instructor",
+          "time": "Schedule"
+        },
+        "loading": "Loading schedule...",
+        "empty": "No schedule data",
+        "dateRange": "{start} to {end}"
+      },
+      "messages": {
+        "noData": "No data",
+        "loading": "Loading..."
+      }
+    },
+    "table": {
+      "pagination": {
+        "summary": "Showing {start}-{end} of {total}",
+        "previous": "Previous",
+        "next": "Next"
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "student": {
+    "profile": {
+      "title": "Personal Profile",
+      "edit": "Edit",
+      "changePassword": "Change Password",
+      "changePasswordForm": {
+        "title": "Reset Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "fillAllFields": "Please fill in all fields",
+        "passwordMismatch": "New password and confirm password do not match",
+        "passwordMinLength": "New password must be at least 8 characters",
+        "changePasswordError": "An error occurred while changing password",
+        "processing": "Processing...",
+        "saveChanges": "Save Changes"
+      },
+      "role": {
+        "student": "Student"
+      },
+      "tabs": {
+        "info": "Personal Information",
+        "password": "Change Password"
+      },
+      "labels": {
+        "fullName": "Full Name",
+        "studentCode": "Student ID",
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "email": "Email",
+        "citizenId": "National ID",
+        "major": "Major",
+        "faculty": "Specialization",
+        "class": "Class",
+        "status": "Enrollment Status",
+        "educationLevel": "Program Level",
+        "academicYear": "Academic Year",
+        "address": "Permanent Address",
+        "notUpdated": "Not yet updated",
+        "notAvailable": "-"
+      },
+      "gender": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "unknown": "-"
+      },
+      "enrollmentStatus": {
+        "active": "Active",
+        "suspended": "Suspended",
+        "graduated": "Graduated",
+        "withdrawn": "Withdrawn",
+        "unknown": "-"
+      },
+      "notifications": {
+        "loadErrorTitle": "Unable to load information",
+        "loadErrorDescription": "An error occurred while loading the profile. Please try again.",
+        "retry": "Retry",
+        "empty": "No profile information found.",
+        "genericError": "An error occurred"
+      },
+      "passwordTab": {
+        "loading": "Loading..."
+      }
+    }
+  }
+}

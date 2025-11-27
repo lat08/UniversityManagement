@@ -1,0 +1,68 @@
+{
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "welcome": "Welcome back, Name!",
+      "pendingTasks": "Pending Tasks",
+      "recentUpdates": "Recent Updates",
+      "viewAll": "View All",
+      "quickActions": "Quick Actions",
+      "systemSettings": "System Settings",
+      "systemStatus": "System Status",
+      "database": "Database",
+      "api": "API: Active",
+      "email": "Email: Active",
+      "configure": "Configure",
+      "quickAddStudent": "Add Student",
+      "quickAddInstructor": "Add Instructor",
+      "openClass": "Open Class",
+      "publishExamSchedule": "Publish Exam Schedule",
+      "sendNotification": "Send Notification",
+      "themeConfig": "Theme Configuration",
+      "themeConfigDesc": "Customize system colors in real-time",
+      "userManagement": "User Management",
+      "userManagementDesc": "Manage student and instructor accounts",
+      "departmentManagement": "Department Management",
+      "departmentManagementDesc": "Manage departments and divisions",
+      "courseManagement": "Course Management",
+      "courseManagementDesc": "Manage courses and subjects",
+      "databaseDesc": "Backup, restore and maintain database",
+      "security": "Security",
+      "securityDesc": "Security settings and permissions",
+      "notifications": "Notifications",
+      "notificationsDesc": "Configure notification system",
+      "analytics": "Reports & Statistics",
+      "analyticsDesc": "View reports and system statistics",
+      "stats": {
+        "totalStudents": "Total Students",
+        "totalStudentsDesc": "+12% from previous semester",
+        "totalInstructors": "Total Instructors",
+        "totalInstructorsDesc": "+3 new instructors",
+        "totalClasses": "Classes",
+        "totalClassesDesc": "Semester I 2024 - 2025",
+        "totalSubjects": "Subjects",
+        "totalSubjectsDesc": "Currently teaching"
+      },
+      "tasks": {
+        "roomRequest": "Room Function Request",
+        "roomRequestDesc": "{count} room function requests pending approval",
+        "gradeApproval": "Grade Approval Requests",
+        "gradeApprovalDesc": "{count} grade approval requests pending",
+        "scheduleChange": "Instructor Schedule Change Requests",
+        "scheduleChangeDesc": "{count} instructor schedule change requests pending"
+      },
+      "updates": {
+        "tuitionDeadline": "Tuition Payment Deadline for Semester I 2025 - 2026",
+        "tuitionDeadlineDesc": "Tuition payment deadline for Semester I from 10/11/2025",
+        "examSchedule": "Exam Schedule Published for Semester I 2025 - 2026",
+        "examScheduleDesc": "Please view detailed exam schedule for Semester I 2025 - 2026",
+        "courseRegistration": "Course Registration",
+        "courseRegistrationDesc": "Course registration opens from Semester I 2025 - 2026",
+        "fromNow": "{value}",
+        "timestamp1": "10 hours ago",
+        "timestamp2": "5 hours ago",
+        "timestamp3": "1 hour ago"
+      }
+    }
+  }
+}

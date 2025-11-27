@@ -1,0 +1,54 @@
+{
+  "student": {
+    "profile": {
+      "title": "Hồ sơ cá nhân",
+      "role": {
+        "student": "Sinh viên"
+      },
+      "tabs": {
+        "info": "Thông tin cá nhân",
+        "password": "Đổi mật khẩu"
+      },
+      "labels": {
+        "fullName": "Họ và tên",
+        "studentCode": "Mã số sinh viên",
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "email": "Email",
+        "citizenId": "CMND / CCCD",
+        "major": "Ngành học",
+        "faculty": "Chuyên ngành",
+        "class": "Lớp",
+        "status": "Tình trạng",
+        "educationLevel": "Bậc hệ đào tạo",
+        "academicYear": "Niên khóa",
+        "address": "Hộ khẩu",
+        "notUpdated": "Chưa cập nhật",
+        "notAvailable": "-"
+      },
+      "gender": {
+        "male": "Nam",
+        "female": "Nữ",
+        "other": "Khác",
+        "unknown": "-"
+      },
+      "enrollmentStatus": {
+        "active": "Đang học",
+        "suspended": "Tạm ngưng",
+        "graduated": "Đã tốt nghiệp",
+        "withdrawn": "Thôi học",
+        "unknown": "-"
+      },
+      "notifications": {
+        "loadErrorTitle": "Không thể tải thông tin",
+        "loadErrorDescription": "Đã xảy ra lỗi trong quá trình tải hồ sơ. Vui lòng thử lại.",
+        "retry": "Thử lại",
+        "empty": "Không tìm thấy thông tin hồ sơ.",
+        "genericError": "Đã xảy ra lỗi"
+      },
+      "passwordTab": {
+        "loading": "Đang tải..."
+      }
+    }
+  }
+}
