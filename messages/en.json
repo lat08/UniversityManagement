@@ -100,6 +100,17 @@
   "common": {
     "loading": "Loading...",
     "retry": "Retry",
+    "actions": {
+      "back": "Back",
+      "cancel": "Cancel",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "add": "Add",
+      "view": "View",
+      "close": "Close",
+      "confirm": "Confirm"
+    },
     "roles": {
       "student": "Student",
       "instructor": "Instructor",
@@ -192,6 +203,7 @@
         "timetable": "Timetable",
         "examSchedule": "Exam Schedule",
         "courseManagement": "Classes & Assignments",
+        "classManagement": "Class Management",
         "courseRegistration": "Course Registration",
         "roomRequests": "Room Requests",
         "studentProfile": "Student Profile",
@@ -238,6 +250,7 @@
       "submit": "Submit",
       "reset": "Reset",
       "loading": "Loading...",
+      "saving": "Saving...",
       "optional": "Optional",
       "noName": "No name",
       "noData": "No data available",
@@ -2605,6 +2618,115 @@
         }
       }
     },
+    "classManagement": {
+      "title": "Class Management",
+      "description": "Manage class information, departments, advisors, and students",
+      "add": "Add Class",
+      "search": "Search classes...",
+      "list": {
+        "title": "Class List",
+        "description": "Manage class information"
+      },
+      "columns": {
+        "classCode": "Class Code",
+        "className": "Class Name",
+        "department": "Department",
+        "faculty": "Faculty",
+        "advisor": "Advisor Instructor",
+        "trainingSystem": "Training System",
+        "startYear": "Start Year",
+        "endYear": "End Year",
+        "curriculum": "Curriculum",
+        "studentCount": "Student Count",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "allDepartments": "All Departments",
+        "allTrainingSystems": "All Training Systems",
+        "allAcademicYears": "All Academic Years",
+        "allStatuses": "All Statuses"
+      },
+      "status": {
+        "active": "Active",
+        "graduated": "Graduated",
+        "inactive": "Inactive"
+      },
+      "toast": {
+        "createSuccess": "Class created successfully",
+        "createError": "Failed to create class",
+        "updateSuccess": "Class updated successfully",
+        "updateError": "Failed to update class",
+        "deleteSuccess": "Class deleted successfully",
+        "deleteError": "Failed to delete class",
+        "fetchError": "Failed to load classes"
+      },
+      "modals": {
+        "add": {
+          "title": "Add New Class",
+          "description": "Enter class information",
+          "classCode": "Class Code",
+          "classCodePlaceholder": "Enter class code",
+          "className": "Class Name",
+          "classNamePlaceholder": "Enter class name",
+          "department": "Department",
+          "selectDepartment": "Select department",
+          "trainingSystem": "Training System",
+          "selectTrainingSystem": "Select training system",
+          "startAcademicYear": "Start Academic Year",
+          "selectAcademicYear": "Select academic year",
+          "advisorInstructor": "Advisor Instructor",
+          "selectInstructor": "Select instructor",
+          "searchInstructor": "Search instructor...",
+          "curriculum": "Curriculum",
+          "selectCurriculum": "Select curriculum",
+          "searchCurriculum": "Search curriculum..."
+        },
+        "edit": {
+          "title": "Edit Class",
+          "description": "Update class information",
+          "classCode": "Class Code",
+          "className": "Class Name",
+          "classNamePlaceholder": "Enter class name",
+          "trainingSystem": "Training System",
+          "selectTrainingSystem": "Select training system",
+          "classStatus": "Status",
+          "selectStatus": "Select status",
+          "advisorInstructor": "Advisor Instructor",
+          "selectInstructor": "Select instructor",
+          "searchInstructor": "Search instructor...",
+          "curriculum": "Curriculum",
+          "selectCurriculum": "Select curriculum",
+          "searchCurriculum": "Search curriculum..."
+        },
+        "view": {
+          "title": "Class Details",
+          "description": "View class details",
+          "basicInfo": "Basic Information",
+          "classCode": "Class Code",
+          "className": "Class Name",
+          "department": "Department",
+          "faculty": "Faculty",
+          "trainingSystem": "Training System",
+          "status": "Status",
+          "advisorInstructor": "Advisor Instructor",
+          "curriculum": "Curriculum",
+          "startAcademicYear": "Start Academic Year",
+          "endAcademicYear": "End Academic Year",
+          "studentCount": "Student Count",
+          "students": "Students List",
+          "studentCode": "Student Code",
+          "studentName": "Full Name",
+          "email": "Email",
+          "notFound": "Class not found"
+        },
+        "delete": {
+          "title": "Delete Class",
+          "message": "Are you sure you want to delete class \"{className}\"?",
+          "warning": "This action cannot be undone."
+        }
+      }
+    },
     "instructorProfile": {
       "title": "Instructor Profile Management",
       "description": "Manage instructor information",
@@ -2678,7 +2800,14 @@
         "specializationPlaceholder": "e.g., Web Development",
         "citizenId": "Citizen ID",
         "citizenIdPlaceholder": "012345678900",
-        "citizenIdInvalid": "Citizen ID must contain 9-12 digits"
+        "citizenIdInvalid": "Citizen ID must contain 9-12 digits",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Invalid email address",
+        "dateOfBirthFuture": "Date of birth cannot be in the future",
+        "dateOfBirthMinAge": "Instructor must be at least 20 years old",
+        "hireDateFuture": "Hire date cannot be in the future",
+        "hireDateBeforeBirth": "Hire date must be at least 20 years after date of birth"
       },
       "editModal": {
         "title": "Update Instructor",
@@ -2718,7 +2847,14 @@
         "status": "Status",
         "selectStatus": "Select status",
         "address": "Address",
-        "enterAddress": "Enter address"
+        "enterAddress": "Enter address",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Invalid email address",
+        "dateOfBirthFuture": "Date of birth cannot be in the future",
+        "dateOfBirthMinAge": "Instructor must be at least 20 years old",
+        "hireDateFuture": "Hire date cannot be in the future",
+        "hireDateBeforeBirth": "Hire date must be at least 20 years after date of birth"
       },
       "statCards": {
         "total": "Total Instructors",
@@ -2748,6 +2884,13 @@
         "edit": "Edit",
         "delete": "Delete"
       },
+      "bulkSelection": "Selected {count} subjects",
+      "bulkEdit": "Edit All",
+      "bulkDelete": "Delete All",
+      "clearSelection": "Clear Selection",
+      "confirmBulkDelete": "Are you sure you want to delete {count} selected instructors?",
+      "bulkEditNotImplemented": "Bulk edit feature is under development",
+      "bulkDeleteNotImplemented": "Bulk delete feature is under development",
       "detailModal": {
         "title": "Instructor Details",
         "loading": "Loading data...",
@@ -2765,6 +2908,174 @@
         "status": "Status",
         "currentClassCount": "Current assigned classes",
         "close": "Close"
+      },
+      "detailPage": {
+        "title": "Instructor Details",
+        "subtitle": "View detailed instructor information",
+        "loading": "Loading data...",
+        "notFound": "Instructor not found",
+        "tabs": {
+          "basic": "Basic Information",
+          "work": "Work Information"
+        },
+        "sections": {
+          "personalInfo": "Personal Information",
+          "workInfo": "Work Information"
+        },
+        "fields": {
+          "instructorCode": "Instructor Code",
+          "fullName": "Full Name",
+          "gender": "Gender",
+          "genderMale": "Male",
+          "genderFemale": "Female",
+          "dateOfBirth": "Date of Birth",
+          "email": "Email",
+          "phoneNumber": "Phone Number",
+          "citizenId": "Citizen ID",
+          "address": "Address",
+          "faculty": "Faculty/Department",
+          "degree": "Degree",
+          "specialization": "Specialization",
+          "hireDate": "Hire Date",
+          "employmentStatus": "Employment Status",
+          "currentClassCount": "Current Classes"
+        }
+      },
+      "editPage": {
+        "title": "Edit Instructor Information",
+        "description": "Update detailed instructor information",
+        "loading": "Loading data...",
+        "loadError": "Unable to load instructor information",
+        "notFound": "Instructor information not found",
+        "tabs": {
+          "basic": "Basic Information",
+          "contact": "Contact Information",
+          "work": "Work Information",
+          "account": "Account"
+        },
+        "sections": {
+          "basic": {
+            "title": "Basic Information",
+            "subtitle": "Personal information of the instructor"
+          },
+          "contact": {
+            "title": "Contact Information",
+            "subtitle": "Contact details of the instructor"
+          },
+          "work": {
+            "title": "Work Information",
+            "subtitle": "Information about work and specialization"
+          },
+          "account": {
+            "title": "Login Account",
+            "subtitle": "Update login password for the instructor"
+          }
+        },
+        "avatar": {
+          "tooltip": "Upload image",
+          "typeError": "Only accept image files in .jpg, .jpeg or .png format",
+          "sizeError": "Image size must not exceed 5MB",
+          "success": "Image has been selected"
+        },
+        "buttons": {
+          "back": "Back",
+          "cancel": "Cancel",
+          "save": "Save changes",
+          "saving": "Saving..."
+        },
+        "toast": {
+          "updateSuccess": "Instructor information updated successfully",
+          "updateError": "Failed to update information",
+          "genericError": "An error occurred while updating information"
+        },
+        "form": {
+          "fullName": {
+            "label": "Full Name",
+            "placeholder": "John Doe"
+          },
+          "dob": {
+            "label": "Date of Birth",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Select date of birth"
+          },
+          "gender": {
+            "label": "Gender",
+            "placeholder": "Select gender",
+            "options": {
+              "male": "Male",
+              "female": "Female"
+            }
+          },
+          "citizenId": {
+            "label": "Citizen ID",
+            "placeholder": "9-12 digits",
+            "hint": "Numbers only, 9-12 characters"
+          },
+          "phone": {
+            "label": "Phone Number",
+            "placeholder": "10-11 digits",
+            "hint": "Numbers only, 10-11 characters"
+          },
+          "address": {
+            "label": "Address",
+            "placeholder": "Enter full address (minimum 5 characters)",
+            "hint": "Minimum 5 characters, maximum 255 characters"
+          },
+          "email": {
+            "label": "Email",
+            "readonlyHint": "Email cannot be edited"
+          },
+          "instructorCode": {
+            "label": "Instructor Code",
+            "readonlyHint": "Instructor code cannot be edited"
+          },
+          "faculty": {
+            "label": "Faculty/Department",
+            "placeholder": "Select faculty/department",
+            "searchPlaceholder": "Search faculty/department..."
+          },
+          "degree": {
+            "label": "Degree",
+            "placeholder": "Select degree"
+          },
+          "specialization": {
+            "label": "Specialization",
+            "placeholder": "Enter specialization (maximum 500 characters)",
+            "hint": "Maximum 500 characters"
+          },
+          "hireDate": {
+            "label": "Hire Date",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Select hire date"
+          },
+          "status": {
+            "label": "Status",
+            "placeholder": "Select status"
+          },
+          "password": {
+            "label": "New Password",
+            "placeholder": "Leave blank if not changing",
+            "hint": "Password must be at least 6 characters"
+          },
+          "confirmPassword": {
+            "label": "Confirm New Password",
+            "placeholder": "Leave blank if not changing",
+            "hint": "Re-enter password to confirm"
+          },
+          "validation": {
+            "fullNameRequired": "Please enter full name",
+            "fullNameMax": "Full name must not exceed 40 characters",
+            "citizenId": "Citizen ID must be 9-12 digits",
+            "phoneNumber": "Phone number must be 10-11 digits",
+            "address": "Address must be more than 5 characters",
+            "dateOfBirth": "Please select date of birth",
+            "gender": "Please select gender",
+            "faculty": "Please select faculty/department",
+            "status": "Please select status",
+            "passwordConfirm": "Password confirmation does not match",
+            "passwordLength": "Password must be at least 6 characters"
+          }
+        }
       },
       "exportModal": {
         "title": "Export Instructor List",
@@ -2809,8 +3120,8 @@
       }
     },
     "courseManagement": {
-      "title": "Class & Assignment Management",
-      "description": "Centrally manage class information and instructor assignments across the school",
+      "title": "Course & Course Class Management",
+      "description": "Centrally manage course information and course classes across the school",
       "coursesTab": "Course List",
       "assignmentsTab": "Assignment List",
       "add": "Add Class",
@@ -2822,6 +3133,7 @@
       "allClasses": "All Classes",
       "allMajors": "All Majors",
       "allSpecializations": "All Specializations",
+      "allAcademicYears": "All Academic Years",
       "allSubjects": "All Subjects",
       "allInstructors": "All Instructors",
       "noData": "No data available",
@@ -2831,13 +3143,29 @@
         "lecturerName": "Lecturer",
         "enrollment": "Enrollment",
         "semester": "Semester",
+        "academicYear": "Academic Year",
+        "feePerCredit": "Fee per credit",
+        "totalFee": "Total fee",
+        "totalClasses": "Total classes",
+        "totalStudents": "Total students",
         "status": "Status",
         "actions": "Actions",
         "courseName": "Course Name",
         "instructorName": "Assigned Instructor",
         "effectiveDate": "Effective Date",
         "notes": "Notes"
-      }
+      },
+      "courseClassesTitle": "Course classes for this course",
+      "courseClassesHint": "(Quick actions for each course class in the table below)",
+      "classColumns": {
+        "classCode": "Class code",
+        "instructor": "Instructor",
+        "room": "Room",
+        "time": "Time",
+        "enrollment": "Enrollment",
+        "actions": "Actions"
+      },
+      "addCourseClass": "Add Course Class"
     },
     "facultyManagement": {
       "title": "Faculty Management",
@@ -4023,6 +4351,7 @@
           "helperIntro": "Change the active status for all selected curricula.",
           "statusLabel": "Active status",
           "statusPlaceholder": "Select status",
+          "statusNoChange": "No change",
           "statusNote": "Only the status field will be updated. Other curriculum information will remain unchanged.",
           "submit": "Update",
           "submitting": "Updating...",
@@ -4063,8 +4392,15 @@
         "addSubtitle": "Select a subject and position to add to curriculum {code} - {name}",
         "yearLabel": "Academic year",
         "yearPlaceholder": "Select academic year",
+        "year1": "Year 1",
+        "year2": "Year 2",
+        "year3": "Year 3",
+        "year4": "Year 4",
         "semesterLabel": "Semester",
         "semesterPlaceholder": "Select semester",
+        "semester1": "Semester 1",
+        "semester2": "Semester 2",
+        "semester3": "Summer semester",
         "subjectLabel": "Subject",
         "subjectPlaceholder": "Select subject",
         "subjectSearchPlaceholder": "Search by subject code or name...",

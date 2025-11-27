@@ -104,6 +104,17 @@
   "common": {
     "loading": "Đang tải...",
     "retry": "Thử lại",
+    "actions": {
+      "back": "Quay lại",
+      "cancel": "Hủy",
+      "save": "Lưu",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "add": "Thêm",
+      "view": "Xem",
+      "close": "Đóng",
+      "confirm": "Xác nhận"
+    },
     "roles": {
       "student": "Sinh viên",
       "instructor": "Giảng viên",
@@ -182,6 +193,7 @@
         "timetable": "Thời khóa biểu",
         "examSchedule": "Lịch thi",
         "courseManagement": "LHP & PC",
+        "classManagement": "Quản lý lớp học định danh",
         "courseRegistration": "Đăng ký học phần",
         "roomRequests": "Yêu cầu phòng học",
         "studentProfile": "Hồ sơ sinh viên",
@@ -228,6 +240,7 @@
       "submit": "Gửi",
       "reset": "Đặt lại",
       "loading": "Đang tải...",
+      "saving": "Đang lưu...",
       "optional": "Tùy chọn",
       "noName": "Không có tên",
       "noData": "Chưa có dữ liệu",
@@ -2600,6 +2613,115 @@
         }
       }
     },
+    "classManagement": {
+      "title": "Quản lý lớp học định danh",
+      "description": "Quản lý thông tin lớp học, chuyên ngành, giảng viên cố vấn và sinh viên",
+      "add": "Thêm lớp học",
+      "search": "Tìm kiếm lớp học...",
+      "list": {
+        "title": "Danh sách lớp học",
+        "description": "Quản lý thông tin lớp học"
+      },
+      "columns": {
+        "classCode": "Mã lớp",
+        "className": "Tên lớp",
+        "department": "Chuyên ngành",
+        "faculty": "Khoa",
+        "advisor": "Giảng viên cố vấn",
+        "trainingSystem": "Hệ đào tạo",
+        "startYear": "Năm bắt đầu",
+        "endYear": "Năm kết thúc",
+        "curriculum": "Chương trình đào tạo",
+        "studentCount": "Số sinh viên",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "filters": {
+        "allDepartments": "Tất cả chuyên ngành",
+        "allTrainingSystems": "Tất cả hệ đào tạo",
+        "allAcademicYears": "Tất cả năm học",
+        "allStatuses": "Tất cả trạng thái"
+      },
+      "status": {
+        "active": "Đang hoạt động",
+        "graduated": "Đã tốt nghiệp",
+        "inactive": "Không hoạt động"
+      },
+      "toast": {
+        "createSuccess": "Tạo lớp học thành công",
+        "createError": "Tạo lớp học thất bại",
+        "updateSuccess": "Cập nhật lớp học thành công",
+        "updateError": "Cập nhật lớp học thất bại",
+        "deleteSuccess": "Xóa lớp học thành công",
+        "deleteError": "Xóa lớp học thất bại",
+        "fetchError": "Không thể tải danh sách lớp học"
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm lớp học mới",
+          "description": "Nhập thông tin lớp học",
+          "classCode": "Mã lớp",
+          "classCodePlaceholder": "Nhập mã lớp",
+          "className": "Tên lớp",
+          "classNamePlaceholder": "Nhập tên lớp",
+          "department": "Chuyên ngành",
+          "selectDepartment": "Chọn chuyên ngành",
+          "trainingSystem": "Hệ đào tạo",
+          "selectTrainingSystem": "Chọn hệ đào tạo",
+          "startAcademicYear": "Năm học bắt đầu",
+          "selectAcademicYear": "Chọn năm học",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "selectInstructor": "Chọn giảng viên",
+          "searchInstructor": "Tìm kiếm giảng viên...",
+          "curriculum": "Chương trình đào tạo",
+          "selectCurriculum": "Chọn chương trình đào tạo",
+          "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa lớp học",
+          "description": "Cập nhật thông tin lớp học",
+          "classCode": "Mã lớp",
+          "className": "Tên lớp",
+          "classNamePlaceholder": "Nhập tên lớp",
+          "trainingSystem": "Hệ đào tạo",
+          "selectTrainingSystem": "Chọn hệ đào tạo",
+          "classStatus": "Trạng thái",
+          "selectStatus": "Chọn trạng thái",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "selectInstructor": "Chọn giảng viên",
+          "searchInstructor": "Tìm kiếm giảng viên...",
+          "curriculum": "Chương trình đào tạo",
+          "selectCurriculum": "Chọn chương trình đào tạo",
+          "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
+        },
+        "view": {
+          "title": "Chi tiết lớp học",
+          "description": "Xem thông tin chi tiết lớp học",
+          "basicInfo": "Thông tin cơ bản",
+          "classCode": "Mã lớp",
+          "className": "Tên lớp",
+          "department": "Chuyên ngành",
+          "faculty": "Khoa",
+          "trainingSystem": "Hệ đào tạo",
+          "status": "Trạng thái",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "curriculum": "Chương trình đào tạo",
+          "startAcademicYear": "Năm học bắt đầu",
+          "endAcademicYear": "Năm học kết thúc",
+          "studentCount": "Số sinh viên",
+          "students": "Danh sách sinh viên",
+          "studentCode": "Mã sinh viên",
+          "studentName": "Họ và tên",
+          "email": "Email",
+          "notFound": "Không tìm thấy thông tin lớp học"
+        },
+        "delete": {
+          "title": "Xóa lớp học",
+          "message": "Bạn có chắc chắn muốn xóa lớp học \"{className}\"?",
+          "warning": "Hành động này không thể hoàn tác."
+        }
+      }
+    },
     "instructorProfile": {
       "title": "Quản lý hồ sơ giảng viên",
       "description": "Quản lý thông tin giảng viên",
@@ -2673,7 +2795,14 @@
         "specializationPlaceholder": "VD: Lập trình Web",
         "citizenId": "CMND/CCCD",
         "citizenIdPlaceholder": "012345678900",
-        "citizenIdInvalid": "CMND/CCCD phải có 9-12 số"
+        "citizenIdInvalid": "CMND/CCCD phải có 9-12 số",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Email không hợp lệ",
+        "dateOfBirthFuture": "Ngày sinh không được là ngày trong tương lai",
+        "dateOfBirthMinAge": "Giảng viên phải từ 20 tuổi trở lên",
+        "hireDateFuture": "Ngày tuyển dụng không được là ngày trong tương lai",
+        "hireDateBeforeBirth": "Ngày tuyển dụng phải sau ngày sinh ít nhất 20 năm"
       },
       "editModal": {
         "title": "Cập nhật giảng viên",
@@ -2713,7 +2842,14 @@
         "status": "Trạng thái",
         "selectStatus": "Chọn trạng thái",
         "address": "Địa chỉ",
-        "enterAddress": "Nhập địa chỉ"
+        "enterAddress": "Nhập địa chỉ",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Email không hợp lệ",
+        "dateOfBirthFuture": "Ngày sinh không được là ngày trong tương lai",
+        "dateOfBirthMinAge": "Giảng viên phải từ 20 tuổi trở lên",
+        "hireDateFuture": "Ngày tuyển dụng không được là ngày trong tương lai",
+        "hireDateBeforeBirth": "Ngày tuyển dụng phải sau ngày sinh ít nhất 20 năm"
       },
       "statCards": {
         "total": "Tổng giảng viên",
@@ -2743,6 +2879,13 @@
         "edit": "Cập nhật",
         "delete": "Xóa"
       },
+      "bulkSelection": "Đã chọn {count} môn học",
+      "bulkEdit": "Chỉnh sửa toàn bộ",
+      "bulkDelete": "Xóa toàn bộ",
+      "clearSelection": "Bỏ chọn",
+      "confirmBulkDelete": "Bạn có chắc chắn muốn xóa {count} giảng viên đã chọn?",
+      "bulkEditNotImplemented": "Chức năng chỉnh sửa hàng loạt đang được phát triển",
+      "bulkDeleteNotImplemented": "Chức năng xóa hàng loạt đang được phát triển",
       "detailModal": {
         "title": "Chi tiết giảng viên",
         "loading": "Đang tải dữ liệu...",
@@ -2760,6 +2903,174 @@
         "status": "Trạng thái",
         "currentClassCount": "Số lớp phụ trách hiện tại",
         "close": "Đóng"
+      },
+      "detailPage": {
+        "title": "Chi tiết giảng viên",
+        "subtitle": "Xem thông tin chi tiết giảng viên",
+        "loading": "Đang tải dữ liệu...",
+        "notFound": "Không tìm thấy giảng viên",
+        "tabs": {
+          "basic": "Thông tin cơ bản",
+          "work": "Thông tin công tác"
+        },
+        "sections": {
+          "personalInfo": "Thông tin cá nhân",
+          "workInfo": "Thông tin công tác"
+        },
+        "fields": {
+          "instructorCode": "Mã giảng viên",
+          "fullName": "Họ và tên",
+          "gender": "Giới tính",
+          "genderMale": "Nam",
+          "genderFemale": "Nữ",
+          "dateOfBirth": "Ngày sinh",
+          "email": "Email",
+          "phoneNumber": "Số điện thoại",
+          "citizenId": "CMND/CCCD",
+          "address": "Địa chỉ",
+          "faculty": "Khoa/Bộ môn",
+          "degree": "Học vị",
+          "specialization": "Chuyên môn",
+          "hireDate": "Ngày tuyển dụng",
+          "employmentStatus": "Trạng thái công tác",
+          "currentClassCount": "Số lớp đang phụ trách"
+        }
+      },
+      "editPage": {
+        "title": "Chỉnh sửa thông tin giảng viên",
+        "description": "Cập nhật thông tin chi tiết của giảng viên",
+        "loading": "Đang tải dữ liệu...",
+        "loadError": "Không thể tải thông tin giảng viên",
+        "notFound": "Không tìm thấy thông tin giảng viên",
+        "tabs": {
+          "basic": "Thông tin cơ bản",
+          "contact": "Thông tin liên hệ",
+          "work": "Thông tin công tác",
+          "account": "Tài khoản"
+        },
+        "sections": {
+          "basic": {
+            "title": "Thông tin cơ bản",
+            "subtitle": "Thông tin cá nhân của giảng viên"
+          },
+          "contact": {
+            "title": "Thông tin liên hệ",
+            "subtitle": "Thông tin liên lạc của giảng viên"
+          },
+          "work": {
+            "title": "Thông tin công tác",
+            "subtitle": "Thông tin về công việc và chuyên môn"
+          },
+          "account": {
+            "title": "Tài khoản đăng nhập",
+            "subtitle": "Cập nhật mật khẩu đăng nhập cho giảng viên"
+          }
+        },
+        "avatar": {
+          "tooltip": "Tải ảnh lên",
+          "typeError": "Chỉ chấp nhận file ảnh định dạng .jpg, .jpeg hoặc .png",
+          "sizeError": "Kích thước ảnh không được vượt quá 5MB",
+          "success": "Ảnh đã được chọn"
+        },
+        "buttons": {
+          "back": "Quay lại",
+          "cancel": "Hủy",
+          "save": "Lưu thay đổi",
+          "saving": "Đang lưu..."
+        },
+        "toast": {
+          "updateSuccess": "Cập nhật thông tin giảng viên thành công",
+          "updateError": "Cập nhật thông tin thất bại",
+          "genericError": "Có lỗi xảy ra khi cập nhật thông tin"
+        },
+        "form": {
+          "fullName": {
+            "label": "Họ và tên",
+            "placeholder": "Nguyễn Văn A"
+          },
+          "dob": {
+            "label": "Ngày sinh",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Chọn ngày sinh"
+          },
+          "gender": {
+            "label": "Giới tính",
+            "placeholder": "Chọn giới tính",
+            "options": {
+              "male": "Nam",
+              "female": "Nữ"
+            }
+          },
+          "citizenId": {
+            "label": "CMND / CCCD",
+            "placeholder": "9-12 số",
+            "hint": "Chỉ nhập số, từ 9-12 ký tự"
+          },
+          "phone": {
+            "label": "Số điện thoại",
+            "placeholder": "10-11 số",
+            "hint": "Chỉ nhập số, từ 10-11 ký tự"
+          },
+          "address": {
+            "label": "Địa chỉ",
+            "placeholder": "Nhập địa chỉ đầy đủ (tối thiểu 5 ký tự)",
+            "hint": "Tối thiểu 5 ký tự, tối đa 255 ký tự"
+          },
+          "email": {
+            "label": "Email",
+            "readonlyHint": "Email không thể chỉnh sửa"
+          },
+          "instructorCode": {
+            "label": "Mã giảng viên",
+            "readonlyHint": "Mã giảng viên không thể chỉnh sửa"
+          },
+          "faculty": {
+            "label": "Khoa/Bộ môn",
+            "placeholder": "Chọn khoa/bộ môn",
+            "searchPlaceholder": "Tìm kiếm khoa/bộ môn..."
+          },
+          "degree": {
+            "label": "Học vị",
+            "placeholder": "Chọn học vị"
+          },
+          "specialization": {
+            "label": "Chuyên môn",
+            "placeholder": "Nhập chuyên môn (tối đa 500 ký tự)",
+            "hint": "Tối đa 500 ký tự"
+          },
+          "hireDate": {
+            "label": "Ngày tuyển dụng",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Chọn ngày tuyển dụng"
+          },
+          "status": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái"
+          },
+          "password": {
+            "label": "Mật khẩu mới",
+            "placeholder": "Để trống nếu không đổi",
+            "hint": "Mật khẩu phải có ít nhất 6 ký tự"
+          },
+          "confirmPassword": {
+            "label": "Xác nhận mật khẩu mới",
+            "placeholder": "Để trống nếu không đổi",
+            "hint": "Nhập lại mật khẩu để xác nhận"
+          },
+          "validation": {
+            "fullNameRequired": "Vui lòng nhập họ và tên",
+            "fullNameMax": "Họ và tên không được vượt quá 40 ký tự",
+            "citizenId": "CMND/CCCD phải từ 9-12 số",
+            "phoneNumber": "Số điện thoại phải từ 10-11 số",
+            "address": "Địa chỉ phải trên 5 ký tự",
+            "dateOfBirth": "Vui lòng chọn ngày sinh",
+            "gender": "Vui lòng chọn giới tính",
+            "faculty": "Vui lòng chọn khoa/bộ môn",
+            "status": "Vui lòng chọn trạng thái",
+            "passwordConfirm": "Mật khẩu xác nhận không khớp",
+            "passwordLength": "Mật khẩu phải có ít nhất 6 ký tự"
+          }
+        }
       },
       "exportModal": {
         "title": "Xuất danh sách giảng viên",
@@ -2804,9 +3115,9 @@
       }
     },
     "courseManagement": {
-      "title": "Quản lý lớp học & Phân công",
-      "description": "Quản lý tập trung thông tin lớp học và phân công giảng viên trong toàn trường",
-      "coursesTab": "Danh sách lớp học",
+      "title": "Quản lý học phần & Lớp học phần",
+      "description": "Quản lý tập trung thông tin học phần và lớp học phần trong toàn trường",
+      "coursesTab": "Danh sách học phần",
       "assignmentsTab": "Danh sách phân công",
       "add": "Thêm lớp học",
       "addNew": "Thêm mới",
@@ -2815,24 +3126,41 @@
       "searchCourse": "Tìm theo mã, tên môn...",
       "searchAssignment": "Tìm kiếm...",
       "allClasses": "Tất cả lớp",
-      "allMajors": "Tất cả chuyên ngành",
-      "allSpecializations": "Tất cả chuyên sâu",
+      "allMajors": "Tất cả ngành",
+      "allSpecializations": "Tất cả chuyên ngành",
+      "allAcademicYears": "Tất cả năm học",
       "allSubjects": "Tất cả môn học",
       "allInstructors": "Tất cả giảng viên",
       "noData": "Không có dữ liệu",
       "columns": {
-        "courseCode": "Mã lớp học phần",
+        "courseCode": "Mã học phần",
         "subjectName": "Môn học",
         "lecturerName": "Giảng viên",
         "enrollment": "Sĩ số",
         "semester": "Học kỳ",
+        "academicYear": "Năm học",
+        "feePerCredit": "Học phí/tín chỉ",
+        "totalFee": "Tổng học phí",
+        "totalClasses": "Tổng số lớp",
+        "totalStudents": "Tổng số sinh viên",
         "status": "Trạng thái",
-        "actions": "HD",
+        "actions": "Thao tác",
         "courseName": "Môn học",
         "instructorName": "Giảng viên phụ trách",
         "effectiveDate": "Ngày áp dụng",
         "notes": "Ghi chú"
-      }
+      },
+      "courseClassesTitle": "Lớp học phần của học phần này",
+      "courseClassesHint": "(Thao tác nhanh với từng lớp học phần ở bảng bên dưới)",
+      "classColumns": {
+        "classCode": "Mã lớp",
+        "instructor": "Giảng viên",
+        "room": "Phòng",
+        "time": "Thời gian",
+        "enrollment": "Sĩ số",
+        "actions": "Thao tác"
+      },
+      "addCourseClass": "Thêm lớp học phần"
     },
     "facultyManagement": {
       "title": "Quản lý ngành",
@@ -4023,6 +4351,7 @@
           "helperIntro": "Thay đổi trạng thái hoạt động cho tất cả các chương trình đào tạo đã chọn.",
           "statusLabel": "Trạng thái hoạt động",
           "statusPlaceholder": "Chọn trạng thái",
+          "statusNoChange": "Không thay đổi",
           "statusNote": "Chỉ áp dụng cho trường trạng thái. Các thuộc tính khác của CTĐT sẽ được giữ nguyên.",
           "submit": "Cập nhật",
           "submitting": "Đang cập nhật...",
@@ -4063,8 +4392,15 @@
         "addSubtitle": "Chọn môn học và vị trí để thêm vào CTĐT {code} - {name}",
         "yearLabel": "Năm học",
         "yearPlaceholder": "Chọn năm học",
+        "year1": "Năm 1",
+        "year2": "Năm 2",
+        "year3": "Năm 3",
+        "year4": "Năm 4",
         "semesterLabel": "Học kỳ",
         "semesterPlaceholder": "Chọn học kỳ",
+        "semester1": "Học kỳ 1",
+        "semester2": "Học kỳ 2",
+        "semester3": "Học kỳ hè",
         "subjectLabel": "Môn học",
         "subjectPlaceholder": "Chọn môn học",
         "subjectSearchPlaceholder": "Tìm theo mã hoặc tên môn học...",

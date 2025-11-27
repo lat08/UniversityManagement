@@ -41,6 +41,7 @@ export const instructorsApi = {
     formData.append('Gender', payload.gender);
     formData.append('FacultyId', payload.facultyId);
 
+    if (payload.email) formData.append('Email', payload.email);
     if (payload.dateOfBirth) formData.append('DateOfBirth', payload.dateOfBirth);
     if (payload.hireDate) formData.append('HireDate', payload.hireDate);
     if (payload.phoneNumber) formData.append('PhoneNumber', payload.phoneNumber);
@@ -82,6 +83,7 @@ export const instructorsApi = {
     if (payload.fullName) formData.append('FullName', payload.fullName);
     if (payload.gender) formData.append('Gender', payload.gender);
     if (payload.facultyId) formData.append('FacultyId', payload.facultyId);
+    if (payload.email) formData.append('Email', payload.email);
     if (payload.dateOfBirth) formData.append('DateOfBirth', payload.dateOfBirth);
     if (payload.hireDate) formData.append('HireDate', payload.hireDate);
     if (payload.phoneNumber) formData.append('PhoneNumber', payload.phoneNumber);

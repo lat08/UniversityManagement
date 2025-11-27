@@ -51,6 +51,7 @@ export interface CreateInstructorPayload {
   fullName: string;
   gender: string;
   facultyId: string;
+  email?: string;
   dateOfBirth?: string;
   hireDate?: string;
   phoneNumber?: string;
@@ -87,6 +88,7 @@ export interface UpdateInstructorPayload {
   fullName?: string;
   gender?: string;
   facultyId?: string;
+  email?: string;
   dateOfBirth?: string;
   hireDate?: string; 
   phoneNumber?: string;

@@ -25,10 +25,9 @@ export const AddSubjectToCurriculumModal = ({
 }: AddSubjectToCurriculumModalProps) => {
   const t = useTranslations('admin.curriculumManagement.subjects')
   const tActions = useTranslations('common.actions')
-  const DEBUG_ADD_SUBJECT_MODAL = false
+  const DEBUG_ADD_SUBJECT_MODAL = true
   const debugAddSubjectModal = (...args: unknown[]) => {
     if (!DEBUG_ADD_SUBJECT_MODAL) return
-    // eslint-disable-next-line no-console
     console.log('[AddSubjectToCurriculumModal]', ...args)
   }
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false)
@@ -51,25 +50,28 @@ export const AddSubjectToCurriculumModal = ({
   const [selectedYearIndex, setSelectedYearIndex] = useState<number | ''>('')
   const [selectedSemesterIndex, setSelectedSemesterIndex] = useState<number | ''>('')
 
+  // Danh sách năm học cố định (1-4)
+  // Note: Backend có thể yêu cầu index bắt đầu từ 1, không phải 0
   const academicYearOptions = useMemo(
-    () =>
-      curriculumDetail?.academicYears.map((year) => ({
-        value: String(year.academicYearIndex),
-        label: year.academicYearName,
-      })) ?? [],
-    [curriculumDetail],
+    () => [
+      { value: '1', label: t('year1') },
+      { value: '2', label: t('year2') },
+      { value: '3', label: t('year3') },
+      { value: '4', label: t('year4') },
+    ],
+    [t],
   )
 
-  const semesterOptions = useMemo(() => {
-    if (!curriculumDetail || selectedYearIndex === '') return []
-    const year = curriculumDetail.academicYears.find((y) => y.academicYearIndex === selectedYearIndex)
-    return (
-      year?.semesters.map((semester) => ({
-        value: String(semester.semesterIndex),
-        label: semester.semesterName,
-      })) ?? []
-    )
-  }, [curriculumDetail, selectedYearIndex])
+  // Danh sách học kỳ cố định (1-3)
+  // Note: Backend có thể yêu cầu index bắt đầu từ 1, không phải 0
+  const semesterOptions = useMemo(
+    () => [
+      { value: '1', label: t('semester1') },
+      { value: '2', label: t('semester2') },
+      { value: '3', label: t('semester3') },
+    ],
+    [t],
+  )
 
   const selectedSubject = useMemo(
     () => subjects.find((s) => s.subjectId === selectedSubjectId) ?? null,
@@ -91,43 +93,44 @@ export const AddSubjectToCurriculumModal = ({
     onClose()
   }
 
-  const loadSubjects = async () => {
-    setIsLoadingSubjects(true)
-    try {
-      /**
-       * Dùng commonApi.getSubjects giống các trang FE khác (course-management, subject-management).
-       */
-      const res = await commonApi.getSubjects()
-      if (res.success && res.data) {
-        // Map về cấu trúc đơn giản dùng cho modal này
-        setSubjects(
-          res.data.map((s) => ({
-            subjectId: s.subjectId,
-            subjectName: s.subjectName,
-            subjectCode: s.subjectCode,
-            credits: s.credits,
-            theoryHours: s.theoryHours,
-            practiceHours: s.practiceHours,
-            departmentName: s.departmentName,
-            // Một số API common có thể trả thêm isGeneral, nếu không có thì để undefined
-            isGeneral: (s as unknown as { isGeneral?: boolean }).isGeneral,
-          })),
-        )
-      } else {
-        toast.error(res.message || t('loadSubjectsError'))
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(err.response?.data?.message || err.message || t('loadSubjectsError'))
-    } finally {
-      setIsLoadingSubjects(false)
-    }
-  }
-
   useEffect(() => {
-    if (isOpen && curriculumDetail) {
-      loadSubjects()
+    if (!isOpen || !curriculumDetail) return
+
+    const loadSubjects = async () => {
+      setIsLoadingSubjects(true)
+      try {
+        /**
+         * Dùng commonApi.getSubjects giống các trang FE khác (course-management, subject-management).
+         */
+        const res = await commonApi.getSubjects()
+        if (res.success && res.data) {
+          // Map về cấu trúc đơn giản dùng cho modal này
+          setSubjects(
+            res.data.map((s) => ({
+              subjectId: s.subjectId,
+              subjectName: s.subjectName,
+              subjectCode: s.subjectCode,
+              credits: s.credits,
+              theoryHours: s.theoryHours,
+              practiceHours: s.practiceHours,
+              departmentName: s.departmentName,
+              // Một số API common có thể trả thêm isGeneral, nếu không có thì để undefined
+              isGeneral: (s as unknown as { isGeneral?: boolean }).isGeneral,
+            })),
+          )
+        } else {
+          toast.error(res.message || t('loadSubjectsError'))
+        }
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { message?: string } }; message?: string }
+        toast.error(err.response?.data?.message || err.message || t('loadSubjectsError'))
+      } finally {
+        setIsLoadingSubjects(false)
+      }
     }
+
+    loadSubjects()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, curriculumDetail])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -181,11 +184,29 @@ export const AddSubjectToCurriculumModal = ({
       })
 
       const newKey = selectedSubjectId
+      const yearIndex = typeof selectedYearIndex === 'number' ? selectedYearIndex : Number(selectedYearIndex)
+      const semIndex = typeof selectedSemesterIndex === 'number' ? selectedSemesterIndex : Number(selectedSemesterIndex)
+      
+      // Validate indexes
+      if (isNaN(yearIndex) || yearIndex < 1 || yearIndex > 4) {
+        debugAddSubjectModal('handleSubmit: invalid yearIndex', { yearIndex, selectedYearIndex })
+        toast.error('Năm học không hợp lệ (phải từ 1-4)')
+        setIsSubmitting(false)
+        return
+      }
+      
+      if (isNaN(semIndex) || semIndex < 1 || semIndex > 3) {
+        debugAddSubjectModal('handleSubmit: invalid semesterIndex', { semIndex, selectedSemesterIndex })
+        toast.error('Học kỳ không hợp lệ (phải từ 1-3)')
+        setIsSubmitting(false)
+        return
+      }
+      
       if (!merged.has(newKey)) {
         merged.set(newKey, {
           subjectId: selectedSubjectId,
-          academicYearIndex: selectedYearIndex as number,
-          semesterIndex: selectedSemesterIndex as number,
+          academicYearIndex: yearIndex,
+          semesterIndex: semIndex,
         })
       }
 
@@ -196,11 +217,12 @@ export const AddSubjectToCurriculumModal = ({
       debugAddSubjectModal('handleSubmit: calling setSubjects', {
         curriculumId: curriculumDetail.curriculumId,
         payload,
+        newSubject: {
+          subjectId: selectedSubjectId,
+          academicYearIndex: yearIndex,
+          semesterIndex: semIndex,
+        },
       })
-
-      // Log body trước khi gửi request để dễ debug
-      // eslint-disable-next-line no-console
-      console.log('[AddSubjectToCurriculumModal] setSubjects payload', payload)
 
       const res = await curriculumsApi.setSubjects(curriculumDetail.curriculumId, payload)
       debugAddSubjectModal('handleSubmit: setSubjects response', res)
@@ -212,8 +234,20 @@ export const AddSubjectToCurriculumModal = ({
         toast.error(res.message || t('addError'))
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(err.response?.data?.message || err.message || t('addGeneralError'))
+      const err = error as { response?: { data?: { message?: string; errors?: string[] } }; message?: string }
+      debugAddSubjectModal('handleSubmit: error', {
+        error: err,
+        responseData: err.response?.data,
+        message: err.response?.data?.message,
+        errors: err.response?.data?.errors,
+      })
+      const errorMessage = err.response?.data?.message || err.message || t('addGeneralError')
+      const errors = err.response?.data?.errors
+      if (errors && errors.length > 0) {
+        toast.error(`${errorMessage}\n${errors.join('\n')}`)
+      } else {
+        toast.error(errorMessage)
+      }
     } finally {
       setIsSubmitting(false)
     }
