@@ -86,7 +86,7 @@ export const EditFacultyModal = ({ isOpen, onClose, onSuccess, faculty }: EditFa
         .catch(() => toast.error(t('errors.loadDivisions')))
         .finally(() => setLoadingDivisions(false));
     }
-  }, [isOpen]);
+  }, [isOpen, t]);
 
   // Load instructors on mount and when search query changes
   useEffect(() => {

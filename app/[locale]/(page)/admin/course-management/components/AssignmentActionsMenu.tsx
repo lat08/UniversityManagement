@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Edit, Eye } from 'lucide-react';
 import { Button } from '@/app/components/ui';
+import { useTranslations } from 'next-intl';
 
 interface AssignmentActionsMenuProps {
   assignmentId: string;
@@ -17,6 +18,7 @@ export const AssignmentActionsMenu = ({
   onEdit,
   compact = false,
 }: AssignmentActionsMenuProps) => {
+  const t = useTranslations('admin.courseManagement');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +54,7 @@ export const AssignmentActionsMenu = ({
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-600 hover:text-gray-900"
-          title="Thao tác"
+          title={t('actions.openMenu')}
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
@@ -81,7 +83,7 @@ export const AssignmentActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Eye className="w-4 h-4 text-blue-600" />
-                Xem chi tiết
+                {t('actions.viewDetails')}
               </button>
               <button
                 onClick={() => {
@@ -91,7 +93,7 @@ export const AssignmentActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Edit className="w-4 h-4 text-green-600" />
-                Chỉnh sửa
+                {t('actions.editAssignment')}
               </button>
             </div>
           </div>
@@ -107,7 +109,7 @@ export const AssignmentActionsMenu = ({
         size="icon"
         onClick={onView}
         className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-        title="Xem chi tiết"
+        title={t('actions.viewDetails')}
       >
         <Eye className="w-4 h-4" />
       </Button>
@@ -116,7 +118,7 @@ export const AssignmentActionsMenu = ({
         size="icon"
         onClick={onEdit}
         className="text-gray-600 hover:text-green-600 hover:bg-green-50"
-        title="Chỉnh sửa"
+        title={t('actions.editAssignment')}
       >
         <Edit className="w-4 h-4" />
       </Button>

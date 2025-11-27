@@ -5,7 +5,6 @@ import { Button, Input } from '@/app/components/ui';
 import { X } from 'lucide-react';
 import { coursesApi } from '../lib/api/coursesApi';
 import { getStatusDisplay } from '../lib/types/types';
-import { useTranslations } from 'next-intl';
 
 interface ViewCourseClassDetailModalProps {
   isOpen: boolean;
@@ -30,7 +29,6 @@ interface CourseClassDetail {
 export const ViewCourseClassDetailModal = ({ isOpen, onClose, courseClassId }: ViewCourseClassDetailModalProps) => {
   const [courseClassDetail, setCourseClassDetail] = useState<CourseClassDetail | null>(null);
   const [loading, setLoading] = useState(false);
-  const t = useTranslations('admin.courseManagement');
 
   useEffect(() => {
     if (isOpen && courseClassId) {

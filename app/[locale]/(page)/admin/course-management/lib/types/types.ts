@@ -209,16 +209,28 @@ export interface UpdateAssignmentPayload extends CreateAssignmentPayload {
   assignmentId: string;
 }
 
-export const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
-  { value: 'active', label: 'Đang học' },
-  { value: 'inactive', label: 'Không hoạt động' },
+export const STATUS_OPTIONS: Array<{ value: '' | 'active' | 'inactive' | 'completed'; labelKey: string }> = [
+  { value: '', labelKey: 'status.all' },
+  { value: 'active', labelKey: 'status.active' },
+  { value: 'inactive', labelKey: 'status.inactive' },
+  { value: 'completed', labelKey: 'status.completed' },
 ];
 
-export const getStatusDisplay = (status: string) => {
-  const statusMap: Record<string, { label: string; color: string }> = {
-    active: { label: 'Đang học', color: 'bg-green-100 text-green-700' },
-    inactive: { label: 'Không hoạt động', color: 'bg-gray-100 text-gray-700' },
+export const getStatusDisplay = (
+  status: string,
+  translate?: (key: string) => string,
+) => {
+  const statusMap: Record<string, { labelKey: string; color: string }> = {
+    active: { labelKey: 'status.active', color: 'bg-green-100 text-green-700' },
+    inactive: { labelKey: 'status.inactive', color: 'bg-gray-100 text-gray-700' },
+    completed: { labelKey: 'status.completed', color: 'bg-blue-100 text-blue-700' },
   };
-  return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
+
+  const fallback = { labelKey: 'status.unknown', color: 'bg-gray-100 text-gray-700' };
+  const statusMeta = statusMap[status] || fallback;
+
+  return {
+    label: translate ? translate(statusMeta.labelKey) : statusMeta.labelKey,
+    color: statusMeta.color,
+  };
 };

@@ -10,6 +10,7 @@ import * as yup from 'yup';
 import type { InferType } from 'yup';
 import { toast } from 'react-hot-toast';
 import { api } from '@/lib/api/client';
+import { useTranslations } from 'next-intl';
 
 interface EditCourseModalProps {
   isOpen: boolean;
@@ -21,18 +22,22 @@ interface EditCourseModalProps {
 const validationSchema = yup.object({
   feePerCredit: yup
     .number()
-    .typeError('Học phí/tín chỉ phải là số')
-    .required('Học phí/tín chỉ là bắt buộc')
-    .moreThan(0, 'Học phí/tín chỉ phải lớn hơn 0'),
+    .typeError('validation.feePerCredit.type')
+    .required('validation.feePerCredit.required')
+    .moreThan(0, 'validation.feePerCredit.min'),
   courseStatus: yup
     .string()
-    .required('Trạng thái là bắt buộc')
-    .oneOf(['active', 'inactive', 'completed'], 'Trạng thái không hợp lệ'),
+    .required('validation.status.required')
+    .oneOf(['active', 'inactive', 'completed'], 'validation.status.invalid'),
 });
 
 type FormData = InferType<typeof validationSchema>;
 
 export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCourseModalProps) => {
+  const t = useTranslations('admin.courseManagement');
+  const modalT = useTranslations('admin.courseManagement.modals.editCourse');
+  const translateError = (message?: string) => (message ? t(message) : '');
+
   const {
     register,
     handleSubmit,
@@ -62,9 +67,9 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
   }, [isOpen, course, reset]);
 
   const statusOptions = [
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Không hoạt động' },
-    { value: 'completed', label: 'Đã hoàn thành' },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+    { value: 'completed', label: t('status.completed') },
   ];
 
   const handleClose = () => {
@@ -86,17 +91,17 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
       });
 
       if (response.data.success) {
-        toast.success('Cập nhật học phần thành công!');
+        toast.success(modalT('toast.success'));
         reset();
         onSuccess?.();
         onClose();
       } else {
-        toast.error(response.data.message || 'Cập nhật học phần thất bại');
+        toast.error(response.data.message || modalT('toast.failure'));
       }
     } catch (error: unknown) {
       const resp = (error as { response?: { data?: { message?: string; errors?: string[] } }; message?: string })?.response?.data;
       const fallbackMessage =
-        resp?.message || resp?.errors?.[0] || (error as { message?: string })?.message || 'Đã xảy ra lỗi';
+        resp?.message || resp?.errors?.[0] || (error as { message?: string })?.message || modalT('toast.error');
       toast.error(fallbackMessage);
     } finally {
       setIsSubmitting(false);
@@ -116,8 +121,8 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Chỉnh sửa học phần</h2>
-              <p className="text-sm text-gray-600 mt-1">Cập nhật thông tin học phần</p>
+              <h2 className="text-2xl font-bold text-gray-900">{modalT('title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{modalT('subtitle')}</p>
             </div>
             <Button
               variant="ghost"
@@ -137,19 +142,19 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
             {/* Thông tin cơ bản (readonly) */}
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Mã học phần</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{modalT('fields.courseCode.readonlyLabel')}</label>
                 <Input value={course.courseCode} disabled className="bg-gray-50" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Môn học</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{modalT('fields.subject.readonlyLabel')}</label>
                 <Input value={course.subjectName} disabled className="bg-gray-50" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Học kỳ</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{modalT('fields.semester.readonlyLabel')}</label>
                 <Input value={course.semester} disabled className="bg-gray-50" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Năm học</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{modalT('fields.academicYear.readonlyLabel')}</label>
                 <Input value={course.academicYear || ''} disabled className="bg-gray-50" />
               </div>
             </div>
@@ -158,7 +163,7 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Học phí/tín chỉ <span className="text-red-500">*</span>
+                  {modalT('fields.feePerCredit.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
@@ -168,22 +173,26 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
                   className={errors.feePerCredit ? 'border-red-500' : ''}
                 />
                 {errors.feePerCredit && (
-                  <p className="mt-1 text-xs text-red-500">{errors.feePerCredit.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.feePerCredit.message)}
+                  </p>
                 )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Trạng thái <span className="text-red-500">*</span>
+                  {modalT('fields.status.label')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
                   options={statusOptions}
                   value={formValues.courseStatus || 'active'}
-                  placeholder="Chọn trạng thái"
+                  placeholder={modalT('fields.status.placeholder')}
                   onChange={(value) => setValue('courseStatus', value as FormData['courseStatus'])}
                   buttonClassName={errors.courseStatus ? 'border-red-500' : ''}
                 />
                 {errors.courseStatus && (
-                  <p className="mt-1 text-xs text-red-500">{errors.courseStatus.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.courseStatus.message)}
+                  </p>
                 )}
               </div>
             </div>
@@ -198,14 +207,14 @@ export const EditCourseModal = ({ isOpen, onClose, onSuccess, course }: EditCour
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {t('buttons.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+              {isSubmitting ? t('buttons.saving') : modalT('submit')}
             </Button>
           </div>
         </form>

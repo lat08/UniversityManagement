@@ -75,7 +75,7 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess }: AddFacultyModalP
         .catch(() => toast.error(t('errors.loadDivisions')))
         .finally(() => setLoadingDivisions(false));
     }
-  }, [isOpen]);
+  }, [isOpen, t]);
 
   // Load instructors on mount and when search query changes
   useEffect(() => {

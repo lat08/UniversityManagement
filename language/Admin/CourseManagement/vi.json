@@ -46,7 +46,182 @@
         "enrollment": "Sĩ số",
         "actions": "Thao tác"
       },
-      "addCourseClass": "Thêm lớp học phần"
+      "addCourseClass": "Thêm lớp học phần",
+      "status": {
+        "all": "Tất cả trạng thái",
+        "active": "Đang hoạt động",
+        "inactive": "Không hoạt động",
+        "completed": "Đã hoàn thành",
+        "unknown": "Không xác định"
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "delete": "Xóa",
+        "close": "Đóng",
+        "saving": "Đang lưu..."
+      },
+      "actions": {
+        "openMenu": "Thao tác",
+        "viewDetails": "Xem chi tiết",
+        "editCourse": "Chỉnh sửa học phần",
+        "editCourseClass": "Cập nhật lớp",
+        "editAssignment": "Chỉnh sửa phân công",
+        "assignInstructor": "Phân công giảng viên",
+        "createCourseClass": "Tạo lớp học phần",
+        "deleteCourse": "Xóa học phần",
+        "deleteCourseClass": "Xóa lớp học phần"
+      },
+      "courseClass": {
+        "noInstructor": "Chưa phân công",
+        "scheduleLine": "Thứ {dayOfWeek}, tiết {start}-{end}",
+        "enrollmentLabel": "{current}/{max} Sinh viên"
+      },
+      "validation": {
+        "courseCode": {
+          "required": "Mã học phần là bắt buộc",
+          "min": "Mã học phần phải có ít nhất 2 ký tự",
+          "max": "Mã học phần không được vượt quá 50 ký tự"
+        },
+        "subject": {
+          "required": "Môn học là bắt buộc"
+        },
+        "semester": {
+          "required": "Học kỳ là bắt buộc"
+        },
+        "feePerCredit": {
+          "type": "Học phí/tín chỉ phải là số",
+          "required": "Học phí/tín chỉ là bắt buộc",
+          "min": "Học phí/tín chỉ phải lớn hơn 0"
+        },
+        "status": {
+          "required": "Trạng thái là bắt buộc",
+          "invalid": "Trạng thái không hợp lệ"
+        },
+        "startDate": {
+          "required": "Ngày bắt đầu là bắt buộc"
+        },
+        "maxStudents": {
+          "type": "Sĩ số tối đa phải là số",
+          "required": "Sĩ số tối đa là bắt buộc",
+          "min": "Sĩ số tối đa phải lớn hơn 0"
+        },
+        "scheduleSuggestion": {
+          "required": "Vui lòng chọn gợi ý lịch học"
+        },
+        "periodRange": {
+          "required": "Khung giờ là bắt buộc",
+          "invalid": "Khung giờ không hợp lệ"
+        }
+      },
+      "modals": {
+        "deleteCourseClass": {
+          "title": "Xác nhận xóa lớp học phần",
+          "message": "Bạn có chắc chắn muốn xóa lớp học phần <strong>{classCode}</strong>?",
+          "warning": "Lưu ý: Hành động này không thể hoàn tác.",
+          "success": "Xóa lớp học phần thành công",
+          "failure": "Xóa lớp học phần thất bại",
+          "error": "Đã xảy ra lỗi khi xóa lớp học phần"
+        },
+        "addCourse": {
+          "title": "Thêm học phần mới",
+          "subtitle": "Nhập thông tin học phần",
+          "submit": "Thêm học phần",
+          "toast": {
+            "success": "Thêm học phần thành công!",
+            "failure": "Thêm học phần thất bại",
+            "error": "Đã xảy ra lỗi"
+          },
+          "fields": {
+            "courseCode": {
+              "label": "Mã học phần",
+              "placeholder": "VD: CE4012025FALL"
+            },
+            "feePerCredit": {
+              "label": "Học phí/tín chỉ"
+            },
+            "subject": {
+              "label": "Môn học",
+              "placeholder": "Chọn môn học",
+              "searchPlaceholder": "Tìm kiếm môn học..."
+            },
+            "semester": {
+              "label": "Học kỳ",
+              "placeholder": "Chọn học kỳ",
+              "searchPlaceholder": "Tìm kiếm học kỳ..."
+            },
+            "status": {
+              "label": "Trạng thái",
+              "placeholder": "Chọn trạng thái"
+            }
+          }
+        },
+        "editCourse": {
+          "title": "Chỉnh sửa học phần",
+          "subtitle": "Cập nhật thông tin học phần",
+          "submit": "Lưu thay đổi",
+          "toast": {
+            "success": "Cập nhật học phần thành công!",
+            "failure": "Cập nhật học phần thất bại",
+            "error": "Đã xảy ra lỗi"
+          },
+          "fields": {
+            "courseCode": {
+              "readonlyLabel": "Mã học phần"
+            },
+            "subject": {
+              "readonlyLabel": "Môn học"
+            },
+            "semester": {
+              "readonlyLabel": "Học kỳ"
+            },
+            "academicYear": {
+              "readonlyLabel": "Năm học"
+            },
+            "feePerCredit": {
+              "label": "Học phí/tín chỉ"
+            },
+            "status": {
+              "label": "Trạng thái",
+              "placeholder": "Chọn trạng thái"
+            }
+          }
+        },
+        "addCourseClass": {
+          "title": "Thêm lớp học phần",
+          "submit": "Thêm lớp học phần",
+          "toast": {
+            "loadSuggestionsError": "Không thể tải gợi ý lịch học",
+            "missingSuggestion": "Vui lòng chọn một gợi ý lịch học",
+            "invalidSuggestion": "Gợi ý lịch học không hợp lệ",
+            "success": "Thêm lớp học phần thành công!",
+            "failure": "Thêm lớp học phần thất bại",
+            "error": "Đã xảy ra lỗi"
+          },
+          "fields": {
+            "startDate": {
+              "label": "Ngày bắt đầu",
+              "placeholder": "dd/mm/yyyy"
+            },
+            "maxStudents": {
+              "label": "Sĩ số tối đa",
+              "placeholder": "VD: 50"
+            },
+            "scheduleSuggestions": {
+              "label": "Gợi ý lịch học",
+              "placeholderSelect": "Chọn gợi ý lịch học",
+              "placeholderEmpty": "Không có gợi ý nào cho ngày này",
+              "placeholderChooseDate": "Chọn ngày bắt đầu trước",
+              "searchPlaceholder": "Tìm kiếm phòng học...",
+              "capacityLabel": "Sức chứa",
+              "periodLabels": {
+                "morning": "Buổi sáng",
+                "afternoon": "Buổi chiều",
+                "evening": "Buổi tối"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

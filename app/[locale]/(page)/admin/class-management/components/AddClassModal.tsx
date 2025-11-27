@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Dropdown, DropdownSearch } from '@/app/components/ui';
 import { X } from 'lucide-react';
@@ -17,21 +17,39 @@ interface AddClassModalProps {
   onSuccess?: () => void;
 }
 
-const validationSchema = yup.object({
-  classCode: yup.string().required('Mã lớp là bắt buộc').min(2, 'Mã lớp phải có ít nhất 2 ký tự'),
-  className: yup.string().required('Tên lớp là bắt buộc').min(2, 'Tên lớp phải có ít nhất 2 ký tự'),
-  departmentId: yup.string().required('Chuyên ngành là bắt buộc'),
-  advisorInstructorId: yup.string().optional(),
-  trainingSystemId: yup.string().required('Hệ đào tạo là bắt buộc'),
-  startAcademicYearId: yup.string().required('Năm học bắt đầu là bắt buộc'),
-  curriculumId: yup.string().optional(),
-});
-
-type FormData = yup.InferType<typeof validationSchema>;
+type FormData = {
+  classCode: string;
+  className: string;
+  departmentId: string;
+  advisorInstructorId?: string;
+  trainingSystemId: string;
+  startAcademicYearId: string;
+  curriculumId?: string;
+};
 
 export default function AddClassModal({ isOpen, onClose, onSuccess }: AddClassModalProps) {
   const t = useTranslations('admin.classManagement');
   const tCommon = useTranslations('common.actions');
+  
+  const validationSchema = useMemo(
+    () =>
+      yup.object({
+        classCode: yup
+          .string()
+          .required(t('validation.classCode.required'))
+          .min(2, t('validation.classCode.min', { min: 2 })),
+        className: yup
+          .string()
+          .required(t('validation.className.required'))
+          .min(2, t('validation.className.min', { min: 2 })),
+        departmentId: yup.string().required(t('validation.departmentId.required')),
+        advisorInstructorId: yup.string().optional(),
+        trainingSystemId: yup.string().required(t('validation.trainingSystemId.required')),
+        startAcademicYearId: yup.string().required(t('validation.startAcademicYearId.required')),
+        curriculumId: yup.string().optional(),
+      }),
+    [t],
+  );
   
   const {
     register,
@@ -249,7 +267,7 @@ export default function AddClassModal({ isOpen, onClose, onSuccess }: AddClassMo
                 options={availableInstructors.map(i => ({ value: i.instructorId, label: i.fullName }))}
                 value={formValues.advisorInstructorId || undefined}
                 placeholder={t('modals.add.selectInstructor')}
-                searchPlaceholder={t('modals.add.searchInstructor') || 'Tìm kiếm giảng viên...'}
+                searchPlaceholder={t('modals.add.searchInstructor')}
                 onChange={(value) => setValue('advisorInstructorId', value || '')}
                 disabled={!formValues.departmentId}
                 showEmptyOption
@@ -265,7 +283,7 @@ export default function AddClassModal({ isOpen, onClose, onSuccess }: AddClassMo
                 options={availableCurriculums.map(c => ({ value: c.curriculumId, label: c.curriculumName }))}
                 value={formValues.curriculumId || undefined}
                 placeholder={t('modals.add.selectCurriculum')}
-                searchPlaceholder={t('modals.add.searchCurriculum') || 'Tìm kiếm chương trình đào tạo...'}
+                searchPlaceholder={t('modals.add.searchCurriculum')}
                 onChange={(value) => setValue('curriculumId', value || '')}
                 disabled={!formValues.departmentId}
                 showEmptyOption

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Dropdown, DropdownSearch } from '@/app/components/ui';
 import { X } from 'lucide-react';
@@ -19,19 +19,32 @@ interface EditClassModalProps {
   onSuccess?: () => void;
 }
 
-const validationSchema = yup.object({
-  className: yup.string().required('Tên lớp là bắt buộc').min(2, 'Tên lớp phải có ít nhất 2 ký tự'),
-  advisorInstructorId: yup.string().optional(),
-  trainingSystemId: yup.string().required('Hệ đào tạo là bắt buộc'),
-  classStatus: yup.string().required('Trạng thái là bắt buộc'),
-  curriculumId: yup.string().optional(),
-});
-
-type FormData = yup.InferType<typeof validationSchema>;
+type FormData = {
+  className: string;
+  advisorInstructorId?: string;
+  trainingSystemId: string;
+  classStatus: string;
+  curriculumId?: string;
+};
 
 export default function EditClassModal({ isOpen, onClose, classItem, onSuccess }: EditClassModalProps) {
   const t = useTranslations('admin.classManagement');
   const tCommon = useTranslations('common.actions');
+  
+  const validationSchema = useMemo(
+    () =>
+      yup.object({
+        className: yup
+          .string()
+          .required(t('validation.className.required'))
+          .min(2, t('validation.className.min', { min: 2 })),
+        advisorInstructorId: yup.string().optional(),
+        trainingSystemId: yup.string().required(t('validation.trainingSystemId.required')),
+        classStatus: yup.string().required(t('validation.classStatus.required')),
+        curriculumId: yup.string().optional(),
+      }),
+    [t],
+  );
   
   const {
     register,
@@ -218,7 +231,7 @@ export default function EditClassModal({ isOpen, onClose, classItem, onSuccess }
                 options={availableInstructors.map(i => ({ value: i.instructorId, label: i.fullName }))}
                 value={formValues.advisorInstructorId || undefined}
                 placeholder={t('modals.edit.selectInstructor')}
-                searchPlaceholder={t('modals.edit.searchInstructor') || 'Tìm kiếm giảng viên...'}
+                searchPlaceholder={t('modals.edit.searchInstructor')}
                 onChange={(value) => setValue('advisorInstructorId', value || '')}
                 showEmptyOption
                 emptyOptionLabel={t('modals.edit.selectInstructor')}
@@ -233,7 +246,7 @@ export default function EditClassModal({ isOpen, onClose, classItem, onSuccess }
                 options={availableCurriculums.map(c => ({ value: c.curriculumId, label: c.curriculumName }))}
                 value={formValues.curriculumId || undefined}
                 placeholder={t('modals.edit.selectCurriculum')}
-                searchPlaceholder={t('modals.edit.searchCurriculum') || 'Tìm kiếm chương trình đào tạo...'}
+                searchPlaceholder={t('modals.edit.searchCurriculum')}
                 onChange={(value) => setValue('curriculumId', value || '')}
                 showEmptyOption
                 emptyOptionLabel={t('modals.edit.selectCurriculum')}

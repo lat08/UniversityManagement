@@ -14,6 +14,7 @@ import { toast } from 'react-hot-toast';
 import { coursesApi } from '../lib/api/coursesApi';
 import type { Course, ScheduleSuggestion } from '../lib/types/types';
 import { api } from '@/lib/api/client';
+import { useTranslations } from 'next-intl';
 
 interface AddCourseClassModalProps {
   isOpen: boolean;
@@ -23,22 +24,26 @@ interface AddCourseClassModalProps {
 }
 
 const validationSchema = yup.object({
-  startDate: yup.string().required('Ngày bắt đầu là bắt buộc'),
+  startDate: yup.string().required('validation.startDate.required'),
   maxStudents: yup
     .number()
-    .typeError('Sĩ số tối đa phải là số')
-    .required('Sĩ số tối đa là bắt buộc')
-    .min(1, 'Sĩ số tối đa phải lớn hơn 0'),
-  roomId: yup.string().required('Vui lòng chọn gợi ý lịch học'),
+    .typeError('validation.maxStudents.type')
+    .required('validation.maxStudents.required')
+    .min(1, 'validation.maxStudents.min'),
+  roomId: yup.string().required('validation.scheduleSuggestion.required'),
   periodRange: yup
     .string()
-    .required('Khung giờ là bắt buộc')
-    .oneOf(['morning', 'afternoon', 'evening'], 'Khung giờ không hợp lệ'),
+    .required('validation.periodRange.required')
+    .oneOf(['morning', 'afternoon', 'evening'], 'validation.periodRange.invalid'),
 });
 
 type FormData = InferType<typeof validationSchema>;
 
 export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddCourseClassModalProps) => {
+  const t = useTranslations('admin.courseManagement');
+  const modalT = useTranslations('admin.courseManagement.modals.addCourseClass');
+  const translateError = (message?: string) => (message ? t(message) : '');
+
   const {
     register,
     handleSubmit,
@@ -151,7 +156,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
             if (res.success) {
               setScheduleSuggestions(res.data);
             } else {
-              toast.error(res.message || 'Không thể tải gợi ý lịch học');
+              toast.error(res.message || modalT('toast.loadSuggestionsError'));
             }
           });
         }
@@ -181,7 +186,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
       if (res.success) {
         setScheduleSuggestions(res.data);
       } else {
-        toast.error(res.message || 'Không thể tải gợi ý lịch học');
+        toast.error(res.message || modalT('toast.loadSuggestionsError'));
       }
     });
   };
@@ -191,12 +196,12 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
     setIsSubmitting(true);
     try {
       if (!selectedSuggestionId) {
-        toast.error('Vui lòng chọn một gợi ý lịch học');
+        toast.error(modalT('toast.missingSuggestion'));
         return;
       }
       const suggestion = scheduleSuggestions.find((s) => s.roomId === selectedSuggestionId);
       if (!suggestion) {
-        toast.error('Gợi ý lịch học không hợp lệ');
+        toast.error(modalT('toast.invalidSuggestion'));
         return;
       }
 
@@ -212,7 +217,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
       });
 
       if (response.data.success) {
-        toast.success('Thêm lớp học phần thành công!');
+        toast.success(modalT('toast.success'));
         reset();
         setSelectedSuggestionId('');
         setScheduleSuggestions([]);
@@ -220,12 +225,12 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
         onSuccess?.();
         onClose();
       } else {
-        toast.error(response.data.message || 'Thêm lớp học phần thất bại');
+        toast.error(response.data.message || modalT('toast.failure'));
       }
     } catch (error: unknown) {
       const resp = (error as { response?: { data?: { message?: string; errors?: string[] } }; message?: string })?.response?.data;
       const fallbackMessage =
-        resp?.message || resp?.errors?.[0] || (error as { message?: string })?.message || 'Đã xảy ra lỗi';
+        resp?.message || resp?.errors?.[0] || (error as { message?: string })?.message || modalT('toast.error');
       toast.error(fallbackMessage);
     } finally {
       setIsSubmitting(false);
@@ -251,7 +256,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Thêm lớp học phần</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{modalT('title')}</h2>
               <p className="text-sm text-gray-600 mt-1">
                 {course.subjectName} • {course.semester} {course.academicYear ? `• ${course.academicYear}` : ''}
               </p>
@@ -275,7 +280,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
               {/* Ngày bắt đầu */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Ngày bắt đầu <span className="text-red-500">*</span>
+                  {modalT('fields.startDate.label')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -287,7 +292,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
                       updateCalendarPosition();
                       setShowCalendar(true);
                     }}
-                    placeholder="dd/mm/yyyy"
+                    placeholder={modalT('fields.startDate.placeholder')}
                     maxLength={10}
                     className={`w-full p-3 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0053AD] bg-white ${
                       errors.startDate ? 'border-red-500' : 'border-gray-200'
@@ -332,46 +337,54 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
                   </div>,
                   document.body,
                 )}
-                {errors.startDate && <p className="mt-1 text-xs text-red-500">{errors.startDate.message}</p>}
+                {errors.startDate && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.startDate.message)}
+                  </p>
+                )}
               </div>
 
               {/* Sĩ số tối đa */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Sĩ số tối đa <span className="text-red-500">*</span>
+                  {modalT('fields.maxStudents.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
                   min="1"
-                  placeholder="VD: 50"
+                  placeholder={modalT('fields.maxStudents.placeholder')}
                   {...register('maxStudents', { valueAsNumber: true })}
                   className={errors.maxStudents ? 'border-red-500' : ''}
                 />
-                {errors.maxStudents && <p className="mt-1 text-xs text-red-500">{errors.maxStudents.message}</p>}
+                {errors.maxStudents && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.maxStudents.message)}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Gợi ý lịch học */}
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Gợi ý lịch học <span className="text-red-500">*</span>
+                {modalT('fields.scheduleSuggestions.label')} <span className="text-red-500">*</span>
               </label>
               <DropdownSearch
                 options={scheduleSuggestions.map((s) => ({
                   value: s.roomId,
                   label: `${s.buildingName ? `${s.buildingName} - ` : ''}${s.roomName} | ${
-                    s.period === 'morning' ? 'Buổi sáng' : s.period === 'afternoon' ? 'Buổi chiều' : 'Buổi tối'
-                  } (${s.startTime} - ${s.endTime}) • Sức chứa: ${s.capacity}`,
+                    modalT(`fields.scheduleSuggestions.periodLabels.${s.period as 'morning' | 'afternoon' | 'evening'}`)
+                  } (${s.startTime} - ${s.endTime}) • ${modalT('fields.scheduleSuggestions.capacityLabel')}: ${s.capacity}`,
                 }))}
                 value={selectedSuggestionId}
                 placeholder={
                   formValues.startDate
                     ? scheduleSuggestions.length > 0
-                      ? 'Chọn gợi ý lịch học'
-                      : 'Không có gợi ý nào cho ngày này'
-                    : 'Chọn ngày bắt đầu trước'
+                      ? modalT('fields.scheduleSuggestions.placeholderSelect')
+                      : modalT('fields.scheduleSuggestions.placeholderEmpty')
+                    : modalT('fields.scheduleSuggestions.placeholderChooseDate')
                 }
-                searchPlaceholder="Tìm kiếm phòng học..."
+                searchPlaceholder={modalT('fields.scheduleSuggestions.searchPlaceholder')}
                 onChange={(value) => {
                   setSelectedSuggestionId(value);
                   const suggestion = scheduleSuggestions.find((s) => s.roomId === value);
@@ -387,7 +400,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
               />
               {(errors.roomId || errors.periodRange) && (
                 <p className="mt-1 text-xs text-red-500">
-                  {errors.roomId?.message || errors.periodRange?.message}
+                  {translateError(errors.roomId?.message || errors.periodRange?.message)}
                 </p>
               )}
             </div>
@@ -401,14 +414,14 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {t('buttons.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang lưu...' : 'Thêm lớp học phần'}
+              {isSubmitting ? t('buttons.saving') : modalT('submit')}
             </Button>
           </div>
         </form>

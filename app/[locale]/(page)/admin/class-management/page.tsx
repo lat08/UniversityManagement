@@ -185,10 +185,10 @@ export default function ClassManagementPage() {
       } else {
         toast.error(response.message || t('toast.deleteError'));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting class:', error);
-      // Extract error message from API response
-      const errorMessage = error?.response?.data?.message || error?.message || t('toast.deleteError');
+      const apiError = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = apiError.response?.data?.message || apiError.message || t('toast.deleteError');
       toast.error(errorMessage);
     }
   };

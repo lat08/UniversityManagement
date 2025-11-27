@@ -761,7 +761,7 @@ export const coursesApi = {
 
       if (response.data.success && response.data.data) {
         const data = response.data.data;
-        const assignedDate = data.instructorAssignedDate ?? data.InstructorAssignedDate;
+        const assignedDate: unknown = data.instructorAssignedDate ?? data.InstructorAssignedDate;
         // Convert DateOnly to yyyy-MM-dd format if needed
         let formattedAssignedDate: string | undefined = undefined;
         if (assignedDate) {
@@ -772,13 +772,21 @@ export const coursesApi = {
             } else {
               formattedAssignedDate = assignedDate;
             }
-          } else {
+          } else if (assignedDate instanceof Date) {
             // If it's a Date object or other format, convert to yyyy-MM-dd
             try {
               const date = new Date(assignedDate);
               formattedAssignedDate = date.toISOString().split('T')[0];
             } catch {
-              formattedAssignedDate = assignedDate.toString();
+              formattedAssignedDate = assignedDate.toISOString();
+            }
+          } else {
+            // Fallback for unknown formats
+            try {
+              const date = new Date(assignedDate as string);
+              formattedAssignedDate = date.toISOString().split('T')[0];
+            } catch {
+              formattedAssignedDate = String(assignedDate);
             }
           }
         }

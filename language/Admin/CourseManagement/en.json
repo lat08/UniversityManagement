@@ -46,7 +46,182 @@
         "enrollment": "Enrollment",
         "actions": "Actions"
       },
-      "addCourseClass": "Add Course Class"
+      "addCourseClass": "Add Course Class",
+      "status": {
+        "all": "All statuses",
+        "active": "Active",
+        "inactive": "Inactive",
+        "completed": "Completed",
+        "unknown": "Unknown"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "close": "Close",
+        "saving": "Saving..."
+      },
+      "actions": {
+        "openMenu": "Actions",
+        "viewDetails": "View details",
+        "editCourse": "Edit course",
+        "editCourseClass": "Update class",
+        "editAssignment": "Edit assignment",
+        "assignInstructor": "Assign instructor",
+        "createCourseClass": "Create course class",
+        "deleteCourse": "Delete course",
+        "deleteCourseClass": "Delete class"
+      },
+      "courseClass": {
+        "noInstructor": "Unassigned",
+        "scheduleLine": "Day {dayOfWeek}, period {start}-{end}",
+        "enrollmentLabel": "{current}/{max} students"
+      },
+      "validation": {
+        "courseCode": {
+          "required": "Course code is required",
+          "min": "Course code must be at least 2 characters",
+          "max": "Course code must be at most 50 characters"
+        },
+        "subject": {
+          "required": "Subject is required"
+        },
+        "semester": {
+          "required": "Semester is required"
+        },
+        "feePerCredit": {
+          "type": "Fee per credit must be a number",
+          "required": "Fee per credit is required",
+          "min": "Fee per credit must be greater than 0"
+        },
+        "status": {
+          "required": "Status is required",
+          "invalid": "Status is invalid"
+        },
+        "startDate": {
+          "required": "Start date is required"
+        },
+        "maxStudents": {
+          "type": "Maximum students must be a number",
+          "required": "Maximum students is required",
+          "min": "Maximum students must be greater than 0"
+        },
+        "scheduleSuggestion": {
+          "required": "Please select a schedule suggestion"
+        },
+        "periodRange": {
+          "required": "Time range is required",
+          "invalid": "Time range is invalid"
+        }
+      },
+      "modals": {
+        "deleteCourseClass": {
+          "title": "Confirm course class deletion",
+          "message": "Are you sure you want to delete course class <strong>{classCode}</strong>?",
+          "warning": "Note: This action cannot be undone.",
+          "success": "Course class deleted successfully",
+          "failure": "Failed to delete course class",
+          "error": "An error occurred while deleting the course class"
+        },
+        "addCourse": {
+          "title": "Add new course",
+          "subtitle": "Enter course information",
+          "submit": "Add course",
+          "toast": {
+            "success": "Course added successfully!",
+            "failure": "Failed to add course",
+            "error": "An unexpected error occurred"
+          },
+          "fields": {
+            "courseCode": {
+              "label": "Course code",
+              "placeholder": "e.g. CE4012025FALL"
+            },
+            "feePerCredit": {
+              "label": "Fee per credit"
+            },
+            "subject": {
+              "label": "Subject",
+              "placeholder": "Select a subject",
+              "searchPlaceholder": "Search subjects..."
+            },
+            "semester": {
+              "label": "Semester",
+              "placeholder": "Select a semester",
+              "searchPlaceholder": "Search semesters..."
+            },
+            "status": {
+              "label": "Status",
+              "placeholder": "Select a status"
+            }
+          }
+        },
+        "editCourse": {
+          "title": "Edit course",
+          "subtitle": "Update course information",
+          "submit": "Save changes",
+          "toast": {
+            "success": "Course updated successfully!",
+            "failure": "Failed to update course",
+            "error": "An unexpected error occurred"
+          },
+          "fields": {
+            "courseCode": {
+              "readonlyLabel": "Course code"
+            },
+            "subject": {
+              "readonlyLabel": "Subject"
+            },
+            "semester": {
+              "readonlyLabel": "Semester"
+            },
+            "academicYear": {
+              "readonlyLabel": "Academic year"
+            },
+            "feePerCredit": {
+              "label": "Fee per credit"
+            },
+            "status": {
+              "label": "Status",
+              "placeholder": "Select a status"
+            }
+          }
+        },
+        "addCourseClass": {
+          "title": "Add course class",
+          "submit": "Add course class",
+          "toast": {
+            "loadSuggestionsError": "Unable to load schedule suggestions",
+            "missingSuggestion": "Please select a schedule suggestion",
+            "invalidSuggestion": "Selected suggestion is invalid",
+            "success": "Course class added successfully!",
+            "failure": "Failed to add course class",
+            "error": "An unexpected error occurred"
+          },
+          "fields": {
+            "startDate": {
+              "label": "Start date",
+              "placeholder": "dd/mm/yyyy"
+            },
+            "maxStudents": {
+              "label": "Maximum students",
+              "placeholder": "e.g. 50"
+            },
+            "scheduleSuggestions": {
+              "label": "Schedule suggestion",
+              "placeholderSelect": "Select a schedule suggestion",
+              "placeholderEmpty": "No suggestions for this date",
+              "placeholderChooseDate": "Choose a start date first",
+              "searchPlaceholder": "Search rooms...",
+              "capacityLabel": "Capacity",
+              "periodLabels": {
+                "morning": "Morning",
+                "afternoon": "Afternoon",
+                "evening": "Evening"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

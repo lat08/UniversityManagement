@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast';
 import { coursesApi } from '../lib/api/coursesApi';
 import type { Subject, Semester } from '../lib/types/types';
 import { api } from '@/lib/api/client';
+import { useTranslations } from 'next-intl';
 
 interface AddCourseModalProps {
   isOpen: boolean;
@@ -21,25 +22,29 @@ interface AddCourseModalProps {
 const validationSchema = yup.object({
   courseCode: yup
     .string()
-    .required('Mã học phần là bắt buộc')
-    .min(2, 'Mã học phần phải có ít nhất 2 ký tự')
-    .max(50, 'Mã học phần không được vượt quá 50 ký tự'),
-  subjectId: yup.string().required('Môn học là bắt buộc'),
-  semesterId: yup.string().required('Học kỳ là bắt buộc'),
+    .required('validation.courseCode.required')
+    .min(2, 'validation.courseCode.min')
+    .max(50, 'validation.courseCode.max'),
+  subjectId: yup.string().required('validation.subject.required'),
+  semesterId: yup.string().required('validation.semester.required'),
   feePerCredit: yup
     .number()
-    .typeError('Học phí/tín chỉ phải là số')
-    .required('Học phí/tín chỉ là bắt buộc')
-    .moreThan(0, 'Học phí/tín chỉ phải lớn hơn 0'),
+    .typeError('validation.feePerCredit.type')
+    .required('validation.feePerCredit.required')
+    .moreThan(0, 'validation.feePerCredit.min'),
   courseStatus: yup
     .string()
-    .required('Trạng thái là bắt buộc')
-    .oneOf(['active', 'inactive', 'completed'], 'Trạng thái không hợp lệ'),
+    .required('validation.status.required')
+    .oneOf(['active', 'inactive', 'completed'], 'validation.status.invalid'),
 });
 
 type FormData = InferType<typeof validationSchema>;
 
 export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalProps) => {
+  const t = useTranslations('admin.courseManagement');
+  const modalT = useTranslations('admin.courseManagement.modals.addCourse');
+  const translateError = (message?: string) => (message ? t(message) : '');
+
   const {
     register,
     handleSubmit,
@@ -79,9 +84,9 @@ export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalPro
   const semesterOptions = semesters.map((s) => ({ value: s.semesterId, label: s.semesterName }));
 
   const statusOptions = [
-    { value: 'active', label: 'Đang hoạt động' },
-    { value: 'inactive', label: 'Không hoạt động' },
-    { value: 'completed', label: 'Đã hoàn thành' },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+    { value: 'completed', label: t('status.completed') },
   ];
 
   const handleClose = () => {
@@ -105,17 +110,17 @@ export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalPro
       });
 
       if (response.data.success) {
-        toast.success('Thêm học phần thành công!');
+        toast.success(modalT('toast.success'));
         reset();
         onSuccess?.();
         onClose();
       } else {
-        toast.error(response.data.message || 'Thêm học phần thất bại');
+        toast.error(response.data.message || modalT('toast.failure'));
       }
     } catch (error: unknown) {
       const resp = (error as { response?: { data?: { message?: string; errors?: string[] } }; message?: string })?.response?.data;
       const fallbackMessage =
-        resp?.message || resp?.errors?.[0] || (error as { message?: string })?.message || 'Đã xảy ra lỗi';
+        resp?.message || resp?.errors?.[0] || (error as { message?: string })?.message || modalT('toast.error');
       toast.error(fallbackMessage);
     } finally {
       setIsSubmitting(false);
@@ -135,8 +140,8 @@ export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalPro
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Thêm học phần mới</h2>
-              <p className="text-sm text-gray-600 mt-1">Nhập thông tin học phần</p>
+              <h2 className="text-2xl font-bold text-gray-900">{modalT('title')}</h2>
+              <p className="text-sm text-gray-600 mt-1">{modalT('subtitle')}</p>
             </div>
             <Button
               variant="ghost"
@@ -157,22 +162,24 @@ export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalPro
               {/* Mã học phần */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Mã học phần <span className="text-red-500">*</span>
+                  {modalT('fields.courseCode.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="VD: CE4012025FALL"
+                  placeholder={modalT('fields.courseCode.placeholder')}
                   {...register('courseCode')}
                   className={errors.courseCode ? 'border-red-500' : ''}
                 />
                 {errors.courseCode && (
-                  <p className="mt-1 text-xs text-red-500">{errors.courseCode.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.courseCode.message)}
+                  </p>
                 )}
               </div>
 
               {/* Học phí/tín chỉ */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Học phí/tín chỉ <span className="text-red-500">*</span>
+                  {modalT('fields.feePerCredit.label')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
@@ -182,64 +189,72 @@ export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalPro
                   className={errors.feePerCredit ? 'border-red-500' : ''}
                 />
                 {errors.feePerCredit && (
-                  <p className="mt-1 text-xs text-red-500">{errors.feePerCredit.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.feePerCredit.message)}
+                  </p>
                 )}
               </div>
 
               {/* Môn học */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Môn học <span className="text-red-500">*</span>
+                  {modalT('fields.subject.label')} <span className="text-red-500">*</span>
                 </label>
                 <DropdownSearch
                   options={subjectOptions}
                   value={formValues.subjectId || ''}
-                  placeholder="Chọn môn học"
-                  searchPlaceholder="Tìm kiếm môn học..."
+                  placeholder={modalT('fields.subject.placeholder')}
+                  searchPlaceholder={modalT('fields.subject.searchPlaceholder')}
                   onChange={(value) => {
                     setValue('subjectId', value);
                   }}
                   buttonClassName={errors.subjectId ? 'border-red-500' : ''}
                 />
                 {errors.subjectId && (
-                  <p className="mt-1 text-xs text-red-500">{errors.subjectId.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.subjectId.message)}
+                  </p>
                 )}
               </div>
 
               {/* Học kỳ */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Học kỳ <span className="text-red-500">*</span>
+                  {modalT('fields.semester.label')} <span className="text-red-500">*</span>
                 </label>
                 <DropdownSearch
                   options={semesterOptions}
                   value={formValues.semesterId || ''}
-                  placeholder="Chọn học kỳ"
-                  searchPlaceholder="Tìm kiếm học kỳ..."
+                  placeholder={modalT('fields.semester.placeholder')}
+                  searchPlaceholder={modalT('fields.semester.searchPlaceholder')}
                   onChange={(value) => {
                     setValue('semesterId', value);
                   }}
                   buttonClassName={errors.semesterId ? 'border-red-500' : ''}
                 />
                 {errors.semesterId && (
-                  <p className="mt-1 text-xs text-red-500">{errors.semesterId.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.semesterId.message)}
+                  </p>
                 )}
               </div>
 
               {/* Trạng thái */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Trạng thái <span className="text-red-500">*</span>
+                  {modalT('fields.status.label')} <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
                   options={statusOptions}
                   value={formValues.courseStatus || 'active'}
-                  placeholder="Chọn trạng thái"
+                  placeholder={modalT('fields.status.placeholder')}
                   onChange={(value) => setValue('courseStatus', value as FormData['courseStatus'])}
                   buttonClassName={errors.courseStatus ? 'border-red-500' : ''}
                 />
                 {errors.courseStatus && (
-                  <p className="mt-1 text-xs text-red-500">{errors.courseStatus.message}</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    {translateError(errors.courseStatus.message)}
+                  </p>
                 )}
               </div>
             </div>
@@ -254,14 +269,14 @@ export const AddCourseModal = ({ isOpen, onClose, onSuccess }: AddCourseModalPro
               disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              Hủy
+              {t('buttons.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang lưu...' : 'Thêm học phần'}
+              {isSubmitting ? t('buttons.saving') : modalT('submit')}
             </Button>
           </div>
         </form>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Edit, Eye, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/app/components/ui';
+import { useTranslations } from 'next-intl';
 
 interface CourseActionsMenuProps {
   courseId: string;
@@ -21,6 +22,7 @@ export const CourseActionsMenu = ({
   onCreateCourseClass,
   compact = false,
 }: CourseActionsMenuProps) => {
+  const t = useTranslations('admin.courseManagement');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +58,7 @@ export const CourseActionsMenu = ({
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-600 hover:text-gray-900"
-          title="Thao tác"
+          title={t('actions.openMenu')}
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
@@ -85,7 +87,7 @@ export const CourseActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Eye className="w-4 h-4 text-blue-600" />
-                Xem chi tiết
+                {t('actions.viewDetails')}
               </button>
               <button
                 onClick={() => {
@@ -95,7 +97,7 @@ export const CourseActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                 <Edit className="w-4 h-4 text-green-600" />
-                Chỉnh sửa
+                {t('actions.editCourse')}
               </button>
               {onCreateCourseClass && (
               <button
@@ -106,7 +108,7 @@ export const CourseActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
                   <Plus className="w-4 h-4 text-blue-600" />
-                  Tạo lớp học phần
+                  {t('actions.createCourseClass')}
               </button>
               )}
               <button
@@ -117,7 +119,7 @@ export const CourseActionsMenu = ({
                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
               >
                 <Trash2 className="w-4 h-4" />
-                Xóa khóa học
+                {t('actions.deleteCourse')}
               </button>
             </div>
           </div>
@@ -133,7 +135,7 @@ export const CourseActionsMenu = ({
         size="icon"
         onClick={onView}
         className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-        title="Xem chi tiết"
+        title={t('actions.viewDetails')}
       >
         <Eye className="w-4 h-4" />
       </Button>
@@ -142,7 +144,7 @@ export const CourseActionsMenu = ({
         size="icon"
         onClick={onEdit}
         className="text-gray-600 hover:text-green-600 hover:bg-green-50"
-        title="Chỉnh sửa"
+        title={t('actions.editCourse')}
       >
         <Edit className="w-4 h-4" />
       </Button>
@@ -152,7 +154,7 @@ export const CourseActionsMenu = ({
         size="icon"
           onClick={onCreateCourseClass}
         className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-          title="Tạo lớp học phần"
+          title={t('actions.createCourseClass')}
       >
           <Plus className="w-4 h-4" />
       </Button>
@@ -162,7 +164,7 @@ export const CourseActionsMenu = ({
         size="icon"
         onClick={onDelete}
         className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-        title="Xóa khóa học"
+        title={t('actions.deleteCourse')}
       >
         <Trash2 className="w-4 h-4" />
       </Button>

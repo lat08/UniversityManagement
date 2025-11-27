@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button, Input } from '@/app/components/ui';
 import { X } from 'lucide-react';
@@ -48,8 +48,6 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
 
     fetchClassDetail();
   }, [isOpen, classId]);
-
-  if (!isOpen) return null;
 
   const statusDisplay = classDetail ? getStatusDisplay(classDetail.classStatus, (key) => t(key)) : null;
 
@@ -102,6 +100,8 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
       </>
     );
   }, []);
+
+  if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -206,7 +206,7 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
                   {t('modals.view.advisorInstructor')}
                 </label>
                 <Input
-                  value={classDetail.advisorInstructorName || 'Chưa phân công'}
+                  value={classDetail.advisorInstructorName || t('modals.view.noAdvisor')}
                   disabled
                   className="bg-gray-50"
                 />
@@ -266,7 +266,7 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
                   {t('modals.view.status')}
                 </label>
                 <Input
-                  value={statusDisplay?.label || classDetail.classStatus || 'N/A'}
+                  value={statusDisplay?.label || classDetail.classStatus || t('modals.view.notAvailable')}
                   disabled
                   className="bg-gray-50"
                 />

@@ -97,7 +97,7 @@ export default function FacultyManagementPage() {
     };
     
     loadDivisions();
-  }, []);
+  }, [t]);
 
   // Load curriculums when division changes
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function FacultyManagementPage() {
       setCurriculums([]);
       setSelectedCurriculumId('');
     }
-  }, [selectedDivisionId]);
+  }, [selectedDivisionId, t]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

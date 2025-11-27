@@ -43,6 +43,28 @@
         "deleteError": "Failed to delete class",
         "fetchError": "Failed to load classes"
       },
+      "validation": {
+        "classCode": {
+          "required": "Class code is required",
+          "min": "Class code must be at least {min} characters"
+        },
+        "className": {
+          "required": "Class name is required",
+          "min": "Class name must be at least {min} characters"
+        },
+        "departmentId": {
+          "required": "Department is required"
+        },
+        "trainingSystemId": {
+          "required": "Training system is required"
+        },
+        "startAcademicYearId": {
+          "required": "Start academic year is required"
+        },
+        "classStatus": {
+          "required": "Status is required"
+        }
+      },
       "modals": {
         "add": {
           "title": "Add New Class",
@@ -100,7 +122,9 @@
           "studentCode": "Student Code",
           "studentName": "Full Name",
           "email": "Email",
-          "notFound": "Class not found"
+          "notFound": "Class not found",
+          "noAdvisor": "Not assigned",
+          "notAvailable": "Not available"
         },
         "delete": {
           "title": "Delete Class",

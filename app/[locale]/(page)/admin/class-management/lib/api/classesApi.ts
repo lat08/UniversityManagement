@@ -14,6 +14,24 @@ import type {
   AcademicYear,
 } from '../types/types';
 
+type AcademicYearApiItem = {
+  academicYearId?: string | number;
+  AcademicYearId?: string | number;
+  yearName?: string;
+  YearName?: string;
+  yearRange?: string;
+  YearRange?: string;
+  yearCode?: string;
+  YearCode?: string;
+};
+
+type TrainingSystemApiItem = {
+  trainingSystemId?: string | number;
+  TrainingSystemId?: string | number;
+  trainingSystemName?: string;
+  TrainingSystemName?: string;
+};
+
 export const classesApi = {
   /**
    * Lấy danh sách lớp học với phân trang và filters
@@ -120,18 +138,20 @@ export const classesApi = {
     try {
       const response = await commonApi.getAcademicYears(count ? { count } : undefined);
       if (response.success && response.data && Array.isArray(response.data)) {
-        const mapped = response.data.map((y: any) => {
-          // Handle both yearRange (from common API) and yearName (expected by class management)
-          const yearName = y.yearName || y.YearName || y.yearRange || y.YearRange || '';
-          const academicYearId = y.academicYearId || y.AcademicYearId || '';
-          const yearCode = y.yearCode || y.YearCode || '';
+        const mapped = response.data
+          .map((year: AcademicYearApiItem): AcademicYear => {
+            // Handle both yearRange (from common API) and yearName (expected by class management)
+            const yearName = year.yearName || year.YearName || year.yearRange || year.YearRange || '';
+            const academicYearId = year.academicYearId || year.AcademicYearId || '';
+            const yearCode = year.yearCode || year.YearCode || '';
 
-          return {
-            academicYearId: String(academicYearId),
-            yearName,
-            yearCode,
-          };
-        }).filter((y: AcademicYear) => y.yearName && y.academicYearId && y.yearName.trim() !== '');
+            return {
+              academicYearId: String(academicYearId),
+              yearName,
+              yearCode,
+            };
+          })
+          .filter((year) => year.yearName && year.academicYearId && year.yearName.trim() !== '');
 
         console.log('[DEBUG] Academic years mapped:', mapped);
         return mapped;
@@ -149,9 +169,9 @@ export const classesApi = {
    */
   getTrainingSystems: async (): Promise<TrainingSystem[]> => {
     try {
-      const response = await api.get<ApiResponse<any[]>>('/v1/class/available-training-systems');
+      const response = await api.get<ApiResponse<TrainingSystemApiItem[]>>('/v1/class/available-training-systems');
       if (response.data.success && response.data.data) {
-        return response.data.data.map((ts: any) => ({
+        return response.data.data.map((ts) => ({
           trainingSystemId: String(ts.trainingSystemId || ts.TrainingSystemId),
           trainingSystemName: ts.trainingSystemName || ts.TrainingSystemName || '',
         }));

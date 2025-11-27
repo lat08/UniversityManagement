@@ -60,7 +60,6 @@ export default function CourseManagementPage() {
   const [courseForEditClass, setCourseForEditClass] = useState<Course | null>(null);
   const [isViewCourseClassModalOpen, setIsViewCourseClassModalOpen] = useState(false);
   const [viewingCourseClassId, setViewingCourseClassId] = useState<string | null>(null);
-  const [isAssignCourseClassModalOpen, setIsAssignCourseClassModalOpen] = useState(false);
   const [assigningCourseClass, setAssigningCourseClass] = useState<CourseClassSummary | null>(null);
   const [isDeleteCourseClassModalOpen, setIsDeleteCourseClassModalOpen] = useState(false);
   const [deletingCourseClass, setDeletingCourseClass] = useState<CourseClassSummary | null>(null);
@@ -271,11 +270,6 @@ export default function CourseManagementPage() {
     setIsEditCourseModalOpen(true);
   }, []);
 
-  const handleAssignCourseClick = useCallback((course: Course) => {
-    setAssigningCourse(course);
-    setIsAssignInstructorModalOpen(true);
-  }, []);
-
   const handleDeleteCourseClick = useCallback((course: Course) => {
     setDeletingCourse(course);
     setIsDeleteCourseModalOpen(true);
@@ -406,7 +400,7 @@ export default function CourseManagementPage() {
                   className="text-gray-600"
                   style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                 >
-                  {courseClass.instructorName || 'Chưa phân công'}
+                  {courseClass.instructorName || t('courseClass.noInstructor')}
                 </td>
               );
             case 'room':
@@ -424,14 +418,23 @@ export default function CourseManagementPage() {
                 <td key="time" className="text-gray-600" style={cellPaddingStyle}>
                   <div className="text-sm leading-snug">
                     <div>{courseClass.startDate} - {courseClass.endDate}</div>
-                    <div>Thứ {courseClass.dayOfWeek}, tiết {courseClass.startPeriod}-{courseClass.endPeriod}</div>
+                    <div>
+                      {t('courseClass.scheduleLine', {
+                        dayOfWeek: courseClass.dayOfWeek,
+                        start: courseClass.startPeriod,
+                        end: courseClass.endPeriod,
+                      })}
+                    </div>
                   </div>
                 </td>
               );
             case 'enrollment':
               return (
                 <td key="enrollment" className="text-gray-900 text-center" style={cellPaddingStyle}>
-                  {courseClass.enrolledStudents}/{courseClass.maximumStudents} Sinh viên
+                  {t('courseClass.enrollmentLabel', {
+                    current: courseClass.enrolledStudents,
+                    max: courseClass.maximumStudents,
+                  })}
                 </td>
               );
             case 'actions':
@@ -443,7 +446,7 @@ export default function CourseManagementPage() {
                       size="icon"
                       onClick={() => handleViewCourseClassClick(courseClass)}
                       className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
-                      title="Xem chi tiết"
+                      title={t('actions.viewDetails')}
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -452,7 +455,7 @@ export default function CourseManagementPage() {
                       size="icon"
                       onClick={() => handleEditCourseClassClick(courseClass, course)}
                       className="text-gray-600 hover:text-green-600 hover:bg-green-50 h-8 w-8"
-                      title="Cập nhật"
+                      title={t('actions.editCourseClass')}
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -461,7 +464,7 @@ export default function CourseManagementPage() {
                       size="icon"
                       onClick={() => handleAssignCourseClassClick(courseClass, course)}
                       className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
-                      title="Gán giảng viên"
+                      title={t('actions.assignInstructor')}
                     >
                       <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -470,7 +473,7 @@ export default function CourseManagementPage() {
                       size="icon"
                       onClick={() => handleDeleteCourseClassClick(courseClass)}
                       className="text-gray-600 hover:text-red-600 hover:bg-red-50 h-8 w-8"
-                      title="Xóa"
+                      title={t('actions.deleteCourseClass')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -483,11 +486,17 @@ export default function CourseManagementPage() {
         })}
       </>
     );
-  }, []);
+  }, [
+    handleAssignCourseClassClick,
+    handleDeleteCourseClassClick,
+    handleEditCourseClassClick,
+    handleViewCourseClassClick,
+    t,
+  ]);
 
   // Render Course Row
   const renderCourseRow = useCallback((course: Course, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const statusDisplay = getStatusDisplay(course.status);
+    const statusDisplay = getStatusDisplay(course.status, (statusKey) => t(statusKey));
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     const isSelected = selectedCourseIds.has(course.courseId);
 
@@ -618,7 +627,16 @@ export default function CourseManagementPage() {
         })}
       </>
     );
-  }, [handleViewCourseClick, handleEditCourseClick, handleDeleteCourseClick, handleOpenCourseClassModal, handleSelectOneCourse, selectedCourseIds, expandedCourseIds]);
+  }, [
+    expandedCourseIds,
+    handleDeleteCourseClick,
+    handleEditCourseClick,
+    handleOpenCourseClassModal,
+    handleSelectOneCourse,
+    handleViewCourseClick,
+    selectedCourseIds,
+    t,
+  ]);
 
   // Render Assignment Row
   const renderAssignmentRow = useCallback((assignment: FacultyAssignment, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
@@ -786,7 +804,7 @@ export default function CourseManagementPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                  Danh sách học phần
+                  {t('coursesTab')}
                 </h2>
               </div>
               <div className="flex gap-3">
@@ -1201,10 +1219,14 @@ export default function CourseManagementPage() {
       {isDeleteCourseClassModalOpen && deletingCourseClass && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Xác nhận xóa lớp học phần</h2>
-            <p className="text-gray-700 mb-6">
-              Bạn có chắc chắn muốn xóa lớp học phần <strong>{deletingCourseClass.courseClassCode}</strong>?
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('modals.deleteCourseClass.title')}</h2>
+            <p className="text-gray-700">
+              {t.rich('modals.deleteCourseClass.message', {
+                strong: (chunks) => <strong>{chunks}</strong>,
+                classCode: deletingCourseClass.courseClassCode,
+              })}
             </p>
+            <p className="text-sm text-red-600 mb-6">{t('modals.deleteCourseClass.warning')}</p>
             <div className="flex gap-3">
               <Button
                 type="button"
@@ -1215,7 +1237,7 @@ export default function CourseManagementPage() {
                 }}
                 className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
               >
-                Hủy
+                {t('buttons.cancel')}
               </Button>
               <Button
                 type="button"
@@ -1224,7 +1246,7 @@ export default function CourseManagementPage() {
                   try {
                     const res = await coursesApi.deleteAssignment(deletingCourseClass.courseClassId);
                     if (res.success) {
-                      toast.success(res.message || 'Xóa lớp học phần thành công');
+                      toast.success(res.message || t('modals.deleteCourseClass.success'));
                       fetchCourses({
                         pageNumber: coursesCurrentPage,
                         pageSize: 20,
@@ -1236,18 +1258,18 @@ export default function CourseManagementPage() {
                       setIsDeleteCourseClassModalOpen(false);
                       setDeletingCourseClass(null);
                     } else {
-                      toast.error(res.message || 'Xóa lớp học phần thất bại');
+                      toast.error(res.message || t('modals.deleteCourseClass.failure'));
                     }
                   } catch (error: unknown) {
                     const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
                                        (error as { message?: string })?.message ||
-                                       'Đã xảy ra lỗi khi xóa lớp học phần';
+                                       t('modals.deleteCourseClass.error');
                     toast.error(errorMessage);
                   }
                 }}
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 transition-colors"
               >
-                Xóa
+                {t('buttons.delete')}
               </Button>
             </div>
           </div>

@@ -43,6 +43,28 @@
         "deleteError": "Xóa lớp học thất bại",
         "fetchError": "Không thể tải danh sách lớp học"
       },
+      "validation": {
+        "classCode": {
+          "required": "Mã lớp là bắt buộc",
+          "min": "Mã lớp phải có ít nhất {min} ký tự"
+        },
+        "className": {
+          "required": "Tên lớp là bắt buộc",
+          "min": "Tên lớp phải có ít nhất {min} ký tự"
+        },
+        "departmentId": {
+          "required": "Chuyên ngành là bắt buộc"
+        },
+        "trainingSystemId": {
+          "required": "Hệ đào tạo là bắt buộc"
+        },
+        "startAcademicYearId": {
+          "required": "Năm học bắt đầu là bắt buộc"
+        },
+        "classStatus": {
+          "required": "Trạng thái là bắt buộc"
+        }
+      },
       "modals": {
         "add": {
           "title": "Thêm lớp học mới",
@@ -100,7 +122,9 @@
           "studentCode": "Mã sinh viên",
           "studentName": "Họ và tên",
           "email": "Email",
-          "notFound": "Không tìm thấy thông tin lớp học"
+          "notFound": "Không tìm thấy thông tin lớp học",
+          "noAdvisor": "Chưa phân công",
+          "notAvailable": "Không xác định"
         },
         "delete": {
           "title": "Xóa lớp học",
