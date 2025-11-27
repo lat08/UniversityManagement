@@ -429,9 +429,9 @@ export default function FacultyManagementPage() {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
             {/* Search Input */}
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-2">
               <SearchInput
                 placeholder={t('search.placeholder')}
                 value={searchQuery}
@@ -466,10 +466,6 @@ export default function FacultyManagementPage() {
               disabled={loadingCurriculums || !selectedDivisionId}
               filterOptions={filterCurriculums}
             />
-          </div>
-
-          {/* Additional Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {/* Status Dropdown */}
             <Dropdown
               options={statusOptions}
