@@ -203,6 +203,7 @@
         "timetable": "Timetable",
         "examSchedule": "Exam Schedule",
         "courseManagement": "Classes & Assignments",
+        "classManagement": "Class Management",
         "courseRegistration": "Course Registration",
         "roomRequests": "Room Requests",
         "studentProfile": "Student Profile",
@@ -249,6 +250,7 @@
       "submit": "Submit",
       "reset": "Reset",
       "loading": "Loading...",
+      "saving": "Saving...",
       "optional": "Optional",
       "noName": "No name",
       "noData": "No data available",
@@ -2615,6 +2617,115 @@
         }
       }
     },
+    "classManagement": {
+      "title": "Class Management",
+      "description": "Manage class information, departments, advisors, and students",
+      "add": "Add Class",
+      "search": "Search classes...",
+      "list": {
+        "title": "Class List",
+        "description": "Manage class information"
+      },
+      "columns": {
+        "classCode": "Class Code",
+        "className": "Class Name",
+        "department": "Department",
+        "faculty": "Faculty",
+        "advisor": "Advisor Instructor",
+        "trainingSystem": "Training System",
+        "startYear": "Start Year",
+        "endYear": "End Year",
+        "curriculum": "Curriculum",
+        "studentCount": "Student Count",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "allDepartments": "All Departments",
+        "allTrainingSystems": "All Training Systems",
+        "allAcademicYears": "All Academic Years",
+        "allStatuses": "All Statuses"
+      },
+      "status": {
+        "active": "Active",
+        "graduated": "Graduated",
+        "inactive": "Inactive"
+      },
+      "toast": {
+        "createSuccess": "Class created successfully",
+        "createError": "Failed to create class",
+        "updateSuccess": "Class updated successfully",
+        "updateError": "Failed to update class",
+        "deleteSuccess": "Class deleted successfully",
+        "deleteError": "Failed to delete class",
+        "fetchError": "Failed to load classes"
+      },
+      "modals": {
+        "add": {
+          "title": "Add New Class",
+          "description": "Enter class information",
+          "classCode": "Class Code",
+          "classCodePlaceholder": "Enter class code",
+          "className": "Class Name",
+          "classNamePlaceholder": "Enter class name",
+          "department": "Department",
+          "selectDepartment": "Select department",
+          "trainingSystem": "Training System",
+          "selectTrainingSystem": "Select training system",
+          "startAcademicYear": "Start Academic Year",
+          "selectAcademicYear": "Select academic year",
+          "advisorInstructor": "Advisor Instructor",
+          "selectInstructor": "Select instructor",
+          "searchInstructor": "Search instructor...",
+          "curriculum": "Curriculum",
+          "selectCurriculum": "Select curriculum",
+          "searchCurriculum": "Search curriculum..."
+        },
+        "edit": {
+          "title": "Edit Class",
+          "description": "Update class information",
+          "classCode": "Class Code",
+          "className": "Class Name",
+          "classNamePlaceholder": "Enter class name",
+          "trainingSystem": "Training System",
+          "selectTrainingSystem": "Select training system",
+          "classStatus": "Status",
+          "selectStatus": "Select status",
+          "advisorInstructor": "Advisor Instructor",
+          "selectInstructor": "Select instructor",
+          "searchInstructor": "Search instructor...",
+          "curriculum": "Curriculum",
+          "selectCurriculum": "Select curriculum",
+          "searchCurriculum": "Search curriculum..."
+        },
+        "view": {
+          "title": "Class Details",
+          "description": "View class details",
+          "basicInfo": "Basic Information",
+          "classCode": "Class Code",
+          "className": "Class Name",
+          "department": "Department",
+          "faculty": "Faculty",
+          "trainingSystem": "Training System",
+          "status": "Status",
+          "advisorInstructor": "Advisor Instructor",
+          "curriculum": "Curriculum",
+          "startAcademicYear": "Start Academic Year",
+          "endAcademicYear": "End Academic Year",
+          "studentCount": "Student Count",
+          "students": "Students List",
+          "studentCode": "Student Code",
+          "studentName": "Full Name",
+          "email": "Email",
+          "notFound": "Class not found"
+        },
+        "delete": {
+          "title": "Delete Class",
+          "message": "Are you sure you want to delete class \"{className}\"?",
+          "warning": "This action cannot be undone."
+        }
+      }
+    },
     "instructorProfile": {
       "title": "Instructor Profile Management",
       "description": "Manage instructor information",
@@ -3005,8 +3116,8 @@
       }
     },
     "courseManagement": {
-      "title": "Class & Assignment Management",
-      "description": "Centrally manage class information and instructor assignments across the school",
+      "title": "Course & Course Class Management",
+      "description": "Centrally manage course information and course classes across the school",
       "coursesTab": "Course List",
       "assignmentsTab": "Assignment List",
       "add": "Add Class",
@@ -3018,6 +3129,7 @@
       "allClasses": "All Classes",
       "allMajors": "All Majors",
       "allSpecializations": "All Specializations",
+      "allAcademicYears": "All Academic Years",
       "allSubjects": "All Subjects",
       "allInstructors": "All Instructors",
       "noData": "No data available",
@@ -3027,13 +3139,29 @@
         "lecturerName": "Lecturer",
         "enrollment": "Enrollment",
         "semester": "Semester",
+        "academicYear": "Academic Year",
+        "feePerCredit": "Fee per credit",
+        "totalFee": "Total fee",
+        "totalClasses": "Total classes",
+        "totalStudents": "Total students",
         "status": "Status",
         "actions": "Actions",
         "courseName": "Course Name",
         "instructorName": "Assigned Instructor",
         "effectiveDate": "Effective Date",
         "notes": "Notes"
-      }
+      },
+      "courseClassesTitle": "Course classes for this course",
+      "courseClassesHint": "(Quick actions for each course class in the table below)",
+      "classColumns": {
+        "classCode": "Class code",
+        "instructor": "Instructor",
+        "room": "Room",
+        "time": "Time",
+        "enrollment": "Enrollment",
+        "actions": "Actions"
+      },
+      "addCourseClass": "Add Course Class"
     },
     "facultyManagement": {
       "title": "Faculty Management",

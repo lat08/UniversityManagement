@@ -16,6 +16,7 @@ interface AssignInstructorModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   course: Course | null;
+  courseClassId?: string; // Optional: if provided, use this instead of course.courseId for assignment
 }
 
 const validationSchema = yup.object({
@@ -26,7 +27,7 @@ const validationSchema = yup.object({
 
 type FormData = InferType<typeof validationSchema>;
 
-export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course }: AssignInstructorModalProps) => {
+export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course, courseClassId }: AssignInstructorModalProps) => {
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset, clearErrors } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
@@ -80,8 +81,10 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course }: As
 
     setIsSubmitting(true);
     try {
+      // Use courseClassId if provided (for course class assignment), otherwise use course.courseId (for course assignment)
+      const targetId = courseClassId || course.courseId;
       const payload = {
-        courseId: course.courseId,
+        courseId: targetId,
         instructorId: data.instructorId,
         effectiveDate: data.effectiveDate,
         notes: data.notes || '',
@@ -115,6 +118,9 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course }: As
     }
   };
 
+  // Get course class code if assigning to a course class
+  const courseClassCode = courseClassId && course.courseClasses?.[0]?.courseClassCode;
+
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -125,7 +131,9 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course }: As
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Phân công giảng viên</h2>
-              <p className="text-sm text-gray-600 mt-1">Phân công giảng viên cho lớp học phần</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {courseClassId ? 'Phân công giảng viên cho lớp học phần' : 'Phân công giảng viên cho học phần'}
+              </p>
             </div>
             <Button
               variant="ghost"
@@ -145,7 +153,7 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course }: As
             {/* Mã */}
             <div className="mb-6">
               <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
-                Mã: {course.courseCode}
+                {courseClassId ? `Mã lớp: ${courseClassCode || 'N/A'}` : `Mã: ${course.courseCode}`}
               </span>
             </div>
 

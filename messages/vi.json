@@ -193,6 +193,7 @@
         "timetable": "Thời khóa biểu",
         "examSchedule": "Lịch thi",
         "courseManagement": "LHP & PC",
+        "classManagement": "Quản lý lớp học định danh",
         "courseRegistration": "Đăng ký học phần",
         "roomRequests": "Yêu cầu phòng học",
         "studentProfile": "Hồ sơ sinh viên",
@@ -239,6 +240,7 @@
       "submit": "Gửi",
       "reset": "Đặt lại",
       "loading": "Đang tải...",
+      "saving": "Đang lưu...",
       "optional": "Tùy chọn",
       "noName": "Không có tên",
       "noData": "Chưa có dữ liệu",
@@ -2610,6 +2612,115 @@
         }
       }
     },
+    "classManagement": {
+      "title": "Quản lý lớp học định danh",
+      "description": "Quản lý thông tin lớp học, chuyên ngành, giảng viên cố vấn và sinh viên",
+      "add": "Thêm lớp học",
+      "search": "Tìm kiếm lớp học...",
+      "list": {
+        "title": "Danh sách lớp học",
+        "description": "Quản lý thông tin lớp học"
+      },
+      "columns": {
+        "classCode": "Mã lớp",
+        "className": "Tên lớp",
+        "department": "Chuyên ngành",
+        "faculty": "Khoa",
+        "advisor": "Giảng viên cố vấn",
+        "trainingSystem": "Hệ đào tạo",
+        "startYear": "Năm bắt đầu",
+        "endYear": "Năm kết thúc",
+        "curriculum": "Chương trình đào tạo",
+        "studentCount": "Số sinh viên",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "filters": {
+        "allDepartments": "Tất cả chuyên ngành",
+        "allTrainingSystems": "Tất cả hệ đào tạo",
+        "allAcademicYears": "Tất cả năm học",
+        "allStatuses": "Tất cả trạng thái"
+      },
+      "status": {
+        "active": "Đang hoạt động",
+        "graduated": "Đã tốt nghiệp",
+        "inactive": "Không hoạt động"
+      },
+      "toast": {
+        "createSuccess": "Tạo lớp học thành công",
+        "createError": "Tạo lớp học thất bại",
+        "updateSuccess": "Cập nhật lớp học thành công",
+        "updateError": "Cập nhật lớp học thất bại",
+        "deleteSuccess": "Xóa lớp học thành công",
+        "deleteError": "Xóa lớp học thất bại",
+        "fetchError": "Không thể tải danh sách lớp học"
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm lớp học mới",
+          "description": "Nhập thông tin lớp học",
+          "classCode": "Mã lớp",
+          "classCodePlaceholder": "Nhập mã lớp",
+          "className": "Tên lớp",
+          "classNamePlaceholder": "Nhập tên lớp",
+          "department": "Chuyên ngành",
+          "selectDepartment": "Chọn chuyên ngành",
+          "trainingSystem": "Hệ đào tạo",
+          "selectTrainingSystem": "Chọn hệ đào tạo",
+          "startAcademicYear": "Năm học bắt đầu",
+          "selectAcademicYear": "Chọn năm học",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "selectInstructor": "Chọn giảng viên",
+          "searchInstructor": "Tìm kiếm giảng viên...",
+          "curriculum": "Chương trình đào tạo",
+          "selectCurriculum": "Chọn chương trình đào tạo",
+          "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa lớp học",
+          "description": "Cập nhật thông tin lớp học",
+          "classCode": "Mã lớp",
+          "className": "Tên lớp",
+          "classNamePlaceholder": "Nhập tên lớp",
+          "trainingSystem": "Hệ đào tạo",
+          "selectTrainingSystem": "Chọn hệ đào tạo",
+          "classStatus": "Trạng thái",
+          "selectStatus": "Chọn trạng thái",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "selectInstructor": "Chọn giảng viên",
+          "searchInstructor": "Tìm kiếm giảng viên...",
+          "curriculum": "Chương trình đào tạo",
+          "selectCurriculum": "Chọn chương trình đào tạo",
+          "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
+        },
+        "view": {
+          "title": "Chi tiết lớp học",
+          "description": "Xem thông tin chi tiết lớp học",
+          "basicInfo": "Thông tin cơ bản",
+          "classCode": "Mã lớp",
+          "className": "Tên lớp",
+          "department": "Chuyên ngành",
+          "faculty": "Khoa",
+          "trainingSystem": "Hệ đào tạo",
+          "status": "Trạng thái",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "curriculum": "Chương trình đào tạo",
+          "startAcademicYear": "Năm học bắt đầu",
+          "endAcademicYear": "Năm học kết thúc",
+          "studentCount": "Số sinh viên",
+          "students": "Danh sách sinh viên",
+          "studentCode": "Mã sinh viên",
+          "studentName": "Họ và tên",
+          "email": "Email",
+          "notFound": "Không tìm thấy thông tin lớp học"
+        },
+        "delete": {
+          "title": "Xóa lớp học",
+          "message": "Bạn có chắc chắn muốn xóa lớp học \"{className}\"?",
+          "warning": "Hành động này không thể hoàn tác."
+        }
+      }
+    },
     "instructorProfile": {
       "title": "Quản lý hồ sơ giảng viên",
       "description": "Quản lý thông tin giảng viên",
@@ -3000,9 +3111,9 @@
       }
     },
     "courseManagement": {
-      "title": "Quản lý lớp học & Phân công",
-      "description": "Quản lý tập trung thông tin lớp học và phân công giảng viên trong toàn trường",
-      "coursesTab": "Danh sách lớp học",
+      "title": "Quản lý học phần & Lớp học phần",
+      "description": "Quản lý tập trung thông tin học phần và lớp học phần trong toàn trường",
+      "coursesTab": "Danh sách học phần",
       "assignmentsTab": "Danh sách phân công",
       "add": "Thêm lớp học",
       "addNew": "Thêm mới",
@@ -3011,24 +3122,41 @@
       "searchCourse": "Tìm theo mã, tên môn...",
       "searchAssignment": "Tìm kiếm...",
       "allClasses": "Tất cả lớp",
-      "allMajors": "Tất cả chuyên ngành",
-      "allSpecializations": "Tất cả chuyên sâu",
+      "allMajors": "Tất cả ngành",
+      "allSpecializations": "Tất cả chuyên ngành",
+      "allAcademicYears": "Tất cả năm học",
       "allSubjects": "Tất cả môn học",
       "allInstructors": "Tất cả giảng viên",
       "noData": "Không có dữ liệu",
       "columns": {
-        "courseCode": "Mã lớp học phần",
+        "courseCode": "Mã học phần",
         "subjectName": "Môn học",
         "lecturerName": "Giảng viên",
         "enrollment": "Sĩ số",
         "semester": "Học kỳ",
+        "academicYear": "Năm học",
+        "feePerCredit": "Học phí/tín chỉ",
+        "totalFee": "Tổng học phí",
+        "totalClasses": "Tổng số lớp",
+        "totalStudents": "Tổng số sinh viên",
         "status": "Trạng thái",
-        "actions": "HD",
+        "actions": "Thao tác",
         "courseName": "Môn học",
         "instructorName": "Giảng viên phụ trách",
         "effectiveDate": "Ngày áp dụng",
         "notes": "Ghi chú"
-      }
+      },
+      "courseClassesTitle": "Lớp học phần của học phần này",
+      "courseClassesHint": "(Thao tác nhanh với từng lớp học phần ở bảng bên dưới)",
+      "classColumns": {
+        "classCode": "Mã lớp",
+        "instructor": "Giảng viên",
+        "room": "Phòng",
+        "time": "Thời gian",
+        "enrollment": "Sĩ số",
+        "actions": "Thao tác"
+      },
+      "addCourseClass": "Thêm lớp học phần"
     },
     "facultyManagement": {
       "title": "Quản lý ngành",

@@ -2,12 +2,19 @@ export interface Course {
   courseId: string;
   courseCode: string;
   subjectName: string;
+  subjectId?: string;
+  subjectCode?: string;
   lecturerName: string;
   lecturerId: string;
   enrollment: number;
   maxEnrollment?: number;
   semester: string;
+  semesterId?: string;
+  academicYear?: string;
+  academicYearId?: string;
   status: 'active' | 'inactive';
+  feePerCredit?: number;
+  totalFee?: number;
   batchId?: string;
   batchName?: string;
   majorId?: string;
@@ -16,6 +23,9 @@ export interface Course {
   specializationName?: string;
   createdAt: string;
   updatedAt: string;
+  totalClasses?: number;
+  totalStudents?: number;
+  courseClasses?: CourseClassSummary[];
 }
 
 export interface FacultyAssignment {
@@ -113,6 +123,38 @@ export interface Room {
   status?: string;
 }
 
+export interface CourseClassSummary {
+  courseClassId: string;
+  courseClassCode: string;
+  instructorName: string;
+  enrolledStudents: number;
+  maximumStudents: number;
+  room: string;
+  startDate: string;
+  endDate: string;
+  dayOfWeek: number;
+  startPeriod: number;
+  endPeriod: number;
+  status: string;
+}
+
+/**
+ * Schedule suggestions returned from
+ * GET /v1/course-classes/schedule-suggestions
+ */
+export interface ScheduleSuggestion {
+  roomId: string;
+  roomName: string;
+  roomType: string;
+  buildingName: string;
+  capacity: number;
+  period: 'morning' | 'afternoon' | 'evening';
+  startTime: string;
+  endTime: string;
+  startPeriod: number;
+  endPeriod: number;
+}
+
 export interface GetCoursesParams {
   pageNumber?: number;
   pageSize?: number;
@@ -123,6 +165,7 @@ export interface GetCoursesParams {
   majorId?: string;
   specializationId?: string;
   status?: string;
+  academicYearId?: string;
 }
 
 export interface GetAssignmentsParams {
@@ -148,9 +191,11 @@ export interface CreateCoursePayload {
 
 export interface UpdateCoursePayload {
   courseId: string;
-  subjectId: string;
   maxEnrollment: number;
   status: 'active' | 'inactive';
+  roomId: string;
+  startDate: string;
+  periodRange: 'morning' | 'afternoon' | 'evening';
 }
 
 export interface CreateAssignmentPayload {

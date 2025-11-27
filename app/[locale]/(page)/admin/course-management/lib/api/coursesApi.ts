@@ -19,6 +19,7 @@ import type {
   UpdateAssignmentPayload,
   Semester,
   Room,
+  ScheduleSuggestion,
 } from '../types/types';
 
 /**
@@ -120,31 +121,91 @@ const getBatchesFromApi = async (): Promise<Batch[]> => {
 };
 
 /**
- * Map CourseClassListItemDto từ BE sang Course của FE
+ * Map CourseResponseDto from /v1/courses to FE Course
  */
-const mapCourseClassToCourse = (item: {
-  courseClassId: string;
-  courseClassCode: string;
+const mapCourseDtoToCourse = (item: {
+  courseId: string;
+  courseCode: string;
+  courseName: string;
+  subjectId?: string;
   subjectName: string;
-  instructorName?: string;
-  instructorId?: string;
-  studentsEnrolled: number;
-  maxStudents: number;
+  subjectCode: string;
+  credits?: number;
+  semesterId?: string;
   semesterName: string;
-  courseClassStatus: string;
+  academicYear?: string;
+  academicYearId?: string;
+  feePerCredit?: number;
+  totalFee?: number;
+  courseStatus: string;
+  totalClasses: number;
+  totalStudents: number;
+  createdAt: string;
+  updatedAt?: string | null;
+  courseClasses?: Array<{
+    courseClassId: string;
+    courseClassCode: string;
+    instructorName: string;
+    enrolledStudents: number;
+    maximumStudents: number;
+    room: string;
+    startDate: string;
+    endDate: string;
+    dayOfWeek: number;
+    startPeriod: number;
+    endPeriod: number;
+    courseClassStatus: string;
+  }>;
 }): Course => {
+  const courseClasses =
+    item.courseClasses?.map((cc) => ({
+      courseClassId: cc.courseClassId,
+      courseClassCode: cc.courseClassCode,
+      instructorName: cc.instructorName,
+      enrolledStudents: cc.enrolledStudents,
+      maximumStudents: cc.maximumStudents,
+      room: cc.room,
+      startDate: cc.startDate,
+      endDate: cc.endDate,
+      dayOfWeek: cc.dayOfWeek,
+      startPeriod: cc.startPeriod,
+      endPeriod: cc.endPeriod,
+      status: cc.courseClassStatus,
+    })) ?? [];
+
+  const maxEnrollment = courseClasses.reduce(
+    (sum, cc) => sum + (cc.maximumStudents || 0),
+    0,
+  );
+
   return {
-    courseId: item.courseClassId,
-    courseCode: item.courseClassCode,
-    subjectName: item.subjectName,
-    lecturerName: item.instructorName || '',
-    lecturerId: item.instructorId || '',
-    enrollment: item.studentsEnrolled,
-    maxEnrollment: item.maxStudents,
+    courseId: item.courseId,
+    courseCode: item.courseCode || '',
+    subjectId: item.subjectId,
+    subjectName: item.subjectName || item.courseName,
+    subjectCode: item.subjectCode,
+    lecturerName: '',
+    lecturerId: '',
+    enrollment: item.totalStudents,
+    maxEnrollment,
     semester: item.semesterName,
-    status: item.courseClassStatus === 'active' ? 'active' : 'inactive',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    semesterId: item.semesterId,
+    academicYear: item.academicYear,
+    academicYearId: item.academicYearId,
+    feePerCredit: item.feePerCredit,
+    totalFee: item.totalFee,
+    status: item.courseStatus === 'active' ? 'active' : 'inactive',
+    batchId: undefined,
+    batchName: undefined,
+    majorId: undefined,
+    majorName: undefined,
+    specializationId: undefined,
+    specializationName: undefined,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt || item.createdAt,
+    totalClasses: item.totalClasses,
+    totalStudents: item.totalStudents,
+    courseClasses,
   };
 };
 
@@ -178,7 +239,7 @@ const mapCourseClassToAssignment = (item: {
 export const coursesApi = {
   /**
    * @api GET /v1/course-classes/all
-   * @description Lấy danh sách lớp học phần với filter và pagination
+ * (ĐÃ ĐỔI) Sử dụng /v1/courses để lấy danh sách khóa học với danh sách lớp học phần
    * @param params - Tham số filter và pagination
    * @returns Danh sách lớp học phần
    * @auth Required (Admin)
@@ -186,12 +247,15 @@ export const coursesApi = {
   getCourses: async (params: GetCoursesParams = {}): Promise<ApiResponse<CoursesResponse>> => {
     try {
       const filterParams: Record<string, unknown> = {
-        Page: params.pageNumber || 1,
-        PageSize: params.pageSize || 20,
-        SearchTerm: params.searchKeyword || undefined,
-        SubjectId: params.subjectId ? (params.subjectId as string) : undefined,
-        InstructorId: params.instructorId ? (params.instructorId as string) : undefined,
-        CourseClassStatus: params.status || undefined,
+        pageNumber: params.pageNumber || 1,
+        pageSize: params.pageSize || 20,
+        searchTerm: params.searchKeyword || undefined,
+        subjectId: params.subjectId || undefined,
+        status: params.status || undefined,
+        academicYearId: params.academicYearId || undefined,
+        // Map FE filters to BE filters: major = faculty, specialization = department
+        facultyId: params.majorId || undefined,
+        departmentId: params.specializationId || undefined,
       };
 
       // Remove undefined values
@@ -205,35 +269,54 @@ export const coursesApi = {
         success: boolean;
         message?: string;
         data: {
-          items: Array<{
-            courseClassId: string;
-            courseClassCode: string;
+          courses: Array<{
+            courseId: string;
+            courseCode: string;
+            courseName: string;
             subjectName: string;
-            instructorName?: string;
-            instructorId?: string;
-            studentsEnrolled: number;
-            maxStudents: number;
+            subjectCode: string;
             semesterName: string;
-            courseClassStatus: string;
+            academicYear: string;
+            feePerCredit: number;
+            totalFee: number;
+            courseStatus: string;
+            totalClasses: number;
+            totalStudents: number;
+            createdAt: string;
+            updatedAt?: string | null;
+            courseClasses?: Array<{
+              courseClassId: string;
+              courseClassCode: string;
+              instructorName: string;
+              enrolledStudents: number;
+              maximumStudents: number;
+              room: string;
+              startDate: string;
+              endDate: string;
+              dayOfWeek: number;
+              startPeriod: number;
+              endPeriod: number;
+              courseClassStatus: string;
+            }>;
           }>;
-          totalCount: number;
-          page: number;
+          totalRecords: number;
+          pageNumber: number;
           pageSize: number;
           totalPages: number;
         };
-      }>('/v1/course-classes/all', { params: filterParams });
+      }>('/v1/courses', { params: filterParams });
 
       if (response.data.success && response.data.data) {
-        const courses = response.data.data.items.map(mapCourseClassToCourse);
+        const courses = response.data.data.courses.map(mapCourseDtoToCourse);
         return {
           success: true,
           message: response.data.message || 'Lấy danh sách lớp học thành công',
           data: {
             courses,
             pagination: {
-              currentPage: response.data.data.page,
+              currentPage: response.data.data.pageNumber,
               pageSize: response.data.data.pageSize,
-              totalCount: response.data.data.totalCount,
+              totalCount: response.data.data.totalRecords,
               totalPages: response.data.data.totalPages,
             },
           },
@@ -450,6 +533,155 @@ export const coursesApi = {
         success: false,
         message: errorMessage,
         data: [],
+      };
+    }
+  },
+
+  /**
+   * @api GET /v1/course-classes/schedule-suggestions
+   * @description Lấy gợi ý lịch học (phòng + khung giờ) cho một ngày cụ thể
+   * @param date - Ngày cần gợi ý (yyyy-MM-dd)
+   * @param buildingId - Lọc theo tòa nhà (tùy chọn)
+   * @param roomType - Lọc theo loại phòng (tùy chọn)
+   * @returns Danh sách gợi ý phòng/khung giờ
+   * @auth Required (Admin)
+   */
+  getScheduleSuggestions: async (params: {
+    date: string;
+    buildingId?: string;
+    roomType?: string;
+  }): Promise<ApiResponse<ScheduleSuggestion[]>> => {
+    try {
+      const response = await api.get<{
+        success: boolean;
+        message?: string;
+        data: {
+          suggestions: Array<{
+            roomId: string;
+            roomName: string;
+            roomType: string;
+            buildingName: string;
+            capacity: number;
+            period: 'morning' | 'afternoon' | 'evening';
+            startTime: string;
+            endTime: string;
+            startPeriod: number;
+            endPeriod: number;
+            isAvailable: boolean;
+          }>;
+        };
+      }>('/v1/course-classes/schedule-suggestions', {
+        params: {
+          date: params.date,
+          buildingId: params.buildingId,
+          roomType: params.roomType,
+        },
+      });
+
+      if (response.data.success && response.data.data) {
+        const suggestions: ScheduleSuggestion[] =
+          response.data.data.suggestions
+            .filter((s) => s.isAvailable)
+            .map((s) => ({
+              roomId: s.roomId,
+              roomName: s.roomName,
+              roomType: s.roomType,
+              buildingName: s.buildingName,
+              capacity: s.capacity,
+              period: s.period,
+              startTime: s.startTime,
+              endTime: s.endTime,
+              startPeriod: s.startPeriod,
+              endPeriod: s.endPeriod,
+            }));
+
+        return {
+          success: true,
+          message: response.data.message || 'Lấy gợi ý lịch học thành công',
+          data: suggestions,
+        };
+      }
+
+      return {
+        success: false,
+        message: response.data.message || 'Lấy gợi ý lịch học thất bại',
+        data: [],
+      };
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } }; message?: string })?.response
+          ?.data?.message ||
+        (error as { message?: string })?.message ||
+        'Đã xảy ra lỗi khi lấy gợi ý lịch học';
+      return {
+        success: false,
+        message: errorMessage,
+        data: [],
+      };
+    }
+  },
+
+  /**
+   * @api GET /v1/course-classes/{courseClassId}
+   * @description Lấy chi tiết lớp học phần (dùng để prefill modal chỉnh sửa)
+   */
+  getCourseClassDetail: async (courseClassId: string): Promise<
+    ApiResponse<{
+      courseClassId: string;
+      courseClassCode: string;
+      subjectName: string;
+      instructorName?: string;
+      instructorId?: string;
+      studentsEnrolled: number;
+      maxStudents: number;
+      semesterName: string;
+      courseClassStatus: string;
+      roomId?: string;
+      startDate: string;
+    }>
+  > => {
+    try {
+      const response = await api.get<{
+        success: boolean;
+        message?: string;
+        data: {
+          courseClassId: string;
+          courseClassCode: string;
+          subjectName: string;
+          instructorName?: string;
+          instructorId?: string;
+          studentsEnrolled: number;
+          maxStudents: number;
+          semesterName: string;
+          courseClassStatus: string;
+          roomId?: string;
+          startDate: string;
+        };
+      }>(`/v1/course-classes/${courseClassId}`);
+
+      if (response.data.success && response.data.data) {
+        return {
+          success: true,
+          message: response.data.message || 'Lấy chi tiết lớp học phần thành công',
+          data: response.data.data,
+        };
+      }
+
+      return {
+        success: false,
+        message: response.data.message || 'Lấy chi tiết lớp học phần thất bại',
+        data: {} as any,
+      };
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } }; message?: string })?.response
+          ?.data?.message ||
+        (error as { message?: string })?.message ||
+        'Đã xảy ra lỗi khi lấy chi tiết lớp học phần';
+      return {
+        success: false,
+        message: errorMessage,
+        data: {} as any,
       };
     }
   },
@@ -691,7 +923,35 @@ export const coursesApi = {
       }>(`/v1/course-classes/${courseClassId}`);
 
       if (detailResponse.data.success && detailResponse.data.data) {
-        const course = mapCourseClassToCourse(detailResponse.data.data);
+        const course = mapCourseDtoToCourse({
+          courseId: createCourseResponse.data.data.courseId,
+          courseCode: createCourseResponse.data.data.courseCode,
+          courseName: detailResponse.data.data.subjectName,
+          subjectName: detailResponse.data.data.subjectName,
+          subjectCode: detailResponse.data.data.courseClassCode,
+          semesterName: detailResponse.data.data.semesterName,
+          courseStatus: detailResponse.data.data.courseClassStatus,
+          totalClasses: 1,
+          totalStudents: detailResponse.data.data.studentsEnrolled,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          courseClasses: [
+            {
+              courseClassId: detailResponse.data.data.courseClassId,
+              courseClassCode: detailResponse.data.data.courseClassCode,
+              instructorName: detailResponse.data.data.instructorName || '',
+              enrolledStudents: detailResponse.data.data.studentsEnrolled,
+              maximumStudents: detailResponse.data.data.maxStudents,
+              room: '', // not returned here
+              startDate: '', // not returned here
+              endDate: '', // not returned here
+              dayOfWeek: 0,
+              startPeriod: 0,
+              endPeriod: 0,
+              courseClassStatus: detailResponse.data.data.courseClassStatus,
+            },
+          ],
+        });
         return {
           success: true,
           message: 'Tạo lớp học phần thành công',
@@ -737,14 +997,15 @@ export const coursesApi = {
           status: string;
         };
       }>(`/v1/course-classes/${payload.courseId}`, {
-        // Note: BE yêu cầu RoomId, StartDate, MaxStudents, PeriodRange, CourseClassStatus
-        // Cần cập nhật modal để có đầy đủ thông tin
+        RoomId: payload.roomId,
+        StartDate: payload.startDate,
         MaxStudents: payload.maxEnrollment,
+        PeriodRange: payload.periodRange,
         CourseClassStatus: payload.status,
       });
 
       if (response.data.success && response.data.data) {
-        // Cần lấy thông tin đầy đủ từ detail API
+        // Lấy thông tin đầy đủ từ detail API
         const detailResponse = await api.get<{
           success: boolean;
           data: {
@@ -761,7 +1022,35 @@ export const coursesApi = {
         }>(`/v1/course-classes/${payload.courseId}`);
 
         if (detailResponse.data.success && detailResponse.data.data) {
-          const course = mapCourseClassToCourse(detailResponse.data.data);
+          const course = mapCourseDtoToCourse({
+            courseId: payload.courseId,
+            courseCode: detailResponse.data.data.courseClassCode,
+            courseName: detailResponse.data.data.subjectName,
+            subjectName: detailResponse.data.data.subjectName,
+            subjectCode: detailResponse.data.data.courseClassCode,
+            semesterName: detailResponse.data.data.semesterName,
+            courseStatus: detailResponse.data.data.courseClassStatus,
+            totalClasses: 1,
+            totalStudents: detailResponse.data.data.studentsEnrolled,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            courseClasses: [
+              {
+                courseClassId: detailResponse.data.data.courseClassId,
+                courseClassCode: detailResponse.data.data.courseClassCode,
+                instructorName: detailResponse.data.data.instructorName || '',
+                enrolledStudents: detailResponse.data.data.studentsEnrolled,
+                maximumStudents: detailResponse.data.data.maxStudents,
+                room: '',
+                startDate: '',
+                endDate: '',
+                dayOfWeek: 0,
+                startPeriod: 0,
+                endPeriod: 0,
+                courseClassStatus: detailResponse.data.data.courseClassStatus,
+              },
+            ],
+          });
           return {
             success: true,
             message: response.data.message || 'Cập nhật lớp học thành công',
@@ -790,9 +1079,9 @@ export const coursesApi = {
   },
 
   /**
-   * @api DELETE /v1/course-classes/{courseClassId}
-   * @description Xóa lớp học phần
-   * @param courseId - ID lớp học phần
+   * @api DELETE /v1/courses/{courseId}
+   * @description Xóa học phần (khóa học)
+   * @param courseId - ID học phần
    * @returns Kết quả xóa
    * @auth Required (Admin)
    */
@@ -801,19 +1090,19 @@ export const coursesApi = {
       const response = await api.delete<{
         success: boolean;
         message?: string;
-      }>(`/v1/course-classes/${courseId}`);
+      }>(`/v1/courses/${courseId}`);
 
       if (response.data.success) {
         return {
           success: true,
-          message: response.data.message || 'Xóa lớp học thành công',
+          message: response.data.message || 'Xóa học phần thành công',
           data: null,
         };
       }
 
       return {
         success: false,
-        message: response.data.message || 'Xóa lớp học thất bại',
+        message: response.data.message || 'Xóa học phần thất bại',
         data: null,
       };
     } catch (error: unknown) {

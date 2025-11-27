@@ -6,6 +6,8 @@ import { X } from 'lucide-react';
 interface ConfirmDeleteCourseModalProps {
   isOpen: boolean;
   courseName?: string;
+  semesterName?: string;
+  academicYear?: string;
   onClose: () => void;
   onConfirm: () => Promise<void>;
 }
@@ -13,6 +15,8 @@ interface ConfirmDeleteCourseModalProps {
 export const ConfirmDeleteCourseModal = ({
   isOpen,
   courseName,
+  semesterName,
+  academicYear,
   onClose,
   onConfirm,
 }: ConfirmDeleteCourseModalProps) => {
@@ -28,7 +32,7 @@ export const ConfirmDeleteCourseModal = ({
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">Xác nhận xóa lớp học phần</h2>
+            <h2 className="text-xl font-bold text-gray-900">Xác nhận xóa học phần</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -42,8 +46,18 @@ export const ConfirmDeleteCourseModal = ({
 
         <div className="p-6">
           <p className="text-gray-700">
-            Bạn có chắc chắn muốn xóa lớp học phần{' '}
-            <span className="font-semibold text-gray-900">{courseName}</span>?
+            Bạn có chắc chắn muốn xóa học phần{' '}
+            <span className="font-semibold text-gray-900">{courseName}</span>
+            {semesterName || academicYear ? (
+              <>
+                {' '}
+                (<span className="font-semibold">
+                  {[semesterName, academicYear].filter(Boolean).join(' - ')}
+                </span>
+                )
+              </>
+            ) : null}
+            ?
           </p>
           <p className="text-sm text-red-600 mt-2">
             Lưu ý: Hành động này không thể hoàn tác.
