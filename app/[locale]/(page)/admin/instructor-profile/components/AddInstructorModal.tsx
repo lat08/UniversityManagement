@@ -27,8 +27,53 @@ const getValidationSchema = (t: (key: string) => string) =>
       .min(2, t('fullNameMin')),
     gender: yup.string().required(t('genderRequired')),
     facultyId: yup.string().required(t('facultyRequired')),
-    dateOfBirth: yup.string().nullable(),
-    hireDate: yup.string().nullable(),
+    email: yup
+      .string()
+      .nullable()
+      .test('email-valid', t('emailInvalid'), (value) => {
+        if (!value) return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }),
+    dateOfBirth: yup
+      .string()
+      .nullable()
+      .test('dob-not-future', t('dateOfBirthFuture'), (value) => {
+        if (!value) return true;
+        const dob = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return dob <= today;
+      })
+      .test('dob-min-age', t('dateOfBirthMinAge'), (value) => {
+        if (!value) return true;
+        const dob = new Date(value);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        const dayDiff = today.getDate() - dob.getDate();
+        const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+        return actualAge >= 20;
+      }),
+    hireDate: yup
+      .string()
+      .nullable()
+      .test('hire-not-future', t('hireDateFuture'), (value) => {
+        if (!value) return true;
+        const hireDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return hireDate <= today;
+      })
+      .test('hire-after-dob', t('hireDateBeforeBirth'), function (value) {
+        if (!value) return true;
+        const { dateOfBirth } = this.parent;
+        if (!dateOfBirth) return true;
+        const dob = new Date(dateOfBirth);
+        const hire = new Date(value);
+        const minHireDate = new Date(dob);
+        minHireDate.setFullYear(minHireDate.getFullYear() + 20);
+        return hire >= minHireDate;
+      }),
     phoneNumber: yup
       .string()
       .nullable()
@@ -53,6 +98,7 @@ type FormData = {
   fullName: string;
   gender: string;
   facultyId: string;
+  email: string | null;
   dateOfBirth: string | null;
   hireDate: string | null;
   phoneNumber: string | null;
@@ -80,6 +126,7 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
       fullName: '',
       gender: '',
       facultyId: '',
+      email: '',
       dateOfBirth: '',
       hireDate: '',
       phoneNumber: '',
@@ -141,6 +188,7 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
         fullName: data.fullName.trim(),
         gender: data.gender,
         facultyId: data.facultyId,
+        email: data.email || undefined,
         dateOfBirth: data.dateOfBirth || undefined,
         hireDate: data.hireDate || undefined,
         phoneNumber: data.phoneNumber || undefined,
@@ -230,6 +278,19 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">{t('email')}</label>
+                <Input
+                  type="email"
+                  placeholder={t('emailPlaceholder')}
+                  {...register('email')}
+                  className={errors.email ? 'border-red-500' : ''}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('phoneNumber')}</label>
                 <Input
                   placeholder={t('phoneNumberPlaceholder')}
@@ -243,12 +304,26 @@ export default function AddInstructorModal({ isOpen, onClose, onSuccess }: AddIn
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('dateOfBirth')}</label>
-                <Input type="date" {...register('dateOfBirth')} />
+                <Input 
+                  type="date" 
+                  {...register('dateOfBirth')}
+                  className={errors.dateOfBirth ? 'border-red-500' : ''}
+                />
+                {errors.dateOfBirth && (
+                  <p className="mt-1 text-xs text-red-500">{errors.dateOfBirth.message}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">{t('hireDate')}</label>
-                <Input type="date" {...register('hireDate')} />
+                <Input 
+                  type="date" 
+                  {...register('hireDate')}
+                  className={errors.hireDate ? 'border-red-500' : ''}
+                />
+                {errors.hireDate && (
+                  <p className="mt-1 text-xs text-red-500">{errors.hireDate.message}</p>
+                )}
               </div>
 
               <div>

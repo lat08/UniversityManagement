@@ -100,6 +100,17 @@
   "common": {
     "loading": "Loading...",
     "retry": "Retry",
+    "actions": {
+      "back": "Back",
+      "cancel": "Cancel",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "add": "Add",
+      "view": "View",
+      "close": "Close",
+      "confirm": "Confirm"
+    },
     "roles": {
       "student": "Student",
       "instructor": "Instructor",
@@ -2674,7 +2685,14 @@
         "specializationPlaceholder": "e.g., Web Development",
         "citizenId": "Citizen ID",
         "citizenIdPlaceholder": "012345678900",
-        "citizenIdInvalid": "Citizen ID must contain 9-12 digits"
+        "citizenIdInvalid": "Citizen ID must contain 9-12 digits",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Invalid email address",
+        "dateOfBirthFuture": "Date of birth cannot be in the future",
+        "dateOfBirthMinAge": "Instructor must be at least 20 years old",
+        "hireDateFuture": "Hire date cannot be in the future",
+        "hireDateBeforeBirth": "Hire date must be at least 20 years after date of birth"
       },
       "editModal": {
         "title": "Update Instructor",
@@ -2714,7 +2732,14 @@
         "status": "Status",
         "selectStatus": "Select status",
         "address": "Address",
-        "enterAddress": "Enter address"
+        "enterAddress": "Enter address",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Invalid email address",
+        "dateOfBirthFuture": "Date of birth cannot be in the future",
+        "dateOfBirthMinAge": "Instructor must be at least 20 years old",
+        "hireDateFuture": "Hire date cannot be in the future",
+        "hireDateBeforeBirth": "Hire date must be at least 20 years after date of birth"
       },
       "statCards": {
         "total": "Total Instructors",
@@ -2744,6 +2769,13 @@
         "edit": "Edit",
         "delete": "Delete"
       },
+      "bulkSelection": "Selected {count} subjects",
+      "bulkEdit": "Edit All",
+      "bulkDelete": "Delete All",
+      "clearSelection": "Clear Selection",
+      "confirmBulkDelete": "Are you sure you want to delete {count} selected instructors?",
+      "bulkEditNotImplemented": "Bulk edit feature is under development",
+      "bulkDeleteNotImplemented": "Bulk delete feature is under development",
       "detailModal": {
         "title": "Instructor Details",
         "loading": "Loading data...",
@@ -2761,6 +2793,174 @@
         "status": "Status",
         "currentClassCount": "Current assigned classes",
         "close": "Close"
+      },
+      "detailPage": {
+        "title": "Instructor Details",
+        "subtitle": "View detailed instructor information",
+        "loading": "Loading data...",
+        "notFound": "Instructor not found",
+        "tabs": {
+          "basic": "Basic Information",
+          "work": "Work Information"
+        },
+        "sections": {
+          "personalInfo": "Personal Information",
+          "workInfo": "Work Information"
+        },
+        "fields": {
+          "instructorCode": "Instructor Code",
+          "fullName": "Full Name",
+          "gender": "Gender",
+          "genderMale": "Male",
+          "genderFemale": "Female",
+          "dateOfBirth": "Date of Birth",
+          "email": "Email",
+          "phoneNumber": "Phone Number",
+          "citizenId": "Citizen ID",
+          "address": "Address",
+          "faculty": "Faculty/Department",
+          "degree": "Degree",
+          "specialization": "Specialization",
+          "hireDate": "Hire Date",
+          "employmentStatus": "Employment Status",
+          "currentClassCount": "Current Classes"
+        }
+      },
+      "editPage": {
+        "title": "Edit Instructor Information",
+        "description": "Update detailed instructor information",
+        "loading": "Loading data...",
+        "loadError": "Unable to load instructor information",
+        "notFound": "Instructor information not found",
+        "tabs": {
+          "basic": "Basic Information",
+          "contact": "Contact Information",
+          "work": "Work Information",
+          "account": "Account"
+        },
+        "sections": {
+          "basic": {
+            "title": "Basic Information",
+            "subtitle": "Personal information of the instructor"
+          },
+          "contact": {
+            "title": "Contact Information",
+            "subtitle": "Contact details of the instructor"
+          },
+          "work": {
+            "title": "Work Information",
+            "subtitle": "Information about work and specialization"
+          },
+          "account": {
+            "title": "Login Account",
+            "subtitle": "Update login password for the instructor"
+          }
+        },
+        "avatar": {
+          "tooltip": "Upload image",
+          "typeError": "Only accept image files in .jpg, .jpeg or .png format",
+          "sizeError": "Image size must not exceed 5MB",
+          "success": "Image has been selected"
+        },
+        "buttons": {
+          "back": "Back",
+          "cancel": "Cancel",
+          "save": "Save changes",
+          "saving": "Saving..."
+        },
+        "toast": {
+          "updateSuccess": "Instructor information updated successfully",
+          "updateError": "Failed to update information",
+          "genericError": "An error occurred while updating information"
+        },
+        "form": {
+          "fullName": {
+            "label": "Full Name",
+            "placeholder": "John Doe"
+          },
+          "dob": {
+            "label": "Date of Birth",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Select date of birth"
+          },
+          "gender": {
+            "label": "Gender",
+            "placeholder": "Select gender",
+            "options": {
+              "male": "Male",
+              "female": "Female"
+            }
+          },
+          "citizenId": {
+            "label": "Citizen ID",
+            "placeholder": "9-12 digits",
+            "hint": "Numbers only, 9-12 characters"
+          },
+          "phone": {
+            "label": "Phone Number",
+            "placeholder": "10-11 digits",
+            "hint": "Numbers only, 10-11 characters"
+          },
+          "address": {
+            "label": "Address",
+            "placeholder": "Enter full address (minimum 5 characters)",
+            "hint": "Minimum 5 characters, maximum 255 characters"
+          },
+          "email": {
+            "label": "Email",
+            "readonlyHint": "Email cannot be edited"
+          },
+          "instructorCode": {
+            "label": "Instructor Code",
+            "readonlyHint": "Instructor code cannot be edited"
+          },
+          "faculty": {
+            "label": "Faculty/Department",
+            "placeholder": "Select faculty/department",
+            "searchPlaceholder": "Search faculty/department..."
+          },
+          "degree": {
+            "label": "Degree",
+            "placeholder": "Select degree"
+          },
+          "specialization": {
+            "label": "Specialization",
+            "placeholder": "Enter specialization (maximum 500 characters)",
+            "hint": "Maximum 500 characters"
+          },
+          "hireDate": {
+            "label": "Hire Date",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Select hire date"
+          },
+          "status": {
+            "label": "Status",
+            "placeholder": "Select status"
+          },
+          "password": {
+            "label": "New Password",
+            "placeholder": "Leave blank if not changing",
+            "hint": "Password must be at least 6 characters"
+          },
+          "confirmPassword": {
+            "label": "Confirm New Password",
+            "placeholder": "Leave blank if not changing",
+            "hint": "Re-enter password to confirm"
+          },
+          "validation": {
+            "fullNameRequired": "Please enter full name",
+            "fullNameMax": "Full name must not exceed 40 characters",
+            "citizenId": "Citizen ID must be 9-12 digits",
+            "phoneNumber": "Phone number must be 10-11 digits",
+            "address": "Address must be more than 5 characters",
+            "dateOfBirth": "Please select date of birth",
+            "gender": "Please select gender",
+            "faculty": "Please select faculty/department",
+            "status": "Please select status",
+            "passwordConfirm": "Password confirmation does not match",
+            "passwordLength": "Password must be at least 6 characters"
+          }
+        }
       },
       "exportModal": {
         "title": "Export Instructor List",
@@ -3959,6 +4159,7 @@
           "helperIntro": "Change the active status for all selected curricula.",
           "statusLabel": "Active status",
           "statusPlaceholder": "Select status",
+          "statusNoChange": "No change",
           "statusNote": "Only the status field will be updated. Other curriculum information will remain unchanged.",
           "submit": "Update",
           "submitting": "Updating...",
@@ -3999,8 +4200,15 @@
         "addSubtitle": "Select a subject and position to add to curriculum {code} - {name}",
         "yearLabel": "Academic year",
         "yearPlaceholder": "Select academic year",
+        "year1": "Year 1",
+        "year2": "Year 2",
+        "year3": "Year 3",
+        "year4": "Year 4",
         "semesterLabel": "Semester",
         "semesterPlaceholder": "Select semester",
+        "semester1": "Semester 1",
+        "semester2": "Semester 2",
+        "semester3": "Summer semester",
         "subjectLabel": "Subject",
         "subjectPlaceholder": "Select subject",
         "subjectSearchPlaceholder": "Search by subject code or name...",
