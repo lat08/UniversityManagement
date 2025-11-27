@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/app/components/ui';
+import { Button, Input } from '@/app/components/ui';
 import { X } from 'lucide-react';
 import { classesApi } from '../lib/api/classesApi';
 import { getStatusDisplay } from '../lib/types/types';
-import type { ClassDetail } from '../lib/types/types';
+import type { ClassDetail, StudentDto } from '../lib/types/types';
+import { ResizableTable, ResizableColumn } from '../../student-profile/components/ResizableTable';
 
 interface ViewClassDetailModalProps {
   isOpen: boolean;
@@ -20,6 +21,13 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
   
   const [classDetail, setClassDetail] = useState<ClassDetail | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [studentColumns, setStudentColumns] = useState<ResizableColumn[]>([
+    { key: 'studentCode', label: t('modals.view.studentCode'), width: 140, minWidth: 120, align: 'left', visible: true, required: true },
+    { key: 'fullName', label: t('modals.view.studentName'), width: 200, minWidth: 150, align: 'left', visible: true, required: true },
+    { key: 'email', label: t('modals.view.email'), width: 220, minWidth: 180, align: 'left', visible: true },
+    { key: 'enrollmentStatus', label: t('modals.view.status'), width: 140, minWidth: 120, align: 'center', visible: true },
+  ]);
 
   useEffect(() => {
     if (!isOpen || !classId) return;
@@ -45,12 +53,66 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
 
   const statusDisplay = classDetail ? getStatusDisplay(classDetail.classStatus, (key) => t(key)) : null;
 
+  const renderStudentRow = useCallback((student: StudentDto, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
+    const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
+    
+    return (
+      <>
+        {visibleColumns.map((column) => {
+          const widthPercent = (column as { widthPercent?: number }).widthPercent || 
+            (baseTotalWidth > 0 ? (column.width / baseTotalWidth) * 100 : 100 / visibleColumns.length);
+          
+          const cellPaddingStyle = {
+            width: `${widthPercent}%`,
+            paddingLeft: cellStyle.paddingX,
+            paddingRight: cellStyle.paddingX,
+            paddingTop: cellStyle.paddingY,
+            paddingBottom: cellStyle.paddingY,
+          };
+          
+          switch (column.key) {
+            case 'studentCode':
+              return (
+                <td key="studentCode" className="text-gray-900 font-medium" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {student.studentCode}
+                </td>
+              );
+            case 'fullName':
+              return (
+                <td key="fullName" className="text-gray-900" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {student.fullName}
+                </td>
+              );
+            case 'email':
+              return (
+                <td key="email" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {student.email}
+                </td>
+              );
+            case 'enrollmentStatus':
+              return (
+                <td key="enrollmentStatus" className="text-center text-gray-600" style={cellPaddingStyle}>
+                  {student.enrollmentStatus}
+                </td>
+              );
+            default:
+              return null;
+          }
+        })}
+      </>
+    );
+  }, []);
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={handleBackdropClick}
     >
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b">
@@ -71,103 +133,162 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="overflow-y-auto flex-1 p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-gray-500">{tCommon('loading')}</div>
             </div>
           ) : classDetail ? (
-            <div className="space-y-6">
-              {/* Basic Information */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Mã lớp học */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('modals.view.basicInfo')}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.classCode')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.classCode}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.className')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.className}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.department')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.departmentName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.faculty')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.facultyName || '-'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.trainingSystem')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.trainingSystemName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.status')}</label>
-                    <p className="mt-1">
-                      {statusDisplay && (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusDisplay.color}`}>
-                          {statusDisplay.label}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.advisorInstructor')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.advisorInstructorName || '-'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.curriculum')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.curriculumName || '-'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.startAcademicYear')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.startAcademicYearName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.endAcademicYear')}</label>
-                    <p className="mt-1 text-sm text-gray-900">{classDetail.endAcademicYearName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('modals.view.studentCount')}</label>
-                    <p className="mt-1 text-sm text-gray-900 font-medium">{classDetail.studentCount}</p>
-                  </div>
-                </div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.classCode')}
+                </label>
+                <Input
+                  value={classDetail.classCode}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Tên lớp học */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.className')}
+                </label>
+                <Input
+                  value={classDetail.className}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Chuyên ngành */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.department')}
+                </label>
+                <Input
+                  value={classDetail.departmentName}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Khoa */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.faculty')}
+                </label>
+                <Input
+                  value={classDetail.facultyName || '-'}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Hệ đào tạo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.trainingSystem')}
+                </label>
+                <Input
+                  value={classDetail.trainingSystemName}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Cố vấn học tập */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.advisorInstructor')}
+                </label>
+                <Input
+                  value={classDetail.advisorInstructorName || 'Chưa phân công'}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Chương trình đào tạo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.curriculum')}
+                </label>
+                <Input
+                  value={classDetail.curriculumName || '-'}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Năm học bắt đầu */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.startAcademicYear')}
+                </label>
+                <Input
+                  value={classDetail.startAcademicYearName}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Năm học kết thúc */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.endAcademicYear')}
+                </label>
+                <Input
+                  value={classDetail.endAcademicYearName}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Số lượng sinh viên */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.studentCount')}
+                </label>
+                <Input
+                  value={classDetail.studentCount.toString()}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+
+              {/* Trạng thái */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('modals.view.status')}
+                </label>
+                <Input
+                  value={statusDisplay?.label || classDetail.classStatus || 'N/A'}
+                  disabled
+                  className="bg-gray-50"
+                />
               </div>
 
               {/* Students List */}
               {classDetail.students && classDetail.students.length > 0 && (
-                <div>
+                <div className="col-span-2 mt-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('modals.view.students')}</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {t('modals.view.studentCode')}
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {t('modals.view.studentName')}
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {t('modals.view.email')}
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {t('modals.view.status')}
-                          </th>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <ResizableTable
+                      columns={studentColumns}
+                      data={classDetail.students}
+                      renderRow={(student, visibleColumns, cellStyle) => (
+                        <tr className="hover:bg-gray-50">
+                          {renderStudentRow(student, visibleColumns, cellStyle)}
                         </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {classDetail.students.map((student) => (
-                          <tr key={student.studentId}>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{student.studentCode}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{student.fullName}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{student.enrollmentStatus}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      )}
+                      isLoading={false}
+                      emptyMessage={tCommon('noData')}
+                      onColumnsResize={setStudentColumns}
+                    />
                   </div>
                 </div>
               )}
@@ -179,11 +300,12 @@ export default function ViewClassDetailModal({ isOpen, onClose, classId }: ViewC
           )}
         </div>
 
-        <div className="p-6 border-t flex justify-end">
+        <div className="flex gap-3 p-6 border-t">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
+            className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
           >
             {tCommon('close')}
           </Button>
