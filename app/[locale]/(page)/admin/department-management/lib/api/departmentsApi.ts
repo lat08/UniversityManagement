@@ -197,24 +197,28 @@ export const departmentsApi = {
   /**
    * @api GET /v1/admin/curriculums
    * @description Lấy danh sách chương trình đào tạo (cho dropdown)
-   * @param departmentId - Lọc theo chuyên ngành (optional, nếu không có sẽ lấy tất cả)
+   * @param departmentId - Lọc theo chuyên ngành (optional)
+   * @param facultyId - Lọc theo ngành học (optional)
    * @returns Danh sách chương trình đào tạo
    * @auth Required (Admin)
    */
-  async getCurricula(departmentId?: string): Promise<Curriculum[]> {
+  async getCurricula(departmentId?: string, facultyId?: string): Promise<Curriculum[]> {
     try {
       const params: Record<string, string | number> = {
         pageSize: 1000,
         pageNumber: 1,
       };
       
-      // Nếu có departmentId thì filter, nếu không thì lấy tất cả (không filter)
       if (departmentId) {
         params.departmentId = departmentId;
       }
+      
+      if (facultyId) {
+        params.facultyId = facultyId;
+      }
 
       const response = await api.get<ApiResponse<{
-        items: Array<{
+        curriculums: Array<{
           curriculumId: string;
           curriculumCode: string;
           curriculumName: string;
@@ -227,7 +231,9 @@ export const departmentsApi = {
         hasNextPage: boolean;
       }>>('/v1/admin/curriculums', { params });
       
-      const items = response.data.data?.items || [];
+      const responseData = response.data.data;
+      const items = responseData?.curriculums || [];
+      
       return items.map((item) => ({
         curriculumId: item.curriculumId,
         curriculumCode: item.curriculumCode,
