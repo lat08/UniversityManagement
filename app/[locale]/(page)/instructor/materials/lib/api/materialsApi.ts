@@ -209,13 +209,50 @@ export const materialsApi = {
   },
 
   updateMaterial: async (documentId: string, data: UpdateMaterialRequest): Promise<ApiResponse<string>> => {
-    if (data.file) {
+    try {
+      if (data.file) {
+        const formData = new FormData()
+        formData.append('CourseClassId', data.courseClassId)
+        formData.append('DocumentType', data.documentType)
+        formData.append('Title', data.title)
+        formData.append('Description', data.description || '')
+        formData.append('File', data.file)
+
+        console.log('[updateMaterial] With file - documentId:', documentId)
+        console.log('[updateMaterial] FormData fields:', {
+          CourseClassId: data.courseClassId,
+          DocumentType: data.documentType,
+          Title: data.title,
+          Description: data.description || '',
+          File: data.file.name
+        })
+
+        const response = await api.put<ApiResponse<string>>(
+          `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        )
+        return response.data
+      }
+
+      // When no file, still use FormData (backend may require it)
       const formData = new FormData()
       formData.append('CourseClassId', data.courseClassId)
       formData.append('DocumentType', data.documentType)
       formData.append('Title', data.title)
       formData.append('Description', data.description || '')
-      formData.append('File', data.file)
+
+      console.log('[updateMaterial] Without file - documentId:', documentId)
+      console.log('[updateMaterial] FormData fields:', {
+        CourseClassId: data.courseClassId,
+        DocumentType: data.documentType,
+        Title: data.title,
+        Description: data.description || ''
+      })
 
       const response = await api.put<ApiResponse<string>>(
         `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
@@ -227,21 +264,15 @@ export const materialsApi = {
         }
       )
       return response.data
+    } catch (error) {
+      console.error('[updateMaterial] Error:', error)
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: unknown; status?: number } }
+        console.error('[updateMaterial] Response status:', axiosError.response?.status)
+        console.error('[updateMaterial] Response data:', axiosError.response?.data)
+      }
+      throw error
     }
-
-    // When no file, send JSON with proper defaults
-    const payload = {
-      courseClassId: data.courseClassId,
-      documentType: data.documentType,
-      title: data.title,
-      description: data.description || ''
-    }
-
-    const response = await api.put<ApiResponse<string>>(
-      `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
-      payload
-    )
-    return response.data
   },
 
   deleteMaterial: async (documentId: string): Promise<ApiResponse<string>> => {
