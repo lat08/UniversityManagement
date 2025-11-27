@@ -342,6 +342,7 @@ export const AddCourseClassModal = ({ isOpen, onClose, course, onSuccess }: AddC
                 </label>
                 <Input
                   type="number"
+                  min="1"
                   placeholder="VD: 50"
                   {...register('maxStudents', { valueAsNumber: true })}
                   className={errors.maxStudents ? 'border-red-500' : ''}

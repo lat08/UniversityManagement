@@ -26,10 +26,10 @@
         "columns": {
           "code": "Code",
           "name": "Subject Name",
-          "instructor": "Instructor",
+          "department": "Department",
           "credits": "Credits",
           "students": "Students",
-          "semester": "Semester",
+          "subjectType": "Subject Type",
           "status": "Status",
           "actions": "Actions"
         }

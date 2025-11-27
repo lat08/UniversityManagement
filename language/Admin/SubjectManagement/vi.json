@@ -26,10 +26,10 @@
         "columns": {
           "code": "Mã",
           "name": "Tên môn học",
-          "instructor": "Giảng viên",
+          "department": "Bộ môn",
           "credits": "Tín chỉ",
           "students": "Sinh viên",
-          "semester": "Kỳ",
+          "subjectType": "Loại môn học",
           "status": "Trạng thái",
           "actions": "HĐ"
         }
