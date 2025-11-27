@@ -7,58 +7,116 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-hot-toast';
-import { Dropdown, Button, Input } from '@/app/components/ui';
-import { facultiesApi } from '../lib/api/facultiesApi';
+import { DropdownSearch, Button, Input } from '@/app/components/ui';
+import { facultiesApi, commonApi } from '../lib/api/facultiesApi';
+import type { Division, Instructor } from '../lib/types/types';
 
 interface AddFacultyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  divisions?: Array<{ value: string; label: string }>;
 }
 
 interface FormData {
-  facultyName: string;
   facultyCode: string;
+  facultyName: string;
   divisionId: string;
   deanId?: string;
+  isActive?: boolean;
 }
 
-export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: AddFacultyModalProps) => {
+export const AddFacultyModal = ({ isOpen, onClose, onSuccess }: AddFacultyModalProps) => {
   const t = useTranslations('admin.facultyManagement');
   const tActions = useTranslations('common.actions');
   
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [loadingDivisions, setLoadingDivisions] = useState(false);
+  const [loadingInstructors, setLoadingInstructors] = useState(false);
+  const [instructorSearchQuery, setInstructorSearchQuery] = useState('');
+
   const validationSchema = useMemo(() => yup.object({
-    facultyName: yup
-      .string()
-      .required(t('form.facultyName.required'))
-      .min(3, t('form.facultyName.min')),
     facultyCode: yup
       .string()
       .required(t('form.facultyCode.required'))
-      .min(2, t('form.facultyCode.min')),
+      .matches(/^[A-Z0-9_]+$/, t('form.facultyCode.invalid'))
+      .max(50, t('form.facultyCode.max')),
+    facultyName: yup
+      .string()
+      .required(t('form.facultyName.required'))
+      .max(200, t('form.facultyName.max')),
     divisionId: yup
       .string()
       .required(t('form.divisionId.required')),
     deanId: yup.string().optional(),
+    isActive: yup.boolean().optional(),
   }), [t]);
 
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
-      facultyName: '',
       facultyCode: '',
+      facultyName: '',
       divisionId: '',
-      deanId: '',
+      deanId: undefined,
+      isActive: true,
     }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formValues = watch();
 
+  // Load divisions on mount
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingDivisions(true);
+      commonApi.getDivisions()
+        .then(setDivisions)
+        .catch(() => toast.error('Không thể tải danh sách khoa'))
+        .finally(() => setLoadingDivisions(false));
+    }
+  }, [isOpen]);
+
+  // Load instructors on mount and when search query changes
+  useEffect(() => {
+    if (isOpen) {
+      const loadInstructors = async () => {
+        setLoadingInstructors(true);
+        try {
+          const data = await commonApi.getInstructors(instructorSearchQuery || undefined);
+          setInstructors(data);
+        } catch {
+          toast.error('Không thể tải danh sách giảng viên');
+        } finally {
+          setLoadingInstructors(false);
+        }
+      };
+
+      const timer = setTimeout(() => {
+        loadInstructors();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, instructorSearchQuery, t]);
+
+  const divisionOptions = useMemo(() => [
+    { value: '', label: t('form.divisionId.placeholder') },
+    ...divisions.map(d => ({ value: d.divisionId, label: `${d.divisionCode} - ${d.divisionName}` }))
+  ], [divisions, t]);
+
+  const instructorOptions = useMemo(() => [
+    { value: '', label: t('form.deanId.placeholder') },
+    ...instructors.map(i => ({ 
+      value: i.instructorId, 
+      label: `${i.instructorCode} - ${i.fullName}` 
+    }))
+  ], [instructors, t]);
+
   const handleClose = useCallback(() => {
     if (!isSubmitting) {
       reset();
+      setInstructorSearchQuery('');
       onClose();
     }
   }, [isSubmitting, reset, onClose]);
@@ -83,11 +141,11 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: 
     setIsSubmitting(true);
     try {
       const payload = {
-        facultyName: data.facultyName,
-        facultyCode: data.facultyCode,
+        facultyCode: data.facultyCode.toUpperCase().trim(),
+        facultyName: data.facultyName.trim(),
         divisionId: data.divisionId,
-        deanId: data.deanId || undefined,
-        facultyStatus: 'active' as const,
+        deanId: data.deanId && data.deanId !== '' ? data.deanId : undefined,
+        isActive: data.isActive ?? true,
       };
 
       const response = await facultiesApi.create(payload);
@@ -95,6 +153,7 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: 
       if (response.success) {
         toast.success(t('hooks.createSuccess'));
         reset();
+        setInstructorSearchQuery('');
         onSuccess?.();
         handleClose();
       } else {
@@ -145,7 +204,23 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: 
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
           <div className="overflow-y-auto flex-1 p-6">
-            <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Mã ngành */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {t('form.facultyCode.label')} <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  placeholder={t('form.facultyCode.placeholder')}
+                  {...register('facultyCode')}
+                  className={errors.facultyCode ? 'border-red-500' : ''}
+                  onChange={(e) => {
+                    setValue('facultyCode', e.target.value.toUpperCase());
+                  }}
+                />
+                {errors.facultyCode && <p className="mt-1 text-xs text-red-500">{errors.facultyCode.message}</p>}
+              </div>
+
               {/* Tên ngành */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -159,42 +234,41 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: 
                 {errors.facultyName && <p className="mt-1 text-xs text-red-500">{errors.facultyName.message}</p>}
               </div>
 
-              {/* Mã ngành */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('form.facultyCode.label')} <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  placeholder={t('form.facultyCode.placeholder')}
-                  {...register('facultyCode')}
-                  className={errors.facultyCode ? 'border-red-500' : ''}
-                />
-                {errors.facultyCode && <p className="mt-1 text-xs text-red-500">{errors.facultyCode.message}</p>}
-              </div>
-
-              {/* Khoa phụ trách */}
-              <div>
+              {/* Khoa */}
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('form.divisionId.label')} <span className="text-red-500">*</span>
                 </label>
-                <Dropdown
-                  options={divisions}
-                  value={formValues.divisionId}
+                <DropdownSearch
+                  options={divisionOptions}
+                  value={formValues.divisionId || ''}
                   placeholder={t('form.divisionId.placeholder')}
-                  onChange={(value) => setValue('divisionId', value)}
+                  searchPlaceholder={t('form.divisionId.searchPlaceholder')}
+                  onChange={(value) => {
+                    setValue('divisionId', value);
+                  }}
+                  disabled={loadingDivisions}
                 />
                 {errors.divisionId && <p className="mt-1 text-xs text-red-500">{errors.divisionId.message}</p>}
               </div>
 
-              {/* Trưởng ngành (optional) */}
-              <div>
+              {/* Trưởng ngành */}
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('form.deanId.label')}
                 </label>
-                <Input
+                <DropdownSearch
+                  options={instructorOptions}
+                  value={formValues.deanId || ''}
                   placeholder={t('form.deanId.placeholder')}
-                  {...register('deanId')}
-                  className={errors.deanId ? 'border-red-500' : ''}
+                  searchPlaceholder={t('form.deanId.searchPlaceholder')}
+                  onChange={(value) => {
+                    setValue('deanId', value && value !== '' ? value : undefined);
+                  }}
+                  onSearch={setInstructorSearchQuery}
+                  disabled={loadingInstructors}
+                  showEmptyOption
+                  emptyOptionLabel={t('form.deanId.placeholder')}
                 />
                 {errors.deanId && <p className="mt-1 text-xs text-red-500">{errors.deanId.message}</p>}
               </div>
@@ -207,14 +281,14 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: 
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10"
+              className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
               {tActions('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white"
+              className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? t('modals.add.submitting') : t('modals.add.submit')}
             </Button>
@@ -224,3 +298,4 @@ export const AddFacultyModal = ({ isOpen, onClose, onSuccess, divisions = [] }: 
     </div>
   );
 };
+

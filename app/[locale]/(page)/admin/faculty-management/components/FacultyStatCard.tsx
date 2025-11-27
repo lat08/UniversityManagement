@@ -35,3 +35,4 @@ export const FacultyStatCard = ({ label, value, Icon, bgColor, iconColor }: Facu
     </div>
   );
 };
+
