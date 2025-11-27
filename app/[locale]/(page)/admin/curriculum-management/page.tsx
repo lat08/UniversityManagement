@@ -480,13 +480,6 @@ export default function CurriculumManagementPage() {
       })
       const payload = { subjects: subjectsPayload }
 
-      // Log body trước khi gửi request để dễ debug
-      // eslint-disable-next-line no-console
-      console.log('[CurriculumManagementPage] setSubjects payload', {
-        curriculumId,
-        payload,
-      })
-
       const res = await curriculumsApi.setSubjects(curriculumId, payload)
       if (res.success) {
         debugCurriculumPage('handleSaveSubjects: success', res)

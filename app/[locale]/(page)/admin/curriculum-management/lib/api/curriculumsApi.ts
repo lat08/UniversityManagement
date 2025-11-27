@@ -13,11 +13,10 @@ import type {
   RemoveCurriculumSubjectsPayload,
 } from '../types/types'
 
-const DEBUG_CURRICULUM_API = false
+const DEBUG_CURRICULUM_API = true
 
 const debugCurriculumApi = (...args: unknown[]) => {
   if (!DEBUG_CURRICULUM_API) return
-  // eslint-disable-next-line no-console
   console.log('[curriculumsApi]', ...args)
 }
 
