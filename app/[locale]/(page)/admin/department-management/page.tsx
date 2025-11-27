@@ -308,6 +308,7 @@ export default function DepartmentManagementPage() {
             case 'curricula':
               const activeCurricula = department.curricula?.filter(c => c.isActive) || [];
               const totalCurricula = department.curricula?.length || 0;
+              const inactiveCurricula = totalCurricula - activeCurricula.length;
               return (
                 <td 
                   key="curricula" 
@@ -324,16 +325,16 @@ export default function DepartmentManagementPage() {
                   {totalCurricula > 0 ? (
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-medium">
-                        {totalCurricula} {totalCurricula === 1 ? 'CTĐT' : 'CTĐT'}
+                        {t('table.curricula.totalLabel', { count: totalCurricula })}
                       </span>
                       {activeCurricula.length > 0 && (
                         <span className="text-xs text-green-600">
-                          {activeCurricula.length} đang áp dụng
+                          {t('table.curricula.activeLabel', { count: activeCurricula.length })}
                         </span>
                       )}
-                      {totalCurricula > activeCurricula.length && (
+                      {inactiveCurricula > 0 && (
                         <span className="text-xs text-gray-400">
-                          {totalCurricula - activeCurricula.length} đã ngừng
+                          {t('table.curricula.inactiveLabel', { count: inactiveCurricula })}
                         </span>
                       )}
                     </div>

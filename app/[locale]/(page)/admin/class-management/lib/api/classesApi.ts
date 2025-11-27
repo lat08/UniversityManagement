@@ -1,7 +1,6 @@
 import { api } from '@/lib/api/client';
 import { commonApi } from '@/lib/api/common';
 import type {
-  Class,
   ClassDetail,
   ClassListResponse,
   ApiResponse,

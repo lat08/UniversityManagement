@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Edit, Eye, ArrowRight, Trash2, Plus } from 'lucide-react';
+import { MoreVertical, Edit, Eye, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/app/components/ui';
 
 interface CourseActionsMenuProps {

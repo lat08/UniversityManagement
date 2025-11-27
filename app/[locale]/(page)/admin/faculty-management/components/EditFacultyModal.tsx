@@ -83,7 +83,7 @@ export const EditFacultyModal = ({ isOpen, onClose, onSuccess, faculty }: EditFa
       setLoadingDivisions(true);
       commonApi.getDivisions()
         .then(setDivisions)
-        .catch(() => toast.error('Không thể tải danh sách khoa'))
+        .catch(() => toast.error(t('errors.loadDivisions')))
         .finally(() => setLoadingDivisions(false));
     }
   }, [isOpen]);
@@ -97,7 +97,7 @@ export const EditFacultyModal = ({ isOpen, onClose, onSuccess, faculty }: EditFa
           const data = await commonApi.getInstructors(instructorSearchQuery || undefined);
           setInstructors(data);
         } catch {
-          toast.error('Không thể tải danh sách giảng viên');
+          toast.error(t('errors.loadInstructors'));
         } finally {
           setLoadingInstructors(false);
         }

@@ -56,7 +56,6 @@ export default function CourseManagementPage() {
   const [isEditCourseClassModalOpen, setIsEditCourseClassModalOpen] = useState(false);
   const [editingCourseClass, setEditingCourseClass] = useState<CourseClassSummary | null>(null);
   const [courseForEditClass, setCourseForEditClass] = useState<Course | null>(null);
-  const [isAssignCourseClassModalOpen, setIsAssignCourseClassModalOpen] = useState(false);
   const [assigningCourseClass, setAssigningCourseClass] = useState<CourseClassSummary | null>(null);
   const [isDeleteCourseClassModalOpen, setIsDeleteCourseClassModalOpen] = useState(false);
   const [deletingCourseClass, setDeletingCourseClass] = useState<CourseClassSummary | null>(null);
@@ -489,7 +488,7 @@ export default function CourseManagementPage() {
         })}
       </>
     );
-  }, [handleViewCourseClick, handleEditCourseClick, handleAssignCourseClick, handleSelectOneCourse, selectedCourseIds]);
+  }, [handleViewCourseClick, handleEditCourseClick, handleDeleteCourseClick, handleOpenCourseClassModal, handleSelectOneCourse, selectedCourseIds, expandedCourseIds]);
 
   // Render Assignment Row
   const renderAssignmentRow = useCallback((assignment: FacultyAssignment, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {

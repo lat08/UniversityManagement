@@ -176,10 +176,10 @@ export const commonApi = {
           
           // Try to find divisions array in any key
           for (const key of keys) {
-            const value = (responseData as any)[key];
-            if (Array.isArray(value) && value.length > 0 && value[0]?.divisionId) {
+            const value = (responseData as Record<string, unknown>)[key];
+            if (Array.isArray(value) && value.length > 0 && value[0] && typeof value[0] === 'object' && 'divisionId' in value[0]) {
               console.log(`Divisions found in key "${key}":`, value.length, 'items');
-              return value;
+              return value as Division[];
             }
           }
         }
@@ -193,17 +193,18 @@ export const commonApi = {
         fullResponse: JSON.stringify(response.data, null, 2)
       });
       return [];
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching divisions:', error);
+      const errorObj = error as { message?: string; response?: { data?: unknown; status?: number; statusText?: string }; config?: { url?: string; method?: string; params?: unknown } };
       console.error('Error details:', {
-        message: error?.message,
-        response: error?.response?.data,
-        status: error?.response?.status,
-        statusText: error?.response?.statusText,
+        message: errorObj?.message,
+        response: errorObj?.response?.data,
+        status: errorObj?.response?.status,
+        statusText: errorObj?.response?.statusText,
         config: {
-          url: error?.config?.url,
-          method: error?.config?.method,
-          params: error?.config?.params,
+          url: errorObj?.config?.url,
+          method: errorObj?.config?.method,
+          params: errorObj?.config?.params,
         }
       });
       return [];

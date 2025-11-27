@@ -30,8 +30,6 @@ import type {
   TuitionDebtItem,
   TuitionDebtFilter,
   TuitionDebtResponse,
-  UpdateTuitionRequest,
-  CreateReminderRequest,
 } from '@/lib/types';
 
 const PAGE_SIZE = 20;
@@ -99,13 +97,13 @@ export default function AdminTuitionPage() {
 
   // getTuitionDebts returns: { statistics: {...}, data: { items: [...], totalCount: ... } }
   // So response = { statistics: {...}, data: { items: [...], totalCount: ... } }
-  const debtItems = response?.data?.items ?? [];
-  const statistics = response?.statistics ?? {
+  const debtItems = useMemo(() => response?.data?.items ?? [], [response?.data?.items]);
+  const statistics = useMemo(() => response?.statistics ?? {
     totalFee: 0,
     totalPaid: 0,
     totalDebt: 0,
     overdue: 0,
-  };
+  }, [response?.statistics]);
   const totalCount = response?.data?.totalCount ?? 0;
   const totalPages = Math.max(1, response?.data?.totalPages ?? 1);
 

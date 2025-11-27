@@ -115,7 +115,6 @@ const AdminRegulationsPage = () => {
   const deleteMutation = useDeleteRegulation();
   const {
     data: detailData,
-    isLoading: isDetailLoading,
     error: detailError,
   } = useRegulationDetail(detailId);
 

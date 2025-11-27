@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Plus, Edit, Trash2, Eye, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { ResizableTable, ResizableColumn } from '../student-profile/components/ResizableTable';
@@ -319,7 +319,7 @@ export default function ClassManagementPage() {
         })}
       </>
     );
-  }, [translateStatusDisplay, tCommon, t]);
+  }, [translateStatusDisplay, tCommon]);
 
   return (
     <div className="space-y-4 lg:space-y-6">

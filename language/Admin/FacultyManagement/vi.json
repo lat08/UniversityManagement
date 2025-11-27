@@ -12,13 +12,24 @@
         "active": "Đang hoạt động",
         "inactive": "Ngừng hoạt động"
       },
+      "status": {
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động",
+        "all": "Tất cả trạng thái"
+      },
       "filters": {
         "allFaculties": "Tất cả ngành học",
         "allCurricula": "Tất cả CTĐT",
         "allStatuses": "Tất cả trạng thái",
+        "allDivisions": "Tất cả khoa",
+        "allCurriculums": "Tất cả chương trình đào tạo",
         "noChange": "Không thay đổi",
         "active": "Đang hoạt động",
-        "inactive": "Ngừng hoạt động"
+        "inactive": "Ngừng hoạt động",
+        "division": "Khoa",
+        "searchDivision": "Tìm kiếm khoa...",
+        "curriculum": "Chương trình đào tạo",
+        "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
       },
       "table": {
         "selected": "Đã chọn {count} ngành",
@@ -28,6 +39,9 @@
           "name": "Ngành",
           "faculty": "Khoa",
           "curriculum": "CTĐT",
+          "division": "Khoa",
+          "dean": "Trưởng ngành",
+          "departments": "Số chuyên ngành",
           "status": "Trạng thái",
           "actions": "HĐ"
         },
@@ -42,6 +56,12 @@
         "bulkDelete": "Xóa đã chọn",
         "clearSelection": "Bỏ chọn"
       },
+      "bulk": {
+        "selected": "Đã chọn {count}",
+        "edit": "Chỉnh sửa đã chọn",
+        "delete": "Xóa đã chọn",
+        "clear": "Bỏ chọn"
+      },
       "hooks": {
         "createSuccess": "Thêm ngành thành công!",
         "createError": "Không thể thêm ngành",
@@ -53,20 +73,44 @@
         "bulkDeleteError": "Không thể xóa các ngành đã chọn",
         "bulkEditSuccess": "Đã cập nhật các ngành đã chọn thành công",
         "bulkEditError": "Không thể cập nhật các ngành đã chọn",
-        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật"
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật",
+        "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+      },
+      "errors": {
+        "loadDivisions": "Không thể tải danh sách khoa",
+        "loadCurriculums": "Không thể tải danh sách chương trình đào tạo",
+        "loadInstructors": "Không thể tải danh sách giảng viên"
       },
       "form": {
         "facultyCode": {
           "label": "Mã ngành",
           "placeholder": "VD: KTPM",
           "required": "Mã ngành là bắt buộc",
-          "min": "Mã ngành phải có ít nhất 2 ký tự"
+          "invalid": "Mã ngành chỉ được chứa chữ in hoa, số và dấu gạch dưới",
+          "min": "Mã ngành phải có ít nhất 2 ký tự",
+          "max": "Mã ngành không được vượt quá 50 ký tự"
         },
         "facultyName": {
           "label": "Tên ngành",
           "placeholder": "VD: Kỹ thuật phần mềm",
           "required": "Tên ngành là bắt buộc",
-          "min": "Tên ngành phải có ít nhất 3 ký tự"
+          "min": "Tên ngành phải có ít nhất 3 ký tự",
+          "max": "Tên ngành không được vượt quá 200 ký tự"
+        },
+        "divisionId": {
+          "label": "Khoa",
+          "placeholder": "Chọn khoa",
+          "searchPlaceholder": "Tìm kiếm khoa...",
+          "required": "Khoa là bắt buộc"
+        },
+        "deanId": {
+          "label": "Trưởng ngành",
+          "placeholder": "Chọn trưởng ngành (tùy chọn)",
+          "searchPlaceholder": "Tìm kiếm giảng viên..."
+        },
+        "isActive": {
+          "label": "Trạng thái",
+          "placeholder": "Chọn trạng thái"
         },
         "majorName": {
           "label": "Tên chuyên ngành",
@@ -124,6 +168,8 @@
         "bulkEdit": {
           "title": "Chỉnh sửa hàng loạt",
           "description": "Đã chọn {count} ngành",
+          "statusLabel": "Trạng thái",
+          "statusPlaceholder": "Chọn trạng thái để cập nhật",
           "submit": "Cập nhật",
           "submitting": "Đang cập nhật..."
         },
@@ -131,6 +177,11 @@
           "title": "Xóa ngành",
           "description": "Bạn có chắc chắn muốn xóa {count} ngành đã chọn?",
           "note": "Hành động này không thể hoàn tác.",
+          "warningTitle": "Cảnh báo",
+          "warningNote": "Các ngành này có dữ liệu liên quan có thể bị ảnh hưởng.",
+          "constraints": {
+            "department": "Ngành này có {count} chuyên ngành"
+          },
           "submit": "Xóa",
           "submitting": "Đang xóa..."
         },
@@ -138,6 +189,11 @@
           "title": "Xóa ngành",
           "description": "Bạn có chắc chắn muốn xóa {name}?",
           "note": "Hành động này không thể hoàn tác.",
+          "warningTitle": "Cảnh báo",
+          "warningNote": "Ngành này có dữ liệu liên quan có thể bị ảnh hưởng.",
+          "constraints": {
+            "department": "Ngành này có {count} chuyên ngành"
+          },
           "submit": "Xóa"
         }
       }

@@ -3,13 +3,20 @@
     "divisionManagement": {
       "title": "Quản lý khoa",
       "description": "Quản lý thông tin khoa, ngành và ban chủ nhiệm",
+      "listTitle": "Danh sách khoa",
       "search": {
         "placeholder": "Tìm kiếm theo mã, tên khoa..."
       },
-      "listTitle": "Danh sách khoa",
+      "status": {
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động",
+        "all": "Tất cả trạng thái",
+        "unknown": "Không xác định"
+      },
       "filters": {
         "allDivisions": "Tất cả đơn vị",
         "allStatuses": "Tất cả trạng thái",
+        "noChange": "Không thay đổi",
         "active": "Đang hoạt động",
         "inactive": "Ngừng hoạt động"
       },
@@ -25,6 +32,8 @@
           "code": "Mã",
           "name": "Tên khoa",
           "division": "Đơn vị",
+          "dean": "Trưởng khoa",
+          "facultyCount": "Số ngành",
           "status": "Trạng thái",
           "actions": "HĐ"
         },
@@ -38,7 +47,15 @@
         "bulkEdit": "Chỉnh sửa đã chọn",
         "bulkDelete": "Xóa đã chọn",
         "clearSelection": "Bỏ chọn",
-        "deleteAll": "Xóa toàn bộ"
+        "deleteAll": "Xóa toàn bộ",
+        "export": "Xuất Excel",
+        "exporting": "Đang xuất..."
+      },
+      "bulk": {
+        "selected": "Đã chọn {count}",
+        "edit": "Chỉnh sửa đã chọn",
+        "delete": "Xóa đã chọn",
+        "clear": "Bỏ chọn"
       },
       "hooks": {
         "createSuccess": "Thêm khoa thành công",
@@ -50,7 +67,82 @@
         "bulkDeleteSuccess": "Xóa các khoa đã chọn thành công",
         "bulkDeleteError": "Không thể xóa các khoa đã chọn",
         "bulkEditSuccess": "Cập nhật các khoa đã chọn thành công",
-        "bulkEditError": "Không thể cập nhật các khoa đã chọn"
+        "bulkEditError": "Không thể cập nhật các khoa đã chọn",
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật",
+        "exportSuccess": "Xuất file thành công",
+        "exportError": "Không thể xuất file",
+        "exportFileName": "DanhSachKhoa",
+        "loadInstructorsError": "Không thể tải danh sách giảng viên",
+        "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+      },
+      "form": {
+        "divisionCode": {
+          "label": "Mã khoa"
+        },
+        "divisionName": {
+          "label": "Tên khoa",
+          "placeholder": "VD: Khoa Công nghệ thông tin",
+          "required": "Tên khoa là bắt buộc",
+          "max": "Tên khoa không được vượt quá 200 ký tự"
+        },
+        "deanId": {
+          "label": "Trưởng khoa",
+          "placeholder": "Chọn trưởng khoa (tùy chọn)",
+          "searchPlaceholder": "Tìm kiếm giảng viên..."
+        },
+        "status": {
+          "label": "Trạng thái",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm khoa",
+          "description": "Nhập thông tin khoa",
+          "submit": "Lưu",
+          "submitting": "Đang lưu..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa khoa",
+          "description": "Cập nhật thông tin khoa",
+          "submit": "Lưu thay đổi",
+          "submitting": "Đang lưu..."
+        },
+        "bulkEdit": {
+          "title": "Chỉnh sửa hàng loạt",
+          "description": "Đã chọn {count} khoa",
+          "statusLabel": "Trạng thái",
+          "statusPlaceholder": "Chọn trạng thái để cập nhật",
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật..."
+        },
+        "bulkDelete": {
+          "title": "Xóa khoa",
+          "description": "Bạn có chắc chắn muốn xóa {count} khoa đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "warningTitle": "Cảnh báo",
+          "warningNote": "Các khoa này có dữ liệu liên quan có thể bị ảnh hưởng.",
+          "constraints": {
+            "faculty": "Các khoa này có {count} ngành",
+            "subject": "Các khoa này có {count} môn học",
+            "instructor": "Các khoa này có {count} giảng viên"
+          },
+          "submit": "Xóa",
+          "submitting": "Đang xóa..."
+        },
+        "confirmDelete": {
+          "title": "Xóa khoa",
+          "description": "Bạn có chắc chắn muốn xóa {name}?",
+          "note": "Hành động này không thể hoàn tác.",
+          "warningTitle": "Cảnh báo",
+          "warningNote": "Khoa này có dữ liệu liên quan có thể bị ảnh hưởng.",
+          "constraints": {
+            "faculty": "Khoa này có {count} ngành",
+            "subject": "Khoa này có {count} môn học",
+            "instructor": "Khoa này có {count} giảng viên"
+          },
+          "submit": "Xóa"
+        }
       }
     }
   }

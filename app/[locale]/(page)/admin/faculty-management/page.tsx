@@ -90,7 +90,7 @@ export default function FacultyManagementPage() {
         setDivisions(divisionsData);
       } catch (error) {
         console.error('Error loading divisions:', error);
-        toast.error('Không thể tải danh sách khoa');
+        toast.error(t('errors.loadDivisions'));
       } finally {
         setLoadingDivisions(false);
       }
@@ -106,7 +106,7 @@ export default function FacultyManagementPage() {
       // Load curriculums for filtering
       commonApi.getCurriculums(undefined, selectedDivisionId)
         .then(setCurriculums)
-        .catch(() => toast.error('Không thể tải danh sách chương trình đào tạo'))
+        .catch(() => toast.error(t('errors.loadCurriculums')))
         .finally(() => setLoadingCurriculums(false));
     } else {
       setCurriculums([]);
