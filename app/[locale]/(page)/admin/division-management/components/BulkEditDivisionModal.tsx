@@ -10,26 +10,20 @@ import { divisionsApi } from '../lib/api/divisionsApi';
 interface BulkEditDivisionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedDivisionIds: string[];
   onSuccess?: () => void;
+  selectedDivisionIds: string[];
 }
 
-export const BulkEditDivisionModal = ({ isOpen, onClose, selectedDivisionIds, onSuccess }: BulkEditDivisionModalProps) => {
+export const BulkEditDivisionModal = ({ isOpen, onClose, onSuccess, selectedDivisionIds }: BulkEditDivisionModalProps) => {
   const t = useTranslations('admin.divisionManagement');
   const tActions = useTranslations('common.actions');
-  
-  const [selectedStatus, setSelectedStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const statusOptions = useMemo(() => [
-    { value: '', label: t('bulk.selectStatus') },
-    { value: 'active', label: t('status.active') },
-    { value: 'inactive', label: t('status.inactive') },
-  ], [t]);
+  
+  const [divisionStatus, setDivisionStatus] = useState<string>('');
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) {
-      setSelectedStatus('');
+      setDivisionStatus('');
       onClose();
     }
   }, [isSubmitting, onClose]);
@@ -50,9 +44,17 @@ export const BulkEditDivisionModal = ({ isOpen, onClose, selectedDivisionIds, on
     };
   }, [isOpen, isSubmitting, handleClose]);
 
-  const handleSubmit = async () => {
-    if (!selectedStatus) {
-      toast.error(t('bulk.selectStatusError'));
+  const statusOptions = useMemo(() => [
+    { value: '', label: t('filters.noChange') },
+    { value: 'active', label: t('status.active') },
+    { value: 'inactive', label: t('status.inactive') },
+  ], [t]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!divisionStatus) {
+      toast.error(t('hooks.bulkEditValidation'));
       return;
     }
 
@@ -60,15 +62,16 @@ export const BulkEditDivisionModal = ({ isOpen, onClose, selectedDivisionIds, on
     try {
       const response = await divisionsApi.bulkUpdateStatus({
         divisionIds: selectedDivisionIds,
-        status: selectedStatus as 'active' | 'inactive',
+        status: divisionStatus as 'active' | 'inactive',
       });
 
-      if (response.isSuccess) {
-        toast.success(t('hooks.bulkUpdateSuccess', { count: response.data.updatedCount }));
+      if (response.success) {
+        toast.success(response.message || t('hooks.bulkEditSuccess', { count: selectedDivisionIds.length }));
+        setDivisionStatus('');
         onSuccess?.();
         handleClose();
       } else {
-        toast.error(response.message || t('hooks.bulkUpdateError'));
+        toast.error(response.message || t('hooks.bulkEditError'));
       }
     } catch (error: unknown) {
       const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
@@ -93,11 +96,11 @@ export const BulkEditDivisionModal = ({ isOpen, onClose, selectedDivisionIds, on
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{t('modals.bulkEdit.title')}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('modals.bulkEdit.title')}</h2>
               <p className="text-sm text-gray-600 mt-1">
                 {t('modals.bulkEdit.description', { count: selectedDivisionIds.length })}
               </p>
@@ -115,40 +118,42 @@ export const BulkEditDivisionModal = ({ isOpen, onClose, selectedDivisionIds, on
           </div>
         </div>
 
-        <div className="p-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              {t('form.status.label')} <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              options={statusOptions}
-              value={selectedStatus}
-              placeholder={t('bulk.selectStatus')}
-              onChange={setSelectedStatus}
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                {t('modals.bulkEdit.statusLabel')}
+              </label>
+              <Dropdown
+                options={statusOptions}
+                value={divisionStatus}
+                placeholder={t('modals.bulkEdit.statusPlaceholder')}
+                onChange={setDivisionStatus}
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-3 p-6 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-            disabled={isSubmitting}
-            className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10"
-          >
-            {tActions('cancel')}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !selectedStatus}
-            className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white"
-          >
-            {isSubmitting ? t('modals.bulkEdit.submitting') : t('modals.bulkEdit.submit')}
-          </Button>
-        </div>
+          <div className="flex gap-3 p-6 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
+            >
+              {tActions('cancel')}
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#0053AD] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? t('modals.bulkEdit.submitting') : t('modals.bulkEdit.submit')}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
+

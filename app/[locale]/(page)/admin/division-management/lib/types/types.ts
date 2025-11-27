@@ -1,15 +1,15 @@
 export interface Division {
-  divisionId: string;
+  divisionId: string; // Guid từ backend sẽ được serialize thành string
   divisionName: string;
   divisionCode: string;
-  divisionStatus: string;
+  divisionStatus?: string; // Backend trả về string, có thể là 'active' hoặc 'inactive'
   deanId?: string;
   deanName?: string;
-  facultyCount?: number;
-  subjectCount?: number;
-  instructorCount?: number;
-  createdAt: string;
-  updatedAt: string;
+  facultyCount: number;
+  subjectCount: number;
+  instructorCount: number;
+  createdAt: string; // DateTime từ backend sẽ được serialize thành ISO string
+  updatedAt?: string;
 }
 
 export interface DivisionBasic {
@@ -17,7 +17,7 @@ export interface DivisionBasic {
   divisionName: string;
   deanId?: string;
   deanName?: string;
-  divisionStatus: string;
+  divisionStatus?: string;
 }
 
 export interface Pagination {
@@ -27,15 +27,24 @@ export interface Pagination {
   totalPages: number;
 }
 
-export interface ApiResponse<T> {
-  isSuccess: boolean;
-  message: string;
-  data: T;
-}
-
-export interface PagedResult {
+export interface DivisionsResponse {
   data: Division[];
   pagination: Pagination;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors?: string[];
+}
+
+export interface PagedResult<T> {
+  Items: T;
+  TotalCount: number;
+  PageNumber: number;
+  PageSize: number;
+  TotalPages: number;
 }
 
 export interface GetDivisionsParams {
@@ -52,21 +61,27 @@ export interface CreateDivisionPayload {
 
 export interface UpdateDivisionPayload {
   divisionName: string;
-  divisionStatus: 'active' | 'inactive';
   deanId?: string;
+  divisionStatus?: 'active' | 'inactive';
 }
 
-export interface BulkStatusUpdatePayload {
+export interface BulkUpdateDivisionStatusPayload {
   divisionIds: string[];
   status: 'active' | 'inactive';
 }
 
-export interface BulkDeletePayload {
+export interface BulkDeleteDivisionPayload {
   divisionIds: string[];
 }
 
+export const STATUS_OPTIONS: Array<{ value: string; labelKey: string }> = [
+  { value: '', labelKey: 'status.all' },
+  { value: 'active', labelKey: 'status.active' },
+  { value: 'inactive', labelKey: 'status.inactive' },
+];
+
 export const getStatusDisplay = (
-  status: string,
+  status: string | undefined,
   labels?: {
     active: string;
     inactive: string;
@@ -75,8 +90,9 @@ export const getStatusDisplay = (
 ) => {
   const statusLower = status?.toLowerCase() || '';
   const statusMap: Record<string, { label: string; color: string }> = {
-    active: { label: labels?.active ?? 'Đang hoạt động', color: 'bg-green-100 text-green-700' },
-    inactive: { label: labels?.inactive ?? 'Ngưng hoạt động', color: 'bg-red-100 text-red-700' },
+    active: { label: labels?.active ?? 'Active', color: 'bg-green-100 text-green-700' },
+    inactive: { label: labels?.inactive ?? 'Inactive', color: 'bg-red-100 text-red-700' },
   };
-  return statusMap[statusLower] || { label: labels?.unknown ?? (status || 'Không xác định'), color: 'bg-gray-100 text-gray-700' };
+  return statusMap[statusLower] || { label: labels?.unknown ?? (status || 'Unknown'), color: 'bg-gray-100 text-gray-700' };
 };
+

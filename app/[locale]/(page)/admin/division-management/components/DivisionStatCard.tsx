@@ -35,3 +35,4 @@ export const DivisionStatCard = ({ label, value, Icon, bgColor, iconColor }: Div
     </div>
   );
 };
+

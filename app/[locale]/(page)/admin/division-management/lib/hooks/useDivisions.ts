@@ -17,38 +17,47 @@ export const useDivisions = () => {
   const fetchDivisions = useCallback(async (params: GetDivisionsParams = {}) => {
     setLoading(true);
     try {
+      // Fetch divisions with current filters
       const response = await divisionsApi.getAll(params);
       
-      if (response.isSuccess && response.data) {
-        // Response structure: { data: { data: Division[], pagination: {...} } }
-        const divisionData = response.data.data || [];
-        const paginationData = response.data.pagination;
+      if (response.success && response.data) {
+        const { data, pagination } = response.data;
         
-        setDivisions(divisionData);
-        setTotalCount(paginationData.totalCount);
-        setTotalPages(paginationData.totalPages);
-        setCurrentPage(paginationData.currentPage);
-        
-        // Calculate stats from current page data
-        const activeDivisions = divisionData.filter((d) => d.divisionStatus?.toLowerCase() === 'active').length;
-        const inactiveDivisions = divisionData.filter((d) => d.divisionStatus?.toLowerCase() === 'inactive').length;
-        setStats({
-          totalDivisions: paginationData.totalCount,
-          activeDivisions,
-          inactiveDivisions,
-        });
+        setDivisions(data || []);
+        setTotalCount(pagination.totalCount || 0);
+        setTotalPages(pagination.totalPages || 0);
+        setCurrentPage(pagination.currentPage || 1);
       } else {
+        // Reset data if request failed
         setDivisions([]);
         setTotalCount(0);
         setTotalPages(0);
-        setStats({
-          totalDivisions: 0,
-          activeDivisions: 0,
-          inactiveDivisions: 0,
-        });
       }
-    } catch (error) {
-      console.error('Error fetching divisions:', error);
+
+      // Fetch stats separately (without searchTerm filter) to get total counts
+      // Stats should always show total counts regardless of current search/filter
+      const [totalResponse, activeResponse, inactiveResponse] = await Promise.all([
+        divisionsApi.getAll({ pageNumber: 1, pageSize: 1 }), // Just to get totalCount, no filters
+        divisionsApi.getAll({ pageNumber: 1, pageSize: 1, status: 'active' }), // Only status filter
+        divisionsApi.getAll({ pageNumber: 1, pageSize: 1, status: 'inactive' }), // Only status filter
+      ]);
+
+      const totalCount = totalResponse.success && totalResponse.data 
+        ? totalResponse.data.pagination.totalCount 
+        : 0;
+      const activeCount = activeResponse.success && activeResponse.data 
+        ? activeResponse.data.pagination.totalCount 
+        : 0;
+      const inactiveCount = inactiveResponse.success && inactiveResponse.data 
+        ? inactiveResponse.data.pagination.totalCount 
+        : 0;
+
+      setStats({
+        totalDivisions: totalCount,
+        activeDivisions: activeCount,
+        inactiveDivisions: inactiveCount,
+      });
+    } catch {
       setDivisions([]);
       setTotalCount(0);
       setTotalPages(0);
@@ -73,3 +82,4 @@ export const useDivisions = () => {
     setCurrentPage,
   };
 };
+

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, School, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck, Download } from 'lucide-react';
+import { Plus, Building2, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck, Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Dropdown, SearchInput, Button } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
@@ -26,7 +26,7 @@ const STAT_CARDS = [
     labelKey: 'stats.total',
     bgColor: 'bg-[#FFDDAA]',
     iconColor: 'text-[#CC8800]',
-    Icon: School
+    Icon: Building2
   },
   { 
     key: 'active', 
@@ -55,27 +55,22 @@ export default function DivisionManagementPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [deletingDivisionId, setDeletingDivisionId] = useState<string | null>(null);
-  const [deletingDivisionName, setDeletingDivisionName] = useState<string | undefined>(undefined);
+  const [deletingDivision, setDeletingDivision] = useState<Division | null>(null);
   const [editingDivision, setEditingDivision] = useState<Division | null>(null);
   const [selectedDivisionIds, setSelectedDivisionIds] = useState<Set<string>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
 
   const { divisions, loading, currentPage, totalCount, totalPages, stats, fetchDivisions, setCurrentPage } = useDivisions();
 
-  // Initialize columns after translations are loaded
-  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([]);
-
-  useEffect(() => {
-    setResizableColumns([
-      { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
-      { key: 'divisionCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-      { key: 'divisionName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
-      { key: 'deanName', label: t('table.columns.dean'), width: 200, minWidth: 150, align: 'left', visible: true },
-      { key: 'facultyCount', label: t('table.columns.facultyCount'), width: 120, minWidth: 100, align: 'center', visible: true },
-      { key: 'instructorCount', label: t('table.columns.instructorCount'), width: 140, minWidth: 120, align: 'center', visible: true },
-      { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
-      { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
-    ]);
-  }, [t]);
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>(() => [
+    { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
+    { key: 'divisionCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+    { key: 'divisionName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
+    { key: 'deanName', label: t('table.columns.dean'), width: 200, minWidth: 150, align: 'left', visible: true },
+    { key: 'facultyCount', label: t('table.columns.facultyCount'), width: 120, minWidth: 100, align: 'center', visible: true },
+    { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
+    { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
+  ]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -94,7 +89,11 @@ export default function DivisionManagementPage() {
     });
   }, [currentPage, searchKeyword, selectedStatus, fetchDivisions]);
 
-  const filteredDivisions = useMemo(() => divisions, [divisions]);
+  // Filter divisions by status on client side if needed (already filtered by API, but keep for consistency)
+  const filteredDivisions = useMemo(() => {
+    if (!selectedStatus) return divisions;
+    return divisions.filter(d => d.divisionStatus?.toLowerCase() === selectedStatus.toLowerCase());
+  }, [divisions, selectedStatus]);
 
   const statValues = useMemo(() => ({
     total: stats.totalDivisions,
@@ -114,9 +113,9 @@ export default function DivisionManagementPage() {
     { value: 'inactive', label: t('status.inactive') },
   ]), [t]);
 
-  const handleDeleteClick = useCallback((divisionId: string, divisionName: string) => {
-    setDeletingDivisionId(divisionId);
-    setDeletingDivisionName(divisionName);
+  const handleDeleteClick = useCallback((division: Division) => {
+    setDeletingDivisionId(division.divisionId);
+    setDeletingDivision(division);
     setIsDeleteModalOpen(true);
   }, []);
 
@@ -128,7 +127,7 @@ export default function DivisionManagementPage() {
   const handleDeleteConfirm = async () => {
     if (!deletingDivisionId) return;
     const res = await divisionsApi.bulkDelete({ divisionIds: [deletingDivisionId] });
-    if (res.isSuccess) {
+    if (res.success) {
       toast.success(t('hooks.deleteSuccess'));
       fetchDivisions({
         pageNumber: currentPage,
@@ -164,8 +163,8 @@ export default function DivisionManagementPage() {
   const handleBulkDelete = async () => {
     const ids = Array.from(selectedDivisionIds);
     const res = await divisionsApi.bulkDelete({ divisionIds: ids });
-    if (res.isSuccess) {
-      toast.success(res.message || t('hooks.bulkDeleteSuccess', { count: res.data.deletedCount }));
+    if (res.success) {
+      toast.success(res.message || t('hooks.bulkDeleteSuccess', { count: ids.length }));
       setSelectedDivisionIds(new Set());
       setIsBulkDeleteModalOpen(false);
       fetchDivisions({
@@ -180,17 +179,17 @@ export default function DivisionManagementPage() {
   };
 
   const handleExport = async () => {
+    setIsExporting(true);
     try {
-      const blob = await divisionsApi.export({
-        searchTerm: searchKeyword || undefined,
-        status: selectedStatus || undefined,
-      });
+      const blob = await divisionsApi.exportToExcel(
+        searchKeyword || undefined,
+        selectedStatus || undefined
+      );
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-      link.download = `DanhSachKhoa_${timestamp}.xlsx`;
+      link.download = `DanhSachKhoa_${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -199,7 +198,8 @@ export default function DivisionManagementPage() {
       toast.success(t('hooks.exportSuccess'));
     } catch (error) {
       toast.error(t('hooks.exportError'));
-      console.error('Export error:', error);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -256,14 +256,8 @@ export default function DivisionManagementPage() {
               );
             case 'facultyCount':
               return (
-                <td key="facultyCount" className="text-gray-900 text-center" style={cellPaddingStyle}>
-                  {division.facultyCount ?? 0}
-                </td>
-              );
-            case 'instructorCount':
-              return (
-                <td key="instructorCount" className="text-gray-900 text-center" style={cellPaddingStyle}>
-                  {division.instructorCount ?? 0}
+                <td key="facultyCount" className="text-gray-600 text-center" style={cellPaddingStyle}>
+                  {division.facultyCount}
                 </td>
               );
             case 'status':
@@ -291,7 +285,7 @@ export default function DivisionManagementPage() {
                     divisionId={division.divisionId}
                     divisionName={division.divisionName}
                     onEdit={() => handleEditClick(division)}
-                    onDelete={() => handleDeleteClick(division.divisionId, division.divisionName)}
+                    onDelete={() => handleDeleteClick(division)}
                     compact={(column.width || 0) < 120}
                   />
                 </td>
@@ -354,11 +348,12 @@ export default function DivisionManagementPage() {
             <div className="flex gap-3">
               <Button
                 onClick={handleExport}
+                disabled={isExporting}
                 variant="outline"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="border-[#0053AD] text-[#0053AD] hover:bg-[#0053AD]/10"
               >
                 <Download className="w-4 h-4" />
-                {t('actions.export')}
+                {isExporting ? t('actions.exporting') : t('actions.export')}
               </Button>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
@@ -526,11 +521,11 @@ export default function DivisionManagementPage() {
 
       <ConfirmDeleteDivisionModal
         isOpen={isDeleteModalOpen}
-        divisionName={deletingDivisionName}
+        division={deletingDivision}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setDeletingDivisionId(null);
-          setDeletingDivisionName(undefined);
+          setDeletingDivision(null);
         }}
         onConfirm={handleDeleteConfirm}
       />
@@ -538,9 +533,11 @@ export default function DivisionManagementPage() {
       <BulkDeleteDivisionModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
-        selectedCount={selectedDivisionIds.size}
+        selectedDivisionIds={Array.from(selectedDivisionIds)}
+        divisions={divisions}
         onConfirm={handleBulkDelete}
       />
     </div>
   );
 }
+
