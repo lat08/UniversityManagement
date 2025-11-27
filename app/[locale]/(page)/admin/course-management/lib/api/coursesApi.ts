@@ -238,11 +238,10 @@ const mapCourseClassToAssignment = (item: {
 
 export const coursesApi = {
   /**
-   * @api GET /v1/courses
-   * @description Lấy danh sách khóa học với danh sách lớp học phần trong một lần gọi API duy nhất
-   * Backend endpoint này trả về tất cả courses kèm courseClasses trong response, không cần gọi API riêng cho từng course
+   * @api GET /v1/course-classes/all
+ * (ĐÃ ĐỔI) Sử dụng /v1/courses để lấy danh sách khóa học với danh sách lớp học phần
    * @param params - Tham số filter và pagination
-   * @returns Danh sách khóa học với course classes đã được include sẵn
+   * @returns Danh sách lớp học phần
    * @auth Required (Admin)
    */
   getCourses: async (params: GetCoursesParams = {}): Promise<ApiResponse<CoursesResponse>> => {
@@ -626,75 +625,6 @@ export const coursesApi = {
    * @api GET /v1/course-classes/{courseClassId}
    * @description Lấy chi tiết lớp học phần (dùng để prefill modal chỉnh sửa)
    */
-  /**
-   * @api GET /v1/course-classes/{courseClassId}/available-instructors
-   * @description Lấy danh sách giảng viên khả dụng cho lớp học phần
-   * @param courseClassId - ID của lớp học phần
-   * @returns Danh sách giảng viên khả dụng (đã lọc theo khoa và không xung đột lịch)
-   */
-  getAvailableInstructorsForCourseClass: async (courseClassId: string): Promise<
-    ApiResponse<Instructor[]>
-  > => {
-    try {
-      const response = await api.get<{
-        success: boolean;
-        message?: string;
-        data: {
-          instructors?: Array<{
-            instructorId: string;
-            InstructorId?: string;
-            instructorName?: string;
-            fullName?: string;
-            FullName?: string;
-            instructorCode?: string;
-            InstructorCode?: string;
-          }>;
-          Instructors?: Array<{
-            instructorId?: string;
-            InstructorId?: string;
-            instructorName?: string;
-            fullName?: string;
-            FullName?: string;
-            instructorCode?: string;
-            InstructorCode?: string;
-          }>;
-          totalCount?: number;
-          TotalCount?: number;
-        };
-      }>(`/v1/course-classes/${courseClassId}/available-instructors`);
-
-      if (response.data.success && response.data.data) {
-        const instructorsList = response.data.data.Instructors ?? response.data.data.instructors ?? [];
-        return {
-          success: true,
-          message: response.data.message || 'Lấy danh sách giảng viên khả dụng thành công',
-          data: instructorsList.map((i) => ({
-            instructorId: i.instructorId ?? i.InstructorId ?? '',
-            instructorName: i.FullName ?? i.fullName ?? i.instructorName ?? 'N/A',
-            instructorCode: i.InstructorCode ?? i.instructorCode,
-          })),
-        };
-      }
-
-      return {
-        success: false,
-        message: response.data.message || 'Lấy danh sách giảng viên khả dụng thất bại',
-        data: [],
-      };
-    } catch (error: unknown) {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } }; message?: string })?.response
-          ?.data?.message ||
-        (error as { message?: string })?.message ||
-        'Đã xảy ra lỗi khi lấy danh sách giảng viên khả dụng';
-      return {
-        success: false,
-        message: errorMessage,
-        data: [],
-      };
-    }
-  },
-
   getCourseClassDetail: async (courseClassId: string): Promise<
     ApiResponse<{
       courseClassId: string;
@@ -708,8 +638,6 @@ export const coursesApi = {
       courseClassStatus: string;
       roomId?: string;
       startDate: string;
-      instructorAssignedDate?: string;
-      note?: string;
     }>
   > => {
     type CourseClassDetailData = {
@@ -732,74 +660,23 @@ export const coursesApi = {
         data: {
           courseClassId: string;
           courseClassCode: string;
-          subjectName?: string;
-          SubjectName?: string;
+          subjectName: string;
           instructorName?: string;
-          InstructorName?: string;
           instructorId?: string;
-          InstructorId?: string;
-          enrolledStudents?: number;
-          EnrolledStudents?: number;
-          maxStudents?: number;
-          MaxStudents?: number;
-          semesterName?: string;
-          SemesterName?: string;
-          status?: string;
-          Status?: string;
-          courseClassStatus?: string;
-          CourseClassStatus?: string;
+          studentsEnrolled: number;
+          maxStudents: number;
+          semesterName: string;
+          courseClassStatus: string;
           roomId?: string;
-          RoomId?: string;
-          startDate?: string;
-          StartDate?: string;
-          instructorAssignedDate?: string;
-          InstructorAssignedDate?: string;
-          note?: string;
-          Note?: string;
+          startDate: string;
         };
       }>(`/v1/course-classes/${courseClassId}`);
 
       if (response.data.success && response.data.data) {
-        const data = response.data.data;
-        const assignedDate = data.instructorAssignedDate ?? data.InstructorAssignedDate;
-        // Convert DateOnly to yyyy-MM-dd format if needed
-        let formattedAssignedDate: string | undefined = undefined;
-        if (assignedDate) {
-          if (typeof assignedDate === 'string') {
-            // If it's already a string, check if it needs formatting
-            if (assignedDate.includes('T')) {
-              formattedAssignedDate = assignedDate.split('T')[0];
-            } else {
-              formattedAssignedDate = assignedDate;
-            }
-          } else {
-            // If it's a Date object or other format, convert to yyyy-MM-dd
-            try {
-              const date = new Date(assignedDate);
-              formattedAssignedDate = date.toISOString().split('T')[0];
-            } catch {
-              formattedAssignedDate = assignedDate.toString();
-            }
-          }
-        }
         return {
           success: true,
           message: response.data.message || 'Lấy chi tiết lớp học phần thành công',
-          data: {
-            courseClassId: data.courseClassId,
-            courseClassCode: data.courseClassCode,
-            subjectName: data.subjectName ?? data.SubjectName ?? '',
-            instructorName: data.instructorName ?? data.InstructorName,
-            instructorId: data.instructorId ?? data.InstructorId,
-            studentsEnrolled: data.enrolledStudents ?? data.EnrolledStudents ?? 0,
-            maxStudents: data.maxStudents ?? data.MaxStudents ?? 0,
-            semesterName: data.semesterName ?? data.SemesterName ?? '',
-            courseClassStatus: data.courseClassStatus ?? data.CourseClassStatus ?? data.status ?? data.Status ?? 'active',
-            roomId: data.roomId ?? data.RoomId,
-            startDate: data.startDate ?? data.StartDate ?? '',
-            instructorAssignedDate: formattedAssignedDate,
-            note: data.note ?? data.Note,
-          },
+          data: response.data.data,
         };
       }
 
@@ -1297,8 +1174,8 @@ export const coursesApi = {
         };
       }>(`/v1/course-classes/${payload.courseId}/assign-instructor`, {
         InstructorId: payload.instructorId,
-        AssignedDate: payload.effectiveDate || null,
-        Note: payload.notes || '',
+        AssignedDate: payload.effectiveDate,
+        Note: payload.notes,
       });
 
       if (response.data.success && response.data.data) {
@@ -1369,8 +1246,8 @@ export const coursesApi = {
         };
       }>(`/v1/course-classes/${payload.courseId}/assign-instructor`, {
         InstructorId: payload.instructorId,
-        AssignedDate: payload.effectiveDate || null,
-        Note: payload.notes || '',
+        AssignedDate: payload.effectiveDate,
+        Note: payload.notes,
       });
 
       if (response.data.success && response.data.data) {

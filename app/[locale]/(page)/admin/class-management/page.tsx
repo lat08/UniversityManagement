@@ -93,7 +93,6 @@ export default function ClassManagementPage() {
   const fetchAcademicYears = async () => {
     try {
       const years = await classesApi.getAcademicYears(10);
-      console.log('[DEBUG] Fetched academic years:', years);
       setAcademicYears(years);
     } catch (error) {
       console.error('Error fetching academic years:', error);
@@ -178,18 +177,16 @@ export default function ClassManagementPage() {
     try {
       const response = await classesApi.deleteClass(deletingClass.classId);
       if (response.success) {
-        toast.success(response.message || t('toast.deleteSuccess'));
+        toast.success(t('toast.deleteSuccess'));
         await fetchClasses();
         setIsDeleteModalOpen(false);
         setDeletingClass(null);
       } else {
         toast.error(response.message || t('toast.deleteError'));
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting class:', error);
-      // Extract error message from API response
-      const errorMessage = error?.response?.data?.message || error?.message || t('toast.deleteError');
-      toast.error(errorMessage);
+      toast.error(t('toast.deleteError'));
     }
   };
 

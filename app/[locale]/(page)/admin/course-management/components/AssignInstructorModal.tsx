@@ -39,149 +39,17 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course, cour
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [pendingInstructorData, setPendingInstructorData] = useState<{
-    instructorId?: string;
-    effectiveDate?: string;
-    note?: string;
-  } | null>(null);
 
   const formValues = watch();
   const notesLength = (formValues.notes || '').length;
 
-  // Set form values after instructors list is loaded
-  useEffect(() => {
-    if (pendingInstructorData && instructors.length > 0) {
-      if (pendingInstructorData.instructorId) {
-        // Verify instructor exists in list
-        const instructorExists = instructors.some(
-          (i) => i.instructorId === pendingInstructorData.instructorId
-        );
-        if (instructorExists) {
-          setValue('instructorId', pendingInstructorData.instructorId, { shouldValidate: false });
-        } else {
-          console.warn('Instructor not found in list:', pendingInstructorData.instructorId);
-        }
-      }
-      if (pendingInstructorData.effectiveDate) {
-        setValue('effectiveDate', pendingInstructorData.effectiveDate, { shouldValidate: false });
-      }
-      if (pendingInstructorData.note) {
-        setValue('notes', pendingInstructorData.note, { shouldValidate: false });
-      }
-      setPendingInstructorData(null);
-    }
-  }, [instructors, pendingInstructorData, setValue]);
-
-  // Load existing assignment data and available instructors when modal opens
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true);
-      
-      // If courseClassId is provided, load existing assignment data and available instructors
-      if (courseClassId) {
-        // Load course class detail first to get existing assignment info
-        coursesApi.getCourseClassDetail(courseClassId)
-          .then((detailRes) => {
-            // Then load available instructors
-            return coursesApi.getAvailableInstructorsForCourseClass(courseClassId)
-              .then((instructorsRes) => {
-                // Load available instructors
-                let instructorsList: Instructor[] = [];
-                if (instructorsRes.success) {
-                  instructorsList = instructorsRes.data;
-                } else {
-                  console.error('Failed to load available instructors:', instructorsRes.message);
-                  toast.error(instructorsRes.message || 'Không thể tải danh sách giảng viên khả dụng');
-                }
-
-                // Preload existing assignment data
-                if (detailRes.success && detailRes.data) {
-                  const detail = detailRes.data;
-                  
-                  // If there's an existing instructor, make sure they're in the list
-                  if (detail.instructorId && detail.instructorName) {
-                    const existingInstructorInList = instructorsList.find(
-                      (i) => i.instructorId === detail.instructorId
-                    );
-                    
-                    // If current instructor is not in available list, add them at the beginning
-                    if (!existingInstructorInList) {
-                      instructorsList = [
-                        {
-                          instructorId: detail.instructorId,
-                          instructorName: detail.instructorName,
-                          instructorCode: undefined,
-                        },
-                        ...instructorsList,
-                      ];
-                    }
-                  }
-                  
-                  // Prepare form data to be set after instructors are loaded
-                  const formData: {
-                    instructorId?: string;
-                    effectiveDate?: string;
-                    note?: string;
-                  } = {};
-                  
-                  if (detail.instructorId) {
-                    formData.instructorId = detail.instructorId;
-                  }
-                  if (detail.instructorAssignedDate) {
-                    // Convert date format if needed (yyyy-MM-dd)
-                    const dateStr = detail.instructorAssignedDate.includes('T') 
-                      ? detail.instructorAssignedDate.split('T')[0]
-                      : detail.instructorAssignedDate;
-                    formData.effectiveDate = dateStr;
-                  } else {
-                    // Default to today if no assigned date
-                    formData.effectiveDate = new Date().toISOString().split('T')[0];
-                  }
-                  if (detail.note) {
-                    formData.note = detail.note;
-                  }
-                  
-                  // Set instructors list first
-                  setInstructors(instructorsList);
-                  
-                  // Set pending data to be applied after instructors list is set (via useEffect)
-                  setPendingInstructorData(formData);
-                } else {
-                  setInstructors(instructorsList);
-                }
-              });
-          })
-          .catch((error) => {
-            console.error('Error loading course class data:', error);
-            toast.error('Đã xảy ra lỗi khi tải thông tin lớp học phần');
-            setInstructors([]);
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      } else {
-        // For course assignment (not course class), just load all instructors
-        coursesApi.getInstructors()
-          .then((res) => {
-            if (res.success) setInstructors(res.data);
-          })
-          .catch((error) => {
-            console.error('Error loading instructors:', error);
-            toast.error('Đã xảy ra lỗi khi tải danh sách giảng viên');
-            setInstructors([]);
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      }
-    } else {
-      // Reset when modal closes
-      setInstructors([]);
-      setPendingInstructorData(null);
-      reset();
+      coursesApi.getInstructors().then((res) => {
+        if (res.success) setInstructors(res.data);
+      });
     }
-  }, [isOpen, courseClassId, setValue, reset]);
+  }, [isOpen]);
 
   const instructorOptions = instructors.map((i) => ({ value: i.instructorId, label: i.instructorName }));
 
@@ -282,18 +150,12 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course, cour
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
           <div className="overflow-y-auto flex-1 p-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-gray-500">Đang tải thông tin...</div>
-              </div>
-            ) : (
-              <>
-                {/* Mã */}
-                <div className="mb-6">
-                  <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
-                    {courseClassId ? `Mã lớp: ${courseClassCode || 'N/A'}` : `Mã: ${course.courseCode}`}
-                  </span>
-                </div>
+            {/* Mã */}
+            <div className="mb-6">
+              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
+                {courseClassId ? `Mã lớp: ${courseClassCode || 'N/A'}` : `Mã: ${course.courseCode}`}
+              </span>
+            </div>
 
             <div className="grid grid-cols-2 gap-6">
               {/* Môn học */}
@@ -362,8 +224,6 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course, cour
                 {errors.notes && <p className="mt-1 text-xs text-red-500">{errors.notes.message}</p>}
               </div>
             </div>
-              </>
-            )}
           </div>
 
           <div className="flex gap-3 p-6 border-t">
@@ -378,7 +238,7 @@ export const AssignInstructorModal = ({ isOpen, onClose, onSuccess, course, cour
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || isLoading}
+              disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Đang lưu...' : 'Lưu'}

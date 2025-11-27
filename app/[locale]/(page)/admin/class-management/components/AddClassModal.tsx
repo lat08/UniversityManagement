@@ -66,10 +66,7 @@ export default function AddClassModal({ isOpen, onClose, onSuccess }: AddClassMo
     if (!isOpen) return;
 
     classesApi.getDepartments().then(setDepartments);
-    classesApi.getAcademicYears(10).then((years) => {
-      console.log('[DEBUG] AddClassModal - Academic years:', years);
-      setAcademicYears(years);
-    });
+    classesApi.getAcademicYears(10).then(setAcademicYears);
     classesApi.getTrainingSystems().then(setTrainingSystems);
   }, [isOpen]);
 

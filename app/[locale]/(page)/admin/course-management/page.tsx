@@ -9,7 +9,6 @@ import { Pagination } from '@/app/components/ui/pagination';
 import { AddCourseModal } from './components/AddCourseModal';
 import { EditCourseModal } from './components/EditCourseModal';
 import { ViewCourseDetailModal } from './components/ViewCourseDetailModal';
-import { ViewCourseClassDetailModal } from './components/ViewCourseClassDetailModal';
 import { AssignInstructorModal } from './components/AssignInstructorModal';
 import { AddAssignmentModal } from './components/AddAssignmentModal';
 import { EditAssignmentModal } from './components/EditAssignmentModal';
@@ -29,7 +28,6 @@ import { getStatusDisplay } from './lib/types/types';
 import type { Course, FacultyAssignment, Major, Specialization, Subject, Instructor, CourseClassSummary, Batch } from './lib/types/types';
 import { format } from 'date-fns';
 import { useSearchParams } from 'next/navigation';
-import { toast } from 'react-hot-toast';
 
 type TabKey = 'courses' | 'assignments';
 
@@ -58,8 +56,6 @@ export default function CourseManagementPage() {
   const [isEditCourseClassModalOpen, setIsEditCourseClassModalOpen] = useState(false);
   const [editingCourseClass, setEditingCourseClass] = useState<CourseClassSummary | null>(null);
   const [courseForEditClass, setCourseForEditClass] = useState<Course | null>(null);
-  const [isViewCourseClassModalOpen, setIsViewCourseClassModalOpen] = useState(false);
-  const [viewingCourseClassId, setViewingCourseClassId] = useState<string | null>(null);
   const [isAssignCourseClassModalOpen, setIsAssignCourseClassModalOpen] = useState(false);
   const [assigningCourseClass, setAssigningCourseClass] = useState<CourseClassSummary | null>(null);
   const [isDeleteCourseClassModalOpen, setIsDeleteCourseClassModalOpen] = useState(false);
@@ -113,16 +109,6 @@ export default function CourseManagementPage() {
     { key: 'semester', label: t('columns.semester'), width: 160, minWidth: 140, align: 'center', visible: true },
     { key: 'status', label: t('columns.status'), width: 140, minWidth: 120, align: 'center', visible: true },
     { key: 'actions', label: t('columns.actions'), width: 180, minWidth: 140, align: 'center', visible: true, required: true },
-  ]);
-
-  // Course Class columns (for nested table)
-  const [courseClassResizableColumns, setCourseClassResizableColumns] = useState<ResizableColumn[]>([
-    { key: 'classCode', label: t('classColumns.classCode'), width: 180, minWidth: 140, align: 'left', visible: true, required: true },
-    { key: 'instructor', label: t('classColumns.instructor'), width: 200, minWidth: 150, align: 'left', visible: true },
-    { key: 'room', label: t('classColumns.room'), width: 140, minWidth: 100, align: 'center', visible: true },
-    { key: 'time', label: t('classColumns.time'), width: 280, minWidth: 220, align: 'left', visible: true },
-    { key: 'enrollment', label: t('classColumns.enrollment'), width: 160, minWidth: 120, align: 'center', visible: true },
-    { key: 'actions', label: t('classColumns.actions'), width: 200, minWidth: 160, align: 'center', visible: true, required: true },
   ]);
 
   // Assignment List columns
@@ -292,9 +278,9 @@ export default function CourseManagementPage() {
   }, []);
 
   // Course class handlers
-  const handleViewCourseClassClick = useCallback((courseClass: CourseClassSummary) => {
-    setViewingCourseClassId(courseClass.courseClassId);
-    setIsViewCourseClassModalOpen(true);
+  const handleViewCourseClassClick = useCallback((course: Course) => {
+    setViewingCourse(course);
+    setIsViewCourseModalOpen(true);
   }, []);
 
   const handleEditCourseClassClick = useCallback((courseClass: CourseClassSummary, course: Course) => {
@@ -368,121 +354,6 @@ export default function CourseManagementPage() {
       }
       return newSet;
     });
-  }, []);
-
-  // Render Course Class Row
-  const renderCourseClassRow = useCallback((courseClass: CourseClassSummary, course: Course, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
-
-    return (
-      <>
-        {visibleColumns.map((column) => {
-          const widthPercent = (column as { widthPercent?: number }).widthPercent ||
-            (baseTotalWidth > 0 ? (column.width / baseTotalWidth) * 100 : 100 / visibleColumns.length);
-
-          const cellPaddingStyle = {
-            width: `${widthPercent}%`,
-            paddingLeft: cellStyle.paddingX,
-            paddingRight: cellStyle.paddingX,
-            paddingTop: cellStyle.paddingY,
-            paddingBottom: cellStyle.paddingY,
-          };
-
-          switch (column.key) {
-            case 'classCode':
-              return (
-                <td
-                  key="classCode"
-                  className="text-gray-900 font-medium"
-                  style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {courseClass.courseClassCode}
-                </td>
-              );
-            case 'instructor':
-              return (
-                <td
-                  key="instructor"
-                  className="text-gray-600"
-                  style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {courseClass.instructorName || 'Chưa phân công'}
-                </td>
-              );
-            case 'room':
-              return (
-                <td
-                  key="room"
-                  className="text-gray-600 text-center"
-                  style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {courseClass.room || '-'}
-                </td>
-              );
-            case 'time':
-              return (
-                <td key="time" className="text-gray-600" style={cellPaddingStyle}>
-                  <div className="text-sm leading-snug">
-                    <div>{courseClass.startDate} - {courseClass.endDate}</div>
-                    <div>Thứ {courseClass.dayOfWeek}, tiết {courseClass.startPeriod}-{courseClass.endPeriod}</div>
-                  </div>
-                </td>
-              );
-            case 'enrollment':
-              return (
-                <td key="enrollment" className="text-gray-900 text-center" style={cellPaddingStyle}>
-                  {courseClass.enrolledStudents}/{courseClass.maximumStudents} Sinh viên
-                </td>
-              );
-            case 'actions':
-              return (
-                <td key="actions" style={{ ...cellPaddingStyle, paddingLeft: '8px', paddingRight: '8px' }}>
-                  <div className="flex justify-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleViewCourseClassClick(courseClass)}
-                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
-                      title="Xem chi tiết"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEditCourseClassClick(courseClass, course)}
-                      className="text-gray-600 hover:text-green-600 hover:bg-green-50 h-8 w-8"
-                      title="Cập nhật"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleAssignCourseClassClick(courseClass, course)}
-                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
-                      title="Gán giảng viên"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteCourseClassClick(courseClass)}
-                      className="text-gray-600 hover:text-red-600 hover:bg-red-50 h-8 w-8"
-                      title="Xóa"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </td>
-              );
-            default:
-              return null;
-          }
-        })}
-      </>
-    );
   }, []);
 
   // Render Course Row
@@ -861,20 +732,98 @@ export default function CourseManagementPage() {
                     {expandedCourseIds.has(course.courseId) && course.courseClasses && course.courseClasses.length > 0 && (
                       <tr className="bg-gray-50">
                         <td
-                          className="px-4 py-3"
+                          className="px-4 py-3 text-sm text-gray-700"
                           colSpan={visibleColumns.length}
                         >
-                          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                            <ResizableTable
-                              columns={courseClassResizableColumns}
-                              data={course.courseClasses}
-                              renderRow={(cc, visibleClassColumns, classCellStyle) => (
-                                <tr className="hover:bg-gray-50 transition-colors">
-                                  {renderCourseClassRow(cc, course, visibleClassColumns, classCellStyle)}
-                                </tr>
-                              )}
-                              onColumnsResize={setCourseClassResizableColumns}
-                            />
+                          <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium text-gray-900">
+                                {t('courseClassesTitle')}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2 text-xs"
+                                onClick={() => handleOpenCourseClassModal(course)}
+                              >
+                                <Plus className="w-4 h-4" />
+                                {t('addCourseClass')}
+                              </Button>
+                            </div>
+                            <span className="text-xs text-gray-500">{t('courseClassesHint')}</span>
+                          </div>
+                          <div className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div className="bg-white border-b border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 flex divide-x divide-gray-200">
+                              <div className="flex-1 text-center">{t('classColumns.classCode')}</div>
+                              <div className="flex-1 text-center">{t('classColumns.instructor')}</div>
+                              <div className="flex-1 text-center">{t('classColumns.room')}</div>
+                              <div className="flex-[1.5] text-center">{t('classColumns.time')}</div>
+                              <div className="flex-1 text-center">{t('classColumns.enrollment')}</div>
+                              <div className="flex-[1.2] text-center">{t('classColumns.actions')}</div>
+                            </div>
+                            <div className="divide-y divide-gray-100 bg-white">
+                              {course.courseClasses.map((cc) => (
+                                <div
+                                  key={cc.courseClassId}
+                                  className="px-3 py-3 text-sm text-gray-800 flex items-center divide-x divide-gray-100"
+                                >
+                                  <div className="flex-1 font-medium text-center truncate">{cc.courseClassCode}</div>
+                                  <div className="flex-1 text-center truncate">
+                                    {cc.instructorName || 'Chưa phân công'}
+                                  </div>
+                                  <div className="flex-1 text-center truncate">{cc.room}</div>
+                                  <div className="flex-[1.5] text-center text-sm text-gray-600 leading-snug">
+                                    <div>
+                                      {cc.startDate} - {cc.endDate}
+                                    </div>
+                                    <div>
+                                      Thứ {cc.dayOfWeek}, tiết {cc.startPeriod}-{cc.endPeriod}
+                                    </div>
+                                  </div>
+                                  <div className="flex-1 text-center">
+                                    {cc.enrolledStudents}/{cc.maximumStudents} Sinh viên
+                                  </div>
+                                  <div className="flex-[1.2] flex justify-center gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleViewCourseClassClick(course)}
+                                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
+                                      title="Xem chi tiết"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleEditCourseClassClick(cc, course)}
+                                      className="text-gray-600 hover:text-green-600 hover:bg-green-50 h-8 w-8"
+                                      title="Cập nhật"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleAssignCourseClassClick(cc, course)}
+                                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 h-8 w-8"
+                                      title="Gán giảng viên"
+                                    >
+                                      <ArrowRight className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDeleteCourseClassClick(cc)}
+                                      className="text-gray-600 hover:text-red-600 hover:bg-red-50 h-8 w-8"
+                                      title="Xóa"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -1095,15 +1044,6 @@ export default function CourseManagementPage() {
         course={viewingCourse}
       />
 
-      <ViewCourseClassDetailModal
-        isOpen={isViewCourseClassModalOpen}
-        onClose={() => {
-          setIsViewCourseClassModalOpen(false);
-          setViewingCourseClassId(null);
-        }}
-        courseClassId={viewingCourseClassId}
-      />
-
       <AssignInstructorModal
         isOpen={isAssignInstructorModalOpen}
         onClose={() => {
@@ -1221,28 +1161,18 @@ export default function CourseManagementPage() {
                 type="button"
                 onClick={async () => {
                   if (!deletingCourseClass) return;
-                  try {
-                    const res = await coursesApi.deleteAssignment(deletingCourseClass.courseClassId);
-                    if (res.success) {
-                      toast.success(res.message || 'Xóa lớp học phần thành công');
-                      fetchCourses({
-                        pageNumber: coursesCurrentPage,
-                        pageSize: 20,
-                        searchKeyword: courseSearchKeyword || undefined,
-                        majorId: selectedCourseMajorId || undefined,
-                        specializationId: selectedCourseSpecializationId || undefined,
-                        academicYearId: selectedCourseAcademicYearId || undefined,
-                      });
-                      setIsDeleteCourseClassModalOpen(false);
-                      setDeletingCourseClass(null);
-                    } else {
-                      toast.error(res.message || 'Xóa lớp học phần thất bại');
-                    }
-                  } catch (error: unknown) {
-                    const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
-                                       (error as { message?: string })?.message ||
-                                       'Đã xảy ra lỗi khi xóa lớp học phần';
-                    toast.error(errorMessage);
+                  const res = await coursesApi.deleteAssignment(deletingCourseClass.courseClassId);
+                  if (res.success) {
+                    fetchCourses({
+                      pageNumber: coursesCurrentPage,
+                      pageSize: 20,
+                      searchKeyword: courseSearchKeyword || undefined,
+                      majorId: selectedCourseMajorId || undefined,
+                      specializationId: selectedCourseSpecializationId || undefined,
+                      academicYearId: selectedCourseAcademicYearId || undefined,
+                    });
+                    setIsDeleteCourseClassModalOpen(false);
+                    setDeletingCourseClass(null);
                   }
                 }}
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 transition-colors"
