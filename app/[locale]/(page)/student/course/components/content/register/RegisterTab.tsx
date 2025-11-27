@@ -1,0 +1,514 @@
+"use client"
+
+import { useMemo, useCallback, useEffect, useState } from "react"
+import { Plus, X } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { Pagination } from "@/app/components/ui/pagination"
+import { Button } from "@/app/components/ui"
+import { AvailableCoursesProps, CourseDto } from "../../../lib/type/courseType"
+import { useAvailableCoursesQuery } from "../../../lib/hooks/useAvailableCoursesQuery"
+import { useCourseFiltersStore } from "../../../lib/stores/courseFiltersStore"
+import { format } from "date-fns"
+import { vi } from "date-fns/locale"
+import CourseFilters from "./CourseFilters"
+
+export function AvailableCourses({ onRegisterClick, onBulkRegisterClick, isRegistering = false, isBulkRegistering = false }: AvailableCoursesProps) {
+  const t = useTranslations('student.course')
+  const filters = useCourseFiltersStore((state) => state.filters)
+  const [currentPage, setCurrentPage] = useState(1)
+  
+  const { courses, isLoading: loading, error, pagination } = useAvailableCoursesQuery({
+    searchQuery: filters.searchQuery,
+    pageNumber: currentPage,
+    pageSize: 15,
+  })
+  
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(page)
+  }, [])
+  const selectedCourseIds = useCourseFiltersStore((state) => state.selectedCourseIds)
+  const selectedCoursesCache = useCourseFiltersStore((state) => state.selectedCoursesCache)
+  const setSelectedCourseIds = useCourseFiltersStore((state) => state.setSelectedCourseIds)
+  const addSelectedCourse = useCourseFiltersStore((state) => state.addSelectedCourse)
+  const removeSelectedCourseId = useCourseFiltersStore((state) => state.removeSelectedCourseId)
+  const clearSelectedCourseIds = useCourseFiltersStore((state) => state.clearSelectedCourseIds)
+
+  console.log('📊 RegisterTab render:', {
+    coursesType: typeof courses,
+    coursesIsArray: Array.isArray(courses),
+    coursesLength: Array.isArray(courses) ? courses.length : 'N/A',
+    loading,
+    error,
+    pagination,
+  });
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters.searchQuery, filters.availableOnly, filters.isGeneral, filters.isInStudentCurriculum])
+
+  // Kiểm tra xem 2 môn học có trùng lịch không
+  const hasScheduleConflict = useCallback((course1: CourseDto, course2: CourseDto) => {
+    if (!course1.weeklySchedules || !course2.weeklySchedules) return false
+    
+    for (const schedule1 of course1.weeklySchedules) {
+      for (const schedule2 of course2.weeklySchedules) {
+        // Kiểm tra cùng ngày trong tuần
+        if (schedule1.dayOfWeek === schedule2.dayOfWeek) {
+          // Kiểm tra trùng khung giờ
+          const start1 = schedule1.startPeriod
+          const end1 = schedule1.endPeriod
+          const start2 = schedule2.startPeriod
+          const end2 = schedule2.endPeriod
+          
+          // Có overlap nếu: start1 < end2 AND start2 < end1
+          if (start1 < end2 && start2 < end1) {
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }, [])
+
+  // Lấy danh sách các môn đã chọn từ cache (bao gồm cả môn ở trang khác)
+  const selectedCourses = useMemo(() => {
+    return Array.from(selectedCoursesCache.values())
+  }, [selectedCoursesCache])
+
+  // Kiểm tra xem 1 môn có bị conflict với bất kỳ môn đã chọn nào không
+  const isConflictWithSelected = useCallback((course: CourseDto) => {
+    if (selectedCourseIds.has(course.courseId)) return false // Môn đang được chọn thì không conflict
+    
+    return selectedCourses.some(selectedCourse => 
+      hasScheduleConflict(course, selectedCourse)
+    )
+  }, [selectedCourses, selectedCourseIds, hasScheduleConflict])
+
+  // Kiểm tra tất cả các trường hợp cần disable checkbox
+  const getCheckboxDisabledState = useCallback((course: CourseDto) => {
+    // 1. Môn đã đăng ký rồi
+    if (course.isRegistered) {
+      return {
+        disabled: true,
+        reason: t('unavailabilityReasons.alreadyRegistered')
+      }
+    }
+
+    // 2. Môn không thể đăng ký (có lý do cụ thể)
+    if (!course.isAvailableForThisStudent) {
+      const reason = course.unavailabilityReason || t('unavailableDefault')
+      return {
+        disabled: true,
+        reason: reason
+      }
+    }
+
+    // 3. Môn đã đầy
+    if (course.isFull) {
+      return {
+        disabled: true,
+        reason: t('unavailabilityReasons.full')
+      }
+    }
+
+    // 4. Môn có conflict với lịch hiện tại của sinh viên
+    if (course.hasScheduleConflict) {
+      return {
+        disabled: true,
+        reason: t('unavailabilityReasons.scheduleConflict')
+      }
+    }
+
+    // 5. Môn trùng lịch với môn đã chọn
+    if (isConflictWithSelected(course)) {
+      return {
+        disabled: true,
+        reason: t('unavailabilityReasons.conflictWithSelected')
+      }
+    }
+
+    return {
+      disabled: false,
+      reason: ''
+    }
+  }, [isConflictWithSelected, t]);
+
+  const handleSelectAll = useCallback((checked: boolean) => {
+    if (checked) {
+      // Chọn tuần tự từng môn, bỏ qua môn bị disable
+      const newSelected = new Set<string>()
+      const newCache = new Map(selectedCoursesCache)
+      
+      for (const course of courses) {
+        const checkboxState = getCheckboxDisabledState(course)
+        // Chỉ chọn môn không bị disable
+        if (!checkboxState.disabled) {
+          // Kiểm tra xem môn này có conflict với các môn đã chọn không
+          const selectedCoursesTemp = Array.from(newCache.values())
+          const hasConflict = selectedCoursesTemp.some(selectedCourse => 
+            hasScheduleConflict(course, selectedCourse)
+          )
+          
+          if (!hasConflict) {
+            newSelected.add(course.courseId)
+            newCache.set(course.courseId, course)
+          }
+        }
+      }
+      
+      setSelectedCourseIds(newSelected)
+      useCourseFiltersStore.setState({ selectedCoursesCache: newCache })
+    } else {
+      // Chỉ bỏ chọn các môn ở trang hiện tại
+      const newSelected = new Set(selectedCourseIds)
+      const newCache = new Map(selectedCoursesCache)
+      
+      courses.forEach(course => {
+        newSelected.delete(course.courseId)
+        newCache.delete(course.courseId)
+      })
+      
+      setSelectedCourseIds(newSelected)
+      useCourseFiltersStore.setState({ selectedCoursesCache: newCache })
+    }
+  }, [courses, hasScheduleConflict, selectedCourseIds, selectedCoursesCache, setSelectedCourseIds, getCheckboxDisabledState])
+
+  const handleSelectCourse = useCallback((course: CourseDto, checked: boolean) => {
+    // Chặn chọn môn không cho phép đăng ký
+    if (checked && !course.isAvailableForThisStudent) {
+      return
+    }
+    
+    if (checked) {
+      // Kiểm tra xem môn có thể chọn không
+      const checkboxState = getCheckboxDisabledState(course)
+      if (checkboxState.disabled) {
+        return // Không cho phép chọn môn đã bị disable
+      }
+      addSelectedCourse(course)
+    } else {
+      removeSelectedCourseId(course.courseId)
+    }
+  }, [addSelectedCourse, removeSelectedCourseId, getCheckboxDisabledState])
+
+  const handleDeselectAll = useCallback(() => {
+    clearSelectedCourseIds()
+  }, [clearSelectedCourseIds])
+
+  const handleBulkRegister = useCallback(async () => {
+    if (selectedCourseIds.size === 0) return
+    
+    try {
+      // Nếu có onBulkRegisterClick, dùng API bulk để tránh spam toast
+      if (onBulkRegisterClick) {
+        await onBulkRegisterClick(Array.from(selectedCourseIds))
+        clearSelectedCourseIds()
+      } else {
+        // Fallback: gọi từng API riêng lẻ (sẽ có nhiều toast)
+        await Promise.all(Array.from(selectedCourseIds).map(id => onRegisterClick(id)))
+        clearSelectedCourseIds()
+      }
+    } catch (error) {
+      // Error đã được xử lý trong onBulkRegisterClick hoặc onRegisterClick
+      console.error('Error in bulk register:', error)
+    }
+  }, [selectedCourseIds, onRegisterClick, onBulkRegisterClick, clearSelectedCourseIds])
+
+  const formatSchedule = useCallback((course: CourseDto) => {
+    if (!course.weeklySchedules || course.weeklySchedules.length === 0) {
+      return t('noSchedule')
+    }
+    const schedule = course.weeklySchedules[0]
+    const startDate = format(new Date(course.startDate), 'dd/MM/yyyy', { locale: vi })
+    const endDate = format(new Date(course.endDate), 'dd/MM/yyyy', { locale: vi })
+    return `${schedule.dayOfWeekName}, tiết ${schedule.startPeriod} - ${schedule.endPeriod}, phòng ${schedule.roomCode} ${startDate} - ${endDate}`
+  }, [t]);
+
+  const getRemainingSlots = useCallback((course: CourseDto) => {
+    return Math.max(0, course.maxStudents - course.registeredStudents)
+  }, [])
+
+  const isAllSelected = useMemo(() => {
+    if (courses.length === 0) return false
+    // Chỉ check các môn ở trang hiện tại (không bị disable)
+    const selectableCoursesOnPage = courses.filter(course => {
+      const checkboxState = getCheckboxDisabledState(course)
+      return !checkboxState.disabled
+    })
+    if (selectableCoursesOnPage.length === 0) return false
+    return selectableCoursesOnPage.every(c => selectedCourseIds.has(c.courseId))
+  }, [courses, selectedCourseIds, getCheckboxDisabledState])
+  
+  const isIndeterminate = useMemo(() => {
+    const selectedOnPage = courses.filter(c => selectedCourseIds.has(c.courseId))
+    return selectedOnPage.length > 0 && !isAllSelected
+  }, [courses, selectedCourseIds, isAllSelected])
+
+  const tableColumns = useMemo(() => [
+    { key: 'checkbox', label: '', align: 'center' as const },
+    { key: 'code', label: t('columns.code'), align: 'left' as const },
+    { key: 'name', label: t('columns.name'), align: 'left' as const },
+    { key: 'instructor', label: t('columns.instructor'), align: 'left' as const },
+    { key: 'credits', label: t('columns.credits'), align: 'center' as const },
+    { key: 'quantity', label: t('columns.quantity'), align: 'center' as const },
+    { key: 'remaining', label: t('columns.remaining'), align: 'center' as const },
+    { key: 'schedule', label: t('columns.schedule'), align: 'left' as const },
+  ], [t])
+
+  const renderCourseRow = useCallback((course: CourseDto) => {
+    const isSelected = selectedCourseIds.has(course.courseId)
+    const remaining = getRemainingSlots(course)
+    const checkboxState = getCheckboxDisabledState(course)
+    const isDisabled = checkboxState.disabled
+
+    return (
+      <>
+        <td className="px-6 py-4">
+          <div className="flex justify-center">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={(e) => handleSelectCourse(course, e.target.checked)}
+              disabled={isDisabled}
+              className={`w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] ${
+                isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+              }`}
+              title={checkboxState.reason || ''}
+            />
+          </div>
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
+          {course.subjectCode}
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
+          {course.subjectName}
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+          {course.instructorName}
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+          {course.credits}
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+          {course.maxStudents}
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+          {remaining}
+        </td>
+        <td className={`px-6 py-4 text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+          {formatSchedule(course)}
+          {isDisabled && checkboxState.reason && (
+            <span className="block text-xs text-red-500 mt-1">⚠️ {checkboxState.reason}</span>
+          )}
+        </td>
+      </>
+    )
+  }, [selectedCourseIds, handleSelectCourse, formatSchedule, getRemainingSlots, getCheckboxDisabledState])
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative">
+      {/* Loading overlay khi đang đăng ký */}
+      {(isRegistering || isBulkRegistering) && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="text-sm text-gray-600 font-medium">
+              {isBulkRegistering ? t('registeringMultiple') : t('registering')}
+            </p>
+          </div>
+        </div>
+      )}
+      <div className="px-6 py-4 border-b border-gray-200">
+        {/* Filters Component */}
+        <CourseFilters />
+
+        {selectedCourseIds.size > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">
+                {t('selectedCount', { count: selectedCourseIds.size })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleBulkRegister}
+                disabled={isBulkRegistering || isRegistering}
+                className="bg-[#0053AD] hover:bg-[#003d82] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                size="sm"
+              >
+                {isBulkRegistering ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    {t('registering')}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    {t('register')}
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeselectAll}
+                className="text-gray-700 border-gray-300 hover:bg-gray-100"
+              >
+                <X className="w-4 h-4" />
+                {t('deselectAll')}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-4">
+          <div className="border border-gray-200 rounded-lg overflow-hidden relative">
+            {/* Subtle loading indicator */}
+            {loading && courses.length > 0 && (
+              <div className="absolute top-2 right-2 z-10">
+                <div className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-2.5 py-1.5 rounded-md shadow-sm border border-blue-200">
+                  <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="text-xs font-medium">{t('loading')}</span>
+                </div>
+              </div>
+            )}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#0053AD] text-white text-sm">
+                    {tableColumns.map((column, index) => {
+                      const alignClass = {
+                        left: "text-left",
+                        center: "text-center",
+                        right: "text-right",
+                      }[column.align || "left"]
+
+                      return (
+                        <th
+                          key={column.key}
+                          className={`px-6 py-4 font-semibold relative ${alignClass}`}
+                        >
+                          {column.key === 'checkbox' ? (
+                            <div className="flex justify-center">
+                              <input
+                                type="checkbox"
+                                checked={isAllSelected}
+                                ref={(input) => {
+                                  if (input) input.indeterminate = isIndeterminate
+                                }}
+                                onChange={(e) => handleSelectAll(e.target.checked)}
+                                disabled={courses.length === 0 || courses.every(c => getCheckboxDisabledState(c).disabled)}
+                                className="w-4 h-4 text-[#0053AD] border-gray-300 rounded focus:ring-[#0053AD] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                              />
+                            </div>
+                          ) : (
+                            column.label
+                          )}
+                          {index < tableColumns.length - 1 && (
+                            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[1.5em] w-[2px] bg-white"></div>
+                          )}
+                        </th>
+                      )
+                    })}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {error ? (
+                    <tr>
+                      <td colSpan={tableColumns.length} className="px-6 py-8 text-center text-red-500">
+                        {error}
+                      </td>
+                    </tr>
+                  ) : loading ? (
+                    // Skeleton loading rows
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <tr key={`skeleton-${index}`}>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-8 mx-auto animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-12 mx-auto animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-12 mx-auto animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : courses.length === 0 ? (
+                    <tr>
+                      <td colSpan={tableColumns.length} className="px-6 py-8 text-center text-gray-500">
+                        {t('noCourses')}
+                      </td>
+                    </tr>
+                  ) : (
+                    courses.map((course, index) => {
+                      const itemKey = course.courseId || `row-${index}`
+                      const checkboxState = getCheckboxDisabledState(course)
+                      const isDisabled = checkboxState.disabled
+                      return (
+                        <tr 
+                          key={itemKey} 
+                          className={`${
+                            isDisabled 
+                              ? 'bg-gray-50 opacity-60' 
+                              : 'hover:bg-gray-50'
+                          } transition-colors duration-150 animate-fade-in`}
+                          style={{ 
+                            animationDelay: `${index * 30}ms`,
+                            animationFillMode: 'both'
+                          }}
+                          onClick={(e) => {
+                            // Chặn click vào row nếu môn không cho phép đăng ký
+                            if (isDisabled) {
+                              e.preventDefault()
+                              e.stopPropagation()
+                            }
+                          }}
+                        >
+                          {renderCourseRow(course)}
+                        </tr>
+                      )
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {pagination && pagination.totalPages > 0 && (
+        <div className="px-6 py-4 border-t border-gray-200 transition-opacity duration-200" style={{ opacity: loading ? 0.6 : 1 }}>
+          <Pagination
+            currentPage={pagination.pageNumber}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.totalCount}
+            pageSize={pagination.pageSize}
+            onPageChange={(page) => goToPage(page)}
+          />
+        </div>
+      )}
+    </div>
+  )
+}

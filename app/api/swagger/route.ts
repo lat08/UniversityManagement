@@ -1,4 +1,3 @@
-import { type NextRequest } from "next/server";
 
 const swaggerDocument = {
   openapi: "3.0.0",
@@ -157,7 +156,7 @@ const swaggerDocument = {
   },
 };
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   return new Response(JSON.stringify(swaggerDocument), {
     headers: {
       "content-type": "application/json",
