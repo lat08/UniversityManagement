@@ -118,40 +118,29 @@ export const classesApi = {
    * Lấy danh sách năm học (academic years)
    */
   getAcademicYears: async (count?: number): Promise<AcademicYear[]> => {
-<<<<<<< HEAD
-    const response = await commonApi.getAcademicYears(count ? { count } : undefined);
-    if (response.success && response.data) {
-      return response.data.map((y) => ({
-        academicYearId: y.academicYearId,
-        yearName: y.yearRange,
-        yearCode: y.yearCode,
-      }));
-=======
     try {
       const response = await commonApi.getAcademicYears(count ? { count } : undefined);
       if (response.success && response.data && Array.isArray(response.data)) {
         const mapped = response.data.map((y: any) => {
           // Handle both yearRange (from common API) and yearName (expected by class management)
-          // Common API returns yearRange, but class management expects yearName
           const yearName = y.yearName || y.YearName || y.yearRange || y.YearRange || '';
           const academicYearId = y.academicYearId || y.AcademicYearId || '';
           const yearCode = y.yearCode || y.YearCode || '';
-          
+
           return {
             academicYearId: String(academicYearId),
-            yearName: yearName,
-            yearCode: yearCode,
+            yearName,
+            yearCode,
           };
-        }).filter((y: AcademicYear) => y.yearName && y.academicYearId && y.yearName.trim() !== ''); // Filter out empty names and IDs
-        
+        }).filter((y: AcademicYear) => y.yearName && y.academicYearId && y.yearName.trim() !== '');
+
         console.log('[DEBUG] Academic years mapped:', mapped);
         return mapped;
-      } else {
-        console.warn('[DEBUG] Academic years response:', response);
       }
+
+      console.warn('[DEBUG] Academic years response:', response);
     } catch (error) {
       console.error('Error fetching academic years:', error);
->>>>>>> d7bef19 (Hoàn thành sửa giao diện Học phần & Lớp học phần, và giao diện lớp định danh)
     }
     return [];
   },
