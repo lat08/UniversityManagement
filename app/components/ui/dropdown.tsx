@@ -154,6 +154,7 @@ export function Dropdown<T = string>({
           }}
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
         >
           {showEmptyOption && (
             <button

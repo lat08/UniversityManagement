@@ -26,6 +26,43 @@
         "download": "Download",
         "delete": "Delete",
         "document": "Document"
+      },
+      "modals": {
+        "uploadDocument": {
+          "title": "Upload New Document",
+          "description": "Description",
+          "subjectClass": "Subject - Class",
+          "selectSubjectClass": "Select option",
+          "subjectClassRequired": "Please select subject - class",
+          "documentType": "Document Type",
+          "selectDocumentType": "Select type",
+          "documentTypeRequired": "Please select document type",
+          "documentName": "Document Name",
+          "documentNamePlaceholder": "Enter document name",
+          "documentNameRequired": "Please enter document name",
+          "descriptionPlaceholder": "Describe document content...",
+          "file": "File",
+          "fileRequired": "Please select a file to upload",
+          "dragDrop": "Drag and drop file here or",
+          "clickToUpload": "click to upload",
+          "supportedFormats": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX",
+          "maxSize": "Maximum size: 50MB",
+          "submit": "Upload",
+          "uploading": "Uploading...",
+          "cancel": "Cancel"
+        },
+        "editDocument": {
+          "title": "Edit Document",
+          "description": "Description",
+          "subjectClass": "Subject - Class",
+          "documentType": "Document Type",
+          "documentName": "Document Name",
+          "file": "New File (optional)",
+          "deleteFile": "Delete File",
+          "submit": "Update",
+          "updating": "Updating...",
+          "cancel": "Cancel"
+        }
       }
     }
   }

@@ -214,7 +214,7 @@ export const materialsApi = {
       formData.append('CourseClassId', data.courseClassId)
       formData.append('DocumentType', data.documentType)
       formData.append('Title', data.title)
-      formData.append('Description', data.description)
+      formData.append('Description', data.description || '')
       formData.append('File', data.file)
 
       const response = await api.put<ApiResponse<string>>(
@@ -229,9 +229,17 @@ export const materialsApi = {
       return response.data
     }
 
+    // When no file, send JSON with proper defaults
+    const payload = {
+      courseClassId: data.courseClassId,
+      documentType: data.documentType,
+      title: data.title,
+      description: data.description || ''
+    }
+
     const response = await api.put<ApiResponse<string>>(
       `${MATERIALS_API.UPDATE_MATERIAL}/${documentId}`,
-      data
+      payload
     )
     return response.data
   },
