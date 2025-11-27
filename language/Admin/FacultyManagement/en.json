@@ -12,13 +12,24 @@
         "active": "Active",
         "inactive": "Inactive"
       },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "all": "All statuses"
+      },
       "filters": {
         "allFaculties": "All faculties",
         "allCurricula": "All curricula",
         "allStatuses": "All statuses",
+        "allDivisions": "All divisions",
+        "allCurriculums": "All curriculums",
         "noChange": "No change",
         "active": "Active",
-        "inactive": "Inactive"
+        "inactive": "Inactive",
+        "division": "Division",
+        "searchDivision": "Search divisions...",
+        "curriculum": "Curriculum",
+        "searchCurriculum": "Search curriculums..."
       },
       "table": {
         "selected": "{count} faculties selected",
@@ -28,6 +39,9 @@
           "name": "Faculty",
           "faculty": "Faculty",
           "curriculum": "Curriculum",
+          "division": "Division",
+          "dean": "Dean",
+          "departments": "Departments",
           "status": "Status",
           "actions": "Actions"
         },
@@ -42,6 +56,12 @@
         "bulkDelete": "Delete Selected",
         "clearSelection": "Clear Selection"
       },
+      "bulk": {
+        "selected": "{count} selected",
+        "edit": "Edit Selected",
+        "delete": "Delete Selected",
+        "clear": "Clear"
+      },
       "hooks": {
         "createSuccess": "Faculty created successfully",
         "createError": "Failed to create faculty",
@@ -53,20 +73,44 @@
         "bulkDeleteError": "Failed to delete selected faculties",
         "bulkEditSuccess": "Updated selected faculties successfully",
         "bulkEditError": "Failed to update selected faculties",
-        "bulkEditValidation": "Select at least one field to update"
+        "bulkEditValidation": "Select at least one field to update",
+        "genericError": "An error occurred. Please try again."
+      },
+      "errors": {
+        "loadDivisions": "Failed to load divisions list",
+        "loadCurriculums": "Failed to load curriculums list",
+        "loadInstructors": "Failed to load instructors list"
       },
       "form": {
         "facultyCode": {
           "label": "Faculty code",
           "placeholder": "e.g. KTPM",
           "required": "Faculty code is required",
-          "min": "Faculty code must be at least 2 characters"
+          "invalid": "Faculty code must contain only uppercase letters, numbers, and underscores",
+          "min": "Faculty code must be at least 2 characters",
+          "max": "Faculty code must not exceed 50 characters"
         },
         "facultyName": {
           "label": "Faculty name",
           "placeholder": "e.g. Software Engineering",
           "required": "Faculty name is required",
-          "min": "Faculty name must be at least 3 characters"
+          "min": "Faculty name must be at least 3 characters",
+          "max": "Faculty name must not exceed 200 characters"
+        },
+        "divisionId": {
+          "label": "Division",
+          "placeholder": "Select division",
+          "searchPlaceholder": "Search divisions...",
+          "required": "Division is required"
+        },
+        "deanId": {
+          "label": "Dean",
+          "placeholder": "Select dean (optional)",
+          "searchPlaceholder": "Search instructors..."
+        },
+        "isActive": {
+          "label": "Status",
+          "placeholder": "Select status"
         },
         "majorName": {
           "label": "Major name",
@@ -123,6 +167,8 @@
         "bulkEdit": {
           "title": "Bulk Edit",
           "description": "{count} faculties selected",
+          "statusLabel": "Status",
+          "statusPlaceholder": "Select status to update",
           "submit": "Update",
           "submitting": "Updating..."
         },
@@ -130,6 +176,11 @@
           "title": "Delete Faculties",
           "description": "Are you sure you want to delete {count} selected faculties?",
           "note": "This action cannot be undone.",
+          "warningTitle": "Warning",
+          "warningNote": "These faculties have associated data that may be affected.",
+          "constraints": {
+            "department": "This faculty has {count} department(s)"
+          },
           "submit": "Delete",
           "submitting": "Deleting..."
         },
@@ -137,6 +188,11 @@
           "title": "Delete Faculty",
           "description": "Are you sure you want to delete {name}?",
           "note": "This action cannot be undone.",
+          "warningTitle": "Warning",
+          "warningNote": "This faculty has associated data that may be affected.",
+          "constraints": {
+            "department": "This faculty has {count} department(s)"
+          },
           "submit": "Delete"
         }
       }

@@ -618,7 +618,7 @@ export default function CourseManagementPage() {
         })}
       </>
     );
-  }, [handleViewCourseClick, handleEditCourseClick, handleAssignCourseClick, handleSelectOneCourse, selectedCourseIds]);
+  }, [handleViewCourseClick, handleEditCourseClick, handleDeleteCourseClick, handleOpenCourseClassModal, handleSelectOneCourse, selectedCourseIds, expandedCourseIds]);
 
   // Render Assignment Row
   const renderAssignmentRow = useCallback((assignment: FacultyAssignment, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {

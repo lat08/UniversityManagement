@@ -96,9 +96,15 @@ export const AddDepartmentModal = ({ isOpen, onClose, onSuccess }: AddDepartment
   const curriculumOptions = useMemo(() => 
     curriculums.map(c => ({ 
       value: c.curriculumId, 
-      label: `${c.curriculumCode} - ${c.curriculumName} (Năm ${c.appliedYear}, v${c.versionNumber})${c.isActive ? '' : ' [Ngừng áp dụng]'}` 
+      label: t('form.curriculumIds.optionLabel', {
+        code: c.curriculumCode,
+        name: c.curriculumName,
+        year: c.appliedYear,
+        version: c.versionNumber,
+        status: c.isActive ? '' : t('form.curriculumIds.inactiveTag')
+      })
     }))
-  , [curriculums]);
+  , [curriculums, t]);
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) {

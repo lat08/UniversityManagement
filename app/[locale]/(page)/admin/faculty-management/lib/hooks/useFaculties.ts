@@ -59,8 +59,8 @@ export const useFaculties = () => {
           ? data.faculties 
           : Array.isArray(responseData.Faculties)
             ? responseData.Faculties
-            : Array.isArray(data.items)
-              ? data.items
+            : Array.isArray(responseData.items)
+              ? responseData.items
               : Array.isArray(responseData.Items)
                 ? responseData.Items
                 : [];

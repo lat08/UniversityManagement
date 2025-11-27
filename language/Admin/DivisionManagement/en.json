@@ -7,9 +7,16 @@
       "search": {
         "placeholder": "Search by division code or name..."
       },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "all": "All statuses",
+        "unknown": "Unknown"
+      },
       "filters": {
         "allDivisions": "All Divisions",
         "allStatuses": "All Statuses",
+        "noChange": "No change",
         "active": "Active",
         "inactive": "Inactive"
       },
@@ -25,6 +32,8 @@
           "code": "Code",
           "name": "Division",
           "division": "Division",
+          "dean": "Dean",
+          "facultyCount": "Faculties",
           "status": "Status",
           "actions": "Actions"
         },
@@ -38,7 +47,15 @@
         "bulkEdit": "Edit Selected",
         "bulkDelete": "Delete Selected",
         "clearSelection": "Clear Selection",
-        "deleteAll": "Delete All"
+        "deleteAll": "Delete All",
+        "export": "Export",
+        "exporting": "Exporting..."
+      },
+      "bulk": {
+        "selected": "{count} selected",
+        "edit": "Edit Selected",
+        "delete": "Delete Selected",
+        "clear": "Clear"
       },
       "hooks": {
         "createSuccess": "Division created successfully",
@@ -50,7 +67,82 @@
         "bulkDeleteSuccess": "Deleted selected divisions successfully",
         "bulkDeleteError": "Failed to delete selected divisions",
         "bulkEditSuccess": "Updated selected divisions successfully",
-        "bulkEditError": "Failed to update selected divisions"
+        "bulkEditError": "Failed to update selected divisions",
+        "bulkEditValidation": "Select at least one field to update",
+        "exportSuccess": "Export completed successfully",
+        "exportError": "Failed to export divisions",
+        "exportFileName": "DivisionList",
+        "loadInstructorsError": "Failed to load instructors list",
+        "genericError": "An error occurred. Please try again."
+      },
+      "form": {
+        "divisionCode": {
+          "label": "Division code"
+        },
+        "divisionName": {
+          "label": "Division name",
+          "placeholder": "e.g. Faculty of Information Technology",
+          "required": "Division name is required",
+          "max": "Division name must not exceed 200 characters"
+        },
+        "deanId": {
+          "label": "Dean",
+          "placeholder": "Select dean (optional)",
+          "searchPlaceholder": "Search instructors..."
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Add Division",
+          "description": "Enter division information",
+          "submit": "Save",
+          "submitting": "Saving..."
+        },
+        "edit": {
+          "title": "Edit Division",
+          "description": "Update division information",
+          "submit": "Save changes",
+          "submitting": "Saving..."
+        },
+        "bulkEdit": {
+          "title": "Bulk Edit",
+          "description": "{count} divisions selected",
+          "statusLabel": "Status",
+          "statusPlaceholder": "Select status to update",
+          "submit": "Update",
+          "submitting": "Updating..."
+        },
+        "bulkDelete": {
+          "title": "Delete Divisions",
+          "description": "Are you sure you want to delete {count} selected divisions?",
+          "note": "This action cannot be undone.",
+          "warningTitle": "Warning",
+          "warningNote": "These divisions have associated data that may be affected.",
+          "constraints": {
+            "faculty": "These divisions have {count} faculty/faculties",
+            "subject": "These divisions have {count} subject(s)",
+            "instructor": "These divisions have {count} instructor(s)"
+          },
+          "submit": "Delete",
+          "submitting": "Deleting..."
+        },
+        "confirmDelete": {
+          "title": "Delete Division",
+          "description": "Are you sure you want to delete {name}?",
+          "note": "This action cannot be undone.",
+          "warningTitle": "Warning",
+          "warningNote": "This division has associated data that may be affected.",
+          "constraints": {
+            "faculty": "This division has {count} faculty/faculties",
+            "subject": "This division has {count} subject(s)",
+            "instructor": "This division has {count} instructor(s)"
+          },
+          "submit": "Delete"
+        }
       }
     }
   }

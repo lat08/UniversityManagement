@@ -1,9 +1,9 @@
 {
   "admin": {
     "departmentManagement": {
-      "title": "Quản lý Chuyên ngành",
+      "title": "Quản lý chuyên ngành",
       "description": "Quản lý thông tin các chuyên ngành",
-      "listTitle": "Danh sách Chuyên ngành",
+      "listTitle": "Danh sách chuyên ngành",
       "search": {
         "placeholder": "Tìm kiếm theo mã, tên chuyên ngành..."
       },
@@ -12,13 +12,23 @@
         "active": "Đang hoạt động",
         "inactive": "Ngừng hoạt động"
       },
+      "status": {
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động",
+        "all": "Tất cả trạng thái"
+      },
       "filters": {
-        "allFaculties": "Tất cả Ngành",
+        "allFaculties": "Tất cả ngành",
         "allCurricula": "Tất cả CTĐT",
+        "allCurriculums": "Tất cả CTĐT",
         "allStatuses": "Tất cả trạng thái",
         "noChange": "Không thay đổi",
         "active": "Đang hoạt động",
-        "inactive": "Ngừng hoạt động"
+        "inactive": "Ngừng hoạt động",
+        "faculty": "Ngành học",
+        "searchFaculty": "Tìm kiếm ngành học...",
+        "curriculum": "Chương trình đào tạo",
+        "searchCurriculum": "Tìm kiếm CTĐT..."
       },
       "table": {
         "selected": "Đã chọn {count} chuyên ngành",
@@ -28,19 +38,34 @@
           "name": "Tên chuyên ngành",
           "faculty": "Ngành học",
           "curriculum": "Thuộc CTĐT",
+          "curricula": "Chương trình",
+          "subjects": "Môn học",
+          "classes": "Lớp học",
           "status": "Trạng thái",
-          "actions": "HD"
+          "actions": "HĐ",
+          "curriculaClickHint": "Nhấn để xem chi tiết chương trình"
         },
         "status": {
           "active": "Đang hoạt động",
           "inactive": "Ngừng hoạt động"
+        },
+        "curricula": {
+          "totalLabel": "{count} CTĐT",
+          "activeLabel": "{count} đang áp dụng",
+          "inactiveLabel": "{count} đã ngừng"
         }
       },
       "actions": {
-        "add": "Thêm mới",
+        "add": "Thêm chuyên ngành",
         "bulkEdit": "Chỉnh sửa đã chọn",
         "bulkDelete": "Xóa đã chọn",
         "clearSelection": "Bỏ chọn"
+      },
+      "bulk": {
+        "selected": "Đã chọn {count}",
+        "edit": "Chỉnh sửa đã chọn",
+        "delete": "Xóa đã chọn",
+        "clear": "Bỏ chọn"
       },
       "hooks": {
         "createSuccess": "Thêm chuyên ngành thành công!",
@@ -49,35 +74,49 @@
         "updateError": "Không thể cập nhật chuyên ngành",
         "deleteSuccess": "Xóa chuyên ngành thành công!",
         "deleteError": "Không thể xóa chuyên ngành",
-        "bulkDeleteSuccess": "Đã xóa các chuyên ngành đã chọn thành công",
+        "bulkDeleteSuccess": "Đã xóa {count} chuyên ngành được chọn",
         "bulkDeleteError": "Không thể xóa các chuyên ngành đã chọn",
-        "bulkEditSuccess": "Đã cập nhật các chuyên ngành đã chọn thành công",
+        "bulkEditSuccess": "Đã cập nhật {success}/{total} chuyên ngành",
         "bulkEditError": "Không thể cập nhật các chuyên ngành đã chọn",
-        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật"
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật",
+        "noChanges": "Không có thay đổi nào để cập nhật",
+        "loadFacultiesError": "Không thể tải danh sách ngành",
+        "loadCurriculumsError": "Không thể tải danh sách CTĐT",
+        "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
       },
       "form": {
         "departmentCode": {
           "label": "Mã chuyên ngành",
           "placeholder": "VD: CNTT",
           "required": "Mã chuyên ngành là bắt buộc",
-          "min": "Mã chuyên ngành phải có ít nhất 2 ký tự"
+          "min": "Mã chuyên ngành phải có ít nhất 2 ký tự",
+          "max": "Mã chuyên ngành không được vượt quá 50 ký tự",
+          "invalid": "Mã chuyên ngành chỉ được chứa chữ in hoa, số và dấu gạch dưới",
+          "hint": "Chỉ sử dụng chữ in hoa, số và dấu gạch dưới"
         },
         "departmentName": {
           "label": "Tên chuyên ngành",
           "placeholder": "VD: Công nghệ thông tin",
           "required": "Tên chuyên ngành là bắt buộc",
-          "min": "Tên chuyên ngành phải có ít nhất 3 ký tự"
+          "min": "Tên chuyên ngành phải có ít nhất 3 ký tự",
+          "max": "Tên chuyên ngành không được vượt quá 200 ký tự"
         },
-        "faculty": {
+        "facultyId": {
           "label": "Ngành học",
           "placeholder": "Chọn ngành học",
-          "search": "Tìm kiếm ngành học...",
+          "searchPlaceholder": "Tìm kiếm ngành học...",
           "required": "Ngành học là bắt buộc"
         },
-        "curriculum": {
-          "label": "Chương trình đào tạo",
-          "placeholder": "Chọn CTĐT",
-          "required": "CTĐT là bắt buộc"
+        "curriculumIds": {
+          "label": "Chương trình đào tạo (không bắt buộc)",
+          "hint": "Có thể chọn nhiều CTĐT để liên kết với chuyên ngành",
+          "loading": "Đang tải danh sách CTĐT...",
+          "empty": "Không có CTĐT nào cho ngành này",
+          "selected": "Đã chọn {count}",
+          "clearAll": "Bỏ chọn tất cả",
+          "yearVersion": "Năm {year}, v{version}",
+          "optionLabel": "{code} - {name} (Năm {year}, v{version}){status}",
+          "inactiveTag": " [Ngừng áp dụng]"
         },
         "status": {
           "label": "Trạng thái",
@@ -100,6 +139,12 @@
         "bulkEdit": {
           "title": "Chỉnh sửa hàng loạt",
           "description": "Đã chọn {count} chuyên ngành",
+          "departmentCodeLabel": "Mã chuyên ngành (tùy chọn)",
+          "departmentCodePlaceholder": "Nhập mã mới",
+          "departmentNameLabel": "Tên chuyên ngành (tùy chọn)",
+          "departmentNamePlaceholder": "Nhập tên mới",
+          "facultyLabel": "Ngành học (tùy chọn)",
+          "facultyPlaceholder": "Chọn ngành học",
           "submit": "Cập nhật",
           "submitting": "Đang cập nhật..."
         },
@@ -115,6 +160,14 @@
           "description": "Bạn có chắc chắn muốn xóa {name}?",
           "note": "Hành động này không thể hoàn tác.",
           "submit": "Xóa"
+        },
+        "curricula": {
+          "title": "Danh sách chương trình",
+          "empty": "Chưa có chương trình nào được liên kết.",
+          "appliedYear": "Năm áp dụng",
+          "version": "Phiên bản",
+          "total": "Tổng số CTĐT",
+          "close": "Đóng"
         }
       }
     }

@@ -189,14 +189,14 @@ export default function DivisionManagementPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `DanhSachKhoa_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.download = `${t('hooks.exportFileName')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast.success(t('hooks.exportSuccess'));
-    } catch (error) {
+    } catch {
       toast.error(t('hooks.exportError'));
     } finally {
       setIsExporting(false);

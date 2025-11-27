@@ -12,13 +12,23 @@
         "active": "Active",
         "inactive": "Inactive"
       },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "all": "All statuses"
+      },
       "filters": {
         "allFaculties": "All Faculties",
         "allCurricula": "All Curricula",
+        "allCurriculums": "All Curricula",
         "allStatuses": "All Statuses",
         "noChange": "No change",
         "active": "Active",
-        "inactive": "Inactive"
+        "inactive": "Inactive",
+        "faculty": "Faculty",
+        "searchFaculty": "Search faculties...",
+        "curriculum": "Curriculum",
+        "searchCurriculum": "Search curricula..."
       },
       "table": {
         "selected": "{count} departments selected",
@@ -28,19 +38,34 @@
           "name": "Department Name",
           "faculty": "Faculty",
           "curriculum": "Curriculum",
+          "curricula": "Curricula",
+          "subjects": "Subjects",
+          "classes": "Classes",
           "status": "Status",
-          "actions": "Actions"
+          "actions": "Actions",
+          "curriculaClickHint": "Click to view detailed curricula"
         },
         "status": {
           "active": "Active",
           "inactive": "Inactive"
+        },
+        "curricula": {
+          "totalLabel": "{count} curricula",
+          "activeLabel": "{count} active",
+          "inactiveLabel": "{count} inactive"
         }
       },
       "actions": {
-        "add": "Add New",
+        "add": "Add Department",
         "bulkEdit": "Edit Selected",
         "bulkDelete": "Delete Selected",
         "clearSelection": "Clear Selection"
+      },
+      "bulk": {
+        "selected": "{count} selected",
+        "edit": "Edit Selected",
+        "delete": "Delete Selected",
+        "clear": "Clear"
       },
       "hooks": {
         "createSuccess": "Department created successfully!",
@@ -49,36 +74,49 @@
         "updateError": "Failed to update department",
         "deleteSuccess": "Department deleted successfully!",
         "deleteError": "Failed to delete department",
-        "bulkDeleteSuccess": "Deleted selected departments successfully",
+        "bulkDeleteSuccess": "Deleted {count} selected departments",
         "bulkDeleteError": "Failed to delete selected departments",
-        "bulkEditSuccess": "Updated selected departments successfully",
+        "bulkEditSuccess": "Updated {success}/{total} departments",
         "bulkEditError": "Failed to update selected departments",
-        "bulkEditValidation": "Please select at least one field to update"
+        "bulkEditValidation": "Please select at least one field to update",
+        "noChanges": "There are no changes to update",
+        "loadFacultiesError": "Failed to load faculties list",
+        "loadCurriculumsError": "Failed to load curricula list",
+        "genericError": "An error occurred. Please try again."
       },
       "form": {
         "departmentCode": {
           "label": "Department Code",
           "placeholder": "e.g. CNTT",
           "required": "Department code is required",
-          "min": "Department code must be at least 2 characters"
+          "min": "Department code must be at least 2 characters",
+          "max": "Department code must not exceed 50 characters",
+          "invalid": "Department code must contain only uppercase letters, numbers, and underscores",
+          "hint": "Only uppercase letters, numbers, and underscores are allowed"
         },
         "departmentName": {
           "label": "Department Name",
           "placeholder": "e.g. Information Technology",
           "required": "Department name is required",
-          "min": "Department name must be at least 3 characters"
+          "min": "Department name must be at least 3 characters",
+          "max": "Department name must not exceed 200 characters"
         },
-        "faculty": {
+        "facultyId": {
           "label": "Faculty",
           "placeholder": "Select faculty",
-          "search": "Search faculties...",
+          "searchPlaceholder": "Search faculties...",
           "required": "Faculty is required"
         },
-        "curriculum": {
-          "label": "Curriculum",
-          "placeholder": "Select curriculum",
-          "required": "Curriculum is required",
-          "note": "You can select multiple curricula after creating the department"
+        "curriculumIds": {
+          "label": "Curricula (optional)",
+          "hint": "Select multiple curricula to associate with this department",
+          "loading": "Loading curricula...",
+          "empty": "No curricula available for this faculty",
+          "selected": "{count} selected",
+          "clearAll": "Clear all",
+          "yearVersion": "Year {year}, v{version}",
+          "optionLabel": "{code} - {name} (Year {year}, v{version}){status}",
+          "inactiveTag": " [Inactive]"
         },
         "status": {
           "label": "Status",
@@ -101,6 +139,12 @@
         "bulkEdit": {
           "title": "Bulk Edit",
           "description": "{count} departments selected",
+          "departmentCodeLabel": "Department Code (optional)",
+          "departmentCodePlaceholder": "Enter new department code",
+          "departmentNameLabel": "Department Name (optional)",
+          "departmentNamePlaceholder": "Enter new department name",
+          "facultyLabel": "Faculty (optional)",
+          "facultyPlaceholder": "Select faculty",
           "submit": "Update",
           "submitting": "Updating..."
         },
@@ -116,6 +160,14 @@
           "description": "Are you sure you want to delete {name}?",
           "note": "This action cannot be undone.",
           "submit": "Delete"
+        },
+        "curricula": {
+          "title": "Associated Curricula",
+          "empty": "No curricula are associated with this department.",
+          "appliedYear": "Applied year",
+          "version": "Version",
+          "total": "Total curricula",
+          "close": "Close"
         }
       }
     }
