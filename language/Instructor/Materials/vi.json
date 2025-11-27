@@ -26,6 +26,43 @@
         "download": "Tải xuống",
         "delete": "Xóa",
         "document": "Tài liệu"
+      },
+      "modals": {
+        "uploadDocument": {
+          "title": "Tải lên tài liệu mới",
+          "description": "Mô tả",
+          "subjectClass": "Môn học - Lớp",
+          "selectSubjectClass": "Chọn phương án",
+          "subjectClassRequired": "Vui lòng chọn môn học - lớp",
+          "documentType": "Loại tài liệu",
+          "selectDocumentType": "Chọn loại",
+          "documentTypeRequired": "Vui lòng chọn loại tài liệu",
+          "documentName": "Tên tài liệu",
+          "documentNamePlaceholder": "Nhập tên tài liệu",
+          "documentNameRequired": "Vui lòng nhập tên tài liệu",
+          "descriptionPlaceholder": "Mô tả nội dung tài liệu...",
+          "file": "File",
+          "fileRequired": "Vui lòng chọn file để tải lên",
+          "dragDrop": "Kéo thả file vào đây hoặc",
+          "clickToUpload": "click để tải lên",
+          "supportedFormats": "Định dạng hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX",
+          "maxSize": "Kích thước tối đa: 50MB",
+          "submit": "Tải lên",
+          "uploading": "Đang tải lên...",
+          "cancel": "Hủy"
+        },
+        "editDocument": {
+          "title": "Chỉnh sửa tài liệu",
+          "description": "Mô tả",
+          "subjectClass": "Môn học - Lớp",
+          "documentType": "Loại tài liệu",
+          "documentName": "Tên tài liệu",
+          "file": "File mới (tùy chọn)",
+          "deleteFile": "Xóa file",
+          "submit": "Cập nhật",
+          "updating": "Đang cập nhật...",
+          "cancel": "Hủy"
+        }
       }
     }
   }
