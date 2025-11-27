@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Dropdown, Button } from '@/app/components/ui';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
-import { useDepartments } from '../lib/hooks/useDepartments';
+import { toast } from 'react-hot-toast';
+import { DropdownSearch, Button, Input } from '@/app/components/ui';
+import { departmentsApi, commonApi } from '../lib/api/departmentsApi';
+import type { Faculty } from '../lib/types/types';
 
 interface BulkEditDepartmentModalProps {
   isOpen: boolean;
@@ -14,34 +15,45 @@ interface BulkEditDepartmentModalProps {
   selectedDepartmentIds: string[];
 }
 
-export const BulkEditDepartmentModal = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  selectedDepartmentIds,
-}: BulkEditDepartmentModalProps) => {
+export const BulkEditDepartmentModal = ({ isOpen, onClose, onSuccess, selectedDepartmentIds }: BulkEditDepartmentModalProps) => {
   const t = useTranslations('admin.departmentManagement');
-  const tCommon = useTranslations('common.actions');
-  const { faculties, bulkEditDepartments, isBulkEditing } = useDepartments();
-
+  const tActions = useTranslations('common.actions');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [departmentCode, setDepartmentCode] = useState<string>('');
+  const [departmentName, setDepartmentName] = useState<string>('');
   const [facultyId, setFacultyId] = useState<string>('');
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [loadingFaculties, setLoadingFaculties] = useState(false);
 
-  const facultyOptions = [
+  // Load faculties on mount
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingFaculties(true);
+      commonApi.getFaculties()
+        .then(setFaculties)
+        .catch(() => toast.error(t('hooks.loadFacultiesError')))
+        .finally(() => setLoadingFaculties(false));
+    }
+  }, [isOpen, t]);
+
+  const facultyOptions = useMemo(() => [
     { value: '', label: t('filters.noChange') },
-    ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
-  ];
-
+    ...faculties.map(f => ({ value: f.facultyId, label: `${f.facultyCode} - ${f.facultyName}` }))
+  ], [faculties, t]);
 
   const handleClose = useCallback(() => {
-    if (!isBulkEditing) {
+    if (!isSubmitting) {
+      setDepartmentCode('');
+      setDepartmentName('');
       setFacultyId('');
       onClose();
     }
-  }, [isBulkEditing, onClose]);
+  }, [isSubmitting, onClose]);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isBulkEditing) {
+      if (event.key === 'Escape' && !isSubmitting) {
         handleClose();
       }
     };
@@ -53,38 +65,69 @@ export const BulkEditDepartmentModal = ({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, isBulkEditing, handleClose]);
+  }, [isOpen, isSubmitting, handleClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!facultyId) {
+    if (!departmentCode && !departmentName && !facultyId) {
       toast.error(t('hooks.bulkEditValidation'));
       return;
     }
 
-    const updates: {
-      facultyId?: string;
-    } = {};
+    setIsSubmitting(true);
+    try {
+      // Update each department individually
+      const results = await Promise.allSettled(
+        selectedDepartmentIds.map(async (id) => {
+          const payload: { departmentCode?: string; departmentName?: string; facultyId?: string } = {};
+          if (departmentCode) payload.departmentCode = departmentCode.toUpperCase().trim();
+          if (departmentName) payload.departmentName = departmentName.trim();
+          if (facultyId) payload.facultyId = facultyId;
+          
+          return departmentsApi.update(id, payload);
+        })
+      );
 
-    if (facultyId) updates.facultyId = facultyId;
+      const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success));
+      
+      if (failed.length > 0) {
+        toast.success(t('hooks.bulkEditSuccess', { 
+          success: selectedDepartmentIds.length - failed.length,
+          total: selectedDepartmentIds.length 
+        }));
+      } else {
+        toast.success(t('hooks.bulkEditSuccess', { 
+          success: selectedDepartmentIds.length,
+          total: selectedDepartmentIds.length 
+        }));
+      }
 
-    bulkEditDepartments({ ids: selectedDepartmentIds, updates });
-    setFacultyId('');
-    onSuccess?.();
-    handleClose();
+      setDepartmentCode('');
+      setDepartmentName('');
+      setFacultyId('');
+      onSuccess?.();
+      handleClose();
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
+                           (error as { message?: string })?.message || 
+                           t('hooks.genericError');
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !isBulkEditing) {
+    if (e.target === e.currentTarget && !isSubmitting) {
       handleClose();
     }
   };
 
   return (
-    <div
+    <div 
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
@@ -101,7 +144,7 @@ export const BulkEditDepartmentModal = ({
               variant="ghost"
               size="sm"
               onClick={handleClose}
-              disabled={isBulkEditing}
+              disabled={isSubmitting}
               className="text-gray-400 hover:text-gray-600"
               type="button"
             >
@@ -114,16 +157,40 @@ export const BulkEditDepartmentModal = ({
           <div className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                {t('form.faculty.label')}
+                {t('modals.bulkEdit.departmentCodeLabel')}
               </label>
-              <Dropdown
-                options={facultyOptions}
-                value={facultyId}
-                placeholder={t('form.faculty.placeholder')}
-                onChange={setFacultyId}
+              <Input
+                placeholder={t('modals.bulkEdit.departmentCodePlaceholder')}
+                value={departmentCode}
+                onChange={(e) => setDepartmentCode(e.target.value)}
+                style={{ textTransform: 'uppercase' }}
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                {t('modals.bulkEdit.departmentNameLabel')}
+              </label>
+              <Input
+                placeholder={t('modals.bulkEdit.departmentNamePlaceholder')}
+                value={departmentName}
+                onChange={(e) => setDepartmentName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                {t('modals.bulkEdit.facultyLabel')}
+              </label>
+              <DropdownSearch
+                options={facultyOptions}
+                value={facultyId}
+                placeholder={t('modals.bulkEdit.facultyPlaceholder')}
+                searchPlaceholder={t('form.facultyId.searchPlaceholder')}
+                onChange={setFacultyId}
+                disabled={loadingFaculties}
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 p-6 border-t">
@@ -131,17 +198,17 @@ export const BulkEditDepartmentModal = ({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={isBulkEditing}
+              disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              {tCommon('cancel')}
+              {tActions('cancel')}
             </Button>
             <Button
               type="submit"
-              disabled={isBulkEditing}
+              disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isBulkEditing ? t('modals.bulkEdit.submitting') : t('modals.bulkEdit.submit')}
+              {isSubmitting ? t('modals.bulkEdit.submitting') : t('modals.bulkEdit.submit')}
             </Button>
           </div>
         </form>

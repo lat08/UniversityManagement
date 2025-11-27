@@ -1,17 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
-import { DropdownSearch, Button, Input } from '@/app/components/ui';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useTranslations } from 'next-intl';
-import { useDepartments } from '../lib/hooks/useDepartments';
-import type { Department } from '../lib/types/types';
-
-// Note: Edit modal không cho phép sửa curriculumIds và status
-// CurriculumIds và status được quản lý riêng trong backend
+import { toast } from 'react-hot-toast';
+import { DropdownSearch, Button, Input } from '@/app/components/ui';
+import { departmentsApi, commonApi } from '../lib/api/departmentsApi';
+import type { Department, Faculty } from '../lib/types/types';
 
 interface EditDepartmentModalProps {
   isOpen: boolean;
@@ -20,81 +18,80 @@ interface EditDepartmentModalProps {
   department: Department | null;
 }
 
-type FormData = {
-  departmentName: string;
-  departmentCode: string;
-  facultyId: string;
-};
+interface FormData {
+  departmentCode?: string;
+  departmentName?: string;
+  facultyId?: string;
+}
 
-export const EditDepartmentModal = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  department,
-}: EditDepartmentModalProps) => {
+export const EditDepartmentModal = ({ isOpen, onClose, onSuccess, department }: EditDepartmentModalProps) => {
   const t = useTranslations('admin.departmentManagement');
-  const tCommon = useTranslations('common.actions');
-  const { faculties, updateDepartment, isUpdating } = useDepartments();
+  const tActions = useTranslations('common.actions');
+  
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [loadingFaculties, setLoadingFaculties] = useState(false);
 
-  const validationSchema = useMemo(
-    () =>
-      yup.object({
-        departmentName: yup
-          .string()
-          .required(t('form.departmentName.required'))
-          .min(3, t('form.departmentName.min')),
-        departmentCode: yup
-          .string()
-          .required(t('form.departmentCode.required'))
-          .min(2, t('form.departmentCode.min')),
-        facultyId: yup.string().required(t('form.faculty.required')),
-      }),
-    [t]
-  );
+  const validationSchema = useMemo(() => yup.object({
+    departmentCode: yup
+      .string()
+      .optional()
+      .matches(/^[A-Z0-9_]+$/, t('form.departmentCode.invalid'))
+      .max(50, t('form.departmentCode.max')),
+    departmentName: yup
+      .string()
+      .optional()
+      .max(200, t('form.departmentName.max')),
+    facultyId: yup
+      .string()
+      .optional(),
+  }), [t]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-    reset,
-    clearErrors,
-  } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
-      departmentName: '',
       departmentCode: '',
+      departmentName: '',
       facultyId: '',
-    },
+    }
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formValues = watch();
+
+  // Load faculties on mount
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingFaculties(true);
+      commonApi.getFaculties()
+        .then(setFaculties)
+        .catch(() => toast.error(t('hooks.loadFacultiesError')))
+        .finally(() => setLoadingFaculties(false));
+    }
+  }, [isOpen, t]);
 
   useEffect(() => {
     if (isOpen && department) {
-      setValue('departmentName', department.departmentName);
       setValue('departmentCode', department.departmentCode);
+      setValue('departmentName', department.departmentName);
       setValue('facultyId', department.facultyId);
     }
   }, [isOpen, department, setValue]);
 
-  const facultyOptions = faculties.map((f) => ({
-    value: f.facultyId,
-    label: f.facultyName,
-  }));
-
+  const facultyOptions = useMemo(() => [
+    { value: '', label: t('form.facultyId.placeholder') },
+    ...faculties.map(f => ({ value: f.facultyId, label: `${f.facultyCode} - ${f.facultyName}` }))
+  ], [faculties, t]);
 
   const handleClose = useCallback(() => {
-    if (!isUpdating) {
+    if (!isSubmitting) {
       reset();
       onClose();
     }
-  }, [isUpdating, reset, onClose]);
+  }, [isSubmitting, reset, onClose]);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isUpdating) {
+      if (event.key === 'Escape' && !isSubmitting) {
         handleClose();
       }
     };
@@ -106,33 +103,62 @@ export const EditDepartmentModal = ({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, isUpdating, handleClose]);
+  }, [isOpen, isSubmitting, handleClose]);
 
   const onSubmit = async (data: FormData) => {
     if (!department) return;
+    
+    setIsSubmitting(true);
+    try {
+      const payload: FormData = {};
+      
+      if (data.departmentCode && data.departmentCode !== department.departmentCode) {
+        payload.departmentCode = data.departmentCode.toUpperCase().trim();
+      }
+      if (data.departmentName && data.departmentName !== department.departmentName) {
+        payload.departmentName = data.departmentName.trim();
+      }
+      if (data.facultyId && data.facultyId !== department.facultyId) {
+        payload.facultyId = data.facultyId;
+      }
 
-    const payload = {
-      departmentName: data.departmentName,
-      departmentCode: data.departmentCode,
-      facultyId: data.facultyId,
-    };
+      // Only update if there are changes
+      if (Object.keys(payload).length === 0) {
+        toast.success(t('hooks.noChanges'));
+        handleClose();
+        return;
+      }
 
-    updateDepartment({ id: department.departmentId, data: payload });
-    reset();
-    onSuccess?.();
-    handleClose();
+      const response = await departmentsApi.update(department.departmentId, payload);
+
+      if (response.success) {
+        toast.success(t('hooks.updateSuccess'));
+        reset();
+        onSuccess?.();
+        handleClose();
+      } else {
+        toast.error(response.message || t('hooks.updateError'));
+      }
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message || 
+                           (error as { message?: string })?.message || 
+                           t('hooks.genericError');
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen || !department) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !isUpdating) {
+    if (e.target === e.currentTarget && !isSubmitting) {
       handleClose();
     }
   };
 
   return (
-    <div
+    <div 
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
@@ -147,7 +173,7 @@ export const EditDepartmentModal = ({
               variant="ghost"
               size="sm"
               onClick={handleClose}
-              disabled={isUpdating}
+              disabled={isSubmitting}
               className="text-gray-400 hover:text-gray-600"
               type="button"
             >
@@ -156,64 +182,52 @@ export const EditDepartmentModal = ({
           </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col flex-1 overflow-hidden"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
           <div className="overflow-y-auto flex-1 p-6">
             <div className="grid grid-cols-2 gap-6">
               {/* Mã chuyên ngành */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('form.departmentCode.label')} <span className="text-red-500">*</span>
+                  {t('form.departmentCode.label')}
                 </label>
                 <Input
                   placeholder={t('form.departmentCode.placeholder')}
                   {...register('departmentCode')}
                   className={errors.departmentCode ? 'border-red-500' : ''}
-                  disabled
+                  style={{ textTransform: 'uppercase' }}
                 />
-                {errors.departmentCode && (
-                  <p className="mt-1 text-xs text-red-500">{errors.departmentCode.message}</p>
-                )}
+                {errors.departmentCode && <p className="mt-1 text-xs text-red-500">{errors.departmentCode.message}</p>}
+                <p className="mt-1 text-xs text-gray-500">{t('form.departmentCode.hint')}</p>
               </div>
 
               {/* Tên chuyên ngành */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('form.departmentName.label')} <span className="text-red-500">*</span>
+                  {t('form.departmentName.label')}
                 </label>
                 <Input
                   placeholder={t('form.departmentName.placeholder')}
                   {...register('departmentName')}
                   className={errors.departmentName ? 'border-red-500' : ''}
                 />
-                {errors.departmentName && (
-                  <p className="mt-1 text-xs text-red-500">{errors.departmentName.message}</p>
-                )}
+                {errors.departmentName && <p className="mt-1 text-xs text-red-500">{errors.departmentName.message}</p>}
               </div>
 
-              {/* Ngành học */}
-              <div>
+              {/* Ngành */}
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('form.faculty.label')} <span className="text-red-500">*</span>
+                  {t('form.facultyId.label')}
                 </label>
                 <DropdownSearch
                   options={facultyOptions}
                   value={formValues.facultyId || ''}
-                  placeholder={t('form.faculty.placeholder')}
-                  searchPlaceholder={t('form.faculty.search')}
-                  onChange={(value) => {
-                    setValue('facultyId', value);
-                    clearErrors('facultyId');
-                  }}
-                  buttonClassName={errors.facultyId ? 'border-red-500' : ''}
+                  placeholder={t('form.facultyId.placeholder')}
+                  searchPlaceholder={t('form.facultyId.searchPlaceholder')}
+                  onChange={(value) => setValue('facultyId', value)}
+                  disabled={loadingFaculties}
                 />
-                {errors.facultyId && (
-                  <p className="mt-1 text-xs text-red-500">{errors.facultyId.message}</p>
-                )}
+                {errors.facultyId && <p className="mt-1 text-xs text-red-500">{errors.facultyId.message}</p>}
               </div>
-
             </div>
           </div>
 
@@ -222,17 +236,17 @@ export const EditDepartmentModal = ({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={isUpdating}
+              disabled={isSubmitting}
               className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
-              {tCommon('cancel')}
+              {tActions('cancel')}
             </Button>
             <Button
               type="submit"
-              disabled={isUpdating}
+              disabled={isSubmitting}
               className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#003d82] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isUpdating ? t('modals.edit.submitting') : t('modals.edit.submit')}
+              {isSubmitting ? t('modals.edit.submitting') : t('modals.edit.submit')}
             </Button>
           </div>
         </form>
@@ -240,5 +254,4 @@ export const EditDepartmentModal = ({
     </div>
   );
 };
-
 
