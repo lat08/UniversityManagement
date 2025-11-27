@@ -44,8 +44,8 @@ export function useDepartments() {
   });
 
   const { data: curricula = [] } = useQuery({
-    queryKey: ['departments-curricula'],
-    queryFn: () => departmentsApi.getCurricula(),
+    queryKey: ['departments-curricula', facultyId],
+    queryFn: () => departmentsApi.getCurricula(undefined, facultyId || undefined),
     staleTime: 3600000,
   });
 

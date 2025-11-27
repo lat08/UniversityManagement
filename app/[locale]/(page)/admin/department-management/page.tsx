@@ -361,10 +361,12 @@ export default function DepartmentManagementPage() {
     ...faculties.map((f) => ({ value: f.facultyId, label: f.facultyName })),
   ];
 
-  const curriculumOptions = [
-    { value: '', label: t('filters.allCurricula') },
-    ...curricula.map((c) => ({ value: c.curriculumId, label: c.curriculumName })),
-  ];
+  const curriculumOptions = useMemo(() => {
+    return [
+      { value: '', label: t('filters.allCurricula') },
+      ...curricula.map((c) => ({ value: c.curriculumId, label: c.curriculumName })),
+    ];
+  }, [curricula, t]);
 
 
   return (
@@ -443,6 +445,7 @@ export default function DepartmentManagementPage() {
               placeholder={t('filters.allFaculties')}
               onChange={(value) => {
                 setSelectedFacultyId(value);
+                setSelectedCurriculumId('');
                 setCurrentPage(1);
               }}
             />
