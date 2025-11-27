@@ -1,0 +1,122 @@
+{
+  "admin": {
+    "departmentManagement": {
+      "title": "Quản lý Chuyên ngành",
+      "description": "Quản lý thông tin các chuyên ngành",
+      "listTitle": "Danh sách Chuyên ngành",
+      "search": {
+        "placeholder": "Tìm kiếm theo mã, tên chuyên ngành..."
+      },
+      "stats": {
+        "total": "Tổng chuyên ngành",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "filters": {
+        "allFaculties": "Tất cả Ngành",
+        "allCurricula": "Tất cả CTĐT",
+        "allStatuses": "Tất cả trạng thái",
+        "noChange": "Không thay đổi",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "table": {
+        "selected": "Đã chọn {count} chuyên ngành",
+        "empty": "Không tìm thấy chuyên ngành nào",
+        "columns": {
+          "code": "Mã",
+          "name": "Tên chuyên ngành",
+          "faculty": "Ngành học",
+          "curriculum": "Thuộc CTĐT",
+          "status": "Trạng thái",
+          "actions": "HD"
+        },
+        "status": {
+          "active": "Đang hoạt động",
+          "inactive": "Ngừng hoạt động"
+        }
+      },
+      "actions": {
+        "add": "Thêm mới",
+        "bulkEdit": "Chỉnh sửa đã chọn",
+        "bulkDelete": "Xóa đã chọn",
+        "clearSelection": "Bỏ chọn"
+      },
+      "hooks": {
+        "createSuccess": "Thêm chuyên ngành thành công!",
+        "createError": "Không thể thêm chuyên ngành",
+        "updateSuccess": "Cập nhật chuyên ngành thành công!",
+        "updateError": "Không thể cập nhật chuyên ngành",
+        "deleteSuccess": "Xóa chuyên ngành thành công!",
+        "deleteError": "Không thể xóa chuyên ngành",
+        "bulkDeleteSuccess": "Đã xóa các chuyên ngành đã chọn thành công",
+        "bulkDeleteError": "Không thể xóa các chuyên ngành đã chọn",
+        "bulkEditSuccess": "Đã cập nhật các chuyên ngành đã chọn thành công",
+        "bulkEditError": "Không thể cập nhật các chuyên ngành đã chọn",
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật"
+      },
+      "form": {
+        "departmentCode": {
+          "label": "Mã chuyên ngành",
+          "placeholder": "VD: CNTT",
+          "required": "Mã chuyên ngành là bắt buộc",
+          "min": "Mã chuyên ngành phải có ít nhất 2 ký tự"
+        },
+        "departmentName": {
+          "label": "Tên chuyên ngành",
+          "placeholder": "VD: Công nghệ thông tin",
+          "required": "Tên chuyên ngành là bắt buộc",
+          "min": "Tên chuyên ngành phải có ít nhất 3 ký tự"
+        },
+        "faculty": {
+          "label": "Ngành học",
+          "placeholder": "Chọn ngành học",
+          "search": "Tìm kiếm ngành học...",
+          "required": "Ngành học là bắt buộc"
+        },
+        "curriculum": {
+          "label": "Chương trình đào tạo",
+          "placeholder": "Chọn CTĐT",
+          "required": "CTĐT là bắt buộc"
+        },
+        "status": {
+          "label": "Trạng thái",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm chuyên ngành",
+          "description": "Nhập thông tin chuyên ngành",
+          "submit": "Lưu",
+          "submitting": "Đang lưu..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa chuyên ngành",
+          "description": "Cập nhật thông tin chuyên ngành",
+          "submit": "Lưu thay đổi",
+          "submitting": "Đang lưu..."
+        },
+        "bulkEdit": {
+          "title": "Chỉnh sửa hàng loạt",
+          "description": "Đã chọn {count} chuyên ngành",
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật..."
+        },
+        "bulkDelete": {
+          "title": "Xóa chuyên ngành",
+          "description": "Bạn có chắc chắn muốn xóa {count} chuyên ngành đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa",
+          "submitting": "Đang xóa..."
+        },
+        "confirmDelete": {
+          "title": "Xóa chuyên ngành",
+          "description": "Bạn có chắc chắn muốn xóa {name}?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa"
+        }
+      }
+    }
+  }
+}

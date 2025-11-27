@@ -1,0 +1,488 @@
+{
+  "admin": {
+    "studentProfile": {
+      "title": "Student Profile Management",
+      "description": "Manage student information, classes, academic years and statuses",
+      "add": "Add Student",
+      "edit": "Edit Information",
+      "delete": "Delete Student",
+      "bulkEdit": "Edit Selected",
+      "bulkDelete": "Delete Selected",
+      "export": "Export Excel",
+      "import": "Import Excel",
+      "search": "Search students...",
+      "list": {
+        "title": "Student List",
+        "description": "Manage student profiles and information"
+      },
+      "statCards": {
+        "totalStudents": "Total Students",
+        "newStudents": "New Students",
+        "graduatingSoon": "Graduating Soon",
+        "studying": "Currently Studying",
+        "onLeave": "On Leave",
+        "expected": "Expected",
+        "onLeaveSubtitle": "Temporarily inactive",
+        "growthCompared": "compared to last year"
+      },
+      "columns": {
+        "mssv": "Student ID",
+        "fullName": "Full Name",
+        "email": "Email",
+        "faculty": "Faculty",
+        "department": "Department",
+        "class": "Class",
+        "academicYear": "Academic Year",
+        "trainingSystem": "Training System",
+        "gpa": "GPA",
+        "credits": "Earned Credits",
+        "debt": "Debt",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "allDepartments": "All Departments",
+        "allAcademicYears": "All Academic Years",
+        "allStatuses": "All Statuses"
+      },
+      "status": {
+        "all": "All statuses",
+        "active": "Studying",
+        "inactive": "Suspended",
+        "droppedOut": "Withdrawn",
+        "suspended": "On academic leave",
+        "qualified": "Eligible to graduate",
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "label": "Actions",
+        "view": "View details",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "columnSelector": {
+        "title": "Visible columns ({visible}/{total})",
+        "tooltip": "Visible columns ({visible}/{total})",
+        "required": "(Required)"
+      },
+      "toast": {
+        "deleteSuccess": "Student deleted successfully",
+        "deleteError": "Failed to delete student"
+      },
+      "bulkActions": {
+        "selected": "{count} students selected",
+        "edit": "Bulk edit",
+        "delete": "Delete selected",
+        "deselect": "Clear selection"
+      },
+      "table": {
+        "selected": "{count} students selected",
+        "empty": "No students found",
+        "loading": "Loading student list..."
+      },
+      "modals": {
+        "bulkEdit": {
+          "title": "Bulk edit",
+          "description": "Update information for {count} students",
+          "statusLabel": "Enrollment status",
+          "statusPlaceholder": "Select status",
+          "classLabel": "Class",
+          "classPlaceholder": "Select class",
+          "noChange": "No change",
+          "validation": "Please select at least one field to update",
+          "toast": {
+            "success": "Updated {success}/{total} students successfully",
+            "error": "Update failed",
+            "genericError": "An error occurred while updating"
+          },
+          "submit": "Update",
+          "submitting": "Updating..."
+        },
+        "bulkDelete": {
+          "title": "Bulk delete",
+          "description": "Are you sure you want to delete {count} selected students?",
+          "warning": "This action cannot be undone.",
+          "toast": {
+            "success": "Deleted {count} students",
+            "error": "Delete failed",
+            "genericError": "An error occurred while deleting"
+          },
+          "submitting": "Deleting..."
+        },
+        "confirmDelete": {
+          "title": "Confirm delete student",
+          "description": "Are you sure you want to delete student {name}? This is a soft delete and can be restored later."
+        },
+        "importExcel": {
+          "title": "Import students from Excel",
+          "description": "Upload an Excel file containing new students",
+          "download": {
+            "title": "Download template",
+            "description": "Download the template to follow the correct format",
+            "button": "Download template",
+            "loading": "Downloading..."
+          },
+          "upload": {
+            "label": "Choose Excel file",
+            "cta": "Select a file or drag & drop here",
+            "supportedFormats": "Only .xlsx or .xls files are accepted"
+          },
+          "validation": {
+            "checking": "Validating...",
+            "valid": "File is valid",
+            "invalid": "File is invalid"
+          },
+          "instructions": {
+            "title": "Important notes",
+            "autoCheck": "The file is validated automatically after upload",
+            "onlyValidFiles": "Import is allowed only when the file is valid (green state)",
+            "matchTemplate": "Make sure the file follows the template format",
+            "maxSize": "File size must not exceed 10MB"
+          },
+          "errors": {
+            "invalidExtension": "Please choose an Excel file (.xlsx or .xls)",
+            "invalidFile": "Invalid file",
+            "noValidFile": "Please select a valid file"
+          },
+          "toast": {
+            "validationSuccess": "File is valid, ready to import",
+            "importSuccess": "Students imported successfully",
+            "importError": "Failed to import students",
+            "templateSuccess": "Template downloaded successfully",
+            "templateError": "Failed to download template"
+          },
+          "submit": "Import file",
+          "submitting": "Importing..."
+        },
+        "export": {
+          "title": "Export student list",
+          "description": "Export student data to an Excel file",
+          "info": {
+            "title": "Export information",
+            "description": "Data will be exported using your current filters"
+          },
+          "details": {
+            "title": "Export details",
+            "items": {
+              "filtered": {
+                "title": "All filtered students",
+                "description": "Includes every student that matches current filters"
+              },
+              "fullInfo": {
+                "title": "Complete student details",
+                "description": "Includes personal, academic, and financial information"
+              },
+              "format": {
+                "title": "Excel format (.xlsx)",
+                "description": "The file downloads immediately after confirmation"
+              }
+            }
+          },
+          "format": {
+            "title": "File format",
+            "label": "Excel (.xlsx)",
+            "description": "Standard format compatible with Microsoft Excel and Google Sheets"
+          },
+          "notes": {
+            "title": "Notes",
+            "autoDownload": "The file downloads automatically after a successful export",
+            "duration": "Export may take a few seconds depending on student count",
+            "filterReminder": "Ensure correct filters are applied before exporting"
+          },
+          "toast": {
+            "success": "File exported successfully",
+            "error": "Failed to export file"
+          },
+          "submit": "Export file",
+          "submitting": "Exporting..."
+        }
+      },
+      "gradeDetail": {
+        "title": "Course grade detail",
+        "sections": {
+          "detail": "Grade details"
+        },
+        "fields": {
+          "code": "Course code:",
+          "credits": "Credits:",
+          "semester": "Semester:",
+          "attendance": "Attendance score",
+          "midterm": "Midterm score",
+          "final": "Final score",
+          "overall": "Overall score (10)",
+          "scaleFour": "Scale 4 score",
+          "letter": "Letter grade",
+          "result": "Result"
+        },
+        "result": {
+          "pass": "Passed",
+          "fail": "Failed"
+        },
+        "components": {
+          "attendanceAttitude": "Attendance & participation",
+          "quiz": "Quizzes",
+          "finalExam": "Final exam",
+          "headers": {
+            "order": "No.",
+            "name": "Component",
+            "weight": "Weight (%)",
+            "score": "Score"
+          }
+        }
+      },
+      "semesterTable": {
+        "columns": {
+          "code": "Course code",
+          "name": "Course name",
+          "creditsShort": "CR",
+          "examScore": "Exam score",
+          "score10": "Final (10)",
+          "score4": "Final (4)",
+          "scoreLetter": "Letter",
+          "result": "Result",
+          "detail": "Details"
+        },
+        "stats": {
+          "semesterGpa4": "Semester GPA (scale 4)",
+          "semesterGpa10": "Semester GPA (scale 10)",
+          "semesterCredits": "Credits earned this semester",
+          "inProgram": "Within curriculum",
+          "outProgram": "Outside curriculum",
+          "cumulativeGpa4": "Cumulative GPA (scale 4)",
+          "cumulativeGpa10": "Cumulative GPA (scale 10)",
+          "cumulativeCredits": "Total accumulated credits",
+          "classificationLabel": "Cumulative academic classification"
+        },
+        "classification": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "fair": "Fair",
+          "average": "Average"
+        }
+      },
+      "gradeStats": {
+        "gpa10": "GPA (scale 10)",
+        "gpa4": "GPA (scale 4)",
+        "totalCredits": "Total credits",
+        "requiredCredits": "/{count} credits",
+        "completedCourses": "Completed courses",
+        "courseUnit": "courses"
+      },
+      "detail": {
+        "noStudent": "Student information not found",
+        "header": {
+          "title": "Student details",
+          "description": "Detailed information and academic history"
+        },
+        "tabs": {
+          "basic": "Profile",
+          "academic": "Academic results",
+          "tuition": "Tuition"
+        },
+        "fields": {
+          "studentCode": "Student ID: {code}",
+          "email": "Email",
+          "citizenId": "Citizen ID",
+          "faculty": "Faculty",
+          "className": "Class",
+          "educationLevel": "Education level",
+          "academicYear": "Academic year",
+          "address": "Address",
+          "genderOther": "Other"
+        },
+        "sections": {
+          "basic": {
+            "title": "Basic information"
+          },
+          "contact": {
+            "title": "Contact information"
+          },
+          "academic": {
+            "title": "Academic information"
+          }
+        },
+        "stats": {
+          "debt": "Debt",
+          "debtOutstanding": "Outstanding balance",
+          "debtCleared": "Fully paid"
+        },
+        "academic": {
+          "noData": "No grade data",
+          "filterLabel": "Filter by semester",
+          "filterEmpty": "No semester selected",
+          "filterSelected": "{count} semesters selected",
+          "selectAll": "Select all",
+          "clearAll": "Clear",
+          "emptyState": "Select at least one semester to view grades"
+        }
+      },
+      "tuition": {
+        "historyTitle": "Tuition history",
+        "historyDescription": "Tuition payment information",
+        "selectSemester": "Select semester",
+        "export": "Export Excel",
+        "exporting": "Exporting...",
+        "columns": {
+          "code": "Course code",
+          "name": "Course name",
+          "credits": "Credits",
+          "fee": "Tuition fee",
+          "status": "Status"
+        },
+        "empty": "No tuition data",
+        "totals": {
+          "label": "Total:",
+          "creditsUnit": "CR"
+        }
+      },
+      "insurance": {
+        "historyTitle": "Health insurance history",
+        "historyDescription": "Health insurance payment information",
+        "selectSemester": "Select semester",
+        "export": "Export Excel",
+        "exporting": "Exporting...",
+        "columns": {
+          "year": "Academic year",
+          "fee": "Insurance fee",
+          "status": "Status"
+        },
+        "empty": "No health insurance data"
+      },
+      "editPage": {
+        "title": "Edit student information",
+        "description": "Update detailed student information",
+        "loading": "Loading data...",
+        "loadError": "Unable to load student information",
+        "notFound": "Student information not found",
+        "tabs": {
+          "basic": "Basic info",
+          "contact": "Contact info",
+          "academic": "Academic",
+          "account": "Account"
+        },
+        "sections": {
+          "basic": {
+            "title": "Basic information",
+            "subtitle": "Student personal information"
+          },
+          "contact": {
+            "title": "Contact information",
+            "subtitle": "Student contact details"
+          },
+          "academic": {
+            "title": "Academic information",
+            "subtitle": "Program and class information"
+          },
+          "account": {
+            "title": "Login account",
+            "subtitle": "Update the student's login password"
+          }
+        },
+        "avatar": {
+          "tooltip": "Upload photo",
+          "typeError": "Only .jpg, .jpeg or .png images are allowed",
+          "sizeError": "Image size must not exceed 5MB",
+          "success": "Photo selected successfully"
+        },
+        "buttons": {
+          "back": "Back",
+          "save": "Save changes",
+          "saving": "Saving..."
+        },
+        "toast": {
+          "updateSuccess": "Student information updated successfully",
+          "updateError": "Failed to update student information",
+          "genericError": "An error occurred while updating information"
+        },
+        "form": {
+          "fullName": {
+            "label": "Full name",
+            "placeholder": "John Nguyen"
+          },
+          "dob": {
+            "label": "Date of birth",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Select date of birth"
+          },
+          "gender": {
+            "label": "Gender",
+            "placeholder": "Select gender",
+            "options": {
+              "male": "Male",
+              "female": "Female"
+            }
+          },
+          "citizenId": {
+            "label": "Citizen ID",
+            "placeholder": "9-12 digits",
+            "hint": "Digits only, between 9-12 characters"
+          },
+          "phone": {
+            "label": "Phone number",
+            "placeholder": "10-11 digits",
+            "hint": "Digits only, between 10-11 characters"
+          },
+          "address": {
+            "label": "Address",
+            "placeholder": "Enter full address (minimum 5 characters)",
+            "hint": "Minimum 5 characters, maximum 255 characters"
+          },
+          "email": {
+            "label": "Email",
+            "readonlyHint": "Email cannot be edited"
+          },
+          "studentCode": {
+            "label": "Student ID",
+            "readonlyHint": "Student ID cannot be edited"
+          },
+          "educationLevel": {
+            "label": "Education level",
+            "value": "Formal university program"
+          },
+          "faculty": {
+            "label": "Faculty",
+            "placeholder": "Select faculty",
+            "searchPlaceholder": "Search faculties..."
+          },
+          "department": {
+            "label": "Department",
+            "placeholder": "Select department",
+            "searchPlaceholder": "Search departments..."
+          },
+          "class": {
+            "label": "Class",
+            "placeholder": "Select class",
+            "searchPlaceholder": "Search classes..."
+          },
+          "status": {
+            "label": "Status",
+            "placeholder": "Select status"
+          },
+          "password": {
+            "label": "New password",
+            "placeholder": "Leave blank to keep current password",
+            "hint": "Password must be at least 6 characters"
+          },
+          "confirmPassword": {
+            "label": "Confirm new password",
+            "placeholder": "Leave blank to keep current password",
+            "hint": "Re-enter password to confirm"
+          },
+          "validation": {
+            "fullNameRequired": "Please enter full name",
+            "fullNameMax": "Full name must not exceed 40 characters",
+            "citizenId": "Citizen ID must contain 9-12 digits",
+            "phoneNumber": "Phone number must contain 10-11 digits",
+            "address": "Address must be at least 5 characters",
+            "dateOfBirth": "Please select a date of birth",
+            "gender": "Please select gender",
+            "class": "Please select class",
+            "status": "Please select status",
+            "passwordConfirm": "Password confirmation does not match",
+            "passwordLength": "Password must be at least 6 characters"
+          }
+        }
+      }
+    }
+  }
+}

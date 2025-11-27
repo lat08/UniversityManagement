@@ -1,0 +1,32 @@
+{
+  "instructor": {
+    "materials": {
+      "title": "Materials & Textbooks",
+      "description": "Manage your teaching materials",
+      "upload": "Upload",
+      "uploadDocument": "Upload Document",
+      "delete": "Delete",
+      "allTypes": "All Document Types",
+      "allSemesters": "All Semesters",
+      "allSubjects": "All Subjects",
+      "retry": "Retry",
+      "search": {
+        "placeholder": "Search by material name, document name",
+        "ariaLabel": "Search by material name, document name",
+        "clear": "Clear search"
+      },
+      "empty": {
+        "noResults": "No documents found",
+        "noResultsDescription": "Try adjusting filters to find matching documents",
+        "noDocuments": "No documents yet",
+        "noDocumentsDescription": "No documents have been uploaded yet"
+      },
+      "documentCard": {
+        "edit": "Edit",
+        "download": "Download",
+        "delete": "Delete",
+        "document": "Document"
+      }
+    }
+  }
+}

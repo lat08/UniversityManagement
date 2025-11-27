@@ -1,0 +1,9 @@
+{
+  "admin": {
+    "themeConfiguration": {
+      "title": "Theme Configuration",
+      "add": "Add Theme",
+      "edit": "Edit Theme"
+    }
+  }
+}

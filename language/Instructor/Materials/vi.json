@@ -1,0 +1,32 @@
+{
+  "instructor": {
+    "materials": {
+      "title": "Bài giảng & Giáo trình",
+      "description": "Quản lý tài liệu giảng dạy của bạn",
+      "upload": "Tải lên",
+      "uploadDocument": "Tải lên tài liệu",
+      "delete": "Xóa",
+      "allTypes": "Tất cả loại tài liệu",
+      "allSemesters": "Tất cả học kỳ",
+      "allSubjects": "Tất cả môn học",
+      "retry": "Thử lại",
+      "search": {
+        "placeholder": "Tìm kiếm theo tên bài giảng, tài liệu",
+        "ariaLabel": "Tìm kiếm theo tên bài giảng, tài liệu",
+        "clear": "Xóa tìm kiếm"
+      },
+      "empty": {
+        "noResults": "Không tìm thấy tài liệu",
+        "noResultsDescription": "Thử điều chỉnh bộ lọc để tìm thấy tài liệu phù hợp",
+        "noDocuments": "Chưa có tài liệu",
+        "noDocumentsDescription": "Hiện tại chưa có tài liệu nào được tải lên"
+      },
+      "documentCard": {
+        "edit": "Chỉnh sửa",
+        "download": "Tải xuống",
+        "delete": "Xóa",
+        "document": "Tài liệu"
+      }
+    }
+  }
+}

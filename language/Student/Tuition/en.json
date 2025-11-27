@@ -1,0 +1,118 @@
+{
+  "student": {
+    "tuition": {
+      "title": "Finance",
+      "description": "Tuition and payment history information",
+      "tuitionTab": "Tuition",
+      "insuranceTab": "Insurance",
+      "historyTab": "Payment History",
+      "summary": {
+        "total": "Total Tuition",
+        "paid": "Paid",
+        "remaining": "Remaining"
+      },
+      "loadError": "Failed to load tuition data",
+      "insuranceLoadError": "Failed to load insurance data",
+      "historyLoadError": "Failed to load payment history",
+      "tuitionSection": {
+        "title": "Tuition List",
+        "subtitle": "Tuition information - {semester}",
+        "coursesBadge": "{count} courses",
+        "semesterPlaceholder": "Select semester",
+        "exportButton": "Export Excel"
+      },
+      "tuitionTable": {
+        "headers": {
+          "code": "Course Code",
+          "name": "Course Name",
+          "credits": "Credits",
+          "amountDue": "Amount Due",
+          "outstanding": "Outstanding",
+          "status": "Status",
+          "select": "Select"
+        },
+        "empty": "No tuition data."
+      },
+      "paymentSummary": {
+        "selectedCredits": "Selected credits:",
+        "total": "Total",
+        "payButton": "Pay"
+      },
+      "insuranceSection": {
+        "title": "Health Insurance List",
+        "description": "Health insurance payment by semester",
+        "exportButton": "Export Excel"
+      },
+      "insuranceTable": {
+        "headers": {
+          "name": "Insurance Name",
+          "validity": "Validity",
+          "amountDue": "Amount Due",
+          "outstanding": "Outstanding",
+          "status": "Status",
+          "select": "Select"
+        },
+        "rowTitle": "Student Health Insurance",
+        "empty": "No health insurance data."
+      },
+      "insuranceSummary": {
+        "selected": "Selected insurance:",
+        "total": "Total",
+        "payButton": "Pay"
+      },
+      "historySection": {
+        "title": "Payment History"
+      },
+      "historyFilters": {
+        "searchPlaceholder": "Search by description/transaction..."
+      },
+      "historyActions": {
+        "exportButton": "Export Excel"
+      },
+      "historyTable": {
+        "headers": {
+          "date": "Date",
+          "description": "Description",
+          "amount": "Amount",
+          "method": "Method",
+          "status": "Status"
+        },
+        "empty": "No payment history."
+      },
+      "qrModal": {
+        "title": "Payment QR",
+        "pending": "Awaiting payment...",
+        "success": "Payment successful!",
+        "failed": "Payment failed. Please try again.",
+        "copyLink": "Copy link",
+        "openNewTab": "Open in new tab",
+        "close": "Close",
+        "copySuccess": "QR link copied!",
+        "loadError": "Unable to load QR. Please try again!"
+      },
+      "toasts": {
+        "tuitionExportSuccess": "Downloading tuition list...",
+        "tuitionExportError": "Unable to download file. Please try again later.",
+        "tuitionSelectionRequired": "Please select at least one course to pay.",
+        "tuitionQrSuccess": "QR created successfully!",
+        "tuitionQrError": "Unable to create QR.",
+        "tuitionPaymentError": "Unable to process payment. Please try again later.",
+        "insuranceExportSuccess": "Downloading insurance list...",
+        "insuranceExportError": "Unable to download file. Please try again later.",
+        "insuranceSelectionRequired": "Please select insurance to pay.",
+        "insuranceQrSuccess": "QR created successfully!",
+        "insuranceQrError": "Insurance payment failed.",
+        "insuranceQrMissing": "No payment link returned from server.",
+        "insurancePaymentError": "Unable to process insurance payment.",
+        "paymentExportSuccess": "Downloading payment history...",
+        "paymentExportError": "Unable to download payment history."
+      },
+      "errors": {
+        "noCourseRegistration": "No tuition information found. Please register for courses.",
+        "tuitionLoad": "Failed to load tuition data.",
+        "insuranceLoad": "Failed to load insurance data.",
+        "historyLoad": "Failed to load payment history."
+      }
+    }
+  }
+}

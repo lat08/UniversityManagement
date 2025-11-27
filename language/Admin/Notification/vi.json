@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "notification": {
+      "title": "Thông báo",
+      "loading": "Đang tải thông báo...",
+      "viewAll": "Xem tất cả thông báo",
+      "unreadCount": "{count} thông báo chưa đọc",
+      "empty": {
+        "title": "Chưa có thông báo",
+        "noNotifications": "Bạn chưa có thông báo nào."
+      }
+    }
+  }
+}

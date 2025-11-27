@@ -1,0 +1,132 @@
+{
+  "instructor": {
+    "grades": {
+      "title": "Grade Management",
+      "description": "Enter and manage student grades",
+      "submit": "Submit for Approval",
+      "approve": "Approve Grades",
+      "empty": {
+        "selectCourseClass": "Please select a course class to view grades"
+      },
+      "header": {
+        "courseCode": "Class Code",
+        "semester": "Semester",
+        "editable": "Editable",
+        "locked": "Locked"
+      },
+      "selector": {
+        "semester": "Semester",
+        "selectSemester": "Select Semester",
+        "loadingSemesters": "Loading semesters...",
+        "allSemesters": "All Semesters",
+        "courseClass": "Course Class",
+        "selectCourseClass": "Select Course Class",
+        "loadingCourseClasses": "Loading course classes...",
+        "loadingCourseClassesList": "Loading course classes list...",
+        "class": "Class",
+        "selectClass": "Select Class",
+        "allClasses": "All Classes",
+        "academicYear": "Academic Year",
+        "selectAcademicYear": "Select Academic Year",
+        "allAcademicYears": "All Academic Years"
+      },
+      "stats": {
+        "totalStudents": "Total Students",
+        "studentsWithGrades": "With Grades",
+        "studentsWithoutGrades": "Without Grades"
+      },
+      "actions": {
+        "editHint": "Click on grade cell to edit",
+        "locked": "Grade table is locked",
+        "viewHistory": "View History",
+        "hideHistory": "Hide History",
+        "exportExcel": "Export Excel",
+        "exporting": "Exporting...",
+        "exportDraft": "Draft",
+        "exportOfficial": "Official",
+        "submitForApproval": "Submit for Approval"
+      },
+      "table": {
+        "mssv": "Student ID",
+        "fullName": "Full Name",
+        "attendanceGrade": "CC",
+        "midtermGrade": "Midterm",
+        "finalGrade": "Final",
+        "average": "Average",
+        "note": "Note",
+        "actions": "Actions",
+        "edit": "Edit",
+        "save": "Save to changes list",
+        "cancel": "Cancel",
+        "saveAll": "Save All",
+        "unsavedChanges": "{count} unsaved changes",
+        "saving": "Saving changes...",
+        "loading": "Loading data...",
+        "noStudents": "No students",
+        "loadingGrades": "Loading grades...",
+        "gradeRangeError": "Grade must be between {min} and {max}",
+        "placeholder": "0-10",
+        "noData": "No data"
+      },
+      "submitDialog": {
+        "title": "Confirm Submit for Approval",
+        "completeMessage": "The grade table will be sent to the administrator for approval. Please make sure all information is correct.",
+        "incompleteMessage": "The grade table is incomplete. Please check again before submitting for approval.",
+        "subject": "Subject",
+        "totalStudents": "Total Students",
+        "studentsWithGrades": "With Grades",
+        "warning": "Some students do not have complete grades. Please check again before submitting for approval.",
+        "noteLabel": "Note (optional)",
+        "notePlaceholder": "Enter note for administrator...",
+        "cancel": "Cancel",
+        "submit": "Submit for Approval"
+      },
+      "history": {
+        "title": "Change History",
+        "changeDate": "Time",
+        "action": "Action",
+        "actorName": "Actor",
+        "note": "Note",
+        "empty": "No change history",
+        "loading": "Loading..."
+      },
+      "versionModal": {
+        "title": "Grade Version Details",
+        "loading": "Loading...",
+        "noData": "No data",
+        "subject": "Subject",
+        "courseClass": "Course Class",
+        "version": "Version",
+        "submittedBy": "Submitted By",
+        "approvedBy": "Approved By",
+        "rejectedBy": "Rejected By",
+        "submissionNote": "Submission Note",
+        "approvalNote": "Approval Note",
+        "studentsList": "Grade List ({count} students)",
+        "emptyData": "No grade data",
+        "close": "Close",
+        "mssv": "Student ID",
+        "fullName": "Full Name",
+        "attendanceGrade": "CC",
+        "midtermGrade": "Midterm",
+        "finalGrade": "Final",
+        "average": "Average"
+      },
+      "statuses": {
+        "Draft": "Draft",
+        "PendingApproval": "Pending Approval",
+        "Approved": "Approved",
+        "Rejected": "Rejected"
+      },
+      "actionLabels": {
+        "Submitted": "Submitted",
+        "Approved": "Approved",
+        "Rejected": "Rejected",
+        "Updated": "Updated",
+        "Created": "Created",
+        "BulkUpdated": "Bulk Updated",
+        "Edited": "Edited"
+      }
+    }
+  }
+}

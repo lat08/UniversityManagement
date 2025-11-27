@@ -1,0 +1,73 @@
+{
+  "instructor": {
+    "profile": {
+      "title": "Personal Profile",
+      "tabs": {
+        "profile": "Personal Information",
+        "password": "Change Password"
+      },
+      "alerts": {
+        "authErrorTitle": "Authentication error",
+        "authErrorDescription": "Please verify your information and try again."
+      },
+      "passwordTab": {
+        "loading": "Loading..."
+      },
+      "fields": {
+        "fullName": "Full Name",
+        "instructorCode": "Instructor ID",
+        "gender": "Gender",
+        "dateOfBirth": "Date of Birth",
+        "degree": "Academic Rank",
+        "role": "Role",
+        "department": "Department",
+        "specialization": "Specialization",
+        "email": "Email",
+        "phoneNumber": "Phone Number",
+        "employmentStatus": "Employment Status",
+        "notUpdated": "Not yet updated"
+      },
+      "gender": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "unknown": "-"
+      },
+      "employmentStatus": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "emptyState": "No profile information found.",
+      "errors": {
+        "loadFailed": "Unable to load data",
+        "retry": "Retry"
+      },
+      "changePassword": {
+        "title": "Reset Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordHintTitle": "Password requirements",
+        "passwordHintValid": "✓ Password is valid",
+        "rules": {
+          "minLength": "Must contain at least 8 characters",
+          "lowercase": "Must include at least 1 lowercase letter",
+          "uppercase": "Must include at least 1 uppercase letter",
+          "number": "Must include at least 1 number",
+          "symbol": "Must include at least 1 special character (@$!%*?&)"
+        },
+        "validation": {
+          "currentRequired": "Please enter your current password",
+          "newRequired": "Please enter a new password",
+          "confirmRequired": "Please confirm your new password",
+          "mismatch": "New passwords do not match",
+          "sameAsCurrent": "New password must be different from the current password"
+        },
+        "actions": {
+          "save": "Save changes",
+          "saving": "Saving..."
+        }
+      }
+    }
+  }
+}

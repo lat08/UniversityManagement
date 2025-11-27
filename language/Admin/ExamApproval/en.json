@@ -1,0 +1,145 @@
+{
+  "admin": {
+    "examApproval": {
+      "pageTitle": "Approve Exam Papers",
+      "pageDescription": "Manage and approve exam papers for lecturers",
+      "loadListError": "Failed to load exam list",
+      "approveSuccess": "Exam approved successfully",
+      "approveError": "Failed to approve exam",
+      "rejectSuccess": "Exam rejected successfully",
+      "rejectError": "Failed to reject exam",
+      "exportSuccess": "Excel exported successfully",
+      "exportError": "Failed to export Excel",
+      "exportNoData": "No data to export",
+      "downloadPdfSuccess": "PDF downloaded successfully",
+      "downloadPdfError": "Failed to download PDF",
+      "list": {
+        "title": "List of Exam Papers",
+        "syncing": "Syncing...",
+        "states": {
+          "loading": "Loading...",
+          "error": "Error loading data",
+          "empty": "No exam papers"
+        }
+      },
+      "table": {
+        "class": "Class",
+        "subject": "Subject",
+        "instructor": "Lecturer",
+        "examType": "Exam Type",
+        "submissionDate": "Submission Date",
+        "semester": "Semester",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending Approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by Subject, Class, Lecturer...",
+        "semester": {
+          "all": "All Semesters",
+          "placeholder": "Select semester"
+        },
+        "examType": {
+          "all": "All Exam Types",
+          "placeholder": "Select exam type",
+          "midterm": "Midterm",
+          "final": "Final",
+          "quiz": "15 minutes",
+          "makeup": "Makeup"
+        },
+        "status": {
+          "all": "All Statuses",
+          "placeholder": "Select status",
+          "pending": "Pending Approval",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        }
+      },
+      "exportExcel": "Export Excel",
+      "common": {
+        "na": "N/A"
+      },
+      "actionsMenu": {
+        "view": "View Details",
+        "approve": "Approve",
+        "reject": "Reject",
+        "downloadPdf": "Download PDF"
+      },
+      "bulkActions": {
+        "selected": "{count} exam papers selected",
+        "approve": "Approve",
+        "reject": "Reject",
+        "clearSelection": "Clear Selection"
+      },
+      "modals": {
+        "bulkApprove": {
+          "title": "Approve Exam Papers",
+          "description": "Are you sure you want to approve {count} selected exam papers?",
+          "submit": "Approve",
+          "submitting": "Approving..."
+        },
+        "bulkReject": {
+          "title": "Reject Exam Papers",
+          "description": "Are you sure you want to reject {count} selected exam papers?",
+          "note": "This action cannot be undone.",
+          "reasonLabel": "Rejection Reason",
+          "reasonPlaceholder": "Enter the reason for rejecting the exam papers...",
+          "submit": "Reject",
+          "submitting": "Rejecting..."
+        }
+      },
+      "detailModal": {
+        "title": "Exam Details",
+        "description": "Detailed information about the exam and its status",
+        "close": "Close",
+        "loading": "Loading...",
+        "error": "Failed to load exam details",
+        "currentStatus": "CURRENT STATUS",
+        "subjectCode": "Subject Code",
+        "examInfo": "EXAM INFORMATION",
+        "subject": "Subject",
+        "courseClass": "Course Section",
+        "semester": "Semester",
+        "examType": "Exam Type",
+        "duration": "Duration",
+        "entryCode": "Exam Code",
+        "minutes": "minutes",
+        "files": "EXAM FILES",
+        "uploaded": "Uploaded",
+        "download": "Download",
+        "downloadPdf": "Download PDF",
+        "downloadSuccess": "Download successful",
+        "downloadError": "Failed to download",
+        "fileNotFound": "File not found",
+        "rejectionReason": "Rejection Reason",
+        "instructor": "INSTRUCTOR",
+        "submissionDate": "SUBMISSION DATE",
+        "approvalDate": "APPROVAL DATE",
+        "approve": "Approve",
+        "reject": "Reject",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "exam.pdf",
+        "defaultAnswerFileName": "answer.pdf"
+      },
+      "rejectModal": {
+        "title": "Please enter the reason for rejecting the exam",
+        "confirmation": "Are you sure you want to reject the exam **{title}** (Type: {type})?",
+        "reasonLabel": "Rejection Reason",
+        "reasonPlaceholder": "Enter the reason for rejecting the exam..",
+        "close": "Close",
+        "cancel": "Cancel",
+        "reject": "Reject",
+        "validation": {
+          "minLength": "Rejection reason must be at least {min} characters",
+          "maxLength": "Rejection reason must not exceed {max} characters"
+        }
+      }
+    }
+  }
+}

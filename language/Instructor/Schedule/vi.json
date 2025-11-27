@@ -1,0 +1,142 @@
+{
+  "instructor": {
+    "schedule": {
+      "weekly": {
+        "title": "Thời khóa biểu giảng dạy theo tuần",
+        "description": "Hiển thị lịch giảng dạy theo từng tuần trong học kỳ",
+        "loading": "Đang tải...",
+        "selectWeek": "Chọn tuần",
+        "selectViewType": "Chọn loại xem",
+        "selectSubject": "Chọn môn học",
+        "searchSubject": "Tìm kiếm môn học...",
+        "viewType": {
+          "personal": "Khung chương trình cá nhân",
+          "subject": "Khung chương trình theo môn học"
+        },
+        "requestChange": "Đề xuất đổi lịch",
+        "export": {
+          "button": "In",
+          "exporting": "Đang xuất...",
+          "success": "Xuất PDF thành công",
+          "error": "Xuất PDF thất bại"
+        },
+        "errors": {
+          "courseNotFound": "Không tìm thấy thông tin lớp học",
+          "selectSemesterAndWeek": "Vui lòng chọn học kỳ và tuần"
+        },
+        "changeRequest": {
+          "title": "Đề xuất đổi lịch dạy",
+          "subject": "Môn",
+          "currentSchedule": "Thông tin lịch hiện tại",
+          "date": "Ngày",
+          "period": "Tiết",
+          "room": "Phòng",
+          "selectNewDate": "Chọn ngày mới",
+          "selectedDate": "Ngày đã chọn",
+          "week": "Tuần",
+          "building": "Cơ sở (tùy chọn)",
+          "roomType": "Loại phòng (tùy chọn)",
+          "all": "Tất cả",
+          "selectSlot": "Chọn giờ trống",
+          "selectDateFirst": "Chọn ngày trước",
+          "loadingSuggestions": "Đang tải gợi ý...",
+          "noSlotsAvailable": "Không có giờ trống khả dụng",
+          "reason": "Lý do đổi lịch",
+          "reasonPlaceholder": "Lý do đề xuất thay đổi...",
+          "charCount": "{count} / 500",
+          "cancel": "Hủy",
+          "submit": "Gửi",
+          "submitting": "Đang gửi...",
+          "errors": {
+            "selectNewDate": "Vui lòng chọn ngày mới",
+            "cannotDetermineWeek": "Không thể xác định tuần học bù",
+            "selectSlot": "Vui lòng chọn giờ trống",
+            "enterReason": "Vui lòng nhập lý do đổi lịch",
+            "reasonMaxLength": "Lý do không được vượt quá 500 ký tự",
+            "slotDateMismatch": "Ngày của slot đã chọn không khớp với ngày đã chọn",
+            "dateBeforeCurrent": "Không thể chọn ngày trước ngày lịch dạy hiện tại",
+            "dateAfterSemester": "Không thể chọn ngày sau ngày kết thúc học kỳ"
+          },
+          "success": "Yêu cầu thay đổi lịch đã được tạo thành công",
+          "error": "Tạo yêu cầu thất bại"
+        },
+        "history": {
+          "title": "Lịch sử đổi lịch",
+          "searchPlaceholder": "Tìm kiếm theo mã môn, tên môn...",
+          "filterStatus": "Lọc theo trạng thái",
+          "all": "Tất cả",
+          "pending": "Đang chờ",
+          "approved": "Đã duyệt",
+          "rejected": "Đã từ chối",
+          "columns": {
+            "createdAt": "Ngày tạo",
+            "subjectCode": "Mã môn",
+            "subjectName": "Tên môn",
+            "cancelledWeek": "Tuần hủy",
+            "status": "Trạng thái",
+            "actions": "Thao tác"
+          },
+          "viewDetail": "Xem chi tiết",
+          "deleteRequest": "Xóa yêu cầu",
+          "loading": "Đang tải lịch sử đổi lịch...",
+          "empty": {
+            "noResults": "Không tìm thấy kết quả cho \"{query}\"",
+            "noRequestsForWeek": "Không có yêu cầu đổi lịch nào cho tuần {week}",
+            "noRequests": "Chưa có yêu cầu đổi lịch nào trong học kỳ này"
+          },
+          "error": "Không thể tải lịch sử đổi lịch",
+          "delete": {
+            "success": "Xóa yêu cầu thành công",
+            "error": "Xóa yêu cầu thất bại",
+            "confirmTitle": "Xác nhận xóa yêu cầu đổi lịch",
+            "confirmDescription": "Bạn có chắc muốn xóa yêu cầu đổi lịch cho môn \"{subjectName}\" ({subjectCode})? Hành động này không thể hoàn tác.",
+            "confirmDescriptionGeneric": "Bạn có chắc muốn xóa yêu cầu đổi lịch này?",
+            "confirm": "Xóa",
+            "cancel": "Hủy"
+          }
+        },
+        "detail": {
+          "title": "Chi tiết yêu cầu đổi lịch",
+          "createdAt": "Ngày tạo",
+          "generalInfo": "Thông tin chung",
+          "subjectName": "Tên môn",
+          "subjectCode": "Mã môn",
+          "reviewedAt": "Ngày duyệt",
+          "cancelledSchedule": "Thông tin lịch bị hủy",
+          "cancelledWeek": "Tuần hủy",
+          "cancelledDate": "Ngày hủy",
+          "dayOfWeek": "Thứ",
+          "time": "Thời gian",
+          "room": "Phòng học",
+          "makeupSchedule": "Thông tin lịch học bù",
+          "makeupWeek": "Tuần bù",
+          "makeupDate": "Ngày bù",
+          "reason": "Lý do đổi lịch",
+          "reviewNote": "Ghi chú từ admin",
+          "close": "Đóng"
+        }
+      },
+      "semester": {
+        "title": "Khung chương trình theo học kỳ",
+        "description": "Hiển thị chương trình giảng dạy theo từng học kỳ",
+        "loading": "Đang tải...",
+        "selectViewType": "Chọn loại xem",
+        "selectSubject": "Chọn môn học",
+        "searchSubject": "Tìm kiếm môn học...",
+        "viewType": {
+          "personal": "Chương trình cá nhân",
+          "subject": "Chương trình theo môn học"
+        },
+        "export": {
+          "button": "In",
+          "exporting": "Đang xuất...",
+          "success": "Xuất PDF thành công",
+          "error": "Xuất PDF thất bại"
+        },
+        "errors": {
+          "selectSemester": "Vui lòng chọn học kỳ"
+        }
+      }
+    }
+  }
+}

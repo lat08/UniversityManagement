@@ -1,0 +1,396 @@
+{
+  "admin": {
+    "instructorProfile": {
+      "title": "Quản lý hồ sơ giảng viên",
+      "description": "Quản lý thông tin giảng viên",
+      "add": "Thêm giảng viên",
+      "edit": "Sửa thông tin",
+      "export": "Xuất Excel",
+      "import": "Nhập Excel",
+      "search": "Tìm kiếm theo mã GV, tên...",
+      "allFaculties": "Tất cả khoa",
+      "allDegrees": "Tất cả học vị",
+      "allStatuses": "Tất cả trạng thái",
+      "noData": "Không có dữ liệu",
+      "deleteError": "Đã xảy ra lỗi khi xóa giảng viên",
+      "deleteSuccess": "Xóa giảng viên thành công",
+      "deleteFailed": "Xóa giảng viên thất bại",
+      "canOnlyDeleteInactive": "Chỉ có thể xóa giảng viên khi trạng thái là \"Ngưng công tác\"",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa giảng viên này? Hành động này không thể hoàn tác.",
+      "listTitle": "Danh sách giảng viên",
+      "listDescription": "Quản lý hồ sơ và thông tin giảng viên",
+      "importExcel": "Nhập Excel",
+      "exportExcel": "Xuất Excel",
+      "addInstructor": "Thêm giảng viên",
+      "allFacultiesOption": "Tất cả khoa",
+      "tableColumns": {
+        "instructorCode": "Mã GV",
+        "fullName": "Họ và tên",
+        "faculty": "Khoa/Bộ môn",
+        "specialization": "Chuyên môn",
+        "contact": "Liên hệ",
+        "classCount": "Số lớp",
+        "status": "Trạng thái",
+        "actions": "HĐ"
+      },
+      "addModal": {
+        "title": "Thêm giảng viên mới",
+        "description": "Nhập thông tin giảng viên",
+        "fullName": "Họ và tên",
+        "fullNameRequired": "Họ và tên là bắt buộc",
+        "fullNameMin": "Họ và tên phải có ít nhất 2 ký tự",
+        "fullNameMax": "Họ và tên không được quá 100 ký tự",
+        "faculty": "Khoa/Bộ môn",
+        "facultyRequired": "Khoa/Bộ môn là bắt buộc",
+        "degree": "Học vị",
+        "gender": "Giới tính",
+        "genderRequired": "Giới tính là bắt buộc",
+        "genderMale": "Nam",
+        "genderFemale": "Nữ",
+        "selectGender": "Chọn giới tính",
+        "status": "Trạng thái",
+        "address": "Địa chỉ",
+        "addressMax": "Địa chỉ không được quá 255 ký tự",
+        "selectFaculty": "Chọn khoa/Bộ môn",
+        "selectDegree": "Chọn học vị",
+        "selectStatus": "Chọn trạng thái",
+        "enterAddress": "Nhập địa chỉ",
+        "specialization": "Chuyên môn",
+        "specializationMax": "Chuyên môn không được quá 200 ký tự",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "saving": "Đang lưu...",
+        "addSuccess": "Thêm giảng viên thành công!",
+        "addSuccessWithCode": "Thêm giảng viên thành công!\nMã giảng viên: {code}",
+        "addError": "Thêm giảng viên thất bại",
+        "addErrorGeneric": "Đã xảy ra lỗi khi thêm giảng viên",
+        "fullNamePlaceholder": "Nguyễn Văn A",
+        "phoneNumber": "Số điện thoại",
+        "phoneNumberPlaceholder": "0123456789",
+        "phoneNumberInvalid": "Số điện thoại phải có 10-11 số",
+        "dateOfBirth": "Ngày sinh",
+        "hireDate": "Ngày tuyển dụng",
+        "specializationPlaceholder": "VD: Lập trình Web",
+        "citizenId": "CMND/CCCD",
+        "citizenIdPlaceholder": "012345678900",
+        "citizenIdInvalid": "CMND/CCCD phải có 9-12 số",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Email không hợp lệ",
+        "dateOfBirthFuture": "Ngày sinh không được là ngày trong tương lai",
+        "dateOfBirthMinAge": "Giảng viên phải từ 20 tuổi trở lên",
+        "hireDateFuture": "Ngày tuyển dụng không được là ngày trong tương lai",
+        "hireDateBeforeBirth": "Ngày tuyển dụng phải sau ngày sinh ít nhất 20 năm"
+      },
+      "editModal": {
+        "title": "Cập nhật giảng viên",
+        "description": "Chỉnh sửa thông tin giảng viên",
+        "loading": "Đang tải dữ liệu...",
+        "fullName": "Họ và tên",
+        "fullNameRequired": "Họ và tên là bắt buộc",
+        "fullNameMin": "Họ và tên phải có ít nhất 2 ký tự",
+        "phoneNumber": "Số điện thoại",
+        "dateOfBirth": "Ngày sinh",
+        "hireDate": "Ngày tuyển dụng",
+        "faculty": "Khoa/Bộ môn",
+        "facultyRequired": "Khoa/Bộ môn là bắt buộc",
+        "specialization": "Chuyên môn",
+        "cancel": "Hủy",
+        "save": "Lưu thay đổi",
+        "saving": "Đang lưu...",
+        "updateSuccess": "Cập nhật giảng viên thành công",
+        "updateError": "Cập nhật giảng viên thất bại",
+        "updateErrorGeneric": "Đã xảy ra lỗi khi cập nhật giảng viên",
+        "loadError": "Không thể tải thông tin giảng viên",
+        "fullNamePlaceholder": "Nguyễn Văn A",
+        "phoneNumberPlaceholder": "0123456789",
+        "phoneNumberInvalid": "Số điện thoại phải có 10-11 số",
+        "selectFaculty": "Chọn khoa/Bộ môn",
+        "degree": "Học vị",
+        "selectDegree": "Chọn học vị",
+        "gender": "Giới tính",
+        "genderRequired": "Giới tính là bắt buộc",
+        "genderMale": "Nam",
+        "genderFemale": "Nữ",
+        "selectGender": "Chọn giới tính",
+        "specializationPlaceholder": "VD: Lập trình Web",
+        "citizenId": "CMND/CCCD",
+        "citizenIdPlaceholder": "012345678900",
+        "citizenIdInvalid": "CMND/CCCD phải có 9-12 số",
+        "status": "Trạng thái",
+        "selectStatus": "Chọn trạng thái",
+        "address": "Địa chỉ",
+        "enterAddress": "Nhập địa chỉ",
+        "email": "Email",
+        "emailPlaceholder": "example@university.edu",
+        "emailInvalid": "Email không hợp lệ",
+        "dateOfBirthFuture": "Ngày sinh không được là ngày trong tương lai",
+        "dateOfBirthMinAge": "Giảng viên phải từ 20 tuổi trở lên",
+        "hireDateFuture": "Ngày tuyển dụng không được là ngày trong tương lai",
+        "hireDateBeforeBirth": "Ngày tuyển dụng phải sau ngày sinh ít nhất 20 năm"
+      },
+      "statCards": {
+        "total": "Tổng giảng viên",
+        "totalSubtitle": "Đang công tác",
+        "professor": "Giáo sư",
+        "professorSubtitle": "GS, PGS",
+        "doctor": "Tiến sĩ",
+        "doctorSubtitle": "TS",
+        "master": "Thạc sĩ",
+        "masterSubtitle": "ThS"
+      },
+      "filters": {
+        "allStatuses": "Tất cả trạng thái",
+        "allDegrees": "Tất cả học vị",
+        "active": "Đang công tác",
+        "onLeave": "Nghỉ phép",
+        "retired": "Nghỉ hưu",
+        "inactive": "Ngưng công tác",
+        "phd": "Tiến sĩ",
+        "master": "Thạc sĩ",
+        "bachelor": "Cử nhân",
+        "engineer": "Kỹ sư"
+      },
+      "actionsMenu": {
+        "title": "Thao tác",
+        "view": "Xem chi tiết",
+        "edit": "Cập nhật",
+        "delete": "Xóa"
+      },
+      "bulkSelection": "Đã chọn {count} môn học",
+      "bulkEdit": "Chỉnh sửa toàn bộ",
+      "bulkDelete": "Xóa toàn bộ",
+      "clearSelection": "Bỏ chọn",
+      "confirmBulkDelete": "Bạn có chắc chắn muốn xóa {count} giảng viên đã chọn?",
+      "bulkEditNotImplemented": "Chức năng chỉnh sửa hàng loạt đang được phát triển",
+      "bulkDeleteNotImplemented": "Chức năng xóa hàng loạt đang được phát triển",
+      "detailModal": {
+        "title": "Chi tiết giảng viên",
+        "loading": "Đang tải dữ liệu...",
+        "personalInfo": "Thông tin cá nhân",
+        "workInfo": "Thông tin công tác",
+        "instructorCode": "Mã giảng viên",
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "phoneNumber": "Số điện thoại",
+        "citizenId": "CCCD",
+        "address": "Địa chỉ",
+        "faculty": "Khoa/Bộ môn",
+        "degree": "Học vị",
+        "specialization": "Chuyên môn",
+        "status": "Trạng thái",
+        "currentClassCount": "Số lớp phụ trách hiện tại",
+        "close": "Đóng"
+      },
+      "detailPage": {
+        "title": "Chi tiết giảng viên",
+        "subtitle": "Xem thông tin chi tiết giảng viên",
+        "loading": "Đang tải dữ liệu...",
+        "notFound": "Không tìm thấy giảng viên",
+        "tabs": {
+          "basic": "Thông tin cơ bản",
+          "work": "Thông tin công tác"
+        },
+        "sections": {
+          "personalInfo": "Thông tin cá nhân",
+          "workInfo": "Thông tin công tác"
+        },
+        "fields": {
+          "instructorCode": "Mã giảng viên",
+          "fullName": "Họ và tên",
+          "gender": "Giới tính",
+          "genderMale": "Nam",
+          "genderFemale": "Nữ",
+          "dateOfBirth": "Ngày sinh",
+          "email": "Email",
+          "phoneNumber": "Số điện thoại",
+          "citizenId": "CMND/CCCD",
+          "address": "Địa chỉ",
+          "faculty": "Khoa/Bộ môn",
+          "degree": "Học vị",
+          "specialization": "Chuyên môn",
+          "hireDate": "Ngày tuyển dụng",
+          "employmentStatus": "Trạng thái công tác",
+          "currentClassCount": "Số lớp đang phụ trách"
+        }
+      },
+      "editPage": {
+        "title": "Chỉnh sửa thông tin giảng viên",
+        "description": "Cập nhật thông tin chi tiết của giảng viên",
+        "loading": "Đang tải dữ liệu...",
+        "loadError": "Không thể tải thông tin giảng viên",
+        "notFound": "Không tìm thấy thông tin giảng viên",
+        "tabs": {
+          "basic": "Thông tin cơ bản",
+          "contact": "Thông tin liên hệ",
+          "work": "Thông tin công tác",
+          "account": "Tài khoản"
+        },
+        "sections": {
+          "basic": {
+            "title": "Thông tin cơ bản",
+            "subtitle": "Thông tin cá nhân của giảng viên"
+          },
+          "contact": {
+            "title": "Thông tin liên hệ",
+            "subtitle": "Thông tin liên lạc của giảng viên"
+          },
+          "work": {
+            "title": "Thông tin công tác",
+            "subtitle": "Thông tin về công việc và chuyên môn"
+          },
+          "account": {
+            "title": "Tài khoản đăng nhập",
+            "subtitle": "Cập nhật mật khẩu đăng nhập cho giảng viên"
+          }
+        },
+        "avatar": {
+          "tooltip": "Tải ảnh lên",
+          "typeError": "Chỉ chấp nhận file ảnh định dạng .jpg, .jpeg hoặc .png",
+          "sizeError": "Kích thước ảnh không được vượt quá 5MB",
+          "success": "Ảnh đã được chọn"
+        },
+        "buttons": {
+          "back": "Quay lại",
+          "cancel": "Hủy",
+          "save": "Lưu thay đổi",
+          "saving": "Đang lưu..."
+        },
+        "toast": {
+          "updateSuccess": "Cập nhật thông tin giảng viên thành công",
+          "updateError": "Cập nhật thông tin thất bại",
+          "genericError": "Có lỗi xảy ra khi cập nhật thông tin"
+        },
+        "form": {
+          "fullName": {
+            "label": "Họ và tên",
+            "placeholder": "Nguyễn Văn A"
+          },
+          "dob": {
+            "label": "Ngày sinh",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Chọn ngày sinh"
+          },
+          "gender": {
+            "label": "Giới tính",
+            "placeholder": "Chọn giới tính",
+            "options": {
+              "male": "Nam",
+              "female": "Nữ"
+            }
+          },
+          "citizenId": {
+            "label": "CMND / CCCD",
+            "placeholder": "9-12 số",
+            "hint": "Chỉ nhập số, từ 9-12 ký tự"
+          },
+          "phone": {
+            "label": "Số điện thoại",
+            "placeholder": "10-11 số",
+            "hint": "Chỉ nhập số, từ 10-11 ký tự"
+          },
+          "address": {
+            "label": "Địa chỉ",
+            "placeholder": "Nhập địa chỉ đầy đủ (tối thiểu 5 ký tự)",
+            "hint": "Tối thiểu 5 ký tự, tối đa 255 ký tự"
+          },
+          "email": {
+            "label": "Email",
+            "readonlyHint": "Email không thể chỉnh sửa"
+          },
+          "instructorCode": {
+            "label": "Mã giảng viên",
+            "readonlyHint": "Mã giảng viên không thể chỉnh sửa"
+          },
+          "faculty": {
+            "label": "Khoa/Bộ môn",
+            "placeholder": "Chọn khoa/bộ môn",
+            "searchPlaceholder": "Tìm kiếm khoa/bộ môn..."
+          },
+          "degree": {
+            "label": "Học vị",
+            "placeholder": "Chọn học vị"
+          },
+          "specialization": {
+            "label": "Chuyên môn",
+            "placeholder": "Nhập chuyên môn (tối đa 500 ký tự)",
+            "hint": "Tối đa 500 ký tự"
+          },
+          "hireDate": {
+            "label": "Ngày tuyển dụng",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Chọn ngày tuyển dụng"
+          },
+          "status": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái"
+          },
+          "password": {
+            "label": "Mật khẩu mới",
+            "placeholder": "Để trống nếu không đổi",
+            "hint": "Mật khẩu phải có ít nhất 6 ký tự"
+          },
+          "confirmPassword": {
+            "label": "Xác nhận mật khẩu mới",
+            "placeholder": "Để trống nếu không đổi",
+            "hint": "Nhập lại mật khẩu để xác nhận"
+          },
+          "validation": {
+            "fullNameRequired": "Vui lòng nhập họ và tên",
+            "fullNameMax": "Họ và tên không được vượt quá 40 ký tự",
+            "citizenId": "CMND/CCCD phải từ 9-12 số",
+            "phoneNumber": "Số điện thoại phải từ 10-11 số",
+            "address": "Địa chỉ phải trên 5 ký tự",
+            "dateOfBirth": "Vui lòng chọn ngày sinh",
+            "gender": "Vui lòng chọn giới tính",
+            "faculty": "Vui lòng chọn khoa/bộ môn",
+            "status": "Vui lòng chọn trạng thái",
+            "passwordConfirm": "Mật khẩu xác nhận không khớp",
+            "passwordLength": "Mật khẩu phải có ít nhất 6 ký tự"
+          }
+        }
+      },
+      "exportModal": {
+        "title": "Xuất danh sách giảng viên",
+        "description": "Xuất dữ liệu giảng viên ra file Excel",
+        "success": "Xuất danh sách giảng viên thành công",
+        "error": "Xuất file thất bại",
+        "infoTitle": "Thông tin xuất",
+        "infoDescription": "Sẽ xuất tất cả giảng viên theo bộ lọc hiện tại",
+        "detailTitle": "Chi tiết xuất file",
+        "detailFilteredTitle": "Toàn bộ giảng viên theo bộ lọc",
+        "detailFilteredDescription": "Bao gồm tất cả giảng viên phù hợp với điều kiện lọc hiện tại",
+        "detailFullInfoTitle": "Thông tin chi tiết đầy đủ",
+        "detailFullInfoDescription": "Bao gồm thông tin cá nhân và công tác của giảng viên",
+        "detailFormatTitle": "Định dạng Excel (.xlsx)",
+        "detailFormatDescription": "File sẽ được tải xuống ngay sau khi xác nhận",
+        "formatLabel": "Định dạng file",
+        "formatName": "Excel (.xlsx)",
+        "formatDescription": "Tương thích với Microsoft Excel và Google Sheets",
+        "noteTitle": "Lưu ý",
+        "noteAutoDownload": "File sẽ được tải xuống tự động sau khi xuất thành công",
+        "noteDuration": "Quá trình xuất có thể mất vài giây tùy vào số lượng giảng viên",
+        "noteFilters": "Đảm bảo bạn đã áp dụng bộ lọc phù hợp trước khi xuất",
+        "cancel": "Hủy",
+        "export": "Xuất file",
+        "exporting": "Đang xuất..."
+      },
+      "importModal": {
+        "title": "Nhập giảng viên từ Excel",
+        "description": "Tải file Excel chứa danh sách giảng viên mới",
+        "downloadTemplateTitle": "Tải xuống file mẫu",
+        "downloadTemplateDescription": "Sử dụng file mẫu để đảm bảo đúng định dạng trước khi nhập",
+        "downloadTemplateButton": "Tải xuống file mẫu",
+        "selectFileLabel": "Chọn file Excel *",
+        "selectedFile": "Đã chọn: {file}",
+        "guidelineTitle": "Hướng dẫn",
+        "guidelineAcceptType": "Chỉ chấp nhận file Excel định dạng .xlsx hoặc .xls",
+        "guidelineValidate": "Dữ liệu sẽ được kiểm tra trước khi import chính thức",
+        "guidelineColumns": "Không thay đổi tên cột trong file mẫu để tránh lỗi",
+        "cancel": "Hủy",
+        "import": "Nhập",
+        "importing": "Đang nhập..."
+      }
+    }
+  }
+}

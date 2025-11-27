@@ -1,0 +1,189 @@
+{
+  "admin": {
+    "regulations": {
+      "pageTitle": "Quản lý Quy chế / Quy định",
+      "pageDescription": "Quản lý, ban hành và cập nhật toàn bộ quy chế, chính sách nội bộ của trường",
+      "stats": {
+        "total": "Tổng số quy chế"
+      },
+      "status": {
+        "draft": "Bản nháp",
+        "active": "Đang áp dụng",
+        "archived": "Đã lưu trữ",
+        "unknown": "Không xác định"
+      },
+      "statusDescriptions": {
+        "draft": "Đang soạn thảo hoặc chờ phê duyệt",
+        "active": "Đã ban hành và có hiệu lực",
+        "archived": "Hết hiệu lực hoặc đã thay thế"
+      },
+      "categories": {
+        "admission": "Tuyển sinh",
+        "academic": "Đào tạo",
+        "finance": "Tài chính",
+        "studentAffairs": "Công tác sinh viên",
+        "general": "Quy định chung"
+      },
+      "units": {
+        "trainingDept": "Phòng Đào tạo",
+        "admissionOffice": "Ban Tuyển sinh",
+        "studentAffairs": "Phòng CTSV",
+        "financeOffice": "Phòng Tài chính",
+        "managementBoard": "Ban Giám hiệu"
+      },
+      "audience": {
+        "all": "Tất cả đối tượng",
+        "student": "Sinh viên",
+        "instructor": "Giảng viên"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm theo mã, tiêu đề, mô tả...",
+        "category": {
+          "all": "Tất cả loại",
+          "placeholder": "Loại quy định"
+        },
+        "unit": {
+          "all": "Tất cả đơn vị",
+          "placeholder": "Đơn vị ban hành"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "placeholder": "Trạng thái"
+        },
+        "audience": {
+          "placeholder": "Đối tượng áp dụng"
+        }
+      },
+      "list": {
+        "title": "Danh sách Quy chế / Quy định",
+        "syncing": "Đang đồng bộ dữ liệu...",
+        "states": {
+          "error": "Không thể tải danh sách quy chế. Vui lòng thử lại sau.",
+          "loading": "Đang tải danh sách quy chế...",
+          "empty": "Không tìm thấy quy chế phù hợp với bộ lọc."
+        },
+        "code": "Mã:",
+        "issueDate": "Ngày ban hành",
+        "effectiveDate": "Ngày hiệu lực",
+        "issuingUnit": "Đơn vị ban hành",
+        "audience": "Đối tượng áp dụng",
+        "actions": {
+          "view": "Xem chi tiết",
+          "edit": "Chỉnh sửa",
+          "download": "Tải xuống",
+          "delete": "Xóa"
+        }
+      },
+      "actions": {
+        "add": "Thêm mới"
+      },
+      "toast": {
+        "fileMissing": "Không tìm thấy tệp để tải xuống",
+        "downloadLoading": "Đang tải xuống tệp...",
+        "downloadSuccess": "Tải tệp thành công",
+        "downloadError": "Không thể tải tệp",
+        "saveError": "Không thể lưu quy chế",
+        "deleteSuccess": "Đã xóa quy chế",
+        "deleteError": "Không thể xóa quy chế"
+      },
+      "form": {
+        "title": {
+          "create": "Thêm Quy chế / Quy định",
+          "edit": "Chỉnh sửa Quy chế / Quy định"
+        },
+        "subtitle": "Nhập đầy đủ thông tin để đảm bảo quy chế được lưu trữ chính xác",
+        "fields": {
+          "code": "Mã quy định",
+          "title": "Tiêu đề",
+          "description": "Mô tả ngắn",
+          "category": "Loại quy định",
+          "issuingUnit": "Đơn vị ban hành",
+          "issueDate": "Ngày ban hành",
+          "effectiveDate": "Ngày hiệu lực",
+          "expireDate": "Ngày hết hiệu lực",
+          "status": "Trạng thái",
+          "audience": "Đối tượng áp dụng",
+          "attachment": "Tài liệu đính kèm"
+        },
+        "placeholders": {
+          "code": "VD: QĐ-1333",
+          "title": "Nhập tiêu đề quy chế",
+          "description": "Mô tả nội dung chính của quy chế...",
+          "category": "Chọn loại",
+          "issuingUnit": "Chọn đơn vị",
+          "status": "Chọn trạng thái",
+          "audience": "Chọn đối tượng"
+        },
+        "validation": {
+          "codeMin": "Mã quy định tối thiểu 2 ký tự",
+          "codePattern": "Mã quy định chỉ được chứa chữ cái A-Z, số, dấu gạch ngang (-) và gạch dưới (_)",
+          "titleMin": "Tiêu đề tối thiểu 4 ký tự",
+          "titleMax": "Tiêu đề không được vượt quá 200 ký tự",
+          "titlePattern": "Tiêu đề chỉ được chứa chữ cái, số, khoảng trắng, dấu gạch ngang (-) và gạch dưới (_)",
+          "descriptionMin": "Mô tả tối thiểu 10 ký tự",
+          "descriptionMax": "Mô tả không được vượt quá 500 ký tự",
+          "categoryRequired": "Chọn loại quy định",
+          "issuingUnitRequired": "Chọn đơn vị ban hành",
+          "issueDateRequired": "Chọn ngày ban hành",
+          "effectiveDateRequired": "Chọn ngày hiệu lực",
+          "effectiveAfterIssue": "Ngày hiệu lực phải lớn hơn hoặc bằng ngày ban hành"
+        },
+        "file": {
+          "helper": "Chọn tệp PDF/DOC/DOCX (tối đa 10MB)",
+          "typeError": "Chỉ hỗ trợ PDF, DOC, DOCX",
+          "sizeError": "Kích thước tệp không vượt quá 10MB",
+          "selected": "Đã chọn: {name}",
+          "current": "Tệp hiện có: {name}"
+        },
+        "actions": {
+          "close": "Đóng",
+          "cancel": "Hủy",
+          "saving": "Đang lưu...",
+          "saveDraft": "Lưu bản nháp",
+          "update": "Cập nhật"
+        }
+      },
+      "detail": {
+        "subtitle": "Chi tiết quy chế",
+        "code": "Mã: {code}",
+        "category": "Loại: {category}",
+        "issueDate": "Ngày ban hành",
+        "effectiveDate": "Ngày hiệu lực",
+        "expireDate": "Ngày hết hiệu lực",
+        "issuingUnit": "Đơn vị ban hành",
+        "audience": "Đối tượng áp dụng",
+        "descriptionTitle": "Mô tả",
+        "attachments": {
+          "title": "Tài liệu đính kèm",
+          "fallbackName": "Tài liệu đính kèm",
+          "view": "Xem",
+          "download": "Tải xuống",
+          "typeLabels": {
+            "pdf": "PDF",
+            "doc": "DOC/DOCX",
+            "generic": "File"
+          }
+        },
+        "actions": {
+          "close": "Đóng"
+        }
+      },
+      "delete": {
+        "title": "Xác nhận xóa quy chế",
+        "message": "Bạn có chắc chắn muốn xóa {title}?",
+        "defaultName": "quy chế này",
+        "warning": "Hành động này không thể hoàn tác.",
+        "cancel": "Hủy",
+        "confirm": "Xóa"
+      },
+      "loadListError": "Không thể tải danh sách quy chế",
+      "loadDetailError": "Không thể tải chi tiết quy chế",
+      "createSuccess": "Tạo quy chế thành công",
+      "updateSuccess": "Cập nhật quy chế thành công",
+      "common": {
+        "emptyValue": "—",
+        "defaultFileName": "quy-che"
+      }
+    }
+  }
+}

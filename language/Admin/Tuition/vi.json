@@ -1,0 +1,165 @@
+{
+  "admin": {
+    "tuition": {
+      "pageTitle": "Học phí - Công nợ",
+      "pageDescription": "Quản lý học phí và công nợ của sinh viên",
+      "stats": {
+        "totalFee": "Tổng thu học kỳ",
+        "totalPaid": "Đã thu",
+        "totalDebt": "Còn nợ",
+        "overdue": "Quá hạn"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo mã, tên sinh viên,...",
+        "semester": {
+          "all": "Tất cả học kỳ",
+          "placeholder": "Chọn học kỳ"
+        },
+        "class": {
+          "all": "Tất cả khóa/ lớp",
+          "placeholder": "Chọn lớp"
+        },
+        "department": {
+          "all": "Tất cả ngành",
+          "placeholder": "Chọn ngành"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "paid": "Đã thanh toán",
+          "unpaid": "Chưa thanh toán",
+          "overdue": "Quá hạn",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "list": {
+        "title": "Danh sách công nợ",
+        "syncing": "Đang đồng bộ dữ liệu...",
+        "states": {
+          "error": "Không thể tải danh sách công nợ. Vui lòng thử lại sau.",
+          "loading": "Đang tải danh sách công nợ...",
+          "empty": "Không tìm thấy công nợ phù hợp với bộ lọc."
+        }
+      },
+      "table": {
+        "columns": {
+          "studentCode": "MSSV",
+          "fullName": "Họ và tên",
+          "major": "Ngành",
+          "className": "Lớp",
+          "totalFee": "Phải thu",
+          "debt": "Còn nợ",
+          "deadline": "Hạn đóng",
+          "status": "Trạng thái",
+          "actions": "HD"
+        }
+      },
+      "actions": {
+        "menu": "Hành động",
+        "viewDetail": "Xem chi tiết",
+        "edit": "Chỉnh sửa học phí",
+        "createReminder": "Tạo nhắc nhở"
+      },
+      "detail": {
+        "title": "Chi tiết học phí",
+        "subtitle": "Chi tiết học phí – công nợ của sinh viên",
+        "loading": "Đang tải chi tiết...",
+        "notFound": "Không tìm thấy thông tin công nợ",
+        "close": "Đóng",
+        "studentInfo": {
+          "title": "Thông tin sinh viên",
+          "studentCode": "MSSV",
+          "fullName": "Họ và tên",
+          "className": "Lớp học",
+          "major": "Ngành học"
+        },
+        "tuitionInfo": {
+          "title": "Thông tin học phí",
+          "totalFee": "Tổng phải thu",
+          "debt": "Còn nợ",
+          "totalCredits": "Tổng tín chỉ",
+          "paid": "Đã thu",
+          "status": "Trạng thái"
+        },
+        "registeredSubjects": {
+          "title": "Danh sách môn học đã đăng ký",
+          "code": "Mã môn",
+          "name": "Tên môn",
+          "credits": "Số tín chỉ",
+          "fee": "Học phí"
+        },
+        "paymentHistory": {
+          "title": "Lịch sử thanh toán",
+          "date": "Ngày",
+          "amount": "Số tiền",
+          "method": "Phương thức",
+          "transactionCode": "Mã GD",
+          "confirmedBy": "Người xác nhận"
+        }
+      },
+      "loadListError": "Không thể tải danh sách công nợ",
+      "status": {
+        "paid": "Đã thanh toán",
+        "unpaid": "Chưa thanh toán",
+        "overdue": "Quá hạn"
+      },
+      "edit": {
+        "title": "Chỉnh sửa học phí",
+        "subtitle": "Cập nhật thông tin học phí của sinh viên",
+        "bulkDescription": "Cập nhật thông tin học phí của {count} sinh viên đã chọn",
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "save": "Lưu thay đổi",
+        "saving": "Đang lưu...",
+        "success": "Cập nhật học phí thành công",
+        "error": "Cập nhật học phí thất bại",
+        "statusRequired": "Vui lòng chọn trạng thái",
+        "fields": {
+          "code": "Mã",
+          "fullName": "Họ và tên",
+          "status": "Trạng thái",
+          "statusPlaceholder": "Chọn trạng thái",
+          "notes": "Ghi chú chung",
+          "notesPlaceholder": "Thêm ghi chú (Tối đa 500 ký tự)",
+          "maxCharacters": "ký tự"
+        }
+      },
+      "reminder": {
+        "title": "Tạo nhắc nhở",
+        "subtitle": "Soạn và gửi nhắc nhở đóng học phí tới sinh viên",
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "send": "Gửi nhắc nhở",
+        "sending": "Đang gửi...",
+        "success": "Gửi nhắc nhở thành công",
+        "error": "Gửi nhắc nhở thất bại",
+        "titleRequired": "Vui lòng nhập tiêu đề",
+        "contentRequired": "Vui lòng nhập nội dung",
+        "bulkDescription": "Soạn và gửi nhắc nhở đóng học phí tới sinh viên - Đã chọn {count} sinh viên",
+        "fields": {
+          "code": "Mã",
+          "fullName": "Họ và tên",
+          "title": "Tiêu đề",
+          "titlePlaceholder": "Nhập tiêu đề nhắc nhở",
+          "content": "Nội dung",
+          "contentPlaceholder": "Nhập nội dung nhắc nhở..."
+        }
+      },
+      "bulkBar": {
+        "selected": "Đã chọn {count} sinh viên",
+        "edit": "Chỉnh sửa",
+        "createReminder": "Tạo nhắc nhở",
+        "delete": "Xóa",
+        "clear": "Bỏ chọn"
+      },
+      "bulkDelete": {
+        "title": "Xóa công nợ học phí",
+        "description": "Bạn có chắc chắn muốn xóa thông tin công nợ học phí của {count} sinh viên đã chọn?",
+        "warning": "Cảnh báo: Hành động này không thể hoàn tác!",
+        "note": "Tất cả thông tin công nợ học phí của các sinh viên đã chọn sẽ bị xóa vĩnh viễn.",
+        "submit": "Xóa",
+        "submitting": "Đang xóa...",
+        "success": "Xóa công nợ học phí thành công"
+      }
+    }
+  }
+}

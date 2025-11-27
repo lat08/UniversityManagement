@@ -1,0 +1,178 @@
+{
+  "admin": {
+    "roomRequests": {
+      "pageTitle": "Room Request Management",
+      "pageDescription": "Centralized processing of room usage requests from students and instructors",
+      "stats": {
+        "total": "Total requests",
+        "pending": "Pending approval",
+        "confirmed": "Approved",
+        "rejected": "Rejected"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Approved",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "filters": {
+        "searchPlaceholder": "Search...",
+        "building": {
+          "all": "All buildings",
+          "placeholder": "Building"
+        },
+        "roomType": {
+          "all": "All room types",
+          "placeholder": "Room type"
+        },
+        "status": {
+          "all": "All statuses",
+          "placeholder": "Status"
+        },
+        "usageDate": "Usage date"
+      },
+      "list": {
+        "title": "List of room requests",
+        "syncing": "Syncing latest data...",
+        "states": {
+          "error": "Unable to load room requests. Please try again later.",
+          "loading": "Loading room request list...",
+          "empty": "No room requests match the current filters."
+        },
+        "columns": {
+          "selectAll": "Select all",
+          "code": "Code",
+          "room": "Room",
+          "student": "Student",
+          "usageDate": "Usage Date",
+          "registrationDate": "Registration Date",
+          "status": "Status",
+          "action": "Action"
+        },
+        "actions": {
+          "view": "View details",
+          "approve": "Approve",
+          "reject": "Reject",
+          "cancel": "Cancel"
+        }
+      },
+      "bulkActions": {
+        "approve": "Bulk approve",
+        "reject": "Bulk reject"
+      },
+      "detailModal": {
+        "title": "Registration Form Details",
+        "subtitle": "Detailed information about the room registration form",
+        "sections": {
+          "requestInfo": "REGISTRATION FORM INFORMATION",
+          "studentInfo": "STUDENT INFORMATION",
+          "roomInfo": "ROOM INFORMATION",
+          "usageInfo": "USAGE INFORMATION"
+        },
+        "fields": {
+          "code": "Form ID",
+          "createdDate": "Creation Date",
+          "status": "Status",
+          "studentId": "Student ID",
+          "fullName": "Full Name",
+          "class": "Class",
+          "roomId": "Room ID",
+          "roomName": "Room Name",
+          "roomType": "Room Type",
+          "building": "Building",
+          "usageDate": "Usage Date",
+          "timeSlot": "Time Slot",
+          "peopleCount": "Number of People",
+          "purpose": "Purpose of Use"
+        },
+        "actions": {
+          "close": "Close",
+          "approve": "Approve",
+          "reject": "Reject",
+          "common": {
+            "na": "N/A"
+          },
+          "defaultQuestionFileName": "exam.pdf",
+          "defaultAnswerFileName": "answer.pdf"
+        }
+      },
+      "approveModal": {
+        "title": "Approve registration request",
+        "question": "Are you sure you want to approve this registration request?",
+        "code": "Code: {code}",
+        "details": {
+          "room": "Room",
+          "building": "Building",
+          "student": "Student",
+          "usageTime": "Usage time"
+        },
+        "note": "Notes",
+        "notePlaceholder": "Enter notes (Optional)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "rejectModal": {
+        "title": "Reject registration application",
+        "instruction": "Enter the reason for rejecting this registration application",
+        "code": "Code: {code}",
+        "details": {
+          "room": "Room",
+          "building": "Building",
+          "student": "Student",
+          "usageTime": "Usage time"
+        },
+        "reason": "Reason for rejection",
+        "reasonPlaceholder": "Enter the reason for rejection (Minimum 10 characters)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "cancelModal": {
+        "title": "Cancel approved registration form",
+        "subtitle": "You are about to cancel an approved form",
+        "code": "Code: {code}",
+        "details": {
+          "room": "Room",
+          "building": "Building",
+          "student": "Student",
+          "usageTime": "Usage time"
+        },
+        "reason": "Reason for cancellation",
+        "reasonPlaceholder": "Enter reason for cancellation (Minimum 10 characters)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "bulkApproveModal": {
+        "title": "Approve {count} registration forms",
+        "description": "List of forms to be approved:",
+        "note": "General notes",
+        "notePlaceholder": "Enter notes (Optional)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      },
+      "bulkRejectModal": {
+        "title": "Reject {count} applications",
+        "warning": "Warning: This action will reject all {count} selected applications",
+        "description": "List of applications to be rejected:",
+        "reason": "Common reason for rejection",
+        "reasonPlaceholder": "Enter reason for rejection (Minimum 10 characters)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      }
+    }
+  }
+}

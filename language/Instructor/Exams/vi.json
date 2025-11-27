@@ -1,0 +1,98 @@
+{
+  "instructor": {
+    "exams": {
+      "title": "Đề thi",
+      "description": "Quản lý đề thi và kiểm tra",
+      "upload": "Tải lên đề thi",
+      "add": "Thêm đề thi",
+      "edit": "Sửa đề thi",
+      "empty": {
+        "noExams": "Không tìm thấy đề thi nào."
+      },
+      "search": {
+        "placeholder": "Tìm kiếm theo tên môn học, giảng viên...",
+        "ariaLabel": "Tìm kiếm theo tên môn học hoặc giảng viên"
+      },
+      "filters": {
+        "allSemesters": "Tất cả học kỳ",
+        "allSubjects": "Tất cả môn học",
+        "allStatuses": "Tất cả trạng thái",
+        "allTypes": "Tất cả loại"
+      },
+      "examCard": {
+        "code": "Mã",
+        "duration": "Thời lượng",
+        "minutes": "phút",
+        "createdAt": "Ngày tạo",
+        "reviewer": "Người duyệt",
+        "downloadQuestion": "Tải đề",
+        "downloadAnswer": "Tải đáp án",
+        "resubmit": "Gửi lại",
+        "view": "Xem",
+        "rejectionReason": "Lý do từ chối:"
+      },
+      "uploadModal": {
+        "title": "Tải lên đề thi mới",
+        "resubmitTitle": "Gửi lại đề thi",
+        "description": "Mô tả",
+        "subject": "Môn học",
+        "subjectRequired": "Vui lòng chọn lớp học phần",
+        "examType": "Loại đề thi",
+        "examTypeRequired": "Vui lòng chọn loại đề thi",
+        "selectExamType": "Chọn loại",
+        "duration": "Thời lượng",
+        "durationPlaceholder": "Thời lượng (phút)",
+        "descriptionPlaceholder": "Mô tả đề thi...",
+        "uploadQuestion": "Tải lên đề thi",
+        "uploadAnswer": "Tải lên đáp án",
+        "clickToUpload": "Click to Upload",
+        "fileSizeError": "Kích thước file không được vượt quá 10MB",
+        "fileTypeError": "Chỉ hỗ trợ file PDF, DOC, DOCX",
+        "questionFileRequired": "Vui lòng chọn file đề thi",
+        "answerFileRequired": "Vui lòng chọn file đáp án",
+        "loadingCourseClasses": "Đang tải danh sách lớp học phần...",
+        "selectCourseClass": "Chọn lớp học phần",
+        "waitingCourseClasses": "Vui lòng chờ danh sách lớp học phần được tải",
+        "cancel": "Hủy",
+        "upload": "Tải lên",
+        "uploading": "Đang tải lên..."
+      },
+      "detailModal": {
+        "title": "Chi tiết đề thi",
+        "description": "Thông tin chi tiết về đề thi và trạng thái",
+        "close": "Đóng",
+        "loading": "Đang tải dữ liệu...",
+        "currentStatus": "TRẠNG THÁI HIỆN TẠI",
+        "subjectCode": "Mã môn",
+        "entryCode": "Mã môn",
+        "examInfo": "Thông tin đề thi",
+        "subject": "Môn học",
+        "courseClass": "Lớp học phần",
+        "semester": "Học kỳ",
+        "examType": "Loại đề thi",
+        "duration": "Thời lượng",
+        "minutes": "phút",
+        "entryCodeLabel": "Mã đề",
+        "files": "Các tệp đề thi",
+        "uploaded": "Đã tải lên",
+        "download": "Tải xuống",
+        "rejectionReason": "Lý do từ chối:",
+        "createdAt": "Ngày tạo",
+        "reviewedAt": "Ngày duyệt",
+        "reviewer": "Người duyệt",
+        "fileNotFound": "Không tìm thấy đường dẫn file"
+      },
+      "examTypes": {
+        "midterm": "Giữa kỳ",
+        "final": "Cuối kỳ",
+        "quiz": "15 phút",
+        "makeup": "Thi lại"
+      },
+      "statuses": {
+        "approved": "Đã duyệt",
+        "pending": "Chờ duyệt",
+        "rejected": "Từ chối"
+      }
+    }
+  }
+}

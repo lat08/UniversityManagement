@@ -1,0 +1,132 @@
+{
+  "instructor": {
+    "grades": {
+      "title": "Quản lý điểm số",
+      "description": "Nhập và quản lý điểm sinh viên",
+      "submit": "Gửi duyệt",
+      "approve": "Duyệt điểm",
+      "empty": {
+        "selectCourseClass": "Vui lòng chọn lớp học phần để xem bảng điểm"
+      },
+      "header": {
+        "courseCode": "Mã lớp",
+        "semester": "Học kỳ",
+        "editable": "Có thể chỉnh sửa",
+        "locked": "Đã khoá"
+      },
+      "selector": {
+        "semester": "Học kỳ",
+        "selectSemester": "Chọn học kỳ",
+        "loadingSemesters": "Đang tải học kỳ...",
+        "allSemesters": "Tất cả học kỳ",
+        "courseClass": "Lớp học phần",
+        "selectCourseClass": "Chọn lớp học phần",
+        "loadingCourseClasses": "Đang tải lớp học phần...",
+        "loadingCourseClassesList": "Đang tải danh sách lớp học phần...",
+        "class": "Lớp",
+        "selectClass": "Chọn lớp",
+        "allClasses": "Tất cả lớp",
+        "academicYear": "Khóa",
+        "selectAcademicYear": "Chọn khóa",
+        "allAcademicYears": "Tất cả khóa"
+      },
+      "stats": {
+        "totalStudents": "Tổng sinh viên",
+        "studentsWithGrades": "Đã nhập điểm",
+        "studentsWithoutGrades": "Chưa nhập"
+      },
+      "actions": {
+        "editHint": "Nhấp vào ô điểm để chỉnh sửa",
+        "locked": "Bảng điểm đã được khóa",
+        "viewHistory": "Xem lịch sử",
+        "hideHistory": "Ẩn lịch sử",
+        "exportExcel": "Xuất Excel",
+        "exporting": "Đang xuất...",
+        "exportDraft": "Bản nháp",
+        "exportOfficial": "Bản chính thức",
+        "submitForApproval": "Gửi duyệt"
+      },
+      "table": {
+        "mssv": "MSSV",
+        "fullName": "Họ và tên",
+        "attendanceGrade": "CC",
+        "midtermGrade": "GK",
+        "finalGrade": "CK",
+        "average": "TB",
+        "note": "Ghi chú",
+        "actions": "Thao tác",
+        "edit": "Chỉnh sửa",
+        "save": "Lưu vào danh sách thay đổi",
+        "cancel": "Hủy",
+        "saveAll": "Lưu tất cả",
+        "unsavedChanges": "Có {count} thay đổi chưa lưu",
+        "saving": "Đang lưu thay đổi...",
+        "loading": "Đang tải dữ liệu...",
+        "noStudents": "Không có sinh viên nào",
+        "loadingGrades": "Đang tải bảng điểm...",
+        "gradeRangeError": "Điểm phải nằm trong khoảng {min}-{max}",
+        "placeholder": "0-10",
+        "noData": "Không có dữ liệu"
+      },
+      "submitDialog": {
+        "title": "Xác nhận gửi duyệt bảng điểm",
+        "completeMessage": "Bảng điểm sẽ được gửi đến quản trị viên để duyệt. Hãy chắc chắn tất cả thông tin đã chính xác.",
+        "incompleteMessage": "Bảng điểm chưa hoàn tất. Hãy kiểm tra lại trước khi gửi duyệt.",
+        "subject": "Môn học",
+        "totalStudents": "Tổng sinh viên",
+        "studentsWithGrades": "Đã nhập điểm",
+        "warning": "Một số sinh viên chưa có điểm đầy đủ. Vui lòng kiểm tra lại trước khi gửi duyệt.",
+        "noteLabel": "Ghi chú (tùy chọn)",
+        "notePlaceholder": "Nhập ghi chú cho quản trị viên...",
+        "cancel": "Hủy",
+        "submit": "Gửi duyệt"
+      },
+      "history": {
+        "title": "Lịch sử thay đổi",
+        "changeDate": "Thời gian",
+        "action": "Hành động",
+        "actorName": "Người thực hiện",
+        "note": "Ghi chú",
+        "empty": "Chưa có lịch sử thay đổi",
+        "loading": "Đang tải..."
+      },
+      "versionModal": {
+        "title": "Chi tiết phiên bản điểm",
+        "loading": "Đang tải...",
+        "noData": "Không có dữ liệu",
+        "subject": "Môn học",
+        "courseClass": "Lớp học phần",
+        "version": "Phiên bản",
+        "submittedBy": "Người gửi duyệt",
+        "approvedBy": "Người duyệt",
+        "rejectedBy": "Người từ chối",
+        "submissionNote": "Ghi chú gửi duyệt",
+        "approvalNote": "Ghi chú duyệt",
+        "studentsList": "Danh sách điểm ({count} sinh viên)",
+        "emptyData": "Không có dữ liệu điểm",
+        "close": "Đóng",
+        "mssv": "MSSV",
+        "fullName": "Họ và tên",
+        "attendanceGrade": "CC",
+        "midtermGrade": "GK",
+        "finalGrade": "CK",
+        "average": "TB"
+      },
+      "statuses": {
+        "Draft": "Bản nháp",
+        "PendingApproval": "Chờ duyệt",
+        "Approved": "Đã duyệt",
+        "Rejected": "Từ chối"
+      },
+      "actionLabels": {
+        "Submitted": "Gửi duyệt",
+        "Approved": "Đã duyệt",
+        "Rejected": "Từ chối",
+        "Updated": "Cập nhật điểm",
+        "Created": "Tạo bản nháp",
+        "BulkUpdated": "Cập nhật hàng loạt",
+        "Edited": "Chỉnh sửa"
+      }
+    }
+  }
+}

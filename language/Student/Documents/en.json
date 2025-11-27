@@ -1,0 +1,44 @@
+{
+  "student": {
+    "documents": {
+      "title": "Documents",
+      "header": {
+        "title": "Documents",
+        "subtitle": "Access all study materials in one place"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by course name, instructor...",
+        "searchAriaLabel": "Search by course name or instructor",
+        "clearSearch": "Clear search",
+        "allSemesters": "All semesters",
+        "allSubjects": "All subjects",
+        "allDocumentTypes": "All document types"
+      },
+      "card": {
+        "documentsCount": "{count, plural, =0 {No documents} one {# document} other {# documents}}",
+        "view": "View"
+      },
+      "modal": {
+        "generalInfoTitle": "I. General Information",
+        "documentsTitle": "II. Detailed Materials",
+        "courseLabel": "Course",
+        "uploaderLabel": "Uploader",
+        "fileSizeLabel": "File size: {size}",
+        "viewOnline": "View Online",
+        "download": "Download",
+        "close": "Close"
+      },
+      "empty": {
+        "emptyTitle": "No documents yet",
+        "emptyDescription": "No documents have been uploaded.",
+        "noResultsTitle": "No documents found",
+        "noResultsDescription": "Try adjusting filters to find the right materials."
+      },
+      "error": {
+        "title": "Unable to load data",
+        "retry": "Retry",
+        "defaultMessage": "Unable to load documents"
+      }
+    }
+  }
+}

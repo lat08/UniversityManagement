@@ -1,0 +1,106 @@
+{
+  "admin": {
+    "notificationManagement": {
+      "general": {
+        "unknown": "Không xác định",
+        "notAvailable": "Chưa xác định",
+        "studentLoadError": "Không thể tải danh sách sinh viên"
+      },
+      "options": {
+        "notificationTypes": {
+          "event": "Sự kiện",
+          "tuition": "Học phí",
+          "schedule": "Lịch học",
+          "important": "Quan trọng"
+        },
+        "targetTypes": {
+          "all": "Tất cả người dùng",
+          "allStudents": "Tất cả sinh viên",
+          "allInstructors": "Tất cả giảng viên",
+          "faculty": "Khoa/Viện",
+          "department": "Bộ môn",
+          "class": "Lớp học",
+          "instructor": "Giảng viên",
+          "student": "Sinh viên"
+        },
+        "sendingMethods": {
+          "system": "Hệ thống",
+          "email": "Email",
+          "both": "Cả hai"
+        },
+        "status": {
+          "all": "Tất cả",
+          "pending": "Đang chờ",
+          "sent": "Đã gửi",
+          "cancelled": "Đã hủy"
+        }
+      },
+      "title": "Quản lý Thông báo",
+      "description": "Quản lý và gửi thông báo đến người dùng",
+      "add": "Thêm thông báo",
+      "create": "Tạo thông báo",
+      "edit": "Sửa thông báo",
+      "send": "Gửi thông báo",
+      "search": "Tìm kiếm theo tiêu đề...",
+      "advancedFilter": "Lọc nâng cao",
+      "clearFilters": "Xóa tất cả bộ lọc nâng cao",
+      "clearDateFilter": "Xóa bộ lọc ngày",
+      "listTitle": "Danh sách Thông báo",
+      "selected": "Đã chọn {count} thông báo",
+      "bulkEdit": "Chỉnh sửa toàn bộ",
+      "deselect": "Bỏ chọn",
+      "allStatus": "Tất cả trạng thái",
+      "allTargets": "Tất cả đối tượng",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "notificationType": "Loại thông báo",
+      "selectType": "Chọn loại thông báo",
+      "sendingMethod": "Phương thức gửi",
+      "selectMethod": "Chọn phương thức",
+      "faculty": "Khoa/Viện",
+      "selectFaculty": "Chọn khoa/viện",
+      "searchFaculty": "Tìm kiếm khoa/viện...",
+      "department": "Bộ môn",
+      "selectDepartment": "Chọn bộ môn",
+      "searchDepartment": "Tìm kiếm bộ môn...",
+      "class": "Lớp học",
+      "selectClass": "Chọn lớp học",
+      "searchClass": "Tìm kiếm lớp học...",
+      "instructor": "Giảng viên",
+      "selectInstructor": "Chọn giảng viên",
+      "searchInstructor": "Tìm kiếm giảng viên...",
+      "student": "Sinh viên",
+      "selectStudent": "Chọn sinh viên",
+      "searchStudent": "Tìm kiếm sinh viên...",
+      "all": "Tất cả",
+      "filtering": "Đang lọc",
+      "noData": "Không có dữ liệu",
+      "loading": "Đang tải...",
+      "columns": {
+        "title": "Tiêu đề",
+        "type": "Loại",
+        "target": "Đối tượng",
+        "method": "Phương thức",
+        "recipients": "Người nhận",
+        "status": "Trạng thái",
+        "scheduledDate": "Ngày gửi dự kiến",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "actions": {
+        "view": "Xem chi tiết",
+        "edit": "Chỉnh sửa",
+        "send": "Gửi",
+        "archive": "Lưu trữ",
+        "cancel": "Hủy"
+      },
+      "stats": {
+        "total": "Tổng số thông báo",
+        "pending": "Đang chờ",
+        "sent": "Đã gửi",
+        "cancelled": "Đã hủy",
+        "archived": "Đã lưu trữ"
+      }
+    }
+  }
+}

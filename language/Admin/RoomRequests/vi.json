@@ -1,0 +1,178 @@
+{
+  "admin": {
+    "roomRequests": {
+      "pageTitle": "Quản lý Đơn đăng ký Phòng",
+      "pageDescription": "Xử lý tập trung các đơn đăng ký sử dụng phòng của sinh viên và giảng viên",
+      "stats": {
+        "total": "Tổng đơn",
+        "pending": "Chờ duyệt",
+        "confirmed": "Đã duyệt",
+        "rejected": "Từ chối"
+      },
+      "status": {
+        "pending": "Chờ duyệt",
+        "confirmed": "Đã duyệt",
+        "rejected": "Từ chối",
+        "cancelled": "Đã hủy"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm...",
+        "building": {
+          "all": "Tất cả toà nhà",
+          "placeholder": "Tòa nhà"
+        },
+        "roomType": {
+          "all": "Tất cả loại phòng",
+          "placeholder": "Loại phòng"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "placeholder": "Trạng thái"
+        },
+        "usageDate": "Ngày sử dụng"
+      },
+      "list": {
+        "title": "Danh sách đơn đăng ký",
+        "syncing": "Đang đồng bộ dữ liệu...",
+        "states": {
+          "error": "Không thể tải danh sách đơn đăng ký. Vui lòng thử lại sau.",
+          "loading": "Đang tải danh sách đơn đăng ký...",
+          "empty": "Không tìm thấy đơn đăng ký phù hợp với bộ lọc."
+        },
+        "columns": {
+          "selectAll": "Chọn tất cả",
+          "code": "Mã",
+          "room": "Phòng",
+          "student": "Sinh viên",
+          "usageDate": "Ngày SD",
+          "registrationDate": "Ngày ĐK",
+          "status": "Trạng thái",
+          "action": "HĐ"
+        },
+        "actions": {
+          "view": "Xem chi tiết",
+          "approve": "Duyệt",
+          "reject": "Từ chối",
+          "cancel": "Hủy"
+        }
+      },
+      "bulkActions": {
+        "approve": "Duyệt nhiều",
+        "reject": "Từ chối nhiều"
+      },
+      "detailModal": {
+        "title": "Chi tiết Đơn đăng ký",
+        "subtitle": "Thông tin chi tiết về đơn đăng ký phòng",
+        "sections": {
+          "requestInfo": "THÔNG TIN ĐƠN ĐĂNG KÝ",
+          "studentInfo": "THÔNG TIN SINH VIÊN",
+          "roomInfo": "THÔNG TIN PHÒNG",
+          "usageInfo": "THÔNG TIN SỬ DỤNG"
+        },
+        "fields": {
+          "code": "Mã đơn",
+          "createdDate": "Ngày tạo đơn",
+          "status": "Trạng thái",
+          "studentId": "Mã số sinh viên",
+          "fullName": "Họ tên",
+          "class": "Lớp",
+          "roomId": "Mã phòng",
+          "roomName": "Tên phòng",
+          "roomType": "Loại phòng",
+          "building": "Toà nhà",
+          "usageDate": "Ngày sử dụng",
+          "timeSlot": "Khung giờ",
+          "peopleCount": "Số người",
+          "purpose": "Mục đích sử dụng"
+        },
+        "actions": {
+          "close": "Đóng",
+          "approve": "Phê duyệt",
+          "reject": "Từ chối",
+          "common": {
+            "na": "N/A"
+          },
+          "defaultQuestionFileName": "de_thi.pdf",
+          "defaultAnswerFileName": "dap_an.pdf"
+        }
+      },
+      "approveModal": {
+        "title": "Duyệt đơn đăng ký",
+        "question": "Bạn có chắc chắn muốn duyệt đơn đăng ký này?",
+        "code": "Mã: {code}",
+        "details": {
+          "room": "Phòng",
+          "building": "Toà nhà",
+          "student": "Sinh viên",
+          "usageTime": "Thời gian sử dụng"
+        },
+        "note": "Ghi chú",
+        "notePlaceholder": "Nhập ghi chú (Tuỳ chọn)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "rejectModal": {
+        "title": "Từ chối đơn đăng ký",
+        "instruction": "Nhập lý do từ chối đơn đăng ký này",
+        "code": "Mã: {code}",
+        "details": {
+          "room": "Phòng",
+          "building": "Toà nhà",
+          "student": "Sinh viên",
+          "usageTime": "Thời gian sử dụng"
+        },
+        "reason": "Lý do từ chối",
+        "reasonPlaceholder": "Nhập lý do từ chối (Tối thiểu 10 ký tự)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "cancelModal": {
+        "title": "Huỷ đơn đăng ký đã duyệt",
+        "subtitle": "Bạn sắp huỷ đơn đã được duyệt",
+        "code": "Mã: {code}",
+        "details": {
+          "room": "Phòng",
+          "building": "Toà nhà",
+          "student": "Sinh viên",
+          "usageTime": "Thời gian sử dụng"
+        },
+        "reason": "Lý do huỷ",
+        "reasonPlaceholder": "Nhập lý do huỷ đơn (Tối thiểu 10 ký tự)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "bulkApproveModal": {
+        "title": "Duyệt {count} đơn đăng ký",
+        "description": "Danh sách các đơn sẽ được duyệt:",
+        "note": "Ghi chú chung",
+        "notePlaceholder": "Nhập ghi chú (Tuỳ chọn)",
+        "noteMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      },
+      "bulkRejectModal": {
+        "title": "Từ chối {count} đơn đăng ký",
+        "warning": "Cảnh báo: Hành động này sẽ từ chối tất cả {count} đơn đã chọn",
+        "description": "Danh sách các đơn sẽ bị từ chối:",
+        "reason": "Lý do bị từ chối chung",
+        "reasonPlaceholder": "Nhập lý do từ chối (Tối thiểu 10 ký tự)",
+        "reasonMaxLength": "{current}/{max}",
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        }
+      }
+    }
+  }
+}

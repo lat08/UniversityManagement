@@ -1,0 +1,98 @@
+{
+  "instructor": {
+    "exams": {
+      "title": "Exams",
+      "description": "Manage exams and tests",
+      "upload": "Upload Exam",
+      "add": "Add Exam",
+      "edit": "Edit Exam",
+      "empty": {
+        "noExams": "No exams found."
+      },
+      "search": {
+        "placeholder": "Search by subject name, instructor...",
+        "ariaLabel": "Search by subject name or instructor"
+      },
+      "filters": {
+        "allSemesters": "All Semesters",
+        "allSubjects": "All Subjects",
+        "allStatuses": "All Statuses",
+        "allTypes": "All Types"
+      },
+      "examCard": {
+        "code": "Code",
+        "duration": "Duration",
+        "minutes": "minutes",
+        "createdAt": "Created At",
+        "reviewer": "Reviewer",
+        "downloadQuestion": "Download Question",
+        "downloadAnswer": "Download Answer",
+        "resubmit": "Resubmit",
+        "view": "View",
+        "rejectionReason": "Rejection Reason:"
+      },
+      "uploadModal": {
+        "title": "Upload New Exam",
+        "resubmitTitle": "Resubmit Exam",
+        "description": "Description",
+        "subject": "Subject",
+        "subjectRequired": "Please select course class",
+        "examType": "Exam Type",
+        "examTypeRequired": "Please select exam type",
+        "selectExamType": "Select Type",
+        "duration": "Duration",
+        "durationPlaceholder": "Duration (minutes)",
+        "descriptionPlaceholder": "Exam description...",
+        "uploadQuestion": "Upload Question",
+        "uploadAnswer": "Upload Answer",
+        "clickToUpload": "Click to Upload",
+        "fileSizeError": "File size must not exceed 10MB",
+        "fileTypeError": "Only PDF, DOC, DOCX files are supported",
+        "questionFileRequired": "Please select question file",
+        "answerFileRequired": "Please select answer file",
+        "loadingCourseClasses": "Loading course classes...",
+        "selectCourseClass": "Select Course Class",
+        "waitingCourseClasses": "Please wait for course classes to load",
+        "cancel": "Cancel",
+        "upload": "Upload",
+        "uploading": "Uploading..."
+      },
+      "detailModal": {
+        "title": "Exam Details",
+        "description": "Detailed information about the exam and status",
+        "close": "Close",
+        "loading": "Loading data...",
+        "currentStatus": "CURRENT STATUS",
+        "subjectCode": "Subject Code",
+        "entryCode": "Entry Code",
+        "examInfo": "Exam Information",
+        "subject": "Subject",
+        "courseClass": "Course Class",
+        "semester": "Semester",
+        "examType": "Exam Type",
+        "duration": "Duration",
+        "minutes": "minutes",
+        "entryCodeLabel": "Entry Code",
+        "files": "Exam Files",
+        "uploaded": "Uploaded",
+        "download": "Download",
+        "rejectionReason": "Rejection Reason:",
+        "createdAt": "Created At",
+        "reviewedAt": "Reviewed At",
+        "reviewer": "Reviewer",
+        "fileNotFound": "File path not found"
+      },
+      "examTypes": {
+        "midterm": "Midterm",
+        "final": "Final",
+        "quiz": "Quiz",
+        "makeup": "Makeup"
+      },
+      "statuses": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected"
+      }
+    }
+  }
+}

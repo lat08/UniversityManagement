@@ -1,0 +1,491 @@
+{
+  "admin": {
+    "studentProfile": {
+      "title": "Quản lý hồ sơ sinh viên",
+      "description": "Quản lý thông tin sinh viên, lớp học, khóa học và trạng thái",
+      "add": "Thêm sinh viên",
+      "addSuccess": "Thêm sinh viên thành công!",
+      "addSuccessWithCode": "Thêm sinh viên thành công!\nMã sinh viên: {code}",
+      "addError": "Thêm sinh viên thất bại",
+      "edit": "Sửa thông tin",
+      "delete": "Xóa sinh viên",
+      "bulkEdit": "Chỉnh sửa đã chọn",
+      "bulkDelete": "Xóa đã chọn",
+      "export": "Xuất Excel",
+      "import": "Nhập Excel",
+      "search": "Tìm kiếm sinh viên...",
+      "list": {
+        "title": "Danh sách sinh viên",
+        "description": "Quản lý hồ sơ và thông tin sinh viên"
+      },
+      "statCards": {
+        "totalStudents": "Tổng sinh viên",
+        "newStudents": "Tân sinh viên",
+        "graduatingSoon": "Sắp tốt nghiệp",
+        "studying": "Đang học",
+        "onLeave": "Bảo lưu",
+        "expected": "Dự kiến",
+        "onLeaveSubtitle": "Tạm nghỉ",
+        "growthCompared": "so với năm trước"
+      },
+      "columns": {
+        "mssv": "MSSV",
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "faculty": "Khoa",
+        "department": "Chuyên ngành",
+        "class": "Lớp",
+        "academicYear": "Khóa",
+        "trainingSystem": "Hệ đào tạo",
+        "gpa": "GPA",
+        "credits": "Tín chỉ tích lũy",
+        "debt": "Công nợ",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "filters": {
+        "allDepartments": "Tất cả chuyên ngành",
+        "allAcademicYears": "Tất cả khóa",
+        "allStatuses": "Tất cả trạng thái"
+      },
+      "status": {
+        "all": "Tất cả trạng thái",
+        "active": "Đang học",
+        "inactive": "Đình chỉ",
+        "droppedOut": "Thôi học",
+        "suspended": "Bảo lưu",
+        "qualified": "Đủ điều kiện tốt nghiệp",
+        "unknown": "Không xác định"
+      },
+      "actions": {
+        "label": "Thao tác",
+        "view": "Xem chi tiết",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa"
+      },
+      "columnSelector": {
+        "title": "Chọn cột hiển thị ({visible}/{total})",
+        "tooltip": "Cột hiển thị ({visible}/{total})",
+        "required": "(Bắt buộc)"
+      },
+      "toast": {
+        "deleteSuccess": "Xóa sinh viên thành công",
+        "deleteError": "Không thể xóa sinh viên"
+      },
+      "bulkActions": {
+        "selected": "Đã chọn {count} sinh viên",
+        "edit": "Chỉnh sửa hàng loạt",
+        "delete": "Xóa đã chọn",
+        "deselect": "Bỏ chọn"
+      },
+      "table": {
+        "selected": "Đã chọn {count} sinh viên",
+        "empty": "Không tìm thấy sinh viên",
+        "loading": "Đang tải danh sách..."
+      },
+      "modals": {
+        "bulkEdit": {
+          "title": "Chỉnh sửa hàng loạt",
+          "description": "Cập nhật thông tin cho {count} sinh viên",
+          "statusLabel": "Trạng thái đào tạo",
+          "statusPlaceholder": "Chọn trạng thái",
+          "classLabel": "Lớp học",
+          "classPlaceholder": "Chọn lớp học",
+          "noChange": "Không thay đổi",
+          "validation": "Vui lòng chọn ít nhất một trường để cập nhật",
+          "toast": {
+            "success": "Cập nhật thành công {success}/{total} sinh viên",
+            "error": "Cập nhật thất bại",
+            "genericError": "Có lỗi xảy ra khi cập nhật"
+          },
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật..."
+        },
+        "bulkDelete": {
+          "title": "Xóa hàng loạt",
+          "description": "Bạn có chắc chắn muốn xóa {count} sinh viên đã chọn?",
+          "warning": "Hành động này không thể hoàn tác.",
+          "toast": {
+            "success": "Đã xóa {count} sinh viên",
+            "error": "Xóa thất bại",
+            "genericError": "Có lỗi xảy ra khi xóa"
+          },
+          "submitting": "Đang xóa..."
+        },
+        "confirmDelete": {
+          "title": "Xác nhận xóa sinh viên",
+          "description": "Bạn có chắc chắn muốn xóa sinh viên {name}? Hành động này là xóa mềm và có thể khôi phục sau."
+        },
+        "importExcel": {
+          "title": "Nhập sinh viên từ Excel",
+          "description": "Tải file Excel chứa danh sách sinh viên mới",
+          "download": {
+            "title": "Tải file mẫu",
+            "description": "Tải xuống file mẫu để xem định dạng đúng và điền thông tin",
+            "button": "Tải file mẫu",
+            "loading": "Đang tải..."
+          },
+          "upload": {
+            "label": "Chọn file Excel",
+            "cta": "Chọn file hoặc kéo thả vào đây",
+            "supportedFormats": "Chỉ chấp nhận file .xlsx hoặc .xls"
+          },
+          "validation": {
+            "checking": "Đang kiểm tra...",
+            "valid": "File hợp lệ",
+            "invalid": "File không hợp lệ"
+          },
+          "instructions": {
+            "title": "Lưu ý quan trọng",
+            "autoCheck": "File sẽ được kiểm tra tự động khi tải lên",
+            "onlyValidFiles": "Chỉ có thể nhập khi file hợp lệ (hiển thị màu xanh)",
+            "matchTemplate": "Đảm bảo file tuân theo định dạng của file mẫu",
+            "maxSize": "File không được vượt quá 10MB"
+          },
+          "errors": {
+            "invalidExtension": "Vui lòng chọn file Excel (.xlsx hoặc .xls)",
+            "invalidFile": "File không hợp lệ",
+            "noValidFile": "Vui lòng chọn file hợp lệ"
+          },
+          "toast": {
+            "validationSuccess": "File hợp lệ, có thể import",
+            "importSuccess": "Nhập sinh viên thành công",
+            "importError": "Import sinh viên thất bại",
+            "templateSuccess": "Tải xuống template thành công",
+            "templateError": "Tải xuống template thất bại"
+          },
+          "submit": "Nhập file",
+          "submitting": "Đang nhập..."
+        },
+        "export": {
+          "title": "Xuất danh sách sinh viên",
+          "description": "Xuất dữ liệu sinh viên ra file Excel",
+          "info": {
+            "title": "Thông tin xuất",
+            "description": "Dữ liệu sẽ được xuất theo bộ lọc hiện tại của bạn"
+          },
+          "details": {
+            "title": "Chi tiết xuất file",
+            "items": {
+              "filtered": {
+                "title": "Tất cả sinh viên theo bộ lọc",
+                "description": "Bao gồm tất cả sinh viên phù hợp với điều kiện lọc hiện tại"
+              },
+              "fullInfo": {
+                "title": "Thông tin chi tiết đầy đủ",
+                "description": "Bao gồm tất cả thông tin cá nhân, học tập và tài chính của sinh viên"
+              },
+              "format": {
+                "title": "Định dạng Excel (.xlsx)",
+                "description": "File sẽ được tải xuống ngay sau khi xác nhận"
+              }
+            }
+          },
+          "format": {
+            "title": "Định dạng file",
+            "label": "Excel (.xlsx)",
+            "description": "Định dạng chuẩn, tương thích với Microsoft Excel và Google Sheets"
+          },
+          "notes": {
+            "title": "Lưu ý",
+            "autoDownload": "File sẽ được tải xuống tự động sau khi xuất thành công",
+            "duration": "Quá trình xuất có thể mất vài giây tùy thuộc vào số lượng sinh viên",
+            "filterReminder": "Đảm bảo bạn đã áp dụng bộ lọc phù hợp trước khi xuất"
+          },
+          "toast": {
+            "success": "Xuất file thành công",
+            "error": "Xuất file thất bại"
+          },
+          "submit": "Xuất file",
+          "submitting": "Đang xuất..."
+        }
+      },
+      "gradeDetail": {
+        "title": "Chi tiết điểm môn học",
+        "sections": {
+          "detail": "Chi tiết điểm"
+        },
+        "fields": {
+          "code": "Mã môn học:",
+          "credits": "Số tín chỉ:",
+          "semester": "Học kỳ:",
+          "attendance": "Điểm chuyên cần",
+          "midterm": "Điểm giữa kỳ",
+          "final": "Điểm cuối kỳ",
+          "overall": "Điểm tổng kết (10)",
+          "scaleFour": "Điểm thang 4",
+          "letter": "Điểm chữ",
+          "result": "Kết quả"
+        },
+        "result": {
+          "pass": "Đạt",
+          "fail": "Không đạt"
+        },
+        "components": {
+          "attendanceAttitude": "Chuyên cần và thái độ học tập",
+          "quiz": "Kiểm tra",
+          "finalExam": "Điểm thi",
+          "headers": {
+            "order": "STT",
+            "name": "Tên thành phần",
+            "weight": "Trọng số (%)",
+            "score": "Điểm"
+          }
+        }
+      },
+      "semesterTable": {
+        "columns": {
+          "code": "Mã MH",
+          "name": "Tên môn học",
+          "creditsShort": "TC",
+          "examScore": "Điểm thi",
+          "score10": "TK (10)",
+          "score4": "TK (4)",
+          "scoreLetter": "TK (chữ)",
+          "result": "Kết quả",
+          "detail": "Chi tiết"
+        },
+        "stats": {
+          "semesterGpa4": "Điểm TB học kỳ hệ 4",
+          "semesterGpa10": "Điểm TB học kỳ hệ 10",
+          "semesterCredits": "Số tín chỉ đạt học kỳ",
+          "inProgram": "Trong CTĐT",
+          "outProgram": "Ngoài CTĐT",
+          "cumulativeGpa4": "Điểm TB tích lũy hệ 4",
+          "cumulativeGpa10": "Điểm TB tích lũy hệ 10",
+          "cumulativeCredits": "Số tín chỉ tích lũy",
+          "classificationLabel": "Xếp loại học lực tích lũy"
+        },
+        "classification": {
+          "excellent": "Xuất sắc",
+          "good": "Giỏi",
+          "fair": "Khá",
+          "average": "Trung bình"
+        }
+      },
+      "gradeStats": {
+        "gpa10": "GPA hệ 10",
+        "gpa4": "GPA hệ 4",
+        "totalCredits": "Tổng tín chỉ",
+        "requiredCredits": "/{count} tín chỉ",
+        "completedCourses": "Môn hoàn thành",
+        "courseUnit": "môn học"
+      },
+      "detail": {
+        "noStudent": "Không tìm thấy thông tin sinh viên",
+        "header": {
+          "title": "Chi tiết sinh viên",
+          "description": "Thông tin chi tiết và lịch sử học tập của sinh viên"
+        },
+        "tabs": {
+          "basic": "Thông tin cơ bản",
+          "academic": "Kết quả học tập",
+          "tuition": "Học phí"
+        },
+        "fields": {
+          "studentCode": "Mã số sinh viên: {code}",
+          "email": "Email",
+          "citizenId": "CCCD",
+          "faculty": "Ngành học",
+          "className": "Lớp",
+          "educationLevel": "Hệ đào tạo",
+          "academicYear": "Khóa",
+          "address": "Địa chỉ",
+          "genderOther": "Khác"
+        },
+        "sections": {
+          "basic": {
+            "title": "Thông tin cơ bản"
+          },
+          "contact": {
+            "title": "Thông tin liên hệ"
+          },
+          "academic": {
+            "title": "Thông tin học vấn"
+          }
+        },
+        "stats": {
+          "debt": "Công nợ",
+          "debtOutstanding": "Chưa thanh toán đầy đủ",
+          "debtCleared": "Đã thanh toán đầy đủ"
+        },
+        "academic": {
+          "noData": "Không có dữ liệu điểm",
+          "filterLabel": "Lọc theo học kỳ",
+          "filterEmpty": "Chưa chọn học kỳ",
+          "filterSelected": "{count} học kỳ đã chọn",
+          "selectAll": "Chọn tất cả",
+          "clearAll": "Bỏ chọn",
+          "emptyState": "Vui lòng chọn ít nhất một học kỳ để xem điểm"
+        }
+      },
+      "tuition": {
+        "historyTitle": "Lịch sử học phí",
+        "historyDescription": "Thông tin thanh toán học phí",
+        "selectSemester": "Chọn học kỳ",
+        "export": "Xuất Excel",
+        "exporting": "Đang xuất...",
+        "columns": {
+          "code": "Mã môn học",
+          "name": "Tên môn học",
+          "credits": "Số tín chỉ",
+          "fee": "Học phí",
+          "status": "Trạng thái"
+        },
+        "empty": "Không có dữ liệu học phí",
+        "totals": {
+          "label": "Tổng cộng:",
+          "creditsUnit": "TC"
+        }
+      },
+      "insurance": {
+        "historyTitle": "Lịch sử bảo hiểm y tế",
+        "historyDescription": "Thông tin thanh toán bảo hiểm y tế",
+        "selectSemester": "Chọn học kỳ",
+        "export": "Xuất Excel",
+        "exporting": "Đang xuất...",
+        "columns": {
+          "year": "Năm học",
+          "fee": "Phí bảo hiểm",
+          "status": "Trạng thái"
+        },
+        "empty": "Không có dữ liệu bảo hiểm y tế"
+      },
+      "editPage": {
+        "title": "Chỉnh sửa thông tin sinh viên",
+        "description": "Cập nhật thông tin chi tiết của sinh viên",
+        "loading": "Đang tải dữ liệu...",
+        "loadError": "Không thể tải thông tin sinh viên",
+        "notFound": "Không tìm thấy thông tin sinh viên",
+        "tabs": {
+          "basic": "Thông tin cơ bản",
+          "contact": "Thông tin liên hệ",
+          "academic": "Học vấn",
+          "account": "Tài khoản"
+        },
+        "sections": {
+          "basic": {
+            "title": "Thông tin cơ bản",
+            "subtitle": "Thông tin cá nhân của sinh viên"
+          },
+          "contact": {
+            "title": "Thông tin liên hệ",
+            "subtitle": "Thông tin liên lạc của sinh viên"
+          },
+          "academic": {
+            "title": "Thông tin học vấn",
+            "subtitle": "Thông tin về chương trình học và lớp học"
+          },
+          "account": {
+            "title": "Tài khoản đăng nhập",
+            "subtitle": "Cập nhật mật khẩu đăng nhập cho sinh viên"
+          }
+        },
+        "avatar": {
+          "tooltip": "Tải ảnh lên",
+          "typeError": "Chỉ chấp nhận file ảnh định dạng .jpg, .jpeg hoặc .png",
+          "sizeError": "Kích thước ảnh không được vượt quá 5MB",
+          "success": "Ảnh đã được chọn"
+        },
+        "buttons": {
+          "back": "Quay lại",
+          "save": "Lưu thay đổi",
+          "saving": "Đang lưu..."
+        },
+        "toast": {
+          "updateSuccess": "Cập nhật thông tin sinh viên thành công",
+          "updateError": "Cập nhật thông tin thất bại",
+          "genericError": "Có lỗi xảy ra khi cập nhật thông tin"
+        },
+        "form": {
+          "fullName": {
+            "label": "Họ và tên",
+            "placeholder": "Nguyễn Văn A"
+          },
+          "dob": {
+            "label": "Ngày sinh",
+            "placeholder": "dd/mm/yyyy",
+            "ariaLabel": "Chọn ngày sinh"
+          },
+          "gender": {
+            "label": "Giới tính",
+            "placeholder": "Chọn giới tính",
+            "options": {
+              "male": "Nam",
+              "female": "Nữ"
+            }
+          },
+          "citizenId": {
+            "label": "CMND / CCCD",
+            "placeholder": "9-12 số",
+            "hint": "Chỉ nhập số, từ 9-12 ký tự"
+          },
+          "phone": {
+            "label": "Số điện thoại",
+            "placeholder": "10-11 số",
+            "hint": "Chỉ nhập số, từ 10-11 ký tự"
+          },
+          "address": {
+            "label": "Địa chỉ",
+            "placeholder": "Nhập địa chỉ đầy đủ (tối thiểu 5 ký tự)",
+            "hint": "Tối thiểu 5 ký tự, tối đa 255 ký tự"
+          },
+          "email": {
+            "label": "Email",
+            "readonlyHint": "Email không thể chỉnh sửa"
+          },
+          "studentCode": {
+            "label": "Mã sinh viên",
+            "readonlyHint": "Mã sinh viên không thể chỉnh sửa"
+          },
+          "educationLevel": {
+            "label": "Hệ đào tạo",
+            "value": "Đại học chính quy"
+          },
+          "faculty": {
+            "label": "Ngành học",
+            "placeholder": "Chọn ngành học",
+            "searchPlaceholder": "Tìm kiếm ngành học..."
+          },
+          "department": {
+            "label": "Chuyên ngành",
+            "placeholder": "Chọn chuyên ngành",
+            "searchPlaceholder": "Tìm kiếm chuyên ngành..."
+          },
+          "class": {
+            "label": "Lớp",
+            "placeholder": "Chọn lớp",
+            "searchPlaceholder": "Tìm kiếm lớp..."
+          },
+          "status": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái"
+          },
+          "password": {
+            "label": "Mật khẩu mới",
+            "placeholder": "Để trống nếu không đổi",
+            "hint": "Mật khẩu phải có ít nhất 6 ký tự"
+          },
+          "confirmPassword": {
+            "label": "Xác nhận mật khẩu mới",
+            "placeholder": "Để trống nếu không đổi",
+            "hint": "Nhập lại mật khẩu để xác nhận"
+          },
+          "validation": {
+            "fullNameRequired": "Vui lòng nhập họ và tên",
+            "fullNameMax": "Họ và tên không được vượt quá 40 ký tự",
+            "citizenId": "CMND/CCCD phải từ 9-12 số",
+            "phoneNumber": "Số điện thoại phải từ 10-11 số",
+            "address": "Địa chỉ phải trên 5 ký tự",
+            "dateOfBirth": "Vui lòng chọn ngày sinh",
+            "gender": "Vui lòng chọn giới tính",
+            "class": "Vui lòng chọn lớp",
+            "status": "Vui lòng chọn trạng thái",
+            "passwordConfirm": "Mật khẩu xác nhận không khớp",
+            "passwordLength": "Mật khẩu phải có ít nhất 6 ký tự"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "student": {
+    "departments": {
+      "title": "Function Rooms",
+      "description": "Book and track the usage history of the university's function rooms.",
+      "tabs": {
+        "rooms": "Room list",
+        "history": "Booking history"
+      },
+      "filters": {
+        "capacityLabel": "Minimum capacity",
+        "capacityPlaceholder": "Enter number of people",
+        "buildingLabel": "Campus",
+        "roomTypeLabel": "Room type",
+        "roomStatusLabel": "Room status",
+        "bookingStatusLabel": "Booking status",
+        "studentCountLabel": "Participants",
+        "all": "All",
+        "buildingOption": "{name} ({code})"
+      },
+      "roomTypes": {
+        "exam": "Exam room",
+        "lecture_hall": "Lecture hall",
+        "classroom": "Classroom",
+        "computer_lab": "Computer lab",
+        "laboratory": "Laboratory",
+        "meeting_room": "Meeting room",
+        "gym_room": "Gym room",
+        "swimming_pool": "Swimming pool",
+        "music_room": "Music room",
+        "art_room": "Art room",
+        "library_room": "Library room",
+        "self_study_room": "Self-study room",
+        "dorm_room": "Dorm room"
+      },
+      "roomStatuses": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "maintenance": "Maintenance",
+        "unknown": "Unknown"
+      },
+      "bookingStatuses": {
+        "pending": "Pending",
+        "confirmed": "Approved",
+        "cancelled": "Cancelled",
+        "completed": "Completed"
+      },
+      "busySlotTypes": {
+        "class": "Class schedule",
+        "exam": "Exam schedule",
+        "booking": "Booked"
+      },
+      "roomList": {
+        "summary": "Found {count} function rooms",
+        "pageInfo": "(Page {current}/{total})",
+        "empty": {
+          "title": "No rooms found",
+          "description": "Please adjust the filters and try again."
+        },
+        "pagination": {
+          "prev": "Previous page",
+          "next": "Next page"
+        }
+      },
+      "roomCard": {
+        "capacity": "Capacity",
+        "capacityValue": "{count} people",
+        "location": "Location",
+        "amenities": "Amenities",
+        "noAmenities": "No amenities available",
+        "moreAmenities": "+{count} more amenities",
+        "book": "Book room",
+        "unavailable": "Unavailable",
+        "unknown": "Unknown"
+      },
+      "history": {
+        "title": "Function room booking history",
+        "total": "Found {count} bookings (Page {current}/{total})",
+        "location": "Location: {building}",
+        "noCode": "No code",
+        "fields": {
+          "createdDate": "Booking date",
+          "bookingCode": "Booking code",
+          "bookingDate": "Usage date",
+          "studentCount": "Participants",
+          "timeRange": "Time range",
+          "purpose": "Usage purpose"
+        },
+        "actions": {
+          "cancel": "Cancel booking",
+          "cancelling": "Cancelling..."
+        },
+        "empty": {
+          "title": "No booking history yet"
+        },
+        "reasons": {
+          "cancelled": "Booking has been cancelled",
+          "completed": "Booking has been completed",
+          "invalidDate": "Invalid date format",
+          "invalidTime": "Invalid time format",
+          "passed": "The scheduled time has passed",
+          "confirmedSoon": "Booking is approved and starts in less than 3 hours. Please contact the administrator to cancel.",
+          "unknown": "Unknown error"
+        },
+        "pagination": {
+          "prev": "Previous page",
+          "next": "Next page"
+        }
+      },
+      "historyFilters": {
+        "minStudentPlaceholder": "Enter number of people"
+      },
+      "modal": {
+        "title": "Book function room",
+        "subtitle": "Provide the information below to complete the booking for room {room}",
+        "statusBadgeFallback": "Unknown",
+        "semester": {
+          "label": "Current semester",
+          "loading": "Loading semester information...",
+          "missing": "No active semester found. Please contact the administrator.",
+          "range": "Bookings are only allowed between {start} - {end}"
+        },
+        "date": {
+          "label": "Usage date",
+          "placeholder": "dd/mm/yyyy",
+          "selected": "Selected date: {date}"
+        },
+        "studentCount": {
+          "label": "Number of participants",
+          "placeholder": "Enter number of participants",
+          "helper": "Maximum capacity: {capacity} people"
+        },
+        "startTime": {
+          "label": "Start time",
+          "placeholderSelectDate": "Please select a date first",
+          "loading": "Loading...",
+          "noSlots": "No available time slots",
+          "default": "Select a start time",
+          "noSlotsHint": "⚠️ No slots available. Please choose another date."
+        },
+        "endTime": {
+          "label": "End time",
+          "placeholder": "Select an end time"
+        },
+        "busySlots": {
+          "title": "Busy time slots",
+          "range": "{start} - {end}"
+        },
+        "purpose": {
+          "label": "Usage purpose",
+          "placeholder": "Describe how you will use the room (max 500 characters)",
+          "counter": "{length} / 500"
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "confirm": "Confirm booking",
+          "confirming": "Booking..."
+        },
+        "periodLabel": "Period {period}"
+      },
+      "cancelModal": {
+        "title": "Cancel booking",
+        "description": "Do you want to cancel the booking of room {room} on {date}, time {timeStart} - {timeEnd}?",
+        "confirm": "Confirm",
+        "cancel": "Close"
+      },
+      "toast": {
+        "bookingSuccess": "Room booking submitted! Status: Pending approval.",
+        "bookingError": "Unable to create room booking.",
+        "cancelSuccess": "Booking cancelled successfully!",
+        "cancelError": "Unable to cancel booking!"
+      },
+      "validation": {
+        "missingFields": "Please fill in all required information",
+        "purposeMax": "Purpose must be less than 500 characters",
+        "studentCountMin": "Participants must be greater than 0",
+        "studentCountMax": "Participants cannot exceed the room capacity ({capacity} people)",
+        "dateInPast": "Booking date cannot be in the past",
+        "outsideSemester": "Booking date must be within the current semester ({start} - {end})",
+        "semesterMissing": "Unable to determine the current semester. Please try again later.",
+        "startTimePast": "Cannot book a time slot that has already passed",
+        "tooManyPeriods": "You cannot book more than 8 consecutive periods",
+        "crossLunch": "You cannot book across the lunch break (period 5 → period 6)"
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "student": {
+    "grades": {
+      "title": "Grades",
+      "description": "View your academic results",
+      "gpa": "GPA",
+      "gpaScale": "GPA 4.0",
+      "totalCredits": "Total Completed Credits",
+      "credits": "credits",
+      "completedCourses": "Completed Courses",
+      "courses": "courses",
+      "noData": "No grade data",
+      "noDataDescription": "Currently no grade data available",
+      "noGradeData": "No grade data",
+      "loadError": "Unable to load data",
+      "exportPdf": "Export PDF",
+      "filterBySemester": "Filter by Semester",
+      "statusLabel": "Status",
+      "status": {
+        "passed": "Passed",
+        "failed": "Failed"
+      },
+      "columns": {
+        "courseCode": "Course Code",
+        "courseName": "Subject Name",
+        "credits": "Credits"
+      },
+      "filters": {
+        "label": "Filter by semester",
+        "placeholder": "No semester selected",
+        "multipleSelected": "{count} semesters selected",
+        "selectAll": "Select all",
+        "clear": "Clear",
+        "exportLabel": "Export",
+        "exportButton": "Print transcript",
+        "exporting": "Exporting..."
+      },
+      "table": {
+        "headers": {
+          "finalExam": "Exam score",
+          "finalGpa10": "Final GPA (10)",
+          "finalGpa4": "Final GPA (4)",
+          "letter": "Letter",
+          "result": "Result",
+          "detail": "Details"
+        },
+        "viewDetail": "View details"
+      },
+      "summary": {
+        "semesterGpa4": "Semester GPA (4-point)",
+        "semesterGpa10": "Semester GPA (10-point)",
+        "semesterCredits": "Semester credits earned",
+        "semesterCreditsInCurriculum": "In curriculum",
+        "semesterCreditsOutCurriculum": "Outside curriculum",
+        "cumulativeGpa4": "Cumulative GPA (4-point)",
+        "cumulativeGpa10": "Cumulative GPA (10-point)",
+        "cumulativeCredits": "Total earned credits",
+        "classificationLabel": "Cumulative academic classification",
+        "classification": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "fair": "Fair",
+          "average": "Average",
+          "weak": "Weak"
+        }
+      },
+      "detailModal": {
+        "meta": "Code: {code} • Credits: {credits}",
+        "headers": {
+          "order": "No.",
+          "component": "Component",
+          "weight": "Weight (%)",
+          "score": "Score"
+        },
+        "close": "Close"
+      }
+    }
+  }
+}

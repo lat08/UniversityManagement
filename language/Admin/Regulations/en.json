@@ -1,0 +1,189 @@
+{
+  "admin": {
+    "regulations": {
+      "pageTitle": "Regulation Management",
+      "pageDescription": "Manage, publish, and keep every institutional regulation up to date",
+      "stats": {
+        "total": "Total regulations"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "In effect",
+        "archived": "Archived",
+        "unknown": "Unknown"
+      },
+      "statusDescriptions": {
+        "draft": "Being drafted or pending approval",
+        "active": "Published and currently effective",
+        "archived": "Expired or replaced"
+      },
+      "categories": {
+        "admission": "Admissions",
+        "academic": "Academics",
+        "finance": "Finance",
+        "studentAffairs": "Student Affairs",
+        "general": "General policies"
+      },
+      "units": {
+        "trainingDept": "Academic Affairs Office",
+        "admissionOffice": "Admissions Office",
+        "studentAffairs": "Student Affairs Office",
+        "financeOffice": "Finance Office",
+        "managementBoard": "Board of Management"
+      },
+      "audience": {
+        "all": "All audiences",
+        "student": "Students",
+        "instructor": "Instructors"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by code, title or description...",
+        "category": {
+          "all": "All types",
+          "placeholder": "Regulation type"
+        },
+        "unit": {
+          "all": "All units",
+          "placeholder": "Issuing unit"
+        },
+        "status": {
+          "all": "All statuses",
+          "placeholder": "Status"
+        },
+        "audience": {
+          "placeholder": "Target audience"
+        }
+      },
+      "list": {
+        "title": "Regulation List",
+        "syncing": "Syncing latest data...",
+        "states": {
+          "error": "Unable to load regulations. Please try again later.",
+          "loading": "Loading regulation list...",
+          "empty": "No regulations match the current filters."
+        },
+        "code": "Code:",
+        "issueDate": "Issue date",
+        "effectiveDate": "Effective date",
+        "issuingUnit": "Issuing unit",
+        "audience": "Target audience",
+        "actions": {
+          "view": "View details",
+          "edit": "Edit",
+          "download": "Download",
+          "delete": "Delete"
+        }
+      },
+      "actions": {
+        "add": "Add new"
+      },
+      "toast": {
+        "fileMissing": "No document available to download",
+        "downloadLoading": "Downloading document...",
+        "downloadSuccess": "Document downloaded successfully",
+        "downloadError": "Unable to download document",
+        "saveError": "Unable to save regulation",
+        "deleteSuccess": "Regulation deleted",
+        "deleteError": "Unable to delete regulation"
+      },
+      "form": {
+        "title": {
+          "create": "Add Regulation",
+          "edit": "Edit Regulation"
+        },
+        "subtitle": "Provide complete information to store the regulation accurately",
+        "fields": {
+          "code": "Regulation code",
+          "title": "Title",
+          "description": "Short description",
+          "category": "Regulation type",
+          "issuingUnit": "Issuing unit",
+          "issueDate": "Issue date",
+          "effectiveDate": "Effective date",
+          "expireDate": "Expiration date",
+          "status": "Status",
+          "audience": "Target audience",
+          "attachment": "Attachment"
+        },
+        "placeholders": {
+          "code": "E.g. REG-1333",
+          "title": "Enter regulation title",
+          "description": "Describe the main content of the regulation...",
+          "category": "Select type",
+          "issuingUnit": "Select unit",
+          "status": "Select status",
+          "audience": "Select audience"
+        },
+        "validation": {
+          "codeMin": "Regulation code must be at least 2 characters",
+          "codePattern": "Regulation code may only contain letters A-Z, numbers, hyphen (-) and underscore (_)",
+          "titleMin": "Title must be at least 4 characters",
+          "titleMax": "Title must not exceed 200 characters",
+          "titlePattern": "Title may only contain letters, numbers, spaces, hyphen (-) and underscore (_)",
+          "descriptionMin": "Description must be at least 10 characters",
+          "descriptionMax": "Description must not exceed 500 characters",
+          "categoryRequired": "Select a regulation type",
+          "issuingUnitRequired": "Select an issuing unit",
+          "issueDateRequired": "Select the issue date",
+          "effectiveDateRequired": "Select the effective date",
+          "effectiveAfterIssue": "Effective date must be on or after the issue date"
+        },
+        "file": {
+          "helper": "Upload PDF/DOC/DOCX files (max 10MB)",
+          "typeError": "Only PDF, DOC, DOCX are supported",
+          "sizeError": "File size must not exceed 10MB",
+          "selected": "Selected: {name}",
+          "current": "Current file: {name}"
+        },
+        "actions": {
+          "close": "Close",
+          "cancel": "Cancel",
+          "saving": "Saving...",
+          "saveDraft": "Save draft",
+          "update": "Update"
+        }
+      },
+      "detail": {
+        "subtitle": "Regulation details",
+        "code": "Code: {code}",
+        "category": "Type: {category}",
+        "issueDate": "Issue date",
+        "effectiveDate": "Effective date",
+        "expireDate": "Expiration date",
+        "issuingUnit": "Issuing unit",
+        "audience": "Target audience",
+        "descriptionTitle": "Description",
+        "attachments": {
+          "title": "Attachment",
+          "fallbackName": "Attachment",
+          "view": "View",
+          "download": "Download",
+          "typeLabels": {
+            "pdf": "PDF",
+            "doc": "DOC/DOCX",
+            "generic": "File"
+          }
+        },
+        "actions": {
+          "close": "Close"
+        }
+      },
+      "delete": {
+        "title": "Delete regulation",
+        "message": "Are you sure you want to delete {title}?",
+        "defaultName": "this regulation",
+        "warning": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "loadListError": "Unable to load regulation list",
+      "loadDetailError": "Unable to load regulation details",
+      "createSuccess": "Regulation created successfully",
+      "updateSuccess": "Regulation updated successfully",
+      "common": {
+        "emptyValue": "—",
+        "defaultFileName": "regulation-document"
+      }
+    }
+  }
+}
