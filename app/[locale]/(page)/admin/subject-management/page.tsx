@@ -81,7 +81,7 @@ export default function SubjectManagementPage() {
       },
       {
         key: 'departmentName',
-        label: t('table.columns.instructor'),
+        label: t('table.columns.department'),
         width: 150,
         minWidth: 120,
         align: 'left',
@@ -104,8 +104,8 @@ export default function SubjectManagementPage() {
         visible: true,
       },
       {
-        key: 'semester',
-        label: t('table.columns.semester'),
+        key: 'isGeneral',
+        label: t('table.columns.subjectType'),
         width: 120,
         minWidth: 100,
         align: 'center',
@@ -232,9 +232,9 @@ export default function SubjectManagementPage() {
                     </span>
                   </td>
                 );
-              case 'semester':
+              case 'isGeneral':
                 return (
-                  <td key="semester" className="text-gray-600 text-center" style={cellPaddingStyle}>
+                  <td key="isGeneral" className="text-gray-600 text-center" style={cellPaddingStyle}>
                     {subject.isGeneral ? t('filters.general') : t('filters.specialized')}
                   </td>
                 );
