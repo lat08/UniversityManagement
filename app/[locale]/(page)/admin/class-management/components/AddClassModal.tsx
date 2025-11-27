@@ -165,8 +165,10 @@ export default function AddClassModal({ isOpen, onClose, onSuccess }: AddClassMo
               <Input
                 {...register('classCode')}
                 placeholder={t('modals.add.classCodePlaceholder')}
-                error={errors.classCode?.message}
               />
+              {errors.classCode && (
+                <p className="mt-1 text-sm text-red-600">{errors.classCode.message}</p>
+              )}
             </div>
 
             <div>
@@ -176,8 +178,10 @@ export default function AddClassModal({ isOpen, onClose, onSuccess }: AddClassMo
               <Input
                 {...register('className')}
                 placeholder={t('modals.add.classNamePlaceholder')}
-                error={errors.className?.message}
               />
+              {errors.className && (
+                <p className="mt-1 text-sm text-red-600">{errors.className.message}</p>
+              )}
             </div>
 
             <div>

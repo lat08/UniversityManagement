@@ -97,7 +97,7 @@ export interface Department {
   departmentId: string;
   departmentName: string;
   departmentCode: string;
-  facultyId: string;
+  facultyId?: string;
 }
 
 export interface TrainingSystem {

@@ -13,9 +13,9 @@ interface ViewCourseDetailModalProps {
 }
 
 export const ViewCourseDetailModal = ({ isOpen, onClose, course }: ViewCourseDetailModalProps) => {
-  if (!isOpen || !course) return null;
-
   const t = useTranslations('admin.courseManagement');
+
+  if (!isOpen || !course) return null;
   const statusDisplay = getStatusDisplay(course.status);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {

@@ -171,8 +171,10 @@ export default function EditClassModal({ isOpen, onClose, classItem, onSuccess }
               <Input
                 {...register('className')}
                 placeholder={t('modals.edit.classNamePlaceholder')}
-                error={errors.className?.message}
               />
+              {errors.className && (
+                <p className="mt-1 text-sm text-red-600">{errors.className.message}</p>
+              )}
             </div>
 
             <div>

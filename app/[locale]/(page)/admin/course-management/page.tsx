@@ -25,7 +25,7 @@ import { useFacultyAssignments } from './lib/hooks/useFacultyAssignments';
 import { coursesApi } from './lib/api/coursesApi';
 import { studentsApi } from '../student-profile/lib/api/studentsApi';
 import { getStatusDisplay } from './lib/types/types';
-import type { Course, FacultyAssignment, Major, Specialization, Subject, Instructor, CourseClassSummary } from './lib/types/types';
+import type { Course, FacultyAssignment, Major, Specialization, Subject, Instructor, CourseClassSummary, Batch } from './lib/types/types';
 import { format } from 'date-fns';
 import { useSearchParams } from 'next/navigation';
 

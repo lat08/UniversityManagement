@@ -122,7 +122,7 @@ export const classesApi = {
     if (response.success && response.data) {
       return response.data.map((y) => ({
         academicYearId: y.academicYearId,
-        yearName: y.yearName,
+        yearName: y.yearRange,
         yearCode: y.yearCode,
       }));
     }

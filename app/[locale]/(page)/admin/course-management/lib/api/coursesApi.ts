@@ -640,6 +640,19 @@ export const coursesApi = {
       startDate: string;
     }>
   > => {
+    type CourseClassDetailData = {
+      courseClassId: string;
+      courseClassCode: string;
+      subjectName: string;
+      instructorName?: string;
+      instructorId?: string;
+      studentsEnrolled: number;
+      maxStudents: number;
+      semesterName: string;
+      courseClassStatus: string;
+      roomId?: string;
+      startDate: string;
+    };
     try {
       const response = await api.get<{
         success: boolean;
@@ -667,10 +680,20 @@ export const coursesApi = {
         };
       }
 
+      const emptyData: CourseClassDetailData = {
+        courseClassId: '',
+        courseClassCode: '',
+        subjectName: '',
+        studentsEnrolled: 0,
+        maxStudents: 0,
+        semesterName: '',
+        courseClassStatus: '',
+        startDate: '',
+      };
       return {
         success: false,
         message: response.data.message || 'Lấy chi tiết lớp học phần thất bại',
-        data: {} as any,
+        data: emptyData,
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -678,10 +701,20 @@ export const coursesApi = {
           ?.data?.message ||
         (error as { message?: string })?.message ||
         'Đã xảy ra lỗi khi lấy chi tiết lớp học phần';
+      const emptyData: CourseClassDetailData = {
+        courseClassId: '',
+        courseClassCode: '',
+        subjectName: '',
+        studentsEnrolled: 0,
+        maxStudents: 0,
+        semesterName: '',
+        courseClassStatus: '',
+        startDate: '',
+      };
       return {
         success: false,
         message: errorMessage,
-        data: {} as any,
+        data: emptyData,
       };
     }
   },
