@@ -200,7 +200,10 @@ export function DropdownSearch<T = string>({
             </div>
           </div>
 
-          <div className="overflow-y-auto max-h-48">
+          <div 
+            className="overflow-y-auto max-h-48"
+            onWheel={(e) => e.stopPropagation()}
+          >
             {showEmptyOption && (
               <button
                 type="button"
