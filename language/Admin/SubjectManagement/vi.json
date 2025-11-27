@@ -1,0 +1,236 @@
+{
+  "admin": {
+    "subjectManagement": {
+      "title": "Quản lý môn học",
+      "description": "Quản lý thông tin các môn học",
+      "listTitle": "Danh sách môn học",
+      "search": {
+        "placeholder": "Tìm kiếm theo Mã môn học, tên..."
+      },
+      "filters": {
+        "allFaculties": "Tất cả khoa",
+        "allDepartments": "Tất cả bộ môn",
+        "allStatuses": "Tất cả trạng thái",
+        "general": "Đại cương",
+        "specialized": "Chuyên ngành",
+        "status": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        }
+      },
+      "table": {
+        "loading": "Đang tải...",
+        "empty": "Không có dữ liệu",
+        "selected": "Đã chọn {count} môn học",
+        "columns": {
+          "code": "Mã",
+          "name": "Tên môn học",
+          "instructor": "Giảng viên",
+          "credits": "Tín chỉ",
+          "students": "Sinh viên",
+          "semester": "Kỳ",
+          "status": "Trạng thái",
+          "actions": "HĐ"
+        }
+      },
+      "actions": {
+        "add": "Thêm mới",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa môn học",
+        "export": "Xuất Excel",
+        "bulkEdit": "Chỉnh sửa toàn bộ",
+        "bulkDelete": "Xóa toàn bộ",
+        "deselectAll": "Bỏ chọn"
+      },
+      "messages": {
+        "deleteSuccess": "Xóa môn học thành công",
+        "deleteError": "Xóa môn học thất bại"
+      },
+      "addModal": {
+        "title": "Thêm mới môn học",
+        "description": "Nhập thông tin môn học mới",
+        "saving": "Đang lưu...",
+        "success": "Thêm môn học thành công!",
+        "error": "Thêm môn học thất bại",
+        "errorGeneric": "Đã xảy ra lỗi khi thêm môn học",
+        "validation": {
+          "hoursRequired": "Ít nhất một trong số giờ lý thuyết hoặc thực hành phải > 0"
+        },
+        "statusOptions": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        },
+        "isGeneralOptions": {
+          "general": "Môn đại cương",
+          "specialized": "Môn chuyên ngành"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Tên môn học",
+            "placeholder": "VD: Đại số tuyến tính",
+            "required": "Tên môn học là bắt buộc",
+            "max": "Tên môn học tối đa 200 ký tự"
+          },
+          "subjectCode": {
+            "label": "Mã môn học",
+            "placeholder": "VD: DSTT",
+            "required": "Mã môn học là bắt buộc",
+            "max": "Mã môn học tối đa 50 ký tự"
+          },
+          "credits": {
+            "label": "Số tín chỉ",
+            "required": "Số tín chỉ là bắt buộc",
+            "min": "Tối thiểu 1 tín chỉ",
+            "max": "Tối đa 10 tín chỉ"
+          },
+          "theoryHours": {
+            "label": "Số giờ lý thuyết",
+            "required": "Số giờ lý thuyết là bắt buộc",
+            "min": "Số giờ lý thuyết phải >= 0"
+          },
+          "practiceHours": {
+            "label": "Số giờ thực hành",
+            "required": "Số giờ thực hành là bắt buộc",
+            "min": "Số giờ thực hành phải >= 0"
+          },
+          "isGeneral": {
+            "label": "Loại môn học",
+            "placeholder": "Chọn loại môn học",
+            "required": "Loại môn học là bắt buộc"
+          },
+          "departmentId": {
+            "label": "Khoa/Bộ môn",
+            "placeholder": "Chọn khoa/bộ môn",
+            "required": "Khoa/Bộ môn là bắt buộc"
+          },
+          "subjectStatus": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái",
+            "required": "Trạng thái là bắt buộc"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Môn tiên quyết",
+            "placeholder": "Chọn môn tiên quyết",
+            "none": "Không có"
+          },
+          "description": {
+            "label": "Mô tả môn học",
+            "placeholder": "Nhập mô tả về môn học...",
+            "max": "Mô tả tối đa 500 ký tự"
+          }
+        }
+      },
+      "editModal": {
+        "title": "Chỉnh sửa môn học",
+        "description": "Chỉnh sửa thông tin các môn học được chọn",
+        "saving": "Đang lưu...",
+        "success": "Cập nhật môn học thành công!",
+        "error": "Cập nhật môn học thất bại",
+        "errorGeneric": "Đã xảy ra lỗi khi cập nhật môn học",
+        "errorLoad": "Không thể tải thông tin môn học",
+        "validation": {
+          "hoursRequired": "Ít nhất một trong số giờ lý thuyết hoặc thực hành phải > 0"
+        },
+        "statusOptions": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        },
+        "isGeneralOptions": {
+          "general": "Môn đại cương",
+          "specialized": "Môn chuyên ngành"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Tên môn học",
+            "placeholder": "VD: Đại số tuyến tính",
+            "required": "Tên môn học là bắt buộc",
+            "max": "Tên môn học tối đa 200 ký tự"
+          },
+          "subjectCode": {
+            "label": "Mã môn học",
+            "placeholder": "VD: DSTT",
+            "required": "Mã môn học là bắt buộc",
+            "max": "Mã môn học tối đa 50 ký tự"
+          },
+          "credits": {
+            "label": "Số tín chỉ",
+            "required": "Số tín chỉ là bắt buộc",
+            "min": "Tối thiểu 1 tín chỉ",
+            "max": "Tối đa 10 tín chỉ"
+          },
+          "theoryHours": {
+            "label": "Số giờ lý thuyết",
+            "required": "Số giờ lý thuyết là bắt buộc",
+            "min": "Số giờ lý thuyết phải >= 0"
+          },
+          "practiceHours": {
+            "label": "Số giờ thực hành",
+            "required": "Số giờ thực hành là bắt buộc",
+            "min": "Số giờ thực hành phải >= 0"
+          },
+          "isGeneral": {
+            "label": "Loại môn học",
+            "placeholder": "Chọn loại môn học",
+            "required": "Loại môn học là bắt buộc"
+          },
+          "departmentId": {
+            "label": "Khoa/Bộ môn",
+            "placeholder": "Chọn khoa/bộ môn",
+            "required": "Khoa/Bộ môn là bắt buộc"
+          },
+          "subjectStatus": {
+            "label": "Trạng thái",
+            "placeholder": "Chọn trạng thái",
+            "required": "Trạng thái là bắt buộc"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Môn tiên quyết",
+            "placeholder": "Chọn môn tiên quyết",
+            "none": "Không có"
+          }
+        }
+      },
+      "deleteModal": {
+        "title": "Xác nhận xóa môn học",
+        "warning": "Cảnh báo:",
+        "message": "Bạn có chắc chắn muốn xóa môn học {subjectName} (Mã: {subjectCode})? Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+        "cancel": "Hủy",
+        "confirm": "Xóa",
+        "deleting": "Đang xóa..."
+      },
+      "bulkEditModal": {
+        "title": "Chỉnh sửa môn học",
+        "description": "Chỉnh sửa thông tin các môn học được chọn",
+        "statusLabel": "Kỳ học",
+        "statusPlaceholder": "Chọn trạng thái",
+        "cancel": "Hủy",
+        "update": "Cập nhật",
+        "updating": "Đang cập nhật...",
+        "success": "Cập nhật trạng thái thành công!",
+        "errorGeneric": "Đã xảy ra lỗi khi cập nhật",
+        "validation": {
+          "statusRequired": "Vui lòng chọn trạng thái"
+        },
+        "statusOptions": {
+          "active": "Hoạt động",
+          "inactive": "Tạm ngưng",
+          "archived": "Lưu trữ"
+        }
+      },
+      "bulkDeleteModal": {
+        "title": "Xác nhận xóa môn học",
+        "warning": "Cảnh báo:",
+        "message": "Bạn có chắc chắn muốn xóa {count} môn học đã chọn? Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa.",
+        "cancel": "Hủy",
+        "confirm": "Xóa",
+        "deleting": "Đang xóa...",
+        "success": "Đã xóa thành công {count} môn học",
+        "error": "Không thể xóa {count} môn học",
+        "errorGeneric": "Đã xảy ra lỗi khi xóa"
+      }
+    }
+  }
+}

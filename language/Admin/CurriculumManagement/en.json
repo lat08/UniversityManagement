@@ -1,0 +1,240 @@
+{
+  "admin": {
+    "curriculumManagement": {
+      "page": {
+        "title": "Curriculum Management",
+        "subtitle": "Manage curricula across faculties and departments",
+        "listTitle": "Curriculum List",
+        "import": "Import Excel",
+        "add": "Add Curriculum",
+        "searchPlaceholder": "Search by curriculum code or name...",
+        "bulkSelection": "{count} curricula selected",
+        "bulkEditPending": "Bulk curriculum editing (status) will be added after the backend API is ready.",
+        "detailPanelLabel": "Curriculum structure"
+      },
+      "filters": {
+        "allFaculties": "All faculties",
+        "allDepartments": "All departments",
+        "allStatuses": "All statuses",
+        "statusActive": "Active",
+        "statusDisabled": "Disabled"
+      },
+      "table": {
+        "empty": "No data available",
+        "columns": {
+          "code": "Code",
+          "name": "Curriculum name",
+          "faculty": "Faculty",
+          "credits": "Credits",
+          "year": "Applied year",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "active": "Active",
+          "disabled": "Disabled",
+          "inactive": "Inactive"
+        }
+      },
+      "selection": {
+        "bulkEdit": "Edit selected",
+        "bulkDelete": "Delete selected",
+        "clear": "Clear selection"
+      },
+      "actions": {
+        "cancel": "Cancel"
+      },
+      "actionsMenu": {
+        "edit": "Edit",
+        "export": "Export Excel",
+        "delete": "Delete curriculum"
+      },
+      "toast": {
+        "exportSuccess": "Curriculum exported to Excel successfully",
+        "exportError": "Failed to export curriculum",
+        "deleteSuccess": "Curriculum deleted successfully",
+        "deleteError": "Failed to delete curriculum",
+        "deleteGeneralError": "An error occurred while deleting curriculum",
+        "bulkDeleteLoopError": "Failed to delete curriculum",
+        "bulkDeleteGeneralError": "An error occurred while deleting curriculum",
+        "bulkDeleteSuccess": "Selected curricula were deleted (if no errors occurred).",
+        "detailError": "Unable to load curriculum details. Please try again."
+      },
+      "fields": {
+        "code": {
+          "label": "Curriculum code",
+          "placeholder": "e.g. CNTT2020",
+          "required": "Curriculum code is required",
+          "max": "Curriculum code must not exceed 50 characters"
+        },
+        "name": {
+          "label": "Curriculum name",
+          "placeholder": "e.g. Information Technology Curriculum",
+          "required": "Curriculum name is required",
+          "max": "Curriculum name must not exceed 500 characters"
+        },
+        "faculty": {
+          "label": "Faculty",
+          "placeholder": "Select faculty",
+          "searchPlaceholder": "Search faculties..."
+        },
+        "department": {
+          "label": "Department",
+          "placeholder": "Select department",
+          "required": "Department is required",
+          "searchPlaceholder": "Search departments..."
+        },
+        "credits": {
+          "label": "Credits",
+          "helper": "Automatically calculated after subjects are added.",
+          "note": "This value is automatically calculated from the course list."
+        },
+        "appliedYear": {
+          "label": "Applied year",
+          "placeholder": "e.g. 2025",
+          "typeError": "Applied year must be a number",
+          "required": "Applied year is required",
+          "min": "Applied year must be between 1900 and 2100",
+          "max": "Applied year must be between 1900 and 2100"
+        },
+        "version": {
+          "label": "Version",
+          "placeholder": "e.g. 1",
+          "typeError": "Version must be a number",
+          "required": "Version is required",
+          "min": "Version must be greater than 0"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Add Curriculum",
+          "description": "Enter curriculum information",
+          "summaryTitle": "Curriculum overview",
+          "summaryLine1": "The curriculum code and name will be displayed across management screens.",
+          "summaryLine2": "You can configure the subject structure after creating the curriculum.",
+          "submit": "Create",
+          "submitting": "Saving...",
+          "success": "Curriculum created successfully!",
+          "error": "Failed to create curriculum",
+          "generalError": "An error occurred",
+          "helperIntro": "Double-check the curriculum code to avoid conflicts with existing curricula."
+        },
+        "edit": {
+          "title": "Edit Curriculum",
+          "description": "Update curriculum name and applied year",
+          "helperIntro": "You can only modify the curriculum name and applied year. Other fields are read-only.",
+          "submit": "Save changes",
+          "submitting": "Saving...",
+          "success": "Curriculum updated successfully!",
+          "error": "Failed to update curriculum",
+          "generalError": "An error occurred"
+        },
+        "import": {
+          "title": "Import curriculum from Excel",
+          "description": "Select an Excel file and curriculum information",
+          "helperIntro": "You may download a template from the system to ensure the correct file format.",
+          "summaryTitle": "How to import curricula from Excel",
+          "summaryLine1": "Make sure the Excel file follows the system template, including subjects and credits.",
+          "summaryLine2": "The curriculum code, name, and applied year will be used to create a new curriculum.",
+          "fileLabel": "Excel file *",
+          "fileHelper": "Supports .xlsx and .xls files up to 10MB",
+          "fileTypeError": "Only Excel files (.xlsx, .xls) are accepted",
+          "fileSizeError": "File size must not exceed 10MB",
+          "fileRequired": "Please select an Excel file",
+          "infoRequired": "Please fill in all required information",
+          "chooseFileButton": "Choose file",
+          "changeFileButton": "Change file",
+          "submit": "Import curriculum",
+          "submitting": "Importing...",
+          "success": "Curriculum imported successfully!",
+          "error": "Failed to import curriculum",
+          "generalError": "An error occurred while importing curriculum"
+        },
+        "confirmDelete": {
+          "title": "Delete Curriculum",
+          "description": "Are you sure you want to delete curriculum {name}?",
+          "note": "Note: This is a soft delete. The curriculum will remain unavailable for new classes.",
+          "submit": "Delete"
+        },
+        "bulkDelete": {
+          "title": "Delete selected curricula",
+          "description": "Are you sure you want to delete all {count} selected curricula?",
+          "helperIntro": "This action will apply to all currently selected curricula.",
+          "warningTitle": "Warning:",
+          "warningDescription": "This action cannot be undone. All related data will be removed.",
+          "warningPoint1": "Existing classes that use these curricula may be affected.",
+          "warningPoint2": "Please carefully review the selection before performing a bulk delete.",
+          "submit": "Confirm",
+          "submitting": "Deleting..."
+        },
+        "bulkEdit": {
+          "title": "Edit curriculum status",
+          "description": "{count} curricula selected",
+          "helperIntro": "Change the active status for all selected curricula.",
+          "statusLabel": "Active status",
+          "statusPlaceholder": "Select status",
+          "statusNoChange": "No change",
+          "statusNote": "Only the status field will be updated. Other curriculum information will remain unchanged.",
+          "submit": "Update",
+          "submitting": "Updating...",
+          "success": "Status updated for selected curricula.",
+          "error": "Failed to update status in bulk.",
+          "generalError": "An error occurred while updating status in bulk.",
+          "validation": "Please select a status before saving."
+        }
+      },
+      "subjects": {
+        "loading": "Loading subjects...",
+        "noData": "No subject data available for this curriculum.",
+        "summary": "{totalSubjects} subjects • {totalCredits} credits",
+        "yearSummary": "{totalSubjects} subjects • {totalCredits} credits",
+        "semesterSummary": "{totalSubjects} subjects • {totalCredits} credits",
+        "totalSubjectsChip": "{count} subjects",
+        "totalCreditsChip": "{credits} credits",
+        "noSubjects": "No subjects in this semester.",
+        "creditsShort": "cr",
+        "hoursShort": "hrs",
+        "type": {
+          "general": "General",
+          "specialized": "Specialized"
+        },
+        "addButton": "Add subject",
+        "noSelectedForRemove": "Please select at least one subject to remove.",
+        "removeSelected": "Remove selected subjects",
+        "removing": "Removing...",
+        "removeSuccess": "Selected subjects were removed from the curriculum.",
+        "removeError": "Failed to remove selected subjects.",
+        "removeGeneralError": "An error occurred while removing subjects.",
+        "saveAll": "Save curriculum structure",
+        "saving": "Saving...",
+        "saveSuccess": "Curriculum subjects updated successfully.",
+        "saveError": "Failed to update curriculum subjects.",
+        "saveGeneralError": "An error occurred while saving curriculum subjects.",
+        "addTitle": "Add subject to curriculum",
+        "addSubtitle": "Select a subject and position to add to curriculum {code} - {name}",
+        "yearLabel": "Academic year",
+        "yearPlaceholder": "Select academic year",
+        "year1": "Year 1",
+        "year2": "Year 2",
+        "year3": "Year 3",
+        "year4": "Year 4",
+        "semesterLabel": "Semester",
+        "semesterPlaceholder": "Select semester",
+        "semester1": "Semester 1",
+        "semester2": "Semester 2",
+        "semester3": "Summer semester",
+        "subjectLabel": "Subject",
+        "subjectPlaceholder": "Select subject",
+        "subjectSearchPlaceholder": "Search by subject code or name...",
+        "addRequired": "Please select academic year, semester and subject.",
+        "alreadyInCurriculum": "This subject is already in the curriculum.",
+        "addSubmitting": "Adding...",
+        "addSubmit": "Add subject",
+        "addSuccess": "Subject added to curriculum successfully.",
+        "addError": "Failed to add subject to curriculum.",
+        "addGeneralError": "An error occurred while adding subject to curriculum.",
+        "loadSubjectsError": "Failed to load subjects. Please try again."
+      }
+    }
+  }
+}

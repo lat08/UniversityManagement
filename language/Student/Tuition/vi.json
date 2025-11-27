@@ -1,0 +1,118 @@
+{
+  "student": {
+    "tuition": {
+      "title": "Tài chính",
+      "description": "Thông tin học phí và lịch sử thanh toán",
+      "tuitionTab": "Học phí",
+      "insuranceTab": "Bảo hiểm",
+      "historyTab": "Lịch sử thanh toán",
+      "summary": {
+        "total": "Tổng học phí",
+        "paid": "Đã thanh toán",
+        "remaining": "Còn lại"
+      },
+      "loadError": "Tải dữ liệu học phí thất bại",
+      "insuranceLoadError": "Tải dữ liệu bảo hiểm thất bại",
+      "historyLoadError": "Tải dữ liệu lịch sử thất bại",
+      "tuitionSection": {
+        "title": "Danh sách học phí",
+        "subtitle": "Thông tin học phí - {semester}",
+        "coursesBadge": "{count} môn học",
+        "semesterPlaceholder": "Chọn học kỳ",
+        "exportButton": "Xuất Excel"
+      },
+      "tuitionTable": {
+        "headers": {
+          "code": "Mã môn",
+          "name": "Tên môn học",
+          "credits": "Tín chỉ",
+          "amountDue": "Phải thu",
+          "outstanding": "Còn nợ",
+          "status": "Trạng thái",
+          "select": "Chọn"
+        },
+        "empty": "Không có dữ liệu học phí."
+      },
+      "paymentSummary": {
+        "selectedCredits": "Số tín chỉ chọn:",
+        "total": "Tổng cộng",
+        "payButton": "Thanh toán"
+      },
+      "insuranceSection": {
+        "title": "Danh sách bảo hiểm y tế",
+        "description": "Thông tin đóng bảo hiểm y tế theo học kỳ",
+        "exportButton": "Xuất Excel"
+      },
+      "insuranceTable": {
+        "headers": {
+          "name": "Tên bảo hiểm y tế",
+          "validity": "Hiệu lực",
+          "amountDue": "Phải thu",
+          "outstanding": "Còn nợ",
+          "status": "Trạng thái",
+          "select": "Chọn"
+        },
+        "rowTitle": "Bảo hiểm Y tế sinh viên",
+        "empty": "Không có dữ liệu bảo hiểm y tế."
+      },
+      "insuranceSummary": {
+        "selected": "Bảo hiểm đã chọn:",
+        "total": "Tổng cộng",
+        "payButton": "Thanh toán"
+      },
+      "historySection": {
+        "title": "Lịch sử thanh toán"
+      },
+      "historyFilters": {
+        "searchPlaceholder": "Tìm kiếm theo nội dung/mã giao dịch..."
+      },
+      "historyActions": {
+        "exportButton": "Xuất Excel"
+      },
+      "historyTable": {
+        "headers": {
+          "date": "Ngày",
+          "description": "Nội dung",
+          "amount": "Số tiền",
+          "method": "Phương thức",
+          "status": "Trạng thái"
+        },
+        "empty": "Không có lịch sử thanh toán."
+      },
+      "qrModal": {
+        "title": "QR Thanh toán",
+        "pending": "Đang chờ thanh toán...",
+        "success": "Thanh toán thành công!",
+        "failed": "Thanh toán thất bại. Vui lòng thử lại.",
+        "copyLink": "Sao chép link",
+        "openNewTab": "Mở trong tab mới",
+        "close": "Đóng",
+        "copySuccess": "Đã sao chép link QR!",
+        "loadError": "Không thể tải QR. Vui lòng thử lại!"
+      },
+      "toasts": {
+        "tuitionExportSuccess": "Đang tải xuống danh sách học phí",
+        "tuitionExportError": "Không thể tải xuống file. Vui lòng thử lại sau.",
+        "tuitionSelectionRequired": "Vui lòng chọn môn học để thanh toán.",
+        "tuitionQrSuccess": "Tạo QR thành công!",
+        "tuitionQrError": "Không thể tạo QR",
+        "tuitionPaymentError": "Không thể xử lý thanh toán. Vui lòng thử lại sau.",
+        "insuranceExportSuccess": "Đang tải xuống danh sách bảo hiểm",
+        "insuranceExportError": "Không thể tải xuống file. Vui lòng thử lại sau.",
+        "insuranceSelectionRequired": "Vui lòng chọn bảo hiểm để thanh toán",
+        "insuranceQrSuccess": "Tạo QR thành công",
+        "insuranceQrError": "Thanh toán bảo hiểm thất bại",
+        "insuranceQrMissing": "Không nhận được link thanh toán từ server",
+        "insurancePaymentError": "Không thể xử lý thanh toán bảo hiểm",
+        "paymentExportSuccess": "Đang tải xuống file lịch sử thanh toán",
+        "paymentExportError": "Không thể tải xuống file. Vui lòng thử lại sau."
+      },
+      "errors": {
+        "noCourseRegistration": "Không tìm thấy thông tin học phí. Vui lòng đăng ký môn học.",
+        "tuitionLoad": "Tải dữ liệu học phí thất bại.",
+        "insuranceLoad": "Tải dữ liệu bảo hiểm thất bại.",
+        "historyLoad": "Tải dữ liệu lịch sử thanh toán thất bại."
+      }
+    }
+  }
+}

@@ -3,7 +3,8 @@ import type {
   TuitionDebtResponse,
   TuitionDebtFilter,
   StudentDebtByCode,
-  ApiResponse,
+  UpdateTuitionRequest,
+  CreateReminderRequest,
 } from '@/lib/types';
 
 /**
@@ -59,15 +60,59 @@ export const getTuitionDebts = async (
  */
 export const getStudentDebtByCode = async (
   studentCode: string,
-): Promise<ApiResponse<StudentDebtByCode>> => {
-  const response = await api.get<ApiResponse<StudentDebtByCode>>(
+): Promise<StudentDebtByCode> => {
+  const response = await api.get<StudentDebtByCode>(
     `/v1/student-debt/${encodeURIComponent(studentCode)}/detail`,
   );
   return response.data;
 };
 
+/**
+ * @api PUT /v1/student-debt/{studentCode}/update
+ * @description Cập nhật thông tin học phí của sinh viên (trạng thái, ghi chú)
+ * @param studentCode - Mã sinh viên
+ * @param data - Dữ liệu cập nhật (status, notes)
+ * @returns void
+ * @auth Required (Admin, Admin_Accountant, Admin_HR)
+ */
+export const updateTuition = async (
+  studentCode: string,
+  data: UpdateTuitionRequest,
+): Promise<void> => {
+  await api.put(`/v1/student-debt/${encodeURIComponent(studentCode)}/update`, data);
+};
+
+/**
+ * @api POST /v1/student-debt/{studentCode}/reminder
+ * @description Tạo và gửi nhắc nhở đóng học phí cho sinh viên
+ * @param studentCode - Mã sinh viên
+ * @param data - Dữ liệu nhắc nhở (title, content)
+ * @returns void
+ * @auth Required (Admin, Admin_Accountant, Admin_HR)
+ */
+export const createReminder = async (
+  studentCode: string,
+  data: CreateReminderRequest,
+): Promise<void> => {
+  await api.post(`/v1/student-debt/${encodeURIComponent(studentCode)}/reminder`, data);
+};
+
+/**
+ * @api DELETE /v1/student-debt/{studentCode}
+ * @description Xóa thông tin công nợ học phí của sinh viên
+ * @param studentCode - Mã sinh viên
+ * @returns void
+ * @auth Required (Admin, Admin_Accountant, Admin_HR)
+ */
+export const deleteTuition = async (studentCode: string): Promise<void> => {
+  await api.delete(`/v1/student-debt/${encodeURIComponent(studentCode)}`);
+};
+
 export const tuitionApi = {
   getTuitionDebts,
   getStudentDebtByCode,
+  updateTuition,
+  createReminder,
+  deleteTuition,
 };
 

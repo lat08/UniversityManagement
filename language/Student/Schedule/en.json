@@ -1,0 +1,24 @@
+{
+  "student": {
+    "schedule": {
+      "loading": "Loading...",
+      "weekly": {
+        "title": "Weekly Schedule",
+        "description": "View schedule by week in the semester",
+        "loading": "Loading...",
+        "selectWeek": "Select Week",
+        "selectViewType": "Select View Type",
+        "selectSubject": "Select Subject",
+        "searchSubject": "Search subject...",
+        "personalSchedule": "Personal Schedule",
+        "subjectSchedule": "Subject Schedule",
+        "export": "Print",
+        "exporting": "Exporting..."
+      },
+      "semester": {
+        "title": "Semester Schedule",
+        "description": "View schedule by semester"
+      }
+    }
+  }
+}

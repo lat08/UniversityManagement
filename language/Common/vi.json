@@ -1,0 +1,345 @@
+{
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "emailLabel": "Nhập địa chỉ Email",
+      "emailPlaceholder": "example@email.com",
+      "passwordLabel": "Nhập mật khẩu",
+      "passwordPlaceholder": "Mật khẩu (ít nhất 6 ký tự)",
+      "forgotPassword": "Quên mật khẩu ?",
+      "submitButton": "Đăng nhập",
+      "loadingText": "Đang đăng nhập...",
+      "success": "Đăng nhập thành công!",
+      "error": "Đăng nhập thất bại. Vui lòng thử lại!",
+      "adminBlocked": "Tài khoản Admin vui lòng đăng nhập tại trang quản trị!",
+      "captchaRequired": "Vui lòng xác nhận bạn không phải là người máy!",
+      "validation": {
+        "emailRequired": "Email không được để trống",
+        "emailInvalid": "Email không hợp lệ",
+        "passwordRequired": "Mật khẩu không được để trống",
+        "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự",
+        "passwordMax": "Mật khẩu không được quá 100 ký tự"
+      }
+    },
+    "adminLogin": {
+      "title": "Đăng nhập quản trị",
+      "portalTitle": "Cổng Quản Trị",
+      "portalDescription": "Đăng nhập để truy cập hệ thống quản lý",
+      "emailLabel": "Email",
+      "emailPlaceholder": "admin@university.edu",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "submitButton": "Đăng nhập",
+      "loadingText": "Đang xử lý...",
+      "success": "Đăng nhập quản trị thành công!",
+      "error": "Đăng nhập thất bại. Vui lòng thử lại!",
+      "roleDenied": "Chỉ tài khoản Admin hoặc Admin_Principal mới được phép truy cập trang này!",
+      "captchaRequired": "Vui lòng xác nhận bạn không phải là người máy!",
+      "validation": {
+        "emailRequired": "Email không được để trống",
+        "emailInvalid": "Email không hợp lệ",
+        "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự",
+        "passwordMax": "Mật khẩu không được quá 100 ký tự"
+      }
+    },
+    "forgotPassword": {
+      "title": "Quên mật khẩu",
+      "description": "Vui lòng nhập Email của bạn để đổi lại mật khẩu",
+      "emailLabel": "Nhập địa chỉ Email",
+      "emailPlaceholder": "Email",
+      "submit": "Tiếp tục",
+      "loadingText": "Đang gửi...",
+      "success": "Mã OTP đã được gửi đến email của bạn!",
+      "error": "Gửi OTP thất bại. Vui lòng thử lại!",
+      "validation": {
+        "emailRequired": "Email không được để trống",
+        "emailInvalid": "Email không hợp lệ"
+      }
+    },
+    "verifyOtp": {
+      "title": "Xác thực mã",
+      "description": "Mã xác thực đã được gửi đến địa chỉ email của bạn",
+      "label": "Nhập mã",
+      "placeholder": "Mã xác thực",
+      "submit": "Xác nhận",
+      "resendNow": "Gửi lại ngay",
+      "resending": "Đang gửi...",
+      "loadingText": "Đang xác thực...",
+      "success": "Xác thực OTP thành công!",
+      "error": "Xác thực OTP thất bại. Vui lòng thử lại!",
+      "resendSuccess": "Mã OTP mới đã được gửi đến email của bạn!",
+      "resendError": "Gửi lại OTP thất bại. Vui lòng thử lại!",
+      "otpRequired": "Vui lòng nhập mã OTP!",
+      "otpInvalid": "Mã OTP phải có 6 chữ số!",
+      "emailNotFound": "Không tìm thấy email. Vui lòng thử lại từ đầu.",
+      "resendAfter": "Gửi lại sau {seconds}s.",
+      "notReceived": "Bạn không nhận được mã?"
+    },
+    "resetPassword": {
+      "title": "Đặt lại mật khẩu",
+      "newPasswordLabel": "Nhập mật khẩu mới",
+      "confirmPasswordLabel": "Nhập lại mật khẩu mới",
+      "placeholder": "Mật khẩu",
+      "submit": "Xác nhận",
+      "loadingText": "Đang xử lý...",
+      "success": "Đặt lại mật khẩu thành công!",
+      "error": "Đặt lại mật khẩu thất bại. Vui lòng thử lại!",
+      "invalidFlow": "Thông tin không hợp lệ. Vui lòng thử lại từ đầu.",
+      "validation": {
+        "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự",
+        "passwordMax": "Mật khẩu không được quá 100 ký tự",
+        "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+        "passwordMismatch": "Mật khẩu xác nhận không khớp"
+      }
+    },
+    "layout": {
+      "backToLogin": "Quay lại đăng nhập",
+      "back": "Quay lại"
+    },
+    "routeGuard": {
+      "otpRequired": "Bạn cần nhập email trước để nhận mã OTP!",
+      "resetRequired": "Bạn cần xác thực OTP trước khi đặt lại mật khẩu!"
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "retry": "Thử lại",
+    "actions": {
+      "actions": "Thao tác",
+      "add": "Thêm",
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận",
+      "search": "Tìm kiếm",
+      "filter": "Lọc",
+      "export": "Xuất",
+      "import": "Nhập",
+      "view": "Xem",
+      "close": "Đóng",
+      "submit": "Gửi",
+      "reset": "Đặt lại",
+      "loading": "Đang tải...",
+      "saving": "Đang lưu...",
+      "optional": "Tùy chọn",
+      "noName": "Không có tên",
+      "noData": "Chưa có dữ liệu",
+      "error": "Có lỗi xảy ra",
+      "success": "Thành công",
+      "failed": "Thất bại",
+      "back": "Quay lại"
+    },
+    "roles": {
+      "student": "Sinh viên",
+      "instructor": "Giảng viên",
+      "admin": "Quản trị viên"
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển",
+      "welcome": "Chào mừng trở lại, {name}!",
+      "welcomeBack": "Chào mừng trở lại"
+    },
+    "regulations": {
+      "error": {
+        "loadFailed": "Không thể tải dữ liệu"
+      },
+      "empty": {
+        "noRegulations": "Chưa có quy chế nào được công bố.",
+        "noResults": "Không tìm thấy quy chế phù hợp với từ khóa \"{query}\""
+      },
+      "search": {
+        "placeholder": "Tìm kiếm theo tiêu đề, mô tả hoặc đối tượng..."
+      },
+      "filter": {
+        "allTypes": "Tất cả loại",
+        "type": "Loại quy định"
+      },
+      "categories": {
+        "admission": "Tuyển sinh",
+        "academic": "Đào tạo",
+        "finance": "Tài chính",
+        "studentAffairs": "Công tác sinh viên",
+        "general": "Quy định chung"
+      },
+      "updated": "Cập nhật",
+      "issueDate": "Ngày ban hành",
+      "effectiveDate": "Ngày hiệu lực",
+      "content": "Nội dung",
+      "viewDocument": "Xem tài liệu chi tiết:",
+      "viewOnline": "Xem trực tuyến",
+      "fileName": "Tên file",
+      "notice": "Lưu ý",
+      "download": {
+        "loading": "Đang tải xuống tệp...",
+        "button": "Tải file",
+        "success": "Đã tải xuống tệp thành công",
+        "error": "Không thể tải xuống tệp. Vui lòng thử lại."
+      }
+    },
+    "sidebar": {
+      "help": "Trợ giúp",
+      "logout": "Đăng xuất",
+      "university": "ĐẠI HỌC",
+      "universityName": "QUỐC TẾ SÀI GÒN",
+      "sections": {
+        "overview": "TỔNG QUAN",
+        "academic": "HỌC VỤ",
+        "students": "SINH VIÊN",
+        "instructors": "GIẢNG VIÊN",
+        "finance": "TÀI CHÍNH",
+        "system": "HỆ THỐNG",
+        "training": "QUẢN LÝ ĐÀO TẠO"
+      },
+      "menu": {
+        "dashboard": "Bảng điều khiển",
+        "notificationManagement": "Thông báo",
+        "statistics": "Báo cáo thống kê",
+        "classroomManagement": "Quản lý phòng học",
+        "divisionManagement": "Quản lý khoa",
+        "programManagement": "Quản lý ngành học",
+        "facultyManagement": "Quản lý ngành",
+        "departmentManagement": "Quản lý chuyên ngành",
+        "regulations": "Quy chế / Quy định",
+        "buildingManagement": "Quản lý tòa nhà",
+        "curriculumManagement": "Chương trình đào tạo",
+        "courseUnitManagement": "Quản lý học phần",
+        "subjectManagement": "Quản lý môn học",
+        "timetable": "Thời khóa biểu",
+        "examSchedule": "Lịch thi",
+        "courseManagement": "LHP & PC",
+        "classManagement": "Quản lý lớp học định danh",
+        "courseRegistration": "Đăng ký học phần",
+        "roomRequests": "Yêu cầu phòng học",
+        "studentProfile": "Hồ sơ sinh viên",
+        "studentTuition": "Học phí - Công nợ",
+        "instructorProfile": "Hồ sơ giảng viên",
+        "gradeApproval": "Duyệt bảng điểm",
+        "examApproval": "Duyệt đề thi",
+        "classLists": "Danh sách lớp",
+        "instructorSchedule": "Thời khóa biểu",
+        "scheduleChanges": "Yêu cầu đổi lịch",
+        "tuitionPolicy": "Chính sách học phí",
+        "payments": "Thanh toán",
+        "revenueReports": "Báo cáo thu",
+        "personalProfile": "Hồ sơ cá nhân",
+        "themeConfiguration": "Cấu hình hệ thống",
+        "notification": "Thông báo",
+        "teachingPlan": "Kế hoạch giảng dạy",
+        "weeklySchedule": "TKB theo tuần",
+        "semesterSchedule": "TKB theo học kỳ",
+        "materials": "Bài giảng & Giáo trình",
+        "exams": "Đề thi",
+        "grades": "Điểm số",
+        "courses": "Khóa học",
+        "departments": "Phòng chức năng",
+        "studyPlan": "Kế hoạch học tập",
+        "documents": "Tài liệu",
+        "tuition": "Học phí"
+      }
+    },
+    "schedule": {
+      "weekLabel": "Tuần {number} [từ ngày {start} đến ngày {end}]",
+      "days": {
+        "monday": {
+          "short": "Thứ 2",
+          "full": "Thứ hai"
+        },
+        "tuesday": {
+          "short": "Thứ 3",
+          "full": "Thứ ba"
+        },
+        "wednesday": {
+          "short": "Thứ 4",
+          "full": "Thứ tư"
+        },
+        "thursday": {
+          "short": "Thứ 5",
+          "full": "Thứ năm"
+        },
+        "friday": {
+          "short": "Thứ 6",
+          "full": "Thứ sáu"
+        },
+        "saturday": {
+          "short": "Thứ 7",
+          "full": "Thứ bảy"
+        },
+        "sunday": {
+          "short": "CN",
+          "full": "Chủ nhật"
+        }
+      },
+      "grid": {
+        "period": "Tiết {period}",
+        "periodRange": "Tiết {start}-{end}",
+        "code": "Mã",
+        "class": "Lớp",
+        "room": "Phòng",
+        "teacher": "GV"
+      },
+      "tooltip": {
+        "code": "Mã MH",
+        "course": "Môn",
+        "type": "Loại",
+        "class": "Lớp",
+        "room": "Phòng",
+        "teacher": "GV",
+        "period": "Tiết",
+        "dayPeriod": "{day} - Tiết",
+        "periodCount": "Số tiết",
+        "date": "Ngày",
+        "note": "Ghi chú"
+      },
+      "conflicts": {
+        "title": "Cảnh báo xung đột lịch học",
+        "item": "{day} - Tiết {period}:",
+        "courseDetail": "{name} ({code}) - {room} - GV: {teacher}"
+      },
+      "table": {
+        "headers": {
+          "subjectCode": "Mã MH",
+          "subjectName": "Tên môn học",
+          "courseGroup": "Nhóm tổ",
+          "credits": "Số tín chỉ",
+          "class": "Lớp",
+          "dayOfWeek": "Thứ",
+          "startPeriod": "Tiết bắt đầu",
+          "period": "Tiết",
+          "numberOfPeriods": "Số tiết",
+          "roomCode": "Phòng",
+          "instructorName": "Giảng viên",
+          "time": "Thời gian học"
+        },
+        "loading": "Đang tải dữ liệu...",
+        "empty": "Không có dữ liệu thời khóa biểu",
+        "dateRange": "{start} đến {end}"
+      },
+      "messages": {
+        "noData": "Không có dữ liệu",
+        "loading": "Đang tải dữ liệu..."
+      }
+    },
+    "table": {
+      "pagination": {
+        "summary": "Hiển thị {start}-{end} trong tổng số {total}",
+        "previous": "Trước",
+        "next": "Sau"
+      }
+    },
+    "profile": {
+      "changePassword": {
+        "title": "Đặt lại mật khẩu",
+        "currentPassword": "Mật khẩu hiện tại",
+        "newPassword": "Mật khẩu mới",
+        "confirmPassword": "Nhập lại mật khẩu mới",
+        "fillAllFields": "Vui lòng điền đầy đủ thông tin",
+        "passwordMismatch": "Mật khẩu mới và mật khẩu xác nhận không khớp",
+        "passwordMinLength": "Mật khẩu mới phải có ít nhất 8 ký tự",
+        "changePasswordError": "Có lỗi xảy ra khi đổi mật khẩu",
+        "processing": "Đang xử lý...",
+        "saveChanges": "Lưu thay đổi"
+      }
+    }
+  }
+}

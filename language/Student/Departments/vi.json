@@ -1,0 +1,187 @@
+{
+  "student": {
+    "departments": {
+      "title": "Phòng chức năng",
+      "description": "Đăng ký và theo dõi lịch sử sử dụng các phòng chức năng của trường.",
+      "tabs": {
+        "rooms": "Danh sách phòng",
+        "history": "Lịch sử đăng ký"
+      },
+      "filters": {
+        "capacityLabel": "Sức chứa tối thiểu",
+        "capacityPlaceholder": "Nhập số lượng người",
+        "buildingLabel": "Cơ sở",
+        "roomTypeLabel": "Loại phòng",
+        "roomStatusLabel": "Trạng thái phòng",
+        "bookingStatusLabel": "Trạng thái đăng ký",
+        "studentCountLabel": "Số người tham gia",
+        "all": "Tất cả",
+        "buildingOption": "{name} ({code})"
+      },
+      "roomTypes": {
+        "exam": "Phòng thi",
+        "lecture_hall": "Giảng đường",
+        "classroom": "Phòng học",
+        "computer_lab": "Phòng máy tính",
+        "laboratory": "Phòng thí nghiệm",
+        "meeting_room": "Phòng họp",
+        "gym_room": "Phòng gym",
+        "swimming_pool": "Hồ bơi",
+        "music_room": "Phòng âm nhạc",
+        "art_room": "Phòng mỹ thuật",
+        "library_room": "Phòng thư viện",
+        "self_study_room": "Phòng tự học",
+        "dorm_room": "Phòng ký túc xá"
+      },
+      "roomStatuses": {
+        "active": "Hoạt động",
+        "inactive": "Ngừng hoạt động",
+        "maintenance": "Bảo trì",
+        "unknown": "Không xác định"
+      },
+      "bookingStatuses": {
+        "pending": "Chờ xác nhận",
+        "confirmed": "Đã xác nhận",
+        "cancelled": "Đã hủy",
+        "completed": "Đã hoàn thành"
+      },
+      "busySlotTypes": {
+        "class": "Lịch học",
+        "exam": "Lịch thi",
+        "booking": "Đã đặt"
+      },
+      "roomList": {
+        "summary": "Tìm thấy {count} phòng chức năng",
+        "pageInfo": "(Trang {current}/{total})",
+        "empty": {
+          "title": "Không tìm thấy phòng nào",
+          "description": "Vui lòng điều chỉnh bộ lọc và thử lại."
+        },
+        "pagination": {
+          "prev": "Trang trước",
+          "next": "Trang sau"
+        }
+      },
+      "roomCard": {
+        "capacity": "Sức chứa",
+        "capacityValue": "{count} người",
+        "location": "Vị trí",
+        "amenities": "Tiện ích",
+        "noAmenities": "Không có tiện ích hiển thị",
+        "moreAmenities": "+{count} tiện ích khác",
+        "book": "Đăng ký",
+        "unavailable": "Không khả dụng",
+        "unknown": "Không xác định"
+      },
+      "history": {
+        "title": "Lịch sử đăng ký phòng chức năng",
+        "total": "Tìm thấy {count} đăng ký (Trang {current}/{total})",
+        "location": "Địa điểm: {building}",
+        "noCode": "Chưa có mã",
+        "fields": {
+          "createdDate": "Ngày đăng ký",
+          "bookingCode": "Mã đăng ký",
+          "bookingDate": "Ngày sử dụng",
+          "studentCount": "Số người tham gia",
+          "timeRange": "Thời gian sử dụng",
+          "purpose": "Mục đích sử dụng"
+        },
+        "actions": {
+          "cancel": "Hủy đăng ký",
+          "cancelling": "Đang hủy..."
+        },
+        "empty": {
+          "title": "Chưa có lịch đăng ký nào"
+        },
+        "reasons": {
+          "cancelled": "Đăng ký đã bị hủy",
+          "completed": "Đăng ký đã hoàn thành",
+          "invalidDate": "Lỗi định dạng ngày",
+          "invalidTime": "Lỗi định dạng giờ",
+          "passed": "Đã qua thời gian sử dụng",
+          "confirmedSoon": "Đăng ký đã được duyệt và còn dưới 3 tiếng. Vui lòng liên hệ quản trị viên để hủy.",
+          "unknown": "Lỗi không xác định"
+        },
+        "pagination": {
+          "prev": "Trang trước",
+          "next": "Trang sau"
+        }
+      },
+      "historyFilters": {
+        "minStudentPlaceholder": "Nhập số lượng người"
+      },
+      "modal": {
+        "title": "Đăng ký phòng chức năng",
+        "subtitle": "Điền thông tin để hoàn tất đăng ký phòng {room}",
+        "statusBadgeFallback": "Không xác định",
+        "semester": {
+          "label": "Học kỳ hiện tại",
+          "loading": "Đang tải thông tin học kỳ...",
+          "missing": "Không tìm thấy học kỳ hiện tại. Vui lòng liên hệ quản trị viên.",
+          "range": "Chỉ có thể đặt trong khoảng: {start} - {end}"
+        },
+        "date": {
+          "label": "Ngày sử dụng",
+          "placeholder": "dd/mm/yyyy",
+          "selected": "Ngày đã chọn: {date}"
+        },
+        "studentCount": {
+          "label": "Số lượng người tham gia",
+          "placeholder": "Nhập số lượng người tham gia",
+          "helper": "Sức chứa tối đa: {capacity} người"
+        },
+        "startTime": {
+          "label": "Thời gian bắt đầu",
+          "placeholderSelectDate": "Vui lòng chọn ngày trước",
+          "loading": "Đang tải...",
+          "noSlots": "Không có khung giờ trống",
+          "default": "Chọn thời gian bắt đầu",
+          "noSlotsHint": "⚠️ Không còn khung giờ trống. Vui lòng chọn ngày khác."
+        },
+        "endTime": {
+          "label": "Thời gian kết thúc",
+          "placeholder": "Chọn thời gian kết thúc"
+        },
+        "busySlots": {
+          "title": "Các khung giờ đã bận",
+          "range": "{start} - {end}"
+        },
+        "purpose": {
+          "label": "Mục đích sử dụng",
+          "placeholder": "Nhập mục đích sử dụng phòng (tối đa 500 ký tự)",
+          "counter": "{length} / 500"
+        },
+        "actions": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận đăng ký",
+          "confirming": "Đang đăng ký..."
+        },
+        "periodLabel": "Tiết {period}"
+      },
+      "cancelModal": {
+        "title": "Xác nhận hủy đăng ký",
+        "description": "Bạn có chắc chắn muốn hủy đăng ký phòng {room} vào ngày {date}, khung giờ {timeStart} - {timeEnd}?",
+        "confirm": "Xác nhận",
+        "cancel": "Hủy"
+      },
+      "toast": {
+        "bookingSuccess": "Đăng ký phòng thành công! Trạng thái: Chờ xác nhận.",
+        "bookingError": "Đăng ký phòng thất bại!",
+        "cancelSuccess": "Hủy đăng ký thành công!",
+        "cancelError": "Hủy đăng ký thất bại!"
+      },
+      "validation": {
+        "missingFields": "Vui lòng điền đầy đủ thông tin",
+        "purposeMax": "Mục đích sử dụng không được vượt quá 500 ký tự",
+        "studentCountMin": "Số lượng người tham gia phải lớn hơn 0",
+        "studentCountMax": "Số lượng người tham gia không được vượt quá sức chứa của phòng ({capacity} người)",
+        "dateInPast": "Ngày đặt phòng không được trong quá khứ",
+        "outsideSemester": "Ngày đặt phòng phải trong khoảng thời gian học kỳ hiện tại ({start} - {end})",
+        "semesterMissing": "Không thể xác định học kỳ hiện tại. Vui lòng thử lại sau.",
+        "startTimePast": "Không thể đặt phòng cho thời gian trong quá khứ",
+        "tooManyPeriods": "Không được đặt quá 8 tiết liên tiếp",
+        "crossLunch": "Không được đặt xuyên qua giờ nghỉ trưa (tiết 5 → tiết 6)"
+      }
+    }
+  }
+}

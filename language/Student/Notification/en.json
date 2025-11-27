@@ -1,0 +1,36 @@
+{
+  "student": {
+    "notification": {
+      "title": "Notifications",
+      "unreadCount": "{count} unread notifications",
+      "loading": "Loading...",
+      "viewAll": "View all",
+      "search": {
+        "placeholder": "Search notifications..."
+      },
+      "filters": {
+        "all": "All",
+        "unread": "Unread",
+        "read": "Read",
+        "important": "Important",
+        "tuition": "Tuition",
+        "event": "Event",
+        "schedule": "Schedule",
+        "status": "Status"
+      },
+      "markAllAsRead": {
+        "button": "Mark all as read",
+        "processing": "Processing..."
+      },
+      "empty": {
+        "title": "No notifications",
+        "noNotifications": "You don't have any notifications yet",
+        "noNotificationsInCategory": "No notifications in this category"
+      },
+      "error": {
+        "title": "Error loading notifications",
+        "retry": "Retry"
+      }
+    }
+  }
+}

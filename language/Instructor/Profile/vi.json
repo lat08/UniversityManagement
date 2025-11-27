@@ -1,0 +1,73 @@
+{
+  "instructor": {
+    "profile": {
+      "title": "Hồ sơ cá nhân",
+      "tabs": {
+        "profile": "Thông tin cá nhân",
+        "password": "Đổi mật khẩu"
+      },
+      "alerts": {
+        "authErrorTitle": "Lỗi xác thực",
+        "authErrorDescription": "Vui lòng kiểm tra lại thông tin và thử lại."
+      },
+      "passwordTab": {
+        "loading": "Đang tải..."
+      },
+      "fields": {
+        "fullName": "Họ và tên",
+        "instructorCode": "Mã số giảng viên",
+        "gender": "Giới tính",
+        "dateOfBirth": "Ngày sinh",
+        "degree": "Học hàm / học vị",
+        "role": "Chức vụ",
+        "department": "Khoa / phòng ban",
+        "specialization": "Chuyên ngành",
+        "email": "Email",
+        "phoneNumber": "Số điện thoại",
+        "employmentStatus": "Trạng thái công tác",
+        "notUpdated": "Chưa cập nhật"
+      },
+      "gender": {
+        "male": "Nam",
+        "female": "Nữ",
+        "other": "Khác",
+        "unknown": "-"
+      },
+      "employmentStatus": {
+        "active": "Đang công tác",
+        "inactive": "Không hoạt động"
+      },
+      "emptyState": "Không tìm thấy thông tin hồ sơ.",
+      "errors": {
+        "loadFailed": "Không thể tải dữ liệu",
+        "retry": "Thử lại"
+      },
+      "changePassword": {
+        "title": "Đặt lại mật khẩu",
+        "currentPassword": "Mật khẩu hiện tại",
+        "newPassword": "Mật khẩu mới",
+        "confirmPassword": "Nhập lại mật khẩu mới",
+        "passwordHintTitle": "Yêu cầu mật khẩu",
+        "passwordHintValid": "✓ Mật khẩu hợp lệ",
+        "rules": {
+          "minLength": "Mật khẩu mới phải có ít nhất 8 ký tự",
+          "lowercase": "Mật khẩu phải chứa ít nhất 1 chữ thường",
+          "uppercase": "Mật khẩu phải chứa ít nhất 1 chữ hoa",
+          "number": "Mật khẩu phải chứa ít nhất 1 số",
+          "symbol": "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (@$!%*?&)"
+        },
+        "validation": {
+          "currentRequired": "Vui lòng nhập mật khẩu hiện tại",
+          "newRequired": "Vui lòng nhập mật khẩu mới",
+          "confirmRequired": "Vui lòng nhập lại mật khẩu mới",
+          "mismatch": "Mật khẩu mới không khớp",
+          "sameAsCurrent": "Mật khẩu mới phải khác mật khẩu hiện tại"
+        },
+        "actions": {
+          "save": "Lưu thay đổi",
+          "saving": "Đang lưu..."
+        }
+      }
+    }
+  }
+}

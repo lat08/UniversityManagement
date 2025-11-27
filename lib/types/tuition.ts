@@ -96,6 +96,18 @@ export interface TuitionDebtResponse {
   data: PaginatedResult<TuitionDebtItem>;
 }
 
+export interface UpdateTuitionRequest {
+  studentCode: string;
+  status: string;
+  notes?: string;
+}
+
+export interface CreateReminderRequest {
+  studentCode: string;
+  title: string;
+  content: string;
+}
+
 
 
 

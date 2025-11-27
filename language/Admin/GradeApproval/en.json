@@ -1,0 +1,169 @@
+{
+  "admin": {
+    "gradeApproval": {
+      "title": "Grade Approval",
+      "description": "Review and approve student grade sheets",
+      "approve": "Approve",
+      "reject": "Reject",
+      "pending": "Pending",
+      "managementTitle": "Approval Request Management",
+      "managementDescription": "Approve grade sheets individually, view request details",
+      "searchInstructor": "Search instructor...",
+      "allInstructors": "All Instructors",
+      "noData": "No data available",
+      "approveSuccess": "Approved successfully {successCount}/{total} grade sheets",
+      "rejectSuccess": "Rejected successfully {successCount}/{total} grade sheets",
+      "approveError": "Unable to approve {failureCount} grade sheets: {errorMessage}",
+      "rejectError": "Unable to reject {failureCount} grade sheets: {errorMessage}",
+      "genericError": "An error occurred. Please try again.",
+      "exportError": "Please select at least one grade sheet to export",
+      "exportSuccess": "Exported successfully {count} grade sheets",
+      "exportErrorGeneric": "An error occurred while exporting file. Please try again.",
+      "stats": {
+        "total": "Total Grades",
+        "pending": "Pending Approval",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "totalDescription": "All",
+        "pendingDescription": "Pending",
+        "approvedDescription": "Completed",
+        "rejectedDescription": "Rejected"
+      },
+      "columns": {
+        "courseCode": "Course Code",
+        "courseName": "Subject",
+        "className": "Class",
+        "facultyName": "Faculty",
+        "instructorName": "Instructor",
+        "semester": "Semester",
+        "studentCount": "Students",
+        "submittedDate": "Submitted Date",
+        "approvalStatus": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "status": "Status",
+        "statusPlaceholder": "All statuses",
+        "semester": "Semester",
+        "subject": "Subject",
+        "courseClass": "Course Class",
+        "faculty": "Faculty",
+        "department": "Department",
+        "instructor": "Instructor",
+        "keyword": "Keyword",
+        "allStatuses": "All statuses"
+      },
+      "bulkBar": {
+        "selected": "{count} grade sheets selected",
+        "export": "Export Excel",
+        "exporting": "Exporting...",
+        "exportTooltip": "Export selected grade sheets to Excel",
+        "approveAll": "Approve All",
+        "rejectAll": "Reject All",
+        "clear": "Clear Selection"
+      },
+      "columnSelector": {
+        "buttonTitle": "Visible columns ({visible}/{total})",
+        "title": "Select visible columns ({visible}/{total})",
+        "required": "(Required)"
+      },
+      "actionsMenu": {
+        "title": "Actions",
+        "view": "View Details",
+        "approve": "Approve",
+        "reject": "Reject"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "unknown": "Unknown"
+      },
+      "detailModal": {
+        "tag": "Grade Sheet Details",
+        "classSemester": "Class {className} · Semester {semester}",
+        "close": "Close",
+        "loading": "Loading grade version data...",
+        "submittedBy": {
+          "title": "Submitted By"
+        },
+        "approvedBy": {
+          "title": "Approved By"
+        },
+        "versionInfo": {
+          "title": "Version",
+          "number": "Version {number}",
+          "students": "{count} students",
+          "previous": "Previous version: #{version}"
+        },
+        "table": {
+          "title": "Grade Details",
+          "displaying": "Displaying {visible}/{total} students",
+          "empty": "No student data in this version.",
+          "loading": "Loading grade sheet...",
+          "columns": {
+            "studentId": "Student ID",
+            "fullName": "Full Name",
+            "attendance": "Attendance",
+            "midterm": "Midterm",
+            "final": "Final",
+            "average": "Average",
+            "note": "Note"
+          },
+          "previousValue": "Previous: {value}"
+        },
+        "footer": {
+          "updatedAt": "Last updated: {value}",
+          "loading": "Loading data...",
+          "locked": {
+            "approved": "This grade sheet has been approved and cannot be changed.",
+            "rejected": "This grade sheet has been rejected and cannot be changed."
+          }
+        }
+      },
+      "exportModal": {
+        "title": "Export Grade Approval List",
+        "description": "Export grade approval data to Excel file",
+        "fileNamePrefix": "grade_approval",
+        "toastSuccess": "File exported successfully",
+        "toastError": "Failed to export file",
+        "summary": {
+          "title": "Export Information",
+          "description": "Data will be exported according to your current filters"
+        },
+        "details": {
+          "title": "Export File Details",
+          "allTitle": "All grade sheets by filter",
+          "allDescription": "Includes all grade sheets matching current filter conditions",
+          "fullTitle": "Complete detailed information",
+          "fullDescription": "Includes students, subjects, instructors and grades",
+          "formatTitle": "Excel format (.xlsx)",
+          "formatDescription": "File will be downloaded immediately after confirmation"
+        },
+        "filters": {
+          "active": "Active filters"
+        },
+        "format": {
+          "title": "File Format",
+          "name": "Excel (.xlsx)",
+          "description": "Compatible with Microsoft Excel and Google Sheets"
+        },
+        "notes": {
+          "title": "Notes",
+          "autoDownload": "File will be downloaded automatically after successful export",
+          "duration": "Export process may take a few seconds depending on the number of grade sheets",
+          "filters": "Make sure you have applied appropriate filters before exporting"
+        },
+        "cancel": "Cancel",
+        "submit": "Export File",
+        "exporting": "Exporting..."
+      },
+      "partialErrorSuffix": "and {count} more errors.",
+      "search": "Search by code, subject name, instructor...",
+      "allFaculties": "All Faculties",
+      "status": "Status",
+      "searchFaculty": "Search faculty...",
+      "searchInstructorPlaceholder": "Search instructor..."
+    }
+  }
+}

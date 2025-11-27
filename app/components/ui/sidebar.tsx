@@ -98,6 +98,7 @@ function getMenuSections(variant: Variant): MenuSection[] {
           { icon: BookText, labelKey: "menu.curriculumManagement", href: "/admin/curriculum-management" },
           { icon: BookMarked, labelKey: "menu.subjectManagement", href: "/admin/subject-management" },
           { icon: Presentation, labelKey: "menu.courseManagement", href: "/admin/course-management" },
+          { icon: Users, labelKey: "menu.classManagement", href: "/admin/class-management" },
           { icon: CalendarClock, labelKey: "menu.examSchedule", href: "/admin/exam-schedule-management" },
           { icon: DoorOpen, labelKey: "menu.roomRequests", href: "/admin/room-requests" },
         ],

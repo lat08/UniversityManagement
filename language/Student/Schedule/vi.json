@@ -1,0 +1,24 @@
+{
+  "student": {
+    "schedule": {
+      "loading": "Đang tải...",
+      "weekly": {
+        "title": "TKB theo tuần",
+        "description": "Hiển thị thời khóa biểu theo từng tuần trong học kỳ",
+        "selectWeek": "Chọn tuần",
+        "selectViewType": "Chọn loại xem",
+        "selectSubject": "Chọn môn học",
+        "searchSubject": "Tìm kiếm môn học...",
+        "personalSchedule": "Thời khóa biểu cá nhân",
+        "subjectSchedule": "Thời khóa biểu theo môn học",
+        "export": "In",
+        "exporting": "Đang xuất...",
+        "loading": "Đang tải..."
+      },
+      "semester": {
+        "title": "TKB theo học kỳ",
+        "description": "Hiển thị thời khóa biểu theo học kỳ"
+      }
+    }
+  }
+}

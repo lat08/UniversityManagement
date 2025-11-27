@@ -1,0 +1,236 @@
+{
+  "admin": {
+    "subjectManagement": {
+      "title": "Subject Management",
+      "description": "Manage subject information",
+      "listTitle": "Subject List",
+      "search": {
+        "placeholder": "Search by subject code, name..."
+      },
+      "filters": {
+        "allFaculties": "All Faculties",
+        "allDepartments": "All Departments",
+        "allStatuses": "All Statuses",
+        "general": "General",
+        "specialized": "Specialized",
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        }
+      },
+      "table": {
+        "loading": "Loading...",
+        "empty": "No data",
+        "selected": "{count} subjects selected",
+        "columns": {
+          "code": "Code",
+          "name": "Subject Name",
+          "instructor": "Instructor",
+          "credits": "Credits",
+          "students": "Students",
+          "semester": "Semester",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "add": "Add New",
+        "edit": "Edit",
+        "delete": "Delete Subject",
+        "export": "Export Excel",
+        "bulkEdit": "Bulk Edit",
+        "bulkDelete": "Bulk Delete",
+        "deselectAll": "Deselect All"
+      },
+      "messages": {
+        "deleteSuccess": "Subject deleted successfully",
+        "deleteError": "Failed to delete subject"
+      },
+      "addModal": {
+        "title": "Add New Subject",
+        "description": "Enter new subject information",
+        "saving": "Saving...",
+        "success": "Subject added successfully!",
+        "error": "Failed to add subject",
+        "errorGeneric": "An error occurred while adding subject",
+        "validation": {
+          "hoursRequired": "At least one of theory hours or practice hours must be > 0"
+        },
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        },
+        "isGeneralOptions": {
+          "general": "General Subject",
+          "specialized": "Specialized Subject"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Subject Name",
+            "placeholder": "E.g: Linear Algebra",
+            "required": "Subject name is required",
+            "max": "Subject name must not exceed 200 characters"
+          },
+          "subjectCode": {
+            "label": "Subject Code",
+            "placeholder": "E.g: LALG",
+            "required": "Subject code is required",
+            "max": "Subject code must not exceed 50 characters"
+          },
+          "credits": {
+            "label": "Credits",
+            "required": "Credits is required",
+            "min": "Minimum 1 credit",
+            "max": "Maximum 10 credits"
+          },
+          "theoryHours": {
+            "label": "Theory Hours",
+            "required": "Theory hours is required",
+            "min": "Theory hours must be >= 0"
+          },
+          "practiceHours": {
+            "label": "Practice Hours",
+            "required": "Practice hours is required",
+            "min": "Practice hours must be >= 0"
+          },
+          "isGeneral": {
+            "label": "Subject Type",
+            "placeholder": "Select subject type",
+            "required": "Subject type is required"
+          },
+          "departmentId": {
+            "label": "Faculty/Department",
+            "placeholder": "Select faculty/department",
+            "required": "Faculty/Department is required"
+          },
+          "subjectStatus": {
+            "label": "Status",
+            "placeholder": "Select status",
+            "required": "Status is required"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Prerequisite Subject",
+            "placeholder": "Select prerequisite subject",
+            "none": "None"
+          },
+          "description": {
+            "label": "Subject Description",
+            "placeholder": "Enter subject description...",
+            "max": "Description must not exceed 500 characters"
+          }
+        }
+      },
+      "editModal": {
+        "title": "Edit Subject",
+        "description": "Edit selected subject information",
+        "saving": "Saving...",
+        "success": "Subject updated successfully!",
+        "error": "Failed to update subject",
+        "errorGeneric": "An error occurred while updating subject",
+        "errorLoad": "Unable to load subject information",
+        "validation": {
+          "hoursRequired": "At least one of theory hours or practice hours must be > 0"
+        },
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        },
+        "isGeneralOptions": {
+          "general": "General Subject",
+          "specialized": "Specialized Subject"
+        },
+        "form": {
+          "subjectName": {
+            "label": "Subject Name",
+            "placeholder": "E.g: Linear Algebra",
+            "required": "Subject name is required",
+            "max": "Subject name must not exceed 200 characters"
+          },
+          "subjectCode": {
+            "label": "Subject Code",
+            "placeholder": "E.g: LALG",
+            "required": "Subject code is required",
+            "max": "Subject code must not exceed 50 characters"
+          },
+          "credits": {
+            "label": "Credits",
+            "required": "Credits is required",
+            "min": "Minimum 1 credit",
+            "max": "Maximum 10 credits"
+          },
+          "theoryHours": {
+            "label": "Theory Hours",
+            "required": "Theory hours is required",
+            "min": "Theory hours must be >= 0"
+          },
+          "practiceHours": {
+            "label": "Practice Hours",
+            "required": "Practice hours is required",
+            "min": "Practice hours must be >= 0"
+          },
+          "isGeneral": {
+            "label": "Subject Type",
+            "placeholder": "Select subject type",
+            "required": "Subject type is required"
+          },
+          "departmentId": {
+            "label": "Faculty/Department",
+            "placeholder": "Select faculty/department",
+            "required": "Faculty/Department is required"
+          },
+          "subjectStatus": {
+            "label": "Status",
+            "placeholder": "Select status",
+            "required": "Status is required"
+          },
+          "prerequisiteSubjectId": {
+            "label": "Prerequisite Subject",
+            "placeholder": "Select prerequisite subject",
+            "none": "None"
+          }
+        }
+      },
+      "deleteModal": {
+        "title": "Confirm Delete Subject",
+        "warning": "Warning:",
+        "message": "Are you sure you want to delete subject {subjectName} (Code: {subjectCode})? This action cannot be undone. All related data will be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
+      },
+      "bulkEditModal": {
+        "title": "Edit Subjects",
+        "description": "Edit selected subjects information",
+        "statusLabel": "Semester",
+        "statusPlaceholder": "Select status",
+        "cancel": "Cancel",
+        "update": "Update",
+        "updating": "Updating...",
+        "success": "Status updated successfully!",
+        "errorGeneric": "An error occurred while updating",
+        "validation": {
+          "statusRequired": "Please select a status"
+        },
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "archived": "Archived"
+        }
+      },
+      "bulkDeleteModal": {
+        "title": "Confirm Delete Subjects",
+        "warning": "Warning:",
+        "message": "Are you sure you want to delete {count} selected subjects? This action cannot be undone. All related data will be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting...",
+        "success": "Successfully deleted {count} subjects",
+        "error": "Unable to delete {count} subjects",
+        "errorGeneric": "An error occurred while deleting"
+      }
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "admin": {
+    "buildingManagement": {
+      "title": "Quản lý tòa nhà",
+      "description": "Quản lý thông tin tòa nhà, trạng thái hoạt động và địa chỉ",
+      "listTitle": "Danh sách tòa nhà",
+      "stats": {
+        "total": "Tổng tòa nhà",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "search": {
+        "placeholder": "Tìm kiếm theo mã, tên tòa nhà..."
+      },
+      "filters": {
+        "allStatuses": "Tất cả",
+        "noChange": "Không thay đổi",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động"
+      },
+      "bulk": {
+        "selected": "Đã chọn {count} tòa nhà",
+        "edit": "Chỉnh sửa toàn bộ",
+        "delete": "Xóa toàn bộ",
+        "clear": "Bỏ chọn"
+      },
+      "table": {
+        "empty": "Không có dữ liệu",
+        "columns": {
+          "code": "Mã",
+          "name": "Tên tòa nhà",
+          "address": "Địa chỉ",
+          "status": "Trạng thái",
+          "actions": "Thao tác"
+        }
+      },
+      "status": {
+        "all": "Tất cả",
+        "active": "Đang hoạt động",
+        "inactive": "Ngừng hoạt động",
+        "unknown": "Không xác định"
+      },
+      "actions": {
+        "add": "Thêm mới"
+      },
+      "hooks": {
+        "createSuccess": "Thêm tòa nhà thành công!",
+        "createError": "Thêm tòa nhà thất bại",
+        "updateSuccess": "Cập nhật tòa nhà thành công!",
+        "updateError": "Cập nhật tòa nhà thất bại",
+        "deleteSuccess": "Xóa tòa nhà thành công",
+        "deleteError": "Xóa tòa nhà thất bại",
+        "bulkDeleteSuccess": "Đã xóa {count} tòa nhà",
+        "bulkDeleteError": "Xóa hàng loạt thất bại",
+        "bulkEditSuccess": "Đã cập nhật {count} tòa nhà",
+        "bulkEditError": "Cập nhật hàng loạt thất bại",
+        "bulkEditValidation": "Vui lòng chọn ít nhất một trường để cập nhật",
+        "genericError": "Đã xảy ra lỗi"
+      },
+      "form": {
+        "buildingCode": {
+          "label": "Mã tòa nhà",
+          "placeholder": "VD: TN-A",
+          "required": "Mã tòa nhà là bắt buộc",
+          "min": "Mã tòa nhà phải có ít nhất 2 ký tự"
+        },
+        "buildingName": {
+          "label": "Tên tòa nhà",
+          "placeholder": "VD: Tòa nhà A",
+          "required": "Tên tòa nhà là bắt buộc",
+          "min": "Tên tòa nhà phải có ít nhất 3 ký tự"
+        },
+        "address": {
+          "label": "Địa chỉ",
+          "placeholder": "VD: 123 Đường ABC, Quận XYZ"
+        },
+        "status": {
+          "label": "Trạng thái",
+          "placeholder": "Chọn trạng thái"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm tòa nhà mới",
+          "description": "Nhập thông tin tòa nhà",
+          "submit": "Lưu",
+          "submitting": "Đang lưu..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa tòa nhà",
+          "description": "Cập nhật thông tin tòa nhà",
+          "submit": "Lưu thay đổi",
+          "submitting": "Đang lưu..."
+        },
+        "bulkEdit": {
+          "title": "Chỉnh sửa hàng loạt",
+          "description": "Đã chọn {count} tòa nhà",
+          "statusLabel": "Trạng thái",
+          "statusPlaceholder": "Chọn trạng thái",
+          "addressLabel": "Địa chỉ",
+          "addressPlaceholder": "Nhập địa chỉ mới (để trống nếu không thay đổi)",
+          "submit": "Cập nhật",
+          "submitting": "Đang cập nhật..."
+        },
+        "bulkDelete": {
+          "title": "Xóa tòa nhà",
+          "description": "Bạn có chắc chắn muốn xóa {count} tòa nhà đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa",
+          "submitting": "Đang xóa..."
+        },
+        "confirmDelete": {
+          "title": "Xóa tòa nhà",
+          "description": "Bạn có chắc chắn muốn xóa {name}?",
+          "note": "Hành động này không thể hoàn tác.",
+          "submit": "Xóa"
+        }
+      }
+    }
+  }
+}

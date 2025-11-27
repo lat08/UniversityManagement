@@ -1,0 +1,34 @@
+{
+  "student": {
+    "dashboard": {
+      "upcomingEvents": "Sự kiện sắp tới",
+      "noEvents": "Không có sự kiện nào",
+      "currentClasses": "Lớp đang theo học",
+      "noClasses": "Không có lớp học nào",
+      "weekdays": {
+        "sunday": "Chủ nhật",
+        "monday": "Thứ hai",
+        "tuesday": "Thứ ba",
+        "wednesday": "Thứ tư",
+        "thursday": "Thứ năm",
+        "friday": "Thứ sáu",
+        "saturday": "Thứ bảy"
+      },
+      "scheduleFormat": "{dayName}, Tiết {startPeriod} - {endPeriod}",
+      "unknownDay": "Không xác định",
+      "selectSemester": "Chọn học kỳ",
+      "stats": {
+        "title": "Thống kê học tập",
+        "cumulativeGpa": "Điểm trung bình tích lũy",
+        "cumulativeCredits": "Tín chỉ tích lũy",
+        "classification": "Xếp loại",
+        "completed": "Đã hoàn thành",
+        "remaining": "Còn lại",
+        "weeklySchedule": "Lịch học trong tuần",
+        "weeklyExamSchedule": "Lịch thi trong tuần",
+        "sessions": "Buổi",
+        "exams": "Môn thi"
+      }
+    }
+  }
+}

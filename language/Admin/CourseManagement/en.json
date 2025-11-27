@@ -1,0 +1,52 @@
+{
+  "admin": {
+    "courseManagement": {
+      "title": "Course & Course Class Management",
+      "description": "Centrally manage course information and course classes across the school",
+      "coursesTab": "Course List",
+      "assignmentsTab": "Assignment List",
+      "add": "Add Class",
+      "addNew": "Add New",
+      "edit": "Edit Class",
+      "assignInstructor": "Assign Instructor",
+      "searchCourse": "Search by code, subject name...",
+      "searchAssignment": "Search...",
+      "allClasses": "All Classes",
+      "allMajors": "All Majors",
+      "allSpecializations": "All Specializations",
+      "allAcademicYears": "All Academic Years",
+      "allSubjects": "All Subjects",
+      "allInstructors": "All Instructors",
+      "noData": "No data available",
+      "columns": {
+        "courseCode": "Course Code",
+        "subjectName": "Subject",
+        "lecturerName": "Lecturer",
+        "enrollment": "Enrollment",
+        "semester": "Semester",
+        "academicYear": "Academic Year",
+        "feePerCredit": "Fee per credit",
+        "totalFee": "Total fee",
+        "totalClasses": "Total classes",
+        "totalStudents": "Total students",
+        "status": "Status",
+        "actions": "Actions",
+        "courseName": "Course Name",
+        "instructorName": "Assigned Instructor",
+        "effectiveDate": "Effective Date",
+        "notes": "Notes"
+      },
+      "courseClassesTitle": "Course classes for this course",
+      "courseClassesHint": "(Quick actions for each course class in the table below)",
+      "classColumns": {
+        "classCode": "Class code",
+        "instructor": "Instructor",
+        "room": "Room",
+        "time": "Time",
+        "enrollment": "Enrollment",
+        "actions": "Actions"
+      },
+      "addCourseClass": "Add Course Class"
+    }
+  }
+}

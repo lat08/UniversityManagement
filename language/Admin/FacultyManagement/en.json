@@ -1,0 +1,145 @@
+{
+  "admin": {
+    "facultyManagement": {
+      "title": "Faculty Management",
+      "description": "Manage faculties, departments, curricula, and training systems",
+      "listTitle": "Faculty List",
+      "search": {
+        "placeholder": "Search by faculty code or name..."
+      },
+      "stats": {
+        "total": "Total Faculties",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filters": {
+        "allFaculties": "All faculties",
+        "allCurricula": "All curricula",
+        "allStatuses": "All statuses",
+        "noChange": "No change",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "selected": "{count} faculties selected",
+        "empty": "No faculties found",
+        "columns": {
+          "code": "Code",
+          "name": "Faculty",
+          "faculty": "Faculty",
+          "curriculum": "Curriculum",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "actions": {
+        "add": "Add Faculty",
+        "bulkEdit": "Edit Selected",
+        "bulkDelete": "Delete Selected",
+        "clearSelection": "Clear Selection"
+      },
+      "hooks": {
+        "createSuccess": "Faculty created successfully",
+        "createError": "Failed to create faculty",
+        "updateSuccess": "Faculty updated successfully",
+        "updateError": "Failed to update faculty",
+        "deleteSuccess": "Faculty deleted successfully",
+        "deleteError": "Failed to delete faculty",
+        "bulkDeleteSuccess": "Deleted selected faculties successfully",
+        "bulkDeleteError": "Failed to delete selected faculties",
+        "bulkEditSuccess": "Updated selected faculties successfully",
+        "bulkEditError": "Failed to update selected faculties",
+        "bulkEditValidation": "Select at least one field to update"
+      },
+      "form": {
+        "facultyCode": {
+          "label": "Faculty code",
+          "placeholder": "e.g. KTPM",
+          "required": "Faculty code is required",
+          "min": "Faculty code must be at least 2 characters"
+        },
+        "facultyName": {
+          "label": "Faculty name",
+          "placeholder": "e.g. Software Engineering",
+          "required": "Faculty name is required",
+          "min": "Faculty name must be at least 3 characters"
+        },
+        "majorName": {
+          "label": "Major name",
+          "placeholder": "e.g. Information Technology",
+          "required": "Major name is required",
+          "min": "Major name must be at least 3 characters"
+        },
+        "majorCode": {
+          "label": "Major code",
+          "placeholder": "e.g. CNTT",
+          "required": "Major code is required",
+          "min": "Major code must be at least 2 characters"
+        },
+        "faculty": {
+          "label": "Faculty",
+          "placeholder": "Select faculty",
+          "search": "Search faculties...",
+          "required": "Faculty is required"
+        },
+        "division": {
+          "label": "Division",
+          "placeholder": "Select division",
+          "search": "Search divisions...",
+          "required": "Division is required"
+        },
+        "trainingSystem": {
+          "label": "Training system",
+          "placeholder": "Select training system",
+          "required": "Training system is required"
+        },
+        "curriculum": {
+          "label": "Curriculum",
+          "placeholder": "Select curriculum",
+          "required": "Curriculum is required"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status"
+        }
+      },
+      "modals": {
+        "add": {
+          "title": "Add Faculty",
+          "description": "Enter faculty information",
+          "submit": "Save",
+          "submitting": "Saving..."
+        },
+        "edit": {
+          "title": "Edit Faculty",
+          "description": "Update faculty information",
+          "submit": "Save changes",
+          "submitting": "Saving..."
+        },
+        "bulkEdit": {
+          "title": "Bulk Edit",
+          "description": "{count} faculties selected",
+          "submit": "Update",
+          "submitting": "Updating..."
+        },
+        "bulkDelete": {
+          "title": "Delete Faculties",
+          "description": "Are you sure you want to delete {count} selected faculties?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete",
+          "submitting": "Deleting..."
+        },
+        "confirmDelete": {
+          "title": "Delete Faculty",
+          "description": "Are you sure you want to delete {name}?",
+          "note": "This action cannot be undone.",
+          "submit": "Delete"
+        }
+      }
+    }
+  }
+}

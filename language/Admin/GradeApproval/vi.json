@@ -1,0 +1,206 @@
+{
+  "admin": {
+    "gradeApproval": {
+      "title": "Duyệt bảng điểm",
+      "description": "Xét duyệt bảng điểm sinh viên",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "pending": "Chờ duyệt",
+      "managementTitle": "Quản lý yêu cầu duyệt",
+      "managementDescription": "Duyệt từng bảng điểm, xem chi tiết yêu cầu",
+      "search": "Tìm kiếm theo mã, tên môn học, giảng viên...",
+      "searchFaculty": "Tìm kiếm khoa...",
+      "searchInstructor": "Tìm kiếm giảng viên...",
+      "searchInstructorPlaceholder": "Tìm kiếm giảng viên...",
+      "allFaculties": "Tất cả khoa",
+      "allInstructors": "Tất cả giảng viên",
+      "allDepartments": "Tất cả bộ môn",
+      "status": "Trạng thái",
+      "noData": "Không có dữ liệu",
+      "approveSuccess": "Duyệt thành công {successCount}/{total} bảng điểm",
+      "rejectSuccess": "Từ chối thành công {successCount}/{total} bảng điểm",
+      "approveError": "Không thể duyệt {failureCount} bảng điểm: {errorMessage}",
+      "rejectError": "Không thể từ chối {failureCount} bảng điểm: {errorMessage}",
+      "genericError": "Có lỗi xảy ra. Vui lòng thử lại.",
+      "exportError": "Vui lòng chọn ít nhất 1 bảng điểm để xuất",
+      "exportSuccess": "Xuất thành công {count} bảng điểm",
+      "exportErrorGeneric": "Có lỗi khi xuất file. Vui lòng thử lại.",
+      "partialErrorSuffix": "và {count} lỗi khác.",
+      "columns": {
+        "courseCode": "Mã môn",
+        "courseName": "Môn học",
+        "className": "Lớp",
+        "facultyName": "Khoa",
+        "instructorName": "Giảng viên",
+        "semester": "Học kỳ",
+        "studentCount": "Số SV",
+        "submittedDate": "Ngày nộp",
+        "approvalStatus": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "stats": {
+        "total": "Tổng bảng điểm",
+        "pending": "Chờ phê duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Đã từ chối",
+        "totalDescription": "Tổng số yêu cầu",
+        "pendingDescription": "Đang chờ xử lý",
+        "approvedDescription": "Đã hoàn tất",
+        "rejectedDescription": "Bị từ chối"
+      },
+      "filters": {
+        "status": "Trạng thái",
+        "statusPlaceholder": "Tất cả trạng thái",
+        "semester": "Học kỳ",
+        "subject": "Môn học",
+        "courseClass": "Lớp học phần",
+        "faculty": "Khoa",
+        "department": "Bộ môn",
+        "instructor": "Giảng viên",
+        "keyword": "Từ khóa",
+        "allStatuses": "Tất cả trạng thái"
+      },
+      "bulkBar": {
+        "selected": "Đã chọn {count} bảng điểm",
+        "export": "Xuất Excel",
+        "exporting": "Đang xuất...",
+        "exportTooltip": "Xuất Excel các bảng điểm đã chọn",
+        "approveAll": "Duyệt toàn bộ",
+        "rejectAll": "Từ chối toàn bộ",
+        "clear": "Bỏ chọn"
+      },
+      "columnSelector": {
+        "buttonTitle": "Cột hiển thị ({visible}/{total})",
+        "title": "Chọn cột hiển thị ({visible}/{total})",
+        "required": "(Bắt buộc)"
+      },
+      "actionsMenu": {
+        "title": "Thao tác",
+        "view": "Xem chi tiết",
+        "approve": "Duyệt",
+        "reject": "Từ chối"
+      },
+      "statuses": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "unknown": "Không xác định"
+      },
+      "detailModal": {
+        "tag": "Chi tiết bảng điểm",
+        "classSemester": "Lớp {className} · Học kỳ {semester}",
+        "close": "Đóng",
+        "loading": "Đang tải dữ liệu phiên bản bảng điểm...",
+        "submittedBy": {
+          "title": "Người nộp"
+        },
+        "approvedBy": {
+          "title": "Người duyệt"
+        },
+        "versionInfo": {
+          "title": "Phiên bản",
+          "number": "Lần {number}",
+          "students": "{count} sinh viên",
+          "previous": "Có phiên bản trước: #{version}"
+        },
+        "table": {
+          "title": "Bảng điểm chi tiết",
+          "displaying": "Hiển thị {visible}/{total} sinh viên",
+          "empty": "Chưa có dữ liệu sinh viên trong phiên bản này.",
+          "loading": "Đang tải bảng điểm...",
+          "columns": {
+            "studentId": "MSSV",
+            "fullName": "Họ tên",
+            "attendance": "Chuyên cần",
+            "midterm": "Giữa kỳ",
+            "final": "Cuối kỳ",
+            "average": "Trung bình",
+            "note": "Ghi chú"
+          },
+          "previousValue": "Trước: {value}"
+        },
+        "footer": {
+          "updatedAt": "Cập nhật lần cuối: {value}",
+          "loading": "Đang tải dữ liệu...",
+          "locked": {
+            "approved": "Bảng điểm này đã được duyệt và không thể thay đổi trạng thái.",
+            "rejected": "Bảng điểm này đã bị từ chối và không thể thay đổi trạng thái."
+          }
+        }
+      },
+      "exportModal": {
+        "title": "Xuất danh sách duyệt bảng điểm",
+        "description": "Xuất dữ liệu duyệt bảng điểm ra file Excel",
+        "fileNamePrefix": "bang_diem_duyet",
+        "toastSuccess": "Xuất file thành công",
+        "toastError": "Xuất file thất bại",
+        "summary": {
+          "title": "Thông tin xuất",
+          "description": "Dữ liệu sẽ được xuất theo bộ lọc hiện tại của bạn"
+        },
+        "details": {
+          "title": "Chi tiết xuất file",
+          "allTitle": "Tất cả bảng điểm theo bộ lọc",
+          "allDescription": "Bao gồm mọi bảng điểm phù hợp với điều kiện lọc hiện tại",
+          "fullTitle": "Thông tin chi tiết đầy đủ",
+          "fullDescription": "Bao gồm sinh viên, môn học, giảng viên và điểm số",
+          "formatTitle": "Định dạng Excel (.xlsx)",
+          "formatDescription": "File sẽ được tải xuống ngay sau khi xác nhận"
+        },
+        "filters": {
+          "active": "Bộ lọc đang áp dụng"
+        },
+        "format": {
+          "title": "Định dạng file",
+          "name": "Excel (.xlsx)",
+          "description": "Tương thích với Microsoft Excel và Google Sheets"
+        },
+        "notes": {
+          "title": "Lưu ý",
+          "autoDownload": "File sẽ được tải xuống tự động sau khi xuất thành công",
+          "duration": "Quá trình xuất có thể mất vài giây tùy số lượng bảng điểm",
+          "filters": "Đảm bảo bạn đã áp dụng bộ lọc phù hợp trước khi xuất"
+        },
+        "cancel": "Hủy",
+        "submit": "Xuất file",
+        "exporting": "Đang xuất..."
+      },
+      "filterModal": {
+        "title": "Bộ lọc nâng cao",
+        "description": "Chọn các tiêu chí để lọc dữ liệu",
+        "typeHint": "Chọn loại lọc (chọn ít nhất 1)",
+        "types": {
+          "status": "Trạng thái",
+          "faculty": "Khoa",
+          "department": "Bộ môn",
+          "instructor": "Giảng viên"
+        },
+        "statusLabel": "Trạng thái",
+        "statusPlaceholder": "Chọn trạng thái",
+        "facultyLabel": "Khoa",
+        "facultyPlaceholder": "Chọn khoa",
+        "departmentLabel": "Bộ môn",
+        "departmentPlaceholder": "Chọn bộ môn",
+        "instructorLabel": "Giảng viên",
+        "instructorPlaceholder": "Chọn giảng viên",
+        "reset": "Đặt lại",
+        "apply": "Áp dụng"
+      },
+      "filterDropdown": {
+        "buttonTitle": "Lọc theo ({count})",
+        "buttonLabel": "Lọc ({count})",
+        "title": "Chọn bộ lọc ({selected}/{total})",
+        "empty": "Chưa chọn",
+        "options": {
+          "status": "Trạng thái",
+          "semester": "Học kỳ",
+          "subject": "Môn học",
+          "courseClass": "Lớp học phần",
+          "faculty": "Khoa",
+          "department": "Bộ môn",
+          "instructor": "Giảng viên"
+        }
+      }
+    }
+  }
+}

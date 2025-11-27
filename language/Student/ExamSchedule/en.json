@@ -1,0 +1,62 @@
+{
+  "student": {
+    "examSchedule": {
+      "title": "Exam Schedule",
+      "description": "Track exam schedules by semester and view detailed information for each subject",
+      "filters": {
+        "semesterPlaceholder": "Select semester"
+      },
+      "actions": {
+        "export": "Export schedule"
+      },
+      "sections": {
+        "timeline": {
+          "title": "Exam timeline",
+          "empty": "No exams scheduled yet"
+        },
+        "notes": {
+          "title": "Notes",
+          "create": "Add",
+          "createTooltip": "Add a new note",
+          "save": "Save",
+          "cancel": "Cancel",
+          "edit": "Edit",
+          "delete": "Delete",
+          "placeholder": "Enter note content...",
+          "saveTooltip": "Save note",
+          "cancelTooltip": "Cancel note",
+          "updateTooltip": "Save changes",
+          "deleteTooltip": "Delete note",
+          "editTooltip": "Edit note",
+          "empty": "No notes yet"
+        }
+      },
+      "timeline": {
+        "room": "Room {room}",
+        "studentCount": "{count} students",
+        "format": "{format}",
+        "status": {
+          "upcoming": "Upcoming",
+          "pending": "Pending",
+          "completed": "Completed",
+          "other": "Scheduled"
+        }
+      },
+      "stats": {
+        "totalExams": {
+          "title": "Total exams",
+          "subtitle": "{semesterName}"
+        },
+        "upcomingExams": {
+          "title": "Upcoming exams",
+          "none": "No upcoming exams",
+          "nextExam": "{subject} - {date} - {time}"
+        },
+        "completedExams": {
+          "title": "Completed exams",
+          "subtitle": "Progress"
+        }
+      }
+    }
+  }
+}

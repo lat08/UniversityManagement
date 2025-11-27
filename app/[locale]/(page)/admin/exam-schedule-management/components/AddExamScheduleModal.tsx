@@ -68,6 +68,11 @@ const getExamScheduleValidationError = (data: FormData): string | null => {
   return null;
 };
 
+const isTruthyString = (value: string | null | undefined): value is string => !!value;
+const isFormHighlight = (
+  value: { label: string; value: string } | null,
+): value is { label: string; value: string } => !!value;
+
 const buildExamSchedulePayload = (data: FormData) => {
   const examTimeFormatted = data.examTime.includes(':')
     ? (data.examTime.split(':').length === 2 ? `${data.examTime}:00` : data.examTime)
@@ -80,9 +85,70 @@ const buildExamSchedulePayload = (data: FormData) => {
     examTime: examTimeFormatted,
     durationInMinutes: Number(data.durationInMinutes),
     examFormat: data.examFormat,
-    proctorIds: (data.proctorIds || []).filter((id): id is string => Boolean(id)),
+    proctorIds: (data.proctorIds || []).filter(isTruthyString),
     notes: data.notes && data.notes.trim() ? data.notes.trim() : undefined,
   };
+};
+
+interface ExamScheduleErrorData {
+  readonly errors?: Record<string, string | string[]>;
+  readonly message?: string;
+  readonly title?: string;
+  readonly detail?: string;
+}
+
+const getValidationErrorsMessage = (
+  errors: Record<string, string | string[]> | undefined,
+): string | null => {
+  if (!errors) {
+    return null;
+  }
+
+  const errorMessages: string[] = [];
+
+  Object.keys(errors).forEach((field) => {
+    const fieldErrors = errors[field];
+    if (Array.isArray(fieldErrors)) {
+      fieldErrors.forEach((msg) => {
+        errorMessages.push(`${field}: ${msg}`);
+      });
+    } else if (typeof fieldErrors === 'string') {
+      errorMessages.push(`${field}: ${fieldErrors}`);
+    }
+  });
+
+  if (errorMessages.length > 0) {
+    return errorMessages.join('\n');
+  }
+
+  const validationErrors = Object.values(errors)
+    .flat()
+    .filter((msg): msg is string => typeof msg === 'string');
+
+  if (validationErrors.length > 0) {
+    return validationErrors.join(', ');
+  }
+
+  return null;
+};
+
+const getProblemDetailsMessage = (
+  errorData: ExamScheduleErrorData | undefined,
+  status?: number,
+): string | null => {
+  if (!errorData) {
+    return null;
+  }
+
+  if (errorData.message && (!errorData.title || status === 500)) {
+    return errorData.message;
+  }
+
+  if (errorData.title) {
+    return errorData.detail ? `${errorData.title}: ${errorData.detail}` : errorData.title;
+  }
+
+  return null;
 };
 
 const getExamScheduleErrorMessage = (error: unknown): string => {
@@ -90,55 +156,24 @@ const getExamScheduleErrorMessage = (error: unknown): string => {
     const apiError = error as {
       response?: {
         status?: number;
-        statusText?: string;
-        data?: {
-          errors?: Record<string, string | string[]>;
-          message?: string;
-          title?: string;
-          detail?: string;
-        };
+        data?: ExamScheduleErrorData;
       };
     };
 
     const errorData = apiError.response?.data;
-    if (errorData?.errors) {
-      const { errors } = errorData;
-      const errorMessages: string[] = [];
 
-      Object.keys(errors).forEach((field) => {
-        const fieldErrors = errors[field];
-        if (Array.isArray(fieldErrors)) {
-          fieldErrors.forEach((msg) => {
-            errorMessages.push(`${field}: ${msg}`);
-          });
-        } else if (typeof fieldErrors === 'string') {
-          errorMessages.push(`${field}: ${fieldErrors}`);
-        }
-      });
-
-      if (errorMessages.length > 0) {
-        return errorMessages.join('\n');
-      }
-
-      const validationErrors = Object.values(errors)
-        .flat()
-        .filter((msg): msg is string => typeof msg === 'string');
-
-      if (validationErrors.length > 0) {
-        return validationErrors.join(', ');
-      }
+    const validationMessage = getValidationErrorsMessage(errorData?.errors);
+    if (validationMessage) {
+      return validationMessage;
     }
 
-    if (errorData?.message) {
-      return errorData.message;
-    }
+    const problemDetailsMessage = getProblemDetailsMessage(
+      errorData,
+      apiError.response?.status,
+    );
 
-    if (errorData?.title) {
-      return errorData.detail ? `${errorData.title}: ${errorData.detail}` : errorData.title;
-    }
-
-    if (apiError.response?.status === 500 && errorData?.message) {
-      return errorData.message;
+    if (problemDetailsMessage) {
+      return problemDetailsMessage;
     }
   } else if (error instanceof Error) {
     return error.message;
@@ -524,7 +559,7 @@ export const AddExamScheduleModal = ({ isOpen, onClose, onSuccess }: AddExamSche
           }`,
         }
       : null,
-  ].filter((item): item is { label: string; value: string } => Boolean(item));
+  ].filter(isFormHighlight);
 
   const semesterOptions = [
     { value: '', label: 'Tất cả học kỳ' },

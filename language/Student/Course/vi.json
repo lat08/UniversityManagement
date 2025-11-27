@@ -1,0 +1,104 @@
+{
+  "student": {
+    "course": {
+      "title": "Khóa học",
+      "registeredTab": "Môn học đã đăng ký",
+      "availableTab": "Đăng ký môn học",
+      "register": "Đăng ký",
+      "cancel": "Hủy",
+      "bulkRegister": "Đăng ký nhiều môn",
+      "selectAll": "Chọn tất cả",
+      "deselectAll": "Bỏ chọn tất cả",
+      "selectedCount": "Đã chọn {count} môn học",
+      "registeringMultiple": "Đang đăng ký nhiều môn học...",
+      "registering": "Đang đăng ký...",
+      "noCourses": "Không có môn học nào",
+      "registerSuccess": "Đăng ký thành công!",
+      "registerError": "Đăng ký thất bại!",
+      "cancelConfirm": "Bạn có chắc chắn muốn hủy môn học",
+      "cancelConfirmDescription": "Hành động này không thể hoàn tác.",
+      "cancelSuccess": "Hủy môn học thành công!",
+      "cancelError": "Hủy môn học thất bại!",
+      "scheduleConflict": "Môn học này trùng lịch với môn đã chọn",
+      "description": "Đăng ký và quản lý các môn học",
+      "unavailableDefault": "Môn học không khả dụng",
+      "noSchedule": "Chưa có lịch",
+      "unavailabilityReasons": {
+        "alreadyRegistered": "Môn học đã được đăng ký",
+        "full": "Môn học đã đầy",
+        "scheduleConflict": "Môn học trùng lịch với lịch học hiện tại",
+        "conflictWithSelected": "Môn học trùng lịch với môn đã chọn"
+      },
+      "columns": {
+        "code": "Mã",
+        "name": "Tên môn học",
+        "instructor": "Giảng viên",
+        "credits": "Số TC",
+        "quantity": "SL",
+        "remaining": "Còn lại",
+        "schedule": "Thời khóa biểu"
+      },
+      "filters": {
+        "title": "Danh sách các môn học",
+        "description": "Tìm kiếm và đăng ký môn học",
+        "search": "Tìm kiếm",
+        "searchPlaceholder": "Tìm kiếm theo mã, tên môn học...",
+        "status": "Trạng thái",
+        "statusPlaceholder": "Trạng thái",
+        "filterByType": "Lọc theo môn",
+        "filterByTypePlaceholder": "Lọc theo môn",
+        "filterByCurriculum": "Lọc theo CTDT",
+        "filterByCurriculumPlaceholder": "Lọc theo CTDT",
+        "all": "Tất cả",
+        "canRegister": "Có thể đăng ký",
+        "cannotRegister": "Không thể đăng ký",
+        "generalOnly": "Chỉ môn đại cương",
+        "majorOnly": "Chỉ môn chuyên ngành",
+        "inCurriculum": "Chỉ môn trong CTDT",
+        "outOfCurriculum": "Chỉ môn ngoài CTDT"
+      },
+      "registered": {
+        "title": "Môn học đã đăng ký",
+        "summary": "{courses} môn học, {credits} tín chỉ",
+        "searchPlaceholder": "Tìm kiếm theo mã, tên môn học...",
+        "register": "Đăng ký",
+        "selectedCount": "Đã chọn {count} môn học",
+        "cancelRegistration": "Hủy đăng ký",
+        "deselectAll": "Bỏ chọn",
+        "noRegisteredCourses": "Không có môn học nào được đăng ký",
+        "lockedTooltip": "Môn học đã bị khóa, không thể chọn",
+        "viewDetail": "Xem chi tiết",
+        "filters": {
+          "allStatus": "Tất cả trạng thái",
+          "registered": "Đã đăng ký",
+          "locked": "Đã khóa"
+        },
+        "columns": {
+          "code": "Mã",
+          "name": "Tên môn học",
+          "instructor": "Giảng viên",
+          "credits": "Số TC",
+          "enrollmentDate": "Ngày đăng kí",
+          "status": "Trạng thái",
+          "action": "HD"
+        },
+        "status": {
+          "locked": "Đã khóa",
+          "registered": "Đã đăng ký"
+        }
+      },
+      "card": {
+        "register": "Đăng ký",
+        "cancel": "Hủy đăng ký",
+        "credits": "{count} tín chỉ",
+        "full": "Đã đầy",
+        "conflict": "Trùng lịch",
+        "instructor": "GV {name} ({code})",
+        "location": "{roomCode} - {roomName}",
+        "dateRange": "Từ {startDate} đến {endDate}",
+        "schedule": "{day} {time}",
+        "status": "{status}"
+      }
+    }
+  }
+}

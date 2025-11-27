@@ -73,7 +73,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
 
   // Tạo validation schema với translations
   const validationSchema = yup.object({
-    name: yup.string().required(t('nameRequired')).min(2, t('nameMin')),
+    name: yup.string().required(t('nameRequired')).min(2, t('nameMin')).max(100, t('nameMax')),
     citizenId: yup.string().required(t('citizenIdRequired')).matches(/^\d{9,12}$/, t('citizenIdInvalid')),
     dob: yup.string()
       .required(t('dobRequired'))
@@ -91,7 +91,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
     facultyId: yup.string().required(t('facultyRequired')),
     departmentId: yup.string().required(t('departmentRequired')),
     class: yup.string().optional(),
-    address: yup.string().required(t('addressRequired')).min(5, t('addressMin')),
+    address: yup.string().required(t('addressRequired')).min(5, t('addressMin')).max(255, t('addressMax')),
     classId: yup.string().required(t('classRequired')),
     enrollmentStatus: yup.string().optional(),
     profilePicturePath: yup.string().optional(),
@@ -123,6 +123,22 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
   const [classes, setClasses] = useState<ClassItem[]>([]);
 
   const formValues = watch();
+
+  // Input handlers với validation
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '');
+    setValue('name', value, { shouldValidate: true });
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setValue('phone', value, { shouldValidate: true });
+  };
+
+  const handleCitizenIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setValue('citizenId', value, { shouldValidate: true });
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -274,11 +290,18 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 {t('name')} <span className="text-red-500">*</span>
               </label>
-              <Input
-                placeholder={t('namePlaceholder')}
-                {...register('name')}
-                className={errors.name ? 'border-red-500' : ''}
-              />
+              <div className="relative">
+                <Input
+                  placeholder={t('namePlaceholder')}
+                  maxLength={100}
+                  value={formValues.name || ''}
+                  onChange={handleNameChange}
+                  className={`pr-16 ${errors.name ? 'border-red-500' : ''}`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  {formValues.name?.length || 0}/100
+                </span>
+              </div>
               {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
             </div>
 
@@ -287,11 +310,18 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 {t('citizenId')} <span className="text-red-500">*</span>
               </label>
-              <Input
-                placeholder={t('citizenIdPlaceholder')}
-                {...register('citizenId')}
-                className={errors.citizenId ? 'border-red-500' : ''}
-              />
+              <div className="relative">
+                <Input
+                  placeholder={t('citizenIdPlaceholder')}
+                  maxLength={12}
+                  value={formValues.citizenId || ''}
+                  onChange={handleCitizenIdChange}
+                  className={`pr-16 ${errors.citizenId ? 'border-red-500' : ''}`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  {formValues.citizenId?.length || 0}/12
+                </span>
+              </div>
               {errors.citizenId && <p className="mt-1 text-xs text-red-500">{errors.citizenId.message}</p>}
             </div>
 
@@ -343,12 +373,19 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 {t('phone')} <span className="text-red-500">*</span>
               </label>
-              <Input
-                type="tel"
-                placeholder={t('phonePlaceholder')}
-                {...register('phone')}
-                className={errors.phone ? 'border-red-500' : ''}
-              />
+              <div className="relative">
+                <Input
+                  type="tel"
+                  placeholder={t('phonePlaceholder')}
+                  maxLength={11}
+                  value={formValues.phone || ''}
+                  onChange={handlePhoneChange}
+                  className={`pr-16 ${errors.phone ? 'border-red-500' : ''}`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  {formValues.phone?.length || 0}/11
+                </span>
+              </div>
               {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
             </div>
 
@@ -430,11 +467,18 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }: AddStude
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 {t('address')} <span className="text-red-500">*</span>
               </label>
-              <Input
-                placeholder={t('addressPlaceholder')}
-                {...register('address')}
-                className={errors.address ? 'border-red-500' : ''}
-              />
+              <div className="relative">
+                <Input
+                  placeholder={t('addressPlaceholder')}
+                  maxLength={255}
+                  value={formValues.address || ''}
+                  onChange={(e) => setValue('address', e.target.value, { shouldValidate: true })}
+                  className={`pr-16 ${errors.address ? 'border-red-500' : ''}`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  {formValues.address?.length || 0}/255
+                </span>
+              </div>
               {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>}
             </div>
             </div>

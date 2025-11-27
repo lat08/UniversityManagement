@@ -1,0 +1,52 @@
+{
+  "admin": {
+    "courseManagement": {
+      "title": "Quản lý học phần & Lớp học phần",
+      "description": "Quản lý tập trung thông tin học phần và lớp học phần trong toàn trường",
+      "coursesTab": "Danh sách học phần",
+      "assignmentsTab": "Danh sách phân công",
+      "add": "Thêm lớp học",
+      "addNew": "Thêm mới",
+      "edit": "Sửa lớp học",
+      "assignInstructor": "Phân công giảng viên",
+      "searchCourse": "Tìm theo mã, tên môn...",
+      "searchAssignment": "Tìm kiếm...",
+      "allClasses": "Tất cả lớp",
+      "allMajors": "Tất cả ngành",
+      "allSpecializations": "Tất cả chuyên ngành",
+      "allAcademicYears": "Tất cả năm học",
+      "allSubjects": "Tất cả môn học",
+      "allInstructors": "Tất cả giảng viên",
+      "noData": "Không có dữ liệu",
+      "columns": {
+        "courseCode": "Mã học phần",
+        "subjectName": "Môn học",
+        "lecturerName": "Giảng viên",
+        "enrollment": "Sĩ số",
+        "semester": "Học kỳ",
+        "academicYear": "Năm học",
+        "feePerCredit": "Học phí/tín chỉ",
+        "totalFee": "Tổng học phí",
+        "totalClasses": "Tổng số lớp",
+        "totalStudents": "Tổng số sinh viên",
+        "status": "Trạng thái",
+        "actions": "Thao tác",
+        "courseName": "Môn học",
+        "instructorName": "Giảng viên phụ trách",
+        "effectiveDate": "Ngày áp dụng",
+        "notes": "Ghi chú"
+      },
+      "courseClassesTitle": "Lớp học phần của học phần này",
+      "courseClassesHint": "(Thao tác nhanh với từng lớp học phần ở bảng bên dưới)",
+      "classColumns": {
+        "classCode": "Mã lớp",
+        "instructor": "Giảng viên",
+        "room": "Phòng",
+        "time": "Thời gian",
+        "enrollment": "Sĩ số",
+        "actions": "Thao tác"
+      },
+      "addCourseClass": "Thêm lớp học phần"
+    }
+  }
+}

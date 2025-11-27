@@ -1,0 +1,113 @@
+{
+  "admin": {
+    "classManagement": {
+      "title": "Quản lý lớp học định danh",
+      "description": "Quản lý thông tin lớp học, chuyên ngành, giảng viên cố vấn và sinh viên",
+      "add": "Thêm lớp học",
+      "search": "Tìm kiếm lớp học...",
+      "list": {
+        "title": "Danh sách lớp học",
+        "description": "Quản lý thông tin lớp học"
+      },
+      "columns": {
+        "classCode": "Mã lớp",
+        "className": "Tên lớp",
+        "department": "Chuyên ngành",
+        "faculty": "Khoa",
+        "advisor": "Giảng viên cố vấn",
+        "trainingSystem": "Hệ đào tạo",
+        "startYear": "Năm bắt đầu",
+        "endYear": "Năm kết thúc",
+        "curriculum": "Chương trình đào tạo",
+        "studentCount": "Số sinh viên",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "filters": {
+        "allDepartments": "Tất cả chuyên ngành",
+        "allTrainingSystems": "Tất cả hệ đào tạo",
+        "allAcademicYears": "Tất cả năm học",
+        "allStatuses": "Tất cả trạng thái"
+      },
+      "status": {
+        "active": "Đang hoạt động",
+        "graduated": "Đã tốt nghiệp",
+        "inactive": "Không hoạt động"
+      },
+      "toast": {
+        "createSuccess": "Tạo lớp học thành công",
+        "createError": "Tạo lớp học thất bại",
+        "updateSuccess": "Cập nhật lớp học thành công",
+        "updateError": "Cập nhật lớp học thất bại",
+        "deleteSuccess": "Xóa lớp học thành công",
+        "deleteError": "Xóa lớp học thất bại",
+        "fetchError": "Không thể tải danh sách lớp học"
+      },
+      "modals": {
+        "add": {
+          "title": "Thêm lớp học mới",
+          "description": "Nhập thông tin lớp học",
+          "classCode": "Mã lớp",
+          "classCodePlaceholder": "Nhập mã lớp",
+          "className": "Tên lớp",
+          "classNamePlaceholder": "Nhập tên lớp",
+          "department": "Chuyên ngành",
+          "selectDepartment": "Chọn chuyên ngành",
+          "trainingSystem": "Hệ đào tạo",
+          "selectTrainingSystem": "Chọn hệ đào tạo",
+          "startAcademicYear": "Năm học bắt đầu",
+          "selectAcademicYear": "Chọn năm học",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "selectInstructor": "Chọn giảng viên",
+          "searchInstructor": "Tìm kiếm giảng viên...",
+          "curriculum": "Chương trình đào tạo",
+          "selectCurriculum": "Chọn chương trình đào tạo",
+          "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
+        },
+        "edit": {
+          "title": "Chỉnh sửa lớp học",
+          "description": "Cập nhật thông tin lớp học",
+          "classCode": "Mã lớp",
+          "className": "Tên lớp",
+          "classNamePlaceholder": "Nhập tên lớp",
+          "trainingSystem": "Hệ đào tạo",
+          "selectTrainingSystem": "Chọn hệ đào tạo",
+          "classStatus": "Trạng thái",
+          "selectStatus": "Chọn trạng thái",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "selectInstructor": "Chọn giảng viên",
+          "searchInstructor": "Tìm kiếm giảng viên...",
+          "curriculum": "Chương trình đào tạo",
+          "selectCurriculum": "Chọn chương trình đào tạo",
+          "searchCurriculum": "Tìm kiếm chương trình đào tạo..."
+        },
+        "view": {
+          "title": "Chi tiết lớp học",
+          "description": "Xem thông tin chi tiết lớp học",
+          "basicInfo": "Thông tin cơ bản",
+          "classCode": "Mã lớp",
+          "className": "Tên lớp",
+          "department": "Chuyên ngành",
+          "faculty": "Khoa",
+          "trainingSystem": "Hệ đào tạo",
+          "status": "Trạng thái",
+          "advisorInstructor": "Giảng viên cố vấn",
+          "curriculum": "Chương trình đào tạo",
+          "startAcademicYear": "Năm học bắt đầu",
+          "endAcademicYear": "Năm học kết thúc",
+          "studentCount": "Số sinh viên",
+          "students": "Danh sách sinh viên",
+          "studentCode": "Mã sinh viên",
+          "studentName": "Họ và tên",
+          "email": "Email",
+          "notFound": "Không tìm thấy thông tin lớp học"
+        },
+        "delete": {
+          "title": "Xóa lớp học",
+          "message": "Bạn có chắc chắn muốn xóa lớp học \"{className}\"?",
+          "warning": "Hành động này không thể hoàn tác."
+        }
+      }
+    }
+  }
+}

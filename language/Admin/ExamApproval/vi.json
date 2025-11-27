@@ -1,0 +1,145 @@
+{
+  "admin": {
+    "examApproval": {
+      "pageTitle": "Duyệt đề thi",
+      "pageDescription": "Quản lý và duyệt đề thi của giảng viên",
+      "loadListError": "Không thể tải danh sách đề thi",
+      "approveSuccess": "Duyệt đề thi thành công",
+      "approveError": "Không thể duyệt đề thi",
+      "rejectSuccess": "Từ chối đề thi thành công",
+      "rejectError": "Không thể từ chối đề thi",
+      "exportSuccess": "Xuất Excel thành công",
+      "exportError": "Không thể xuất Excel",
+      "exportNoData": "Không có dữ liệu để xuất",
+      "downloadPdfSuccess": "Tải PDF thành công",
+      "downloadPdfError": "Không thể tải PDF",
+      "list": {
+        "title": "Danh sách đề thi",
+        "syncing": "Đang đồng bộ...",
+        "states": {
+          "loading": "Đang tải...",
+          "error": "Có lỗi xảy ra khi tải dữ liệu",
+          "empty": "Không có đề thi nào"
+        }
+      },
+      "table": {
+        "class": "Lớp",
+        "subject": "Môn học",
+        "instructor": "Giảng viên",
+        "examType": "Loại thi",
+        "submissionDate": "Ngày nộp",
+        "semester": "Kỳ",
+        "status": "Trạng thái",
+        "actions": "HĐ"
+      },
+      "status": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối"
+      },
+      "filters": {
+        "searchPlaceholder": "Tìm kiếm theo Môn học, Lớp, Giảng viên...",
+        "semester": {
+          "all": "Tất cả học kỳ",
+          "placeholder": "Chọn học kỳ"
+        },
+        "examType": {
+          "all": "Tất cả loại thi",
+          "placeholder": "Chọn loại thi",
+          "midterm": "Giữa kỳ",
+          "final": "Cuối kỳ",
+          "quiz": "15 phút",
+          "makeup": "Thi lại"
+        },
+        "status": {
+          "all": "Tất cả trạng thái",
+          "placeholder": "Chọn trạng thái",
+          "pending": "Chờ duyệt",
+          "approved": "Đã duyệt",
+          "rejected": "Từ chối"
+        }
+      },
+      "exportExcel": "Xuất Excel",
+      "common": {
+        "na": "N/A"
+      },
+      "actionsMenu": {
+        "view": "Xem chi tiết",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "downloadPdf": "Tải PDF"
+      },
+      "bulkActions": {
+        "selected": "{count} đề thi đã chọn",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "clearSelection": "Bỏ chọn"
+      },
+      "modals": {
+        "bulkApprove": {
+          "title": "Phê duyệt đề thi",
+          "description": "Bạn có chắc chắn muốn phê duyệt {count} đề thi đã chọn?",
+          "submit": "Phê duyệt",
+          "submitting": "Đang phê duyệt..."
+        },
+        "bulkReject": {
+          "title": "Từ chối đề thi",
+          "description": "Bạn có chắc chắn muốn từ chối {count} đề thi đã chọn?",
+          "note": "Hành động này không thể hoàn tác.",
+          "reasonLabel": "Lý do từ chối",
+          "reasonPlaceholder": "Nhập lý do từ chối đề thi...",
+          "submit": "Từ chối",
+          "submitting": "Đang từ chối..."
+        }
+      },
+      "detailModal": {
+        "title": "Chi tiết đề thi",
+        "description": "Thông tin chi tiết về đề thi và trạng thái",
+        "close": "Đóng",
+        "loading": "Đang tải...",
+        "error": "Không thể tải chi tiết đề thi",
+        "currentStatus": "TRẠNG THÁI HIỆN TẠI",
+        "subjectCode": "Mã môn",
+        "examInfo": "THÔNG TIN ĐỀ THI",
+        "subject": "Môn học",
+        "courseClass": "Lớp học phần",
+        "semester": "Học kỳ",
+        "examType": "Loại đề thi",
+        "duration": "Thời lượng",
+        "entryCode": "Mã đề",
+        "minutes": "phút",
+        "files": "CÁC TỆP ĐỀ THI",
+        "uploaded": "Đã tải lên",
+        "download": "Tải xuống",
+        "downloadPdf": "Tải PDF",
+        "downloadSuccess": "Tải xuống thành công",
+        "downloadError": "Không thể tải xuống",
+        "fileNotFound": "Không tìm thấy file",
+        "rejectionReason": "Lý do từ chối",
+        "instructor": "GIẢNG VIÊN",
+        "submissionDate": "NGÀY NỘP",
+        "approvalDate": "NGÀY DUYỆT",
+        "approve": "Phê duyệt",
+        "reject": "Từ chối",
+        "common": {
+          "na": "N/A"
+        },
+        "defaultQuestionFileName": "de_thi.pdf",
+        "defaultAnswerFileName": "dap_an.pdf"
+      },
+      "rejectModal": {
+        "title": "Vui lòng nhập lí do từ chối đề thi",
+        "confirmation": "Bạn có chắc chắn muốn từ chối đề thi **{title}** (Loại: {type})?",
+        "reasonLabel": "Lý do từ chối",
+        "reasonPlaceholder": "Nhập lý do từ chối đề thi..",
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "reject": "Từ chối",
+        "validation": {
+          "minLength": "Lý do từ chối phải có ít nhất {min} ký tự",
+          "maxLength": "Lý do từ chối không được vượt quá {max} ký tự"
+        }
+      }
+    }
+  }
+}

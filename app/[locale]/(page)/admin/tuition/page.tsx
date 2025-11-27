@@ -18,8 +18,21 @@ import { useTuitionDebts } from '@/lib/hooks/useTuitionDebt';
 import { useSemesters, useClasses, useDepartments } from '@/lib/hooks/useCommonData';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { TuitionDebtDetailModal } from './components/tuition-debt-detail-modal';
+import { EditTuitionModal } from './components/edit-tuition-modal';
+import { CreateReminderModal } from './components/create-reminder-modal';
+import { BulkDeleteTuitionModal } from './components/bulk-delete-tuition-modal';
+import { BulkActionBar } from './components/bulk-action-bar';
 import { TuitionDebtActionsMenu } from './components/tuition-debt-actions-menu';
-import type { TuitionDebtItem, TuitionDebtFilter, TuitionDebtResponse } from '@/lib/types';
+import { tuitionApi } from '@/lib/api/tuition';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/api/queryKeys';
+import type {
+  TuitionDebtItem,
+  TuitionDebtFilter,
+  TuitionDebtResponse,
+  UpdateTuitionRequest,
+  CreateReminderRequest,
+} from '@/lib/types';
 
 const PAGE_SIZE = 20;
 
@@ -37,6 +50,13 @@ export default function AdminTuitionPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStudentCodes, setSelectedStudentCodes] = useState<Set<string>>(new Set());
   const [detailStudentCode, setDetailStudentCode] = useState<string | null>(null);
+  const [editStudent, setEditStudent] = useState<TuitionDebtItem | null>(null);
+  const [editStudents, setEditStudents] = useState<TuitionDebtItem[]>([]);
+  const [reminderStudent, setReminderStudent] = useState<TuitionDebtItem | null>(null);
+  const [reminderStudents, setReminderStudents] = useState<TuitionDebtItem[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { data: semestersData } = useSemesters();
   const { data: classesData } = useClasses(
@@ -155,6 +175,96 @@ export default function AdminTuitionPage() {
   const handleViewDetail = (studentCode: string) => {
     setDetailStudentCode(studentCode);
   };
+
+  const handleEdit = (student: TuitionDebtItem) => {
+    setEditStudent(student);
+    setEditStudents([]);
+  };
+
+  const handleBulkEdit = () => {
+    setEditStudent(null);
+    setEditStudents(selectedStudents);
+  };
+
+  const handleCreateReminder = (student: TuitionDebtItem) => {
+    setReminderStudent(student);
+    setReminderStudents([]);
+  };
+
+  const handleBulkCreateReminder = () => {
+    setReminderStudent(null);
+    setReminderStudents(selectedStudents);
+  };
+
+  const handleBulkDelete = () => {
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    await deleteTuitionMutation.mutateAsync(Array.from(selectedStudentCodes));
+    setIsBulkDeleteModalOpen(false);
+    toast.success(t('bulkDelete.success'));
+  };
+
+  const selectedStudents = useMemo(() => {
+    return debtItems.filter((item) => selectedStudentCodes.has(item.studentCode));
+  }, [debtItems, selectedStudentCodes]);
+
+  const updateTuitionMutation = useMutation({
+    mutationFn: async (data: { studentCodes: string[]; status: string; notes: string }) => {
+      // Update each student individually (backend may support bulk later)
+      await Promise.all(
+        data.studentCodes.map((studentCode) =>
+          tuitionApi.updateTuition(studentCode, {
+            studentCode,
+            status: data.status,
+            notes: data.notes,
+          }),
+        ),
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tuition.debtList(filter),
+      });
+      selectedStudentCodes.forEach((code) => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.tuition.debtDetail(code),
+        });
+      });
+      setSelectedStudentCodes(new Set());
+    },
+  });
+
+  const createReminderMutation = useMutation({
+    mutationFn: async (data: { studentCodes: string[]; title: string; content: string }) => {
+      // Send reminder to each student individually (backend may support bulk later)
+      await Promise.all(
+        data.studentCodes.map((studentCode) =>
+          tuitionApi.createReminder(studentCode, {
+            studentCode,
+            title: data.title,
+            content: data.content,
+          }),
+        ),
+      );
+    },
+  });
+
+  const deleteTuitionMutation = useMutation({
+    mutationFn: async (studentCodes: string[]) => {
+      // Delete each student individually (backend may support bulk later)
+      await Promise.all(
+        studentCodes.map((studentCode) => tuitionApi.deleteTuition(studentCode)),
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tuition.debtList(filter),
+      });
+      setSelectedStudentCodes(new Set());
+    },
+  });
 
   const getStatusTranslation = (status: string): string => {
     if (status.includes('Đã thanh toán') || status.toLowerCase().includes('paid')) {
@@ -304,6 +414,24 @@ export default function AdminTuitionPage() {
             </div>
           </div>
 
+          {/* Bulk Actions Bar */}
+          {selectedStudentCodes.size > 0 && (
+            <div className="px-4 pt-4 lg:px-6">
+              <BulkActionBar
+                selectedCount={selectedStudentCodes.size}
+                onEdit={handleBulkEdit}
+                onCreateReminder={handleBulkCreateReminder}
+                onDelete={handleBulkDelete}
+                onClear={() => setSelectedStudentCodes(new Set())}
+                isProcessing={
+                  updateTuitionMutation.isPending ||
+                  createReminderMutation.isPending ||
+                  deleteTuitionMutation.isPending
+                }
+              />
+            </div>
+          )}
+
           {/* Table */}
           <div className="px-4 py-6 lg:px-6">
             {error ? (
@@ -349,6 +477,8 @@ export default function AdminTuitionPage() {
                     <td className="px-6 py-4 text-center">
                       <TuitionDebtActionsMenu
                         onView={() => handleViewDetail(item.studentCode)}
+                        onEdit={() => handleEdit(item)}
+                        onCreateReminder={() => handleCreateReminder(item)}
                       />
                     </td>
                   </>
@@ -375,6 +505,43 @@ export default function AdminTuitionPage() {
         open={Boolean(detailStudentCode)}
         studentCode={detailStudentCode}
         onClose={() => setDetailStudentCode(null)}
+      />
+
+      {/* Edit Tuition Modal */}
+      <EditTuitionModal
+        open={Boolean(editStudent) || editStudents.length > 0}
+        student={editStudent}
+        students={editStudents}
+        onClose={() => {
+          setEditStudent(null);
+          setEditStudents([]);
+        }}
+        onSave={async (data) => {
+          await updateTuitionMutation.mutateAsync(data);
+        }}
+      />
+
+      {/* Create Reminder Modal */}
+      <CreateReminderModal
+        open={Boolean(reminderStudent) || reminderStudents.length > 0}
+        student={reminderStudent}
+        students={reminderStudents}
+        onClose={() => {
+          setReminderStudent(null);
+          setReminderStudents([]);
+        }}
+        onSend={async (data) => {
+          await createReminderMutation.mutateAsync(data);
+        }}
+      />
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteTuitionModal
+        isOpen={isBulkDeleteModalOpen}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        onConfirm={handleConfirmBulkDelete}
+        selectedCount={selectedStudentCodes.size}
+        isDeleting={deleteTuitionMutation.isPending}
       />
     </>
   );
