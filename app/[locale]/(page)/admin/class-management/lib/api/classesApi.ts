@@ -118,6 +118,7 @@ export const classesApi = {
    * Lấy danh sách năm học (academic years)
    */
   getAcademicYears: async (count?: number): Promise<AcademicYear[]> => {
+<<<<<<< HEAD
     const response = await commonApi.getAcademicYears(count ? { count } : undefined);
     if (response.success && response.data) {
       return response.data.map((y) => ({
@@ -125,17 +126,51 @@ export const classesApi = {
         yearName: y.yearRange,
         yearCode: y.yearCode,
       }));
+=======
+    try {
+      const response = await commonApi.getAcademicYears(count ? { count } : undefined);
+      if (response.success && response.data && Array.isArray(response.data)) {
+        const mapped = response.data.map((y: any) => {
+          // Handle both yearRange (from common API) and yearName (expected by class management)
+          // Common API returns yearRange, but class management expects yearName
+          const yearName = y.yearName || y.YearName || y.yearRange || y.YearRange || '';
+          const academicYearId = y.academicYearId || y.AcademicYearId || '';
+          const yearCode = y.yearCode || y.YearCode || '';
+          
+          return {
+            academicYearId: String(academicYearId),
+            yearName: yearName,
+            yearCode: yearCode,
+          };
+        }).filter((y: AcademicYear) => y.yearName && y.academicYearId && y.yearName.trim() !== ''); // Filter out empty names and IDs
+        
+        console.log('[DEBUG] Academic years mapped:', mapped);
+        return mapped;
+      } else {
+        console.warn('[DEBUG] Academic years response:', response);
+      }
+    } catch (error) {
+      console.error('Error fetching academic years:', error);
+>>>>>>> d7bef19 (Hoàn thành sửa giao diện Học phần & Lớp học phần, và giao diện lớp định danh)
     }
     return [];
   },
 
   /**
    * Lấy danh sách hệ đào tạo (training systems)
-   * Note: This might need to be implemented in the backend or use a different endpoint
    */
   getTrainingSystems: async (): Promise<TrainingSystem[]> => {
-    // TODO: Implement when backend endpoint is available
-    // For now, return empty array or use a mock
+    try {
+      const response = await api.get<ApiResponse<any[]>>('/v1/class/available-training-systems');
+      if (response.data.success && response.data.data) {
+        return response.data.data.map((ts: any) => ({
+          trainingSystemId: String(ts.trainingSystemId || ts.TrainingSystemId),
+          trainingSystemName: ts.trainingSystemName || ts.TrainingSystemName || '',
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching training systems:', error);
+    }
     return [];
   },
 };

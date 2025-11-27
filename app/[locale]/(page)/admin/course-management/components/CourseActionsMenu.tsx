@@ -98,16 +98,16 @@ export const CourseActionsMenu = ({
                 Chỉnh sửa
               </button>
               {onCreateCourseClass && (
-                <button
-                  onClick={() => {
+              <button
+                onClick={() => {
                     onCreateCourseClass();
-                    setIsOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
+                  setIsOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
                   <Plus className="w-4 h-4 text-blue-600" />
                   Tạo lớp học phần
-                </button>
+              </button>
               )}
               <button
                 onClick={() => {
@@ -147,15 +147,15 @@ export const CourseActionsMenu = ({
         <Edit className="w-4 h-4" />
       </Button>
       {onCreateCourseClass && (
-        <Button
-          variant="ghost"
-          size="icon"
+      <Button
+        variant="ghost"
+        size="icon"
           onClick={onCreateCourseClass}
-          className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+        className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
           title="Tạo lớp học phần"
-        >
+      >
           <Plus className="w-4 h-4" />
-        </Button>
+      </Button>
       )}
       <Button
         variant="ghost"

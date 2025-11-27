@@ -1,0 +1,12 @@
+using System.Collections.Generic;
+
+namespace EduManagement.Core.Application.DTOs.CourseClass;
+
+public class CourseClassListResponseDto
+{
+    public List<CourseClassDto> Items { get; set; } = new();
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+}
