@@ -138,7 +138,7 @@ export function Dropdown<T = string>({
         <div
           ref={dropdownRef}
           className={cn(
-            "fixed z-20 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
+            "fixed z-[10000] bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto transition-all",
             isOpen 
               ? "opacity-100 translate-y-0 scale-100 duration-200 ease-out" 
               : dropdownPosition.openUpward
