@@ -166,6 +166,19 @@ export default function RoomRequestsPage() {
     setCurrentPage((prev) => Math.min(prev, totalPages));
   }, [totalPages]);
 
+  const pendingRequests = useMemo(
+    () => requests.filter((r) => r.bookingStatus === 'pending'),
+    [requests],
+  );
+
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const pendingIds = new Set(pendingRequests.map((r) => r.bookingId));
+      const filtered = new Set(Array.from(prev).filter((id) => pendingIds.has(id)));
+      return filtered.size !== prev.size ? filtered : prev;
+    });
+  }, [pendingRequests]);
+
   const handleSelectOne = (id: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -268,16 +281,21 @@ export default function RoomRequestsPage() {
     }
   };
 
-  const isAllSelected = requests.length > 0 && selectedIds.size === requests.length;
-  const isIndeterminate = selectedIds.size > 0 && !isAllSelected;
+  const selectedPendingIds = useMemo(
+    () => new Set(pendingRequests.filter((r) => selectedIds.has(r.bookingId)).map((r) => r.bookingId)),
+    [pendingRequests, selectedIds],
+  );
+
+  const isAllSelected = pendingRequests.length > 0 && selectedPendingIds.size === pendingRequests.length;
+  const isIndeterminate = selectedPendingIds.size > 0 && !isAllSelected;
 
   const handleToggleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(requests.map((r) => r.bookingId)));
+      setSelectedIds(new Set(pendingRequests.map((r) => r.bookingId)));
     } else {
       setSelectedIds(new Set());
     }
-  }, [requests]);
+  }, [pendingRequests]);
 
   const tableColumns = useMemo(
     () => [
@@ -286,8 +304,10 @@ export default function RoomRequestsPage() {
         label: (
           <Checkbox
             checked={isAllSelected ? true : isIndeterminate ? 'indeterminate' : false}
+            disabled={pendingRequests.length === 0}
             onCheckedChange={(checked) => handleToggleSelectAll(checked === true)}
             aria-label={t('list.columns.selectAll')}
+            className="border-white bg-white data-[state=checked]:bg-white data-[state=checked]:text-[#0053AD]"
           />
         ),
         className: 'w-12 text-center',
@@ -301,12 +321,13 @@ export default function RoomRequestsPage() {
       { key: 'status', label: t('list.columns.status') },
       { key: 'action', label: t('list.columns.action'), className: 'w-20' },
     ],
-    [handleToggleSelectAll, isAllSelected, isIndeterminate, t],
+    [isAllSelected, isIndeterminate, handleToggleSelectAll, pendingRequests.length, t],
   );
 
   const renderRow = (request: RoomRequestRecord) => {
     const statusMeta = ROOM_REQUEST_STATUS_META[request.bookingStatus];
     const isSelected = selectedIds.has(request.bookingId);
+    const isPending = request.bookingStatus === 'pending';
 
     return (
       <>
@@ -314,6 +335,7 @@ export default function RoomRequestsPage() {
           <div className="flex justify-center">
             <Checkbox
               checked={isSelected}
+              disabled={!isPending}
               onCheckedChange={(checked) => handleSelectOne(request.bookingId, checked === true)}
             />
           </div>
