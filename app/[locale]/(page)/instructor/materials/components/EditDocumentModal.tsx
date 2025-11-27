@@ -48,9 +48,9 @@ export function EditDocumentModal({
   isUpdating = false,
   isLoadingCourseClasses = false,
 }: EditDocumentModalProps) {
-  const t = useTranslations('admin.modals.editDocument')
+  const t = useTranslations('instructor.materials.modals.editDocument')
   const tCommon = useTranslations('common.actions')
-  const tUpload = useTranslations('admin.modals.uploadDocument')
+  const tUpload = useTranslations('instructor.materials.modals.uploadDocument')
   
   const [formData, setFormData] = useState<EditFormData>({
     subjectClass: "",

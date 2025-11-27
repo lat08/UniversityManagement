@@ -43,7 +43,7 @@ export function UploadDocumentModal({
   isUploading = false,
   isLoadingCourseClasses = false,
 }: UploadDocumentModalProps) {
-  const t = useTranslations('admin.modals.uploadDocument')
+  const t = useTranslations('instructor.materials.modals.uploadDocument')
   const tCommon = useTranslations('common.actions')
   
   const [formData, setFormData] = useState<UploadFormData>({
