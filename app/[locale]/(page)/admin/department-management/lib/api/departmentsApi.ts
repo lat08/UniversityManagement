@@ -1,248 +1,178 @@
 import { api } from '@/lib/api/client';
-import { commonApi } from '@/lib/api/common';
-import {
+import type {
   Department,
-  CreateDepartmentDto,
-  UpdateDepartmentDto,
-  BulkEditDepartmentDto,
-  DepartmentStats,
   ApiResponse,
-  PaginatedResponse,
+  DepartmentListResponse,
+  GetDepartmentsParams,
+  CreateDepartmentPayload,
+  UpdateDepartmentPayload,
   Faculty,
   Curriculum,
-  DepartmentListResponseDto,
 } from '../types/types';
 
-/**
- * @api GET /v1/admin/departments
- * @description Lấy danh sách chuyên ngành với phân trang và tìm kiếm
- * @param searchQuery - Từ khóa tìm kiếm (mã, tên chuyên ngành)
- * @param facultyId - Lọc theo ngành học
- * @param curriculumId - Lọc theo chương trình đào tạo
- * @param status - Lọc theo trạng thái
- * @param pageNumber - Số trang
- * @param pageSize - Số lượng mỗi trang
- * @returns Danh sách chuyên ngành
- * @auth Required (Admin)
- */
 export const departmentsApi = {
-  async getAll(params?: {
-    searchQuery?: string;
-    facultyId?: string;
-    curriculumId?: string;
-    pageNumber?: number;
-    pageSize?: number;
-  }): Promise<PaginatedResponse<Department>> {
-    const queryParams: Record<string, string | number> = {};
+  // GET /v1/admin/departments - Lấy danh sách chuyên ngành với phân trang và filter
+  getAll: async (params: GetDepartmentsParams = {}): Promise<ApiResponse<DepartmentListResponse>> => {
+    const queryParams: Record<string, string> = {};
     
-    if (params?.searchQuery) {
-      queryParams.searchTerm = params.searchQuery;
+    if (params.pageNumber) queryParams.pageNumber = params.pageNumber.toString();
+    if (params.pageSize) queryParams.pageSize = params.pageSize.toString();
+    if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+    if (params.facultyId) queryParams.facultyId = params.facultyId;
+    if (params.curriculumId) queryParams.curriculumId = params.curriculumId;
+    if (params.isActive !== undefined && params.isActive !== null) {
+      queryParams.isActive = params.isActive.toString();
     }
-    if (params?.facultyId) {
-      queryParams.facultyId = params.facultyId;
+    if (params.sortBy) queryParams.sortBy = params.sortBy;
+    if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
+
+    const response = await api.get<ApiResponse<DepartmentListResponse>>('/v1/admin/departments', {
+      params: queryParams,
+    });
+    
+    return response.data;
+  },
+
+  // GET /v1/admin/departments/{id} - Lấy chi tiết chuyên ngành
+  getById: async (id: string): Promise<Department> => {
+    const response = await api.get<ApiResponse<Department>>(`/v1/admin/departments/${id}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
-    if (params?.curriculumId) {
-      queryParams.curriculumId = params.curriculumId;
-    }
-    if (params?.pageNumber) {
-      queryParams.pageNumber = params.pageNumber;
-    }
-    if (params?.pageSize) {
-      queryParams.pageSize = params.pageSize;
-    }
-
-    const response = await api.get<ApiResponse<DepartmentListResponseDto>>(
-      '/v1/admin/departments',
-      { params: queryParams }
-    );
-
-    // Map response structure từ backend
-    const backendData = response.data.data;
-    return {
-      items: backendData.items,
-      totalCount: backendData.totalCount,
-      pageNumber: backendData.pageNumber,
-      pageSize: backendData.pageSize,
-      totalPages: backendData.totalPages,
-      hasPreviousPage: backendData.hasPreviousPage,
-      hasNextPage: backendData.hasNextPage,
-    };
+    throw new Error(response.data.message || 'Không tìm thấy chuyên ngành');
   },
 
-  /**
-   * @api GET /v1/admin/departments/{id}
-   * @description Lấy thông tin chi tiết chuyên ngành theo ID
-   * @param id - ID chuyên ngành
-   * @returns Thông tin chuyên ngành
-   * @auth Required (Admin)
-   */
-  async getById(id: string): Promise<Department> {
-    const response = await api.get<ApiResponse<Department>>(
-      `/v1/admin/departments/${id}`
-    );
-    return response.data.data;
+  // POST /v1/admin/departments - Tạo chuyên ngành mới
+  create: async (payload: CreateDepartmentPayload): Promise<ApiResponse<Department>> => {
+    const response = await api.post<ApiResponse<Department>>('/v1/admin/departments', payload);
+    return response.data;
   },
 
-  /**
-   * @api POST /v1/admin/departments
-   * @description Tạo chuyên ngành mới
-   * @param data - Dữ liệu chuyên ngành mới
-   * @returns Chuyên ngành vừa tạo
-   * @auth Required (Admin)
-   */
-  async create(data: CreateDepartmentDto): Promise<Department> {
-    const response = await api.post<ApiResponse<Department>>(
-      '/v1/admin/departments',
-      data
-    );
-    return response.data.data;
+  // PUT /v1/admin/departments/{id} - Cập nhật chuyên ngành
+  update: async (id: string, payload: UpdateDepartmentPayload): Promise<ApiResponse<Department>> => {
+    const response = await api.put<ApiResponse<Department>>(`/v1/admin/departments/${id}`, payload);
+    return response.data;
   },
 
-  /**
-   * @api PUT /v1/admin/departments/{id}
-   * @description Cập nhật thông tin chuyên ngành
-   * @param id - ID chuyên ngành
-   * @param data - Dữ liệu cập nhật
-   * @returns Chuyên ngành đã cập nhật
-   * @auth Required (Admin)
-   */
-  async update(id: string, data: UpdateDepartmentDto): Promise<Department> {
-    const response = await api.put<ApiResponse<Department>>(
-      `/v1/admin/departments/${id}`,
-      data
-    );
-    return response.data.data;
+  // DELETE /v1/admin/departments/{id} - Xóa mềm chuyên ngành
+  delete: async (id: string): Promise<ApiResponse<null>> => {
+    const response = await api.delete<ApiResponse<null>>(`/v1/admin/departments/${id}`);
+    return response.data;
   },
 
-  /**
-   * @api DELETE /v1/admin/departments/{id}
-   * @description Xóa chuyên ngành
-   * @param id - ID chuyên ngành
-   * @auth Required (Admin)
-   */
-  async delete(id: string): Promise<void> {
-    await api.delete(`/v1/admin/departments/${id}`);
-  },
-
-  /**
-   * @api DELETE /v1/admin/departments (bulk)
-   * @description Xóa nhiều chuyên ngành
-   * @param ids - Mảng ID chuyên ngành
-   * @auth Required (Admin)
-   */
-  async bulkDelete(ids: string[]): Promise<void> {
-    await Promise.all(ids.map((id) => this.delete(id)));
-  },
-
-  /**
-   * @api PUT /v1/admin/departments (bulk)
-   * @description Cập nhật hàng loạt chuyên ngành
-   * @param data - Dữ liệu cập nhật hàng loạt
-   * @auth Required (Admin)
-   */
-  async bulkEdit(data: BulkEditDepartmentDto): Promise<void> {
-    await Promise.all(
-      data.ids.map((id) =>
-        this.update(id, {
-          facultyId: data.updates.facultyId,
-        })
-      )
-    );
-  },
-
-  /**
-   * @api GET /v1/admin/departments/stats
-   * @description Lấy thống kê chuyên ngành
-   * @returns Thống kê (tổng số, đang hoạt động, ngừng hoạt động)
-   * @auth Required (Admin)
-   */
-  async getStats(): Promise<DepartmentStats> {
-    const departments = await this.getAll({ pageSize: 1000 });
-    return {
-      total: departments.totalCount,
-      active: departments.items.filter((d) => d.isActive).length,
-      inactive: departments.items.filter((d) => !d.isActive).length,
-    };
-  },
-
-  /**
-   * @api GET /v1/common/faculties
-   * @description Lấy danh sách ngành học (cho dropdown)
-   * @returns Danh sách ngành học
-   * @auth Required
-   */
-  async getFaculties(): Promise<Faculty[]> {
+  // Bulk delete - xóa nhiều chuyên ngành
+  bulkDelete: async (ids: string[]): Promise<ApiResponse<null>> => {
     try {
-      type RawFaculty = Faculty & {
-        id?: string;
-        name?: string;
-        code?: string;
-        FacultyId?: string;
-        FacultyName?: string;
-        FacultyCode?: string;
-      };
-      const response = await commonApi.getFaculties();
-      const faculties = (response.data ?? []) as RawFaculty[];
-      return faculties.map((f) => ({
-        facultyId: f.facultyId || f.FacultyId || f.id || '',
-        facultyName: f.facultyName || f.FacultyName || f.name || '',
-        facultyCode: f.facultyCode || f.FacultyCode || f.code || '',
-      }));
-    } catch (error) {
-      console.error('Failed to fetch faculties:', error);
-      return [];
-    }
-  },
-
-  /**
-   * @api GET /v1/admin/curriculums
-   * @description Lấy danh sách chương trình đào tạo (cho dropdown)
-   * @param departmentId - Lọc theo chuyên ngành (optional)
-   * @param facultyId - Lọc theo ngành học (optional)
-   * @returns Danh sách chương trình đào tạo
-   * @auth Required (Admin)
-   */
-  async getCurricula(departmentId?: string, facultyId?: string): Promise<Curriculum[]> {
-    try {
-      const params: Record<string, string | number> = {
-        pageSize: 1000,
-        pageNumber: 1,
-      };
+      const results = await Promise.allSettled(ids.map((id) => departmentsApi.delete(id)));
+      const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success));
       
-      if (departmentId) {
-        params.departmentId = departmentId;
+      if (failed.length > 0) {
+        return {
+          success: false,
+          message: `Xóa thành công ${ids.length - failed.length}/${ids.length} chuyên ngành`,
+          data: null,
+        };
       }
       
-      if (facultyId) {
-        params.facultyId = facultyId;
+      return {
+        success: true,
+        message: `Đã xóa ${ids.length} chuyên ngành`,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: 'Xóa hàng loạt thất bại',
+        data: null,
+      };
+    }
+  },
+
+  // Get statistics - lấy thống kê tổng số, active, inactive
+  getStats: async (): Promise<{ total: number; active: number; inactive: number }> => {
+    try {
+      // Gọi API 3 lần để lấy stats chính xác
+      const [allResponse, activeResponse, inactiveResponse] = await Promise.all([
+        departmentsApi.getAll({ pageNumber: 1, pageSize: 1 }), // Chỉ cần totalCount
+        departmentsApi.getAll({ pageNumber: 1, pageSize: 1, isActive: true }),
+        departmentsApi.getAll({ pageNumber: 1, pageSize: 1, isActive: false }),
+      ]);
+
+      interface ResponseData {
+        totalCount?: number;
+        TotalCount?: number;
       }
 
-      const response = await api.get<ApiResponse<{
-        curriculums: Array<{
-          curriculumId: string;
-          curriculumCode: string;
-          curriculumName: string;
-        }>;
-        totalCount: number;
-        pageNumber: number;
-        pageSize: number;
-        totalPages: number;
-        hasPreviousPage: boolean;
-        hasNextPage: boolean;
-      }>>('/v1/admin/curriculums', { params });
-      
-      const responseData = response.data.data;
-      const items = responseData?.curriculums || [];
-      
-      return items.map((item) => ({
-        curriculumId: item.curriculumId,
-        curriculumCode: item.curriculumCode,
-        curriculumName: item.curriculumName,
-      }));
-    } catch (error) {
-      console.error('Failed to fetch curricula:', error);
-      return [];
+      const getTotalCount = (data: DepartmentListResponse | undefined): number => {
+        if (!data) return 0;
+        const responseData = data as unknown as ResponseData;
+        return responseData.totalCount ?? responseData.TotalCount ?? 0;
+      };
+
+      const total = allResponse.success ? getTotalCount(allResponse.data) : 0;
+      const active = activeResponse.success ? getTotalCount(activeResponse.data) : 0;
+      const inactive = inactiveResponse.success ? getTotalCount(inactiveResponse.data) : 0;
+
+      return { total, active, inactive };
+    } catch {
+      return { total: 0, active: 0, inactive: 0 };
     }
+  },
+};
+
+// API để lấy danh sách faculties và curriculums từ CommonController
+export const commonApi = {
+  // GET /v1/common/faculties - Lấy danh sách tất cả khoa
+  getFaculties: async (): Promise<Faculty[]> => {
+    const response = await api.get<ApiResponse<Faculty[]>>('/v1/common/faculties');
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    return [];
+  },
+
+  // GET /v1/admin/curriculums - Lấy danh sách chương trình đào tạo
+  getCurriculums: async (departmentId?: string, facultyId?: string): Promise<Curriculum[]> => {
+    const queryParams: Record<string, string> = {};
+    if (departmentId) {
+      queryParams.departmentId = departmentId;
+    }
+    if (facultyId) {
+      queryParams.facultyId = facultyId;
+    }
+    // Set page size to get more results
+    queryParams.pageSize = '1000';
+    queryParams.pageNumber = '1';
+    
+    const response = await api.get<ApiResponse<{ curriculums: Curriculum[]; totalCount: number }>>('/v1/admin/curriculums', {
+      params: queryParams,
+    });
+    
+    if (response.data.success && response.data.data) {
+      const data = response.data.data;
+      // Handle both PascalCase and camelCase from CurriculumListResponseDto
+      // Backend returns: { Curriculums: CurriculumListItemDto[], TotalCount, PageNumber, PageSize, TotalPages }
+      interface CurriculumResponseData {
+        curriculums?: Curriculum[];
+        Curriculums?: Curriculum[];
+        items?: Curriculum[];
+        Items?: Curriculum[];
+      }
+      
+      const responseData = data as unknown as CurriculumResponseData;
+      const items = Array.isArray(responseData.Curriculums)
+        ? responseData.Curriculums
+        : Array.isArray(responseData.curriculums)
+          ? responseData.curriculums
+          : Array.isArray(responseData.items)
+            ? responseData.items
+            : Array.isArray(responseData.Items)
+              ? responseData.Items
+              : [];
+      
+      return items;
+    }
+    return [];
   },
 };
 

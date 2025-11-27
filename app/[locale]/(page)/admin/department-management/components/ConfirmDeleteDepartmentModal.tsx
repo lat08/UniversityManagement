@@ -1,8 +1,8 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 
 interface ConfirmDeleteDepartmentModalProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export const ConfirmDeleteDepartmentModal = ({
   onConfirm,
 }: ConfirmDeleteDepartmentModalProps) => {
   const t = useTranslations('admin.departmentManagement');
-  const tCommon = useTranslations('common.actions');
+  const tActions = useTranslations('common.actions');
 
   if (!isOpen) return null;
 
@@ -46,14 +46,20 @@ export const ConfirmDeleteDepartmentModal = ({
 
         <div className="p-6">
           <p className="text-gray-700">
-            {t('modals.confirmDelete.description', { name: departmentName ?? '' })}
+            {t('modals.confirmDelete.description', { name: departmentName ?? tActions('noName') })}
           </p>
-          <p className="text-sm text-red-600 mt-2">{t('modals.confirmDelete.note')}</p>
+          <p className="text-sm text-red-600 mt-2">
+            {t('modals.confirmDelete.note')}
+          </p>
         </div>
 
         <div className="flex gap-3 p-6 border-t">
-          <Button variant="outline" onClick={onClose} className="flex-1">
-            {tCommon('cancel')}
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="flex-1"
+          >
+            {tActions('cancel')}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -66,9 +72,4 @@ export const ConfirmDeleteDepartmentModal = ({
     </div>
   );
 };
-
-
-
-
-
 

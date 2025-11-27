@@ -1,15 +1,17 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { X, AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
+import type { Division } from '../lib/types/types';
 
 interface BulkDeleteDivisionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  selectedCount: number;
+  selectedDivisionIds: string[];
+  divisions: Division[];
   isDeleting?: boolean;
 }
 
@@ -17,12 +19,45 @@ export const BulkDeleteDivisionModal = ({
   isOpen,
   onClose,
   onConfirm,
-  selectedCount,
+  selectedDivisionIds,
+  divisions,
   isDeleting = false
 }: BulkDeleteDivisionModalProps) => {
   const t = useTranslations('admin.divisionManagement');
   const tActions = useTranslations('common.actions');
-  
+
+  const selectedDivisions = useMemo(() => {
+    return divisions.filter(d => selectedDivisionIds.includes(d.divisionId));
+  }, [divisions, selectedDivisionIds]);
+
+  const hasConstraints = useMemo(() => {
+    return selectedDivisions.some(d => 
+      (d.facultyCount > 0) || (d.subjectCount > 0) || (d.instructorCount > 0)
+    );
+  }, [selectedDivisions]);
+
+  const totalConstraints = useMemo(() => {
+    return {
+      faculties: selectedDivisions.reduce((sum, d) => sum + d.facultyCount, 0),
+      subjects: selectedDivisions.reduce((sum, d) => sum + d.subjectCount, 0),
+      instructors: selectedDivisions.reduce((sum, d) => sum + d.instructorCount, 0),
+    };
+  }, [selectedDivisions]);
+
+  const constraintMessages = useMemo(() => {
+    const messages: string[] = [];
+    if (totalConstraints.faculties > 0) {
+      messages.push(t('modals.bulkDelete.constraints.faculty', { count: totalConstraints.faculties }));
+    }
+    if (totalConstraints.subjects > 0) {
+      messages.push(t('modals.bulkDelete.constraints.subject', { count: totalConstraints.subjects }));
+    }
+    if (totalConstraints.instructors > 0) {
+      messages.push(t('modals.bulkDelete.constraints.instructor', { count: totalConstraints.instructors }));
+    }
+    return messages;
+  }, [totalConstraints, t]);
+
   const handleClose = useCallback(() => {
     if (!isDeleting) {
       onClose();
@@ -76,17 +111,34 @@ export const BulkDeleteDivisionModal = ({
         </div>
 
         <div className="p-6">
-          <p className="text-gray-700">
-            {t('modals.bulkDelete.description', { count: selectedCount })}
+          <p className="text-gray-700 mb-4">
+            {t('modals.bulkDelete.description', { count: selectedDivisionIds.length })}
           </p>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
-            <p className="text-sm text-red-700 font-medium">
-              {t('modals.bulkDelete.warning')}
-            </p>
-            <p className="text-xs text-red-600 mt-1">
-              {t('modals.bulkDelete.note')}
-            </p>
-          </div>
+
+          {hasConstraints && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-amber-900 mb-2">
+                    {t('modals.bulkDelete.warningTitle')}
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-amber-800">
+                    {constraintMessages.map((message, index) => (
+                      <li key={index}>{message}</li>
+                    ))}
+                  </ul>
+                  <p className="text-sm text-amber-700 mt-3 font-medium">
+                    {t('modals.bulkDelete.warningNote')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm text-gray-500">
+            {t('modals.bulkDelete.note')}
+          </p>
         </div>
 
         <div className="flex gap-3 p-6 border-t">
@@ -110,3 +162,4 @@ export const BulkDeleteDivisionModal = ({
     </div>
   );
 };
+

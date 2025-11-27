@@ -29,20 +29,12 @@ export const DivisionActionsMenu = ({
       }
     };
 
-    const handleScroll = () => {
-      if (isOpen) {
-        setIsOpen(false);
-      }
-    };
-
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', handleScroll, true);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScroll, true);
     };
   }, [isOpen]);
 
@@ -63,7 +55,7 @@ export const DivisionActionsMenu = ({
           <div className="fixed mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[100]"
             style={{
               top: dropdownRef.current ? 
-                dropdownRef.current.getBoundingClientRect().bottom + 4 : 0,
+                dropdownRef.current.getBoundingClientRect().bottom + window.scrollY + 4 : 0,
               left: dropdownRef.current ? 
                 Math.min(
                   dropdownRef.current.getBoundingClientRect().right - 192,
@@ -122,3 +114,4 @@ export const DivisionActionsMenu = ({
     </div>
   );
 };
+

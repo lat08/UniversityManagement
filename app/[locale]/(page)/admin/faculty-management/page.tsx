@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, GraduationCap, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck } from 'lucide-react';
+import { Plus, Building2, CheckCircle2, XCircle, Edit2, Trash2, X, CircleCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Dropdown, SearchInput, Button } from '@/app/components/ui';
+import { DropdownSearch, SearchInput, Button, Dropdown } from '@/app/components/ui';
 import { Pagination } from '@/app/components/ui/pagination';
 import { AddFacultyModal } from './components/AddFacultyModal';
 import { EditFacultyModal } from './components/EditFacultyModal';
@@ -16,9 +16,9 @@ import { ResizableTable, ResizableColumn } from '../student-profile/components/R
 import { TableSkeleton } from '../student-profile/components/LoadingSkeleton';
 import { toast } from 'react-hot-toast';
 import { useFaculties } from './lib/hooks/useFaculties';
-import { facultiesApi } from './lib/api/facultiesApi';
+import { facultiesApi, commonApi } from './lib/api/facultiesApi';
 import { getStatusDisplay } from './lib/types/types';
-import type { Faculty } from './lib/types/types';
+import type { Faculty, Division, Curriculum } from './lib/types/types';
 
 const STAT_CARDS = [
   { 
@@ -26,7 +26,7 @@ const STAT_CARDS = [
     labelKey: 'stats.total',
     bgColor: 'bg-[#FFDDAA]',
     iconColor: 'text-[#CC8800]',
-    Icon: GraduationCap
+    Icon: Building2
   },
   { 
     key: 'active', 
@@ -48,35 +48,71 @@ export default function FacultyManagementPage() {
   const t = useTranslations('admin.facultyManagement');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [selectedDivision, setSelectedDivision] = useState('');
-  const [selectedCurriculum, setSelectedCurriculum] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedDivisionId, setSelectedDivisionId] = useState<string>('');
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [deletingFacultyId, setDeletingFacultyId] = useState<string | null>(null);
-  const [deletingFacultyName, setDeletingFacultyName] = useState<string | undefined>(undefined);
+  const [deletingFaculty, setDeletingFaculty] = useState<Faculty | null>(null);
   const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
   const [selectedFacultyIds, setSelectedFacultyIds] = useState<Set<string>>(new Set());
+  
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [curriculums, setCurriculums] = useState<Curriculum[]>([]);
+  const [loadingDivisions, setLoadingDivisions] = useState(false);
+  const [loadingCurriculums, setLoadingCurriculums] = useState(false);
 
-  const { faculties, loading, currentPage, totalCount, totalPages, stats, fetchFaculties, setCurrentPage } = useFaculties();
+  const { faculties, loading, currentPage, totalCount, totalPages, stats, fetchFaculties, fetchStats, setCurrentPage } = useFaculties();
 
-  // Initialize columns after translations are loaded
-  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>([]);
+  const [resizableColumns, setResizableColumns] = useState<ResizableColumn[]>(() => [
+    { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
+    { key: 'facultyCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
+    { key: 'facultyName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
+    { key: 'divisionName', label: t('table.columns.division'), width: 200, minWidth: 150, align: 'left', visible: true },
+    { key: 'deanName', label: t('table.columns.dean'), width: 200, minWidth: 150, align: 'left', visible: true },
+    { key: 'departmentCount', label: t('table.columns.departments'), width: 120, minWidth: 100, align: 'center', visible: true },
+    { key: 'status', label: t('table.columns.status'), width: 120, minWidth: 100, align: 'center', visible: true },
+    { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
+  ]);
 
+  // Load divisions on mount
   useEffect(() => {
-    setResizableColumns([
-      { key: 'checkbox', label: '', width: 60, minWidth: 60, align: 'center', visible: true, required: true },
-      { key: 'facultyCode', label: t('table.columns.code'), width: 120, minWidth: 100, align: 'left', visible: true, required: true },
-      { key: 'facultyName', label: t('table.columns.name'), width: 250, minWidth: 200, align: 'left', visible: true, required: true },
-      { key: 'divisionName', label: t('table.columns.division'), width: 200, minWidth: 150, align: 'left', visible: true },
-      { key: 'curriculumCode', label: t('table.columns.curriculum'), width: 150, minWidth: 120, align: 'left', visible: true },
-      { key: 'status', label: t('table.columns.status'), width: 160, minWidth: 140, align: 'center', visible: true },
-      { key: 'actions', label: t('table.columns.actions'), width: 140, minWidth: 100, align: 'center', visible: true, required: true },
-    ]);
-  }, [t]);
+    const loadDivisions = async () => {
+      setLoadingDivisions(true);
+      try {
+        console.log('Loading divisions...');
+        const divisionsData = await commonApi.getDivisions();
+        console.log('Divisions loaded:', divisionsData);
+        setDivisions(divisionsData);
+      } catch (error) {
+        console.error('Error loading divisions:', error);
+        toast.error('Không thể tải danh sách khoa');
+      } finally {
+        setLoadingDivisions(false);
+      }
+    };
+    
+    loadDivisions();
+  }, []);
+
+  // Load curriculums when division changes
+  useEffect(() => {
+    if (selectedDivisionId) {
+      setLoadingCurriculums(true);
+      // Load curriculums for filtering
+      commonApi.getCurriculums(undefined, selectedDivisionId)
+        .then(setCurriculums)
+        .catch(() => toast.error('Không thể tải danh sách chương trình đào tạo'))
+        .finally(() => setLoadingCurriculums(false));
+    } else {
+      setCurriculums([]);
+      setSelectedCurriculumId('');
+    }
+  }, [selectedDivisionId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -86,18 +122,25 @@ export default function FacultyManagementPage() {
     return () => clearTimeout(timer);
   }, [searchQuery, setCurrentPage]);
 
+  // Fetch stats on mount (always total counts, not filtered)
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
   useEffect(() => {
     fetchFaculties({
       pageNumber: currentPage,
       pageSize: 20,
       searchTerm: searchKeyword || undefined,
-      divisionId: selectedDivision || undefined,
-      curriculumCode: selectedCurriculum || undefined,
-      status: selectedStatus || undefined,
+      divisionId: selectedDivisionId || undefined,
+      curriculumId: selectedCurriculumId || undefined,
+      isActive: selectedStatus ? selectedStatus === 'active' : undefined,
     });
-  }, [currentPage, searchKeyword, selectedDivision, selectedCurriculum, selectedStatus, fetchFaculties]);
+  }, [currentPage, searchKeyword, selectedDivisionId, selectedCurriculumId, selectedStatus, fetchFaculties]);
 
-  const filteredFaculties = useMemo(() => faculties, [faculties]);
+  const filteredFaculties = useMemo(() => {
+    return faculties;
+  }, [faculties]);
 
   const statValues = useMemo(() => ({
     total: stats.totalFaculties,
@@ -108,7 +151,6 @@ export default function FacultyManagementPage() {
   const statusLabels = useMemo(() => ({
     active: t('status.active'),
     inactive: t('status.inactive'),
-    unknown: t('status.unknown'),
   }), [t]);
 
   const statusOptions = useMemo(() => ([
@@ -117,23 +159,48 @@ export default function FacultyManagementPage() {
     { value: 'inactive', label: t('status.inactive') },
   ]), [t]);
 
-  // Mock divisions - replace with actual API call
-  const divisionOptions = useMemo(() => ([
-    { value: '', label: t('filters.allDivisions') },
-    { value: '66b96277-1886-4eaf-98f6-3e03bfddd595', label: 'Khoa học và Công nghệ' },
-    { value: '5e4fd89c-9cc0-488f-b8f7-de8bde3a270c', label: 'Kinh tế và Quản trị' },
-  ]), [t]);
+  const divisionOptions = useMemo(() => {
+    console.log('Creating divisionOptions, divisions count:', divisions.length, 'divisions:', divisions);
+    const options = [
+      { value: '', label: t('filters.allDivisions') },
+      ...divisions.map(d => ({ 
+        value: d.divisionId, 
+        label: `${d.divisionCode} - ${d.divisionName}` 
+      }))
+    ];
+    console.log('Division options created:', options.length, 'options');
+    return options;
+  }, [divisions, t]);
 
-  // Mock curriculums - replace with actual API call
-  const curriculumOptions = useMemo(() => ([
+  const curriculumOptions = useMemo(() => [
     { value: '', label: t('filters.allCurriculums') },
-    { value: 'CTDT-KT-2023', label: 'CTDT-KT-2023' },
-    { value: 'CTDT-KT-2022', label: 'CTDT-KT-2022' },
-  ]), [t]);
+    ...curriculums.map(c => ({ 
+      value: c.curriculumId, 
+      label: `${c.curriculumCode} - ${c.curriculumName} (${c.appliedYear}, v${c.versionNumber})`,
+      // Add searchable text for better filtering
+      searchText: `${c.curriculumCode} ${c.curriculumName} ${c.appliedYear} v${c.versionNumber} ${c.departmentName || ''}`.toLowerCase()
+    }))
+  ], [curriculums, t]);
 
-  const handleDeleteClick = useCallback((facultyId: string, facultyName: string) => {
-    setDeletingFacultyId(facultyId);
-    setDeletingFacultyName(facultyName);
+  // Custom filter function for curriculums
+  const filterCurriculums = useCallback((options: typeof curriculumOptions, query: string) => {
+    if (!query) return options;
+    const lowerQuery = query.toLowerCase();
+    return options.filter(opt => {
+      if (opt.value === '') return true; // Always show "All" option
+      interface OptionWithSearch {
+        searchText?: string;
+        label: string;
+      }
+      const optionWithSearch = opt as unknown as OptionWithSearch;
+      const searchText = optionWithSearch.searchText || opt.label.toLowerCase();
+      return searchText.includes(lowerQuery);
+    });
+  }, []);
+
+  const handleDeleteClick = useCallback((faculty: Faculty) => {
+    setDeletingFacultyId(faculty.facultyId);
+    setDeletingFaculty(faculty);
     setIsDeleteModalOpen(true);
   }, []);
 
@@ -147,14 +214,15 @@ export default function FacultyManagementPage() {
     const res = await facultiesApi.delete(deletingFacultyId);
     if (res.success) {
       toast.success(t('hooks.deleteSuccess'));
-      fetchFaculties({
+      // Refresh both list and stats
+      await fetchFaculties({
         pageNumber: currentPage,
         pageSize: 20,
         searchTerm: searchKeyword || undefined,
-        divisionId: selectedDivision || undefined,
-        curriculumCode: selectedCurriculum || undefined,
-        status: selectedStatus || undefined,
-      });
+        divisionId: selectedDivisionId || undefined,
+        curriculumId: selectedCurriculumId || undefined,
+        isActive: selectedStatus ? selectedStatus === 'active' : undefined,
+      }, true); // Pass true to update stats
     } else {
       toast.error(res.message || t('hooks.deleteError'));
     }
@@ -187,21 +255,22 @@ export default function FacultyManagementPage() {
       toast.success(res.message || t('hooks.bulkDeleteSuccess', { count: ids.length }));
       setSelectedFacultyIds(new Set());
       setIsBulkDeleteModalOpen(false);
-      fetchFaculties({
+      // Refresh both list and stats
+      await fetchFaculties({
         pageNumber: currentPage,
         pageSize: 20,
         searchTerm: searchKeyword || undefined,
-        divisionId: selectedDivision || undefined,
-        curriculumCode: selectedCurriculum || undefined,
-        status: selectedStatus || undefined,
-      });
+        divisionId: selectedDivisionId || undefined,
+        curriculumId: selectedCurriculumId || undefined,
+        isActive: selectedStatus ? selectedStatus === 'active' : undefined,
+      }, true); // Pass true to update stats
     } else {
       toast.error(res.message || t('hooks.bulkDeleteError'));
     }
   };
 
   const renderFacultyRow = useCallback((faculty: Faculty, visibleColumns: ResizableColumn[], cellStyle: { paddingX: string; paddingY: string }) => {
-    const statusDisplay = getStatusDisplay(faculty.facultyStatus, statusLabels);
+    const statusDisplay = getStatusDisplay(faculty.isActive, statusLabels);
     const baseTotalWidth = visibleColumns.reduce((sum, col) => sum + col.width, 0);
     const isSelected = selectedFacultyIds.has(faculty.facultyId);
 
@@ -251,10 +320,16 @@ export default function FacultyManagementPage() {
                   {faculty.divisionName || '-'}
                 </td>
               );
-            case 'curriculumCode':
+            case 'deanName':
               return (
-                <td key="curriculumCode" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {faculty.curriculumCodes && faculty.curriculumCodes.length > 0 ? faculty.curriculumCodes[0] : '-'}
+                <td key="deanName" className="text-gray-600" style={{ ...cellPaddingStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {faculty.deanName || '-'}
+                </td>
+              );
+            case 'departmentCount':
+              return (
+                <td key="departmentCount" className="text-gray-600 text-center" style={cellPaddingStyle}>
+                  {faculty.departmentCount ?? 0}
                 </td>
               );
             case 'status':
@@ -282,7 +357,7 @@ export default function FacultyManagementPage() {
                     facultyId={faculty.facultyId}
                     facultyName={faculty.facultyName}
                     onEdit={() => handleEditClick(faculty)}
-                    onDelete={() => handleDeleteClick(faculty.facultyId, faculty.facultyName)}
+                    onDelete={() => handleDeleteClick(faculty)}
                     compact={(column.width || 0) < 120}
                   />
                 </td>
@@ -365,27 +440,36 @@ export default function FacultyManagementPage() {
             </div>
 
             {/* Division Dropdown */}
-            <Dropdown
+            <DropdownSearch
               options={divisionOptions}
-              value={selectedDivision || ''}
-              placeholder={t('filters.allDivisions')}
+              value={selectedDivisionId || ''}
+              placeholder={t('filters.division')}
+              searchPlaceholder={t('filters.searchDivision')}
               onChange={(value) => {
-                setSelectedDivision(value);
+                setSelectedDivisionId(value);
+                setSelectedCurriculumId('');
                 setCurrentPage(1);
               }}
+              disabled={loadingDivisions}
             />
 
             {/* Curriculum Dropdown */}
-            <Dropdown
+            <DropdownSearch
               options={curriculumOptions}
-              value={selectedCurriculum || ''}
-              placeholder={t('filters.allCurriculums')}
+              value={selectedCurriculumId || ''}
+              placeholder={t('filters.curriculum')}
+              searchPlaceholder={t('filters.searchCurriculum')}
               onChange={(value) => {
-                setSelectedCurriculum(value);
+                setSelectedCurriculumId(value);
                 setCurrentPage(1);
               }}
+              disabled={loadingCurriculums || !selectedDivisionId}
+              filterOptions={filterCurriculums}
             />
+          </div>
 
+          {/* Additional Filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {/* Status Dropdown */}
             <Dropdown
               options={statusOptions}
@@ -487,16 +571,15 @@ export default function FacultyManagementPage() {
       <AddFacultyModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        divisions={divisionOptions.filter(d => d.value)}
-        onSuccess={() => {
-          fetchFaculties({
+        onSuccess={async () => {
+          await fetchFaculties({
             pageNumber: currentPage,
             pageSize: 20,
             searchTerm: searchKeyword || undefined,
-            divisionId: selectedDivision || undefined,
-            curriculumCode: selectedCurriculum || undefined,
-            status: selectedStatus || undefined,
-          });
+            divisionId: selectedDivisionId || undefined,
+            curriculumId: selectedCurriculumId || undefined,
+            isActive: selectedStatus ? selectedStatus === 'active' : undefined,
+          }, true); // Pass true to update stats
         }}
       />
 
@@ -507,16 +590,15 @@ export default function FacultyManagementPage() {
           setEditingFaculty(null);
         }}
         faculty={editingFaculty}
-        divisions={divisionOptions.filter(d => d.value)}
-        onSuccess={() => {
-          fetchFaculties({
+        onSuccess={async () => {
+          await fetchFaculties({
             pageNumber: currentPage,
             pageSize: 20,
             searchTerm: searchKeyword || undefined,
-            divisionId: selectedDivision || undefined,
-            curriculumCode: selectedCurriculum || undefined,
-            status: selectedStatus || undefined,
-          });
+            divisionId: selectedDivisionId || undefined,
+            curriculumId: selectedCurriculumId || undefined,
+            isActive: selectedStatus ? selectedStatus === 'active' : undefined,
+          }, true); // Pass true to update stats
         }}
       />
 
@@ -524,26 +606,29 @@ export default function FacultyManagementPage() {
         isOpen={isBulkEditModalOpen}
         onClose={() => setIsBulkEditModalOpen(false)}
         selectedFacultyIds={Array.from(selectedFacultyIds)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setSelectedFacultyIds(new Set());
-          fetchFaculties({
-            pageNumber: currentPage,
-            pageSize: 20,
-            searchTerm: searchKeyword || undefined,
-            divisionId: selectedDivision || undefined,
-            curriculumCode: selectedCurriculum || undefined,
-            status: selectedStatus || undefined,
-          });
+          await Promise.all([
+            fetchFaculties({
+              pageNumber: currentPage,
+              pageSize: 20,
+              searchTerm: searchKeyword || undefined,
+              divisionId: selectedDivisionId || undefined,
+              curriculumId: selectedCurriculumId || undefined,
+              isActive: selectedStatus ? selectedStatus === 'active' : undefined,
+            }),
+            fetchStats(),
+          ]);
         }}
       />
 
       <ConfirmDeleteFacultyModal
         isOpen={isDeleteModalOpen}
-        facultyName={deletingFacultyName}
+        faculty={deletingFaculty}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setDeletingFacultyId(null);
-          setDeletingFacultyName(undefined);
+          setDeletingFaculty(null);
         }}
         onConfirm={handleDeleteConfirm}
       />
@@ -551,9 +636,11 @@ export default function FacultyManagementPage() {
       <BulkDeleteFacultyModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
-        selectedCount={selectedFacultyIds.size}
+        selectedFacultyIds={Array.from(selectedFacultyIds)}
+        faculties={faculties}
         onConfirm={handleBulkDelete}
       />
     </div>
   );
 }
+

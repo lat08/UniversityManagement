@@ -11,4 +11,5 @@ export { Button, buttonVariants } from "./button"
 export { Input } from "./input"
 export { Textarea } from "./textarea"
 export { Checkbox } from "./checkbox"
+export { Badge } from "./badge"
 

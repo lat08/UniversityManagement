@@ -1,9 +1,10 @@
 'use client';
 
+import React from 'react';
 import { useMemo } from 'react';
 import { LucideIcon } from 'lucide-react';
-import { useCountUp } from '@/lib/hooks/useCountUp';
 import { useLocale } from 'next-intl';
+import { useCountUp } from '@/lib/hooks/useCountUp';
 
 interface DepartmentStatCardProps {
   label: string;
@@ -13,13 +14,7 @@ interface DepartmentStatCardProps {
   iconColor: string;
 }
 
-export const DepartmentStatCard = ({
-  label,
-  value,
-  Icon,
-  bgColor,
-  iconColor,
-}: DepartmentStatCardProps) => {
+export const DepartmentStatCard = ({ label, value, Icon, bgColor, iconColor }: DepartmentStatCardProps) => {
   const locale = useLocale();
   const count = useCountUp(value, { duration: 1200, start: 0 });
   const displayValue = useMemo(() => Math.round(count), [count]);
@@ -40,9 +35,4 @@ export const DepartmentStatCard = ({
     </div>
   );
 };
-
-
-
-
-
 

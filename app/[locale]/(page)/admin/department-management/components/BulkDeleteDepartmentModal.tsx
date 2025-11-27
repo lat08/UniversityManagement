@@ -1,16 +1,14 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui';
 import { X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 
 interface BulkDeleteDepartmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   selectedCount: number;
-  isDeleting?: boolean;
 }
 
 export const BulkDeleteDepartmentModal = ({
@@ -18,46 +16,19 @@ export const BulkDeleteDepartmentModal = ({
   onClose,
   onConfirm,
   selectedCount,
-  isDeleting = false,
 }: BulkDeleteDepartmentModalProps) => {
   const t = useTranslations('admin.departmentManagement');
-  const tCommon = useTranslations('common.actions');
-
-  const handleClose = useCallback(() => {
-    if (!isDeleting) {
-      onClose();
-    }
-  }, [isDeleting, onClose]);
-
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isDeleting) {
-        handleClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, isDeleting, handleClose]);
+  const tActions = useTranslations('common.actions');
 
   if (!isOpen) return null;
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !isDeleting) {
-      handleClose();
-    }
+  const handleConfirm = async () => {
+    await onConfirm();
+    onClose();
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
@@ -65,10 +36,8 @@ export const BulkDeleteDepartmentModal = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleClose}
-              disabled={isDeleting}
+              onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
-              type="button"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -79,28 +48,28 @@ export const BulkDeleteDepartmentModal = ({
           <p className="text-gray-700">
             {t('modals.bulkDelete.description', { count: selectedCount })}
           </p>
-          <p className="text-sm text-gray-500 mt-2">{t('modals.bulkDelete.note')}</p>
+          <p className="text-sm text-red-600 mt-2">
+            {t('modals.bulkDelete.note')}
+          </p>
         </div>
 
         <div className="flex gap-3 p-6 border-t">
-          <Button variant="outline" onClick={handleClose} disabled={isDeleting} className="flex-1">
-            {tCommon('cancel')}
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="flex-1"
+          >
+            {tActions('cancel')}
           </Button>
           <Button
-            onClick={onConfirm}
-            disabled={isDeleting}
+            onClick={handleConfirm}
             className="flex-1 bg-red-600 hover:bg-red-700 text-white"
           >
-            {isDeleting ? t('modals.bulkDelete.submitting') : t('modals.bulkDelete.submit')}
+            {t('modals.bulkDelete.submit')}
           </Button>
         </div>
       </div>
     </div>
   );
 };
-
-
-
-
-
 

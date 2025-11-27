@@ -7,67 +7,100 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-hot-toast';
-import { Dropdown, Button, Input } from '@/app/components/ui';
-import { divisionsApi } from '../lib/api/divisionsApi';
+import { DropdownSearch, Button, Input, Dropdown } from '@/app/components/ui';
+import { divisionsApi, commonApi, type Instructor } from '../lib/api/divisionsApi';
 import type { Division } from '../lib/types/types';
 
 interface EditDivisionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  division: Division | null;
   onSuccess?: () => void;
+  division: Division | null;
 }
 
 interface FormData {
   divisionName: string;
-  divisionStatus: string;
   deanId?: string;
+  divisionStatus?: string;
 }
 
-export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: EditDivisionModalProps) => {
+export const EditDivisionModal = ({ isOpen, onClose, onSuccess, division }: EditDivisionModalProps) => {
   const t = useTranslations('admin.divisionManagement');
   const tActions = useTranslations('common.actions');
   
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [loadingInstructors, setLoadingInstructors] = useState(false);
+  const [instructorSearchQuery, setInstructorSearchQuery] = useState('');
+
   const validationSchema = useMemo(() => yup.object({
     divisionName: yup
       .string()
       .required(t('form.divisionName.required'))
-      .min(3, t('form.divisionName.min')),
-    divisionStatus: yup
-      .string()
-      .required(t('form.status.required'))
-      .oneOf(['active', 'inactive'], t('form.status.invalid')),
+      .max(200, t('form.divisionName.max')),
     deanId: yup.string().optional(),
+    divisionStatus: yup.string().optional(),
   }), [t]);
 
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<FormData>({
     resolver: yupResolver(validationSchema) as unknown as Resolver<FormData>,
     defaultValues: {
       divisionName: '',
+      deanId: undefined,
       divisionStatus: 'active',
-      deanId: '',
     }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formValues = watch();
 
+  useEffect(() => {
+    if (isOpen && division) {
+      setValue('divisionName', division.divisionName);
+      setValue('deanId', division.deanId || undefined);
+      setValue('divisionStatus', division.divisionStatus || 'active');
+    }
+  }, [isOpen, division, setValue]);
+
+  // Load instructors on mount and when search query changes
+  useEffect(() => {
+    if (isOpen) {
+      const loadInstructors = async () => {
+        setLoadingInstructors(true);
+        try {
+          const data = await commonApi.getInstructors(instructorSearchQuery || undefined);
+          setInstructors(data);
+        } catch {
+          toast.error(t('hooks.loadInstructorsError'));
+        } finally {
+          setLoadingInstructors(false);
+        }
+      };
+
+      const timer = setTimeout(() => {
+        loadInstructors();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, instructorSearchQuery, t]);
+
+  const instructorOptions = useMemo(() => [
+    { value: '', label: t('form.deanId.placeholder') },
+    ...instructors.map(i => ({ 
+      value: i.instructorId, 
+      label: `${i.instructorCode} - ${i.fullName}` 
+    }))
+  ], [instructors, t]);
+
   const statusOptions = useMemo(() => [
     { value: 'active', label: t('status.active') },
     { value: 'inactive', label: t('status.inactive') },
   ], [t]);
 
-  useEffect(() => {
-    if (division && isOpen) {
-      setValue('divisionName', division.divisionName);
-      setValue('divisionStatus', division.divisionStatus);
-      setValue('deanId', division.deanId || '');
-    }
-  }, [division, isOpen, setValue]);
-
   const handleClose = useCallback(() => {
     if (!isSubmitting) {
       reset();
+      setInstructorSearchQuery('');
       onClose();
     }
   }, [isSubmitting, reset, onClose]);
@@ -95,15 +128,16 @@ export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: Edit
     try {
       const payload = {
         divisionName: data.divisionName,
-        divisionStatus: data.divisionStatus as 'active' | 'inactive',
-        deanId: data.deanId || undefined,
+        deanId: data.deanId && data.deanId !== '' ? data.deanId : undefined,
+        divisionStatus: (data.divisionStatus as 'active' | 'inactive') || 'active',
       };
 
       const response = await divisionsApi.update(division.divisionId, payload);
 
-      if (response.isSuccess) {
+      if (response.success) {
         toast.success(t('hooks.updateSuccess'));
         reset();
+        setInstructorSearchQuery('');
         onSuccess?.();
         handleClose();
       } else {
@@ -137,9 +171,7 @@ export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: Edit
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{t('modals.edit.title')}</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {t('modals.edit.description')} <span className="font-medium">{division.divisionCode}</span>
-              </p>
+              <p className="text-sm text-gray-600 mt-1">{t('modals.edit.description')}</p>
             </div>
             <Button
               variant="ghost"
@@ -156,7 +188,7 @@ export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: Edit
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
           <div className="overflow-y-auto flex-1 p-6">
-            <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
               {/* Mã khoa (read-only) */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -183,30 +215,37 @@ export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: Edit
               </div>
 
               {/* Trưởng khoa */}
-              <div>
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   {t('form.deanId.label')}
                 </label>
-                <Input
+                <DropdownSearch
+                  options={instructorOptions}
+                  value={formValues.deanId || ''}
                   placeholder={t('form.deanId.placeholder')}
-                  {...register('deanId')}
-                  className={errors.deanId ? 'border-red-500' : ''}
+                  searchPlaceholder={t('form.deanId.searchPlaceholder')}
+                  onChange={(value) => {
+                    setValue('deanId', value && value !== '' ? value : undefined);
+                  }}
+                  onSearch={setInstructorSearchQuery}
+                  disabled={loadingInstructors}
+                  showEmptyOption
+                  emptyOptionLabel={t('form.deanId.placeholder')}
                 />
                 {errors.deanId && <p className="mt-1 text-xs text-red-500">{errors.deanId.message}</p>}
               </div>
 
               {/* Trạng thái */}
-              <div>
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('form.status.label')} <span className="text-red-500">*</span>
+                  {t('form.status.label')}
                 </label>
                 <Dropdown
                   options={statusOptions}
-                  value={formValues.divisionStatus}
+                  value={formValues.divisionStatus || 'active'}
                   placeholder={t('form.status.placeholder')}
                   onChange={(value) => setValue('divisionStatus', value)}
                 />
-                {errors.divisionStatus && <p className="mt-1 text-xs text-red-500">{errors.divisionStatus.message}</p>}
               </div>
             </div>
           </div>
@@ -217,14 +256,14 @@ export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: Edit
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10"
+              className="flex-1 border-[#0053AD] bg-white text-[#0053AD] hover:bg-[#0053AD]/10 hover:border-[#0053AD]/80 transition-colors"
             >
               {tActions('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white"
+              className="flex-1 bg-[#0053AD] hover:bg-[#003d82] text-white border-[#0053AD] hover:border-[#0053AD] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? t('modals.edit.submitting') : t('modals.edit.submit')}
             </Button>
@@ -234,3 +273,4 @@ export const EditDivisionModal = ({ isOpen, onClose, division, onSuccess }: Edit
     </div>
   );
 };
+
